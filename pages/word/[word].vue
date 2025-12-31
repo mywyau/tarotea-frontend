@@ -4,12 +4,10 @@ const route = useRoute()
 // The Chinese word itself (e.g. 一, 唔知, 啦)
 const wordParam = route.params.word as string
 
-const encodedWord = encodeURIComponent(wordParam)
-
 const { data: word, error } = await useFetch(
-  `/content/cantonese/words/${encodedWord}.json`,
+  `/content/cantonese/words/${wordParam}.json`,
   {
-    key: `word-${encodedWord}`
+    key: `word-${wordParam}`
   }
 )
 
@@ -68,12 +66,13 @@ const safeWord = computed(() => word.value!)
         <li v-for="example in safeWord.examples ?? []" :key="example" class="border-l-4 border-gray-200 pl-4 pr-4 py-2">
           <div class="flex items-center justify-between gap-4">
             <span class="text-lg">
-              {{ example }}
+              {{ example.word }}
             </span>
-
-            <AudioButton :src="`/audio/words/${example}.mp3`" />
+            
+            <AudioButton :src="`/audio/words/${example.id}.mp3`" />
           </div>
         </li>
+
       </ul>
     </section>
   </main>

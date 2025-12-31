@@ -6,17 +6,17 @@
     {
       "title": "Basic Numbers (1–10)",
       "items": [
-        { "word": "零", "jyutping": "ling4", "meaning": "zero" },
-        { "word": "一", "jyutping": "jat1", "meaning": "one" },
-        { "word": "二", "jyutping": "ji6", "meaning": "two" },
-        { "word": "三", "jyutping": "saam1", "meaning": "three" },
-        { "word": "四", "jyutping": "sei3", "meaning": "four" },
-        { "word": "五", "jyutping": "ng5", "meaning": "five" },
-        { "word": "六", "jyutping": "luk6", "meaning": "six" },
-        { "word": "七", "jyutping": "cat1", "meaning": "seven" },
-        { "word": "八", "jyutping": "baat3", "meaning": "eight" },
-        { "word": "九", "jyutping": "gau2", "meaning": "nine" },
-        { "word": "十", "jyutping": "sap6", "meaning": "ten" }
+        { "id": "zero","word": "零", "jyutping": "ling4", "meaning": "zero" },
+        { "id": "one","word": "一", "jyutping": "jat1", "meaning": "one" },
+        { "id": "two","word": "二", "jyutping": "ji6", "meaning": "two" },
+        { "id": "three","word": "三", "jyutping": "saam1", "meaning": "three" },
+        { "id": "four","word": "四", "jyutping": "sei3", "meaning": "four" },
+        { "id": "five","word": "五", "jyutping": "ng5", "meaning": "five" },
+        { "id": "six","word": "六", "jyutping": "luk6", "meaning": "six" },
+        { "id": "seveb","word": "七", "jyutping": "cat1", "meaning": "seven" },
+        { "id": "eight","word": "八", "jyutping": "baat3", "meaning": "eight" },
+        { "id": "nine","word": "九", "jyutping": "gau2", "meaning": "nine" },
+        { "id": "ten","word": "十", "jyutping": "sap6", "meaning": "ten" }
       ]
     },
 

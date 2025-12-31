@@ -1,0 +1,20 @@
+{
+  "id": "one",
+  "word": "一",
+  "jyutping": "jat1",
+  "meaning": "one",
+  "usage": [
+    "Used for counting",
+    "Used before measure words"
+  ],
+  "examples": [
+    { "id": "one_person", "word":"一個人"},
+    { "id": "one_o_clock", "word":"一點"},
+    { "id": "one_cup_water", "word":"一杯水"},
+    { "id": "one_bowl_rice", "word":"一碗飯"},
+    { "id": "one_sheet_paper", "word":"一張紙"},
+    { "id": "one_road", "word":"一條路"},
+    { "id": "one_time", "word":"一次"},
+    { "id": "one_day", "word":"一日"}
+  ]
+}
