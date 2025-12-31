@@ -12,13 +12,14 @@ const { data: word, error } = await useFetch(
   }
 )
 
-// Fail fast during SSR
-if (error.value || !word.value) {
-  throw createError({
-    statusCode: 404,
-    statusMessage: 'Word not found'
-  })
-}
+watchEffect(() => {
+  if (error.value) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Word not found'
+    })
+  }
+})
 
 
 const safeWord = computed(() => word.value!)
