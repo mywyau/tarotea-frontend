@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 const topics = [
   {
     id: 'numbers',
@@ -14,8 +15,14 @@ const topics = [
     id: 'measure-words',
     title: 'Measure Words',
     description: 'Classifiers used with numbers and objects.',
+  },
+  {
+    id: 'colours',
+    title: 'Colours',
+    description: 'Learn colour words and usage',
   }
 ]
+
 </script>
 
 <template>
@@ -32,11 +39,7 @@ const topics = [
     </header>
 
     <ul class="space-y-4">
-      <li
-        v-for="topic in topics"
-        :key="topic.id"
-        class="border rounded p-4 hover:bg-gray-50"
-      >
+      <li v-for="topic in topics" :key="topic.id" class="border rounded p-4 hover:bg-gray-50">
         <NuxtLink :to="`/topics/${topic.id}`" class="block">
           <div class="text-lg font-medium">
             {{ topic.title }}

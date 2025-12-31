@@ -8,7 +8,7 @@
   <header class="border-b bg-white shadow-sm py-3">
     <div class="max-w-5xl mx-auto flex justify-between items-center px-4">
       <NuxtLink to="/" class="text-2xl font-bold text-primary-600">
-        Walnut
+        TaroTea
       </NuxtLink>
 
       <div>
@@ -23,7 +23,11 @@
           </NuxtLink>
 
           <NuxtLink to="/levels" class="text-l text-primary-600">
-            Levels
+            Words
+          </NuxtLink>
+
+          <NuxtLink to="/modules" class="text-l text-primary-600">
+            Modules
           </NuxtLink>
 
           <!-- <NuxtLink to="/words/level-one" class="text-l text-primary-600">

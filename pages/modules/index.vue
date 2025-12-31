@@ -3,19 +3,66 @@ const modules = [
   {
     slug: 'daily',
     title: 'Daily Spoken Cantonese',
-    description: 'Common phrases and patterns used in everyday conversation.'
+    description: 'Essential phrases and patterns used in everyday Cantonese conversation.'
   },
   {
-    slug: 'particles',
-    title: 'Sentence-final Particles',
-    description: 'Learn how 啦、喎、呀 change tone and meaning.'
+    slug: 'introductions',
+    title: 'Introductions & Small Talk',
+    description: 'Greeting people, introducing yourself, and making simple small talk.'
+  },
+  {
+    slug: 'questions',
+    title: 'Asking Questions',
+    description: 'Asking questions naturally using 咩、邊、點、幾多 and common patterns.'
+  },
+  {
+    slug: 'time',
+    title: 'Time & Timing',
+    description: 'Talking about now, later, schedules, and making plans with others.'
+  },
+  {
+    slug: 'money',
+    title: 'Money & Prices',
+    description: 'Talking about prices, money, quantities, and costs in daily life.'
   },
   {
     slug: 'food',
-    title: 'Eating & Meeting Up',
-    description: 'Natural ways to talk about food, plans, and timing.'
+    title: 'Eating & Ordering Food',
+    description: 'Ordering food, talking about meals, and deciding when to eat.'
+  },
+  {
+    slug: 'weather',
+    title: 'Weather & Conditions',
+    description: 'Talking about the weather, temperature, and daily conditions.'
+  },
+  {
+    slug: 'emotions',
+    title: 'Feelings & Reactions',
+    description: 'Expressing emotions, reactions, and how you feel in everyday situations.'
+  },
+  {
+    slug: 'travel',
+    title: 'Getting Around',
+    description: 'Directions, transport, and moving around the city with confidence.'
+  },
+  {
+    slug: 'opinions',
+    title: 'Opinions & Preferences',
+    description: 'Saying what you think, like, want, or don’t like in natural Cantonese.'
+  },
+  {
+    slug: 'problems',
+    title: 'Problems & Fixes',
+    description: 'Explaining problems, asking for help, and finding simple solutions.'
+  },
+  {
+    slug: 'work',
+    title: 'Work & Daily Routine',
+    description: 'Talking about work, jobs, schedules, and everyday routines.'
   }
 ]
+
+
 </script>
 
 <template>
@@ -30,11 +77,7 @@ const modules = [
     </p>
 
     <ul class="space-y-4">
-      <li
-        v-for="module in modules"
-        :key="module.slug"
-        class="border rounded p-4 hover:bg-gray-50"
-      >
+      <li v-for="module in modules" :key="module.slug" class="border rounded p-4 hover:bg-gray-50">
         <NuxtLink :to="`/module/${module.slug}`" class="block">
           <div class="text-lg font-medium">
             {{ module.title }}

@@ -8,12 +8,12 @@ const levels = [
   {
     id: 'level-two',
     title: 'Level  2',
-    description: 'Everyday usage and common expansions.'
+    description: 'Everyday usage and common expansions for more natural conversations'
   },
   {
     id: 'level-three',
     title: 'Level  3',
-    description: 'More natural phrasing and longer sentences.'
+    description: 'More Opinions, situations, emotions, comparison, and abstract ideas'
   }
 ]
 </script>
@@ -21,11 +21,11 @@ const levels = [
 <template>
   <main class="max-w-3xl mx-auto py-12 px-4">
     <h1 class="text-3xl font-semibold mb-4">
-      Levels
+      Words
     </h1>
 
     <p class="text-gray-600 mb-8">
-      Explore Cantonese sentence patterns organised by Level  level
+      Explore Cantonese words patterns organised by Level
     </p>
 
     <ul class="space-y-4">
