@@ -5,8 +5,6 @@ export default defineEventHandler(async (event) => {
   
   const id = getRouterParam(event, 'id')
 
-  const decodedParam = decodeURIComponent(id || "unable to decode character")  // TODO: we need to move to raw english and avoid encode and decoding
-
   try {
     const file = join(process.cwd(), 'server/data/words', `${decodedParam}.json`)
     const json = await readFile(file, 'utf-8')
