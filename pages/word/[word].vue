@@ -7,7 +7,8 @@ const wordParam = route.params.word as string
 const { data: word, error } = await useFetch(
   `/content/cantonese/words/${wordParam}.json`,
   {
-    key: `word-${wordParam}`
+    key: `word-${wordParam}`,
+    server: false
   }
 )
 
