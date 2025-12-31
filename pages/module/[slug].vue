@@ -17,3 +17,4 @@ const module = modules[route.params.slug]
     </ul>
   </main>
 </template>
+

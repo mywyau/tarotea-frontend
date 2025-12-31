@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 const route = useRoute()
 
 // The Chinese word itself (e.g. 一, 唔知, 啦)
@@ -8,41 +7,47 @@ const wordParam = route.params.word as string
 const { data: word, error } = await useFetch(
   `/content/cantonese/words/${wordParam}.json`,
   {
-    key: `word-${wordParam}`,
-    server: false
+    key: `word-${wordParam}`
   }
 )
+
+// Fail fast during SSR
+if (error.value || !word.value) {
+  throw createError({
+    statusCode: 404,
+    statusMessage: 'Word not found'
+  })
+}
+
+const safeWord = computed(() => word.value!)
 </script>
 
 <template>
-  <!-- SUCCESS -->
-  <main
-    v-if="word"
-    class="max-w-2xl mx-auto px-4 py-12 space-y-10"
-  >
+  <main class="max-w-2xl mx-auto px-4 py-12 space-y-10">
     <!-- Word header -->
     <section class="text-center space-y-2">
       <div class="text-4xl font-medium">
-        {{ word.word }}
+        {{ safeWord.word }}
       </div>
 
       <div class="text-lg text-gray-400">
-        {{ word.jyutping }}
+        {{ safeWord.jyutping }}
       </div>
 
       <div class="text-lg text-gray-600">
-        {{ word.meaning }}
+        {{ safeWord.meaning }}
       </div>
     </section>
 
     <!-- Usage notes -->
-    <section v-if="word.usage?.length">
+    <section v-if="safeWord.usage?.length">
       <h2 class="text-lg font-semibold mb-3">
         Usage
       </h2>
+
       <ul class="list-disc pl-5 space-y-2 text-gray-700">
         <li
-          v-for="note in word.usage"
+          v-for="note in safeWord.usage ?? []"
           :key="note"
         >
           {{ note }}
@@ -51,13 +56,14 @@ const { data: word, error } = await useFetch(
     </section>
 
     <!-- Examples -->
-    <section v-if="word.examples?.length">
+    <section v-if="safeWord.examples?.length">
       <h2 class="text-lg font-semibold mb-3">
         Examples
       </h2>
+
       <ul class="space-y-3">
         <li
-          v-for="ex in word.examples"
+          v-for="ex in safeWord.examples ?? []"
           :key="ex"
           class="border-l-4 border-gray-200 pl-4"
         >
@@ -66,25 +72,4 @@ const { data: word, error } = await useFetch(
       </ul>
     </section>
   </main>
-
-  <!-- ERROR -->
-  <div
-    v-else-if="error"
-    class="max-w-xl mx-auto px-4 py-12 text-center space-y-4"
-  >
-    <p class="text-red-600">
-      This word doesn’t exist yet.
-    </p>
-    <NuxtLink to="/" class="underline">
-      Go home
-    </NuxtLink>
-  </div>
-
-  <!-- LOADING -->
-  <div
-    v-else
-    class="max-w-xl mx-auto px-4 py-12 text-center text-gray-500"
-  >
-    Loading…
-  </div>
 </template>
