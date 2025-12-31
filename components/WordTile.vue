@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 const props = defineProps<{
   id: string
 }>()
@@ -26,7 +26,33 @@ const { data: word } = await useFetch(
   </NuxtLink>
 
   <!-- Optional: loading state -->
-  <div v-else class="border rounded-lg p-4 text-center text-gray-300">
-    …
-  </div>
+  <!-- <div v-else class="border rounded-lg p-4 text-center text-gray-300"> -->
+    <!-- … -->
+  <!-- </div> -->
+<!-- </template>  -->
+
+
+<script setup lang="ts">
+defineProps<{
+  word: string
+  jyutping: string
+  meaning: string
+}>()
+</script>
+
+<template>
+  <NuxtLink
+    :to="`/word/${word}`"
+    class="border rounded-lg p-4 hover:bg-gray-50 transition space-y-1"
+  >
+    <div class="text-xl text-center">
+      {{ word }}
+    </div>
+    <div class="text-sm text-gray-400 text-center">
+      {{ jyutping }}
+    </div>
+    <div class="text-xs text-gray-500 text-center">
+      {{ meaning }}
+    </div>
+  </NuxtLink>
 </template>

@@ -1,18 +1,18 @@
 <script setup lang="ts">
 const levels = [
   {
-    id: 'hsk1',
-    title: 'HSK 1',
+    id: 'level-one',
+    title: 'Level 1',
     description: 'Core beginner sentence patterns and expressions.'
   },
   {
-    id: 'hsk2',
-    title: 'HSK 2',
+    id: 'level-two',
+    title: 'Level  2',
     description: 'Everyday usage and common expansions.'
   },
   {
-    id: 'hsk3',
-    title: 'HSK 3',
+    id: 'level-three',
+    title: 'Level  3',
     description: 'More natural phrasing and longer sentences.'
   }
 ]
@@ -21,20 +21,16 @@ const levels = [
 <template>
   <main class="max-w-3xl mx-auto py-12 px-4">
     <h1 class="text-3xl font-semibold mb-4">
-      HSK Levels
+      Level  Levels
     </h1>
 
     <p class="text-gray-600 mb-8">
-      Explore Cantonese sentence patterns organised by HSK level
+      Explore Cantonese sentence patterns organised by Level  level
     </p>
 
     <ul class="space-y-4">
-      <li
-        v-for="level in levels"
-        :key="level.id"
-        class="border rounded p-4 hover:bg-gray-50"
-      >
-        <NuxtLink :to="`/hsk/${level.id}`" class="block">
+      <li v-for="level in levels" :key="level.id" class="border rounded p-4 hover:bg-gray-50">
+        <NuxtLink :to="`/words/${level.id}`" class="block">
           <div class="text-lg font-medium">
             {{ level.title }}
           </div>

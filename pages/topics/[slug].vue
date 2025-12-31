@@ -11,6 +11,8 @@ const { data: topic, error } = await useFetch(
     server: false
   }
 )
+
+console.log(`/index/topics/${slug}.json`)
 </script>
 
 <template>
@@ -24,19 +26,26 @@ const { data: topic, error } = await useFetch(
       </p>
 
       <!-- Words -->
-      <section v-if="topic.words?.length">
+      <!-- <section v-if="topic.words?.length">
         <h2 class="text-lg font-semibold mt-8 mb-4">
           Words
         </h2>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          <WordTile
-            v-for="id in topic.words"
-            :key="id"
-            :id="id"
-          />
+          <WordTile v-for="id in topic.sections.words" :key="id" :id="id" />
+        </div>
+      </section> -->
+
+      <section v-for="section in topic.sections" :key="section.title" class="space-y-4">
+        <h2 class="text-lg font-semibold mt-8">
+          {{ section.title }}
+        </h2>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <WordTile v-for="item in section.items" :key="item.word" :word="item.word" :jyutping="item.jyutping" :meaning="item.meaning" />
         </div>
       </section>
+
 
       <!-- Phrases (later) -->
       <section v-if="topic.phrases?.length">

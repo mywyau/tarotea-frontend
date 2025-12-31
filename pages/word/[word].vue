@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 const route = useRoute()
 
 // The Chinese word itself (e.g. 一, 唔知, 啦)

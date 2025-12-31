@@ -1,13 +1,13 @@
 <script setup lang="ts">
 const route = useRoute()
 
-// level will be "hsk1", "hsk2", etc.
+// level will be "level 1", "level 2", etc.
 const level = route.params.level as string
 
 const { data: index, error } = await useFetch(
-  `/index/hsk/${level}.json`,
+  `/index/level/${level}.json`,
   {
-    key: `hsk-${level}`,
+    key: `level-${level}`,
     server: false
   }
 )
@@ -40,7 +40,7 @@ const { data: index, error } = await useFetch(
     <!-- Error -->
     <div v-else-if="error">
       <p class="text-red-600">
-        This HSK level isn’t available yet.
+        This Level isn’t available yet.
       </p>
       <NuxtLink to="/" class="underline">
         Go home

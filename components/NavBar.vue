@@ -22,12 +22,48 @@
             Topics
           </NuxtLink>
 
-          <NuxtLink to="/hsk" class="text-l text-primary-600">
-            HSK
+          <NuxtLink to="/levels" class="text-l text-primary-600">
+            Levels
           </NuxtLink>
 
+          <!-- <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 1
+          </NuxtLink>
+
+          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 2
+          </NuxtLink>
+
+          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 3
+          </NuxtLink>
+
+          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 4
+          </NuxtLink>
+
+          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 6
+          </NuxtLink>
+
+          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 7
+          </NuxtLink>
+
+          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 8
+          </NuxtLink>
+
+          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 9
+          </NuxtLink>
+
+          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
+            Level 10
+          </NuxtLink> -->
+
           <span class="text-gray-700">{{ user?.name }}</span>
-<!-- 
+          <!-- 
           <Button variant="danger" @click="logout">
             Logout
           </Button> -->
