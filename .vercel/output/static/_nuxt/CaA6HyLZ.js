@@ -1,1 +1,0 @@
-import{j as l,c,o as r,a as e,q as s,t as a}from"./MBpTA9d8.js";const n={class:"text-center"},u=l({__name:"RubyText",props:{text:{},ruby:{},textClass:{default:"text-lg"},rubyClass:{default:"text-sm text-gray-400"}},setup(t){return(o,x)=>(r(),c("div",n,[e("div",{class:s(t.rubyClass)},a(t.ruby),3),e("div",{class:s(t.textClass)},a(t.text),3)]))}});export{u as _};
