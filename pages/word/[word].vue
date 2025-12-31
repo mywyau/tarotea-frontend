@@ -1,25 +1,15 @@
 <script setup lang="ts">
-const route = useRoute()
 
+const route = useRoute()
 const wordParam = computed(() => route.params.word as string)
 
 const { data: word, error, pending } = await useFetch(
-  () => `/api/words/${decodeURIComponent(wordParam.value)}`,
+  () => `/api/words/${encodeURIComponent(wordParam.value)}`,
   {
     key: () => `word-${wordParam.value}`,
     server: true
   }
 )
-
-// Only throw once we KNOW it failed
-// watchEffect(() => {
-//   if (!pending.value && error.value) {
-//     throw createError({
-//       statusCode: 404,
-//       statusMessage: 'Word not found'
-//     })
-//   }
-// })
 
 const notFound = computed(() => error.value?.statusCode === 404)
 const safeWord = computed(() => word.value)
@@ -81,4 +71,17 @@ const safeWord = computed(() => word.value)
       </ul>
     </section>
   </main>
+
+  <!-- NOT FOUND -->
+  <div v-else-if="notFound" class="text-center py-20">
+    <h1 class="text-2xl font-semibold">Word not found</h1>
+    <p class="text-gray-500 mt-2">
+      The word "{{ wordParam }}" does not exist.
+    </p>
+  </div>
+
+  <!-- LOADING / OTHER -->
+  <div v-else class="text-center py-20 text-gray-400">
+    Loading…
+  </div>
 </template>
