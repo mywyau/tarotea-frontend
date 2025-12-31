@@ -1,6 +1,9 @@
 <script setup lang="ts">
+
 const route = useRoute()
+
 const levelParam = route.params.level as string
+
 
 const { data: index, error } = await useFetch(
   `/index/words/level/${levelParam}.json`,

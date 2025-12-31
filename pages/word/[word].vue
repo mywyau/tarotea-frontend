@@ -4,10 +4,12 @@ const route = useRoute()
 // The Chinese word itself (e.g. 一, 唔知, 啦)
 const wordParam = route.params.word as string
 
+const encodedWord = encodeURIComponent(wordParam)
+
 const { data: word, error } = await useFetch(
-  `/content/cantonese/words/${wordParam}.json`,
+  `/content/cantonese/words/${encodedWord}.json`,
   {
-    key: `word-${wordParam}`
+    key: `word-${encodedWord}`
   }
 )
 
