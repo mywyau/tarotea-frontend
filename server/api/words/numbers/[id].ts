@@ -37,6 +37,14 @@ export default defineEventHandler(async (event) => {
     七十: "tens",
     八十: "tens",
     九十: "tens",
+
+    // beyond
+    一百: "beyond",
+    二百: "beyond",
+    一千: "beyond",
+    一萬: "beyond",
+    十萬: "beyond",
+    一百萬: "beyond",
   };
 
   setHeader(
