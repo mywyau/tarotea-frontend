@@ -19,7 +19,7 @@ const safeTopic = computed(() => topic.value)
 </script>
 
 <template>
-  <main v-if="safeWord" class="max-w-4xl mx-auto px-4 py-12 space-y-8">
+  <main v-if="safeTopic" class="max-w-4xl mx-auto px-4 py-12 space-y-8">
     <h1 class="text-3xl font-semibold">
       {{ safeTopic.title }}
     </h1>
