@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import WordTile from '@/components/WordTile.vue'
+import WordTile from '@/components/WordTile.vue';
 
 const route = useRoute()
 
 const slug = computed(() => route.params.slug as string)
+
+const { public: { cdnBase } } = useRuntimeConfig();
+
+if (process.client) {
+  console.log("CDN URL:", `${cdnBase}/index/topics/${slug}.json`)
+}
 
 console.log(`/api/index/topics/${slug.value}`)
 

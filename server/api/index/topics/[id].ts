@@ -8,12 +8,10 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
+  const {public: { cdnBase }} = useRuntimeConfig();
 
   console.log(`${cdnBase}/index/topics/${id}.json`)
-  
+
   try {
     return await $fetch(
       `${cdnBase}/index/topics/${id}.json`
