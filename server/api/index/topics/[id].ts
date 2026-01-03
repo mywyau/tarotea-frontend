@@ -12,6 +12,8 @@ export default defineEventHandler(async (event) => {
     public: { cdnBase },
   } = useRuntimeConfig();
 
+  console.log(`${cdnBase}/index/topics/${id}.json`)
+  
   try {
     return await $fetch(
       `${cdnBase}/index/topics/${id}.json`
