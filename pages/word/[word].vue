@@ -88,7 +88,7 @@ const safeWord = computed(() => word.value)
       </div>
 
       <AudioButton v-if="folder" :src="`${cdnBase}/audio/words/${folder}/${safeWord.word}/${safeWord.word}.mp3`" />
-      {{ `${cdnBase}/audio/words/${folder}/${safeWord.word}/${safeWord.word}.mp3` }}
+      <!-- {{ `${cdnBase}/audio/words/${folder}/${safeWord.word}/${safeWord.word}.mp3` }} -->
     </section>
 
     <!-- Usage notes -->
@@ -120,7 +120,7 @@ const safeWord = computed(() => word.value)
 
             <AudioButton v-if="folder" :src="`${cdnBase}/audio/words/${folder}/${safeWord.word}/${example}.mp3`" />
             
-            {{ `${cdnBase}/audio/words/${folder}/${safeWord.word}/${example}.mp3` }}
+            <!-- {{ `${cdnBase}/audio/words/${folder}/${safeWord.word}/${example}.mp3` }} -->
           </div>
         </li>
 
