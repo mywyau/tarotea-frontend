@@ -26,44 +26,8 @@
             Words
           </NuxtLink>
 
-          <NuxtLink to="/modules" class="text-l text-primary-600">
+          <!-- <NuxtLink to="/modules" class="text-l text-primary-600">
             Modules
-          </NuxtLink>
-
-          <!-- <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 1
-          </NuxtLink>
-
-          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 2
-          </NuxtLink>
-
-          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 3
-          </NuxtLink>
-
-          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 4
-          </NuxtLink>
-
-          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 6
-          </NuxtLink>
-
-          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 7
-          </NuxtLink>
-
-          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 8
-          </NuxtLink>
-
-          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 9
-          </NuxtLink>
-
-          <NuxtLink to="/words/level-one" class="text-l text-primary-600">
-            Level 10
           </NuxtLink> -->
 
           <span class="text-gray-700">{{ user?.name }}</span>
