@@ -22,6 +22,7 @@ const safeWord = computed(() => index.value)
 
 
 <template>
+
   <main v-if="safeWord" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
     <!-- Word header -->
     <section class="text-center space-y-2">
@@ -78,4 +79,5 @@ const safeWord = computed(() => index.value)
       </ul>
     </section>
   </main>
+  
 </template>

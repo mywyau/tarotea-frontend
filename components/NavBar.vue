@@ -23,7 +23,7 @@
           </NuxtLink>
 
           <NuxtLink to="/levels" class="text-l text-primary-600">
-            Words
+            Levels
           </NuxtLink>
 
           <!-- <NuxtLink to="/modules" class="text-l text-primary-600">
