@@ -2,10 +2,12 @@
 const route = useRoute()
 const level = route.params.level as string
 
-const { data: index, error } = await useFetch(
-  `/index/level/${level}.json`,
+
+const { data: index, error, pending } = await useFetch(
+  () => `/api/index/level/${level}`,
   {
-    key: `level-${level}`
+    key: `level-${level}`,
+    server: true
   }
 )
 

@@ -2,12 +2,13 @@
 import RubyText from '@/components/RubyText.vue'
 
 const route = useRoute()
-const id = route.params.id as string
+const wordParam = computed(() => route.params.word as string)
 
-const { data: item, error } = await useFetch(
-  `/content/cantonese/${id}.json`,
+const { data: word, error, pending } = await useFetch(
+  () => `/api/words/level/${wordParam.value}`,
   {
-    key: `item-${id}`
+    key: () => `words-level-${wordParam.value}`,
+    server: true
   }
 )
 

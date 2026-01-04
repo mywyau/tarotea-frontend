@@ -30,7 +30,7 @@ const levels = [
 
     <ul class="space-y-4">
       <li v-for="level in levels" :key="level.id" class="border rounded p-4 hover:bg-gray-50">
-        <NuxtLink :to="`/words/${level.id}`" class="block">
+        <NuxtLink :to="`/level/${level.id}`" class="block">
           <div class="text-lg font-medium">
             {{ level.title }}
           </div>

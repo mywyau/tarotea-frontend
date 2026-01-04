@@ -4,11 +4,11 @@ const route = useRoute()
 
 const levelParam = route.params.level as string
 
-
 const { data: index, error } = await useFetch(
-  `/index/words/level/${levelParam}.json`,
+  `api/index/level/words/${levelParam}.json`,
   {
-    key: `level-words-${levelParam}`
+    key: `level-words-${levelParam}`,
+    server: true
   }
 )
 
@@ -21,7 +21,9 @@ if (error.value || !index.value) {
 }
 
 const safeIndex = computed(() => index.value!)
+
 </script>
+
 <template>
   <main class="max-w-4xl mx-auto px-4 py-12">
     <!-- Header -->
