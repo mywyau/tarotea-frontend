@@ -10,9 +10,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const cdnBase = useRuntimeConfig().public.cdnBase;
-
   console.log("CDN (runtime):", useRuntimeConfig().public.cdnBase)
-
 
   try {
     return await $fetch(

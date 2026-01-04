@@ -9,7 +9,7 @@ const { data: topic, error, pending } = await useFetch(
   () => `/api/index/topics/${slug.value}`,
   {
     key: () => `topic-${slug.value}`,
-    server: false
+    server: true
   }
 )
 
