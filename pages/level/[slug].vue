@@ -2,13 +2,12 @@
 import WordTile from '@/components/WordTile.vue';
 
 const route = useRoute()
-
 const slug = computed(() => route.params.slug as string)
 
 const { data: topic, error, pending } = await useFetch(
-  () => `/api/words/level/${slug.value}`,
+  () => `/api/index/levels/${slug.value}`,
   {
-    key: () => `words-level-${slug.value}`,
+    key: () => `index-level-${slug.value}`,
     server: true
   }
 )
@@ -28,7 +27,7 @@ const safeTopic = computed(() => topic.value)
     </p>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-      <WordTile v-for="word in safeTopic.words ?? []" :key="word.word" :word="word.word" :jyutping="word.jyutping"
+      <WordTile v-for="word in safeTopic.words ?? []" :to="`/level/${slug}/word/${word.word}`" :key="word.word" :word="word.word" :jyutping="word.jyutping"
         :meaning="word.meaning" />
     </div>
   </main>

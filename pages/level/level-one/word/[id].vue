@@ -3,10 +3,10 @@
 const route = useRoute()
 const idParam = computed(() => route.params.id as string)
 
-const { data: index, error, pending } = await useFetch(
-  () => `/api/words/level/${idParam.value}`,
+const { data: word, error, pending } = await useFetch(
+  () => `/api/words/level-one/${decodeURIComponent(idParam.value)}`,
   {
-    key: () => `words-level-${idParam.value}`,
+    key: () => `words-level-one-${idParam.value}`,
     server: true
   }
 )
@@ -14,9 +14,10 @@ const { data: index, error, pending } = await useFetch(
 const cdnBase = useRuntimeConfig().public.cdnBase;
 
 console.log(`hello ${cdnBase}`)
+console.log(`hello ${idParam.value}`)
 
 const notFound = computed(() => error.value?.statusCode === 404)
-const safeWord = computed(() => index.value)
+const safeWord = computed(() => word.value)
 
 </script>
 
@@ -79,5 +80,5 @@ const safeWord = computed(() => index.value)
       </ul>
     </section>
   </main>
-  
+
 </template>
