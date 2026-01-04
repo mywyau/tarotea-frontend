@@ -13,6 +13,8 @@ const { data: word, error, pending } = await useFetch(
 
 const cdnBase = useRuntimeConfig().public.cdnBase;
 
+console.log(`hello ${cdnBase}`)
+
 const WORD_PATHS: Record<string, string> = {
   // units
   零: "units",
@@ -85,7 +87,8 @@ const safeWord = computed(() => word.value)
         {{ safeWord.meaning }}
       </div>
 
-      <AudioButton v-if="folder" :src="`${cdnBase}/audio/words/${folder}/${wordParam.value}/${safeWord.word}.mp3`" />
+      <AudioButton v-if="folder" :src="`${cdnBase}/audio/words/${folder}/${safeWord.word}/${safeWord.word}.mp3`" />
+      {{ `${cdnBase}/audio/words/${folder}/${safeWord.word}/${safeWord.word}.mp3` }}
     </section>
 
     <!-- Usage notes -->
@@ -115,7 +118,9 @@ const safeWord = computed(() => word.value)
               {{ example }}
             </span>
 
-            <AudioButton v-if="folder" :src="`${cdnBase}/audio/words/${folder}/${wordParam.value}/${example}.mp3`" />
+            <AudioButton v-if="folder" :src="`${cdnBase}/audio/words/${folder}/${safeWord.word}/${example}.mp3`" />
+            
+            {{ `${cdnBase}/audio/words/${folder}/${safeWord.word}/${example}.mp3` }}
           </div>
         </li>
 
