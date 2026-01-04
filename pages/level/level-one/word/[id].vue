@@ -39,8 +39,8 @@ const safeWord = computed(() => word.value)
         {{ safeWord.meaning }}
       </div>
 
-      <AudioButton v-if="folder" :src="`${cdnBase}/audio/words/${folder}/${safeWord.word}/${safeWord.word}.mp3`" />
-      <!-- {{ `${cdnBase}/audio/words/${folder}/${safeWord.word}/${safeWord.word}.mp3` }} -->
+      <AudioButton :src="`${cdnBase}/audio/level/level-one/${safeWord.word}/${safeWord.word}.mp3`" />
+      <!-- {{ `${cdnBase}/audio/level/level-one/${safeWord.word}/${safeWord.word}.mp3` }} -->
     </section>
 
     <!-- Usage notes -->
@@ -70,9 +70,8 @@ const safeWord = computed(() => word.value)
               {{ example }}
             </span>
 
-            <AudioButton v-if="folder" :src="`${cdnBase}/audio/words/${folder}/${safeWord.word}/${example}.mp3`" />
-            
-            <!-- {{ `${cdnBase}/audio/words/${folder}/${safeWord.word}/${example}.mp3` }} -->
+            <AudioButton :src="`${cdnBase}/audio/level/level-one/${safeWord.word}/${example}.mp3`" />
+            <!-- {{ `${cdnBase}/audio/level/level-one/${safeWord.word}/${example}.mp3` }} -->
           </div>
         </li>
 
