@@ -82,3 +82,6 @@ tarotea-content/content/cantonese/words/level-one/我.json
 wrangler r2 object put tarotea-content /Users/michaelyau/tarotea/openai-tts/public/words \
   --recursive \
   --prefix words
+
+wrangler r2 object list tarotea-content --remote
+wrangler r2 object delete audio/ --prefix
