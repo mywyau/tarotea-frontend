@@ -54,7 +54,7 @@ const categories =
       </h2>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        <WordTile v-for="word in category.words" :key="word.word" :to="`/level/${slug}/word/${word.word}`"
+        <WordTile v-for="word in category.words" :key="word.word" :to="`/level/${slug}/word/${word.id}`"
           :word="word.word" :jyutping="word.jyutping" :meaning="word.meaning" />
       </div>
     </section>
