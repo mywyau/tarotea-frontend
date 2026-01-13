@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
 
   try {
     return await $fetch(
-      `${cdnBase}/index/levels/${id}.json`
+      `${cdnBase}/levels/${id}.json`
     );
   } catch {
     throw createError({
