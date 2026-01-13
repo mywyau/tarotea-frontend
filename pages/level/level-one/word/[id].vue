@@ -66,6 +66,9 @@ const notFound = computed(() => error.value?.statusCode === 404)
               </span>
 
               <AudioButton v-if="word.audio?.examples?.[index]" :src="`${cdnBase}/audio/${word.audio.examples[index]}`" />
+
+              {{ `${cdnBase}/audio/${word.audio.examples[index]}` }}
+
             </div>
 
             <div class="text-sm text-gray-400">
