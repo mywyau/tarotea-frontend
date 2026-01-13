@@ -18,9 +18,9 @@
 
         <div class="flex items-center gap-4">
 
-          <NuxtLink to="/topics" class="text-l text-primary-600">
+          <!-- <NuxtLink to="/topics" class="text-l text-primary-600">
             Topics
-          </NuxtLink>
+          </NuxtLink> -->
 
           <NuxtLink to="/levels" class="text-l text-primary-600">
             Levels
