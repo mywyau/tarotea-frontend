@@ -4,11 +4,11 @@
       Learn and understand everyday Cantonese :)
     </p>
 
-    <NuxtLink
+    <!-- <NuxtLink
       to="/topics"
       class="inline-block px-4 py-2 border rounded"
     >
       Start with viewing some topics →
-    </NuxtLink>
+    </NuxtLink> -->
   </main>
 </template>
