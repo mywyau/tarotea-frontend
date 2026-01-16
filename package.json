@@ -10,9 +10,11 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@auth0/auth0-spa-js": "^2.11.3",
     "@nuxt/fonts": "^0.12.1",
     "@nuxtjs/tailwindcss": "^6.14.0",
     "nuxt": "^3.20.2",
+    "pg": "^8.17.1",
     "vue": "^3.5.26",
     "vue-router": "^4.6.4"
   },

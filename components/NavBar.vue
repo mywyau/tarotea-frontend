@@ -2,19 +2,29 @@
 
 // import Button from '~/components/Button.vue';
 
+const isClient = ref(false)
+
+onMounted(() => {
+  isClient.value = true
+})
+
 </script>
 
 <template>
   <header class="border-b bg-white shadow-sm py-3">
+
     <div class="max-w-5xl mx-auto flex justify-between items-center px-4">
+
       <NuxtLink to="/" class="text-2xl font-bold text-primary-600">
         TaroTea
       </NuxtLink>
 
       <div>
-        <!-- <Button variant="primary" v-if="!isAuthenticated" @click="login">
-          Login
-        </Button> -->
+
+        <!-- <button @click="loginWithEmail">
+          Continue with email
+        </button> -->
+
 
         <div class="flex items-center gap-4">
 
@@ -30,11 +40,14 @@
             Modules
           </NuxtLink> -->
 
+          <button v-if="isClient" @click="loginWithGoogle">
+            Login
+          </button>
+
           <span class="text-gray-700">{{ user?.name }}</span>
-          <!-- 
-          <Button variant="danger" @click="logout">
-            Logout
-          </Button> -->
+
+          <button @click="logout">Log out</button>
+
         </div>
 
       </div>
