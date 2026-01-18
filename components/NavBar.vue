@@ -1,14 +1,21 @@
-<script setup>
+<script setup lang="ts">
 
 // import Button from '~/components/Button.vue';
+import { useUpgrade } from '@/composables/useUpgrade'
+
 
 const isClient = ref(false)
+
+function upgrade(billing: 'monthly' | 'yearly') {
+  useUpgrade(billing)
+}
 
 onMounted(() => {
   isClient.value = true
 })
 
 </script>
+
 
 <template>
   <header class="border-b bg-white shadow-sm py-3">
@@ -39,6 +46,12 @@ onMounted(() => {
           <!-- <NuxtLink to="/modules" class="text-l text-primary-600">
             Modules
           </NuxtLink> -->
+
+          <button v-if="me && me.plan !== 'pro'" class="text-sm px-3 py-1 rounded bg-green-600 text-white"
+            @click="upgrade('monthly')">
+            Upgrade
+          </button>
+ 
 
           <button v-if="isClient" @click="loginWithGoogle">
             Login

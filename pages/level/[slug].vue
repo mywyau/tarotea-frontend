@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import WordTile from '@/components/WordTile.vue'
-import { getLevelNumber } from '@/utils/levels'
+import { useUpgrade } from '@/composables/useUpgrade'
 import { canAccessLevel } from '@/utils/access'
+import { getLevelNumber } from '@/utils/levels'
+
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -56,23 +58,11 @@ const categories = computed(() => {
         This level is part of Tarotea Pro.
       </p>
 
-      <button
-        v-if="!me"
-        class="mt-4 px-4 py-2 rounded bg-blue-600 text-white"
-        @click="loginWithGoogle"
-        type="button"
-      >
+      <button v-if="!me" class="mt-4 px-4 py-2 rounded bg-blue-600 text-white" @click="loginWithGoogle" type="button">
         Sign in to unlock
       </button>
 
-      <button
-        v-else
-        class="mt-4 px-4 py-2 rounded bg-green-600 text-white"
-        disabled
-        type="button"
-      >
-        Upgrade coming soon
-      </button>
+
     </section>
 
     <!-- ✅ ACCESS GRANTED -->
@@ -98,24 +88,14 @@ const categories = computed(() => {
         </header>
 
         <!-- Categories -->
-        <section
-          v-for="category in categories"
-          :key="category.key"
-          class="space-y-4"
-        >
+        <section v-for="category in categories" :key="category.key" class="space-y-4">
           <h2 class="text-xl font-medium capitalize">
             {{ category.title }}
           </h2>
 
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-            <WordTile
-              v-for="word in category.words"
-              :key="word.word"
-              :to="`/level/${slug}/word/${word.id}`"
-              :word="word.word"
-              :jyutping="word.jyutping"
-              :meaning="word.meaning"
-            />
+            <WordTile v-for="word in category.words" :key="word.word" :to="`/level/${slug}/word/${word.id}`"
+              :word="word.word" :jyutping="word.jyutping" :meaning="word.meaning" />
           </div>
         </section>
       </template>

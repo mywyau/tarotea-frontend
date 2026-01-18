@@ -1,6 +1,12 @@
 <script setup lang="ts">
 
+import { useUpgrade } from '@/composables/useUpgrade'
+
 const me = await useMe()
+
+function upgrade(billing: 'monthly' | 'yearly') {
+  useUpgrade(billing)
+}
 
 const levels = [
   {
@@ -84,6 +90,17 @@ const levels = [
         </div>
       </li>
     </ul>
+
+
+    <div class="flex justify-center gap-3 mt-4">
+      <button class="px-4 py-2 rounded bg-green-600 text-white" @click="upgrade('monthly')">
+        £5.99 / month
+      </button>
+
+      <button class="px-4 py-2 rounded border border-green-600 text-green-700" @click="upgrade('yearly')">
+        £59 / year
+      </button>
+    </div>
 
   </main>
 </template>
