@@ -1,13 +1,22 @@
 export const useMe = async () => {
-  const { user } = await useAuth()
+  const { isAuthenticated, getAccessToken } = await useAuth();
 
-  if (!user?.sub) {
-    return null
+  if (!isAuthenticated) {
+    return null;
   }
 
-  return await $fetch('/api/me', {
+  const token = await getAccessToken();
+
+  console.log(token);
+
+  if (!token) {
+    return null;
+  }
+
+  return await $fetch("/api/me", {
     headers: {
-      'x-user-id': user.sub
-    }
-  })
-}
+      Authorization: `Bearer ${token}`,
+      cache: "no-store",
+    },
+  });
+};

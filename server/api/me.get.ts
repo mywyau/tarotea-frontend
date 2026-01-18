@@ -1,14 +1,8 @@
-import { db } from '~/server/db'
-import { getHeader, createError } from 'h3'
+import { db } from "~/server/db"
+import { requireUser } from "@/server/utils/requireUser"
 
 export default defineEventHandler(async (event) => {
-    
-  // 🚨 TEMP: trust client for now (we’ll secure this next)
-  const userId = getHeader(event, 'x-user-id')
-
-  if (!userId) {
-    return null
-  }
+  const userId = await requireUser(event)
 
   const { rows } = await db.query(
     `
