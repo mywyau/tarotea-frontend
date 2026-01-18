@@ -51,7 +51,11 @@ const levels = [
       Explore Cantonese sentence patterns organised by Level
     </p>
 
-    <p v-if="!me" class="mb-6 text-sm text-gray-500">
+    <!-- <p v-if="!me" class="mb-6 text-sm text-gray-500">
+      Sign in to track progress and unlock advanced levels.
+    </p> -->
+
+    <p v-if="authReady && !me" class="mb-6 text-sm text-gray-500">
       Sign in to track progress and unlock advanced levels.
     </p>
 
@@ -92,7 +96,7 @@ const levels = [
     </ul>
 
 
-    <div class="flex justify-center gap-3 mt-4">
+    <div v-if="me && me.plan !== 'pro'" class="flex justify-center gap-3 mt-4">
       <button class="px-4 py-2 rounded bg-green-600 text-white" @click="upgrade('monthly')">
         £5.99 / month
       </button>

@@ -1,4 +1,8 @@
 export const useMe = async () => {
+
+  
+  if (!process.client) return undefined;
+
   const { isAuthenticated, getAccessToken } = await useAuth();
 
   if (!isAuthenticated) {
