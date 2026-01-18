@@ -1,13 +1,22 @@
 <script setup lang="ts">
 
 // import Button from '~/components/Button.vue';
+import { logout } from '@/composables/useAuth'
 import { useUpgrade } from '@/composables/useUpgrade'
+
+
+const me = await useMe()
+const authReady = computed(() => me !== undefined)
 
 
 const isClient = ref(false)
 
 function upgrade(billing: 'monthly' | 'yearly') {
   useUpgrade(billing)
+}
+
+function handleLogout() {
+  logout()
 }
 
 onMounted(() => {
@@ -51,7 +60,7 @@ onMounted(() => {
             @click="upgrade('monthly')">
             Upgrade
           </button>
- 
+
 
           <button v-if="isClient" @click="loginWithGoogle">
             Login
@@ -59,7 +68,11 @@ onMounted(() => {
 
           <span class="text-gray-700">{{ user?.name }}</span>
 
-          <button @click="logout">Log out</button>
+          <!-- <button @click="logout">Log out</button> -->
+
+          <button v-if="authReady && me" class="text-sm text-red-600 hover:underline" @click="handleLogout">
+            Log out
+          </button>
 
         </div>
 

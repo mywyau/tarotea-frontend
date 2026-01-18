@@ -63,6 +63,7 @@ export async function loginWithEmail() {
 }
 
 export async function logout() {
+  
   if (!process.client) return;
 
   const { client } = await useAuth();
