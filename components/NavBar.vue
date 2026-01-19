@@ -3,10 +3,12 @@
 // import Button from '~/components/Button.vue';
 import { logout } from '@/composables/useAuth'
 import { useUpgrade } from '@/composables/useUpgrade'
+import { useMeState } from '@/composables/useMeState'
 
+const { me, authReady, refresh } = useMeState()
 
-const me = await useMe()
-const authReady = computed(() => me !== undefined)
+// const me = await useMe()
+// const authReady = computed(() => me !== undefined)
 
 
 const isClient = ref(false)
@@ -17,10 +19,12 @@ function upgrade(billing: 'monthly' | 'yearly') {
 
 function handleLogout() {
   logout()
+  me.value = null // optional: immediate UI update
 }
 
 onMounted(() => {
   isClient.value = true
+  refresh()
 })
 
 </script>

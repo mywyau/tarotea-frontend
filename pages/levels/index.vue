@@ -2,7 +2,9 @@
 
 import { useUpgrade } from '@/composables/useUpgrade'
 
-const me = await useMe()
+// const me = await useMe()
+const { me, authReady } = useMeState()
+
 
 function upgrade(billing: 'monthly' | 'yearly') {
   useUpgrade(billing)

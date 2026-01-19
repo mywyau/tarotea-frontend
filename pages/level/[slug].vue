@@ -13,7 +13,9 @@ if (!levelNumber) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
 
-const me = await useMe()
+// const me = await useMe()
+const { me, authReady } = useMeState()
+
 const hasAccess = canAccessLevel(levelNumber, me)
 
 // IMPORTANT: ensure this matches what /api/me returns.

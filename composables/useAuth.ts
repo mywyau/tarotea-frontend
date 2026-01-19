@@ -22,6 +22,10 @@ export async function useAuth() {
         redirect_uri: window.location.origin + "/callback",
         audience: useRuntimeConfig().public.auth0Audience,
       },
+      // These are needed for refresh persistence of the auth tokens from auth0
+      cacheLocation: "localstorage",
+      useRefreshTokens: true,
+      useRefreshTokensFallback: true,
     });
   }
 
@@ -40,17 +44,16 @@ export async function useAuth() {
   };
 }
 
-
 export async function loginWithGoogle() {
-  if (!process.client) return
-  const { client } = await useAuth()
-  if (!client) return
+  if (!process.client) return;
+  const { client } = await useAuth();
+  if (!client) return;
 
   await client.loginWithRedirect({
     authorizationParams: {
-      connection: 'google-oauth2'
-    }
-  })
+      connection: "google-oauth2",
+    },
+  });
 }
 
 export async function loginWithEmail() {
@@ -63,7 +66,6 @@ export async function loginWithEmail() {
 }
 
 export async function logout() {
-  
   if (!process.client) return;
 
   const { client } = await useAuth();
