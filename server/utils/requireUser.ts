@@ -2,6 +2,7 @@ import { getHeader, createError } from "h3";
 import { verifyAuth0Token } from "./auth0";
 
 export async function requireUser(event: any) {
+  
   const authHeader = getHeader(event, "authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
