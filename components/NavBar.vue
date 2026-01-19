@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 // import Button from '~/components/Button.vue';
-import { logout } from '@/composables/useAuth'
+import { logout, loginWithGoogle } from '@/composables/useAuth'
 import { useUpgrade } from '@/composables/useUpgrade'
 import { useMeState } from '@/composables/useMeState'
 
@@ -9,7 +9,6 @@ const { me, authReady, refresh } = useMeState()
 
 // const me = await useMe()
 // const authReady = computed(() => me !== undefined)
-
 
 const isClient = ref(false)
 
