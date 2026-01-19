@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import WordTile from '@/components/WordTile.vue'
-import { useUpgrade } from '@/composables/useUpgrade'
 import { canAccessLevel } from '@/utils/access'
 import { getLevelNumber } from '@/utils/levels'
 
@@ -16,7 +15,11 @@ if (!levelNumber) {
 // const me = await useMe()
 const { me, authReady } = useMeState()
 
-const hasAccess = canAccessLevel(levelNumber, me)
+// const hasAccess = canAccessLevel(levelNumber, me)
+
+const hasAccess = computed(() =>
+  authReady.value && canAccessLevel(levelNumber, me.value)
+)
 
 // IMPORTANT: ensure this matches what /api/me returns.
 // If /api/me returns { id: "..."} you're good.
@@ -51,7 +54,7 @@ const categories = computed(() => {
 <template>
   <main class="max-w-4xl mx-auto px-4 py-12 space-y-12">
     <!-- 🔒 ACCESS DENIED (do NOT depend on safeTopic) -->
-    <section v-if="!hasAccess" class="text-center space-y-4">
+    <section v-if="authReady && !hasAccess" class="text-center space-y-4">
       <h1 class="text-3xl font-semibold">
         🔒 Level locked
       </h1>

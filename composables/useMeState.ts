@@ -1,35 +1,35 @@
 export function useMeState() {
-  const me = useState<any | null | undefined>('me', () => undefined) // undefined=loading, null=logged out
-  const loading = useState<boolean>('meLoading', () => false)
+  const me = useState<any | null | undefined>("me", () => undefined); // undefined=loading, null=logged out
+  const loading = useState<boolean>("meLoading", () => false);
 
   const refresh = async () => {
-    if (!process.client) return
+    if (!process.client) return;
 
-    loading.value = true
+    loading.value = true;
     try {
-      const { isAuthenticated, getAccessToken } = await useAuth()
+      const { isAuthenticated, getAccessToken } = await useAuth();
 
       if (!isAuthenticated) {
-        me.value = null
-        return
+        me.value = null;
+        return;
       }
 
-      const token = await getAccessToken()
+      const token = await getAccessToken();
       if (!token) {
-        me.value = null
-        return
+        me.value = null;
+        return;
       }
 
-      me.value = await $fetch('/api/me', {
+      me.value = await $fetch("/api/me", {
         headers: { Authorization: `Bearer ${token}` },
-        cache: 'no-store'
-      })
+        cache: "no-store",
+      });
     } finally {
-      loading.value = false
+      loading.value = false;
     }
-  }
+  };
 
-  const authReady = computed(() => me.value !== undefined)
+  const authReady = computed(() => me.value !== undefined);
 
-  return { me, loading, authReady, refresh }
+  return { me, loading, authReady, refresh };
 }
