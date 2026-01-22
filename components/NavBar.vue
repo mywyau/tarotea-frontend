@@ -34,29 +34,22 @@ onMounted(() => {
         </NuxtLink>
 
         <!-- Upgrade -->
-        <button
-          v-if="authReady && me && me.plan !== 'pro'"
-          class="text-sm px-3 py-1 rounded bg-green-600 text-white"
-          @click="upgrade('monthly')"
-        >
+        <button v-if="authReady && me && me.plan !== 'pro'" class="text-sm px-3 py-1 rounded bg-green-600 text-white"
+          @click="upgrade('monthly')">
           Upgrade
         </button>
 
+        <span v-if="authReady && me" class="text-sm text-gray-700">
+          {{ me.email }}
+        </span>
+
         <!-- Login -->
-        <button
-          v-if="authReady && !me"
-          class="text-blue-600 hover:underline"
-          @click="loginWithGoogle"
-        >
+        <button v-if="authReady && !me" class="text-blue-600 hover:underline" @click="loginWithGoogle">
           Login
         </button>
 
         <!-- Logout -->
-        <button
-          v-if="authReady && me"
-          class="text-red-600 hover:underline"
-          @click="handleLogout"
-        >
+        <button v-if="authReady && me" class="text-red-600 hover:underline" @click="handleLogout">
           Log out
         </button>
 
