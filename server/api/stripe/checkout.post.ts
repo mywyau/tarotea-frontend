@@ -1,3 +1,5 @@
+// server/checkout.post.ts
+
 import { createError, getHeader, readBody } from "h3";
 import Stripe from "stripe";
 import { requireUser } from "~/server/utils/requireUser";
@@ -69,25 +71,59 @@ export default defineEventHandler(async (event) => {
   }
 
   // 🧾 Create Checkout Session
-  const session = await stripe.checkout.sessions.create({
-    mode: "subscription",
 
-    line_items: [
-      {
-        price: priceId,
-        quantity: 1,
+  // const session = await stripe.checkout.sessions.create({
+  //   mode: "subscription",
+
+  //   line_items: [
+  //     {
+  //       price: priceId,
+  //       quantity: 1,
+  //     },
+  //   ],
+
+  //   success_url: `${origin}/billing/success`,
+  //   cancel_url: `${origin}/billing/cancel`,
+
+  //   // 🔗 Link Stripe → your user
+  //   client_reference_id: userId,
+  //   metadata: {
+  //     userId,
+  //     plan: billing, // 'monthly' | 'yearly'
+  //   },
+  // });
+
+  // 🧾 Create Checkout Session
+  const session = await stripe.checkout.sessions.create(
+    {
+      mode: "subscription",
+
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+
+      success_url: `${origin}/billing/success`,
+      cancel_url: `${origin}/billing/cancel`,
+
+      client_reference_id: userId,
+
+      metadata: {
+        userId,
+        plan: billing,
       },
-    ],
 
-    success_url: `${origin}/billing/success`,
-    cancel_url: `${origin}/billing/cancel`,
-
-    // 🔗 Link Stripe → your user
-    client_reference_id: userId,
-    metadata: {
-      userId,
+      subscription_data: {
+        metadata: {
+          userId,
+          plan: billing,
+        },
+      },
     },
-  });
+    { idempotencyKey: `checkout:${userId}:${billing}` }
+  );
 
   return {
     url: session.url,
