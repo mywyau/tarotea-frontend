@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
     stripeEvent = stripe.webhooks.constructEvent(
       body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!
+      process.env.STRIPE_WEBHOOK_SIGNING_KEY!
     );
   } catch (err) {
     console.error("Webhook verification failed", err);
