@@ -21,15 +21,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 🌍 Base URL (required by Stripe)
-  //   const baseUrl = process.env.PUBLIC_BASE_URL;
-  //   if (!baseUrl) {
-  //     throw createError({
-  //       statusCode: 500,
-  //       statusMessage: "PUBLIC_BASE_URL not configured",
-  //     });
-  //   }
-
   // 🔑 Lookup key from env
   const lookupKey =
     billing === "monthly"

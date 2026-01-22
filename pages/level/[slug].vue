@@ -1,4 +1,9 @@
 <script setup lang="ts">
+
+definePageMeta({
+  middleware: ['level-exists']
+})
+
 import WordTile from '@/components/WordTile.vue'
 import { canAccessLevel } from '@/utils/access'
 import { getLevelNumber } from '@/utils/levels'
@@ -7,34 +12,56 @@ import { getLevelNumber } from '@/utils/levels'
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const levelNumber = getLevelNumber(slug.value)
-if (!levelNumber) {
-  throw createError({ statusCode: 404, statusMessage: 'Level not found' })
-}
+// const levelNumber = getLevelNumber(slug.value)
 
-// const me = await useMe()
+const levelNumberRef =
+  computed(() => {
+    if (!slug.value) return null
+    return getLevelNumber(slug.value)
+  })
+
+
+// if (!levelNumber) {
+//   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
+// }
+
+
 const { me, authReady } = useMeState()
 
-// const hasAccess = canAccessLevel(levelNumber, me)
-
-const hasAccess = computed(() =>
-  authReady.value && canAccessLevel(levelNumber, me.value)
-)
+const hasAccess = computed(() => {
+  if (!authReady.value) return false
+  if (!levelNumberRef.value) return false
+  return canAccessLevel(levelNumberRef.value, me.value)
+})
 
 // IMPORTANT: ensure this matches what /api/me returns.
 // If /api/me returns { id: "..."} you're good.
 // If it returns { user_id: "..."} then change me?.id accordingly.
 
 const headers = computed(() => {
-  if (!me?.id) return undefined
-  return { 'x-user-id': me.id }
+  if (!me.value?.id) return undefined
+  return { 'x-user-id': me.value.id }
 })
 
-const { data: topic, error, pending } = await useFetch(
-  () => (hasAccess ? `/api/index/levels/${slug.value}` : null),
+const shouldFetch = computed(() =>
+  authReady.value && hasAccess.value
+)
+
+// const { data: topic, error, pending } = await useFetch(
+//   () => (shouldFetch.value ? `/api/index/levels/${slug.value}` : null),
+//   {
+//     key: () => `index-level-${slug.value}`,
+//     server: false,
+//     headers
+//   }
+// )
+
+const { data: topic, error, pending, refresh } = await useFetch(
+  () => `/api/index/levels/${slug.value}`,
   {
     key: () => `index-level-${slug.value}`,
     server: false,
+    immediate: false, // ⬅️ IMPORTANT
     headers
   }
 )
@@ -49,10 +76,22 @@ const categories = computed(() => {
     words
   }))
 })
+
+watch(
+  [shouldFetch, slug],
+  ([canFetch, slugValue]) => {
+    if (canFetch && slugValue) {
+      refresh()
+    }
+  },
+  { immediate: true }
+)
+
 </script>
 
 <template>
   <main class="max-w-4xl mx-auto px-4 py-12 space-y-12">
+
     <!-- 🔒 ACCESS DENIED (do NOT depend on safeTopic) -->
     <section v-if="authReady && !hasAccess" class="text-center space-y-4">
       <h1 class="text-3xl font-semibold">
