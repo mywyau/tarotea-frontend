@@ -22,14 +22,15 @@
       </div>
     </div>
 
-    <p class="mt-12 mb-8 text-gray-600">
+    <p class="mt-8 text-gray-600">
       Learn and understand everyday Cantonese :)
     </p>
 
-    <NuxtLink
-      to="/levels"
-      class="inline-block px-4 py-2 border rounded"
-    >
+    <p class="mt-8 text-gray-600">
+      App is a work in progress, thank you for your patience 
+    </p>
+
+    <NuxtLink to="/levels" class="mt-8 inline-block px-4 py-2 border rounded">
       Start with viewing levels →
     </NuxtLink>
 
