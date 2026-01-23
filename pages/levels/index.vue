@@ -91,14 +91,13 @@ const levels = [
           </div>
 
           <button class="mt-2 text-sm text-blue-600 hover:underline" @click="loginWithGoogle">
-            Sign in to unlock
+            Sign in and upgrade to unlock
           </button>
         </div>
       </li>
     </ul>
 
-
-    <div v-if="me && me.plan !== 'monthly' && me.plan !== 'yearly'" class="flex justify-center gap-3 mt-4">
+    <!-- <div v-if="me && me.plan !== 'monthly' && me.plan !== 'yearly'" class="flex justify-center gap-3 mt-4">
       <button class="px-4 py-2 rounded bg-green-600 text-white" @click="upgrade('monthly')">
         £5.99 / month
       </button>
@@ -106,7 +105,7 @@ const levels = [
       <button class="px-4 py-2 rounded border border-green-600 text-green-700" @click="upgrade('yearly')">
         £59 / year
       </button>
-    </div>
+    </div> -->
 
   </main>
 </template>
