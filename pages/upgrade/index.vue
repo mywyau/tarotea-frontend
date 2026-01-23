@@ -35,7 +35,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
           class="block w-full rounded-lg border border-gray-300 py-3 font-medium hover:bg-gray-50 transition"
           @click="upgrade('monthly')"
         >
-          Monthly plan
+          Monthly plan · £5.99
         </button>
 
         <!-- Yearly -->
@@ -43,7 +43,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
           class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
           @click="upgrade('yearly')"
         >
-          Yearly plan · Best value
+          Yearly plan · £59.99 · Best value 
         </button>
 
       </div>
