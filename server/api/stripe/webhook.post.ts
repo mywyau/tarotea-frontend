@@ -1,4 +1,4 @@
-// server/webhook.post.ts
+// server/api/stripe/webhook.post.ts
 
 import { createError, getHeader, readRawBody } from "h3";
 import Stripe from "stripe";

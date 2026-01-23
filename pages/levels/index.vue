@@ -98,7 +98,7 @@ const levels = [
     </ul>
 
 
-    <div v-if="me && me.plan !== 'pro'" class="flex justify-center gap-3 mt-4">
+    <div v-if="me && me.plan !== 'monthly' && me.plan !== 'yearly'" class="flex justify-center gap-3 mt-4">
       <button class="px-4 py-2 rounded bg-green-600 text-white" @click="upgrade('monthly')">
         £5.99 / month
       </button>

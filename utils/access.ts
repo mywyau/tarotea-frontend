@@ -6,5 +6,5 @@ export function canAccessLevel(level: number, me: any | null) {
   if (!me) return false
 
   // Paid users get everything
-  return me.plan === 'pro' && me.active === true
+  return me.plan === 'monthly' || me.plan === 'yearly' && me.active === true
 }

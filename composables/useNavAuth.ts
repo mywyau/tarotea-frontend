@@ -1,9 +1,8 @@
-export function useMeState() {
+export function useNavAuth() {
   const me = useState<any | null | undefined>("me", () => undefined); // undefined=loading, null=logged out
   const loading = useState<boolean>("meLoading", () => false);
 
   const refresh = async () => {
-    
     if (!process.client) return;
 
     loading.value = true;
@@ -31,7 +30,19 @@ export function useMeState() {
     }
   };
 
+  const status = computed<"loading" | "logged-in" | "logged-out">(() => {
+    if (loading.value || me.value === undefined) {
+      return "loading";
+    }
+
+    if (me.value) {
+      return "logged-in";
+    }
+
+    return "logged-out";
+  });
+
   const authReady = computed(() => me.value !== undefined);
 
-  return { me, loading, authReady, refresh };
+  return { me, loading, authReady, status, refresh };
 }

@@ -52,6 +52,7 @@ export async function loginWithGoogle() {
   await client.loginWithRedirect({
     authorizationParams: {
       connection: "google-oauth2",
+      prompt: "select_account",
     },
   });
 }
@@ -65,8 +66,24 @@ export async function loginWithEmail() {
   await client.loginWithRedirect();
 }
 
+// export async function logout() {
+//   if (!process.client) return;
+
+//   const { client } = await useAuth();
+//   if (!client) return;
+
+//   await client.logout({
+//     logoutParams: {
+//       returnTo: window.location.origin,
+//     },
+//   });
+
 export async function logout() {
   if (!process.client) return;
+
+  // Clear local app state
+  const { me } = useMeState();
+  me.value = null;
 
   const { client } = await useAuth();
   if (!client) return;

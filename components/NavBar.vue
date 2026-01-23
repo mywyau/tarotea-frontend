@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { logout, loginWithGoogle } from '@/composables/useAuth'
+import { loginWithGoogle, logout } from '@/composables/useAuth'
+import { useNavAuth } from '@/composables/useNavAuth'
 import { useUpgrade } from '@/composables/useUpgrade'
-import { useMeState } from '@/composables/useMeState'
 
-const { me, authReady, refresh } = useMeState()
+// const { me, authReady, refresh } = useMeState()
+
+const { me, authReady, status, refresh } = useNavAuth()
 
 function upgrade(billing: 'monthly' | 'yearly') {
   useUpgrade(billing)
@@ -17,6 +19,7 @@ async function handleLogout() {
 onMounted(() => {
   refresh()
 })
+
 </script>
 
 <template>
@@ -27,33 +30,42 @@ onMounted(() => {
         TaroTea
       </NuxtLink>
 
+      <!-- Right side -->
+
       <div class="flex items-center gap-6">
 
         <NuxtLink to="/levels" class="text-l text-primary-600">
           Levels
         </NuxtLink>
 
-        <!-- Upgrade -->
-        <button v-if="authReady && me && me.plan !== 'pro'" class="text-sm px-3 py-1 rounded bg-green-600 text-white"
-          @click="upgrade('monthly')">
-          Upgrade
-        </button>
+        <template v-if="status === 'loading'">
+          <span class="text-sm text-gray-400">
+            Loading…
+          </span>
+        </template>
 
-        <span v-if="authReady && me" class="text-sm text-gray-700">
-          {{ me.email }}
-        </span>
+        <template v-else-if="status === 'logged-in'">
 
-        <!-- Login -->
-        <button v-if="authReady && !me" class="text-blue-600 hover:underline" @click="loginWithGoogle">
+          <NuxtLink v-if="me && me.plan !== 'monthly' && me.plan !== 'yearly'" to="/upgrade"
+            class="text-l text-primary-600">
+            Upgrade
+          </NuxtLink>
+
+          <span class="text-sm text-gray-700">
+            {{ me!.email }}
+          </span>
+
+          <button class="text-red-600 hover:underline" @click="handleLogout">
+            Log out
+          </button>
+        </template>
+
+        <button v-if="status !== 'loading' && status === 'logged-out'" class="text-blue-600 hover:underline"
+          @click="loginWithGoogle">
           Login
         </button>
-
-        <!-- Logout -->
-        <button v-if="authReady && me" class="text-red-600 hover:underline" @click="handleLogout">
-          Log out
-        </button>
-
       </div>
+
     </div>
   </header>
 </template>

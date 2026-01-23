@@ -122,7 +122,7 @@ export default defineEventHandler(async (event) => {
         },
       },
     },
-    { idempotencyKey: `checkout:${userId}:${billing}` }
+    // { idempotencyKey: `checkout:${userId}:${billing}` }
   );
 
   return {
