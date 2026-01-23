@@ -1,0 +1,40 @@
+<template>
+    <footer class="border-t bg-white mt-8">
+        <div class="max-w-5xl mx-auto px-4 py-4 text-sm text-gray-600">
+
+            <div class="flex flex-col sm:flex-row justify-between gap-4">
+
+                <!-- Left -->
+                <div>
+                    <div class="font-semibold text-gray-800">
+                        TaroTea
+                    </div>
+                    <p class="mt-1 max-w-sm hidden sm:block">
+                        Learn and understand everyday Cantonese.
+                    </p>
+                </div>
+
+                <!-- Right -->
+                <div class="flex gap-4">
+                    <NuxtLink to="/about" class="hover:underline">
+                        About
+                    </NuxtLink>
+
+                    <!-- <NuxtLink to="/faq" class="hover:underline">
+                        FAQ
+                    </NuxtLink> -->
+<!-- 
+                    <NuxtLink to="/tips" class="hover:underline">
+                        Tips
+                    </NuxtLink> -->
+                </div>
+
+            </div>
+
+            <div class="mt-3 text-xs text-gray-400">
+                © {{ new Date().getFullYear() }} TaroTea
+            </div>
+
+        </div>
+    </footer>
+</template>

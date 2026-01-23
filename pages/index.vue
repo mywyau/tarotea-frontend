@@ -1,3 +1,10 @@
+<script setup lang="ts">
+const { data: stats } = await useFetch('/api/stats', {
+  server: true,   // fetch on server for fast first render
+  lazy: true,     // don’t block page load if slow
+})
+</script>
+
 <template>
   <main class="max-w-xl mx-auto py-16 text-center">
 
@@ -5,21 +12,22 @@
 
       <div class="rounded-lg border p-6">
         <div class="text-base font-semibold">
-          {{ stats?.activeUsers ?? '—' }}
+          {{ stats?.totalUsers ?? '—' }}
         </div>
         <div class="text-sm text-gray-500">
-          Active learners
+          Total users ever logged in or registered
         </div>
       </div>
 
       <div class="rounded-lg border p-6">
-        <div class="text- font-semibold">
+        <div class="text-base font-semibold">
           {{ stats?.paidUsers ?? '—' }}
         </div>
         <div class="text-sm text-gray-500">
-          Supporting the project
+          Active Paid learners
         </div>
       </div>
+
     </div>
 
     <p class="mt-8 text-gray-600">
@@ -27,7 +35,7 @@
     </p>
 
     <p class="mt-8 text-gray-600">
-      App is a work in progress, thank you for your patience 
+      App is a work in progress, thank you for your patience
     </p>
 
     <NuxtLink to="/levels" class="mt-8 inline-block px-4 py-2 border rounded">
