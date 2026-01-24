@@ -18,7 +18,7 @@ definePageMeta({
         <p class="text-gray-700">
             The goal is not to overwhelm with grammar or academic explanations,
             but to help learners recognise, understand, and remember the words and phrases
-            we actually hear in real life. Hopefuly in a clear and approachable way.
+            we actually hear in real life. 
         </p>
 
         <h2 class="text-xl font-semibold pt-2">
