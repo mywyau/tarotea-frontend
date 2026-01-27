@@ -63,10 +63,16 @@ const categories = computed(() => {
         This level is part of Tarotea Pro.
       </p>
 
-      <button v-if="!me" class="mt-4 px-4 py-2 rounded bg-blue-600 text-white" @click="loginWithGoogle" type="button">
-        Sign in to unlock
-      </button>
+      <!-- TODO once real stripe payments are in we add buttons back in or for testing stripe test integrations -->
+      <!-- <button v-if="!me" class="mt-4 px-4 py-2 rounded bg-blue-600 text-white" @click="loginWithGoogle" type="button">
+        Sign in and upgrade to unlock
+      </button> -->
 
+      <div class="mt-8">
+        <NuxtLink class="text-sm text-blue-600 hover:underline" :to="`/upgrade/coming-soon`">
+          Sign in and upgrade to unlock
+        </NuxtLink>
+      </div>
 
     </section>
 
