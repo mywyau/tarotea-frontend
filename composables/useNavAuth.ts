@@ -7,6 +7,29 @@ export function useNavAuth() {
 
     loading.value = true;
 
+    //   try {
+    //     const { isAuthenticated, getAccessToken } = await useAuth();
+
+    //     if (!isAuthenticated) {
+    //       me.value = null;
+    //       return;
+    //     }
+
+    //     const token = await getAccessToken();
+    //     if (!token) {
+    //       me.value = null;
+    //       return;
+    //     }
+
+    //     me.value = await $fetch("/api/me", {
+    //       headers: { Authorization: `Bearer ${token}` },
+    //       cache: "no-store",
+    //     });
+    //   } finally {
+    //     loading.value = false;
+    //   }
+    // };
+
     try {
       const { isAuthenticated, getAccessToken } = await useAuth();
 
@@ -25,6 +48,8 @@ export function useNavAuth() {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
+    } catch {
+      me.value = null;
     } finally {
       loading.value = false;
     }
@@ -43,6 +68,10 @@ export function useNavAuth() {
   });
 
   const authReady = computed(() => me.value !== undefined);
+
+  if (process.client) {
+    refresh();
+  }
 
   return { me, loading, authReady, status, refresh };
 }

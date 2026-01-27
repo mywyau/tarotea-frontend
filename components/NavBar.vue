@@ -16,10 +16,6 @@ async function handleLogout() {
   me.value = null
 }
 
-onMounted(() => {
-  refresh()
-})
-
 </script>
 
 <template>
@@ -38,13 +34,36 @@ onMounted(() => {
           Levels
         </NuxtLink>
 
-        <template v-if="status === 'loading'">
-          <span class="text-sm text-gray-400">
-            Loading…
-          </span>
-        </template>
 
-        <template v-else-if="status === 'logged-in'">
+
+        <ClientOnly>
+          <template v-if="status === 'loading'">
+            <span class="text-sm text-gray-400">Loading…</span>
+          </template>
+
+          <template v-else-if="status === 'logged-in'">
+            <NuxtLink v-if="me && me.plan !== 'monthly' && me.plan !== 'yearly'" to="/upgrade"
+              class="text-l text-primary-600">
+              Upgrade
+            </NuxtLink>
+
+            <span class="text-sm text-gray-700">
+              {{ me.email }}
+            </span>
+
+            <button class="text-red-600 hover:underline" @click="handleLogout">
+              Log out
+            </button>
+          </template>
+
+          <button v-else class="text-blue-600 hover:underline" @click="loginWithGoogle">
+            Login
+          </button>
+        </ClientOnly>
+
+
+
+        <!-- <template v-else-if="status === 'logged-in'">
 
           <NuxtLink v-if="me && me.plan !== 'monthly' && me.plan !== 'yearly'" to="/upgrade"
             class="text-l text-primary-600">
@@ -58,12 +77,12 @@ onMounted(() => {
           <button class="text-red-600 hover:underline" @click="handleLogout">
             Log out
           </button>
-        </template>
+        </template> -->
 
-        <button v-if="status !== 'loading' && status === 'logged-out'" class="text-blue-600 hover:underline"
+        <!-- <button v-if="status !== 'loading' && status === 'logged-out'" class="text-blue-600 hover:underline"
           @click="loginWithGoogle">
           Login
-        </button>
+        </button> -->
       </div>
 
     </div>
