@@ -16,9 +16,9 @@
 
                 <!-- Right -->
                 <div class="flex gap-4">
-                    <NuxtLink to="/about" class="hover:underline">
+                    <!-- <NuxtLink to="/about" class="hover:underline">
                         About
-                    </NuxtLink>
+                    </NuxtLink> -->
 
                     <!-- <NuxtLink to="/faq" class="hover:underline">
                         FAQ
