@@ -30,14 +30,14 @@ function goBack() {
     </h1>
 
     <p class="text-gray-600">
-      Unlock full access to Cantonese learning,
+      Full access to Cantonese learning,
       with native audio and carefully selected everyday words.
     </p>
 
     <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
       <li>• Full access to all levels</li>
-      <li>• Native Cantonese audio for every word</li>
-      <li>• No fluff neatly organised content</li>
+      <li>• Native Cantonese audio for every word and sentence</li>
+      <li>• No fluff, neatly organised content</li>
       <li>• New content added regularly</li>
       <li>• Randomised exercises and tests</li>
     </ul>
@@ -46,7 +46,7 @@ function goBack() {
       <div class="text-2xl font-medium">
         £5.99 <span class="text-base text-gray-500">/ month</span>
       </div>
-      <div class="text-sm text-gray-500">
+      <div class="text-sm mt-2 text-gray-500">
         Cancel anytime
       </div>
     </div>

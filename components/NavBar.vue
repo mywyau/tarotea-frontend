@@ -34,7 +34,9 @@ async function handleLogout() {
           Levels
         </NuxtLink>
 
-
+        <NuxtLink to="/upgrade/coming-soon" class="text-l text-primary-600">
+          Test
+        </NuxtLink>
 
         <ClientOnly>
           <template v-if="status === 'loading'">
