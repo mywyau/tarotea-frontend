@@ -36,7 +36,7 @@ function goBack() {
 
     <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
       <li>• Full access to all levels</li>
-      <li>• Native Cantonese audio for every word and sentence</li>
+      <li>• Native Cantonese audio for every word</li>
       <li>• No fluff, neatly organised content</li>
       <li>• New content added regularly</li>
       <li>• Randomised exercises and tests</li>
