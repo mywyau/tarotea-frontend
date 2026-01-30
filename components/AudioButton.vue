@@ -3,7 +3,12 @@ const props = defineProps<{
   src: string
 }>()
 
+
 const { volume } = useAudioVolume()
+const { play: playGlobal } = useGlobalAudio()
+
+
+
 const audio = ref<HTMLAudioElement | null>(null)
 
 const play = () => {
@@ -14,7 +19,9 @@ const play = () => {
   // 🔑 MUST apply volume right before playing
   audio.value.volume = volume.value
   audio.value.currentTime = 0
-  audio.value.play()
+  // audio.value.play()
+  playGlobal(audio.value)
+
 }
 
 // 🔁 Update volume while audio is playing
@@ -26,12 +33,8 @@ watch(volume, v => {
 </script>
 
 <template>
-  <button
-    @click="play"
-    class="inline-flex items-center justify-center rounded-full p-2
-           bg-gray-100 hover:bg-gray-200 transition"
-    aria-label="Play audio"
-  >
-    ▶︎
+  <button @click="play" class="inline-flex items-center justify-center rounded-lg p-2
+           bg-gray-200 hover:bg-gray-300 transition" aria-label="Play audio">
+    ▶︎ Play
   </button>
 </template>
