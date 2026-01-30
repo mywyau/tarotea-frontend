@@ -1,4 +1,7 @@
 <script setup lang="ts">
+
+const { volume } = useAudioVolume()
+
 const route = useRoute()
 
 const wordParam = computed(() => route.params.word as string)

@@ -14,6 +14,8 @@ const { data, error } = await useFetch(
 
 const cdnBase = runtimeConfig.public.cdnBase
 
+const { volume } = useAudioVolume()
+
 const word = computed(() => data.value)
 const notFound = computed(() => error.value?.statusCode === 404)
 </script>
@@ -50,6 +52,16 @@ const notFound = computed(() => error.value?.statusCode === 404)
       </ul>
     </section>
 
+    <div class="flex items-center justify-center gap-3 pt-2 text-sm text-gray-500">
+      <span class="select-none">Volume</span>
+
+      <input type="range" min="0" max="1" step="0.01" v-model="volume" class="w-32 accent-gray-500" />
+
+      <span class="w-8 text-left tabular-nums">
+        {{ Math.round(volume * 100) }}%
+      </span>
+    </div>
+
     <!-- Examples -->
     <section v-if="word.examples?.length">
       <h2 class="text-lg font-semibold mb-3">
@@ -65,7 +77,8 @@ const notFound = computed(() => error.value?.statusCode === 404)
                 {{ example.sentence }}
               </span>
 
-              <AudioButton v-if="word.audio?.examples?.[index]" :src="`${cdnBase}/audio/${word.audio.examples[index]}`" />
+              <AudioButton v-if="word.audio?.examples?.[index]"
+                :src="`${cdnBase}/audio/${word.audio.examples[index]}`" />
 
               <!-- {{ `${cdnBase}/audio/${word.audio.examples[index]}` }} -->
 
