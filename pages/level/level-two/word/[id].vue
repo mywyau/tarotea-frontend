@@ -52,10 +52,10 @@ const notFound = computed(() => error.value?.statusCode === 404)
       </ul>
     </section>
 
-    <div class="flex items-center justify-center gap-3 pt-2 text-sm text-gray-500">
+    <div class="flex items-center justify-center gap-3 pt-2 text-sm text-black">
       <span class="select-none">Volume</span>
 
-      <input type="range" min="0" max="1" step="0.01" v-model="volume" class="w-32 accent-gray-500" />
+      <input type="range" min="0" max="1" step="0.01" v-model="volume" class="w-32 accent-teal-400" />
 
       <span class="w-8 text-left tabular-nums">
         {{ Math.round(volume * 100) }}%

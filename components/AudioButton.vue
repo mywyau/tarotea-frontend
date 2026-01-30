@@ -33,8 +33,8 @@ watch(volume, v => {
 </script>
 
 <template>
-  <button @click="play" class="inline-flex items-center justify-center rounded-lg p-2
-           bg-gray-200 hover:bg-gray-300 transition" aria-label="Play audio">
+  <button @click="play" class="inline-flex items-center justify-center rounded p-2
+           bg-gray-100 hover:bg-gray-200 border border-black transition" aria-label="Play audio">
     ▶︎ Play
   </button>
 </template>
