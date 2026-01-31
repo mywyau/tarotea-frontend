@@ -29,16 +29,16 @@ const levels = [
     title: 'Level  3',
     description: 'Intermediate spoken Cantonese. Expressing thoughts, reasons, and everyday abstract concepts naturally.'
   },
-  // {
-  //   id: 'level-four',
-  //   title: 'Level  4',
-  //   description: 'Express opinions, explain situations, discuss experiences, and handle real-life problems in natural spoken Cantonese.'
-  // },
-  //   {
-  //   id: 'level-five',
-  //   title: 'Level  5',
-  //   description: 'Handle work situations, services, expectations, and real-life responsibilities in natural spoken Cantonese.'
-  // },
+  {
+    id: 'level-four',
+    title: 'Level  4 (Coming soon)',
+    description: 'Express opinions, explain situations, discuss experiences, and handle real-life problems in natural spoken Cantonese.'
+  },
+  {
+    id: 'level-five',
+    title: 'Level  5 (Coming soon)',
+    description: 'Handle work situations, services, expectations, and real-life responsibilities in natural spoken Cantonese.'
+  },
 ]
 </script>
 
@@ -52,10 +52,6 @@ const levels = [
     <p class="text-gray-600 mb-8">
       Explore Cantonese sentence patterns organised by Level
     </p>
-
-    <!-- <p v-if="!me" class="mb-6 text-sm text-gray-500">
-      Sign in to track progress and unlock advanced levels.
-    </p> -->
 
     <p v-if="authReady && !me" class="mb-6 text-sm text-gray-500">
       Sign in to track progress and unlock advanced levels.
@@ -89,10 +85,6 @@ const levels = [
           <div class="text-sm text-gray-600">
             {{ level.description }}
           </div>
-
-          <!-- <button class="mt-2 text-sm text-blue-600 hover:underline" @click="loginWithGoogle">
-            Sign in and upgrade to unlock
-          </button> -->
 
           <NuxtLink class="mt-2 text-sm text-blue-600 hover:underline" :to="`/upgrade/coming-soon`">
             Sign in and upgrade to unlock

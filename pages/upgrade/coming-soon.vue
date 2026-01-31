@@ -30,8 +30,7 @@ function goBack() {
     </h1>
 
     <p class="text-gray-600">
-      Full access to Cantonese learning,
-      with native audio and carefully selected everyday words.
+      Unlock all levels and learn Cantonese without limits.
     </p>
 
     <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">

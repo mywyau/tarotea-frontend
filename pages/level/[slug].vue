@@ -1,7 +1,14 @@
 <script setup lang="ts">
+
+
+
 import WordTile from '@/components/WordTile.vue'
-import { canAccessLevel } from '@/utils/access'
+import { canAccessLevel } from '~/utils/canAccessLevel'
 import { getLevelNumber } from '@/utils/levels'
+
+definePageMeta({
+  middleware: ['level-coming-soon']
+})
 
 
 const route = useRoute()

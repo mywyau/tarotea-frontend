@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import { useUpgrade } from '@/composables/useUpgrade'
 import { useMeState } from '@/composables/useMeState'
-import { loginWithGoogle, logout } from '@/composables/useAuth'
-import { useNavAuth } from '@/composables/useNavAuth'
+import { useUpgrade } from '@/composables/useUpgrade'
 
 definePageMeta({ layout: 'default' })
 
@@ -14,52 +12,56 @@ function upgrade(plan: 'monthly' | 'yearly') {
 </script>
 
 <template>
-  <main class="min-h-[70vh] flex items-center justify-center px-4">
-    <div class="max-w-md w-full text-center space-y-6">
+  <main class="min-h-[70vh] px-4 pt-20 pb-16">
 
-      <div class="text-5xl">🍵</div>
+    <div class="max-w-md w-full mx-auto text-center space-y-6">
+      <div class="max-w-md w-full text-center space-y-6">
 
-      <h1 class="text-2xl font-semibold">
-        Upgrade your plan
-      </h1>
+        <div class="text-5xl">🍵</div>
 
-      <p class="text-gray-600">
-        Unlock all levels and learn Cantonese without limits.
-      </p>
+        <h1 class="text-2xl font-semibold">
+          Upgrade your plan
+        </h1>
 
-      <!-- Plans -->
-      <div class="space-y-3 pt-4">
+        <p class="text-gray-600">
+          Unlock all levels and learn Cantonese without limits.
+        </p>
 
-        <!-- Monthly -->
-        <button
-          class="block w-full rounded-lg border border-gray-300 py-3 font-medium hover:bg-gray-50 transition"
-          @click="upgrade('monthly')"
-        >
-          Monthly plan · £5.99
-        </button>
+        <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
+          <li>• Full access to all levels</li>
+          <li>• Native Cantonese audio for every word</li>
+          <li>• No fluff, neatly organised content</li>
+          <li>• New content added regularly</li>
+          <li>• Randomised exercises and tests</li>
+        </ul>
 
-        <!-- Yearly -->
-        <button
-          class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
-          @click="upgrade('yearly')"
-        >
-          Yearly plan · £59.99 · Best value 
-        </button>
+        <!-- Plans -->
+        <div class="space-y-3 pt-4">
+
+          <!-- Monthly -->
+          <button class="block w-full rounded-lg border border-gray-300 py-3 font-medium hover:bg-gray-50 transition"
+            @click="upgrade('monthly')">
+            Monthly plan · £5.99
+          </button>
+
+          <!-- Yearly -->
+          <button class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
+            @click="upgrade('yearly')">
+            Yearly plan · £59.99 · Best value
+          </button>
+
+        </div>
+
+        <!-- Secondary -->
+        <NuxtLink to="/levels" class="block pt-4 text-sm text-gray-500 hover:underline">
+          Continue learning without upgrading
+        </NuxtLink>
+
+        <p class="text-xs text-gray-400 pt-4">
+          You can change or cancel your plan at any time.
+        </p>
 
       </div>
-
-      <!-- Secondary -->
-      <NuxtLink
-        to="/levels"
-        class="block pt-4 text-sm text-gray-500 hover:underline"
-      >
-        Continue learning without upgrading
-      </NuxtLink>
-
-      <p class="text-xs text-gray-400 pt-4">
-        You can change or cancel your plan at any time.
-      </p>
-
     </div>
   </main>
 </template>
