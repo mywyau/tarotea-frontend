@@ -22,7 +22,7 @@ async function handleLogout() {
   <header class="border-b bg-white shadow-sm py-3">
     <div class="max-w-5xl mx-auto flex justify-between items-center px-4">
 
-      <NuxtLink to="/" class="text-2xl font-bold text-primary-600">
+      <NuxtLink to="/" class="text-2xl font-bold text-primary-60 hover:text-gray-500">
         TaroTea
       </NuxtLink>
 
