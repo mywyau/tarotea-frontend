@@ -1,7 +1,6 @@
 <script setup lang="ts">
 
 
-
 import WordTile from '@/components/WordTile.vue'
 import { canAccessLevel } from '~/utils/canAccessLevel'
 import { getLevelNumber } from '@/utils/levels'
