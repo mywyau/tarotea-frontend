@@ -12,7 +12,7 @@ export default defineNuxtRouteMiddleware((to) => {
     return navigateTo('/content-not-available')
   }
 
-  if (!me.value) {
-    return navigateTo('/signin')
-  }
+  // if (!me.value) {
+  //   return navigateTo('/signin')
+  // }
 })
