@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware((to) => {
 
   const levelId = to.params.slug as string
 
-  const comingSoonLevels = ['level-three', 'level-four', 'level-five']
+  const comingSoonLevels = ['level-four', 'level-five']
 
   if (comingSoonLevels.includes(levelId)) {
     return navigateTo('/content-not-available')
