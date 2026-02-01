@@ -1,8 +1,15 @@
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: ['level-access']
+})
+
 import { generateQuiz } from '@/utils/quiz/generateQuiz'
 import { levelOneWords } from '@/utils/quiz/levelOneWords'
 import { computed, ref } from 'vue'
+
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
 
 const questions = ref(generateQuiz(levelOneWords))
 const current = ref(0)
@@ -16,7 +23,12 @@ function answer(index: number) {
   if (answered.value) return
   selectedIndex.value = index
   answered.value = true
-  if (index === question.value.correctIndex) score.value++
+  if (index === question.value.correctIndex) {
+    score.value++
+    playCorrectJingle() // ✅ here
+  } else {
+    playIncorrectJingle()
+  }
 }
 
 function next() {
@@ -39,18 +51,21 @@ function next() {
 
     <div v-if="current < questions.length" class="space-y-6">
 
-      <p class="text-center text-xl">
+      <p class="text-center text-4xl">
         {{ question.prompt }}
       </p>
 
-      <div class="space-y-3">
-        <button v-for="(option, i) in question.options" :key="i"
-          class="w-full rounded border py-2 px-4 text-left text-lg" :class="{
-            'bg-green-100 border-green-500':
-              answered && i === question.correctIndex,
-            'bg-red-100 border-red-500':
-              answered && i === selectedIndex && i !== question.correctIndex
-          }" @click="answer(i)">
+      <div class="grid grid-cols-2 gap-4">
+        <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-lg border flex items-center justify-center
+           text-2xl font-medium text-center p-6 transition" :class="[
+            !answered && 'hover:bg-gray-100',
+            {
+              'bg-green-100':
+                answered && i === question.correctIndex,
+              'bg-red-100':
+                answered && i === selectedIndex && i !== question.correctIndex
+            }
+          ]" @click="answer(i)">
           {{ option }}
         </button>
       </div>
@@ -71,8 +86,8 @@ function next() {
         You scored {{ score }} / {{ questions.length }} - {{ (score / questions.length) * 100 }}%
       </p>
 
-      <NuxtLink to="/level/level-one" class="text-sm text-blue-600 hover:underline">
-        Back to Level 1
+      <NuxtLink :to="`/level/${slug}`" class="text-sm text-blue-600 hover:underline">
+        Back to Level
       </NuxtLink>
     </div>
 

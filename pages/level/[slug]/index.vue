@@ -8,7 +8,6 @@ definePageMeta({
   middleware: ['level-coming-soon']
 })
 
-
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
@@ -17,10 +16,7 @@ if (!levelNumber) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
 
-// const me = await useMe()
 const { me, authReady } = useMeState()
-
-// const hasAccess = canAccessLevel(levelNumber, me)
 
 const hasAccess = computed(() =>
   authReady.value && canAccessLevel(levelNumber, me.value)
@@ -58,6 +54,7 @@ const categories = computed(() => {
 
 <template>
   <main class="max-w-4xl mx-auto px-4 py-12 space-y-12">
+
     <!-- 🔒 ACCESS DENIED (do NOT depend on safeTopic) -->
     <section v-if="authReady && !hasAccess" class="text-center space-y-4">
       <h1 class="text-3xl font-semibold">
@@ -68,17 +65,11 @@ const categories = computed(() => {
         This level is part of Tarotea Pro.
       </p>
 
-      <!-- TODO once real stripe payments are in we add buttons back in or for testing stripe test integrations -->
-      <!-- <button v-if="!me" class="mt-4 px-4 py-2 rounded bg-blue-600 text-white" @click="loginWithGoogle" type="button">
-        Sign in and upgrade to unlock
-      </button> -->
-
       <div class="mt-8">
         <NuxtLink class="text-sm text-blue-600 hover:underline" :to="`/upgrade/coming-soon`">
           Sign in and upgrade to unlock
         </NuxtLink>
       </div>
-
     </section>
 
     <!-- ✅ ACCESS GRANTED -->

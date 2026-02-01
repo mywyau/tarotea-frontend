@@ -35,7 +35,7 @@ function goBack() {
 
     <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
       <li>• Full access to all levels</li>
-      <li>• Native Cantonese audio for every word</li>
+      <li>• Native Cantonese audio</li>
       <li>• No fluff, neatly organised content</li>
       <li>• New content added regularly</li>
       <li>• Randomised exercises and tests</li>
@@ -49,22 +49,5 @@ function goBack() {
         Cancel anytime
       </div>
     </div>
-
-    <!-- <div class="space-y-3 pt-4">
-      <button
-        class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
-        @click="joinPro"
-      >
-        Join Pro
-      </button>
-
-      <button
-        class="w-full text-gray-500 hover:underline"
-        @click="goBack"
-      >
-        Not now
-      </button>
-    </div> -->
-
   </main>
 </template>
