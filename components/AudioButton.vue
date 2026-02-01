@@ -1,13 +1,12 @@
 <script setup lang="ts">
 const props = defineProps<{
   src: string
+  autoplay?: boolean
 }>()
 
 
 const { volume } = useAudioVolume()
 const { play: playGlobal } = useGlobalAudio()
-
-
 
 const audio = ref<HTMLAudioElement | null>(null)
 
@@ -23,6 +22,12 @@ const play = () => {
   playGlobal(audio.value)
 
 }
+
+onMounted(() => {
+  if (props.autoplay) {
+    play() // ✅ THIS is the key fix
+  }
+})
 
 // 🔁 Update volume while audio is playing
 watch(volume, v => {
