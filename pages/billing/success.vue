@@ -4,8 +4,9 @@ definePageMeta({
 })
 
 // Optional: read Stripe params if you want later
-const route = useRoute()
-const sessionId = route.query.session_id as string | undefined
+// const route = useRoute()
+// const sessionId = route.query.session_id as string | undefined
+
 </script>
 
 <template>

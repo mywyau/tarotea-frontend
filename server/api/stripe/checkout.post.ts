@@ -97,6 +97,7 @@ export default defineEventHandler(async (event) => {
   const session = await stripe.checkout.sessions.create(
     {
       mode: "subscription",
+      // customer_creation: "always", // 👈 FORCE customer creation - not needed since we are using subscription mode
 
       line_items: [
         {
@@ -121,7 +122,7 @@ export default defineEventHandler(async (event) => {
           plan: billing,
         },
       },
-    },
+    }
     // { idempotencyKey: `checkout:${userId}:${billing}` }
   );
 

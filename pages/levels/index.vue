@@ -15,29 +15,34 @@ const levels = [
     id: 'level-one',
     number: 1,
     title: 'Level 1',
-    description: 'Foundation vocabulary for basic spoken Cantonese: identity, actions, daily life, and simple needs.'
+    description: 'Foundation vocabulary: identity, actions, daily life, and simple needs.'
   },
   {
     id: 'level-two',
     number: 2,
     title: 'Level  2',
-    description: 'Spoken Cantonese for daily situations, intentions, feelings, and simple reasoning.'
+    description: 'Daily situations, intentions, feelings, and simple reasoning.'
   },
   {
     id: 'level-three',
     number: 3,
     title: 'Level  3',
-    description: 'Intermediate spoken Cantonese. Expressing thoughts, reasons, and everyday abstract concepts naturally.'
+    description: 'Intermediate cantonese, expressing thoughts, reasons, and everyday abstract concepts naturally.'
   },
   {
     id: 'level-four',
     title: 'Level  4 (Coming soon)',
-    description: 'Express opinions, explain situations, discuss experiences, and handle real-life problems in natural spoken Cantonese.'
+    description: 'Express opinions, explain situations, discuss experiences, and handle real-life problems.'
   },
   {
     id: 'level-five',
     title: 'Level  5 (Coming soon)',
-    description: 'Handle work situations, services, expectations, and real-life responsibilities in natural spoken Cantonese.'
+    description: 'Handle work situations, services, expectations, and real-life responsibilities.'
+  },
+  {
+    id: 'level-six',
+    title: 'Level 6 (Coming soon)',
+    description: 'Tell stories, describe past experiences, and explain events clearly and naturally in spoken Cantonese.'
   },
 ]
 </script>
