@@ -86,7 +86,7 @@ function next() {
       <p class="text-gray-600">
         Quizzes are part of Tarotea Pro.
       </p>
-      <NuxtLink to="/upgrade/coming-soon" class="text-sm text-blue-600 hover:underline">
+      <NuxtLink to="/upgrade/coming-soon" class="text-sm text-gray-400 hover:underline">
         Upgrade to unlock
       </NuxtLink>
     </section>
@@ -135,12 +135,20 @@ function next() {
         </h2>
 
         <p class="text-gray-600">
-          You scored {{ score }} / {{ questions.length }} - {{ (score / questions.length) * 100 }}%
+          You scored {{ score === questions.length
+            ? '100%'
+            : ((score / questions.length) * 100).toFixed(2) + '%' }}
         </p>
 
-        <NuxtLink :to="`/level/${slug}`" class="text-sm text-blue-600 hover:underline">
-          Back to Level 
-        </NuxtLink>
+        <div class="pt-4 space-y-4">
+          <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`" class="block text-sm text-gray-400 hover:underline">
+            Back to Start
+          </NuxtLink>
+
+          <NuxtLink :to="`/level/${slug}`" class="block text-sm text-gray-400 hover:underline">
+            Back to Level
+          </NuxtLink>
+        </div>
       </div>
     </section>
 

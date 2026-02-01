@@ -31,7 +31,7 @@ import { useMeState } from "~/composables/useMeState";
 // });
 
 // import Stripe from 'stripe'
-import { useServerAuth } from '~/server/utils/useServerAuth'
+import { getAuthenticatedUserFromDB } from '~/server/utils/getAuthenticatedUserFromDB'
 
 export default defineEventHandler(async (event) => {
 
@@ -41,7 +41,10 @@ export default defineEventHandler(async (event) => {
     apiVersion: '2023-10-16'
   })
 
-  const { user } = await useServerAuth(event)
+  const user = await getAuthenticatedUserFromDB(event)
+
+  console.log(user.stripeCustomerId)
+  console.log(`${config.public.siteUrl}/account`)
 
   if (!user?.stripeCustomerId) {
     throw createError({ statusCode: 401 })

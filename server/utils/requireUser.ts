@@ -17,6 +17,8 @@ export async function requireUser(event: any) {
   try {
     const payload = await verifyAuth0Token(token);
 
+    console.log(payload)
+
     if (!payload.sub) {
       throw createError({
         statusCode: 401,
