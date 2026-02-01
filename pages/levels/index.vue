@@ -53,10 +53,6 @@ const levels = [
       Explore Cantonese sentence patterns organised by Level
     </p>
 
-    <p v-if="authReady && !me" class="mb-6 text-sm text-gray-500">
-      Sign in to track progress and unlock advanced levels.
-    </p>
-
     <ul class="space-y-4">
 
       <li v-for="level in levels" :key="level.id" class="border rounded p-4" :class="{

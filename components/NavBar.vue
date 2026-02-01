@@ -34,8 +34,8 @@ async function handleLogout() {
           Levels
         </NuxtLink>
 
-        <NuxtLink to="/upgrade/coming-soon" class="text-l text-primary-600">
-          Test
+        <NuxtLink to="/quiz" class="text-l text-primary-600">
+          Quiz
         </NuxtLink>
 
         <ClientOnly>

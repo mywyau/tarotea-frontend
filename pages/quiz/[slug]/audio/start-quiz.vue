@@ -31,7 +31,6 @@ const hasAccess = computed(() =>
   canAccessLevel(levelNumber.value, me.value)
 )
 
-const started = ref(false)
 </script>
 
 <template>
@@ -54,11 +53,11 @@ const started = ref(false)
       <div class="text-4xl">📝</div>
 
       <h1 class="text-3xl font-semibold">
-        Level {{ levelNumber }} Quiz
+        Level {{ levelNumber }} Audio Quiz
       </h1>
 
       <p class="text-gray-600">
-        Test your understanding of the words from this level.
+        Test your listening skills of the words from this level.
       </p>
 
       <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
@@ -66,21 +65,20 @@ const started = ref(false)
         <li>• Cantonese ↔ English</li>
       </ul>
 
-      <NuxtLink :to="`/level/${slug}/quiz`" class="block mt-6 w-full rounded-lg bg-black text-white py-3 font-medium
-         text-center hover:bg-gray-800 transition">
+      <NuxtLink :to="`/quiz/${slug}/audio/test`"
+        class="block mt-6 w-full rounded-lg bg-black text-white py-3 font-medium text-center hover:bg-gray-800 transition">
         Start quiz
       </NuxtLink>
 
+      <NuxtLink :to="`/quiz/`" class="block text-sm text-gray-500 hover:underline">
+        Back to all quiz levels
+      </NuxtLink>
+
       <NuxtLink :to="`/level/${slug}`" class="block text-sm text-gray-500 hover:underline">
-        Back to level
+        To level content
       </NuxtLink>
 
     </section>
-
-    <!-- 🧠 Quiz engine -->
-    <!-- <section v-else class="text-center text-gray-600">
-      Quiz engine goes here 👀
-    </section> -->
 
   </main>
 </template>

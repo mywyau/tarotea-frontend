@@ -1,10 +1,13 @@
 export function canAccessLevel(level: number, me: any | null) {
   // Free preview
-  if (level <= 2) return true
+  if (level <= 1) return true
 
   // Must be logged in
   if (!me) return false
 
-  // Paid users get everything
-  return me.plan === 'monthly' || me.plan === 'yearly' && me.active === true
+  // Paid + active users only
+  return (
+    (me.plan === 'monthly' || me.plan === 'yearly') &&
+    me.active === true
+  )
 }
