@@ -35,7 +35,7 @@ export function playCorrectJingle(volume = 0.8) {
 }
 
 
-export function playIncorrectJingle(volume = 0.2) {
+export function playIncorrectJingle(volume = 0.8) {
   const ctx = new AudioContext()
   const now = ctx.currentTime
 

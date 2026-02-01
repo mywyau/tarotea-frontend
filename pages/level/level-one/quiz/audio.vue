@@ -34,7 +34,7 @@ function answer(index: number) {
     score.value++
     playCorrectJingle() // ✅ here
   } else {
-    playIncorrectJingle(0.2)
+    playIncorrectJingle()
   }
 }
 
