@@ -22,7 +22,6 @@ const questions = computed(() =>
     : []
 )
 
-// const questions = ref(generateQuiz(levelOneWords))
 
 const current = ref(0)
 const score = ref(0)
@@ -55,7 +54,7 @@ function answer(index: number) {
   answered.value = true
   if (index === question.value.correctIndex) {
     score.value++
-    playCorrectJingle() // ✅ here
+    playCorrectJingle()
   } else {
     playIncorrectJingle()
   }

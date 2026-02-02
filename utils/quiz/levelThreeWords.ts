@@ -4,66 +4,61 @@ export type Word = {
   jyutping: string
   meaning: string
 }
-
 export const levelThreeWords: Word[] = [
-  
-  // thinking_and_intentions
-  { id: 'gok3dak1-think', word: '覺得', jyutping: 'gok3 dak1', meaning: 'to feel / think' },
-  { id: 'hei1mong6-hope', word: '希望', jyutping: 'hei1 mong6', meaning: 'to hope' },
-  { id: 'seoi1jiu3-need', word: '需要', jyutping: 'seoi1 jiu3', meaning: 'to need' },
-  { id: 'kyut3ding6-decide', word: '決定', jyutping: 'kyut3 ding6', meaning: 'to decide' },
-  { id: 'si3-try', word: '試', jyutping: 'si3', meaning: 'to try' },
-  { id: 'si3haa5-try-casual', word: '試下', jyutping: 'si3 haa5', meaning: 'try (casual)' },
+  // thinking_and_opinions
+  { id: 'jing6wai4-opinion', word: '認為', jyutping: 'jing6 wai4', meaning: 'to think / to believe (opinion)' },
+  { id: 'gam2gok3-feeling', word: '感覺', jyutping: 'gam2 gok3', meaning: 'feeling / impression' },
+  { id: 'faat3jin6-discover', word: '發現', jyutping: 'faat3 jin6', meaning: 'to discover / realise' },
+  { id: 'liu5gaai2-understand', word: '了解', jyutping: 'liu5 gaai2', meaning: 'to understand clearly' },
+  { id: 'nam2faat3-idea', word: '諗法', jyutping: 'nam2 faat3', meaning: 'way of thinking / idea' },
+  { id: 'ji3gin3-opinion', word: '意見', jyutping: 'ji3 gin3', meaning: 'opinion / suggestion' },
 
-  // memory_and_understanding
-  { id: 'gei3dak1-remember', word: '記得', jyutping: 'gei3 dak1', meaning: 'to remember' },
-  { id: 'mong4gei3-forget', word: '忘記', jyutping: 'mong4 gei3', meaning: 'to forget' },
-  { id: 'ming4baak6-understand', word: '明白', jyutping: 'ming4 baak6', meaning: 'to understand' },
-  { id: 'ming4m4ming4-understand-question', word: '明唔明', jyutping: 'ming4 m4 ming4', meaning: 'do you understand?' },
-  { id: 'soeng1seon3-believe', word: '相信', jyutping: 'soeng1 seon3', meaning: 'to believe' },
+  // situations_and_causes
+  { id: 'cing4fong3-situation', word: '情況', jyutping: 'cing4 fong3', meaning: 'situation' },
+  { id: 'jyun4jan1-reason', word: '原因', jyutping: 'jyun4 jan1', meaning: 'reason' },
+  { id: 'git3gwo2-result', word: '結果', jyutping: 'git3 gwo2', meaning: 'result / outcome' },
+  { id: 'jing2hoeng2-affect', word: '影響', jyutping: 'jing2 hoeng2', meaning: 'to affect / influence' },
+  { id: 'faat3sang1-happen', word: '發生', jyutping: 'faat3 sang1', meaning: 'to happen' },
+  { id: 'cyu2lei5-handle', word: '處理', jyutping: 'cyu2 lei5', meaning: 'to handle / deal with' },
+  { id: 'min6deoi3-face', word: '面對', jyutping: 'min6 deoi3', meaning: 'to face (a situation)' },
 
-  // actions_and_change
-  { id: 'hoi1ci2-start', word: '開始', jyutping: 'hoi1 ci2', meaning: 'to start' },
-  { id: 'git3cuk1-end', word: '結束', jyutping: 'git3 cuk1', meaning: 'to end' },
-  { id: 'gai3zuk6-continue', word: '繼續', jyutping: 'gai3 zuk6', meaning: 'to continue' },
-  { id: 'ting4-stop', word: '停', jyutping: 'ting4', meaning: 'to stop' },
-  { id: 'goi2bin3-change', word: '改變', jyutping: 'goi2 bin3', meaning: 'to change' },
-  { id: 'jyun4sing4-complete', word: '完成', jyutping: 'jyun4 sing4', meaning: 'to complete' },
-
-  // success_and_results
-  { id: 'sing4gung1-success', word: '成功', jyutping: 'sing4 gung1', meaning: 'success / to succeed' },
-  { id: 'sat1baai6-failure', word: '失敗', jyutping: 'sat1 baai6', meaning: 'to fail' },
-  { id: 'git3gwo2-result', word: '結果', jyutping: 'git3 gwo2', meaning: 'result' },
-  { id: 'man6tai4-problem', word: '問題', jyutping: 'man6 tai4', meaning: 'problem' },
-  { id: 'daap3on3-answer', word: '答案', jyutping: 'daap3 on3', meaning: 'answer' },
-
-  // descriptions_and_quality
-  { id: 'jung4ji6-easy', word: '容易', jyutping: 'jung4 ji6', meaning: 'easy' },
-  { id: 'naan4-difficult', word: '難', jyutping: 'naan4', meaning: 'difficult' },
-  { id: 'zung6jiu3-important', word: '重要', jyutping: 'zung6 jiu3', meaning: 'important' },
-  { id: 'dak6bit6-special', word: '特別', jyutping: 'dak6 bit6', meaning: 'special' },
-  { id: 'zing1soeng4-normal', word: '正常', jyutping: 'zing1 soeng4', meaning: 'normal' },
-  { id: 'kei4gwaai3-strange', word: '奇怪', jyutping: 'kei4 gwaai3', meaning: 'strange' },
-  { id: 'cing1co2-clear', word: '清楚', jyutping: 'cing1 co2', meaning: 'clear' },
-
-  // feelings_and_states
-  { id: 'daam1sam1-worry', word: '擔心', jyutping: 'daam1 sam1', meaning: 'to worry' },
-  { id: 'fong3sam1-relieved', word: '放心', jyutping: 'fong3 sam1', meaning: 'to feel relieved' },
-  { id: 'hoi1sam1-happy', word: '開心', jyutping: 'hoi1 sam1', meaning: 'happy' },
-  { id: 'sat1mong6-disappointed', word: '失望', jyutping: 'sat1 mong6', meaning: 'disappointed' },
-  { id: 'san1fu2-tiring', word: '辛苦', jyutping: 'san1 fu2', meaning: 'tiring / hard work' },
-
-  // reasoning_and_linking
-  { id: 'jyu4gwo2-if', word: '如果', jyutping: 'jyu4 gwo2', meaning: 'if' },
-  { id: 'jan1wai6-because', word: '因為', jyutping: 'jan1 wai6', meaning: 'because' },
-  { id: 'so2ji5-therefore', word: '所以', jyutping: 'so2 ji5', meaning: 'therefore' },
-  { id: 'seoi1jin4-although', word: '雖然', jyutping: 'seoi1 jin4', meaning: 'although' },
-  { id: 'daan6hai6-but', word: '但係', jyutping: 'daan6 hai6', meaning: 'but' },
+  // decisions_and_actions
+  { id: 'gei1wui6-opportunity', word: '機會', jyutping: 'gei1 wui6', meaning: 'opportunity' },
+  { id: 'fong1faat3-method', word: '方法', jyutping: 'fong1 faat3', meaning: 'method / way' },
+  { id: 'gai3waak6-plan', word: '計劃', jyutping: 'gai3 waak6', meaning: 'plan' },
+  { id: 'syun2zaak6-choose', word: '選擇', jyutping: 'syun2 zaak6', meaning: 'to choose / choice' },
+  { id: 'kyut3ding6-decide', word: '決定', jyutping: 'kyut3 ding6', meaning: 'to decide / decision' },
+  { id: 'zeon2bei6-prepare', word: '準備', jyutping: 'zeon2 bei6', meaning: 'to prepare' },
+  { id: 'on1paai4-arrange', word: '安排', jyutping: 'on1 paai4', meaning: 'to arrange' },
 
   // comparison_and_degree
-  { id: 'caa1m4do1-almost', word: '差唔多', jyutping: 'caa1 m4 do1', meaning: 'almost / similar' },
-  { id: 'gang3gaa1-more', word: '更加', jyutping: 'gang3 gaa1', meaning: 'even more' },
   { id: 'bei2gaau3-compare', word: '比較', jyutping: 'bei2 gaau3', meaning: 'comparatively' },
-  { id: 'hou2ci5-seems-like', word: '好似', jyutping: 'hou2 ci5', meaning: 'seems like' },
-  { id: 'jat1joeng6-same', word: '一樣', jyutping: 'jat1 joeng6', meaning: 'the same' }
+  { id: 'gang3gaa1-more', word: '更加', jyutping: 'gang3 gaa1', meaning: 'even more' },
+  { id: 'caa1m4do1-almost', word: '差唔多', jyutping: 'caa1 m4 do1', meaning: 'almost / roughly the same' },
+  { id: 'jat1joeng6-same', word: '一樣', jyutping: 'jat1 joeng6', meaning: 'the same' },
+  { id: 'm4tung4-different', word: '唔同', jyutping: 'm4 tung4', meaning: 'different' },
+  { id: 'daai6koi3-probably', word: '大概', jyutping: 'daai6 koi3', meaning: 'probably / roughly' },
+
+  // emotions_and_states
+  { id: 'daam1sam1-worry', word: '擔心', jyutping: 'daam1 sam1', meaning: 'to worry' },
+  { id: 'fong3sam1-relieved', word: '放心', jyutping: 'fong3 sam1', meaning: 'to feel relieved' },
+  { id: 'sat1mong6-disappointed', word: '失望', jyutping: 'sat1 mong6', meaning: 'disappointed' },
+  { id: 'mun5ji3-satisfied', word: '滿意', jyutping: 'mun5 ji3', meaning: 'satisfied' },
+  { id: 'gan2zoeng1-nervous', word: '緊張', jyutping: 'gan2 zoeng1', meaning: 'nervous' },
+  { id: 'zaap6gwaan3-habit', word: '習慣', jyutping: 'zaap6 gwaan3', meaning: 'habit / to be used to' },
+
+  // connectors_and_flow
+  { id: 'jyu4gwo2-if', word: '如果', jyutping: 'jyu4 gwo2', meaning: 'if' },
+  { id: 'daan6hai6-but', word: '但係', jyutping: 'daan6 hai6', meaning: 'but' },
+  { id: 'jan1wai6-because', word: '因為', jyutping: 'jan1 wai6', meaning: 'because' },
+  { id: 'so2ji5-therefore', word: '所以', jyutping: 'so2 ji5', meaning: 'therefore' },
+  { id: 'kei4sat6-actually', word: '其實', jyutping: 'kei4 sat6', meaning: 'actually' },
+  { id: 'zik1hai6-that-is', word: '即係', jyutping: 'zik1 hai6', meaning: 'that is / meaning' },
+
+  // time_and_progression
+  { id: 'jat1zik6-continuously', word: '一直', jyutping: 'jat1 zik6', meaning: 'continuously / all along' },
+  { id: 'zung1jyu1-finally', word: '終於', jyutping: 'zung1 jyu1', meaning: 'finally' },
+  { id: 'maan6maan6-slowly', word: '慢慢', jyutping: 'maan6 maan6', meaning: 'slowly' },
+  { id: 'dat6jin4-suddenly', word: '突然', jyutping: 'dat6 jin4', meaning: 'suddenly' },
+  { id: 'bun2loi4-originally', word: '本來', jyutping: 'bun2 loi4', meaning: 'originally' }
 ]
