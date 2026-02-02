@@ -16,7 +16,7 @@ export async function requireUser(event: any) {
   try {
     const payload = await verifyAuth0Token(token);
 
-    console.log("[requireUser.ts][requireUser] ", payload);
+    // console.log("[requireUser.ts][requireUser] ", payload);
 
     if (!payload.sub) {
       throw createError({

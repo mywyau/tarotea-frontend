@@ -12,20 +12,20 @@
 //   )
 // }
 
-export function hasPaidAccess(me: any | null) {
+import type { MeUser } from "@/composables/useMeStateV2";
 
-  if (!me) return false
-
+export function hasPaidAccess(user: MeUser): boolean {
   return (
-    (me.plan === 'monthly' || me.plan === 'yearly') &&
-    me.active === true
-  )
+    (user.plan === "monthly" || user.plan === "yearly") && user.active === true
+  );
 }
 
 export function isFreeLevel(level: number) {
-  return level <= 2
+  return level <= 2;
 }
 
-export function canAccessLevel(level: number, me: any | null) {
-  return isFreeLevel(level) || hasPaidAccess(me)
+export function canAccessLevel(level: number, user: MeUser | null): boolean {
+  if (isFreeLevel(level)) return true;
+  if (!user) return false;
+  return hasPaidAccess(user);
 }
