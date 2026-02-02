@@ -1,10 +1,20 @@
 <script setup lang="ts">
-
 import { useUpgrade } from '@/composables/useUpgrade'
+import { onMounted } from 'vue'
 
-// const me = await useMe()
-const { me, authReady } = useMeState()
+const {
+  authReady,
+  isLoggedIn,
+  user,
+  resolve
+} = useMeStateV2()
 
+// Resolve auth once on mount (safe + idempotent)
+onMounted(async () => {
+  if (!authReady.value) {
+    await resolve()
+  }
+})
 
 function upgrade(billing: 'monthly' | 'yearly') {
   useUpgrade(billing)
@@ -21,37 +31,56 @@ const levels = [
   {
     id: 'level-two',
     number: 2,
-    title: 'Level  2',
+    title: 'Level 2',
     comingSoon: false,
     description: 'Daily situations, intentions, feelings, and simple reasoning.'
   },
   {
     id: 'level-three',
     number: 3,
-    title: 'Level  3',
+    title: 'Level 3',
     comingSoon: false,
-    description: 'Intermediate cantonese, expressing thoughts, reasons, and everyday abstract concepts naturally.'
+    description: 'Intermediate Cantonese, expressing thoughts and reasons naturally.'
   },
   {
     id: 'level-four',
-    title: 'Level  4',
+    number: 4,
+    title: 'Level 4',
     comingSoon: true,
-    description: 'Express opinions, explain situations, discuss experiences, and handle real-life problems.'
+    description: 'Express opinions, explain situations, discuss experiences.'
   },
   {
     id: 'level-five',
-    title: 'Level  5',
+    number: 5,
+    title: 'Level 5',
     comingSoon: true,
-    description: 'Handle work situations, services, expectations, and real-life responsibilities.'
+    description: 'Handle work situations, services, and expectations.'
   },
   {
     id: 'level-six',
+    number: 6,
     title: 'Level 6',
     comingSoon: true,
-    description: 'Tell stories, describe past experiences, and explain events clearly and naturally.'
+    description: 'Tell stories and describe past experiences naturally.'
   },
 ]
+
+// --- helpers ---
+
+const canEnterLevel = (level: any) => {
+  if (!authReady.value) return false
+  if (level.comingSoon) return false
+
+  // Free levels (1–2)
+  if (isFreeLevel(level.number)) return true
+
+  // Paid levels
+  if (!isLoggedIn.value) return false
+
+  return canAccessLevel(level.number, user.value!)
+}
 </script>
+
 
 <template>
   <main class="max-w-3xl mx-auto py-12 px-4">
@@ -66,22 +95,17 @@ const levels = [
 
     <ul class="space-y-4">
 
-      <!-- <li v-for="level in levels" :key="level.id" class="border rounded p-4" :class="{
-        'hover:bg-gray-50': canAccessLevel(level.number, me),
-        'opacity-60 cursor-not-allowed': !canAccessLevel(level.number, me)
-      }"> -->
 
       <li v-for="level in levels" :key="level.id" class="border rounded p-4 space-y-3 transition" :class="[
         level.comingSoon
           ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
-          : canAccessLevel(level.number, me)
+          : canEnterLevel(level)
             ? 'hover:bg-gray-50'
             : 'opacity-80'
       ]">
 
         <!-- Accessible level -->
-        <NuxtLink v-if="canAccessLevel(level.number, me)" :to="`/level/${level.id}`" class="block">
-
+        <NuxtLink v-if="canEnterLevel(level)" :to="`/level/${level.id}`" class="block">
           <div class="text-lg font-medium">
             {{ level.title }}
             <span v-if="level.comingSoon" class="text-sm text-gray-400 font-normal">
@@ -107,13 +131,11 @@ const levels = [
             {{ level.description }}
           </div>
 
-          <!-- <div v-if="!canAccessLevel(level.number, me)" class="pt-2">
-            <NuxtLink to="/upgrade/coming-soon" class="text-sm text-blue-500 hover:underline">
-              Upgrade to unlock level
-            </NuxtLink>
-          </div> -->
-
+          <p v-if="!isFreeLevel(level.number)" class="text-sm text-gray-500">
+            Upgrade to unlock
+          </p>
         </div>
+
       </li>
     </ul>
   </main>

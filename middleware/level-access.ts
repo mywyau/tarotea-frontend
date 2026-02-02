@@ -1,22 +1,3 @@
-// export default defineNuxtRouteMiddleware(() => {
-
-//   const route = useRoute()
-//   const { me, authReady } = useMeState()
-
-//   if (!authReady.value) return
-
-//   const slug = route.params.slug as string
-//   const levelNumber = getLevelNumber(slug)
-
-//   if (!levelNumber) {
-//     throw createError({ statusCode: 404 })
-//   }
-
-//   if (!canAccessLevel(levelNumber, me.value)) {
-//     return navigateTo('/upgrade/coming-soon')
-//   }
-// })
-
 export default defineNuxtRouteMiddleware(() => {
   const route = useRoute();
   const slug = route.params.slug as string;
