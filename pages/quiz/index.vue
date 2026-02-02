@@ -49,7 +49,9 @@ const quizLevels = [
 const isComingSoon = (level: any) => level.comingSoon === true
 
 const canEnterLevel = (level: any) => {
+
   if (!authReady.value) return false
+
   if (isComingSoon(level)) return false
 
   // ✅ Free levels are always accessible
@@ -97,7 +99,7 @@ const canEnterLevel = (level: any) => {
         </div>
 
         <!-- ✅ Available & accessible -->
-        <div v-if="canEnterLevel(quizLevel)" class="flex gap-3 pt-2">
+        <div v-if="canEnterLevel(quizLevel) && !isComingSoon(quizLevel)" class="flex gap-3 pt-2">
           <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`"
             class="flex-1 rounded border px-3 py-2 text-sm text-center hover:bg-gray-100">
             Word quiz
