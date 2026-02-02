@@ -5,19 +5,49 @@ definePageMeta({
 })
 
 import { generateQuiz } from '@/utils/quiz/generateQuiz'
-import { levelOneWords } from '@/utils/quiz/levelOneWords'
 import { computed, ref } from 'vue'
+
+import { LEVEL_WORDS } from '@/utils/quiz/levels'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const questions = ref(generateQuiz(levelOneWords))
+const wordsForLevel = computed(() => {
+  return LEVEL_WORDS[slug.value as keyof typeof LEVEL_WORDS] ?? null
+})
+
+const questions = computed(() =>
+  wordsForLevel.value
+    ? generateQuiz(wordsForLevel.value)
+    : []
+)
+
+// const questions = ref(generateQuiz(levelOneWords))
+
 const current = ref(0)
 const score = ref(0)
 const answered = ref(false)
 const selectedIndex = ref<number | null>(null)
 
 const question = computed(() => questions.value[current.value])
+
+const LEVEL_TITLES: Record<string, string> = {
+  'level-one': 'Level 1',
+  'level-two': 'Level 2',
+  'level-three': 'Level 3',
+  'level-four': 'Level 4',
+  'level-five': 'Level 5',
+  'level-six': 'Level 6',
+  'level-seven': 'Level 7',
+  'level-eight': 'Level 8',
+  'level-nine': 'Level 9',
+  'level-ten': 'Level 10',
+  'level-eleven': 'Level 11',
+  'level-twelve': 'Level 12',
+  'level-thirteen': 'Level 13',
+  'level-fourteen': 'Level 14',
+  'level-fiftheen': 'Level 15',
+}
 
 function answer(index: number) {
   if (answered.value) return
@@ -42,7 +72,7 @@ function next() {
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
     <h1 class="text-2xl font-semibold text-center">
-      Level 1 Quiz
+      {{ LEVEL_TITLES[slug] ?? 'Unknown level' }}
     </h1>
 
     <p v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 text-center">
