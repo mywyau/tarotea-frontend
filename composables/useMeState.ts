@@ -28,10 +28,8 @@ export function useMeState() {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
-      console.log(`[useMeState] `, me.value)
     } finally {
       loading.value = false;
-      console.log(`[finally] `, me.value)
     }
   };
 
