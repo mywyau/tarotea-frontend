@@ -1,8 +1,7 @@
-import { getHeader, createError } from "h3";
+import { createError, getHeader } from "h3";
 import { verifyAuth0Token } from "./auth0";
 
 export async function requireUser(event: any) {
-  
   const authHeader = getHeader(event, "authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -17,7 +16,7 @@ export async function requireUser(event: any) {
   try {
     const payload = await verifyAuth0Token(token);
 
-    console.log(payload)
+    console.log("[requireUser.ts][requireUser] ", payload);
 
     if (!payload.sub) {
       throw createError({

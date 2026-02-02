@@ -11,7 +11,7 @@ export const useMe = async () => {
 
   const token = await getAccessToken();
 
-  console.log(token);
+  // console.log(token);
 
   if (!token) {
     return null;

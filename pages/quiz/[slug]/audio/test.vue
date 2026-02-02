@@ -84,7 +84,7 @@ function next() {
     <section v-if="authReady && !hasAccess" class="text-center space-y-4">
       <h1 class="text-2xl font-semibold">🔒 Quiz locked</h1>
       <p class="text-gray-600">
-        Quizzes are part of Tarotea Pro.
+        Quizzes are part of TaroTeaMonthly or TaroTeaYearly.
       </p>
       <NuxtLink to="/upgrade/coming-soon" class="text-sm text-gray-400 hover:underline">
         Upgrade to unlock

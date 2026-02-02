@@ -1,5 +1,7 @@
 export function useMeState() {
+
   const me = useState<any | null | undefined>("me", () => undefined); // undefined=loading, null=logged out
+
   const loading = useState<boolean>("meLoading", () => false);
 
   const refresh = async () => {
@@ -26,8 +28,10 @@ export function useMeState() {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
+      console.log(`[useMeState] `, me.value)
     } finally {
       loading.value = false;
+      console.log(`[finally] `, me.value)
     }
   };
 

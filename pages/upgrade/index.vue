@@ -6,9 +6,23 @@ definePageMeta({ layout: 'default' })
 
 const { me, authReady } = useMeState()
 
+const isSubscribed = computed(() =>
+  authReady.value &&
+  me.value &&
+  me.value.plan !== 'free' &&
+  me.value.active === true
+)
+
 function upgrade(plan: 'monthly' | 'yearly') {
+  if (isSubscribed.value) {
+    // Already paid → manage subscription instead
+    navigateTo('/account')
+    return
+  }
+
   useUpgrade(plan)
 }
+
 </script>
 
 <template>
@@ -37,25 +51,36 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
         <!-- Plans -->
         <div class="space-y-3 pt-4">
-
           <!-- Monthly -->
-          <button class="block w-full rounded-lg border border-gray-300 py-3 font-medium hover:bg-gray-50 transition"
+          <button class="block w-full rounded-lg border border-gray-300 py-3 font-medium transition"
+            :class="isSubscribed ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-50'" :disabled="isSubscribed"
             @click="upgrade('monthly')">
             Monthly plan · £5.99
           </button>
 
           <!-- Yearly -->
-          <button class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
+          <button class="block w-full rounded-lg bg-black text-white py-3 font-medium transition"
+            :class="isSubscribed ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-800'" :disabled="isSubscribed"
             @click="upgrade('yearly')">
             Yearly plan · £59.99 · Best value
           </button>
 
         </div>
 
-        <!-- Secondary -->
-        <NuxtLink to="/levels" class="block pt-4 text-sm text-gray-500 hover:underline">
-          Continue learning without upgrading
-        </NuxtLink>
+        <p v-if="isSubscribed" class="text-sm text-gray-600">
+          You’re already subscribed.
+          <NuxtLink to="/account" class="text-blue-600 hover:underline">
+            Manage your plan
+          </NuxtLink>
+        </p>
+
+
+        <p v-if="!isSubscribed" class="text-sm text-gray-600">
+          <!-- Secondary -->
+          <NuxtLink to="/levels" class="block pt-4 text-sm text-gray-500 hover:underline">
+            Continue learning without upgrading
+          </NuxtLink>
+        </p>
 
         <p class="text-xs text-gray-400 pt-4">
           You can change or cancel your plan at any time.

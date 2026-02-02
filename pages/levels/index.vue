@@ -15,34 +15,40 @@ const levels = [
     id: 'level-one',
     number: 1,
     title: 'Level 1',
+    comingSoon: false,
     description: 'Foundation vocabulary: identity, actions, daily life, and simple needs.'
   },
   {
     id: 'level-two',
     number: 2,
     title: 'Level  2',
+    comingSoon: false,
     description: 'Daily situations, intentions, feelings, and simple reasoning.'
   },
   {
     id: 'level-three',
     number: 3,
     title: 'Level  3',
+    comingSoon: false,
     description: 'Intermediate cantonese, expressing thoughts, reasons, and everyday abstract concepts naturally.'
   },
   {
     id: 'level-four',
-    title: 'Level  4 (Coming soon)',
+    title: 'Level  4',
+    comingSoon: true,
     description: 'Express opinions, explain situations, discuss experiences, and handle real-life problems.'
   },
   {
     id: 'level-five',
-    title: 'Level  5 (Coming soon)',
+    title: 'Level  5',
+    comingSoon: true,
     description: 'Handle work situations, services, expectations, and real-life responsibilities.'
   },
   {
     id: 'level-six',
-    title: 'Level 6 (Coming soon)',
-    description: 'Tell stories, describe past experiences, and explain events clearly and naturally in spoken Cantonese.'
+    title: 'Level 6',
+    comingSoon: true,
+    description: 'Tell stories, describe past experiences, and explain events clearly and naturally.'
   },
 ]
 </script>
@@ -60,16 +66,29 @@ const levels = [
 
     <ul class="space-y-4">
 
-      <li v-for="level in levels" :key="level.id" class="border rounded p-4" :class="{
+      <!-- <li v-for="level in levels" :key="level.id" class="border rounded p-4" :class="{
         'hover:bg-gray-50': canAccessLevel(level.number, me),
         'opacity-60 cursor-not-allowed': !canAccessLevel(level.number, me)
-      }">
+      }"> -->
+
+      <li v-for="level in levels" :key="level.id" class="border rounded p-4 space-y-3 transition" :class="[
+        level.comingSoon
+          ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
+          : canAccessLevel(level.number, me)
+            ? 'hover:bg-gray-50'
+            : 'opacity-80'
+      ]">
 
         <!-- Accessible level -->
         <NuxtLink v-if="canAccessLevel(level.number, me)" :to="`/level/${level.id}`" class="block">
+
           <div class="text-lg font-medium">
             {{ level.title }}
+            <span v-if="level.comingSoon" class="text-sm text-gray-400 font-normal">
+              (Coming soon)
+            </span>
           </div>
+
           <div class="text-sm text-gray-600">
             {{ level.description }}
           </div>
@@ -77,9 +96,10 @@ const levels = [
 
         <!-- Locked level -->
         <div v-else class="space-y-2">
-          <div class="flex items-center gap-2">
-            <span class="text-lg font-medium">
-              🔒 {{ level.title }}
+          <div class="text-lg font-medium">
+            {{ level.title }}
+            <span v-if="level.comingSoon" class="text-sm text-gray-400 font-normal">
+              (Coming soon)
             </span>
           </div>
 
@@ -87,9 +107,12 @@ const levels = [
             {{ level.description }}
           </div>
 
-          <NuxtLink class="mt-2 text-sm text-blue-600 hover:underline" :to="`/upgrade/coming-soon`">
-            Sign in and upgrade to unlock
-          </NuxtLink>
+          <!-- <div v-if="!canAccessLevel(level.number, me)" class="pt-2">
+            <NuxtLink to="/upgrade/coming-soon" class="text-sm text-blue-500 hover:underline">
+              Upgrade to unlock level
+            </NuxtLink>
+          </div> -->
+
         </div>
       </li>
     </ul>

@@ -6,7 +6,7 @@ definePageMeta({
 
 <template>
   <main class="max-w-xl mx-auto px-4 py-20 text-center space-y-6">
-    <h1 class="text-3xl font-semibold">Coming soon 🚧</h1>
+    <h1 class="text-3xl font-semibold">Content Not Available 🚧</h1>
 
     <p class="text-gray-600">
       This content isn’t available yet.
@@ -15,12 +15,5 @@ definePageMeta({
     <p class="text-gray-500 text-sm">
       Sign in and upgrade to unlock advanced levels as they’re released.
     </p>
-
-    <NuxtLink
-      to="/upgrade"
-      class="inline-block mt-4 text-blue-600 hover:underline"
-    >
-      View upgrade plans
-    </NuxtLink>
   </main>
 </template>

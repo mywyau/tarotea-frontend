@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
 import WordTile from '@/components/WordTile.vue'
-import { canAccessLevel } from '~/utils/canAccessLevel'
 import { getLevelNumber } from '@/utils/levels'
+import { canAccessLevel } from '~/utils/canAccessLevel'
 
 definePageMeta({
   middleware: ['level-coming-soon']
@@ -62,13 +62,13 @@ const categories = computed(() => {
       </h1>
 
       <p class="text-gray-600">
-        This level is part of Tarotea Pro.
+        This level is part of TaroTeaMonthly or TaroTeaYearly.
       </p>
 
       <div class="mt-8">
-        <NuxtLink class="text-sm text-blue-600 hover:underline" :to="`/upgrade/coming-soon`">
-          Sign in and upgrade to unlock
-        </NuxtLink>
+        <p class="text-gray-500 text-sm">
+          Sign in and upgrade to unlock advanced levels as they’re released.
+        </p>
       </div>
     </section>
 

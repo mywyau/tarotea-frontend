@@ -40,11 +40,11 @@ const hasAccess = computed(() =>
     <section v-if="authReady && !hasAccess" class="text-center space-y-4">
       <h1 class="text-2xl font-semibold">🔒 Quiz locked</h1>
       <p class="text-gray-600">
-        Quizzes are part of Tarotea Pro.
+        Quizzes are part of TaroTeaMonthly or TaroTeaYearly.
       </p>
-      <NuxtLink to="/upgrade/coming-soon" class="text-sm text-blue-600 hover:underline">
-        Sign in and upgrade to unlock
-      </NuxtLink>
+      <p class="text-gray-500 text-sm">
+        Sign in and upgrade to unlock advanced levels as they’re released.
+      </p>
     </section>
 
     <!-- ✅ Quiz intro -->

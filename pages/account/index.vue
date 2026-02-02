@@ -65,7 +65,7 @@ async function openBillingPortal() {
             </button>
 
             <NuxtLink v-else to="/upgrade"
-                class="block text-center rounded-lg border py-3 font-medium hover:bg-gray-50">
+                class="bg-black rounded-lg text-white block text-center py-3 font-medium hover:bg-gray-800 transition">
                 Upgrade plan
             </NuxtLink>
 
@@ -76,9 +76,6 @@ async function openBillingPortal() {
             <p class="text-gray-600">
                 You’re not signed in.
             </p>
-            <NuxtLink to="/login" class="text-blue-600 hover:underline">
-                Sign in
-            </NuxtLink>
         </div>
 
     </main>

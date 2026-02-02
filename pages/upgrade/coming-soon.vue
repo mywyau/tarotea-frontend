@@ -1,6 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
-  title: 'TaroTea Pro'
+  title: 'TaroTeaMonthly or TaroTeaYearly'
 })
 
 const router = useRouter()
