@@ -1,6 +1,8 @@
+import { levelFourWords } from "./levelFourWords";
 import { levelOneWords } from "./levelOneWords";
 import { levelThreeWords } from "./levelThreeWords";
 import { levelTwoWords } from "./levelTwoWords";
+import { levelFiveWords } from "./levelFiveWords";
 
 export type LevelSlug =
   | "level-one"
@@ -20,8 +22,8 @@ export const LEVEL_WORDS: Record<LevelSlug, any[]> = {
   "level-one": levelOneWords,
   "level-two": levelTwoWords,
   "level-three": levelThreeWords,
-  "level-four": levelThreeWords,
-  "level-five": levelThreeWords,
+  "level-four": levelFourWords,
+  "level-five": levelFiveWords,
   "level-six": levelThreeWords,
   "level-eight": levelThreeWords,
   "level-nine": levelThreeWords,
