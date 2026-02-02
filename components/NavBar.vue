@@ -3,8 +3,6 @@ import { loginWithGoogle, logout } from '@/composables/useAuth'
 import { useNavAuth } from '@/composables/useNavAuth'
 import { useUpgrade } from '@/composables/useUpgrade'
 
-// const { me, authReady, refresh } = useMeState()
-
 const { me, authReady, status, refresh } = useNavAuth()
 
 function upgrade(billing: 'monthly' | 'yearly') {

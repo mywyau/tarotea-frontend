@@ -1,8 +1,8 @@
 export interface MeUser {
   id: string;
   email: string;
-  plan?: "monthly" | "yearly";
-  active?: boolean
+  plan?: "free" | "monthly" | "yearly";
+  active?: boolean;
 }
 
 export type MeState =

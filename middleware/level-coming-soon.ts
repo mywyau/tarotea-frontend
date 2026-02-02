@@ -11,8 +11,4 @@ export default defineNuxtRouteMiddleware((to) => {
   if (comingSoonLevels.includes(levelId)) {
     return navigateTo('/content-not-available')
   }
-
-  // if (!me.value) {
-  //   return navigateTo('/signin')
-  // }
 })
