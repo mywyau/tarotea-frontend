@@ -5,7 +5,6 @@ export const useGlobalAudio = () => {
   )
 
   const play = (audio: HTMLAudioElement) => {
-    // Stop anything already playing
     if (current.value && current.value !== audio) {
       current.value.pause()
       current.value.currentTime = 0
@@ -15,5 +14,13 @@ export const useGlobalAudio = () => {
     audio.play()
   }
 
-  return { current, play }
+  const stop = () => {
+    if (current.value) {
+      current.value.pause()
+      current.value.currentTime = 0
+      current.value = null
+    }
+  }
+
+  return { current, play, stop }
 }

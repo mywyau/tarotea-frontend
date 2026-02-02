@@ -9,8 +9,16 @@ import { computed, ref } from 'vue'
 import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz'
 import { LEVEL_WORDS } from '@/utils/quiz/levels'
 
+import {
+  playQuizCompleteFailSong,
+  playQuizCompleteFanfareSong,
+  playQuizCompleteOkaySong
+} from '@/utils/sounds'
+
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+
+const { stop } = useGlobalAudio()
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -70,10 +78,44 @@ function answer(index: number) {
 }
 
 function next() {
+  stop() // 🔑 stop current word audio
   answered.value = false
   selectedIndex.value = null
   current.value++
 }
+
+
+const percentage = computed(() => {
+  if (questions.value.length === 0) return 0
+  return (score.value / questions.value.length) * 100
+})
+
+const completionSoundPlayed = ref(false)
+
+watch(
+  () => current.value,
+  (newCurrent) => {
+    if (
+      newCurrent >= questions.value.length &&
+      !completionSoundPlayed.value
+    ) {
+      completionSoundPlayed.value = true
+
+      stop() // 🔑 stop last word audio
+
+      setTimeout(() => {
+        if (percentage.value >= 95) {
+          playQuizCompleteFanfareSong()
+        } else if (percentage.value >= 50) {
+          playQuizCompleteOkaySong()
+        } else {
+          playQuizCompleteFailSong()
+        }
+      }, 400)
+    }
+  }
+)
+
 
 </script>
 
