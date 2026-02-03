@@ -5,6 +5,9 @@ const {
     authReady,
     isLoggedIn,
     user,
+    entitlement,
+    isCanceling,
+    currentPeriodEnd,
     resolve
 } = useMeStateV2()
 
@@ -58,18 +61,28 @@ async function openBillingPortal() {
                 <p class="text-sm text-gray-500">Plan</p>
 
                 <p class="font-medium">
-                    <span v-if="user!.plan === 'monthly'">Monthly</span>
-                    <span v-else-if="user!.plan === 'yearly'">Yearly</span>
+                    <span v-if="entitlement?.plan === 'monthly'">Monthly</span>
+                    <span v-else-if="entitlement?.plan === 'yearly'">Yearly</span>
                     <span v-else>Free</span>
                 </p>
 
-                <p v-if="user!.active === false" class="text-sm text-gray-500">
-                    Cancels at end of billing period
+                <p v-if="isCanceling && currentPeriodEnd" class="text-sm text-gray-500">
+                    Cancels on {{ currentPeriodEnd.toLocaleDateString() }}
                 </p>
+
+                <p v-else-if="entitlement?.subscription_status === 'active' && currentPeriodEnd"
+                    class="text-sm text-gray-500">
+                    Renews on {{ currentPeriodEnd.toLocaleDateString() }}
+                </p>
+
+                <p v-else-if="entitlement?.subscription_status === 'past_due'" class="text-sm text-red-600">
+                    Payment issue — update your card to keep access
+                </p>
+
             </div>
 
             <!-- Billing -->
-            <button v-if="user!.plan !== 'free'"
+            <button v-if="entitlement && entitlement.plan !== 'free'"
                 class="w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
                 @click="openBillingPortal">
                 Manage billing

@@ -6,6 +6,45 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
+type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled";
+
+interface Entitlement {
+  plan: "free" | "monthly" | "yearly";
+  subscription_status: SubscriptionStatus;
+  active: boolean;
+  cancel_at_period_end: boolean;
+
+  current_period_end?: string;
+  canceled_at?: string;
+}
+
+function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
+
+  const item = sub.items?.data?.[0];
+
+  const active =
+    sub.status === "active" ||
+    sub.status === "trialing" ||
+    sub.status === "past_due";
+
+  return {
+    plan: (sub.metadata.plan as "monthly" | "yearly") ?? "free",
+    subscription_status: sub.status as SubscriptionStatus,
+    active,
+    cancel_at_period_end: sub.cancel_at_period_end ?? false,
+
+    ...(item?.current_period_end && {
+      current_period_end: new Date(
+        item.current_period_end * 1000,
+      ).toISOString(),
+    }),
+
+    ...(sub.canceled_at && {
+      canceled_at: new Date(sub.canceled_at * 1000).toISOString(),
+    }),
+  };
+}
+
 export default defineEventHandler(async (event) => {
   const sig = getHeader(event, "stripe-signature");
   const body = await readRawBody(event);
@@ -63,54 +102,49 @@ export default defineEventHandler(async (event) => {
     case "customer.subscription.updated": {
       const sub = stripeEvent.data.object as Stripe.Subscription;
 
-      const userId = sub.metadata.userId;
-      const plan = sub.metadata.plan;
       const customerId = typeof sub.customer === "string" ? sub.customer : null;
 
-      if (!userId || !plan || !customerId) {
-        console.error("Subscription missing data", {
-          subId: sub.id,
-          userId,
-          plan,
-          customerId,
-        });
+      if (!customerId) break;
+
+      const userRes = await db.query(
+        `select id from users where stripe_customer_id = $1`,
+        [customerId],
+      );
+
+      if (userRes.rowCount === 0) {
+        console.error("No user for Stripe customer", customerId);
         break;
       }
 
-      const check = await db.query(
-        `select id, stripe_customer_id from users where id = $1`,
-        [userId],
-      );
+      const userId = userRes.rows[0].id;
 
-      console.log("👀 users row seen by webhook:", check.rows);
-
-      // ✅ ALWAYS ensure customer ID is linked
-      const res = await db.query(
-        `
-          update users
-          set stripe_customer_id = $1
-          where id = $2
-            and stripe_customer_id is null
-        `,
-        [customerId, userId],
-      );
-
-      console.log("🧩 users update rowCount:", res.rowCount);
-
-      const active = sub.status === "active" || sub.status === "trialing";
+      const e = entitlementFromSubscription(sub);
 
       await db.query(
         `
           update entitlements
-          set plan = $1,
-              active = $2
-          where user_id = $3
+          set
+            plan = $1,
+            subscription_status = $2,
+            active = $3,
+            cancel_at_period_end = $4,
+            current_period_end = $5,
+            canceled_at = $6
+          where user_id = $7
         `,
-        [plan, active, userId],
+        [
+          e.plan,
+          e.subscription_status,
+          e.active,
+          e.cancel_at_period_end,
+          e.current_period_end,
+          e.canceled_at,
+          userId,
+        ],
       );
+
       return { received: true };
     }
-
     case "customer.subscription.deleted": {
       const sub = stripeEvent.data.object as Stripe.Subscription;
       const customerId = typeof sub.customer === "string" ? sub.customer : null;
@@ -135,8 +169,13 @@ export default defineEventHandler(async (event) => {
       await db.query(
         `
           update entitlements
-          set plan = 'free',
-              active = false
+          set
+            plan = 'free',
+            subscription_status = 'canceled',
+            active = false,
+            cancel_at_period_end = false,
+            current_period_end = null,
+            canceled_at = now()
           where user_id = $1
         `,
         [userId],
