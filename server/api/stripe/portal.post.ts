@@ -1,60 +1,28 @@
 import Stripe from "stripe";
-import { useAuth } from "~/composables/useAuth";
-import { useMeState } from "~/composables/useMeState";
-
-// export default defineEventHandler(async (event) => {
-
-//   const config = useRuntimeConfig();
-
-//   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-//     apiVersion: "2023-10-16",
-//   });
-
-//   // 🔐 Get user from session (adjust to your auth)
-//   const { me } = await useAuth(event);
-
-//   if (!me || !me.stripeCustomerId) {
-//     throw createError({
-//       statusCode: 401,
-//       statusMessage: "Not authenticated",
-//     });
-//   }
-
-//   const session = await stripe.billingPortal.sessions.create({
-//     customer: me.stripeCustomerId,
-//     return_url: `${config.public.siteUrl}/account`,
-//   });
-
-//   return {
-//     url: session.url,
-//   };
-// });
 
 // import Stripe from 'stripe'
-import { getAuthenticatedUserFromDB } from '~/server/utils/getAuthenticatedUserFromDB'
+import { getAuthenticatedUserFromDB } from "~/server/utils/getAuthenticatedUserFromDB";
 
 export default defineEventHandler(async (event) => {
-
-  const config = useRuntimeConfig()
+  const config = useRuntimeConfig();
 
   const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2023-10-16'
-  })
+    apiVersion: "2023-10-16",
+  });
 
-  const user = await getAuthenticatedUserFromDB(event)
+  const user = await getAuthenticatedUserFromDB(event);
 
-  console.log(user.stripeCustomerId)
-  console.log(`${config.public.siteUrl}/account`)
+  console.log(user.stripeCustomerId);
+  console.log(`${config.public.siteUrl}/account`);
 
   if (!user?.stripeCustomerId) {
-    throw createError({ statusCode: 401 })
+    throw createError({ statusCode: 401 });
   }
 
   const session = await stripe.billingPortal.sessions.create({
     customer: user.stripeCustomerId,
-    return_url: `${config.public.siteUrl}/account`
-  })
+    return_url: `${config.public.siteUrl}/account`,
+  });
 
-  return { url: session.url }
-})
-
+  return { url: session.url };
+});

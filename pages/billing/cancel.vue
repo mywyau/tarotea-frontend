@@ -17,7 +17,7 @@ function upgrade(billing: 'monthly' | 'yearly') {
       </h1>
 
       <p class="text-gray-600">
-        No worries — your payment was cancelled and no charges were made.
+        No worries! Your payment was cancelled and no charges were made.
       </p>
 
       <p class="text-sm text-gray-500">
@@ -25,31 +25,24 @@ function upgrade(billing: 'monthly' | 'yearly') {
       </p>
 
       <div class="space-y-3 pt-4">
-        <button
-          @click="upgrade('monthly')"
-          class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
-        >
-          Monthly plan
+        <button @click="upgrade('monthly')"
+          class="block w-full rounded-lg border border-gray-300 py-3 font-medium transition hover:bg-gray-50">
+          Monthly plan · £5.99
         </button>
 
-        <button
-          @click="upgrade('yearly')"
-          class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
-        >
-          Yearly plan (save more)
+        <button @click="upgrade('yearly')"
+          class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition">
+          Yearly plan · £59.99 · Best value
         </button>
       </div>
 
 
-      
-      <NuxtLink
-        to="/levels"
-        class="block pt-4 text-sm text-gray-500 hover:underline"
-      >
+
+      <NuxtLink to="/levels" class="block pt-4 text-sm text-gray-500 hover:underline">
         Continue learning without upgrading
       </NuxtLink>
 
-      <p class="text-xs text-gray-400 pt-4">
+      <p class="text-sm text-gray-400 pt-4">
         You can safely close this page.
       </p>
 

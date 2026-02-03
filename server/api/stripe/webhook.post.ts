@@ -114,9 +114,24 @@ export default defineEventHandler(async (event) => {
     case "customer.subscription.deleted": {
       const sub = stripeEvent.data.object as Stripe.Subscription;
 
-      const userId = sub.metadata.userId;
+      const customerId = typeof sub.customer === "string" ? sub.customer : null;
 
-      if (!userId) break;
+      if (!customerId) {
+        console.error("Deleted subscription missing customer");
+        break;
+      }
+
+      const userRes = await db.query(
+        `select id from users where stripe_customer_id = $1`,
+        [customerId],
+      );
+
+      if (userRes.rowCount === 0) {
+        console.error("No user for Stripe customer", customerId);
+        break;
+      }
+
+      const userId = userRes.rows[0].id;
 
       await db.query(
         `
@@ -127,6 +142,7 @@ export default defineEventHandler(async (event) => {
         `,
         [userId],
       );
+
       return { received: true };
     }
   }
