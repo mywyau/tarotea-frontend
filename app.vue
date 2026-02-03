@@ -1,11 +1,11 @@
 <script setup lang="ts">
 
-import { Analytics } from '@vercel/analytics/nuxt'
+import { Analytics } from '@vercel/analytics/nuxt';
 
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col">
+  <div class="min-h-screen flex flex-col overflow-x-hidden">
     <NavBar />
     <main class="flex-1">
       <Analytics />
