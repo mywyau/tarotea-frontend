@@ -90,7 +90,7 @@ const canEnterLevel = (level: any) => {
     </h1>
 
     <p class="text-gray-600 mb-8">
-      Explore Cantonese sentence patterns organised by Level
+      Explore Cantonese words and sentence patterns organised by level
     </p>
 
     <ul class="space-y-4">

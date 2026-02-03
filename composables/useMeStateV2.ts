@@ -1,8 +1,29 @@
+// export interface MeUser {
+//   id: string;
+//   email: string;
+//   plan?: "free" | "monthly" | "yearly";
+//   active?: boolean;
+// }
+
+export type SubscriptionStatus =
+  | "active"
+  | "trialing"
+  | "past_due"
+  | "canceled";
+
+export interface Entitlement {
+  plan: "free" | "monthly" | "yearly";
+  subscription_status: SubscriptionStatus;
+  active: boolean;
+  cancel_at_period_end: boolean;
+  current_period_end?: string;
+  canceled_at?: string;
+}
+
 export interface MeUser {
   id: string;
   email: string;
-  plan?: "free" | "monthly" | "yearly";
-  active?: boolean;
+  entitlement: Entitlement;
 }
 
 export type MeState =
@@ -34,6 +55,11 @@ export function useMeStateV2() {
     try {
       const token = await auth.getAccessToken();
 
+      // const user = await $fetch<MeUser>("/api/me", {
+      //   headers: { Authorization: `Bearer ${token}` },
+      //   cache: "no-store",
+      // });
+
       const user = await $fetch<MeUser>("/api/me", {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
@@ -55,11 +81,37 @@ export function useMeStateV2() {
     state.value.status === "logged-in" ? state.value.user : null,
   );
 
+  const entitlement = computed(() =>
+    state.value.status === "logged-in" ? state.value.user.entitlement : null,
+  );
+
+  const hasPaidAccess = computed(() =>
+    entitlement.value
+      ? ["active", "trialing", "past_due"].includes(
+          entitlement.value.subscription_status,
+        )
+      : false,
+  );
+
+  const isCanceling = computed(
+    () => entitlement.value?.cancel_at_period_end === true,
+  );
+
+  const currentPeriodEnd = computed(() =>
+    entitlement.value?.current_period_end
+      ? new Date(entitlement.value.current_period_end)
+      : null,
+  );
+
   return {
     state,
     authReady,
     isLoggedIn,
     user,
+    entitlement,
+    hasPaidAccess,
+    isCanceling,
+    currentPeriodEnd,
     resolve,
   };
 }

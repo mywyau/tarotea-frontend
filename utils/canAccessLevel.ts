@@ -1,18 +1,11 @@
-// export function canAccessLevel(level: number, me: any | null) {
-//   // Free preview
-//   if (level <= 2) return true
+import type { MeUser } from "@/composables/useMeStateV2";
 
-//   // Must be logged in
-//   if (!me) return false
-
-//   // Paid + active users only
-//   return (
-//     (me.plan === 'monthly' || me.plan === 'yearly') &&
-//     me.active === true
-//   )
+// export function hasPaidAccess(entitlement) {
+//   return entitlement.subscription_status === 'active'
+//       || entitlement.subscription_status === 'trialing'
+//       || entitlement.subscription_status === 'past_due'
 // }
 
-import type { MeUser } from "@/composables/useMeStateV2";
 
 export function hasPaidAccess(user: MeUser): boolean {
   return (

@@ -30,12 +30,12 @@ const { data: stats } = await useFetch('/api/stats', {
 
     </div>
 
-    <p class="mt-8 text-gray-600">
+    <p class="mt-8 text-lg text-gray-600">
       Learn and understand everyday Cantonese
     </p>
 
-    <NuxtLink to="/levels" class="mt-8 inline-block px-4 py-2 border rounded">
-      Start with viewing levels →
+    <NuxtLink to="/levels" class="mt-8 block text-gray-500 hover:underline">
+      Start with viewing some vocabulary →
     </NuxtLink>
 
   </main>
