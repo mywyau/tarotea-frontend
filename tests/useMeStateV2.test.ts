@@ -52,7 +52,7 @@ describe("useMeStateV2", () => {
     const fakeUser: MeUser = {
       id: "123",
       email: "test@example.com",
-      plan: "pro",
+      plan: "monthly",
     };
 
     useAuthMock.mockResolvedValue({

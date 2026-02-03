@@ -113,7 +113,6 @@ export default defineEventHandler(async (event) => {
 
     case "customer.subscription.deleted": {
       const sub = stripeEvent.data.object as Stripe.Subscription;
-
       const customerId = typeof sub.customer === "string" ? sub.customer : null;
 
       if (!customerId) {
