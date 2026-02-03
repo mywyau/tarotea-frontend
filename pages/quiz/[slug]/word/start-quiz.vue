@@ -71,12 +71,12 @@ const hasAccess = computed(() =>
         Start quiz
       </NuxtLink>
 
-      <NuxtLink :to="`/quiz/`" class="block text-sm text-gray-500 hover:underline">
-        Back to all quiz levels
+      <NuxtLink :to="`/quiz/`" class="block text-gray-500 hover:underline">
+        ← All quizzes
       </NuxtLink>
 
-      <NuxtLink :to="`/level/${slug}`" class="block text-sm text-gray-500 hover:underline">
-        Back to level
+      <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
+        ← Level {{ levelNumber }} Vocab
       </NuxtLink>
 
     </section>

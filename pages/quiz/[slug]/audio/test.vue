@@ -177,17 +177,22 @@ watch(
         </h2>
 
         <p class="text-gray-600">
+          {{ score }} / {{ questions.length }}
+        </p>
+
+        <p class="text-gray-600">
           You scored {{ score === questions.length
             ? '100%'
             : ((score / questions.length) * 100).toFixed(2) + '%' }}
         </p>
 
         <div class="pt-4 space-y-4">
-          <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`" class="block text-sm text-gray-400 hover:underline">
-            Back to Start
+          <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`"
+            class="block w-full rounded bg-black text-white py-2 text-center font-medium hover:bg-gray-800 transition">
+            Restart Quiz
           </NuxtLink>
 
-          <NuxtLink :to="`/level/${slug}`" class="block text-sm text-gray-400 hover:underline">
+          <NuxtLink :to="`/level/${slug}`" class="block text-lg text-gray-400 hover:underline">
             Back to Level
           </NuxtLink>
         </div>

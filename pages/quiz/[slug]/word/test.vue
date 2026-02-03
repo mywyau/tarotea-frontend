@@ -145,8 +145,12 @@ watch(
     <div v-else class="text-center space-y-6">
 
       <h2 class="text-2xl font-semibold">
-          Quiz complete
+        Quiz complete
       </h2>
+
+      <p class="text-gray-600">
+        {{ score }} / {{ questions.length }}
+      </p>
 
       <p class="text-gray-600">
         You scored {{ score === questions.length
@@ -155,8 +159,9 @@ watch(
       </p>
 
       <div class="pt-4 space-y-4">
-        <NuxtLink :to="`/quiz/${slug}/word/start-quiz`" class="block text-sm text-gray-400 hover:underline">
-          Back to Start
+        <NuxtLink :to="`/quiz/${slug}/word/start-quiz`"
+          class="block w-full rounded bg-black text-white py-2 text-center font-medium hover:bg-gray-800 transition">
+          Restart Quiz
         </NuxtLink>
 
         <NuxtLink :to="`/level/${slug}`" class="block text-sm text-gray-400 hover:underline">
