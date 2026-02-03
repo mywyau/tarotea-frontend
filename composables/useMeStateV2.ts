@@ -1,10 +1,3 @@
-// export interface MeUser {
-//   id: string;
-//   email: string;
-//   plan?: "free" | "monthly" | "yearly";
-//   active?: boolean;
-// }
-
 export type SubscriptionStatus =
   | "active"
   | "trialing"
@@ -55,12 +48,7 @@ export function useMeStateV2() {
     try {
       const token = await auth.getAccessToken();
 
-      // const user = await $fetch<MeUser>("/api/me", {
-      //   headers: { Authorization: `Bearer ${token}` },
-      //   cache: "no-store",
-      // });
-
-      const user = await $fetch<MeUser>("/api/me", {
+      const user = await $fetch<MeUser>("/api/meV2", {
         headers: { Authorization: `Bearer ${token}` },
         cache: "no-store",
       });
