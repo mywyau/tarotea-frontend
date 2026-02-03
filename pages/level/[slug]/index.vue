@@ -22,9 +22,8 @@ const hasAccess = computed(() =>
   authReady.value && canAccessLevel(levelNumber, me.value)
 )
 
-// IMPORTANT: ensure this matches what /api/me returns.
-// If /api/me returns { id: "..."} you're good.
-// If it returns { user_id: "..."} then change me?.id accordingly.
+// IMPORTANT: ensure this matches what /api/meV2 returns.
+// If /api/meV2 returns { id: "..."} you're good.
 
 const headers = computed(() => {
   if (!me?.id) return undefined
