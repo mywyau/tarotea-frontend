@@ -90,7 +90,7 @@ watch(
 
       // small delay so UI settles first
       setTimeout(() => {
-        if (percentage.value >= 95) {
+        if (percentage.value >= 90) {
           playQuizCompleteFanfareSong()
         } else if (percentage.value >= 50) {
           playQuizCompleteOkaySong()
@@ -107,7 +107,8 @@ watch(
 <template>
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
-    <NuxtLink :to="`/quiz/${slug}/word/start-quiz`" class="text-gray-500 hover:underline">
+    <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/word/start-quiz`"
+      class="text-gray-500 hover:underline">
       ← Restart Quiz
     </NuxtLink>
 
