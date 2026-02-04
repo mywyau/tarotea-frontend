@@ -25,18 +25,19 @@ async function handleLogout() {
 <template>
 
   <header class="border-b bg-white shadow-sm">
+
     <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
 
       <!-- Logo -->
-      <NuxtLink to="/" class="text-2xl font-bold text-primary-600">
+      <NuxtLink to="/" class="text-2xl font-bold text-primary-600 hover:text-gray-600">
         TaroTea
       </NuxtLink>
 
       <!-- Desktop nav -->
 
       <nav class="hidden md:flex items-center gap-6">
-        <NuxtLink to="/levels" class="nav-link">Levels</NuxtLink>
-        <NuxtLink to="/quiz" class="nav-link">Quiz</NuxtLink>
+        <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
+        <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Quiz</NuxtLink>
 
         <!-- Wait until auth is resolved -->
         <template v-if="!authReady">
@@ -44,20 +45,20 @@ async function handleLogout() {
         </template>
 
         <template v-else-if="isLoggedIn">
-          <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="nav-link">
+          <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="nav-link hover:text-gray-600">
             Upgrade
           </NuxtLink>
 
-          <NuxtLink to="/account" class="nav-link">
+          <NuxtLink to="/account" class="nav-link hover:text-gray-600">
             Account
           </NuxtLink>
 
-          <button class="text-red-600 hover:underline" @click="handleLogout">
+          <button class="text-red-600 hover:text-red-400" @click="handleLogout">
             Log out
           </button>
         </template>
 
-        <button v-else class="text-blue-600 hover:underline" @click="loginWithGoogle">
+        <button v-else class="text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
           Login
         </button>
       </nav>
