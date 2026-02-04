@@ -45,7 +45,10 @@ async function handleLogout() {
         </template>
 
         <template v-else-if="isLoggedIn">
-          <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="nav-link hover:text-gray-600">
+          <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="font-medium bg-clip-text text-transparent
+         bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
+         hover:from-pink-400 hover:via-purple-400 hover:to-indigo-400
+         transition">
             Upgrade
           </NuxtLink>
 
