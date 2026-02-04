@@ -45,10 +45,18 @@ async function handleLogout() {
         </template>
 
         <template v-else-if="isLoggedIn">
-          <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="font-medium bg-clip-text text-transparent
+          <!-- <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="font-medium bg-clip-text text-transparent
          bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
          hover:from-pink-400 hover:via-purple-400 hover:to-indigo-400
          transition">
+            Upgrade
+          </NuxtLink> -->
+
+          <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="font-medium bg-clip-text text-transparent
+         bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
+         hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
+         transition
+         hover:scale-105 hover:saturate-150">
             Upgrade
           </NuxtLink>
 
@@ -103,9 +111,11 @@ async function handleLogout() {
         <template v-else-if="isLoggedIn">
 
           <div>
-            <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="mobile-secondary font-medium
-         bg-clip-text text-transparent
-         bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500" @click="mobileOpen = false">
+            <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="mobile-secondary font-medium bg-clip-text text-transparent
+         bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600
+         hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
+         transition
+         hover:scale-105 hover:saturate-150" @click="mobileOpen = false">
               Upgrade
             </NuxtLink>
           </div>
