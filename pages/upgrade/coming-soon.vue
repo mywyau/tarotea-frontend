@@ -1,25 +1,9 @@
 <script setup lang="ts">
+
 definePageMeta({
   title: 'TaroTeaMonthly or TaroTeaYearly'
 })
 
-const router = useRouter()
-
-function joinPro() {
-  // 🔍 fake paywall signal
-  console.log('[paywall] join_pro_clicked')
-
-  // Optional: send to analytics later
-  // useTrack('join_pro_clicked')
-
-  alert(
-    'Payments are not live yet.\n\nThis helps me understand what to build next — thank you!'
-  )
-}
-
-function goBack() {
-  router.back()
-}
 </script>
 
 <template>

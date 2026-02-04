@@ -15,17 +15,16 @@ const play = () => {
     audio.value = new Audio(props.src)
   }
 
-  // 🔑 MUST apply volume right before playing
+  // MUST apply volume right before playing
   audio.value.volume = volume.value
   audio.value.currentTime = 0
-  // audio.value.play()
   playGlobal(audio.value)
 
 }
 
 onMounted(() => {
   if (props.autoplay) {
-    play() // ✅ THIS is the key fix
+    play() 
   }
 })
 

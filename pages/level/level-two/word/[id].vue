@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 
@@ -22,6 +23,11 @@ const notFound = computed(() => error.value?.statusCode === 404)
 
 <template>
   <main v-if="word" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
+
+    <NuxtLink :to="`/level/level-two`" class="block text-gray-500 hover:underline">
+      ← Level 2 Vocab
+    </NuxtLink>
+
     <!-- Word header -->
     <section class="text-center space-y-2">
       <div class="text-4xl font-medium">

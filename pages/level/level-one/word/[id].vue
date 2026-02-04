@@ -23,6 +23,11 @@ const notFound = computed(() => error.value?.statusCode === 404)
 
 <template>
   <main v-if="word" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
+
+    <NuxtLink :to="`/level/level-one`" class="block text-gray-500 hover:underline">
+      ← Level 1 Vocab
+    </NuxtLink>
+
     <!-- Word header -->
     <section class="text-center space-y-2">
       <div class="text-4xl font-medium">
@@ -80,8 +85,7 @@ const notFound = computed(() => error.value?.statusCode === 404)
               </span>
 
               <AudioButton v-if="word.audio?.examples?.[index]"
-                :src="`${cdnBase}/audio/${word.audio.examples[index]}`" 
-              />
+                :src="`${cdnBase}/audio/${word.audio.examples[index]}`" />
 
               <!-- {{ `${cdnBase}/audio/${word.audio.examples[index]}` }} -->
             </div>

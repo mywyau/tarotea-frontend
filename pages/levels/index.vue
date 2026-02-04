@@ -121,7 +121,7 @@ const canEnterLevel = (level: any) => {
         </NuxtLink>
 
         <!-- Locked level -->
-        <div v-else class="space-y-2">
+        <div v-else class="space-y-2 cursor-not-allowed">
           <div class="text-lg font-medium">
             {{ level.title }}
             <span v-if="level.comingSoon" class="text-sm text-gray-400 font-normal">
