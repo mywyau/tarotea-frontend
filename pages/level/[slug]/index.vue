@@ -1,11 +1,12 @@
 <script setup lang="ts">
-import WordTile from '@/components/WordTile.vue'
-import { getLevelNumber } from '@/utils/levels'
 
 definePageMeta({
   middleware: ['level-access'],
   ssr: true,
 })
+
+import WordTile from '@/components/WordTile.vue'
+import { getLevelNumber } from '@/utils/levels'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -49,24 +50,14 @@ const categories = computed(() =>
       <p class="text-gray-600">{{ topic.description }}</p>
     </header>
 
-    <section
-      v-for="category in categories"
-      :key="category.key"
-      class="space-y-4"
-    >
+    <section v-for="category in categories" :key="category.key" class="space-y-4">
       <h2 class="text-xl font-medium capitalize">
         {{ category.title }}
       </h2>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        <WordTile
-          v-for="word in category.words"
-          :key="word.id"
-          :to="`/level/${slug}/word/${word.id}`"
-          :word="word.word"
-          :jyutping="word.jyutping"
-          :meaning="word.meaning"
-        />
+        <WordTile v-for="word in category.words" :key="word.id" :to="`/level/${slug}/word/${word.id}`" :word="word.word"
+          :jyutping="word.jyutping" :meaning="word.meaning" />
       </div>
     </section>
   </main>

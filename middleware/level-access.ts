@@ -32,7 +32,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // 🔒 Block if user can't access
   if (!canAccessLevel(levelNumber, entitlement.value!) && levelNumber > 4) {
-    return navigateTo("/upgrade/coming-soon");
+    return navigateTo("/coming-soon");
   }
 
   if (!canAccessLevel(levelNumber, entitlement.value!)) {

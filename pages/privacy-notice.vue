@@ -148,7 +148,7 @@ definePageMeta({
       </p>
     </section>
 
-    <section class="space-y-3">
+    <!-- <section class="space-y-3">
       <h2 class="text-xl font-semibold">10. Contact</h2>
 
       <p class="text-gray-700">
@@ -156,7 +156,7 @@ definePageMeta({
         <br />
         <span class="font-medium">contact@tarotea.dev</span>
       </p>
-    </section>
+    </section> -->
 
   </main>
 </template>
