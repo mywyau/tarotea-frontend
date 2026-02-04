@@ -16,19 +16,14 @@
 
                 <!-- Right -->
                 <div class="flex gap-4">
-                    <!-- <NuxtLink to="/about" class="hover:underline">
-                        About
-                    </NuxtLink> -->
+                    <NuxtLink to="/privacy-notice" class="hover:underline">
+                        Privacy Notice
+                    </NuxtLink>
 
-                    <!-- <NuxtLink to="/faq" class="hover:underline">
-                        FAQ
-                    </NuxtLink> -->
-<!-- 
-                    <NuxtLink to="/tips" class="hover:underline">
-                        Tips
-                    </NuxtLink> -->
+                    <NuxtLink to="/terms-of-service" class="hover:underline">
+                        Terms of Service
+                    </NuxtLink>
                 </div>
-
             </div>
 
             <div class="mt-3 text-xs text-gray-400">
