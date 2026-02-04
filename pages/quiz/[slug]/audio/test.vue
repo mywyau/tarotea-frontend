@@ -40,20 +40,20 @@ const selectedIndex = ref<number | null>(null)
 
 const question = computed(() => questions.value[current.value])
 
-  const {
-    state,
-    authReady,
-    isLoggedIn,
-    user,
-    entitlement,
-    hasPaidAccess,
-    isCanceling,
-    currentPeriodEnd,
-    resolve,
-  } = useMeStateV2();
-  
-  
-  const levelNumber = getLevelNumber(slug.value)
+const {
+  state,
+  authReady,
+  isLoggedIn,
+  user,
+  entitlement,
+  hasPaidAccess,
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
+} = useMeStateV2();
+
+
+const levelNumber = getLevelNumber(slug.value)
 
 const hasAccess = computed(() =>
   canAccessLevel(levelNumber, entitlement.value!)
@@ -145,8 +145,12 @@ watch(
       </NuxtLink>
     </section>
 
-    <section class="text-center space-y-4">
+    <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`" class="text-gray-500 hover:underline">
+      ← Restart Quiz
+    </NuxtLink>
 
+    <section class="text-center space-y-4">
+      
       <h1 class="text-2xl font-semibold text-center">
         {{ LEVEL_TITLES[slug] ?? 'Unknown level' }}
       </h1>
@@ -204,9 +208,10 @@ watch(
             Restart Quiz
           </NuxtLink>
 
-          <NuxtLink :to="`/level/${slug}`" class="block text-lg text-gray-400 hover:underline">
-            Back to Level
+          <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
+            ← Level {{ levelNumber }} Vocab
           </NuxtLink>
+
         </div>
       </div>
     </section>

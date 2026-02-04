@@ -18,7 +18,7 @@ function toggleMobile() {
 
 async function handleLogout() {
   await logout()
-  await resolve({ force: true }) // 🔑 re-sync global auth state
+  await resolve({ force: true }) // re-sync global auth state
 }
 </script>
 
