@@ -89,7 +89,6 @@ async function handleLogout() {
         <NuxtLink to="/quiz" class="mobile-primary" @click="mobileOpen = false">
           Quiz
         </NuxtLink>
-
       </div>
 
       <!-- Divider -->
@@ -102,21 +101,31 @@ async function handleLogout() {
         </template>
 
         <template v-else-if="isLoggedIn">
-          <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="mobile-secondary"
-            @click="mobileOpen = false">
-            Upgrade
-          </NuxtLink>
 
-          <NuxtLink to="/account" class="mobile-secondary" @click="mobileOpen = false">
-            Account
-          </NuxtLink>
+          <div>
+            <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="mobile-secondary font-medium
+         bg-clip-text text-transparent
+         bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500" @click="mobileOpen = false">
+              Upgrade
+            </NuxtLink>
+          </div>
 
-          <button class="mobile-danger" @click="handleLogout">
+          <div class="border-t pt-2"></div>
+
+          <div>
+            <NuxtLink to="/account" class="mobile-secondary" @click="mobileOpen = false">
+              Account
+            </NuxtLink>
+          </div>
+
+          <div class="border-t pt-2"></div>
+
+          <button class="mobile-danger text-red-600 hover:text-red-400" @click="handleLogout">
             Log out
           </button>
         </template>
 
-        <button v-else class="mobile-secondary" @click="loginWithGoogle">
+        <button v-else class="mobile-secondary text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
           Login
         </button>
       </ClientOnly>
