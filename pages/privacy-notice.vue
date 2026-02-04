@@ -30,11 +30,11 @@ definePageMeta({
       <p class="text-gray-700">
         TaroTea is a web application for learning spoken Cantonese.
       </p>
-      <p class="text-gray-700">
+      <!-- <p class="text-gray-700">
         If you have any questions about this notice or your data, you can contact us at:
         <br />
         <span class="font-medium">Email:</span> contact@tarotea.dev
-      </p>
+      </p> -->
     </section>
 
     <section class="space-y-3">
