@@ -7,8 +7,6 @@ export default defineEventHandler(async (event) => {
 
   const { public: { cdnBase } } = useRuntimeConfig();
 
-  // console.log(`${cdnBase}/words/${id}.json`)
-
   try {
     return await $fetch(
       `${cdnBase}/words/${id}.json`

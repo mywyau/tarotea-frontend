@@ -36,6 +36,8 @@ async function handleLogout() {
       <!-- Desktop nav -->
 
       <nav class="hidden md:flex items-center gap-6">
+
+        <NuxtLink to="/exercises/sentences/level-one" class="nav-link hover:text-gray-600">Exercises</NuxtLink>
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
         <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Quiz</NuxtLink>
 
@@ -45,12 +47,6 @@ async function handleLogout() {
         </template>
 
         <template v-else-if="isLoggedIn">
-          <!-- <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="font-medium bg-clip-text text-transparent
-         bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
-         hover:from-pink-400 hover:via-purple-400 hover:to-indigo-400
-         transition">
-            Upgrade
-          </NuxtLink> -->
 
           <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="font-medium bg-clip-text text-transparent
          bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
@@ -85,6 +81,13 @@ async function handleLogout() {
     <!-- Mobile menu -->
     <div v-if="mobileOpen" class="md:hidden border-t bg-white px-4 py-5 space-y-4">
       <!-- Primary nav -->
+
+      <div class="">
+        <NuxtLink to="/exercises/sentences/level-one" class="mobile-primary">Exercises</NuxtLink>
+      </div>
+
+      <div class="border-t pt-2"></div>
+
       <div class="">
         <NuxtLink to="/levels" class="mobile-primary" @click="mobileOpen = false">
           Levels

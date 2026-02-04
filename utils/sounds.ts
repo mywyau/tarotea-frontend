@@ -9,8 +9,17 @@ export function playUISound(
   playGlobal(audio);
 }
 
+let audioCtx: AudioContext | null = null;
+
+function getAudioContext(): AudioContext {
+  if (!audioCtx) {
+    audioCtx = new AudioContext();
+  }
+  return audioCtx;
+}
+
 export function playCorrectJingle(volume = 0.8) {
-  const ctx = new AudioContext();
+  const ctx = getAudioContext();
 
   const now = ctx.currentTime;
 
@@ -34,7 +43,8 @@ export function playCorrectJingle(volume = 0.8) {
 }
 
 export function playIncorrectJingle(volume = 0.5) {
-  const ctx = new AudioContext();
+    const ctx = getAudioContext();
+
   const now = ctx.currentTime;
 
   const osc = ctx.createOscillator();
@@ -55,7 +65,8 @@ export function playIncorrectJingle(volume = 0.5) {
 }
 
 export function playQuizCompleteFanfareSong(volume = 0.9) {
-  const ctx = new AudioContext();
+    const ctx = getAudioContext();
+
   const now = ctx.currentTime;
 
   const gain = ctx.createGain();
@@ -86,7 +97,8 @@ export function playQuizCompleteFanfareSong(volume = 0.9) {
 }
 
 export function playQuizCompleteOkaySong(volume = 0.1) {
-  const ctx = new AudioContext();
+    const ctx = getAudioContext();
+
   const now = ctx.currentTime;
 
   const gain = ctx.createGain();
@@ -124,7 +136,8 @@ export function playQuizCompleteOkaySong(volume = 0.1) {
 }
 
 export function playQuizCompleteFailSong(volume = 0.55) {
-  const ctx = new AudioContext();
+    const ctx = getAudioContext();
+
   const now = ctx.currentTime;
 
   const gain = ctx.createGain();
