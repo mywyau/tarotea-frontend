@@ -6,13 +6,11 @@ export function hasPaidAccess(entitlement: Entitlement) {
       || entitlement.subscription_status === 'past_due'
 }
 
-
 export function isFreeLevel(level: number) {
   return level <= 2;
 }
 
 export function canAccessLevel(level: number, entitlement: Entitlement): boolean {
-  // if (isFreeLevel(level)) return true;
   if (!entitlement) return false;
   return hasPaidAccess(entitlement);
 }

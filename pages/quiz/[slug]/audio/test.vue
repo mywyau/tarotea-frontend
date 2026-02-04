@@ -40,11 +40,23 @@ const selectedIndex = ref<number | null>(null)
 
 const question = computed(() => questions.value[current.value])
 
-const { me, authReady } = useMeState()
-const levelNumber = getLevelNumber(slug.value)
+  const {
+    state,
+    authReady,
+    isLoggedIn,
+    user,
+    entitlement,
+    hasPaidAccess,
+    isCanceling,
+    currentPeriodEnd,
+    resolve,
+  } = useMeStateV2();
+  
+  
+  const levelNumber = getLevelNumber(slug.value)
 
 const hasAccess = computed(() =>
-  canAccessLevel(levelNumber, me.value)
+  canAccessLevel(levelNumber, entitlement.value!)
 )
 
 const LEVEL_TITLES: Record<string, string> = {
@@ -133,7 +145,7 @@ watch(
       </NuxtLink>
     </section>
 
-    <section v-else class="text-center space-y-4">
+    <section class="text-center space-y-4">
 
       <h1 class="text-2xl font-semibold text-center">
         {{ LEVEL_TITLES[slug] ?? 'Unknown level' }}

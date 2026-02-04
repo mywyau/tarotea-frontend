@@ -12,7 +12,7 @@ export default defineNuxtRouteMiddleware(() => {
     return;
   }
   // ⛔ Never run auth logic on server
-  if (process.server) return;
+  // if (process.server) return;
 
   // const { me, authReady } = useMeState();
 
