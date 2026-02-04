@@ -12,8 +12,8 @@ export default defineEventHandler(async (event) => {
 
   const user = await getAuthenticatedUserFromDB(event);
 
-  console.log(user.stripeCustomerId);
-  console.log(`${config.public.siteUrl}/account`);
+  // console.log(user.stripeCustomerId);
+  // console.log(`${config.public.siteUrl}/account`);
 
   if (!user?.stripeCustomerId) {
     throw createError({ statusCode: 401 });
