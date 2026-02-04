@@ -7,11 +7,11 @@ export default defineEventHandler(async (event) => {
 
   const { public: { cdnBase } } = useRuntimeConfig();
 
-  console.log(`${cdnBase}/content/cantonese/words/level/level-four/${id}.json`)
+  console.log(`${cdnBase}/content/cantonese/words/level/level-three/${id}.json`)
 
   try {
     return await $fetch(
-      `${cdnBase}/content/cantonese/words/level/level-four/${id}.json`
+      `${cdnBase}/content/cantonese/words/level/level-three/${id}.json`
     );
   } catch {
     throw createError({

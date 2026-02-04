@@ -3,10 +3,6 @@
 import { canAccessLevel } from '@/utils/canAccessLevel'
 import { getLevelNumber } from '@/utils/levels'
 
-// definePageMeta({
-//   middleware: ['level-access']
-// })
-
 const route = useRoute()
 const slug = computed(() => route.params.slug as string | undefined)
 
@@ -24,12 +20,24 @@ watchEffect(() => {
   }
 })
 
-const { me, authReady } = useMeState()
+// const { me, authReady } = useMeState()
+
+const {
+  state,
+  authReady,
+  isLoggedIn,
+  user,
+  entitlement,
+  hasPaidAccess,
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
+} = useMeStateV2()
 
 const hasAccess = computed(() =>
   authReady.value &&
   levelNumber.value !== null &&
-  canAccessLevel(levelNumber.value, me.value)
+  canAccessLevel(levelNumber.value, entitlement.value!)
 )
 
 </script>

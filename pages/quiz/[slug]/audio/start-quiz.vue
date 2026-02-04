@@ -23,12 +23,24 @@ watchEffect(() => {
   }
 })
 
-const { me, authReady } = useMeState()
+// const { me, authReady } = useMeState()
+
+const {
+  state,
+  authReady,
+  isLoggedIn,
+  user,
+  entitlement,
+  hasPaidAccess,
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
+} = useMeStateV2()
 
 const hasAccess = computed(() =>
   authReady.value &&
   levelNumber.value !== null &&
-  canAccessLevel(levelNumber.value, me.value)
+  canAccessLevel(levelNumber.value, entitlement.value!)
 )
 
 </script>

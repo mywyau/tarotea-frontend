@@ -3,12 +3,12 @@ definePageMeta({ ssr: false })
 
 import { onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
-import { useMeState } from '@/composables/useMeState'
+import { useMeStateV2 } from '@/composables/useMeStateV2'
 
 const route = useRoute()
 const router = useRouter()
 
-const { refresh } = useMeState()
+const me = useMeStateV2()
 
 const error = route.query.error as string | undefined
 const description = route.query.error_description as string | undefined
@@ -43,9 +43,8 @@ onMounted(async () => {
       })
     }
 
-    // ✅ THIS IS THE MISSING PIECE
-    await refresh()
-
+    // await refresh()
+    await me.resolve({ force: true })
     await router.replace('/')
   } catch (e) {
     console.error('Login callback failed:', e)

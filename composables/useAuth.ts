@@ -45,6 +45,7 @@ export async function useAuth() {
 }
 
 export async function loginWithGoogle() {
+
   if (!process.client) return;
   const { client } = await useAuth();
   if (!client) return;

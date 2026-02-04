@@ -12,11 +12,11 @@ const {
 } = useMeStateV2()
 
 // Resolve auth once on mount
-onMounted(async () => {
-    if (!authReady.value) {
-        await resolve()
-    }
-})
+// onMounted(async () => {
+//     if (!authReady.value) {
+//         await resolve()
+//     }
+// })
 
 async function openBillingPortal() {
     // Extra guard (defensive, but nice)

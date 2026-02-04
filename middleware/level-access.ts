@@ -12,14 +12,26 @@ export default defineNuxtRouteMiddleware(() => {
     return;
   }
   // ⛔ Never run auth logic on server
-  if (process.server) return;
+  // if (process.server) return;
 
-  const { me, authReady } = useMeState();
+  // const { me, authReady } = useMeState();
+
+  const {
+    state,
+    authReady,
+    isLoggedIn,
+    user,
+    entitlement,
+    hasPaidAccess,
+    isCanceling,
+    currentPeriodEnd,
+    resolve,
+  } = useMeStateV2();
 
   // ⛔ Wait until auth is resolved
   if (!authReady.value) return;
 
-  if (!canAccessLevel(levelNumber, me.value)) {
+  if (!canAccessLevel(levelNumber, entitlement.value!)) {
     return navigateTo("/upgrade/coming-soon");
   }
 });

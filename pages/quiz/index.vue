@@ -7,7 +7,11 @@ const {
   authReady,
   isLoggedIn,
   user,
-  resolve
+  entitlement,
+  hasPaidAccess,
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
 } = useMeStateV2()
 
 // Resolve auth once on mount (safe + idempotent)
@@ -60,7 +64,7 @@ const canEnterLevel = (level: any) => {
   // 🔒 Paid levels require login
   if (!isLoggedIn.value) return false
 
-  return canAccessLevel(level.number, user.value!)
+  return canAccessLevel(level.number, entitlement.value!)
 }
 
 </script>

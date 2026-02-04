@@ -25,21 +25,24 @@ export type MeState =
   | { status: "logged-in"; user: MeUser };
 
 export function useMeStateV2() {
-  const state = useState<MeState>("meState", () => ({
+  const state = useState<MeState>("meStateV2", () => ({
     status: "loading",
   }));
 
-  const resolved = useState<boolean>("meResolved", () => false);
+  const resolved = useState<boolean>("meResolvedV2", () => false);
 
-  const resolve = async (): Promise<void> => {
-    if (resolved.value) return;
+  const resolve = async ({ force = false } = {}) => {
+
+    if (resolved.value && !force) return;
+
+    resolved.value = false;
+    state.value = { status: "loading" };
+
     if (process.server) return;
 
     const auth = await useAuth();
 
-    const isAuthenticated = auth.isAuthenticated === true;
-
-    if (!isAuthenticated) {
+    if (!auth.isAuthenticated) {
       state.value = { status: "logged-out" };
       resolved.value = true;
       return;
@@ -47,12 +50,9 @@ export function useMeStateV2() {
 
     try {
       const token = await auth.getAccessToken();
-
       const user = await $fetch<MeUser>("/api/meV2", {
         headers: { Authorization: `Bearer ${token}` },
-        cache: "no-store",
       });
-
       state.value = { status: "logged-in", user };
     } catch {
       state.value = { status: "logged-out" };
