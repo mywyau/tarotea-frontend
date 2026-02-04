@@ -3,7 +3,7 @@ import WordTile from '@/components/WordTile.vue'
 import { getLevelNumber } from '@/utils/levels'
 
 definePageMeta({
-  middleware: ['level-coming-soon'],
+  middleware: ['level-access'],
   ssr: true,
 })
 

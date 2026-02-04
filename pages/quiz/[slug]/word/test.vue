@@ -168,8 +168,8 @@ watch(
           Restart Quiz
         </NuxtLink>
 
-        <NuxtLink :to="`/level/${slug}`" class="block text-sm text-gray-400 hover:underline">
-          Back to Level
+        <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
+          ← Level {{ levelNumber }} Vocab
         </NuxtLink>
       </div>
     </div>

@@ -1,16 +1,25 @@
 <script setup lang="ts">
-import { useMeState } from '@/composables/useMeState'
-import { useUpgrade } from '@/composables/useUpgrade'
+import { useUpgrade } from '@/composables/useUpgrade';
 
 definePageMeta({ layout: 'default' })
 
-const { me, authReady } = useMeState()
+const {
+  state,
+  authReady,
+  isLoggedIn,
+  user,
+  entitlement,
+  hasPaidAccess,
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
+} = useMeStateV2();
 
 const isSubscribed = computed(() =>
   authReady.value &&
-  me.value &&
-  me.value.plan !== 'free' &&
-  me.value.active === true
+  entitlement.value &&
+  entitlement.value.plan !== 'free' &&
+  entitlement.value.active === true
 )
 
 function upgrade(plan: 'monthly' | 'yearly') {
@@ -50,7 +59,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         </ul>
 
         <!-- Plans -->
-        <div class="space-y-3 pt-4">
+        <div v-if="isLoggedIn" class="space-y-3 pt-4">
           <!-- Monthly -->
           <button class="block w-full rounded-lg border border-gray-300 py-3 font-medium transition"
             :class="isSubscribed ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-50'" :disabled="isSubscribed"
@@ -64,7 +73,11 @@ function upgrade(plan: 'monthly' | 'yearly') {
             @click="upgrade('yearly')">
             Yearly plan · £59.99 · Best value
           </button>
+        </div>
 
+        <div v-if="!isLoggedIn" class="space-y-3 pt-4">
+          <!-- Monthly -->
+          <p class="text-lg text-gray-600">Please login in or sign-up and upgrade</p>
         </div>
 
         <p v-if="isSubscribed" class="text-sm text-gray-600">
@@ -77,8 +90,8 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
         <p v-if="!isSubscribed" class="text-sm text-gray-600">
           <!-- Secondary -->
-          <NuxtLink to="/levels" class="block pt-4 text-sm text-gray-500 hover:underline">
-            Continue learning without upgrading
+          <NuxtLink to="/levels" class="pt-4 text-sm text-gray-500 hover:underline">
+           ← Continue learning without upgrading
           </NuxtLink>
         </p>
 

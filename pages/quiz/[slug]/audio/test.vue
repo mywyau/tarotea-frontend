@@ -135,22 +135,12 @@ watch(
 
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
-    <section v-if="authReady && !hasAccess" class="text-center space-y-4">
-      <h1 class="text-2xl font-semibold">🔒 Quiz locked</h1>
-      <p class="text-gray-600">
-        Quizzes are part of TaroTeaMonthly or TaroTeaYearly.
-      </p>
-      <NuxtLink to="/upgrade/coming-soon" class="text-sm text-gray-400 hover:underline">
-        Upgrade to unlock
-      </NuxtLink>
-    </section>
-
     <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`" class="text-gray-500 hover:underline">
       ← Restart Quiz
     </NuxtLink>
 
     <section class="text-center space-y-4">
-      
+
       <h1 class="text-2xl font-semibold text-center">
         {{ LEVEL_TITLES[slug] ?? 'Unknown level' }}
       </h1>
@@ -189,7 +179,7 @@ watch(
       <div v-else class="text-center space-y-6">
 
         <h2 class="text-2xl font-semibold">
-          🎉 Quiz complete
+          Quiz complete
         </h2>
 
         <p class="text-gray-600">

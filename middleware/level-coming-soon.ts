@@ -12,7 +12,7 @@ export default defineNuxtRouteMiddleware((to) => {
     resolve,
   } = useMeStateV2();
 
-  if (!authReady.value) return;
+  // if (!authReady.value) return;
 
   const levelId = to.params.slug as string;
 

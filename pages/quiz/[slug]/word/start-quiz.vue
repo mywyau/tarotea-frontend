@@ -1,6 +1,9 @@
 <script setup lang="ts">
 
-import { canAccessLevel } from '@/utils/canAccessLevel'
+definePageMeta({
+  middleware: ['level-access']
+})
+
 import { getLevelNumber } from '@/utils/levels'
 
 const route = useRoute()
@@ -11,14 +14,6 @@ const levelNumber = computed(() => {
   return getLevelNumber(slug.value)
 })
 
-watchEffect(() => {
-  if (slug.value && levelNumber.value === null) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Level not found'
-    })
-  }
-})
 
 const {
   state,
@@ -32,11 +27,14 @@ const {
   resolve,
 } = useMeStateV2()
 
-const hasAccess = computed(() =>
-  authReady.value &&
-  levelNumber.value !== null &&
-  canAccessLevel(levelNumber.value, entitlement.value!)
-)
+watchEffect(() => {
+  if (slug.value && levelNumber.value === null) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Level not found'
+    })
+  }
+})
 
 </script>
 
@@ -48,7 +46,7 @@ const hasAccess = computed(() =>
     </NuxtLink>
 
     <!-- 🔒 Locked -->
-    <section v-if="authReady && !hasPaidAccess.valueOf" class="text-center space-y-4">
+    <section v-if="(authReady && !hasPaidAccess.valueOf)" class="text-center space-y-4">
       <h1 class="text-2xl font-semibold">🔒 Quiz locked</h1>
       <p class="text-gray-600">
         Quizzes are part of TaroTeaMonthly or TaroTeaYearly.

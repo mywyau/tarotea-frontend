@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { canAccessLevel } from '@/utils/canAccessLevel'
-import { getLevelNumber } from '@/utils/levels'
 
-// definePageMeta({
-//   middleware: ['level-access']
-// })
+definePageMeta({
+  middleware: ['level-access']
+})
+
+
+import { getLevelNumber } from '@/utils/levels'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string | undefined)
@@ -12,15 +13,6 @@ const slug = computed(() => route.params.slug as string | undefined)
 const levelNumber = computed(() => {
   if (!slug.value) return null
   return getLevelNumber(slug.value)
-})
-
-watchEffect(() => {
-  if (slug.value && levelNumber.value === null) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: 'Level not found'
-    })
-  }
 })
 
 const {
@@ -35,11 +27,14 @@ const {
   resolve,
 } = useMeStateV2()
 
-const hasAccess = computed(() =>
-  authReady.value &&
-  levelNumber.value !== null &&
-  canAccessLevel(levelNumber.value, entitlement.value!)
-)
+watchEffect(() => {
+  if (slug.value && levelNumber.value === null) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: 'Level not found'
+    })
+  }
+})
 
 </script>
 

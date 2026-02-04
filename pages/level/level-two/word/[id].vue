@@ -1,5 +1,10 @@
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: ['level-access'],
+  ssr: true,
+})
+
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 

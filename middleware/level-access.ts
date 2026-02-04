@@ -1,20 +1,17 @@
-export default defineNuxtRouteMiddleware(() => {
-  const route = useRoute();
-  const slug = route.params.slug as string;
+export default defineNuxtRouteMiddleware(async (to) => {
+  const slug = to.params.slug as string | undefined;
+  if (!slug) return;
 
   const levelNumber = getLevelNumber(slug);
 
   if (!levelNumber) {
     throw createError({ statusCode: 404 });
   }
-  // ✅ FREE LEVELS — always allow
-  if (levelNumber < 2) {
+
+  // ✅ Free levels always allowed
+  if (levelNumber <= 2) {
     return;
   }
-  // ⛔ Never run auth logic on server
-  // if (process.server) return;
-
-  // const { me, authReady } = useMeState();
 
   const {
     state,
@@ -28,10 +25,17 @@ export default defineNuxtRouteMiddleware(() => {
     resolve,
   } = useMeStateV2();
 
-  // ⛔ Wait until auth is resolved
-  if (!authReady.value) return;
+  // ⏳ Ensure auth is resolved before gating
+  // if (!authReady.value) {
+  //   await resolve();
+  // }
+
+  // 🔒 Block if user can't access
+  if (!canAccessLevel(levelNumber, entitlement.value!) && levelNumber > 4) {
+    return navigateTo("/upgrade/coming-soon");
+  }
 
   if (!canAccessLevel(levelNumber, entitlement.value!)) {
-    return navigateTo("/upgrade/coming-soon");
+    return navigateTo("/upgrade");
   }
 });
