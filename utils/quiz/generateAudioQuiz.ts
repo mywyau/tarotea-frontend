@@ -11,7 +11,7 @@ export type AudioQuizQuestion = {
   correctIndex: number
 }
 
-export function generateAudioQuiz(words: Word[], count = 5): AudioQuizQuestion[] {
+export function generateAudioQuiz(words: Word[], count = 20): AudioQuizQuestion[] {
   const selected = shuffle(words).slice(0, count)
 
   return selected.map(word => {
