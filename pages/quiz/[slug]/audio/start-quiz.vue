@@ -23,8 +23,6 @@ watchEffect(() => {
   }
 })
 
-// const { me, authReady } = useMeState()
-
 const {
   state,
   authReady,
@@ -48,8 +46,12 @@ const hasAccess = computed(() =>
 <template>
   <main class="max-w-xl mx-auto px-4 py-16 space-y-10">
 
+    <NuxtLink :to="`/quiz/`" class="text-gray-500 hover:underline">
+      ← All quizzes
+    </NuxtLink>
+
     <!-- 🔒 Locked -->
-    <section v-if="authReady && !hasAccess" class="text-center space-y-4">
+    <section v-if="authReady && !hasPaidAccess.valueOf" class="text-center space-y-4">
       <h1 class="text-2xl font-semibold">🔒 Quiz locked</h1>
       <p class="text-gray-600">
         Quizzes are part of TaroTeaMonthly or TaroTeaYearly.
@@ -82,13 +84,12 @@ const hasAccess = computed(() =>
         Start quiz
       </NuxtLink>
 
-      <NuxtLink :to="`/quiz/`" class="block text-gray-500 hover:underline">
-        ← All quizzes
-      </NuxtLink>
+      <div class="mt-8">
+        <NuxtLink :to="`/level/${slug}`" class="text-gray-500 hover:underline">
+          ← Level {{ levelNumber }} Vocab
+        </NuxtLink>
+      </div>
 
-      <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
-        ← Level {{ levelNumber }} Vocab
-      </NuxtLink>
 
     </section>
 

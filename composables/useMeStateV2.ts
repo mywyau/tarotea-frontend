@@ -75,9 +75,7 @@ export function useMeStateV2() {
 
   const hasPaidAccess = computed(() =>
     entitlement.value
-      ? ["active", "trialing", "past_due"].includes(
-          entitlement.value.subscription_status,
-        )
+      ? ["active", "trialing", "past_due"].includes(entitlement.value.subscription_status)
       : false,
   );
 

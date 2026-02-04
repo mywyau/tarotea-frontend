@@ -107,6 +107,10 @@ watch(
 <template>
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
+    <NuxtLink :to="`/quiz/${slug}/word/start-quiz`" class="text-gray-500 hover:underline">
+      ← Restart Quiz
+    </NuxtLink>
+
     <h1 class="text-2xl font-semibold text-center">
       {{ LEVEL_TITLES[slug] ?? 'Unknown level' }}
     </h1>
