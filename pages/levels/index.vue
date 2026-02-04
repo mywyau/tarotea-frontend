@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { useUpgrade } from '@/composables/useUpgrade'
 import { onMounted } from 'vue'
 
 const {
+  state,
   authReady,
   isLoggedIn,
   user,
-  resolve
+  entitlement,
+  hasPaidAccess,
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
 } = useMeStateV2()
 
 // Resolve auth once on mount (safe + idempotent)
@@ -15,10 +19,6 @@ onMounted(async () => {
     await resolve()
   }
 })
-
-function upgrade(billing: 'monthly' | 'yearly') {
-  useUpgrade(billing)
-}
 
 const levels = [
   {
@@ -46,7 +46,7 @@ const levels = [
     id: 'level-four',
     number: 4,
     title: 'Level 4',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Express opinions, explain situations, discuss experiences.'
   },
   {
@@ -68,6 +68,7 @@ const levels = [
 // --- helpers ---
 
 const canEnterLevel = (level: any) => {
+
   if (!authReady.value) return false
   if (level.comingSoon) return false
 
@@ -77,8 +78,9 @@ const canEnterLevel = (level: any) => {
   // Paid levels
   if (!isLoggedIn.value) return false
 
-  return canAccessLevel(level.number, user.value!)
+  return canAccessLevel(level.number, entitlement.value!)
 }
+
 </script>
 
 

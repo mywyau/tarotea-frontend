@@ -1,14 +1,24 @@
 export default defineNuxtRouteMiddleware((to) => {
-    
-  const { me, authReady } = useMeState()
 
-  if (!authReady.value) return
+  const {
+    state,
+    authReady,
+    isLoggedIn,
+    user,
+    entitlement,
+    hasPaidAccess,
+    isCanceling,
+    currentPeriodEnd,
+    resolve,
+  } = useMeStateV2();
 
-  const levelId = to.params.slug as string
+  if (!authReady.value) return;
 
-  const comingSoonLevels = ['level-four', 'level-five']
+  const levelId = to.params.slug as string;
+
+  const comingSoonLevels = ["level-five", "level-six"];
 
   if (comingSoonLevels.includes(levelId)) {
-    return navigateTo('/content-not-available')
+    return navigateTo("/content-not-available");
   }
-})
+});

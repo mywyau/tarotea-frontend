@@ -11,23 +11,30 @@ definePageMeta({
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const levelNumber = getLevelNumber(slug.value)
+const levelNumber = computed(() => getLevelNumber(slug.value))
+
 if (!levelNumber) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
 
-const { me, authReady } = useMeState()
+const {
+  state,
+  authReady,
+  isLoggedIn,
+  user,
+  entitlement,
+  hasPaidAccess,
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
+} = useMeStateV2()
 
-const hasAccess = computed(() =>
-  authReady.value && canAccessLevel(levelNumber, me.value)
-)
 
-// IMPORTANT: ensure this matches what /api/meV2 returns.
-// If /api/meV2 returns { id: "..."} you're good.
+const hasAccess = () => authReady.value && canAccessLevel(levelNumber.value, user.value)
 
 const headers = computed(() => {
-  if (!me?.id) return undefined
-  return { 'x-user-id': me.id }
+  if (!user.value?.id) return undefined
+  return { 'x-user-id': user.value?.id }
 })
 
 const { data: topic, error, pending } = await useFetch(
@@ -35,7 +42,7 @@ const { data: topic, error, pending } = await useFetch(
   {
     key: () => `index-level-${slug.value}`,
     server: false,
-    headers
+    headers,
   }
 )
 
@@ -49,13 +56,24 @@ const categories = computed(() => {
     words
   }))
 })
+
+onMounted(() => {
+  resolve() // grabs the user auth data to drive this page... we may need to rethink this
+})
+
+watchEffect(() => {
+  if (levelNumber.value === null) {
+    throw createError({ statusCode: 404, statusMessage: 'Level not found' })
+  }
+})
+
 </script>
 
 <template>
   <main class="max-w-4xl mx-auto px-4 py-12 space-y-12">
 
     <!-- 🔒 ACCESS DENIED (do NOT depend on safeTopic) -->
-    <section v-if="authReady && !hasAccess" class="text-center space-y-4">
+    <!-- <section v-if="authReady && !hasAccess" class="text-center space-y-4">
       <h1 class="text-3xl font-semibold">
         🔒 Level locked
       </h1>
@@ -69,11 +87,11 @@ const categories = computed(() => {
           Sign in and upgrade to unlock advanced levels as they’re released.
         </p>
       </div>
-    </section>
+    </section> -->
 
     <!-- ✅ ACCESS GRANTED -->
-    <template v-else>
-      <div v-if="pending" class="text-gray-600">
+    <template>
+      <div v-if="pending" class="text-black">
         Loading…
       </div>
 

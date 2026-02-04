@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
   )
 
   const ent = rows[0]
-  const isPro = ent?.plan === 'pro' && ent?.active === true
+  const isPro = ent?.plan === 'monthly' && ent?.active === true
 
   if (!isPro) {
     throw createError({ statusCode: 403, statusMessage: 'Upgrade required' })
