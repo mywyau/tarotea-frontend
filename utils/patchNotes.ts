@@ -9,7 +9,8 @@ export const patchNotes: PatchNote[] = [
     date: 'Feb 2026',
     title: 'New learning content',
     items: [
-      'Adding new level 4 vocabulary content',
+      'Adding topics placeholder for future content',
+      'Slowly adding new level 4 vocabulary - work in progress',
       'Adding level 1 sentence based exercises',
       'Auth still locked',
     ]

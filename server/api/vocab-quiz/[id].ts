@@ -10,11 +10,11 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
 
   try {
-    return await $fetch(`${cdnBase}/sentences/${id}.json`);
+    return await $fetch(`${cdnBase}/vocab-quiz/${id}.json`);
   } catch {
     throw createError({
       statusCode: 404,
-      statusMessage: "sentence set not found",
+      statusMessage: "vocab-quiz set not found",
     });
   }
 });

@@ -7,7 +7,19 @@ definePageMeta({
 import { generateQuiz } from '@/utils/quiz/generateQuiz'
 import { computed, ref } from 'vue'
 
-import { LEVEL_WORDS } from '@/utils/quiz/levels'
+type Word = {
+  id: string
+  word: string
+  jyutping: string
+  meaning: string
+}
+
+type LevelData = {
+  level: number
+  title: string
+  description: string
+  categories: Record<string, Word[]>
+}
 
 import {
   playQuizCompleteFailSong,
@@ -18,16 +30,25 @@ import {
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const wordsForLevel = computed(() => {
-  return LEVEL_WORDS[slug.value as keyof typeof LEVEL_WORDS] ?? null
+const wordsForLevel = computed<Word[]>(() => {
+  if (!data.value) return []
+
+  return Object.values(data.value.categories).flat()
 })
 
 const questions = computed(() =>
-  wordsForLevel.value
+  wordsForLevel.value.length
     ? generateQuiz(wordsForLevel.value)
     : []
 )
 
+const { data, error } = await useFetch<LevelData>(
+  () => `/api/vocab-quiz/${slug.value}`,
+  {
+    key: () => `vocab-quiz-${slug.value}`,
+    server: true
+  }
+)
 
 const current = ref(0)
 const score = ref(0)

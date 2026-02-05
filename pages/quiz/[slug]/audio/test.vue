@@ -4,10 +4,24 @@ definePageMeta({
   middleware: ['level-access']
 })
 
+type Word = {
+  id: string
+  word: string
+  jyutping: string
+  meaning: string
+}
+
+type LevelData = {
+  level: number
+  title: string
+  description: string
+  categories: Record<string, Word[]>
+}
+
+
 import { computed, ref } from 'vue'
 
 import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz'
-import { LEVEL_WORDS } from '@/utils/quiz/levels'
 
 import {
   playQuizCompleteFailSong,
@@ -20,18 +34,37 @@ const slug = computed(() => route.params.slug as string)
 
 const { stop } = useGlobalAudio()
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+const { data, error } = await useFetch<LevelData>(
+  () => `/api/vocab-quiz/${slug.value}`,
+  {
+    key: () => `audio-quiz-${slug.value}`,
+    server: true
+  }
+)
 
-const wordsForLevel = computed(() => {
-  return LEVEL_WORDS[slug.value as keyof typeof LEVEL_WORDS] ?? null
+const wordsForLevel = computed<Word[]>(() => {
+  if (!data.value) return []
+  return Object.values(data.value.categories).flat()
 })
 
 const questions = computed(() =>
-  wordsForLevel.value
+  wordsForLevel.value.length
     ? generateAudioQuiz(wordsForLevel.value)
     : []
 )
+
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
+
+// const wordsForLevel = computed(() => {
+//   return LEVEL_WORDS[slug.value as keyof typeof LEVEL_WORDS] ?? null
+// })
+
+// const questions = computed(() =>
+//   wordsForLevel.value
+//     ? generateAudioQuiz(wordsForLevel.value)
+//     : []
+// )
 
 const current = ref(0)
 const score = ref(0)
@@ -131,7 +164,8 @@ watch(
 
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
-    <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/audio/start-quiz`" class="text-gray-500 hover:underline">
+    <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/audio/start-quiz`"
+      class="text-gray-500 hover:underline">
       ← Restart Quiz
     </NuxtLink>
 
