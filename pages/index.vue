@@ -15,7 +15,7 @@ const { data: stats } = await useFetch('/api/stats', {
           {{ stats?.totalUsers ?? '—' }}
         </div>
         <div class="text-sm text-gray-500">
-          Total users ever logged in or registered
+          Total users
         </div>
       </div>
 
@@ -24,7 +24,7 @@ const { data: stats } = await useFetch('/api/stats', {
           {{ stats?.paidUsers ?? '—' }}
         </div>
         <div class="text-sm text-gray-500">
-          Active Paid learners
+          Active learners
         </div>
       </div>
 
