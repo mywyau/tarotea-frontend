@@ -27,23 +27,23 @@ function shuffle<T>(arr: T[]): T[] {
 
 const encouragingMessages = [
   "Nice work, keep going 😊",
-  "Great job, you’re making progress",
-  "Well done! Every bit of practice counts",
-  "You’re doing really well, keep it up!",
-  "That’s another step forward 👏 Great job!",
-  "Good effort! You’re building momentum",
-  "Solid work, your Cantonese is improving.",
-  "Keep going, you’re on the right track",
-  "Practice like this really pays off",
-  "Well done your consistency matters 😊",
-  "You’re getting more comfortable with this",
-  "Nice progress! Take a moment to feel it",
-  "You’re learning more than you think",
-  "Each practice makes the next one easier",
-  "Great focus, that’s how it sticks",
-  "You showed up and practiced. That matters",
-  "Another session done nicely handled",
-  "You’re building real understanding now"
+  "Great job, you’re making real progress 🌱",
+  "Well done! Every bit of practice counts ✨",
+  "You’re doing really well, keep it up 💪",
+  "That’s another step forward 👏",
+  "Good effort, you’re building momentum 🚀",
+  "Solid work, your Cantonese is improving 📈",
+  "Keep going, you’re on the right track 🧭",
+  "Practice like this really pays off 💡",
+  "Well done, consistency matters 😊",
+  "You’re getting more comfortable with this 🙂",
+  "Nice progress! Take a moment to feel it 🌸",
+  "You’re learning more than you think 🧠",
+  "Each practice makes the next one easier 🔁",
+  "Great focus, that’s how it sticks 🎯",
+  "You showed up and practiced — that’s a win 🏆",
+  "Another session done, nicely handled 👍",
+  "You’re building real understanding now 🌟"
 ]
 
 function getRandomEncouragement(messages: string[]) {
@@ -140,10 +140,12 @@ watch(
         {{ option }}
       </button>
 
-      <button v-if="currentIndex < props.sentences.length" class="w-full rounded-lg border border-gray-900 bg-gray-900
-         px-4 py-3 text-center text-white transition hover:bg-gray-800" @click="next">
-        Next →
-      </button>
+      <div class="min-h-[3.5rem]">
+        <button v-if="showResult && currentIndex < props.sentences.length" class="w-full rounded-lg border border-gray-900 bg-gray-900
+           px-4 py-3 text-center text-white transition hover:bg-gray-800" @click="next">
+          Next →
+        </button>
+      </div>
     </div>
   </div>
 
