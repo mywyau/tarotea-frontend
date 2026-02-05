@@ -66,9 +66,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Invalid signature" });
   }
 
-  // console.log("🔥 Stripe webhook received");
-  // console.log("Event type:", stripeEvent.type);
-
   switch (stripeEvent.type) {
     case "checkout.session.completed": {
       const session = stripeEvent.data.object as Stripe.Checkout.Session;

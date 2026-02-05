@@ -46,7 +46,7 @@ const levels = [
     id: 'level-four',
     number: 4,
     title: 'Level 4',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Express opinions, explain situations, discuss experiences.'
   },
   {
