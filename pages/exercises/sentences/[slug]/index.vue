@@ -99,15 +99,8 @@ const allSentences = computed(() =>
     </NuxtLink> -->
 
     <NuxtLink :to="`/coming-soon`" class="text-sm text-gray-500 hover:underline">
-      ← Back to sentence exercises
+      ← Back to all exercises
     </NuxtLink>
-
-    <!-- Header -->
-    <!-- <header class="text-center space-y-3">
-      <h1 class="text-3xl font-semibold">
-        Sentence Practice
-      </h1>
-    </header> -->
 
     <!-- Exercise -->
     <SentenceMeaningExercise :key="quizKey" :sentences="sessionSentences" :all-sentences="allSentences" />
