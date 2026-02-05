@@ -55,10 +55,6 @@ const {
 
 const levelNumber = getLevelNumber(slug.value)
 
-const hasAccess = computed(() =>
-  canAccessLevel(levelNumber, entitlement.value!)
-)
-
 const LEVEL_TITLES: Record<string, string> = {
   'level-one': 'Level 1',
   'level-two': 'Level 2',
