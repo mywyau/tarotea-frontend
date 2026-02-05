@@ -37,8 +37,9 @@ async function handleLogout() {
 
       <nav class="hidden md:flex items-center gap-6">
 
-        <NuxtLink to="/exercises/sentences/level-one" class="nav-link hover:text-gray-600">Exercises</NuxtLink>
+        <NuxtLink to="/topics" class="nav-link hover:text-gray-600">Topics</NuxtLink>
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
+        <NuxtLink to="/exercises/sentences/level-one" class="nav-link hover:text-gray-600">Exercises</NuxtLink>
         <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Quiz</NuxtLink>
         <!-- Wait until auth is resolved -->
         <template v-if="!authReady">
@@ -90,16 +91,16 @@ async function handleLogout() {
       <div class="border-t pt-2"></div>
 
       <div>
-        <NuxtLink to="/exercises/sentences/level-one" class="mobile-primary">
-          Exercises
+        <NuxtLink to="/levels" class="mobile-primary" @click="mobileOpen = false">
+          Levels
         </NuxtLink>
       </div>
 
       <div class="border-t pt-2"></div>
 
       <div>
-        <NuxtLink to="/levels" class="mobile-primary" @click="mobileOpen = false">
-          Levels
+        <NuxtLink to="/exercises/sentences/level-one" class="mobile-primary">
+          Exercises
         </NuxtLink>
       </div>
 
