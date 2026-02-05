@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
 
 const {
     authReady,
@@ -11,12 +10,47 @@ const {
     resolve
 } = useMeStateV2()
 
-// Resolve auth once on mount
-// onMounted(async () => {
-//     if (!authReady.value) {
-//         await resolve()
-//     }
-// })
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const deleting = ref(false)
+
+async function deleteAccount() {
+    if (!isLoggedIn.value) return
+
+    const confirmed = window.confirm(
+        'This will permanently delete your account and all data. This cannot be undone.\n\nDo you want to continue?'
+    )
+
+    if (!confirmed) return
+
+    deleting.value = true
+
+    try {
+        const auth = await useAuth()
+        const token = await auth.getAccessToken()
+
+        await $fetch('/api/account', {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+
+        // Auth0 session is gone anyway, but be explicit
+        await auth.client?.logout({
+            logoutParams: {
+                returnTo: window.location.origin
+            }
+        })
+    } catch (err) {
+        console.error('Account deletion failed', err)
+        alert('Something went wrong deleting your account. Please try again.')
+    } finally {
+        deleting.value = false
+    }
+}
 
 async function openBillingPortal() {
     // Extra guard (defensive, but nice)
@@ -92,6 +126,23 @@ async function openBillingPortal() {
                 class="bg-black rounded-lg text-white block text-center py-3 font-medium hover:bg-gray-800 transition">
                 Upgrade plan
             </NuxtLink>
+
+            <!-- Danger zone -->
+            <div class="border border-red-200 rounded-lg p-4 space-y-3">
+                <p class="text-sm font-medium text-red-700">
+                    Danger zone
+                </p>
+
+                <p class="text-sm text-red-600">
+                    Deleting your account permanently removes your data and subscription.
+                    If you sign in again, a new account will be created.
+                </p>
+
+                <button class="w-full rounded-lg border border-red-500 text-red-600 py-3 font-medium
+           hover:bg-red-50 transition disabled:opacity-50" :disabled="deleting" @click="deleteAccount">
+                    {{ deleting ? 'Deleting account…' : 'Delete account' }}
+                </button>
+            </div>
 
         </div>
 

@@ -9,6 +9,7 @@ type PostLoginBody = {
 }
 
 export default defineEventHandler(async (event) => {
+  
   const body = await readBody<PostLoginBody>(event)
 
   if (!body?.sub || !body?.email) {
