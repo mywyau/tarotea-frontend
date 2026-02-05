@@ -151,9 +151,7 @@ watch(
 
   <!-- Done -->
   <div v-else class="text-center">
-    <!-- <h2 class="text-2xl font-semibold">Nice work</h2> -->
-    <!-- <p class="mt-4 text-gray-500 mt-2">You’ve finished 20 questions</p> -->
-
+    
     <!-- Uses css styling -->
     <div class="mt-4 min-h-[2rem]">
       <Transition name="fade">
