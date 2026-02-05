@@ -50,12 +50,12 @@ function selectOption(option: string) {
   } else {
     playIncorrectJingle()
   }
+}
 
-  setTimeout(() => {
-    selected.value = null
-    showResult.value = false
-    currentIndex.value++
-  }, 900)
+function next() {
+  selected.value = null
+  showResult.value = false
+  currentIndex.value++
 }
 
 const isCorrect = computed(() => {
@@ -64,6 +64,7 @@ const isCorrect = computed(() => {
 </script>
 
 <template>
+
   <div v-if="currentSentence" class="max-w-xl mx-auto space-y-8">
 
     <!-- Prompt -->
@@ -76,48 +77,24 @@ const isCorrect = computed(() => {
 
     <!-- Options -->
     <div class="grid gap-3">
-      <button v-for="option in options" :key="option" class="rounded-lg border px-4 py-3 text-left transition
+      <button v-for="option in options" :disabled="showResult" :key="option" class="rounded-lg border px-4 py-3 text-left transition disabled:opacity-60 disabled:cursor-not-allowed
                hover:bg-gray-50" :class="{
-                'border-green-500 bg-green-50': showResult && option === currentSentence.meaning,
-                'border-red-500 bg-red-50 animate-shake': showResult && option === selected && !isCorrect
+                'bg-green-100': showResult && option === currentSentence.meaning,
+                'bg-red-100 animate-shake': showResult && option === selected && !isCorrect
               }" @click="selectOption(option)">
         {{ option }}
       </button>
-    </div>
 
+      <button v-if="showResult" class="w-full rounded-lg border border-gray-900 bg-gray-900
+         px-4 py-3 text-center text-white transition hover:bg-gray-800" @click="next">
+        Next →
+      </button>
+    </div>
   </div>
 
   <!-- Done -->
-  <div v-else class="text-center py-20">
+  <div v-else class="text-center">
     <h2 class="text-2xl font-semibold">Nice work</h2>
     <p class="text-gray-500 mt-2">You’ve finished this set.</p>
   </div>
 </template>
-
-<style scoped>
-@keyframes shake {
-  0% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-4px);
-  }
-
-  50% {
-    transform: translateX(4px);
-  }
-
-  75% {
-    transform: translateX(-4px);
-  }
-
-  100% {
-    transform: translateX(0);
-  }
-}
-
-.animate-shake {
-  animation: shake 0.3s;
-}
-</style>

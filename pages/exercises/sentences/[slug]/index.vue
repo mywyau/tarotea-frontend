@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-definePageMeta({
-  middleware: ['coming-soon'],
-  ssr: true,
-})
+// definePageMeta({
+//   middleware: ['coming-soon'],
+//   ssr: true,
+// })
 
 import SentenceMeaningExercise from '@/components/SentenceMeaningExercise.vue'
 import { getLevelNumber } from '@/utils/levels'
