@@ -10,7 +10,7 @@ export function isFreeLevel(level: number) {
   return level <= 2;
 }
 
-export function canAccessLevel(level: number, entitlement: Entitlement): boolean {
+export function canAccessLevel(entitlement: Entitlement): boolean {
   if (!entitlement) return false;
   return hasPaidAccess(entitlement);
 }

@@ -78,7 +78,7 @@ const canEnterLevel = (level: any) => {
   // Paid levels
   if (!isLoggedIn.value) return false
 
-  return canAccessLevel(level.number, entitlement.value!)
+  return canAccessLevel(entitlement.value!)
 }
 
 </script>
