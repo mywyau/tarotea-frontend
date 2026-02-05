@@ -82,7 +82,17 @@ async function handleLogout() {
       <!-- Primary nav -->
 
       <div>
-        <NuxtLink to="/exercises/sentences/level-one" class="mobile-primary">Exercises</NuxtLink>
+        <NuxtLink to="/topics" class="mobile-primary">
+          Topics
+        </NuxtLink>
+      </div>
+
+      <div class="border-t pt-2"></div>
+
+      <div>
+        <NuxtLink to="/exercises/sentences/level-one" class="mobile-primary">
+          Exercises
+        </NuxtLink>
       </div>
 
       <div class="border-t pt-2"></div>
