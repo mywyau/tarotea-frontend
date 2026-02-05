@@ -25,6 +25,35 @@ function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5)
 }
 
+const encouragingMessages = [
+  "Nice work, keep going 😊",
+  "Great job, you’re making progress",
+  "Well done! Every bit of practice counts",
+  "You’re doing really well, keep it up!",
+  "That’s another step forward 👏 Great job!",
+  "Good effort! You’re building momentum",
+  "Solid work, your Cantonese is improving.",
+  "Keep going, you’re on the right track",
+  "Practice like this really pays off",
+  "Well done your consistency matters 😊",
+  "You’re getting more comfortable with this",
+  "Nice progress! Take a moment to feel it",
+  "You’re learning more than you think",
+  "Each practice makes the next one easier",
+  "Great focus, that’s how it sticks",
+  "You showed up and practiced. That matters",
+  "Another session done nicely handled",
+  "You’re building real understanding now"
+]
+
+function getRandomEncouragement(messages: string[]) {
+  return messages[Math.floor(Math.random() * messages.length)]
+}
+
+const encouragement = computed(() =>
+  getRandomEncouragement(encouragingMessages)
+)
+
 const options = computed(() => {
   if (!currentSentence.value) return []
 
@@ -61,6 +90,25 @@ function next() {
 const isCorrect = computed(() => {
   return selected.value === currentSentence.value?.meaning
 })
+
+const progressText = computed(() => {
+  return `${currentIndex.value + 1} / ${props.sentences.length}`
+})
+
+const showEncouragement = ref(false)
+
+watch(
+  () => currentIndex.value,
+  (i) => {
+    if (i >= props.sentences.length) {
+      setTimeout(() => {
+        showEncouragement.value = true
+      }, 300)
+    }
+  }
+)
+
+
 </script>
 
 <template>
@@ -70,10 +118,17 @@ const isCorrect = computed(() => {
     <!-- Prompt -->
     <div class="text-center space-y-2">
       <p class="text text-gray-500">What does this sentence mean?</p>
-      <div class="text-3xl font-medium">
-        {{ currentSentence.text }}
+
+      <div class="text-center space-y-1">
+        <p class="text-sm text-gray-400">
+          {{ progressText }}
+        </p>
+        <div class="text-3xl font-medium">
+          {{ currentSentence.text }}
+        </div>
       </div>
     </div>
+
 
     <!-- Options -->
     <div class="grid gap-3">
@@ -85,7 +140,7 @@ const isCorrect = computed(() => {
         {{ option }}
       </button>
 
-      <button v-if="showResult" class="w-full rounded-lg border border-gray-900 bg-gray-900
+      <button v-if="currentIndex < props.sentences.length" class="w-full rounded-lg border border-gray-900 bg-gray-900
          px-4 py-3 text-center text-white transition hover:bg-gray-800" @click="next">
         Next →
       </button>
@@ -94,7 +149,28 @@ const isCorrect = computed(() => {
 
   <!-- Done -->
   <div v-else class="text-center">
-    <h2 class="text-2xl font-semibold">Nice work</h2>
-    <p class="text-gray-500 mt-2">You’ve finished this set.</p>
+    <!-- <h2 class="text-2xl font-semibold">Nice work</h2> -->
+    <!-- <p class="mt-4 text-gray-500 mt-2">You’ve finished 20 questions</p> -->
+
+    <!-- Uses css styling -->
+    <div class="mt-4 min-h-[2rem]">
+      <Transition name="fade">
+        <p v-if="showEncouragement" class="text-2xl text-black">
+          {{ encouragement }}
+        </p>
+      </Transition>
+    </div>
+
   </div>
 </template>
+
+
+<style scoped>
+.fade-enter-active {
+  transition: opacity 4s ease;
+}
+
+.fade-enter-from {
+  opacity: 0;
+}
+</style>
