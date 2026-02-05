@@ -23,32 +23,48 @@ onMounted(async () => {
 
 const quizLevels = [
   {
-    id: 'level-one', number: 1, title: 'Level 1', comingSoon: false,
+    id: 'level-one',
+    number: 1,
+    title: 'Level 1',
+    comingSoon: false,
     description: 'Foundation vocabulary: identity, actions, daily life, and simple needs.'
   },
   {
-    id: 'level-two', number: 2, title: 'Level 2', comingSoon: false,
+    id: 'level-two',
+    number: 2,
+    title: 'Level 2',
+    comingSoon: false,
     description: 'Daily situations, intentions, feelings, and simple reasoning.'
   },
   {
-    id: 'level-three', number: 3, title: 'Level 3', comingSoon: false,
-    description: 'Expressing thoughts, reasons, and everyday abstract concepts naturally.'
+    id: 'level-three',
+    number: 3,
+    title: 'Level 3',
+    comingSoon: false,
+    description: 'Intermediate Cantonese, expressing thoughts and reasons naturally.'
   },
   {
-    id: 'level-four', number: 4, title: 'Level 4', comingSoon: true,
-    description: 'Express opinions, explain situations, discuss experiences, and handle real-life problems.'
+    id: 'level-four',
+    number: 4,
+    title: 'Level 4',
+    comingSoon: true,
+    description: 'Express opinions, explain situations, discuss experiences.'
   },
   {
-    id: 'level-five', number: 5, title: 'Level 5', comingSoon: true,
-    description: 'Handle work situations, services, expectations, and real-life responsibilities.'
+    id: 'level-five',
+    number: 5,
+    title: 'Level 5',
+    comingSoon: true,
+    description: 'Handle work situations, services, and expectations.'
   },
   {
-    id: 'level-six', number: 6, title: 'Level 6', comingSoon: true,
-    description: 'Tell stories, describe past experiences, and explain events clearly and naturally in spoken Cantonese.'
-  }
+    id: 'level-six',
+    number: 6,
+    title: 'Level 6',
+    comingSoon: true,
+    description: 'Tell stories and describe past experiences naturally.'
+  },
 ]
-
-// --- helpers ---
 
 const isComingSoon = (level: any) => level.comingSoon === true
 
