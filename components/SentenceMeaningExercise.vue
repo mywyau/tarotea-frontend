@@ -25,6 +25,35 @@ function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5)
 }
 
+const encouragingMessages = [
+  "Nice work, keep going 😊",
+  "Great job, you’re making real progress 🌱",
+  "Well done! Every bit of practice counts ✨",
+  "You’re doing really well, keep it up 💪",
+  "That’s another step forward 👏",
+  "Good effort, you’re building momentum 🚀",
+  "Solid work, your Cantonese is improving 📈",
+  "Keep going, you’re on the right track 🧭",
+  "Practice like this really pays off 💡",
+  "Well done, consistency matters 😊",
+  "You’re getting more comfortable with this 🙂",
+  "Nice progress! Take a moment to feel it 🌸",
+  "You’re learning more than you think 🧠",
+  "Each practice makes the next one easier 🔁",
+  "Great focus, that’s how it sticks 🎯",
+  "You showed up and practiced — that’s a win 🏆",
+  "Another session done, nicely handled 👍",
+  "You’re building real understanding now 🌟"
+]
+
+function getRandomEncouragement(messages: string[]) {
+  return messages[Math.floor(Math.random() * messages.length)]
+}
+
+const encouragement = computed(() =>
+  getRandomEncouragement(encouragingMessages)
+)
+
 const options = computed(() => {
   if (!currentSentence.value) return []
 
@@ -50,74 +79,98 @@ function selectOption(option: string) {
   } else {
     playIncorrectJingle()
   }
+}
 
-  setTimeout(() => {
-    selected.value = null
-    showResult.value = false
-    currentIndex.value++
-  }, 900)
+function next() {
+  selected.value = null
+  showResult.value = false
+  currentIndex.value++
 }
 
 const isCorrect = computed(() => {
   return selected.value === currentSentence.value?.meaning
 })
+
+const progressText = computed(() => {
+  return `${currentIndex.value + 1} / ${props.sentences.length}`
+})
+
+const showEncouragement = ref(false)
+
+watch(
+  () => currentIndex.value,
+  (i) => {
+    if (i >= props.sentences.length) {
+      setTimeout(() => {
+        showEncouragement.value = true
+      }, 300)
+    }
+  }
+)
+
+
 </script>
 
 <template>
+
   <div v-if="currentSentence" class="max-w-xl mx-auto space-y-8">
 
     <!-- Prompt -->
     <div class="text-center space-y-2">
       <p class="text text-gray-500">What does this sentence mean?</p>
-      <div class="text-3xl font-medium">
-        {{ currentSentence.text }}
+
+      <div class="text-center space-y-1">
+        <p class="text-sm text-gray-400">
+          {{ progressText }}
+        </p>
+        <div class="text-3xl font-medium">
+          {{ currentSentence.text }}
+        </div>
       </div>
     </div>
 
+
     <!-- Options -->
     <div class="grid gap-3">
-      <button v-for="option in options" :key="option" class="rounded-lg border px-4 py-3 text-left transition
+      <button v-for="option in options" :disabled="showResult" :key="option" class="rounded-lg border px-4 py-3 text-left transition disabled:opacity-60 disabled:cursor-not-allowed
                hover:bg-gray-50" :class="{
-                'border-green-500 bg-green-50': showResult && option === currentSentence.meaning,
-                'border-red-500 bg-red-50 animate-shake': showResult && option === selected && !isCorrect
+                'bg-green-100': showResult && option === currentSentence.meaning,
+                'bg-red-100 animate-shake': showResult && option === selected && !isCorrect
               }" @click="selectOption(option)">
         {{ option }}
       </button>
-    </div>
 
+      <div class="min-h-[3.5rem]">
+        <button v-if="showResult && currentIndex < props.sentences.length" class="w-full rounded-lg border border-gray-900 bg-gray-900
+           px-4 py-3 text-center text-white transition hover:bg-gray-800" @click="next">
+          Next →
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Done -->
-  <div v-else class="text-center py-20">
-    <h2 class="text-2xl font-semibold">Nice work</h2>
-    <p class="text-gray-500 mt-2">You’ve finished this set.</p>
+  <div v-else class="text-center">
+    
+    <!-- Uses css styling -->
+    <div class="mt-4 min-h-[2rem]">
+      <Transition name="fade">
+        <p v-if="showEncouragement" class="text-2xl text-black">
+          {{ encouragement }}
+        </p>
+      </Transition>
+    </div>
+
   </div>
 </template>
 
+
 <style scoped>
-@keyframes shake {
-  0% {
-    transform: translateX(0);
-  }
-
-  25% {
-    transform: translateX(-4px);
-  }
-
-  50% {
-    transform: translateX(4px);
-  }
-
-  75% {
-    transform: translateX(-4px);
-  }
-
-  100% {
-    transform: translateX(0);
-  }
+.fade-enter-active {
+  transition: opacity 4s ease;
 }
 
-.animate-shake {
-  animation: shake 0.3s;
+.fade-enter-from {
+  opacity: 0;
 }
 </style>

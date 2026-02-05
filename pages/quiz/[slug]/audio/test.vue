@@ -162,7 +162,7 @@ watch(
             {
               'bg-green-100':
                 answered && i === question.correctIndex,
-              'bg-red-100':
+              'bg-red-100 animate-shake':
                 answered && i === selectedIndex && i !== question.correctIndex
             }
           ]" @click="answer(i)">

@@ -1,5 +1,6 @@
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
+
   if (!id) {
     throw createError({ statusCode: 400, statusMessage: "Missing id" });
   }
@@ -9,11 +10,12 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
 
   try {
-    return await $fetch(`${cdnBase}/words/${id}.json`);
+    console.log(`${cdnBase}/sentences/${id}.json`)
+    return await $fetch(`${cdnBase}/sentences/${id}.json`);
   } catch {
     throw createError({
       statusCode: 404,
-      statusMessage: "Word not found",
+      statusMessage: "sentence set not found",
     });
   }
 });
