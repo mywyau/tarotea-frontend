@@ -41,9 +41,9 @@ const topics = [
   },
   {
     id: 'clothing',
-    title: 'Slang',
+    title: 'Clothing',
     comingSoon: true,
-    description: 'Learn slang used in everyday life and in real situations.'
+    description: 'Name and describe items of clothing.'
   },
   {
     id: 'measurements',
