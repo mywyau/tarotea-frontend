@@ -43,7 +43,7 @@ const { data, error } = await useFetch(
   }
 )
 
-const QUESTIONS_PER_SESSION = 5
+const QUESTIONS_PER_SESSION = 20
 
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5)
