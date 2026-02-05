@@ -40,7 +40,6 @@ async function handleLogout() {
         <NuxtLink to="/exercises/sentences/level-one" class="nav-link hover:text-gray-600">Exercises</NuxtLink>
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
         <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Quiz</NuxtLink>
-
         <!-- Wait until auth is resolved -->
         <template v-if="!authReady">
           <span class="text-gray-400">…</span>
@@ -82,13 +81,13 @@ async function handleLogout() {
     <div v-if="mobileOpen" class="md:hidden border-t bg-white px-4 py-5 space-y-4">
       <!-- Primary nav -->
 
-      <div class="">
+      <div>
         <NuxtLink to="/exercises/sentences/level-one" class="mobile-primary">Exercises</NuxtLink>
       </div>
 
       <div class="border-t pt-2"></div>
 
-      <div class="">
+      <div>
         <NuxtLink to="/levels" class="mobile-primary" @click="mobileOpen = false">
           Levels
         </NuxtLink>
@@ -96,7 +95,7 @@ async function handleLogout() {
 
       <div class="border-t pt-2"></div>
 
-      <div class="">
+      <div>
         <NuxtLink to="/quiz" class="mobile-primary" @click="mobileOpen = false">
           Quiz
         </NuxtLink>

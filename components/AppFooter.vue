@@ -23,6 +23,10 @@
                     <NuxtLink to="/terms-of-service" class="hover:underline">
                         Terms of Service
                     </NuxtLink>
+
+                    <NuxtLink to="/patch-notes" class="hover:underline">
+                        Patch Notes
+                    </NuxtLink>
                 </div>
             </div>
 
