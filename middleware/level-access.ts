@@ -31,11 +31,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // }
 
   // 🔒 Block if user can't access
-  if (!canAccessLevel(levelNumber, entitlement.value!) && levelNumber > 4) {
+  if (!canAccessLevel(entitlement.value!) && levelNumber > 4) {
     return navigateTo("/coming-soon");
   }
 
-  if (!canAccessLevel(levelNumber, entitlement.value!)) {
+  if (!canAccessLevel(entitlement.value!)) {
     return navigateTo("/upgrade");
   }
 });
