@@ -8,6 +8,7 @@ export type SessionUser = {
   stripeCustomerId?: string | null;
   plan?: string | null;
   subscriptionStatus?: string | null;
+  deletingAt?: string | null;
   cancelAtPeriodEnd?: boolean | null;
 };
 
@@ -43,9 +44,9 @@ export async function getUserFromSession(
       u.id,
       u.email,
       u.stripe_customer_id,
+      u.deleting_at,
       e.plan,
-      e.subscription_status,
-      e.cancel_at_period_end
+      e.subscription_status
     FROM users u
     LEFT JOIN entitlements e ON e.user_id = u.id
     WHERE u.id = $1
@@ -62,6 +63,6 @@ export async function getUserFromSession(
     stripeCustomerId: row.stripe_customer_id,
     plan: row.plan,
     subscriptionStatus: row.subscription_status,
-    cancelAtPeriodEnd: row.cancel_at_period_end,
+    deletingAt: row.deleting_at,
   };
 }
