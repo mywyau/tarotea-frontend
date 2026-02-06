@@ -27,6 +27,10 @@
                     <NuxtLink to="/patch-notes" class="hover:underline">
                         Patch Notes
                     </NuxtLink>
+
+                    <NuxtLink to="/contact" class="hover:underline">
+                        Contact
+                    </NuxtLink>
                 </div>
             </div>
 

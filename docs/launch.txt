@@ -138,3 +138,13 @@ PHILOSOPHY REMINDER
 - Respect user data
 - Ship improvements incrementally
 - Avoid premature complexity
+
+
+[ ] Domain email (support@, billing@)
+[ ] Stripe branding + email sender
+[ ] Auth0 email sender + templates
+[ ] About / Contact / Privacy / Terms pages
+[ ] Neutral product voice (no personal language)
+[ ] Clean error messages
+[ ] Footer with links
+[ ] Support auto-reply
