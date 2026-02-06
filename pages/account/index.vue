@@ -168,9 +168,6 @@ async function openBillingPortal() {
 
             <!-- Danger zone -->
             <div class="border border-red-200 rounded-lg p-4 space-y-4">
-                <p class="text-sm font-medium text-red-700">
-                    Danger zone
-                </p>
 
                 <p class="text-sm text-red-600">
                     Deleting your account permanently removes your data and subscription.
@@ -182,12 +179,12 @@ async function openBillingPortal() {
                         Type <span class="font-mono font-semibold">delete</span> to confirm
                     </label>
 
-                    <input v-model="deleteConfirmInput" type="text" placeholder="delete" class="w-full rounded-lg border px-3 py-2 text-sm
-             focus:outline-none focus:ring-2 focus:ring-red-400" />
+                    <input v-model="deleteConfirmInput" type="text" placeholder="delete"
+                        class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400" />
                 </div>
 
-                <button class="w-full rounded-lg border border-red-500 text-red-600 py-3 font-medium
-           hover:bg-red-50 transition disabled:opacity-50"
+                <button
+                    class="w-full rounded-lg border border-red-500 text-red-600 py-3 font-medium hover:bg-red-50 transition disabled:opacity-50"
                     :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'" @click="deleteAccount">
                     {{ deleting ? 'Deleting account…' : 'Delete account' }}
                 </button>
