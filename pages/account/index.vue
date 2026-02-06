@@ -17,42 +17,6 @@ const router = useRouter()
 const deleting = ref(false)
 const deleteConfirmInput = ref('')
 
-// async function deleteAccount() {
-//     if (!isLoggedIn.value) return
-
-//     const confirmed = window.confirm(
-//         'This will permanently delete your account and all data. This cannot be undone.\n\nDo you want to continue?'
-//     )
-
-//     if (!confirmed) return
-
-//     deleting.value = true
-
-//     try {
-//         const auth = await useAuth()
-//         const token = await auth.getAccessToken()
-
-//         await $fetch('/api/account', {
-//             method: 'DELETE',
-//             headers: {
-//                 Authorization: `Bearer ${token}`
-//             }
-//         })
-
-//         // Auth0 session is gone anyway, but be explicit
-//         await auth.client?.logout({
-//             logoutParams: {
-//                 returnTo: window.location.origin
-//             }
-//         })
-//     } catch (err) {
-//         console.error('Account deletion failed', err)
-//         alert('Something went wrong deleting your account. Please try again.')
-//     } finally {
-//         deleting.value = false
-//     }
-// }
-
 async function deleteAccount() {
     if (!isLoggedIn.value) return
     if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return

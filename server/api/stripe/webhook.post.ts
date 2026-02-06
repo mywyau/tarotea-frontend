@@ -19,7 +19,6 @@ interface Entitlement {
 }
 
 function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
-
   const item = sub.items?.data?.[0];
 
   const active =
@@ -69,21 +68,13 @@ export default defineEventHandler(async (event) => {
   switch (stripeEvent.type) {
     case "checkout.session.completed": {
       const session = stripeEvent.data.object as Stripe.Checkout.Session;
-      const userId = session.client_reference_id ?? session.metadata?.userId;
 
+      const userId = session.client_reference_id;
       const customerId =
         typeof session.customer === "string" ? session.customer : null;
 
-      if (!userId || !customerId) {
-        console.error("Checkout missing data", {
-          sessionId: session.id,
-          userId,
-          customerId,
-        });
-        break;
-      }
+      if (!userId || !customerId) break;
 
-      // ✅ Link Stripe customer to user
       await db.query(
         `
           update users
@@ -99,21 +90,82 @@ export default defineEventHandler(async (event) => {
     case "customer.subscription.updated": {
       const sub = stripeEvent.data.object as Stripe.Subscription;
 
-      const customerId = typeof sub.customer === "string" ? sub.customer : null;
+      const userId = sub.metadata?.userId;
 
-      if (!customerId) break;
-
-      const userRes = await db.query(
-        `select id from users where stripe_customer_id = $1`,
-        [customerId],
-      );
-
-      if (userRes.rowCount === 0) {
-        console.error("No user for Stripe customer", customerId);
+      if (!userId) {
+        console.error("Subscription missing userId metadata", sub.id);
         break;
       }
 
-      const userId = userRes.rows[0].id;
+      const e = entitlementFromSubscription(sub);
+
+      await db.query(
+        `
+          update entitlements
+          set
+            plan = $1,
+            subscription_status = $2,
+            cancel_at_period_end = $3,
+            current_period_end = $4,
+            canceled_at = $5
+          where user_id = $6
+        `,
+        [
+          e.plan,
+          e.subscription_status,
+          e.cancel_at_period_end,
+          e.current_period_end,
+          e.canceled_at,
+          userId,
+        ],
+      );
+
+      return { received: true };
+    }
+    case "customer.subscription.deleted": {
+      const sub = stripeEvent.data.object as Stripe.Subscription;
+
+      const userId = sub.metadata?.userId;
+
+      if (!userId) {
+        console.error("Subscription missing userId metadata", sub.id);
+        break;
+      }
+
+      await db.query(
+        `
+          update entitlements
+          set
+            plan = 'free',
+            subscription_status = 'canceled',
+            active = true,
+            cancel_at_period_end = false,
+            current_period_end = null,
+            canceled_at = now()
+          where user_id = $1
+        `,
+        [userId],
+      );
+
+      return { received: true };
+    }
+    case "invoice.paid": {
+      // this is the event when stripe finishes and fires a status which is "active" or not
+      // subscription updated will often be set to "incomplete"
+
+      const invoice = stripeEvent.data.object as Stripe.Invoice;
+
+      const subId =
+        typeof invoice.subscription === "string" ? invoice.subscription : null;
+
+      if (!subId) break;
+
+      const sub = await stripe.subscriptions.retrieve(subId);
+
+      if (sub.status === "canceled") break;
+
+      const userId = sub.metadata?.userId;
+      if (!userId) break;
 
       const e = entitlementFromSubscription(sub);
 
@@ -132,7 +184,7 @@ export default defineEventHandler(async (event) => {
         [
           e.plan,
           e.subscription_status,
-          e.active,
+          true, // 👈 FORCE ACTIVE ON PAYMENT
           e.cancel_at_period_end,
           e.current_period_end,
           e.canceled_at,
@@ -142,37 +194,20 @@ export default defineEventHandler(async (event) => {
 
       return { received: true };
     }
-    case "customer.subscription.deleted": {
-      const sub = stripeEvent.data.object as Stripe.Subscription;
-      const customerId = typeof sub.customer === "string" ? sub.customer : null;
+    case "invoice.payment_failed": {
+      const invoice = stripeEvent.data.object as Stripe.Invoice;
+      const subId =
+        typeof invoice.subscription === "string" ? invoice.subscription : null;
+      if (!subId) break;
 
-      if (!customerId) {
-        console.error("Deleted subscription missing customer");
-        break;
-      }
-
-      const userRes = await db.query(
-        `select id from users where stripe_customer_id = $1`,
-        [customerId],
-      );
-
-      if (userRes.rowCount === 0) {
-        console.error("No user for Stripe customer", customerId);
-        break;
-      }
-
-      const userId = userRes.rows[0].id;
+      const sub = await stripe.subscriptions.retrieve(subId);
+      const userId = sub.metadata?.userId;
+      if (!userId) break;
 
       await db.query(
         `
           update entitlements
-          set
-            plan = 'free',
-            subscription_status = 'canceled',
-            active = false,
-            cancel_at_period_end = false,
-            current_period_end = null,
-            canceled_at = now()
+          set active = false
           where user_id = $1
         `,
         [userId],

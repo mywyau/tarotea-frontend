@@ -1,6 +1,7 @@
 import { db } from '~/server/db'
 
 export async function deleteUserData(userId: string) {
+  
   await db.query('BEGIN')
 
   try {
