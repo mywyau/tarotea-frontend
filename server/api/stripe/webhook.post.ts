@@ -26,11 +26,16 @@ function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
     sub.status === "trialing" ||
     sub.status === "past_due";
 
+  // 👇 Stripe-safe interpretation
+  const cancelAtPeriodEnd =
+    sub.cancel_at_period_end ||
+    (sub.cancel_at && sub.cancel_at * 1000 > Date.now());
+
   return {
     plan: (sub.metadata.plan as "monthly" | "yearly") ?? "free",
     subscription_status: sub.status as SubscriptionStatus,
     active,
-    cancel_at_period_end: sub.cancel_at_period_end ?? false,
+    cancel_at_period_end: Boolean(cancelAtPeriodEnd),
 
     ...(item?.current_period_end && {
       current_period_end: new Date(
@@ -138,7 +143,7 @@ export default defineEventHandler(async (event) => {
           set
             plan = 'free',
             subscription_status = 'canceled',
-            active = true,
+            active = false,
             cancel_at_period_end = false,
             current_period_end = null,
             canceled_at = now()
