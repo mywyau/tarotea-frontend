@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
 
 const {
     authReady,
@@ -11,12 +10,50 @@ const {
     resolve
 } = useMeStateV2()
 
-// Resolve auth once on mount
-// onMounted(async () => {
-//     if (!authReady.value) {
-//         await resolve()
-//     }
-// })
+
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const deleting = ref(false)
+const deleteConfirmInput = ref('')
+
+async function deleteAccount() {
+    if (!isLoggedIn.value) return
+    if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
+
+    deleting.value = true
+
+    try {
+        const auth = await useAuth()
+        const token = await auth.getAccessToken()
+
+        await $fetch('/api/account', {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: {
+                confirm: 'DELETE'
+            }
+        })
+
+        await auth.client?.logout({
+            logoutParams: {
+                returnTo: window.location.origin
+            }
+        })
+    } catch (err: any) {
+        console.error('Account deletion failed', err)
+        alert(
+            err?.data?.statusMessage ??
+            'Something went wrong deleting your account. Please try again.'
+        )
+    } finally {
+        deleting.value = false
+        deleteConfirmInput.value = ''
+    }
+}
+
 
 async function openBillingPortal() {
     // Extra guard (defensive, but nice)
@@ -92,6 +129,31 @@ async function openBillingPortal() {
                 class="bg-black rounded-lg text-white block text-center py-3 font-medium hover:bg-gray-800 transition">
                 Upgrade plan
             </NuxtLink>
+
+            <!-- Danger zone -->
+            <div class="border border-red-200 rounded-lg p-4 space-y-4">
+
+                <p class="text-sm text-red-600">
+                    Deleting your account permanently removes your data and subscription.
+                    This action cannot be undone.
+                </p>
+
+                <div class="space-y-2">
+                    <label class="block text-sm text-gray-700">
+                        Type <span class="font-mono font-semibold">delete</span> to confirm
+                    </label>
+
+                    <input v-model="deleteConfirmInput" type="text" placeholder="delete"
+                        class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400" />
+                </div>
+
+                <button
+                    class="w-full rounded-lg border border-red-500 text-red-600 py-3 font-medium hover:bg-red-50 transition disabled:opacity-50"
+                    :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'" @click="deleteAccount">
+                    {{ deleting ? 'Deleting account…' : 'Delete account' }}
+                </button>
+            </div>
+
 
         </div>
 

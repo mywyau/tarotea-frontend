@@ -1,87 +1,66 @@
-# Nuxt Minimal Starter
+# TaroTea 🍵
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+TaroTea is a focused web app for learning **real, spoken Cantonese** through vocabulary, audio, and interactive quizzes.
 
-## Setup
+The goal is not academic Cantonese, but the words and phrases you actually hear and use in daily life.
 
-Make sure to install dependencies:
+---
 
-```bash
-# npm
-npm install
+## Features
 
-# pnpm
-pnpm install
+- 📚 Structured vocabulary by level and topic
+- 🧠 Word quizzes and audio listening quizzes
+- 🔊 Native Cantonese audio
+- 🔐 Auth0 authentication (Google login)
+- 💳 Stripe subscriptions (Free / Pro)
+- 🗑️ Full account deletion with data + billing cleanup
 
-# yarn
-yarn install
+---
 
-# bun
-bun install
-```
+## Tech Stack
 
-## Development Server
+- **Frontend:** Nuxt 3 + Vue + Tailwind
+- **Backend:** Nuxt server routes (Nitro)
+- **Auth:** Auth0 (JWT-based)
+- **Billing:** Stripe Checkout + Billing Portal
+- **Database:** PostgreSQL (Supabase)
+- **CDN:** JSON + audio served from CDN
 
-Start the development server on `http://localhost:3000`:
+---
 
-```bash
-# npm
-npm run dev
+## Architecture Overview
 
-# pnpm
-pnpm dev
+- Auth0 user ID (`sub`) is the primary user identifier
+- Users are created on first login
+- Vocabulary data is stored as JSON and fetched from a CDN
+- Stripe is the source of truth for billing
+- Entitlements are mirrored locally for fast access checks
 
-# yarn
-yarn dev
+---
 
-# bun
-bun run dev
-```
+## Account Deletion
 
-## Production
+Users can permanently delete their account.
 
-Build the application for production:
+Deletion flow:
+1. User confirms deletion
+2. Stripe subscriptions are canceled
+3. App data is deleted
+4. Auth0 user is removed
 
-```bash
-# npm
-npm run build
+If billing cancellation fails, deletion is blocked and must be retried.
 
-# pnpm
-pnpm build
+---
 
-# yarn
-yarn build
+## Status
 
-# bun
-bun run build
-```
+🚧 Actively developed  
+This project is evolving and features may change.
 
-Locally preview production build:
+---
 
-```bash
-# npm
-npm run preview
+## Philosophy
 
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
-
-
-
-tarotea-content/content/cantonese/words/level-one/我.json
-
-
-wrangler r2 object put tarotea-content /Users/michaelyau/tarotea/openai-tts/public/words \
-  --recursive \
-  --prefix words
-
-wrangler r2 object list tarotea-content --remote
-wrangler r2 object delete audio/ --prefix
+- Keep the app simple and calm
+- Teach natural Cantonese, not textbook grammar
+- Respect user data — no dark patterns, easy deletion

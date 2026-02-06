@@ -36,6 +36,9 @@ export async function useAuth() {
     return await auth0Client!.getTokenSilently();
   }
 
+  console.log("Auth0 user:", user);
+  console.log("Auth0 user ID (sub):", user?.sub);
+
   return {
     client: auth0Client,
     isAuthenticated,
@@ -45,7 +48,6 @@ export async function useAuth() {
 }
 
 export async function loginWithGoogle() {
-
   if (!process.client) return;
   const { client } = await useAuth();
   if (!client) return;
@@ -68,17 +70,17 @@ export async function loginWithEmail() {
 }
 
 export async function logout() {
-  if (!process.client) return
+  if (!process.client) return;
 
-  const { state } = useMeStateV2()
-  state.value = { status: "logged-out" }
+  const { state } = useMeStateV2();
+  state.value = { status: "logged-out" };
 
-  const { client } = await useAuth()
-  if (!client) return
+  const { client } = await useAuth();
+  if (!client) return;
 
   await client.logout({
     logoutParams: {
-      returnTo: window.location.origin
-    }
-  })
+      returnTo: window.location.origin,
+    },
+  });
 }
