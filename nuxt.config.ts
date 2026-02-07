@@ -21,12 +21,16 @@ export default defineNuxtConfig({
 
   app: {
     head: {
-      title: "TaroTea — Learn Spoken Cantonese",
+      titleTemplate: (titleChunk) => {
+        return titleChunk
+          ? `${titleChunk} · TaroTea`
+          : "TaroTea · Learn Cantonese";
+      },
       meta: [
         {
           name: "description",
           content:
-            "Learn natural, spoken Cantonese with practical modules and topics.",
+            "Learn natural, spoken Cantonese with exercises, vocabulary, audio and quizzes.",
         },
       ],
     },
