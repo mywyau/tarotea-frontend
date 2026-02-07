@@ -139,7 +139,7 @@ async function openBillingPortal() {
                 </p>
 
                 <p class="text-sm text-red-600">
-                    Cancel any active subscription so it won’t renew
+                    It will also cancel any active subscription so it won’t renew upon account deletion.
                 </p>
 
                 <p class="text-sm text-red-600">
