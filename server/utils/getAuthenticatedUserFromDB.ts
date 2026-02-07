@@ -6,8 +6,6 @@ import { requireUser } from "~/server/utils/requireUser";
 export async function getAuthenticatedUserFromDB(event: any) {
 
   const userId = await requireUser(event)
-
-  // console.log('user id: ', userId)
   
   const { rows } = await db.query(
     `
@@ -20,8 +18,6 @@ export async function getAuthenticatedUserFromDB(event: any) {
     `,
     [userId]
   )
-
-  // console.log(rows[0])
 
   return rows[0] ?? null
 }

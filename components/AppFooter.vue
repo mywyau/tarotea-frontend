@@ -25,6 +25,10 @@
                         Privacy Notice
                     </NuxtLink>
 
+                    <NuxtLink to="/refund-policy" class="hover:underline">
+                        Refund Policy
+                    </NuxtLink>
+
                     <NuxtLink to="/terms-of-service" class="hover:underline">
                         Terms of Service
                     </NuxtLink>
