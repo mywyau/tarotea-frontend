@@ -13,7 +13,7 @@ definePageMeta({
 
     <p class="text-gray-700">
       Have a question, found an issue, or want to share feedback?
-      I’d love to hear from you.
+      We'd love to hear from you.
     </p>
 
     <div class="border rounded-lg p-4 space-y-2">
