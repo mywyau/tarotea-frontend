@@ -1,6 +1,15 @@
 <script setup lang="ts">
 
+
 definePageMeta({
+  title: 'Cantonese Exercises by Level – Vocabulary & Sentence Practice',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Practice spoken Cantonese with vocabulary and sentence exercises organised by level. Audio-first learning with Jyutping and real usage.'
+    }
+  ],
   middleware: ['coming-soon'],
   ssr: true,
 })
