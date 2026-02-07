@@ -13,6 +13,7 @@ const props = defineProps<{
   allSentences: Sentence[] // broader pool for distractors
 }>()
 
+const wrongSelection = ref<string | null>(null)
 const currentIndex = ref(0)
 const selected = ref<string | null>(null)
 const showResult = ref(false)
@@ -77,12 +78,14 @@ function selectOption(option: string) {
   if (option === currentSentence.value?.meaning) {
     playCorrectJingle()
   } else {
+    wrongSelection.value = option
     playIncorrectJingle()
   }
 }
 
 function next() {
   selected.value = null
+  wrongSelection.value = null
   showResult.value = false
   currentIndex.value++
 }
@@ -151,7 +154,7 @@ watch(
 
   <!-- Done -->
   <div v-else class="text-center">
-    
+
     <!-- Uses css styling -->
     <div class="mt-4 min-h-[2rem]">
       <Transition name="fade">

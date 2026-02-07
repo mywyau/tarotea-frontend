@@ -49,23 +49,16 @@ function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5)
 }
 
-const sentencesCDN = computed(() => data.value)
-const notFound = computed(() => error.value?.statusCode === 404)
-
-
-const current = ref(0)
-const answered = ref(false)
-const selectedIndex = ref<number | null>(null)
-const question = computed(() => questions.value[current.value])
-
 const quizKey = ref(0)
 
 function resetQuiz() {
-  // we reset the quiz by changing the component key
+  generateSession()
   quizKey.value++
 }
 
-const sessionSentences = computed(() => {
+const sessionSentences = ref<Sentence[]>([])
+
+function generateSession() {
   const all = data.value?.sentences ?? []
 
   const mapped = all.map(s => ({
@@ -74,8 +67,8 @@ const sessionSentences = computed(() => {
     meaning: s.meaning
   }))
 
-  return shuffle(mapped).slice(0, QUESTIONS_PER_SESSION)
-})
+  sessionSentences.value = shuffle(mapped).slice(0, QUESTIONS_PER_SESSION)
+}
 
 const allSentences = computed(() =>
   (data.value?.sentences ?? []).map(s => ({
@@ -85,18 +78,16 @@ const allSentences = computed(() =>
   }))
 )
 
+watchEffect(() => {
+  if (data.value?.sentences) {
+    generateSession()
+  }
+})
+
 </script>
 
 <template>
   <main class="max-w-3xl mx-auto px-4 py-12 space-y-10">
-
-    <!-- Back -->
-    <!-- <NuxtLink
-      :to="`/quiz/${slug}`"
-      class="text-sm text-gray-500 hover:underline"
-    >
-      ← Back to sentence exercises
-    </NuxtLink> -->
 
     <NuxtLink :to="`/coming-soon`" class="text-sm text-gray-500 hover:underline">
       ← Back to all exercises
@@ -111,7 +102,6 @@ const allSentences = computed(() =>
         Reset quiz
       </button>
     </div>
-
 
   </main>
 </template>
