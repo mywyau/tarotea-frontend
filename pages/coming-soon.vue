@@ -12,7 +12,7 @@ definePageMeta({
     </h1>
 
     <p class="text-gray-600">
-      Sit tight, new cantonese content or app features are on the way.
+      Sit tight, new cantonese content and app features are on the way.
     </p>
 
     <p class="text-sm text-gray-500 pt-4">

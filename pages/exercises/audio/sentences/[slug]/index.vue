@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-// definePageMeta({
-//   middleware: ['coming-soon'],
-//   ssr: true,
-// })
+definePageMeta({
+  middleware: ['coming-soon'],
+  ssr: true,
+})
 
 import SentenceMeaningExercise from '@/components/SentenceMeaningExercise.vue'
 import { getLevelNumber } from '@/utils/levels'
@@ -89,7 +89,7 @@ watchEffect(() => {
 <template>
   <main class="max-w-3xl mx-auto px-4 py-12 space-y-10">
 
-    <NuxtLink :to="`/coming-soon`" class="text-sm text-gray-500 hover:underline">
+    <NuxtLink :to="`/exercises`" class="text-sm text-gray-500 hover:underline">
       ← Back to all exercises
     </NuxtLink>
 

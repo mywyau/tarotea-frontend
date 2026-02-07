@@ -39,7 +39,7 @@ async function handleLogout() {
 
         <NuxtLink to="/topics" class="nav-link hover:text-gray-600">Topics</NuxtLink>
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
-        <NuxtLink to="/exercises/sentences/level-one" class="nav-link hover:text-gray-600">Exercises</NuxtLink>
+        <NuxtLink to="/exercises" class="nav-link hover:text-gray-600">Exercises</NuxtLink>
         <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Quiz</NuxtLink>
         <!-- Wait until auth is resolved -->
         <template v-if="!authReady">
@@ -99,7 +99,7 @@ async function handleLogout() {
       <div class="border-t pt-2"></div>
 
       <div>
-        <NuxtLink to="/exercises/sentences/level-one" class="mobile-primary">
+        <NuxtLink to="/exercises" class="mobile-primary">
           Exercises
         </NuxtLink>
       </div>
