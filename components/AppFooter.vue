@@ -16,6 +16,11 @@
 
                 <!-- Right -->
                 <div class="flex gap-4">
+
+                    <NuxtLink to="/contact" class="hover:underline">
+                        Contact
+                    </NuxtLink>
+
                     <NuxtLink to="/privacy-notice" class="hover:underline">
                         Privacy Notice
                     </NuxtLink>
@@ -26,10 +31,6 @@
 
                     <NuxtLink to="/patch-notes" class="hover:underline">
                         Patch Notes
-                    </NuxtLink>
-
-                    <NuxtLink to="/contact" class="hover:underline">
-                        Contact
                     </NuxtLink>
                 </div>
             </div>
