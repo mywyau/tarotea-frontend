@@ -59,11 +59,13 @@ export default defineEventHandler(async (event) => {
 
   let stripeEvent: Stripe.Event;
 
+  console.log("Webhook key present:", Boolean(process.env.STRIPE_WEBHOOK_SECRET));
+
   try {
     stripeEvent = stripe.webhooks.constructEvent(
       body,
       sig,
-      process.env.STRIPE_WEBHOOK_SIGNING_KEY!,
+      process.env.STRIPE_WEBHOOK_SECRET!,
     );
   } catch (err) {
     console.error("Webhook verification failed", err);

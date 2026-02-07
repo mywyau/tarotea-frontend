@@ -124,14 +124,14 @@ definePageMeta({
       </p>
     </section>
 
-    <!-- <section class="space-y-3">
+    <section class="space-y-3">
       <h2 class="text-xl font-semibold">11. Contact</h2>
       <p class="text-gray-700">
         If you have any questions about these Terms, please contact:
         <br />
         <span class="font-medium">contact@tarotea.dev</span>
       </p>
-    </section> -->
+    </section>
 
   </main>
 </template>

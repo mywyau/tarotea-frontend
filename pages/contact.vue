@@ -25,7 +25,7 @@ definePageMeta({
         href="mailto:support@tarotea.app"
         class="font-medium text-black hover:underline"
       >
-        support@tarotea.app
+        contact@tarotea.dev
       </a>
     </div>
 

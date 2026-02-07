@@ -1,7 +1,6 @@
-// server/checkout.post.ts
-
 import { createError, getHeader, readBody } from "h3";
 import Stripe from "stripe";
+import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -11,6 +10,20 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 export default defineEventHandler(async (event) => {
   // 🔐 Authenticated user
   const userId = await requireUser(event);
+
+  // 👤 Fetch user email
+  const { rows } = await db.query(`select email from users where id = $1`, [
+    userId,
+  ]);
+
+  if (!rows[0]?.email) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "User email not found",
+    });
+  }
+
+  const userEmail = rows[0].email;
 
   // 📦 Request body
   const body = await readBody(event);
@@ -23,16 +36,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 🌍 Base URL (required by Stripe)
-  //   const baseUrl = process.env.PUBLIC_BASE_URL;
-  //   if (!baseUrl) {
-  //     throw createError({
-  //       statusCode: 500,
-  //       statusMessage: "PUBLIC_BASE_URL not configured",
-  //     });
-  //   }
-
-  // 🔑 Lookup key from env
   const lookupKey =
     billing === "monthly"
       ? process.env.STRIPE_PRICE_MONTHLY
@@ -45,7 +48,6 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 💳 Resolve lookup key → actual price ID
   const prices = await stripe.prices.list({
     lookup_keys: [lookupKey],
     limit: 1,
@@ -70,46 +72,21 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 🧾 Create Checkout Session
-
-  // const session = await stripe.checkout.sessions.create({
-  //   mode: "subscription",
-
-  //   line_items: [
-  //     {
-  //       price: priceId,
-  //       quantity: 1,
-  //     },
-  //   ],
-
-  //   success_url: `${origin}/billing/success`,
-  //   cancel_url: `${origin}/billing/cancel`,
-
-  //   // 🔗 Link Stripe → your user
-  //   client_reference_id: userId,
-  //   metadata: {
-  //     userId,
-  //     plan: billing, // 'monthly' | 'yearly'
-  //   },
-  // });
+  const idempotencyKey = `checkout:${userId}:${billing}:${Math.floor(Date.now() / 10_000)}`;
 
   // 🧾 Create Checkout Session
   const session = await stripe.checkout.sessions.create(
     {
       mode: "subscription",
-      // customer_creation: "always", // 👈 FORCE customer creation - not needed since we are using subscription mode
 
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
+      line_items: [{ price: priceId, quantity: 1 }],
 
       success_url: `${origin}/billing/success`,
       cancel_url: `${origin}/billing/cancel`,
 
       client_reference_id: userId,
+
+      customer_email: userEmail, // ✅ CORRECT
 
       metadata: {
         userId,
@@ -122,11 +99,11 @@ export default defineEventHandler(async (event) => {
           plan: billing,
         },
       },
-    }
-    // { idempotencyKey: `checkout:${userId}:${billing}` }
+    },
+    {
+      idempotencyKey: idempotencyKey,
+    },
   );
 
-  return {
-    url: session.url,
-  };
+  return { url: session.url };
 });
