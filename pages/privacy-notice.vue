@@ -154,7 +154,7 @@ definePageMeta({
       <p class="text-gray-700">
         If you have any questions about this Privacy Notice, please contact:
         <br />
-        <span class="font-medium">support@tarotea.dev</span>
+        <span class="font-medium">contact@tarotea.dev</span>
       </p>
     </section>
 

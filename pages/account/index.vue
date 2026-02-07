@@ -134,8 +134,17 @@ async function openBillingPortal() {
             <div class="border border-red-200 rounded-lg p-4 space-y-4">
 
                 <p class="text-sm text-red-600">
-                    Deleting your account permanently removes your data and subscription.
+                    Deleting your account permanently removes your account, data and subscription.
                     This action cannot be undone.
+                </p>
+
+                <p class="text-sm text-red-600">
+                    Cancel any active subscription so it won’t renew
+                </p>
+
+                <p class="text-sm text-red-600">
+                    We do not issue automatic refunds for unused subscription time.
+                    If you believe you were charged in error, please contact support.
                 </p>
 
                 <div class="space-y-2">

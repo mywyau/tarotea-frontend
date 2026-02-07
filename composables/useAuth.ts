@@ -36,9 +36,6 @@ export async function useAuth() {
     return await auth0Client!.getTokenSilently();
   }
 
-  console.log("Auth0 user:", user);
-  console.log("Auth0 user ID (sub):", user?.sub);
-
   return {
     client: auth0Client,
     isAuthenticated,
