@@ -6,7 +6,7 @@ import { getAuthenticatedUserFromDB } from "~/server/utils/getAuthenticatedUserF
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig();
 
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_LIVE!, {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2023-10-16",
   });
 

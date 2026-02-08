@@ -33,7 +33,7 @@ export default defineEventHandler(async (event) => {
   try {
     // 4️⃣ Cancel Stripe subscriptions
     if (user.stripeCustomerId) {
-      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_LIVE!, {
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
         apiVersion: "2023-10-16",
       });
 
