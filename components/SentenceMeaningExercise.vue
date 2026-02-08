@@ -27,25 +27,27 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 const encouragingMessages = [
-  "Nice work, keep going 😊",
-  "Great job, you’re making real progress 🌱",
-  "Well done! Every bit of practice counts ✨",
-  "You’re doing really well, keep it up 💪",
-  "That’s another step forward 👏",
-  "Good effort, you’re building momentum 🚀",
-  "Solid work, your Cantonese is improving 📈",
-  "Keep going, you’re on the right track 🧭",
-  "Practice like this really pays off 💡",
-  "Well done, consistency matters 😊",
-  "You’re getting more comfortable with this 🙂",
-  "Nice progress! Take a moment to feel it 🌸",
-  "You’re learning more than you think 🧠",
-  "Each practice makes the next one easier 🔁",
-  "Great focus, that’s how it sticks 🎯",
-  "You showed up and practiced — that’s a win 🏆",
-  "Another session done, nicely handled 👍",
-  "You’re building real understanding now 🌟"
+  "Nice work",
+  "Good job — keep going",
+  "That was solid practice",
+  "Well done. This kind of repetition helps",
+  "Another one done",
+  "Good effort today",
+  "You’re making steady progress",
+  "That’s moving in the right direction",
+  "This kind of practice adds up",
+  "Well done — consistency matters",
+  "You’re getting more comfortable with this",
+  "That went well",
+  "You’re building a real feel for it",
+  "Each session makes the next easier",
+  "Good focus there",
+  "You showed up and practiced",
+  "Nicely handled.",
+  "That’s good progress",
+  "Keep going"
 ]
+
 
 function getRandomEncouragement(messages: string[]) {
   return messages[Math.floor(Math.random() * messages.length)]
