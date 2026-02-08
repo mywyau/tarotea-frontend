@@ -11,11 +11,11 @@ definePageMeta({
 
     <header class="space-y-3 text-center">
       <h1 class="text-3xl font-semibold">
-        What’s new
+        Patch Notes
       </h1>
 
       <p class="text-gray-600">
-        Small, steady improvements to help communicate changes to the App.
+        Improvements, features and improvements
       </p>
     </header>
 
