@@ -11,7 +11,6 @@ type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled";
 interface Entitlement {
   plan: "free" | "monthly" | "yearly";
   subscription_status: SubscriptionStatus;
-  active: boolean;
   cancel_at_period_end: boolean;
 
   current_period_end?: string;
@@ -21,11 +20,6 @@ interface Entitlement {
 function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
   const item = sub.items?.data?.[0];
 
-  const active =
-    sub.status === "active" ||
-    sub.status === "trialing" ||
-    sub.status === "past_due";
-
   // 👇 Stripe-safe interpretation
   const cancelAtPeriodEnd =
     sub.cancel_at_period_end ||
@@ -34,7 +28,6 @@ function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
   return {
     plan: (sub.metadata.plan as "monthly" | "yearly") ?? "free",
     subscription_status: sub.status as SubscriptionStatus,
-    active,
     cancel_at_period_end: Boolean(cancelAtPeriodEnd),
 
     ...(item?.current_period_end && {
@@ -97,16 +90,15 @@ export default defineEventHandler(async (event) => {
           set
             plan = $1,
             subscription_status = $2,
-            active = $3,
-            cancel_at_period_end = $4,
-            current_period_end = $5,
-            canceled_at = $6
-          where user_id = $7
+            active = true,
+            cancel_at_period_end = $3,
+            current_period_end = $4,
+            canceled_at = $5
+          where user_id = $6
         `,
         [
           e.plan,
           e.subscription_status,
-          true, // 👈 FORCE ACTIVE ON PAYMENT
           e.cancel_at_period_end,
           e.current_period_end,
           e.canceled_at,
@@ -152,14 +144,19 @@ export default defineEventHandler(async (event) => {
 
       await db.query(
         `
-          update entitlements
-          set
+        UPDATE entitlements
+          SET
             plan = $1,
             subscription_status = $2,
             cancel_at_period_end = $3,
             current_period_end = $4,
             canceled_at = $5
-          where user_id = $6
+          WHERE user_id = $6
+          AND (
+            current_period_end IS NULL
+            OR $4 IS NULL
+            OR $4 >= current_period_end
+          );
         `,
         [
           e.plan,
