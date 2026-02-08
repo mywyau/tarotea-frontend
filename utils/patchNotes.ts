@@ -13,7 +13,7 @@ export const patchNotes: PatchNote[] = [
       'Adding exercise quizzes and exercises section as placeholder for possibly new learning modes',
       'Adding level 1 sentence based exercises',
       'Adding topics placeholder for future content',
-      'Slowly adding new level 4 vocabulary - work in progress',
+      'Added new level 4 vocabulary, audio and quizzes',
       'Auth still locked',
     ]
   },
