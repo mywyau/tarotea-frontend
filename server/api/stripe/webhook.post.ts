@@ -71,22 +71,68 @@ export default defineEventHandler(async (event) => {
   }
 
   switch (stripeEvent.type) {
-    case "checkout.session.completed": {
-      const session = stripeEvent.data.object as Stripe.Checkout.Session;
+    case "invoice.paid": {
+      // this is the event when stripe finishes and fires a status which is "active" or not
+      // subscription updated will often be set to "incomplete"
 
-      const userId = session.client_reference_id;
-      const customerId =
-        typeof session.customer === "string" ? session.customer : null;
+      const invoice = stripeEvent.data.object as Stripe.Invoice;
 
-      if (!userId || !customerId) break;
+      const subId =
+        typeof invoice.subscription === "string" ? invoice.subscription : null;
+
+      if (!subId) break;
+
+      const sub = await stripe.subscriptions.retrieve(subId);
+
+      if (sub.status === "canceled") break;
+
+      const userId = sub.metadata?.userId;
+      if (!userId) break;
+
+      const e = entitlementFromSubscription(sub);
 
       await db.query(
         `
-          update users
-          set stripe_customer_id = $1
-          where id = $2
+          update entitlements
+          set
+            plan = $1,
+            subscription_status = $2,
+            active = $3,
+            cancel_at_period_end = $4,
+            current_period_end = $5,
+            canceled_at = $6
+          where user_id = $7
         `,
-        [customerId, userId],
+        [
+          e.plan,
+          e.subscription_status,
+          true, // 👈 FORCE ACTIVE ON PAYMENT
+          e.cancel_at_period_end,
+          e.current_period_end,
+          e.canceled_at,
+          userId,
+        ],
+      );
+
+      return { received: true };
+    }
+    case "invoice.payment_failed": {
+      const invoice = stripeEvent.data.object as Stripe.Invoice;
+      const subId =
+        typeof invoice.subscription === "string" ? invoice.subscription : null;
+      if (!subId) break;
+
+      const sub = await stripe.subscriptions.retrieve(subId);
+      const userId = sub.metadata?.userId;
+      if (!userId) break;
+
+      await db.query(
+        `
+          update entitlements
+          set active = false
+          where user_id = $1
+        `,
+        [userId],
       );
 
       return { received: true };
@@ -154,68 +200,22 @@ export default defineEventHandler(async (event) => {
 
       return { received: true };
     }
-    case "invoice.paid": {
-      // this is the event when stripe finishes and fires a status which is "active" or not
-      // subscription updated will often be set to "incomplete"
+    case "checkout.session.completed": {
+      const session = stripeEvent.data.object as Stripe.Checkout.Session;
 
-      const invoice = stripeEvent.data.object as Stripe.Invoice;
+      const userId = session.client_reference_id;
+      const customerId =
+        typeof session.customer === "string" ? session.customer : null;
 
-      const subId =
-        typeof invoice.subscription === "string" ? invoice.subscription : null;
-
-      if (!subId) break;
-
-      const sub = await stripe.subscriptions.retrieve(subId);
-
-      if (sub.status === "canceled") break;
-
-      const userId = sub.metadata?.userId;
-      if (!userId) break;
-
-      const e = entitlementFromSubscription(sub);
+      if (!userId || !customerId) break;
 
       await db.query(
         `
-          update entitlements
-          set
-            plan = $1,
-            subscription_status = $2,
-            active = $3,
-            cancel_at_period_end = $4,
-            current_period_end = $5,
-            canceled_at = $6
-          where user_id = $7
+          update users
+          set stripe_customer_id = $1
+          where id = $2
         `,
-        [
-          e.plan,
-          e.subscription_status,
-          true, // 👈 FORCE ACTIVE ON PAYMENT
-          e.cancel_at_period_end,
-          e.current_period_end,
-          e.canceled_at,
-          userId,
-        ],
-      );
-
-      return { received: true };
-    }
-    case "invoice.payment_failed": {
-      const invoice = stripeEvent.data.object as Stripe.Invoice;
-      const subId =
-        typeof invoice.subscription === "string" ? invoice.subscription : null;
-      if (!subId) break;
-
-      const sub = await stripe.subscriptions.retrieve(subId);
-      const userId = sub.metadata?.userId;
-      if (!userId) break;
-
-      await db.query(
-        `
-          update entitlements
-          set active = false
-          where user_id = $1
-        `,
-        [userId],
+        [customerId, userId],
       );
 
       return { received: true };
