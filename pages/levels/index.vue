@@ -1,4 +1,7 @@
 <script setup lang="ts">
+
+
+
 import { onMounted } from 'vue'
 
 const {
@@ -46,7 +49,7 @@ const levels = [
     id: 'level-four',
     number: 4,
     title: 'Level 4',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Express opinions, explain situations, discuss experiences.'
   },
   {
