@@ -152,11 +152,6 @@ export default defineEventHandler(async (event) => {
             current_period_end = $4,
             canceled_at = $5
           WHERE user_id = $6
-          AND (
-            current_period_end IS NULL
-            OR $4 IS NULL
-            OR $4 >= current_period_end
-          );
         `,
         [
           e.plan,
