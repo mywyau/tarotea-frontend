@@ -2,7 +2,7 @@ import { createError, getHeader, readRawBody } from "h3";
 import Stripe from "stripe";
 import { db } from "~/server/db";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_LIVE!, {
   apiVersion: "2023-10-16",
 });
 
@@ -63,7 +63,7 @@ export default defineEventHandler(async (event) => {
     stripeEvent = stripe.webhooks.constructEvent(
       body,
       sig,
-      process.env.STRIPE_WEBHOOK_SECRET!,
+      process.env.STRIPE_WEBHOOK_SECRET_LIVE!,
     );
   } catch (err) {
     console.error("Webhook verification failed", err);

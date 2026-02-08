@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY_LIVE!, {
   apiVersion: "2023-10-16",
 });
 
