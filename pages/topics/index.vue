@@ -34,9 +34,9 @@ const topics = [
     description: 'Say hello, goodbye, thank people, apologise, and handle basic polite interactions.'
   },
   {
-    id: 'food',
+    id: 'food-ordering',
     title: 'Food & Ordering',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about food, order at restaurants, express preferences, and ask for recommendations.'
   },
   {
@@ -283,18 +283,22 @@ const canEnterTopic = (topic: any) => {
             ? 'hover:bg-gray-50'
             : 'opacity-80'
       ]">
+      
+        <NuxtLink :to="`topics/words/${topic.id}`" class="block space-y-3">
 
-        <div class="text-lg font-medium">
-          {{ topic.title }}
-          <span v-if="topic.comingSoon" class="text-sm text-gray-400 font-normal">
-            (Coming soon)
-          </span>
-        </div>
+          <div class="text-lg font-medium">
+            {{ topic.title }}
+            <span v-if="topic.comingSoon" class="text-sm text-gray-400 font-normal">
+              (Coming soon)
+            </span>
+          </div>
 
-        <div class="text-sm text-gray-600">
-          {{ topic.description }}
-        </div>
+          <div class="text-sm text-gray-600">
+            {{ topic.description }}
+          </div>
+        </NuxtLink>
       </li>
+
     </ul>
 
   </main>
