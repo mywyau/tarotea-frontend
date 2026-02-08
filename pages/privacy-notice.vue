@@ -28,7 +28,7 @@ definePageMeta({
     <section class="space-y-3">
       <h2 class="text-xl font-semibold">1. Who we are</h2>
       <p class="text-gray-700">
-        TaroTea is a web application for learning spoken Cantonese.
+        TaroTea is a web application for learning Cantonese.
       </p>
       <p class="text-gray-700">
         If you have any questions about this notice or your data, you can contact us at:

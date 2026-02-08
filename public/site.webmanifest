@@ -1,7 +1,7 @@
 {
   "name": "TaroTea",
   "short_name": "TaroTea",
-  "description": "Learn spoken Cantonese with audio-first lessons.",
+  "description": "Learn spoken and written Cantonese with audio, exercises and quizzes.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

@@ -3,12 +3,12 @@
 // app.vue
 useHead({
   titleTemplate: (titleChunk) =>
-    titleChunk ? `${titleChunk} · TaroTea` : 'TaroTea · Learn Spoken Cantonese',
+    titleChunk ? `${titleChunk} · TaroTea` : 'TaroTea · Learn Cantonese',
 
   meta: [
     {
       name: 'description',
-      content: 'Learn spoken Cantonese with high quality audio, Jyutping, and real-life sentences.',
+      content: 'Learn Cantonese with high quality audio, Jyutping, and real-life sentences.',
     },
     { name: 'application-name', content: 'TaroTea' },
     { name: 'apple-mobile-web-app-title', content: 'TaroTea' },

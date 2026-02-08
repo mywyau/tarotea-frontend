@@ -91,7 +91,7 @@ if (!levelMeta.value) {
           Sentence practice
         </h2>
         <p class="text-sm text-gray-600">
-          Understand meaning in full, natural spoken sentences.
+          Understand meaning in full, natural sentences.
         </p>
       </NuxtLink>
 

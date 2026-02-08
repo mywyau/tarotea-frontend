@@ -30,7 +30,7 @@ export default defineNuxtConfig({
         {
           name: "description",
           content:
-            "Learn natural, spoken Cantonese with exercises, vocabulary, audio and quizzes.",
+            "Learn natural Cantonese with exercises, vocabulary, audio and quizzes.",
         },
       ],
     },
