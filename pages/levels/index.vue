@@ -145,3 +145,4 @@ const canEnterLevel = (level: any) => {
     </ul>
   </main>
 </template>
+
