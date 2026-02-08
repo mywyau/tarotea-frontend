@@ -9,7 +9,6 @@ export const patchNotes: PatchNote[] = [
     date: 'Feb 2026',
     title: 'February Dev Notes',
     items: [
-      'Fixing up live payments via stripe locked behind Auth',
       'Adding exercise quizzes and exercises section as placeholder for possibly new learning modes',
       'Adding level 1 sentence based exercises',
       'Adding topics placeholder for future content',
