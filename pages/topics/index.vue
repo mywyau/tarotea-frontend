@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-// definePageMeta({
-//   middleware: ['coming-soon'],
-//   ssr: true,
-// })
+definePageMeta({
+  middleware: ['coming-soon'],
+  ssr: true,
+})
 
 import { onMounted } from 'vue'
 
@@ -27,11 +27,24 @@ onMounted(async () => {
 })
 
 const topics = [
+
+  {
+    id: 'survival-essentials',
+    title: 'Survival & Essentials',
+    comingSoon: false,
+    description: 'Essential phrases for getting by: toilets, emergencies, asking for help, and basic needs.'
+  },
   {
     id: 'greetings',
     title: 'Greetings & Politeness',
     comingSoon: true,
     description: 'Say hello, goodbye, thank people, apologise, and handle basic polite interactions.'
+  },
+  {
+    id: 'fruits-vegetables',
+    title: 'Fruit & Vegetables',
+    comingSoon: false,
+    description: 'Name and describe fruits and vegetables.'
   },
   {
     id: 'food-ordering',
@@ -42,19 +55,19 @@ const topics = [
   {
     id: 'clothing',
     title: 'Clothing',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Name and describe items of clothing.'
   },
   {
-    id: 'measurements',
+    id: 'measure-quantities',
     title: 'Measurements & Quantities',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Describe amounts, sizes, prices, and quantities used in daily life and shopping.'
   },
   {
-    id: 'time',
+    id: 'time-dates',
     title: 'Time & Dates',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about time, days, dates, schedules, and when things happen.'
   },
   {
@@ -64,33 +77,33 @@ const topics = [
     description: 'Discuss prices, paying, change, costs, and money-related situations.'
   },
   {
-    id: 'countries',
+    id: 'countries-nationalities',
     title: 'Countries & Nationalities',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about where you are from, countries, languages, and cultural background.'
   },
   {
-    id: 'transport',
+    id: 'transport-travel',
     title: 'Transport & Travel',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Use transport, ask for directions, talk about travel plans, and get around the city.'
   },
   {
-    id: 'family',
+    id: 'family-relationships',
     title: 'Family & Relationships',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about family members, relatives, and personal relationships.'
   },
   {
-    id: 'home',
+    id: 'furniture',
     title: 'Home & Furniture',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Describe your home, rooms, furniture, and everyday household items.'
   },
   {
     id: 'professions',
     title: 'Work & Professions',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about jobs, workplaces, roles, and what people do for work.'
   },
   {
@@ -102,13 +115,13 @@ const topics = [
   {
     id: 'health',
     title: 'Health & Wellbeing',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Describe how you feel, talk about common health issues, and seek basic help.'
   },
   {
     id: 'emotions',
     title: 'Feelings & Emotions',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Express emotions, moods, opinions, and personal reactions naturally.'
   },
   {
@@ -126,7 +139,7 @@ const topics = [
   {
     id: 'weather',
     title: 'Weather & Seasons',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about the weather, seasons, temperature, and climate.'
   },
   {
@@ -162,7 +175,7 @@ const topics = [
   {
     id: 'hobbies',
     title: 'Hobbies & Interests',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Discuss hobbies, interests, and things you enjoy doing.'
   },
   {
@@ -278,7 +291,7 @@ const canEnterTopic = (topic: any) => {
 
       <li v-for="topic in topics" :key="topic.id" class="border rounded p-4 space-y-3 transition" :class="[
         topic.comingSoon
-          ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
+          ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80 hover:bg-gray-50'
           : canEnterTopic(topic)
             ? 'hover:bg-gray-50'
             : 'opacity-80'
