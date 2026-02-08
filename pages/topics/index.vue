@@ -35,9 +35,9 @@ const topics = [
     description: 'Essential phrases for getting by: toilets, emergencies, asking for help, and basic needs.'
   },
   {
-    id: 'greetings',
+    id: 'greetings-polite',
     title: 'Greetings & Politeness',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Say hello, goodbye, thank people, apologise, and handle basic polite interactions.'
   },
   {
@@ -133,7 +133,7 @@ const topics = [
   {
     id: 'directions',
     title: 'Directions & Locations',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Ask for directions, describe locations, and navigate places confidently.'
   },
   {
@@ -235,7 +235,7 @@ const topics = [
   {
     id: 'technology',
     title: 'Technology & Devices',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about phones, computers, apps, and everyday tech usage.'
   },
   {
