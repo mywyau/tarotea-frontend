@@ -42,6 +42,51 @@ function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
   };
 }
 
+function getSubscriptionIdFromInvoiceLines(
+  invoice: Stripe.Invoice,
+): string | null {
+  const line = invoice.lines?.data?.[0] as any;
+
+  return typeof line?.parent?.subscription_item_details?.subscription ===
+    "string"
+    ? line.parent.subscription_item_details.subscription
+    : null;
+}
+
+function getSubscriptionIdFromInvoice(invoice: Stripe.Invoice): string | null {
+  const parent = invoice.parent as any;
+
+  if (
+    parent?.type === "subscription_details" &&
+    typeof parent?.subscription_details?.subscription === "string"
+  ) {
+    return parent.subscription_details.subscription;
+  }
+
+  return null;
+}
+
+function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
+  const parent = invoice.parent as any;
+
+  if (
+    parent?.type === "subscription_details" &&
+    typeof parent?.subscription_details?.subscription === "string"
+  ) {
+    return parent.subscription_details.subscription;
+  }
+
+  const line = invoice.lines?.data?.[0] as any;
+
+  if (
+    typeof line?.parent?.subscription_item_details?.subscription === "string"
+  ) {
+    return line.parent.subscription_item_details.subscription;
+  }
+
+  return null;
+}
+
 export default defineEventHandler(async (event) => {
   const sig = getHeader(event, "stripe-signature");
   const body = await readRawBody(event);
@@ -64,19 +109,58 @@ export default defineEventHandler(async (event) => {
   }
 
   switch (stripeEvent.type) {
-    case "invoice.paid": {
-      // this is the event when stripe finishes and fires a status which is "active" or not
-      // subscription updated will often be set to "incomplete"
+    // case "invoice.paid": {
+    //   // this is the event when stripe finishes and fires a status which is "active" or not
+    //   // subscription updated will often be set to "incomplete"
 
+    //   const invoice = stripeEvent.data.object as Stripe.Invoice;
+
+    //   const subId =
+    //     typeof invoice.subscription === "string" ? invoice.subscription : null;
+
+    //   if (!subId) break;
+
+    //   const sub = await stripe.subscriptions.retrieve(subId);
+
+    //   if (sub.status === "canceled") break;
+
+    //   const userId = sub.metadata?.userId;
+    //   if (!userId) break;
+
+    //   const e = entitlementFromSubscription(sub);
+
+    //   await db.query(
+    //     `
+    //       update entitlements
+    //       set
+    //         plan = $1,
+    //         subscription_status = $2,
+    //         active = true,
+    //         cancel_at_period_end = $3,
+    //         current_period_end = $4,
+    //         canceled_at = $5
+    //       where user_id = $6
+    //     `,
+    //     [
+    //       e.plan,
+    //       e.subscription_status,
+    //       e.cancel_at_period_end,
+    //       e.current_period_end,
+    //       e.canceled_at,
+    //       userId,
+    //     ],
+    //   );
+
+    //   return { received: true };
+    // }
+
+    case "invoice.paid": {
       const invoice = stripeEvent.data.object as Stripe.Invoice;
 
-      const subId =
-        typeof invoice.subscription === "string" ? invoice.subscription : null;
-
+      const subId = extractSubscriptionId(invoice);
       if (!subId) break;
 
       const sub = await stripe.subscriptions.retrieve(subId);
-
       if (sub.status === "canceled") break;
 
       const userId = sub.metadata?.userId;
@@ -86,16 +170,16 @@ export default defineEventHandler(async (event) => {
 
       await db.query(
         `
-          update entitlements
-          set
-            plan = $1,
-            subscription_status = $2,
-            active = true,
-            cancel_at_period_end = $3,
-            current_period_end = $4,
-            canceled_at = $5
-          where user_id = $6
-        `,
+      update entitlements
+      set
+        plan = $1,
+        subscription_status = $2,
+        active = true,
+        cancel_at_period_end = $3,
+        current_period_end = $4,
+        canceled_at = $5
+      where user_id = $6
+    `,
         [
           e.plan,
           e.subscription_status,
