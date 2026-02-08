@@ -283,8 +283,8 @@ const canEnterTopic = (topic: any) => {
             ? 'hover:bg-gray-50'
             : 'opacity-80'
       ]">
-
-        <NuxtLink :to="`topic/words/${topic.id}`" class="block space-y-3">
+      
+        <NuxtLink :to="`topics/words/${topic.id}`" class="block space-y-3">
 
           <div class="text-lg font-medium">
             {{ topic.title }}
