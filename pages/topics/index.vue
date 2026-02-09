@@ -54,7 +54,7 @@ const topics = [
   {
     id: 'fruits-vegetables',
     title: 'Fruit & Vegetables',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Name and describe fruits and vegetables.'
   },
   {
