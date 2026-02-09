@@ -297,7 +297,9 @@ const canEnterTopic = (topic: any) => {
             : 'opacity-80'
       ]">
 
-        <NuxtLink :to="`topic/words/${topic.id}`" class="block space-y-3">
+        <NuxtLink :to="canEnterTopic(topic) ? `topic/words/${topic.id}` : undefined" class="block space-y-3" :class="{
+          'cursor-not-allowed pointer-events-none': !canEnterTopic(topic)
+        }">
 
           <div class="text-lg font-medium">
             {{ topic.title }}
