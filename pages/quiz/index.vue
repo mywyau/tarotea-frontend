@@ -99,7 +99,7 @@ const canEnterLevel = (level: any) => {
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-      <li v-for="quizLevel in quizLevels" :key="quizLevel.id" class="border rounded p-4 space-y-3 transition" :class="[
+      <li v-for="quizLevel in quizLevels" :key="quizLevel.id" class="border rounded-lg p-4 space-y-3 transition" :class="[
         quizLevel.comingSoon
           ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
           : canEnterLevel(quizLevel)

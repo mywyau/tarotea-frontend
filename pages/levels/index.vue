@@ -101,7 +101,7 @@ const canEnterLevel = (level: any) => {
     <ul class="space-y-4">
 
 
-      <li v-for="level in levels" :key="level.id" class="border rounded p-4 space-y-3 transition" :class="[
+      <li v-for="level in levels" :key="level.id" class="border rounded-lg p-4 space-y-3 transition" :class="[
         level.comingSoon
           ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
           : canEnterLevel(level)
