@@ -309,7 +309,6 @@ function topicLink(topic: Topic) {
 <template>
   <main class="max-w-5xl mx-auto py-12 px-4 space-y-8">
     <header>
-      <h1 class="text-3xl font-semibold">Topics</h1>
       <p class="text-gray-600 mt-2">
         Vocabulary and sentences grouped by subject matter.
       </p>
