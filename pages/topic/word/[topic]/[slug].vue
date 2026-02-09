@@ -8,13 +8,13 @@ definePageMeta({
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 
-const id = computed(() => decodeURIComponent(route.params.id as string))
+const slug = computed(() => decodeURIComponent(route.params.slug as string))
 const topic = computed(() => route.params.topic as string)
 
 const { data, error } = await useFetch(
-    () => `/api/words/${id.value}`,
+    () => `/api/words/${slug.value}`,
     {
-        key: () => `word-${id.value}`,
+        key: () => `word-${slug.value}`,
         server: true
     }
 )
@@ -26,13 +26,14 @@ const cdnBase = runtimeConfig.public.cdnBase
 const word = computed(() => data.value)
 const notFound = computed(() => error.value?.statusCode === 404)
 
+
 </script>
 
 <template>
     <main v-if="word" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
 
-        <NuxtLink :to="`/topics/${topic}`" class="block text-gray-500 hover:underline">
-            ← Topics - {{ topic }}
+        <NuxtLink :to="`/topic/words/${topic}`" class="block text-gray-500 hover:underline">
+            ← {{ topic.replace("-", " ") }}
         </NuxtLink>
 
         <!-- Word header -->
@@ -113,7 +114,7 @@ const notFound = computed(() => error.value?.statusCode === 404)
     <main v-else-if="notFound" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
 
         <NuxtLink :to="`/topic/words/${topic}`" class="block text-gray-500 hover:underline">
-            ← Topics - {{ topic }}
+            ← {{ topic.replace("-", " ") }}
         </NuxtLink>
         <!-- 404 -->
         <div class="max-w-xl mx-auto px-4 py-24 text-center text-gray-500">

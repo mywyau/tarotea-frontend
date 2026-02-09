@@ -37,37 +37,37 @@ const topics = [
   {
     id: 'greetings-polite',
     title: 'Greetings & Politeness',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Say hello, goodbye, thank people, apologise, and handle basic polite interactions.'
   },
   {
     id: 'fruits-vegetables',
     title: 'Fruit & Vegetables',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Name and describe fruits and vegetables.'
   },
   {
     id: 'food-ordering',
     title: 'Food & Ordering',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Talk about food, order at restaurants, express preferences, and ask for recommendations.'
   },
   {
     id: 'clothing',
     title: 'Clothing',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Name and describe items of clothing.'
   },
   {
     id: 'measure-quantities',
     title: 'Measurements & Quantities',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Describe amounts, sizes, prices, and quantities used in daily life and shopping.'
   },
   {
     id: 'time-dates',
     title: 'Time & Dates',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Talk about time, days, dates, schedules, and when things happen.'
   },
   {
@@ -79,31 +79,31 @@ const topics = [
   {
     id: 'countries-nationalities',
     title: 'Countries & Nationalities',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Talk about where you are from, countries, languages, and cultural background.'
   },
   {
     id: 'transport-travel',
     title: 'Transport & Travel',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Use transport, ask for directions, talk about travel plans, and get around the city.'
   },
   {
     id: 'family-relationships',
     title: 'Family & Relationships',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Talk about family members, relatives, and personal relationships.'
   },
   {
     id: 'furniture',
     title: 'Home & Furniture',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Describe your home, rooms, furniture, and everyday household items.'
   },
   {
     id: 'professions',
     title: 'Work & Professions',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Talk about jobs, workplaces, roles, and what people do for work.'
   },
   {
@@ -115,13 +115,13 @@ const topics = [
   {
     id: 'health',
     title: 'Health & Wellbeing',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Describe how you feel, talk about common health issues, and seek basic help.'
   },
   {
     id: 'emotions',
     title: 'Feelings & Emotions',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Express emotions, moods, opinions, and personal reactions naturally.'
   },
   {
@@ -133,13 +133,13 @@ const topics = [
   {
     id: 'directions',
     title: 'Directions & Locations',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Ask for directions, describe locations, and navigate places confidently.'
   },
   {
     id: 'weather',
     title: 'Weather & Seasons',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Talk about the weather, seasons, temperature, and climate.'
   },
   {
@@ -175,7 +175,7 @@ const topics = [
   {
     id: 'hobbies',
     title: 'Hobbies & Interests',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Discuss hobbies, interests, and things you enjoy doing.'
   },
   {
@@ -235,7 +235,7 @@ const topics = [
   {
     id: 'technology',
     title: 'Technology & Devices',
-    comingSoon: false,
+    comingSoon: true,
     description: 'Talk about phones, computers, apps, and everyday tech usage.'
   },
   {
