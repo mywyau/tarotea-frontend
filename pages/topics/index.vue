@@ -37,7 +37,7 @@ const topics = [
   {
     id: 'greetings-polite',
     title: 'Greetings & Politeness',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Say hello, goodbye, thank people, apologise, and handle basic polite interactions.'
   },
   {
