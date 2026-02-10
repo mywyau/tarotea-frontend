@@ -22,7 +22,7 @@ definePageMeta({
       </p>
 
       <a
-        href="mailto:support@tarotea.app"
+        href="mailto:contact@tarotea.dev"
         class="font-medium text-black hover:underline"
       >
         contact@tarotea.dev
