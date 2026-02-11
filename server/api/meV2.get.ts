@@ -21,6 +21,14 @@ interface MeResponse {
 export default defineEventHandler(async (event): Promise<MeResponse> => {
   const userId = await requireUser(event);
 
+  console.log(
+    JSON.stringify({
+      event: "me_endpoint_called",
+      userId,
+      timestamp: new Date().toISOString(),
+    }),
+  );
+
   const { rows } = await db.query(
     `
       select
@@ -41,6 +49,16 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
 
   const row = rows[0];
 
+  if (!row) {
+    console.error(
+      JSON.stringify({
+        event: "me_user_not_found",
+        userId,
+      }),
+    );
+    throw createError({ statusCode: 404, statusMessage: "User not found" });
+  }
+
   const entitlement: Entitlement = row?.plan
     ? {
         plan: row.plan,
@@ -60,6 +78,17 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
         active: false,
         cancel_at_period_end: false,
       };
+
+  // ✅ 3️⃣ Log resolved entitlement (safe summary only)
+  console.log(
+    JSON.stringify({
+      event: "entitlement_resolved",
+      userId,
+      plan: entitlement.plan,
+      active: entitlement.active,
+      subscription_status: entitlement.subscription_status,
+    }),
+  );
 
   return {
     id: row.id,
