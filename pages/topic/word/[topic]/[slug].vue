@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-// definePageMeta({
-//     middleware: ['coming-soon'],
-//     ssr: true,
-// })
+definePageMeta({
+    middleware: ['word-access'],
+    ssr: true,
+})
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()

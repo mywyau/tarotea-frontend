@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-// definePageMeta({
-//   middleware: ['coming-soon'],
-//   ssr: true,
-// })
+definePageMeta({
+    middleware: ['topic-access'],
+    ssr: false,
+})
 
 import WordTile from '@/components/WordTile.vue'
 
