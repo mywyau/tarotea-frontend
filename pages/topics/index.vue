@@ -66,7 +66,7 @@ const topics = [
   {
     id: 'clothing',
     title: 'Clothing',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Name and describe items of clothing.'
   },
   {
