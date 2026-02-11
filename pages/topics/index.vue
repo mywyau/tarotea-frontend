@@ -58,16 +58,16 @@ const topics = [
     description: 'Name and describe fruits and vegetables.'
   },
   {
-    id: 'food-ordering',
-    title: 'Food & Ordering',
-    comingSoon: true,
-    description: 'Talk about food, order at restaurants, express preferences, and ask for recommendations.'
-  },
-  {
     id: 'clothing',
     title: 'Clothing',
     comingSoon: false,
     description: 'Name and describe items of clothing.'
+  },
+  {
+    id: 'food-ordering',
+    title: 'Food & Ordering',
+    comingSoon: true,
+    description: 'Talk about food, order at restaurants, express preferences, and ask for recommendations.'
   },
   {
     id: 'measure-quantities',
@@ -314,23 +314,13 @@ function topicLink(topic: Topic) {
       </p>
     </header>
 
-    <ul
-      class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-    >
-      <li
-        v-for="topic in topics"
-        :key="topic.id"
-        class="border rounded-lg p-4 space-y-3 transition"
-        :class="[
-          topic.comingSoon
-            ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
-            : 'hover:bg-gray-50 cursor-pointer'
-        ]"
-      >
-        <NuxtLink
-          :to="topicLink(topic)"
-          class="block space-y-2"
-        >
+    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <li v-for="topic in topics" :key="topic.id" class="border rounded-lg p-4 space-y-3 transition" :class="[
+        topic.comingSoon
+          ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
+          : 'hover:bg-gray-50 cursor-pointer'
+      ]">
+        <NuxtLink :to="topicLink(topic)" class="block space-y-2">
           <!-- Title row -->
           <div class="flex items-center justify-between">
             <h2 class="text-lg font-medium">
@@ -344,10 +334,7 @@ function topicLink(topic: Topic) {
           </p>
 
           <!-- Locked message -->
-          <p
-            v-if="topic.requiresPaid && !canEnterTopic(topic)"
-            class="text-xs text-gray-400 pt-1"
-          >
+          <p v-if="topic.requiresPaid && !canEnterTopic(topic)" class="text-xs text-gray-400 pt-1">
             Locked — upgrade to access
           </p>
         </NuxtLink>
