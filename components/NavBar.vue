@@ -37,6 +37,7 @@ async function handleLogout() {
 
       <nav class="hidden md:flex items-center gap-6">
 
+        <NuxtLink to="/topic/greetings-polite/quiz" class="nav-link hover:text-gray-600">Topic Quiz</NuxtLink>
         <NuxtLink to="/topics" class="nav-link hover:text-gray-600">Topics</NuxtLink>
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
         <NuxtLink to="/exercises" class="nav-link hover:text-gray-600">Exercises</NuxtLink>

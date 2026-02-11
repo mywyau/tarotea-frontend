@@ -64,12 +64,6 @@ const topics = [
     description: 'Name and describe items of clothing.'
   },
   {
-    id: 'food-ordering',
-    title: 'Food & Ordering',
-    comingSoon: true,
-    description: 'Talk about food, order at restaurants, express preferences, and ask for recommendations.'
-  },
-  {
     id: 'measure-quantities',
     title: 'Measurements & Quantities',
     comingSoon: true,
@@ -112,10 +106,10 @@ const topics = [
     description: 'Describe your home, rooms, furniture, and everyday household items.'
   },
   {
-    id: 'professions',
-    title: 'Work & Professions',
+    id: 'food-ordering',
+    title: 'Food & Ordering',
     comingSoon: true,
-    description: 'Talk about jobs, workplaces, roles, and what people do for work.'
+    description: 'Talk about food, order at restaurants, express preferences, and ask for recommendations.'
   },
   {
     id: 'shopping',
@@ -140,6 +134,12 @@ const topics = [
     title: 'Daily Life & Routines',
     comingSoon: true,
     description: 'Talk about daily habits, routines, plans, and everyday activities.'
+  },
+  {
+    id: 'professions',
+    title: 'Work & Professions',
+    comingSoon: true,
+    description: 'Talk about jobs, workplaces, roles, and what people do for work.'
   },
   {
     id: 'directions',
