@@ -6,7 +6,6 @@ type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled";
 interface Entitlement {
   plan: "free" | "monthly" | "yearly";
   subscription_status: SubscriptionStatus;
-  active: boolean;
   cancel_at_period_end: boolean;
   current_period_end?: string;
   canceled_at?: string;
@@ -36,7 +35,6 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
         u.email,
         e.plan,
         e.subscription_status,
-        e.active,
         e.cancel_at_period_end,
         e.current_period_end,
         e.canceled_at
@@ -63,7 +61,6 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
     ? {
         plan: row.plan,
         subscription_status: row.subscription_status,
-        active: row.active,
         cancel_at_period_end: row.cancel_at_period_end,
         ...(row.current_period_end && {
           current_period_end: new Date(row.current_period_end).toISOString(),
@@ -75,7 +72,6 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
     : {
         plan: "free",
         subscription_status: "canceled",
-        active: false,
         cancel_at_period_end: false,
       };
 
@@ -85,7 +81,6 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
       event: "entitlement_resolved",
       userId,
       plan: entitlement.plan,
-      active: entitlement.active,
       subscription_status: entitlement.subscription_status,
     }),
   );

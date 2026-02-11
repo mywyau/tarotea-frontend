@@ -9,7 +9,7 @@ export default defineEventHandler(async () => {
     `
     SELECT COUNT(*)::int AS count
     FROM entitlements
-    WHERE active = true
+    WHERE subscription_status = 'active'
       AND plan IN ('monthly', 'yearly')
     `
   )

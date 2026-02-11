@@ -62,7 +62,7 @@ export default defineNuxtRouteMiddleware((to) => {
 
   // 🔒 Premium-only topics (if you later flip some to live)
   const hasPremium =
-    entitlement.value?.active &&
+    entitlement.value?.subscription_status == "active" &&
     (entitlement.value.plan === "monthly" ||
       entitlement.value.plan === "yearly");
 

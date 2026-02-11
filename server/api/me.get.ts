@@ -11,7 +11,6 @@ export default defineEventHandler(async (event) => {
       u.id,
       u.email,
       e.plan,
-      e.active
     from users u
     join entitlements e on e.user_id = u.id
     where u.id = $1

@@ -98,8 +98,10 @@ async function openBillingPortal() {
                 <p class="text-sm text-gray-500">Plan</p>
 
                 <p class="font-medium">
-                    <span v-if="entitlement?.plan === 'monthly'">Monthly</span>
-                    <span v-else-if="entitlement?.plan === 'yearly'">Yearly</span>
+                    <span
+                        v-if="entitlement?.plan === 'monthly' && entitlement?.subscription_status == 'active'">Monthly</span>
+                    <span
+                        v-else-if="entitlement?.plan === 'yearly' && entitlement?.subscription_status == 'active'">Yearly</span>
                     <span v-else>Free</span>
                 </p>
 

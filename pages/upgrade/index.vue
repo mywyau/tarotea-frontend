@@ -16,10 +16,7 @@ const {
 } = useMeStateV2();
 
 const isSubscribed = computed(() =>
-  authReady.value &&
-  entitlement.value &&
-  entitlement.value.plan !== 'free' &&
-  entitlement.value.active === true
+  authReady.value && hasPaidAccess.value
 )
 
 function upgrade(plan: 'monthly' | 'yearly') {

@@ -48,7 +48,8 @@ async function handleLogout() {
 
         <template v-else-if="isLoggedIn">
 
-          <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="font-medium bg-clip-text text-transparent
+          <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" to="/upgrade"
+            class="font-medium bg-clip-text text-transparent
          bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
          hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
          transition
@@ -124,7 +125,8 @@ async function handleLogout() {
         <template v-else-if="isLoggedIn">
 
           <div>
-            <NuxtLink v-if="entitlement?.plan === 'free'" to="/upgrade" class="mobile-secondary font-medium bg-clip-text text-transparent
+            <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" to="/upgrade"
+              class="mobile-secondary font-medium bg-clip-text text-transparent
          bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600
          hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
          transition

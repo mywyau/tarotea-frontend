@@ -12,7 +12,6 @@ interface Entitlement {
   plan: "free" | "monthly" | "yearly";
   subscription_status: SubscriptionStatus;
   cancel_at_period_end: boolean;
-
   current_period_end?: string;
   canceled_at?: string;
 }
@@ -109,51 +108,6 @@ export default defineEventHandler(async (event) => {
   }
 
   switch (stripeEvent.type) {
-    // case "invoice.paid": {
-    //   // this is the event when stripe finishes and fires a status which is "active" or not
-    //   // subscription updated will often be set to "incomplete"
-
-    //   const invoice = stripeEvent.data.object as Stripe.Invoice;
-
-    //   const subId =
-    //     typeof invoice.subscription === "string" ? invoice.subscription : null;
-
-    //   if (!subId) break;
-
-    //   const sub = await stripe.subscriptions.retrieve(subId);
-
-    //   if (sub.status === "canceled") break;
-
-    //   const userId = sub.metadata?.userId;
-    //   if (!userId) break;
-
-    //   const e = entitlementFromSubscription(sub);
-
-    //   await db.query(
-    //     `
-    //       update entitlements
-    //       set
-    //         plan = $1,
-    //         subscription_status = $2,
-    //         active = true,
-    //         cancel_at_period_end = $3,
-    //         current_period_end = $4,
-    //         canceled_at = $5
-    //       where user_id = $6
-    //     `,
-    //     [
-    //       e.plan,
-    //       e.subscription_status,
-    //       e.cancel_at_period_end,
-    //       e.current_period_end,
-    //       e.canceled_at,
-    //       userId,
-    //     ],
-    //   );
-
-    //   return { received: true };
-    // }
-
     case "invoice.paid": {
       const invoice = stripeEvent.data.object as Stripe.Invoice;
 
@@ -171,13 +125,12 @@ export default defineEventHandler(async (event) => {
       await db.query(
         `
       update entitlements
-      set
-        plan = $1,
-        subscription_status = $2,
-        active = true,
-        cancel_at_period_end = $3,
-        current_period_end = $4,
-        canceled_at = $5
+        set
+          plan = $1,
+          subscription_status = $2,
+          cancel_at_period_end = $3,
+          current_period_end = $4,
+          canceled_at = $5
       where user_id = $6
     `,
         [
@@ -205,7 +158,6 @@ export default defineEventHandler(async (event) => {
       await db.query(
         `
           update entitlements
-          set active = false
           where user_id = $1
         `,
         [userId],
@@ -213,7 +165,7 @@ export default defineEventHandler(async (event) => {
 
       return { received: true };
     }
-    case "customer.subscription.created": // 👇 this block runs for BOTH events for creation and  customer.subscription.updated": since there is no break;
+    // case "customer.subscription.created": // 👇 this block runs for BOTH events for creation and  customer.subscription.updated": since there is no break;
     case "customer.subscription.updated": {
       const sub = stripeEvent.data.object as Stripe.Subscription;
 
@@ -265,7 +217,6 @@ export default defineEventHandler(async (event) => {
           set
             plan = 'free',
             subscription_status = 'canceled',
-            active = false,
             cancel_at_period_end = false,
             current_period_end = null,
             canceled_at = now()

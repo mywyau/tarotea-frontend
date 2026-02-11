@@ -35,8 +35,8 @@ export default defineEventHandler(async (event) => {
   // 2️⃣ Create entitlement if not exists
   await db.query(
     `
-    INSERT INTO entitlements (user_id, plan, active)
-    VALUES ($1, 'free', true)
+    INSERT INTO entitlements (user_id, plan, subscription_status)
+    VALUES ($1, 'free', 'no_subscription')
     ON CONFLICT (user_id) DO NOTHING
     `,
     [userId]
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
       u.id,
       u.email,
       e.plan,
-      e.active
+      e.subscription_status
     FROM users u
     JOIN entitlements e ON e.user_id = u.id
     WHERE u.id = $1

@@ -2,12 +2,12 @@ export type SubscriptionStatus =
   | "active"
   | "trialing"
   | "past_due"
-  | "canceled";
+  | "canceled"
+  | "incomplete";
 
 export interface Entitlement {
   plan: "free" | "monthly" | "yearly";
   subscription_status: SubscriptionStatus;
-  active: boolean;
   cancel_at_period_end: boolean;
   current_period_end?: string;
   canceled_at?: string;
@@ -32,7 +32,6 @@ export function useMeStateV2() {
   const resolved = useState<boolean>("meResolvedV2", () => false);
 
   const resolve = async ({ force = false } = {}) => {
-
     if (resolved.value && !force) return;
 
     resolved.value = false;
@@ -73,11 +72,16 @@ export function useMeStateV2() {
     state.value.status === "logged-in" ? state.value.user.entitlement : null,
   );
 
-  const hasPaidAccess = computed(() =>
-    entitlement.value
-      ? ["active", "trialing", "past_due"].includes(entitlement.value.subscription_status)
-      : false,
-  );
+  const hasPaidAccess = computed(() => {
+    if (!entitlement.value) return false;
+
+    return (
+      entitlement.value.plan !== "free" &&
+      ["active", "trialing", "past_due"].includes(
+        entitlement.value.subscription_status,
+      )
+    );
+  });
 
   const isCanceling = computed(
     () => entitlement.value?.cancel_at_period_end === true,

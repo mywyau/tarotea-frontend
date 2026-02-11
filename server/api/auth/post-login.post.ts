@@ -32,11 +32,11 @@ export default defineEventHandler(async (event) => {
       [userId, email]
     )
 
-    // 2️⃣ Create default entitlement if missing
+    // 2️⃣ Create default entitlement if missing // e.g. user logins first time ever
     await db.query(
       `
-      insert into entitlements (user_id, plan, active)
-      values ($1, 'free', true)
+      insert into entitlements (user_id, plan, subscription_status)
+      values ($1, 'free', 'no_subscription')
       on conflict (user_id) do nothing
       `,
       [userId]
@@ -49,7 +49,7 @@ export default defineEventHandler(async (event) => {
         u.id,
         u.email,
         e.plan,
-        e.active
+        e.subscription_status
       from users u
       join entitlements e on e.user_id = u.id
       where u.id = $1

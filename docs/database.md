@@ -26,7 +26,6 @@ Tracks access level and billing state.
 Columns:
 - user_id (text, PK, FK → users.id)
 - plan (text) — free | monthly | yearly
-- active (boolean)
 - subscription_status (text)
 - cancel_at_period_end (boolean)
 - current_period_end (timestamptz)

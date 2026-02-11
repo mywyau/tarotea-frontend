@@ -30,12 +30,12 @@ export default defineEventHandler(async (event) => {
 
   // 🔒 Require pro entitlement
   const { rows } = await db.query(
-    `select plan, active from entitlements where user_id = $1`,
+    `select plan, subscription_plan from entitlements where user_id = $1`,
     [userId]
   )
 
   const ent = rows[0]
-  const isPro = ent?.plan === 'monthly' && ent?.active === true
+  const isPro = (ent?.plan === 'monthly' && ent?.subscription_plan === 'active') || (ent?.plan === 'yearly' && ent?.subscription_plan === 'active')
 
   if (!isPro) {
     throw createError({ statusCode: 403, statusMessage: 'Upgrade required' })
