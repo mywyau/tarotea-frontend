@@ -8,6 +8,8 @@ definePageMeta({
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 
+const { authReady } = useMeStateV2() // for now just to prevent hydration redirect jitters
+
 const slug = computed(() => decodeURIComponent(route.params.slug as string))
 const topic = computed(() => route.params.topic as string)
 
@@ -26,11 +28,10 @@ const cdnBase = runtimeConfig.public.cdnBase
 const word = computed(() => data.value)
 const notFound = computed(() => error.value?.statusCode === 404)
 
-
 </script>
 
 <template>
-    <main v-if="word" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
+    <main v-if="authReady && word" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
 
         <NuxtLink :to="`/topic/words/${topic}`" class="block text-gray-500 hover:underline">
             ← {{ topic.replace("-", " ") }}

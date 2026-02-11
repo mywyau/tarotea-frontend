@@ -10,6 +10,8 @@ import WordTile from '@/components/WordTile.vue'
 const route = useRoute()
 const slug = route.params.topic as string
 
+const { authReady } = useMeStateV2() // for now just to prevent hydration redirect jitters
+
 // SSR-safe fetch (no gating, no nulls)
 const { data: topic, error } = await useFetch(
   `/api/index/topics/${slug}`,
@@ -39,7 +41,7 @@ const categories = computed(() =>
 </script>
 
 <template>
-  <main class="max-w-4xl mx-auto px-4 py-12 space-y-12">
+  <main v-if="authReady" class="max-w-4xl mx-auto px-4 py-12 space-y-12">
     <header class="space-y-2">
       <h1 class="text-3xl font-semibold">{{ topic.title }}</h1>
       <p class="text-gray-600">{{ topic.description }}</p>

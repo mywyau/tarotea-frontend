@@ -1,19 +1,16 @@
-export default defineNuxtRouteMiddleware((to) => {
-
+export default defineNuxtRouteMiddleware(async (to) => {
   const topic = to.params.topic as string | undefined;
   const slug = to.params.slug as string | undefined;
 
-  if (!topic) return;
-  if (!slug) return;
+  if (!topic || !slug) return;
 
-  const { authReady, entitlement } = useMeStateV2();
+  const { authReady, resolve, entitlement } = useMeStateV2();
 
-  // ⛔ Wait for auth
+  // ✅ Wait for auth before continuing
   if (!authReady.value) {
-    return;
+    await resolve();
   }
 
-  // 🔹 First 4 free topics
   const FREE_TOPICS = [
     "survival-essentials",
     "greetings-polite",
@@ -21,55 +18,16 @@ export default defineNuxtRouteMiddleware((to) => {
     "clothing",
   ];
 
-  const COMING_SOON_TOPICS = [
-    "food-ordering",
-    "measure-quantities",
-    "time-dates",
-    "money",
-    "countries-nationalities",
-    "transport-travel",
-    "family-relationships",
-    "furniture",
-    "professions",
-    "shopping",
-    "health",
-    "emotions",
-    "daily-life",
-    "directions",
-    "weather",
-    "emergencies",
-    "phone-internet",
-    "appointments",
-    "housing",
-    "school-education",
-    "hobbies",
-    "sports-fitness",
-    "entertainment",
-    "social-media",
-    "opinions",
-    "complaints",
-    "celebrations",
-    "culture",
-    "dating",
-    "news",
-    "technology",
-    "food-cooking",
-    "travel-abroad",
-    "slang",
-  ];
-
-  // ✅ Always allow free topics
+  // Free topics allowed
   if (FREE_TOPICS.includes(topic)) {
     return;
   }
 
-  // 🔒 Premium-only topics (if you later flip some to live)
   const hasPremium =
     entitlement.value?.active &&
-    (entitlement.value.plan === "monthly" ||
-      entitlement.value.plan === "yearly");
+    ["monthly", "yearly"].includes(entitlement.value.plan);
 
   if (!hasPremium) {
-    return navigateTo("/upgrade");
+    return navigateTo("/upgrade", { replace: true });
   }
 });
