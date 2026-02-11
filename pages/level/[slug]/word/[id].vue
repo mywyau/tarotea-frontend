@@ -1,36 +1,50 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-access'],
+  middleware: ['level-word-access'],
   ssr: true,
 })
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 
+// Dynamic params
+const level = computed(() => route.params.slug as string)
 const id = computed(() => decodeURIComponent(route.params.id as string))
 
+// Fetch word data
 const { data, error } = await useFetch(
   () => `/api/words/${id.value}`,
   {
     key: () => `word-${id.value}`,
-    server: true
+    server: true,
   }
 )
 
 const cdnBase = runtimeConfig.public.cdnBase
-
 const { volume } = useAudioVolume()
 
 const word = computed(() => data.value)
 const notFound = computed(() => error.value?.statusCode === 404)
+
+// Format level label (level-four → Level Four)
+const formattedLevel = computed(() => {
+  return level.value
+    .replace(/-/g, " ")
+    .replace(/\b\w/g, c => c.toUpperCase())
+})
+
 </script>
 
 <template>
   <main v-if="word" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
 
-    <NuxtLink :to="`/level/level-three`" class="block text-gray-500 hover:underline">
-      ← Level 3 Vocab
+    <!-- Back link -->
+    <NuxtLink
+      :to="`/level/${level}`"
+      class="block text-gray-500 hover:underline"
+    >
+      ← {{ formattedLevel }} Vocab
     </NuxtLink>
 
     <!-- Word header -->
@@ -47,7 +61,10 @@ const notFound = computed(() => error.value?.statusCode === 404)
         {{ word.meaning }}
       </div>
 
-      <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" />
+      <AudioButton
+        v-if="word.audio?.word"
+        :src="`${cdnBase}/audio/${word.audio.word}`"
+      />
     </section>
 
     <!-- Usage -->
@@ -63,10 +80,18 @@ const notFound = computed(() => error.value?.statusCode === 404)
       </ul>
     </section>
 
-    <div class="flex items-center justify-center gap-3 pt-2 text-sm text-black">
+    <!-- Volume -->
+    <div class="flex items-center justify-center gap-3 pt-2 text-sm text-gray-500">
       <span class="select-none">Volume</span>
 
-      <input type="range" min="0" max="1" step="0.01" v-model="volume" class="w-32 accent-black" />
+      <input
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        v-model="volume"
+        class="w-32 accent-black"
+      />
 
       <span class="w-8 text-left tabular-nums">
         {{ Math.round(volume * 100) }}%
@@ -80,19 +105,21 @@ const notFound = computed(() => error.value?.statusCode === 404)
       </h2>
 
       <ul class="space-y-4">
-        <li v-for="(example, index) in word.examples" :key="example.sentence"
-          class="border-l-4 border-gray-200 pl-4 py-2">
+        <li
+          v-for="(example, index) in word.examples"
+          :key="example.sentence"
+          class="border-l-4 border-gray-200 pl-4 py-2"
+        >
           <div class="space-y-1">
             <div class="flex items-center justify-between gap-4">
               <span class="text-lg">
                 {{ example.sentence }}
               </span>
 
-              <AudioButton v-if="word.audio?.examples?.[index]"
-                :src="`${cdnBase}/audio/${word.audio.examples[index]}`" />
-
-              <!-- {{ `${cdnBase}/audio/${word.audio.examples[index]}` }} -->
-
+              <AudioButton
+                v-if="word.audio?.examples?.[index]"
+                :src="`${cdnBase}/audio/${word.audio.examples[index]}`"
+              />
             </div>
 
             <div class="text-sm text-gray-400">
@@ -110,7 +137,10 @@ const notFound = computed(() => error.value?.statusCode === 404)
   </main>
 
   <!-- 404 -->
-  <div v-else-if="notFound" class="max-w-xl mx-auto px-4 py-24 text-center text-gray-500">
+  <div
+    v-else-if="notFound"
+    class="max-w-xl mx-auto px-4 py-24 text-center text-gray-500"
+  >
     Word not found
   </div>
 </template>

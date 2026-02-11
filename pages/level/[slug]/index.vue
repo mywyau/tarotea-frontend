@@ -7,6 +7,8 @@ definePageMeta({
 
 import WordTile from '@/components/WordTile.vue'
 import { getLevelNumber } from '@/utils/levels'
+import { createError } from 'nuxt/app'
+import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const slug = route.params.slug as string

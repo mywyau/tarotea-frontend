@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-    middleware: ['word-access'],
+    middleware: ['topic-word-access'],
     ssr: true,
 })
 
