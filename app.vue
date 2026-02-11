@@ -25,6 +25,13 @@ useHead({
 
 import { Analytics } from '@vercel/analytics/nuxt';
 
+
+const { resolve } = useMeStateV2();
+
+onMounted(() => {
+  resolve();
+});
+
 </script>
 
 <template>

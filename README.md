@@ -64,3 +64,32 @@ This project is evolving and features may change.
 - Keep the app simple and calm
 - Teach natural Cantonese, not textbook grammar
 - Respect user data — no dark patterns, easy deletion
+
+
+### Clear build
+
+```
+rm -rf .nuxt
+rm -rf node_modules
+rm -rf .output
+```
+
+### Install dependencies
+```
+npm install
+```
+
+### Run dev build
+```
+npm run build
+```
+
+### Run dev build
+```
+npm run dev
+```
+
+### Run preview prod
+```
+npm run preview
+```
