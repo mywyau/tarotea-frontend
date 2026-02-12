@@ -76,6 +76,7 @@ const FREE_TOPICS = new Set([
   "greetings-polite",
   "fruits-vegetables",
   "clothing",
+  // "measure-quantities"
 ])
 
 export default defineNuxtRouteMiddleware((to) => {
