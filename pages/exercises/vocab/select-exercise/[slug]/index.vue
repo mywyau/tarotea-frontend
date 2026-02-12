@@ -71,7 +71,7 @@ if (!levelMeta.value) {
 
       <!-- Vocabulary -->
       <NuxtLink
-        :to="`/exercise/${levelId}/vocab/start-exercise`"
+        :to="`/exercises/${levelId}/vocab/start-exercise`"
         class="rounded-xl border p-6 transition hover:bg-gray-50"
       >
         <h2 class="text-lg font-medium mb-1">
@@ -84,7 +84,7 @@ if (!levelMeta.value) {
 
       <!-- Sentences -->
       <NuxtLink
-        :to="`/exercise/${levelId}/sentence/start-exercise`"
+        :to="`/exercises/vocab/sentences/${levelId}`"
         class="rounded-xl border p-6 transition hover:bg-gray-50"
       >
         <h2 class="text-lg font-medium mb-1">
