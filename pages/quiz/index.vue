@@ -99,7 +99,7 @@ const canEnterLevel = (level: any) => {
         quizLevel.comingSoon
           ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
           : canEnterLevel(quizLevel)
-            ? 'hover:bg-gray-50'
+            ? ''
             : 'opacity-80'
       ]">
 
@@ -117,12 +117,12 @@ const canEnterLevel = (level: any) => {
         <!-- ✅ Available & accessible -->
         <div v-if="canEnterLevel(quizLevel) && !isComingSoon(quizLevel)" class="flex gap-3 pt-2">
           <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`"
-            class="flex-1 rounded border px-3 py-2 text-sm text-center hover:bg-gray-100">
+            class="flex-1 rounded px-3 py-2 text-sm text-center bg-blue-50 text-blue-700 hover:bg-blue-100">
             Word quiz
           </NuxtLink>
 
           <NuxtLink :to="`/quiz/${quizLevel.id}/audio/start-quiz`"
-            class="flex-1 rounded border px-3 py-2 text-sm text-center hover:bg-gray-100">
+            class="flex-1 rounded px-3 py-2 text-sm text-center bg-purple-50 text-purple-700 hover:bg-purple-100">
             Audio quiz
           </NuxtLink>
         </div>

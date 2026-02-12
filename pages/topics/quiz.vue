@@ -287,11 +287,11 @@ const canEnterTopic = (topic: any) => {
             Practice and test your self
         </p>
 
-        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
 
 
             <li v-for="topic in topics" :key="topic.id"
-                class="group bg-white border border-gray-200 rounded-xl p-5 shadow-sm transition-all duration-200"
+                class="group bg-white border border-gray-200 rounded-lg p-5 shadow-sm transition-all duration-200"
                 :class="[
                     topic.comingSoon
                         ? 'opacity-60 cursor-not-allowed'
@@ -311,15 +311,17 @@ const canEnterTopic = (topic: any) => {
                 <div class="h-px bg-gray-100 my-4"></div>
 
                 <!-- Quiz Buttons -->
-                <div class="flex gap-2 flex-wrap">
+                <div class="flex gap-3">
 
-                    <NuxtLink :to="`/topic/quiz/vocabulary/${topic.id}`"
-                        class="px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition">
+                    <NuxtLink :to="`/topic/quiz/vocabulary/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm font-medium rounded-lg
+       bg-blue-50 text-blue-700 hover:bg-blue-100
+       transition whitespace-nowrap">
                         Vocabulary
                     </NuxtLink>
 
-                    <NuxtLink :to="`/topic/quiz/audio/${topic.id}`"
-                        class="px-3 py-1.5 text-xs font-medium rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition">
+                    <NuxtLink :to="`/topic/quiz/audio/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm font-medium rounded-lg
+       bg-purple-50 text-purple-700 hover:bg-purple-100
+       transition whitespace-nowrap">
                         Audio
                     </NuxtLink>
 
