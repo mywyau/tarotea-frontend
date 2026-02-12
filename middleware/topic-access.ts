@@ -3,17 +3,17 @@ const FREE_TOPICS = new Set([
   "greetings-polite",
   "fruits-vegetables",
   "clothing",
-  "measure-quantities",
 ]);
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const topic = to.params.topic as string | undefined;
   if (!topic) return;
 
-  const { authReady, resolve, hasPaidAccess } = useMeStateV2();
+  const { authReady, resolve, entitlement } = useMeStateV2();
 
   if (!authReady.value) {
-    await resolve();
+    return
+    // await resolve();
   }
 
   // ✅ Free topics always allowed
@@ -21,9 +21,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
-  console.log(hasPaidAccess.value);
+  if (!authReady.value) return;
+
+  // console.log(hasPaidAccess.value);
   // 🔒 Premium required
-  if (!hasPaidAccess.value) {
-    return navigateTo("/upgrade", { replace: true });
+  // if (!hasPaidAccess.value) {
+  //   return navigateTo("/upgrade", { replace: true });
+  // }
+  
+  if (!canAccessLevel(entitlement.value!)) {
+    return navigateTo("/upgrade");
   }
 });

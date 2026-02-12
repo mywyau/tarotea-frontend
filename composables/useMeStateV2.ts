@@ -99,7 +99,7 @@ export function useMeStateV2() {
     isLoggedIn,
     user,
     entitlement,
-    hasPaidAccess,
+    hasPaidAccess,  // this is dodgy use entitlements instead please :) to determine access
     isCanceling,
     currentPeriodEnd,
     resolve,

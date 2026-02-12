@@ -49,7 +49,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
         <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
           <li>• Full access to growing content.</li>
-          <li>• New topics and levels added regularly.</li>    
+          <li>• New topics and levels added regularly.</li>
           <li>• Native Cantonese audio for every word</li>
           <li>• No fluff, neatly organised content</li>
           <li>• New content added regularly</li>
@@ -73,11 +73,6 @@ function upgrade(plan: 'monthly' | 'yearly') {
           </button>
         </div>
 
-        <div v-if="!isLoggedIn" class="space-y-3 pt-4">
-          <!-- Monthly -->
-          <p class="text-lg text-gray-600">Please login in or sign-up and upgrade</p>
-        </div>
-
         <p v-if="isSubscribed" class="text-sm text-gray-600">
           You’re already subscribed.
           <NuxtLink to="/account" class="text-blue-600 hover:underline">
@@ -89,7 +84,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         <p v-if="!isSubscribed" class="text-sm text-gray-600">
           <!-- Secondary -->
           <NuxtLink to="/levels" class="pt-4 text-sm text-gray-500 hover:underline">
-           ← Continue learning without upgrading
+            ← Continue learning without upgrading
           </NuxtLink>
         </p>
 

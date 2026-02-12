@@ -2,10 +2,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const topic = to.params.topic as string | undefined;
   if (!topic) return;
 
-  const { authReady, hasPaidAccess, resolve } = useMeStateV2();
+  const { authReady, hasPaidAccess, resolve, entitlement } = useMeStateV2();
 
   if (!authReady.value) {
-    await resolve();
+    return;
+    // await resolve();
   }
 
   const FREE_TOPICS = [
@@ -13,7 +14,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     "greetings-polite",
     "fruits-vegetables",
     "clothing",
-    "measure-quantities"
   ];
 
   // ✅ Free topics
@@ -22,7 +22,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // 🔒 Premium required
-  if (!hasPaidAccess.value) {
-    return navigateTo("/upgrade", { replace: true });
+  // if (!hasPaidAccess.value) {
+  //   return navigateTo("/upgrade", { replace: true });
+  // }
+
+  if (!canAccessLevel(entitlement.value!)) {
+    return navigateTo("/upgrade");
   }
 });

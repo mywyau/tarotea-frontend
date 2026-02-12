@@ -1,48 +1,23 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['topic-access'],
-  ssr: false,
+    middleware: ['topic-access'],
+    ssr: true,
 })
 
-import WordTile from '@/components/WordTile.vue';
+import WordTile from '@/components/WordTile.vue'
 
 const route = useRoute()
 const slug = route.params.topic as string
 
-const FREE_TOPICS = new Set([
-  "survival-essentials",
-  "greetings-polite",
-  "fruits-vegetables",
-  "clothing",
-]);
-
-
-
 const { authReady } = useMeStateV2() // for now just to prevent hydration redirect jitters
-
-
-let headers = {}
-
-const auth = await useAuth();
-
-if (auth.isAuthenticated) {
-  const token = await auth.getAccessToken();
-  headers = {
-    Authorization: `Bearer ${token}`,
-  };
-}
 
 // SSR-safe fetch (no gating, no nulls)
 const { data: topic, error } = await useFetch(
   `/api/index/topics/${slug}`,
   {
     server: true,
-    // credentials: 'include', // 👈 cookies
-    // headers: {
-    // Authorization: `Bearer ${token}`,
-    // },
-    headers
+    credentials: 'include', // 👈 cookies
   }
 )
 
