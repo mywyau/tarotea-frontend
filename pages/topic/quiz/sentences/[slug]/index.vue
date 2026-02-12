@@ -82,11 +82,9 @@ watchEffect(() => {
 <template>
   <main class="max-w-3xl mx-auto px-4 py-12 space-y-10">
 
-    <NuxtLink :to="`/exercises`" class="text-sm text-gray-500 hover:underline">
-      ← Back to all exercises
+    <NuxtLink :to="`/topics/quiz`" class="text-sm text-gray-500 hover:underline">
+      ← Back to all topic quizzes
     </NuxtLink>
-
-
     
     <!-- Exercise -->
     <SentenceMeaningExercise :key="quizKey" :sentences="sessionSentences" :all-sentences="allSentences" />

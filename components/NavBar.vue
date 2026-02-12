@@ -37,22 +37,14 @@ async function handleLogout() {
 
       <nav class="hidden md:flex items-center gap-6">
 
-        <NuxtLink to="/topic/exercises/vocab/select-exercise/clothing" class="nav-link hover:text-gray-600">
-          Topic Exercises Selector
-        </NuxtLink>
-
-        <NuxtLink to="/topic/exercises/vocab/sentences/clothing" class="nav-link hover:text-gray-600">
-          Topic Exercises
-        </NuxtLink>
-
         <NuxtLink to="/topics" class="nav-link hover:text-gray-600">Topics</NuxtLink>
         <NuxtLink to="/topics/quiz" class="nav-link hover:text-gray-600">Topic Quiz</NuxtLink>
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
         <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Level Quiz</NuxtLink>
 
-        <NuxtLink to="/exercises" class="nav-link hover:text-gray-600">
+        <!-- <NuxtLink to="/exercises" class="nav-link hover:text-gray-600">
           Exercises
-        </NuxtLink>
+        </NuxtLink> -->
 
 
         <!-- Wait until auth is resolved -->
