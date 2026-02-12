@@ -1,0 +1,164 @@
+<script setup lang="ts">
+
+
+definePageMeta({
+  title: 'Cantonese Exercises by Level – Vocabulary & Sentence Practice',
+  meta: [
+    {
+      name: 'description',
+      content:
+        'Practice spoken Cantonese with vocabulary and sentence exercises organised by level. Audio-first learning with Jyutping and real usage.'
+    }
+  ],
+  // middleware: ['coming-soon'],
+  ssr: true,
+})
+
+import { onMounted } from 'vue'
+
+const {
+  state,
+  authReady,
+  isLoggedIn,
+  user,
+  entitlement,
+  hasPaidAccess,
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
+} = useMeStateV2()
+
+// Resolve auth once on mount (safe + idempotent)
+onMounted(async () => {
+  if (!authReady.value) {
+    await resolve()
+  }
+})
+
+const exerciseLevels = [
+  {
+    id: 'level-one',
+    number: 1,
+    title: 'Level 1',
+    comingSoon: false,
+    description: 'Foundation vocabulary: identity, actions, daily life, and simple needs.'
+  },
+  {
+    id: 'level-two',
+    number: 2,
+    title: 'Level 2',
+    comingSoon: false,
+    description: 'Daily situations, intentions, feelings, and simple reasoning.'
+  },
+  {
+    id: 'level-three',
+    number: 3,
+    title: 'Level 3',
+    comingSoon: false,
+    description: 'Intermediate Cantonese, expressing thoughts and reasons naturally.'
+  },
+  {
+    id: 'level-four',
+    number: 4,
+    title: 'Level 4',
+    comingSoon: true,
+    description: 'Express opinions, explain situations, discuss experiences.'
+  },
+  {
+    id: 'level-five',
+    number: 5,
+    title: 'Level 5',
+    comingSoon: true,
+    description: 'Handle work situations, services, and expectations.'
+  },
+  {
+    id: 'level-six',
+    number: 6,
+    title: 'Level 6',
+    comingSoon: true,
+    description: 'Tell stories and describe past experiences naturally.'
+  },
+]
+
+const isComingSoon = (level: any) => level.comingSoon === true
+
+const canEnterLevel = (level: any) => {
+
+  if (!authReady.value) return false
+
+  if (isComingSoon(level)) return false
+
+  // ✅ Free levels are always accessible
+  if (isFreeLevel(level.number)) return true
+
+  // 🔒 Paid levels require login
+  if (!isLoggedIn.value) return false
+
+  return canAccessLevel(entitlement.value!)
+}
+
+</script>
+
+
+<template>
+  <main class="max-w-3xl mx-auto py-12 px-4">
+
+    <h1 class="text-3xl font-semibold mb-4">
+      Exercises
+    </h1>
+
+    <p class="text-gray-600 mb-8">
+      Practice your cantonese
+    </p>
+
+    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+      <li v-for="exerciseLevel in exerciseLevels" :key="exerciseLevel.id"
+        class="border rounded p-4 space-y-3 transition" :class="[
+          exerciseLevel.comingSoon
+            ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
+            : canEnterLevel(exerciseLevel)
+              ? 'hover:bg-gray-50'
+              : 'opacity-80'
+        ]">
+
+        <div class="text-lg font-medium">
+          {{ exerciseLevel.title }}
+          <span v-if="exerciseLevel.comingSoon" class="text-sm text-gray-400 font-normal">
+            (Coming soon)
+          </span>
+        </div>
+
+        <div class="text-sm text-gray-600">
+          {{ exerciseLevel.description }}
+        </div>
+
+        <!-- ✅ Available & accessible -->
+        <div v-if="canEnterLevel(exerciseLevel) && !isComingSoon(exerciseLevel)" class="flex gap-3 pt-2">
+          <NuxtLink :to="`/exercises/vocab/select-exercise/${exerciseLevel.id}`"
+            class="flex-1 rounded border px-3 py-2 text-sm text-center hover:bg-gray-100">
+            Vocab exercises
+          </NuxtLink>
+
+          <NuxtLink :to="`/exercises/audio/select-exercise/${exerciseLevel.id}`"
+            class="flex-1 rounded border px-3 py-2 text-sm text-center hover:bg-gray-100">
+            Audio exercises
+          </NuxtLink>
+        </div>
+
+        <!-- 🚧 Coming soon (paid OR free) -->
+        <div v-else-if="isComingSoon(exerciseLevel)" class="pt-2 text-sm text-gray-400">
+          Coming soon
+        </div>
+
+        <!-- 🔒 Locked (not paid) -->
+        <div v-else class="pt-2">
+          <p class="text-sm text-gray-500">
+            Upgrade to unlock
+          </p>
+        </div>
+      </li>
+    </ul>
+
+  </main>
+</template>

@@ -84,7 +84,7 @@ if (!levelMeta.value) {
 
       <!-- Sentences -->
       <NuxtLink
-        :to="`/exercise/${levelId}/sentence/start-exercise`"
+        :to="`/exercise/vocab/sentences/${levelId}`"
         class="rounded-xl border p-6 transition hover:bg-gray-50"
       >
         <h2 class="text-lg font-medium mb-1">

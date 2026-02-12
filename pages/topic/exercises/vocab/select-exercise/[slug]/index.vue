@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
-definePageMeta({
-  middleware: ['coming-soon'],
-  ssr: true,
-})
+// definePageMeta({
+//   middleware: ['coming-soon'],
+//   ssr: true,
+// })
 
 import { computed, onMounted } from 'vue'
 
@@ -21,28 +21,17 @@ onMounted(async () => {
   }
 })
 
-const levelMeta = computed(() => {
+const topicMeta = computed(() => {
   const map: Record<string, { title: string; description: string }> = {
-    'level-one': {
-      title: 'Level 1',
-      description: 'Foundation vocabulary, actions, and everyday usage.'
-    },
-    'level-two': {
-      title: 'Level 2',
-      description: 'Daily situations, intentions, and feelings.'
-    },
-    'level-three': {
-      title: 'Level 3',
-      description: 'Expressing thoughts and reasons naturally.'
-    },
+    'clothing': {
+      title: 'Clothing Sentences',
+      description: 'Clothing based sentence exercises.'
+    }
   }
 
   return map[levelId.value]
 })
 
-if (!levelMeta.value) {
-  throw createError({ statusCode: 404, statusMessage: 'Level not found' })
-}
 </script>
 
 <template>
@@ -50,19 +39,19 @@ if (!levelMeta.value) {
 
     <!-- Back -->
     <NuxtLink
-      to="/exercises"
+      to="/topics/quiz"
       class="text-sm text-gray-500 hover:underline"
     >
-      ← Back to exercises
+      ← Back to topic quiz
     </NuxtLink>
 
     <!-- Header -->
     <div class="space-y-2">
       <h1 class="text-3xl font-semibold">
-        {{ levelMeta.title }}
+        {{ topicMeta.title }}
       </h1>
       <p class="text-gray-600">
-        {{ levelMeta.description }}
+        {{ topicMeta.description }}
       </p>
     </div>
 
@@ -71,7 +60,7 @@ if (!levelMeta.value) {
 
       <!-- Vocabulary -->
       <NuxtLink
-        :to="`/exercises/${levelId}/vocab/start-exercise`"
+        :to="`/topic/exercises/vocab/word/${levelId}`"
         class="rounded-xl border p-6 transition hover:bg-gray-50"
       >
         <h2 class="text-lg font-medium mb-1">
@@ -84,7 +73,7 @@ if (!levelMeta.value) {
 
       <!-- Sentences -->
       <NuxtLink
-        :to="`/exercises/vocab/sentences/${levelId}`"
+        :to="`/topic/exercises/vocab/sentences/${levelId}`"
         class="rounded-xl border p-6 transition hover:bg-gray-50"
       >
         <h2 class="text-lg font-medium mb-1">

@@ -313,13 +313,13 @@ const canEnterTopic = (topic: any) => {
                 <!-- Quiz Buttons -->
                 <div class="flex gap-3">
 
-                    <NuxtLink :to="`/topic/quiz/vocabulary/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm font-medium rounded-lg
+                    <NuxtLink :to="`/topic/quiz/vocabulary/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm rounded-lg
        bg-blue-50 text-blue-700 hover:bg-blue-100
        transition whitespace-nowrap">
                         Vocabulary
                     </NuxtLink>
 
-                    <NuxtLink :to="`/topic/quiz/audio/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm font-medium rounded-lg
+                    <NuxtLink :to="`/topic/quiz/audio/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm rounded-lg
        bg-purple-50 text-purple-700 hover:bg-purple-100
        transition whitespace-nowrap">
                         Audio

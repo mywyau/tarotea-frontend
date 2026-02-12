@@ -66,8 +66,9 @@ const options = computed(() => {
     .filter(s => s.id !== currentSentence.value.id)
     .map(s => s.meaning)
 
-  const uniqueDistractors = Array.from(new Set(distractors))
-    .slice(0, 3)
+  const uniqueDistractors = shuffle(
+    Array.from(new Set(distractors))
+  ).slice(0, 3)
 
   return shuffle([correct, ...uniqueDistractors])
 })
