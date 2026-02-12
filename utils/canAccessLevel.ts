@@ -1,9 +1,12 @@
-import type { Entitlement, MeUser } from "@/composables/useMeStateV2";
+import type { Entitlement } from "@/composables/useMeStateV2";
 
 export function hasPaidAccess(entitlement: Entitlement) {
-  return entitlement.subscription_status === 'active'
-      || entitlement.subscription_status === 'trialing'
-      || entitlement.subscription_status === 'past_due'
+  return (
+    entitlement.plan !== "free" &&
+    (entitlement.subscription_status === "active" ||
+      entitlement.subscription_status === "trialing" ||
+      entitlement.subscription_status === "past_due")
+  );
 }
 
 export function isFreeLevel(level: number) {

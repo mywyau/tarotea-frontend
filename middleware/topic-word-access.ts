@@ -13,7 +13,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     "greetings-polite",
     "fruits-vegetables",
     "clothing",
-    // "measure-quantities"
+    "measure-quantities"
   ];
 
   // ✅ Free topics
