@@ -313,27 +313,35 @@ const canEnterTopic = (topic: any) => {
                 <!-- Quiz Buttons -->
                 <div class="flex grid grid-cols-2  gap-3">
 
-                    <NuxtLink :to="`/topic/quiz/vocabulary/word/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm rounded-lg
-       bg-blue-50 text-blue-700 hover:bg-blue-100
-       transition whitespace-nowrap">
+                    <NuxtLink :to="`/topic/quiz/vocabulary/word/${topic.id}`" :class="[
+                        topic.comingSoon
+                            ? 'flex-1 text-center px-4 py-2.5 text-sm rounded-lg opacity-60 cursor-not-allowed transition whitespace-nowrap'
+                            : `flex-1 text-center px-4 py-2.5 text-sm rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition whitespace-nowrap`
+                    ]">
                         Vocab
                     </NuxtLink>
 
-                    <NuxtLink :to="`/topic/quiz/vocabulary/audio/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm rounded-lg
-       bg-purple-50 text-purple-700 hover:bg-purple-100
-       transition whitespace-nowrap">
+                    <NuxtLink :to="`/topic/quiz/vocabulary/audio/${topic.id}`" :class="[
+                        topic.comingSoon
+                            ? 'flex-1 text-center px-4 py-2.5 text-sm rounded-lg opacity-60 cursor-not-allowed transition whitespace-nowrap'
+                            : `flex-1 text-center px-4 py-2.5 text-sm rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition whitespace-nowrap`
+                    ]">
                         Vocab Audio
                     </NuxtLink>
 
-                    <NuxtLink :to="`/topic/quiz/sentences/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm rounded-lg
-       bg-blue-50 text-blue-700 hover:bg-blue-100
-       transition whitespace-nowrap">
+                    <NuxtLink :to="`/topic/quiz/sentences/${topic.id}`" :class="[
+                        topic.comingSoon
+                            ? 'flex-1 text-center px-4 py-2.5 text-sm rounded-lg opacity-60 cursor-not-allowed transition whitespace-nowrap'
+                            : `flex-1 text-center px-4 py-2.5 text-sm rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition whitespace-nowrap`
+                    ]">
                         Sentence
                     </NuxtLink>
 
-                    <!-- <NuxtLink :to="`/topic/quiz/sentences/audio/${topic.id}`" class="flex-1 text-center px-4 py-2.5 text-sm rounded-lg
-       bg-purple-50 text-purple-700 hover:bg-purple-100
-       transition whitespace-nowrap">
+                    <!-- <NuxtLink :to="`/topic/quiz/sentences/audio/${topic.id}`" :class="[
+                        topic.comingSoon
+                            ? 'flex-1 text-center px-4 py-2.5 text-sm rounded-lg opacity-60 cursor-not-allowed transition whitespace-nowrap'
+                            : `flex-1 text-center px-4 py-2.5 text-sm rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition whitespace-nowrap`
+                    ]">
                         Sentence Audio
                     </NuxtLink> -->
                 </div>
