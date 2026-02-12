@@ -273,26 +273,6 @@ const canEnterTopic = (topic: any) => {
     return canAccessLevel(entitlement.value!)
 }
 
-const topicLink = (topic: any, path: string) => {
-    if (topic.comingSoon) return undefined
-    return `/topic/quiz/${path}/${topic.id}`
-}
-
-const baseButtonClass =
-    'flex-1 text-center px-4 py-2.5 text-sm rounded-lg transition whitespace-nowrap'
-
-const disabledClass =
-    'opacity-60 cursor-not-allowed pointer-events-none bg-gray-100 text-gray-400'
-
-const vocabClass =
-    'bg-blue-50 text-blue-700 hover:bg-blue-100'
-
-const audioClass =
-    'bg-purple-50 text-purple-700 hover:bg-purple-100'
-
-const sentenceClass =
-    'bg-green-50 text-green-700 hover:bg-green-100'
-
 
 </script>
 
@@ -360,22 +340,6 @@ const sentenceClass =
                     ]">
                         Sentence
                     </NuxtLink>
-
-                    <!-- <NuxtLink :to="`/topic/quiz/vocabulary/audio/${topic.id}`" :class="[
-                        topic.comingSoon
-                            ? 'flex-1 text-center px-4 py-2.5 text-sm rounded-lg opacity-60 cursor-not-allowed transition whitespace-nowrap'
-                            : `flex-1 text-center px-4 py-2.5 text-sm rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition whitespace-nowrap`
-                    ]">
-                        Vocab Audio
-                    </NuxtLink> -->
-
-                    <!-- <NuxtLink :to="`/topic/quiz/sentences/${topic.id}`" :class="[
-                        topic.comingSoon
-                            ? 'flex-1 text-center px-4 py-2.5 text-sm rounded-lg opacity-60 cursor-not-allowed transition whitespace-nowrap'
-                            : `flex-1 text-center px-4 py-2.5 text-sm rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition whitespace-nowrap`
-                    ]">
-                        Sentence
-                    </NuxtLink> -->
 
                     <!-- <NuxtLink :to="`/topic/quiz/sentences/audio/${topic.id}`" :class="[
                         topic.comingSoon

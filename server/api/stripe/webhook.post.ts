@@ -6,7 +6,12 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 
-type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled";
+type SubscriptionStatus =
+  | "active"
+  | "trialing"
+  | "past_due"
+  | "canceled"
+  | "incomplete_expired";
 
 interface Entitlement {
   plan: "free" | "monthly" | "yearly";
@@ -146,6 +151,7 @@ export default defineEventHandler(async (event) => {
       return { received: true };
     }
     case "invoice.payment_failed": {
+      
       const invoice = stripeEvent.data.object as Stripe.Invoice;
       const subId =
         typeof invoice.subscription === "string" ? invoice.subscription : null;
@@ -178,26 +184,55 @@ export default defineEventHandler(async (event) => {
 
       const e = entitlementFromSubscription(sub);
 
-      await db.query(
-        `
-        UPDATE entitlements
-          SET
-            plan = $1,
-            subscription_status = $2,
-            cancel_at_period_end = $3,
-            current_period_end = $4,
-            canceled_at = $5
-          WHERE user_id = $6
-        `,
-        [
-          e.plan,
-          e.subscription_status,
-          e.cancel_at_period_end,
-          e.current_period_end,
-          e.canceled_at,
-          userId,
-        ],
-      );
+      switch (e.subscription_status) {
+        case "active":
+        case "trialing": {
+          await db.query(
+            `
+              UPDATE entitlements
+              SET
+                plan = $1,
+                subscription_status = $2,
+                cancel_at_period_end = $3,
+                current_period_end = $4,
+                canceled_at = $5
+              WHERE user_id = $6
+            `,
+            [
+              e.plan,
+              e.subscription_status,
+              e.cancel_at_period_end,
+              e.current_period_end,
+              e.canceled_at,
+              userId,
+            ],
+          );
+          break;
+        }
+
+        case "past_due":
+        case "canceled":
+        case "incomplete_expired": {
+          await db.query(
+            `
+              UPDATE entitlements
+              SET
+                plan = 'free',
+                subscription_status = $1,
+                cancel_at_period_end = false,
+                current_period_end = null,
+                canceled_at = $2
+              WHERE user_id = $3
+            `,
+            [
+              e.subscription_status,
+              e.canceled_at ?? new Date().toISOString(),
+              userId,
+            ],
+          );
+          break;
+        }
+      }
 
       return { received: true };
     }
