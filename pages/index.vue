@@ -35,8 +35,8 @@ const { data: stats } = await useFetch('/api/stats', {
     </p>
 
     <div class="mt-4">
-      <NuxtLink to="/levels" class="text-gray-500 hover:underline">
-        Start with viewing some vocabulary →
+      <NuxtLink to="/topics" class="text-gray-500 hover:underline">
+        Start with viewing some vocabulary topics →
       </NuxtLink>
     </div>
 
