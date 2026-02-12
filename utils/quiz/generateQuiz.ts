@@ -1,4 +1,3 @@
-import type { Word } from './levelOneWords'
 
 export type QuizQuestion = {
   prompt: string
@@ -11,6 +10,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 export function generateQuiz(words: Word[], count = 20): QuizQuestion[] {
+
   const selected = shuffle(words).slice(0, count)
 
   return selected.map(word => {

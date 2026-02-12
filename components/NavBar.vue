@@ -37,11 +37,12 @@ async function handleLogout() {
 
       <nav class="hidden md:flex items-center gap-6">
 
-        <NuxtLink to="/topic/greetings-polite/quiz" class="nav-link hover:text-gray-600">Topic Quiz</NuxtLink>
         <NuxtLink to="/topics" class="nav-link hover:text-gray-600">Topics</NuxtLink>
+        <NuxtLink to="/topics/quiz" class="nav-link hover:text-gray-600">Topic Quiz</NuxtLink>
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
-        <NuxtLink to="/exercises" class="nav-link hover:text-gray-600">Exercises</NuxtLink>
-        <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Quiz</NuxtLink>
+        <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Level Quiz</NuxtLink>
+        <!-- <NuxtLink to="/exercises" class="nav-link hover:text-gray-600">Exercises</NuxtLink> -->
+
         <!-- Wait until auth is resolved -->
         <template v-if="!authReady">
           <span class="text-gray-400">…</span>
@@ -84,9 +85,18 @@ async function handleLogout() {
     <div v-if="mobileOpen" class="md:hidden border-t bg-white px-4 py-5 space-y-4">
       <!-- Primary nav -->
 
+
       <div>
         <NuxtLink to="/topics" class="mobile-primary">
           Topics
+        </NuxtLink>
+      </div>
+
+      <div class="border-t pt-2"></div>
+
+      <div>
+        <NuxtLink to="/topics/quiz" class="mobile-primary">
+          Topic Quiz
         </NuxtLink>
       </div>
 
@@ -101,21 +111,18 @@ async function handleLogout() {
       <div class="border-t pt-2"></div>
 
       <div>
+        <NuxtLink to="/quiz" class="mobile-primary" @click="mobileOpen = false">
+          Level Quiz
+        </NuxtLink>
+      </div>
+
+      <!-- <div class="border-t pt-2"></div> -->
+
+      <!-- <div>
         <NuxtLink to="/exercises" class="mobile-primary">
           Exercises
         </NuxtLink>
-      </div>
-
-      <div class="border-t pt-2"></div>
-
-      <div>
-        <NuxtLink to="/quiz" class="mobile-primary" @click="mobileOpen = false">
-          Quiz
-        </NuxtLink>
-      </div>
-
-      <!-- Divider -->
-      <div class="border-t pt-2"></div>
+      </div> -->
 
       <!-- Account / upgrade -->
       <ClientOnly>
@@ -124,6 +131,10 @@ async function handleLogout() {
         </template>
 
         <template v-else-if="isLoggedIn">
+
+          <!-- Divider -->
+          <div v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'"
+            class="border-t pt-2"></div>
 
           <div>
             <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" to="/upgrade"
@@ -151,9 +162,13 @@ async function handleLogout() {
           </button>
         </template>
 
-        <button v-else class="mobile-secondary text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
-          Login
-        </button>
+        <div v-else>
+          <div class="border-t pt-6"></div>
+          <button class="mobile-secondary text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
+            Login
+          </button>
+        </div>
+
       </ClientOnly>
     </div>
 

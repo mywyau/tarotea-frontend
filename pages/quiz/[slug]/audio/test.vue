@@ -56,16 +56,6 @@ const questions = computed(() =>
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-// const wordsForLevel = computed(() => {
-//   return LEVEL_WORDS[slug.value as keyof typeof LEVEL_WORDS] ?? null
-// })
-
-// const questions = computed(() =>
-//   wordsForLevel.value
-//     ? generateAudioQuiz(wordsForLevel.value)
-//     : []
-// )
-
 const current = ref(0)
 const score = ref(0)
 const answered = ref(false)

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-definePageMeta({
-    middleware: ['coming-soon']
-})
+
+// definePageMeta({
+//     middleware: ['coming-soon']
+// })
 
 import type { TopicData } from '@/types/topic'
 import { computed, ref, watch } from 'vue'
@@ -13,7 +14,7 @@ import {
     playQuizCompleteFanfareSong,
     playQuizCompleteOkaySong
 } from '@/utils/sounds'
-import { buildTopicQuiz } from '~/utils/quiz/buildTopicQuiz'
+import { generateQuiz } from '~/utils/quiz/buildTopicQuiz'
 
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)
@@ -36,7 +37,7 @@ const wordsForTopic = computed(() => {
 
 const questions = computed(() =>
     wordsForTopic.value.length
-        ? buildTopicQuiz(wordsForTopic.value)
+        ? generateQuiz(wordsForTopic.value)
         : []
 )
 
@@ -101,6 +102,11 @@ watch(
 <template>
     <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
+        <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-gray-500 hover:underline">
+            ← Back to topic quizzes
+        </NuxtLink>
+
+
         <section class="text-center space-y-4">
 
             <p v-if="current < questions.length" class="text-sm text-gray-500">
@@ -111,12 +117,12 @@ watch(
 
                 <!-- Show Cantonese word -->
                 <div class="text-4xl font-medium">
-                    {{ question.word }}
+                    {{ question.prompt }}
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-lg border flex items-center justify-center
-              text-lg font-medium text-center p-4 transition" :class="[
+              text-2xl font-medium text-center p-4 transition" :class="[
                 !answered && 'hover:bg-gray-100',
                 {
                     'bg-green-100':
