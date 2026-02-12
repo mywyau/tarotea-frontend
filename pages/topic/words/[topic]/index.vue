@@ -5,16 +5,33 @@ definePageMeta({
   ssr: false,
 })
 
-import WordTile from '@/components/WordTile.vue'
+import WordTile from '@/components/WordTile.vue';
 
 const route = useRoute()
 const slug = route.params.topic as string
 
+const FREE_TOPICS = new Set([
+  "survival-essentials",
+  "greetings-polite",
+  "fruits-vegetables",
+  "clothing",
+]);
+
+let headers = {}
+
+
 const { authReady } = useMeStateV2() // for now just to prevent hydration redirect jitters
 
-const auth = await useAuth();
-const token = await auth.getAccessToken();
+if(!FREE_TOPICS.has(slug)) {
+  const auth = await useAuth();
 
+  if(auth.isAuthenticated) {
+    const token = await auth.getAccessToken();
+    headers = {
+      Authorization: `Bearer ${token}`,
+    };
+  }
+}
 
 // SSR-safe fetch (no gating, no nulls)
 const { data: topic, error } = await useFetch(
@@ -22,9 +39,10 @@ const { data: topic, error } = await useFetch(
   {
     server: true,
     // credentials: 'include', // 👈 cookies
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
+    // headers: {
+      // Authorization: `Bearer ${token}`,
+    // },
+    headers
   }
 )
 
