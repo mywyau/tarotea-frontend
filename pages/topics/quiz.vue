@@ -305,10 +305,6 @@ const canEnterTopic = (topic: any) => {
                             {{ topic.title }}
                         </h2>
                     </div>
-
-                    <p class="text-sm text-gray-500 leading-relaxed">
-                        {{ topic.description }}
-                    </p>
                 </div>
 
                 <!-- Divider -->
