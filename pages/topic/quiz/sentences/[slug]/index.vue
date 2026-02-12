@@ -7,13 +7,13 @@
 
 import SentenceMeaningExercise from '@/components/SentenceMeaningExercise.vue'
 
-interface SentenceLevelPayload {
-  level: number
-  set: number
-  title: string
-  mode: string
-  sentences: Sentence[]
-}
+// interface SentenceLevelPayload {
+//   level: number
+//   set: number
+//   title: string
+//   mode: string
+//   sentences: Sentence[]
+// }
 
 interface Sentence {
   id: string
