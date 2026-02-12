@@ -17,20 +17,20 @@ const FREE_TOPICS = new Set([
   "clothing",
 ]);
 
-let headers = {}
 
 
 const { authReady } = useMeStateV2() // for now just to prevent hydration redirect jitters
 
-if(!FREE_TOPICS.has(slug)) {
-  const auth = await useAuth();
 
-  if(auth.isAuthenticated) {
-    const token = await auth.getAccessToken();
-    headers = {
-      Authorization: `Bearer ${token}`,
-    };
-  }
+let headers = {}
+
+const auth = await useAuth();
+
+if (auth.isAuthenticated) {
+  const token = await auth.getAccessToken();
+  headers = {
+    Authorization: `Bearer ${token}`,
+  };
 }
 
 // SSR-safe fetch (no gating, no nulls)
@@ -40,7 +40,7 @@ const { data: topic, error } = await useFetch(
     server: true,
     // credentials: 'include', // 👈 cookies
     // headers: {
-      // Authorization: `Bearer ${token}`,
+    // Authorization: `Bearer ${token}`,
     // },
     headers
   }
