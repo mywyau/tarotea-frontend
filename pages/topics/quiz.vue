@@ -404,6 +404,7 @@ function canEnterTopic(topic: Topic) {
                         Sentence Audio
                     </NuxtLink> -->
                 </div>
+                <p v-if="!canEnterTopic(topic)" class="text-sm text-gray-400 text-center pt-4">Upgrade to unlock</p>
             </li>
         </ul>
     </main>

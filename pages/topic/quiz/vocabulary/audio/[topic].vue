@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['topic-access'],
-  ssr: true,
+    middleware: ['topic-access'],
+    ssr: true,
 })
 
 
@@ -106,6 +106,13 @@ const percentage = computed(() => {
 
 const completionSoundPlayed = ref(false)
 
+const formattedTitle = computed(() => {
+    return slug.value
+        .split('-')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ')
+})
+
 watch(
     () => current.value,
     (newCurrent) => {
@@ -137,15 +144,14 @@ watch(
 
     <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
-        <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`"
-            class="text-gray-500 hover:underline">
+        <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-gray-500 hover:underline">
             ← Back to topic quizzes
         </NuxtLink>
 
         <section class="text-center space-y-4">
 
             <h1 class="text-2xl font-semibold text-center">
-                {{ slug }} Audio Quiz
+                {{ formattedTitle }} Audio Quiz
             </h1>
 
             <p v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 text-center">
@@ -203,9 +209,9 @@ watch(
                     </NuxtLink>
 
 
-                <NuxtLink :to="`/topic/words/${slug}`" class="block text-gray-500 hover:underline">
-                    ← Topic {{ slug }}
-                </NuxtLink>
+                    <NuxtLink :to="`/topic/words/${slug}`" class="block text-gray-500 hover:underline">
+                        ← Topic {{ slug }}
+                    </NuxtLink>
 
                 </div>
             </div>
