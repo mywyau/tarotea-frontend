@@ -21,11 +21,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
-  // 🔒 Premium required
-  // if (!hasPaidAccess.value) {
-  //   return navigateTo("/upgrade", { replace: true });
-  // }
-
   if (!canAccessLevel(entitlement.value!)) {
     return navigateTo("/upgrade");
   }
