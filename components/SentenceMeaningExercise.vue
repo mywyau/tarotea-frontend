@@ -138,11 +138,13 @@ watch(
 
     <!-- Options -->
     <div class="grid gap-3">
-      <button v-for="option in options" :disabled="showResult" :key="option" class="rounded-lg border px-4 py-3 text-left transition disabled:opacity-60 disabled:cursor-not-allowed
-               hover:bg-gray-50" :class="{
-                'bg-green-100': showResult && option === currentSentence.meaning,
-                'bg-red-100 animate-shake': showResult && option === selected && !isCorrect
-              }" @click="selectOption(option)">
+      <button v-for="option in options" :key="option" :disabled="showResult" @click="selectOption(option)"
+        class="rounded-lg border px-4 py-3 text-left transition disabled:opacity-60 disabled:cursor-not-allowed" :class="{
+          'hover:bg-gray-50': !showResult,
+          'bg-green-200 border-green-400': showResult && option === currentSentence.meaning,
+          'bg-red-200 border-red-400 animate-shake': showResult && option === selected && !isCorrect
+        }">
+
         {{ option }}
       </button>
 
