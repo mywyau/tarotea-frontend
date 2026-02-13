@@ -12,8 +12,6 @@ export const patchNotes: PatchNote[] = [
       "More content for topics 'time & dates' & 'money'",
       "More content for level 5 & 6",
       "Sentence based topic quiz to have a larger sentence pool, instead of just 20 questions",
-      "",
-      "",
     ],
   },
   {
