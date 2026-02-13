@@ -15,7 +15,7 @@ definePageMeta({
       </h1>
 
       <p class="text-gray-600">
-        Improvements, features and improvements
+        Improvements, features and updates
       </p>
     </header>
 
