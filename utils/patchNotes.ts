@@ -34,6 +34,7 @@ export const patchNotes: PatchNote[] = [
       "Fixed and improved mobile viewing",
       "Added level 1-3 word tiles",
       "Added Audio and setence examples",
+      "App conceptualised and created. Hello World!",
     ],
   },
 ];
