@@ -161,10 +161,13 @@ watch(
                     {{ percentage.toFixed(0) }}%
                 </p>
 
-                <NuxtLink :to="`/topic/${topicSlug}/quiz`" class="block w-full rounded bg-black text-white py-2">
+                <NuxtLink :to="`/topics/quiz`" class="block w-full rounded bg-black text-white py-2">
                     Restart Quiz
                 </NuxtLink>
 
+                <NuxtLink :to="`/topic/words/${topicSlug}`" class="block text-gray-500 hover:underline">
+                    ← Topic {{ topicSlug }}
+                </NuxtLink>
             </div>
 
         </section>

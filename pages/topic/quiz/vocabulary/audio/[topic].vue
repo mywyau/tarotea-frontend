@@ -196,14 +196,16 @@ watch(
                 </p>
 
                 <div class="pt-4 space-y-4">
-                    <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`"
+                    <!-- <NuxtLink :to="`/topics/quiz/${slug}`" -->
+                    <NuxtLink :to="`/topics/quiz`"
                         class="block w-full rounded bg-black text-white py-2 text-center font-medium hover:bg-gray-800 transition">
                         Restart Quiz
                     </NuxtLink>
 
-                    <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
-                        ← Level {{ levelNumber }} Vocab
-                    </NuxtLink>
+
+                <NuxtLink :to="`/topic/words/${slug}`" class="block text-gray-500 hover:underline">
+                    ← Topic {{ slug }}
+                </NuxtLink>
 
                 </div>
             </div>
