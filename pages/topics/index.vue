@@ -360,7 +360,7 @@ function topicLink(topic: Topic) {
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
       <li v-for="topic in topics" :key="topic.id" class="border rounded-lg p-4 space-y-3 transition"
         :class="[
-          topic.comingSoon
+          topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
             ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
             : 'hover:bg-gray-50 cursor-pointer'
         ]">
