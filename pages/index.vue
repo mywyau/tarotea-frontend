@@ -6,7 +6,7 @@ const { data: stats } = await useFetch('/api/stats', {
 </script>
 
 <template>
-  <main class="max-w-xl mx-auto py-16 text-center">
+  <main class="max-w-xl mx-auto py-16 px-4 sm:px-6 text-center">
 
     <div class="mt-12 grid grid-cols-2 gap-6 text-center">
 
