@@ -80,7 +80,7 @@ const topics = [
   {
     id: 'time-dates',
     title: 'Time & Dates',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about time, days, dates, schedules, and when things happen.',
     requiresPaid: true
   },
