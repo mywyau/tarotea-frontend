@@ -4,6 +4,12 @@
 //     middleware: ['coming-soon']
 // })
 
+definePageMeta({
+    middleware: ['topic-access'],
+    ssr: true,
+})
+
+
 import type { TopicData } from '@/types/topic'
 import { computed, ref, watch } from 'vue'
 

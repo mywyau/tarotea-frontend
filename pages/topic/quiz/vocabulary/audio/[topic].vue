@@ -1,5 +1,11 @@
 <script setup lang="ts">
 
+definePageMeta({
+  middleware: ['topic-access'],
+  ssr: true,
+})
+
+
 type Word = {
     id: string
     word: string

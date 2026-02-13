@@ -5,6 +5,12 @@
 //   ssr: true,
 // })
 
+definePageMeta({
+  middleware: ['topic-access'],
+  ssr: true,
+})
+
+
 import SentenceMeaningExercise from '@/components/SentenceMeaningExercise.vue'
 
 interface SentenceLevelPayload {
@@ -26,7 +32,7 @@ interface Sentence {
 }
 
 const route = useRoute()
-const slug = computed(() => route.params.slug as string)
+const slug = computed(() => route.params.topic as string)
 
 const { data, error } = await useFetch(
   () => `/api/topic/sentences/${slug.value}`,

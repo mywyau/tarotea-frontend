@@ -1,19 +1,11 @@
 <script setup lang="ts">
 
-// definePageMeta({
-//   middleware: ['coming-soon'],
-//   ssr: true,
-// })
+definePageMeta({
+  middleware: ['topic-access'],
+  ssr: true,
+})
 
 import SentenceMeaningExercise from '@/components/SentenceMeaningExercise.vue'
-
-// interface SentenceLevelPayload {
-//   level: number
-//   set: number
-//   title: string
-//   mode: string
-//   sentences: Sentence[]
-// }
 
 interface Sentence {
   id: string
@@ -26,7 +18,7 @@ interface Sentence {
 }
 
 const route = useRoute()
-const slug = computed(() => route.params.slug as string)
+const slug = computed(() => route.params.topic as string)
 
 const { data, error } = await useFetch(
   () => `/api/topic/sentences/${slug.value}`,
@@ -85,7 +77,7 @@ watchEffect(() => {
     <NuxtLink :to="`/topics/quiz`" class="text-sm text-gray-500 hover:underline">
       ← Back to all topic quizzes
     </NuxtLink>
-    
+
     <!-- Exercise -->
     <SentenceMeaningExercise :key="quizKey" :sentences="sessionSentences" :all-sentences="allSentences" />
 
