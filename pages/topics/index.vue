@@ -358,19 +358,23 @@ function topicLink(topic: Topic) {
     </header>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-      <li v-for="topic in topics" :key="topic.id" class="border rounded-lg p-4 space-y-3 transition"
-        :class="[
-          topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
-            ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
-            : 'hover:bg-gray-50 cursor-pointer'
-        ]">
+      <li v-for="topic in topics" :key="topic.id" class="border rounded-lg p-4 space-y-3 transition" :class="[
+        topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
+          ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
+          : 'hover:bg-gray-50 cursor-pointer'
+      ]">
 
         <NuxtLink :to="canEnterTopic(topic) ? topicLink(topic) : undefined" class="block space-y-2">
           <!-- Title row -->
           <div class="flex items-center justify-between">
+
             <h2 class="text-lg font-medium">
               {{ topic.title }}
+              <p v-if="topic.comingSoon" class="text-sm text-gray-400 font-normal">
+                (Coming soon)
+              </p>
             </h2>
+
           </div>
 
           <!-- Description -->

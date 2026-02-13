@@ -353,6 +353,9 @@ function canEnterTopic(topic: Topic) {
                     <div class="flex items-center justify-between">
                         <h2 class="text-lg font-semibold text-gray-900">
                             {{ topic.title }}
+                            <p v-if="topic.comingSoon" class="text-sm text-gray-400 font-normal">
+                                (Coming soon)
+                            </p>
                         </h2>
                     </div>
                 </div>
