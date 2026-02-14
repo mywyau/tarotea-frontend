@@ -63,20 +63,10 @@ const score = ref(0)
 const answered = ref(false)
 const selectedIndex = ref<number | null>(null)
 
+const currentXp = ref<number | null>(null)
+const currentStreak = ref<number | null>(null)
+
 const question = computed(() => questions.value[current.value])
-
-const {
-  state,
-  authReady,
-  isLoggedIn,
-  user,
-  entitlement,
-  hasPaidAccess,
-  isCanceling,
-  currentPeriodEnd,
-  resolve,
-} = useMeStateV2();
-
 
 const levelNumber = getLevelNumber(slug.value)
 
@@ -122,7 +112,12 @@ async function answer(index: number) {
   try {
     const token = await getAccessToken()
 
-    const res = await $fetch('/api/word-progress/update', {
+    const res = await $fetch<{
+      success: boolean
+      delta: number
+      newXp: number
+      newStreak: number
+    }>('/api/word-progress/update', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -133,7 +128,10 @@ async function answer(index: number) {
       }
     })
 
+
     xpDelta.value = res.delta
+    currentXp.value = res.newXp
+    currentStreak.value = res.newStreak
 
     setTimeout(() => {
       xpDelta.value = null
@@ -158,6 +156,34 @@ const percentage = computed(() => {
 })
 
 const completionSoundPlayed = ref(false)
+
+watch(
+  () => question.value?.wordId,
+  async (wordId) => {
+    if (!wordId) return
+
+    try {
+      const token = await getAccessToken()
+
+      const progressMap = await $fetch<
+        Record<string, { xp: number; streak: number }>
+      >(
+        '/api/word-progress',
+        {
+          query: { wordIds: wordId },
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
+
+      currentXp.value = progressMap[wordId]?.xp ?? 0
+      currentStreak.value = progressMap[wordId]?.streak ?? 0
+    } catch {
+      currentXp.value = 0
+      currentStreak.value = 0
+    }
+  },
+  { immediate: true }
+)
 
 watch(
   () => current.value,
@@ -209,6 +235,25 @@ watch(
 
         <div v-if="question.type === 'audio'" class="text-center">
           <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
+        </div>
+
+        <div class="text-center space-y-3">
+
+          <div v-if="currentXp !== null" class="text-sm text-gray-500">
+            {{ currentXp }} XP
+          </div>
+
+          <div class="w-32 mx-auto h-1 bg-gray-200 rounded">
+            <div class="h-1 bg-green-500 rounded transition-all duration-500"
+              :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+          </div>
+
+          <transition name="fade-streak" mode="out-in">
+            <div v-if="currentStreak && currentStreak > 0" :key="question.wordId" class="text-xs text-orange-500">
+              🔥 {{ currentStreak }} streak
+            </div>
+          </transition>
+
         </div>
 
         <div class="h-8 relative flex items-center justify-center">
@@ -274,6 +319,7 @@ watch(
   </main>
 </template>
 
+
 <style scoped>
 .xp-fall-enter-active {
   transition: transform 0.6s ease, opacity 0.6s ease;
@@ -296,5 +342,16 @@ watch(
 .xp-fall-leave-to {
   opacity: 0;
   transform: translateY(35px) scale(0.95);
+}
+
+.fade-streak-enter-active,
+.fade-streak-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-streak-enter-from,
+.fade-streak-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>
