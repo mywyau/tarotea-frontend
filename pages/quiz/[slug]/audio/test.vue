@@ -264,7 +264,7 @@ watch(
           </NuxtLink>
 
           <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
-            ← Level {{ levelNumber }} Vocab
+            ← {{ levelNumber }} Vocab
           </NuxtLink>
 
         </div>
