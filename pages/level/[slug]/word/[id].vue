@@ -37,10 +37,12 @@ const formattedLevel = computed(() => {
 const MASTERY_XP = 1000
 
 const masteryPercent = computed(() => {
-  return Math.min((xp.value / MASTERY_XP) * 100, 100)
+  const value = xp.value ?? 0
+  return Math.min((value / MASTERY_XP) * 100, 100)
 })
 
-const xp = ref(0)
+const xp = ref<number>(0)
+const streak = ref<number>(0)
 
 onMounted(async () => {
   try {
@@ -48,19 +50,20 @@ onMounted(async () => {
     const token = await getAccessToken()
 
 
-    const xpMap = await $fetch<Record<string, number>>(
+    const progressMap = await $fetch<
+      Record<string, { xp: number; streak: number }>
+    >(
       '/api/word-progress',
       {
-        query: {
-          wordIds: id.value
-        },
+        query: { wordIds: id.value },
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
     )
 
-    xp.value = xpMap[id.value] ?? 0
+    xp.value = progressMap[id.value]?.xp ?? 0
+    streak.value = progressMap[id.value]?.streak ?? 0
 
   } catch (err) {
     // not logged in or failed → ignore
@@ -95,7 +98,7 @@ onMounted(async () => {
       </div>
 
       <!-- XP block -->
-      <div v-if="xp !== null" class="pt-6 space-y-3">
+      <div class="pt-6 space-y-3">
 
         <!-- XP + label -->
         <div class="flex justify-between text-sm text-gray-500 max-w-xs mx-auto">
@@ -109,9 +112,9 @@ onMounted(async () => {
         </div>
 
         <!-- Streak -->
-        <div v-if="word.streak > 0" class="text-xs text-orange-500">
-          🔥 {{ word.streak }} streak
-        </div>
+        <!-- <div v-if="streak > 0" class="text-xs text-orange-500">
+          🔥 {{ streak }} streak
+        </div> -->
 
       </div>
 

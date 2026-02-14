@@ -45,9 +45,9 @@ const categories = computed(() =>
   }))
 )
 
-const xpMap = ref<Record<string, number>>({})
+const progressMap = ref<Record<string, { xp: number; streak: number }>>({})
 
-onMounted(async () => {
+async function loadProgress() {
   try {
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
@@ -56,24 +56,30 @@ onMounted(async () => {
       .flat()
       .map((w: any) => w.id)
 
-    const result = await $fetch<Record<string, number>>(
-      '/api/word-progress',
-      {
-        query: { wordIds: wordIds.join(',') },
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      }
-    )
+    if (!wordIds.length) return
 
-    xpMap.value = result
+    const result = await $fetch<
+      Record<string, { xp: number; streak: number }>
+    >('/api/word-progress', {
+      query: { wordIds: wordIds.join(',') },
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    progressMap.value = result
   } catch {
-    xpMap.value = {}
+    progressMap.value = {}
   }
-})
+}
+
+onMounted(loadProgress)
 
 
-const getXp = (id: string) => xpMap.value?.[id] ?? 0
+const getXp = (id: string) =>
+  progressMap.value?.[id]?.xp ?? 0
+
+const getStreak = (id: string) =>
+  progressMap.value?.[id]?.streak ?? 0
+
 </script>
 
 <template>
@@ -89,8 +95,10 @@ const getXp = (id: string) => xpMap.value?.[id] ?? 0
       </h2>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+
         <WordTile v-for="word in category.words" :key="word.id" :to="`/level/${slug}/word/${word.id}`" :word="word.word"
-          :jyutping="word.jyutping" :meaning="word.meaning" :xp="getXp(word.id)" />
+          :jyutping="word.jyutping" :meaning="word.meaning" :xp="getXp(word.id)" :streak="getStreak(word.id)" />
+
       </div>
     </section>
   </main>
