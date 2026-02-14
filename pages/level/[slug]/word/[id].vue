@@ -40,17 +40,7 @@ const masteryPercent = computed(() => {
   return Math.min((xp.value / MASTERY_XP) * 100, 100)
 })
 
-const masteryLabel = computed(() => {
-  const value = xp.value
-
-  if (value >= 400) return "Mastered"
-  if (value >= 200) return "Strong"
-  if (value >= 50) return "Learning"
-  return "New"
-})
-
 const xp = ref(0)
-const streak = ref(0)
 
 onMounted(async () => {
   try {
@@ -109,7 +99,8 @@ onMounted(async () => {
 
         <!-- XP + label -->
         <div class="flex justify-between text-sm text-gray-500 max-w-xs mx-auto">
-          <span>{{ xp }} XP</span>
+          <span v-if="xp === 0"></span>
+          <span v-else>{{ xp }} XP</span>
         </div>
 
         <!-- Progress bar -->

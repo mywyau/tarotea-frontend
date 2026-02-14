@@ -45,29 +45,56 @@ const categories = computed(() =>
   }))
 )
 
-const { getAccessToken } = await useAuth()
-const token = await getAccessToken()
+// const { getAccessToken } = await useAuth()
+// const token = await getAccessToken()
 
-const wordIds = Object.values(topic.value.categories)
-  .flat()
-  .map((w: any) => w.id)
+// const wordIds = Object.values(topic.value.categories)
+//   .flat()
+//   .map((w: any) => w.id)
 
-const { data: xpMap } = await useFetch<Record<string, number>>(
-  '/api/word-progress',
-  {
-    query: {
-      wordIds: wordIds.join(',')
-    },
-    server: true,
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
+// const { data: xpMap } = await useFetch<Record<string, number>>(
+//   '/api/word-progress',
+//   {
+//     query: {
+//       wordIds: wordIds.join(',')
+//     },
+//     server: true,
+//     headers: {
+//       Authorization: `Bearer ${token}`
+//     }
+//   }
+// )
+
+const xpMap = ref<Record<string, number>>({})
+
+onMounted(async () => {
+  try {
+    const { getAccessToken } = await useAuth()
+    const token = await getAccessToken()
+
+    const wordIds = Object.values(topic.value.categories)
+      .flat()
+      .map((w: any) => w.id)
+
+    const result = await $fetch<Record<string, number>>(
+      '/api/word-progress',
+      {
+        query: { wordIds: wordIds.join(',') },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    xpMap.value = result
+
+  } catch {
+    xpMap.value = {}
   }
-)
+})
+
 
 const getXp = (id: string) => xpMap.value?.[id] ?? 0
-
-
 </script>
 
 <template>
