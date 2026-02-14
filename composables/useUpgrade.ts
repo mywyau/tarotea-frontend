@@ -1,6 +1,7 @@
 export async function useUpgrade(billing: "monthly" | "yearly") {
   
   const { getAccessToken } = await useAuth();
+  
   const token = await getAccessToken();
 
   const res = await $fetch("/api/stripe/checkout", {

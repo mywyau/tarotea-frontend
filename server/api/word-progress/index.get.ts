@@ -1,0 +1,45 @@
+import { getQuery, createError } from "h3"
+import { db } from "~/server/db"
+import { requireUser } from "~/server/utils/requireUser"
+
+export default defineEventHandler(async (event) => {
+  // 🔐 Require authenticated user
+  const userId = await requireUser(event)
+
+  const query = getQuery(event)
+
+  const wordIdsParam = query.wordIds
+
+  if (!wordIdsParam || typeof wordIdsParam !== "string") {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "wordIds query param required"
+    })
+  }
+
+  const wordIds = wordIdsParam.split(",")
+
+  if (wordIds.length === 0) {
+    return {}
+  }
+
+  // 🔥 Use = ANY($2) for array binding
+  const { rows } = await db.query(
+    `
+    select word_id, xp
+    from user_word_progress
+    where user_id = $1
+    and word_id = any($2)
+    `,
+    [userId, wordIds]
+  )
+
+  // Convert rows → map
+  const xpMap: Record<string, number> = {}
+
+  for (const row of rows) {
+    xpMap[row.word_id] = row.xp
+  }
+
+  return xpMap
+})

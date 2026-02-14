@@ -43,6 +43,30 @@ const categories = computed(() =>
     words,
   }))
 )
+
+const { getAccessToken } = await useAuth()
+const token = await getAccessToken()
+
+const wordIds = Object.values(topic.value.categories)
+  .flat()
+  .map((w: any) => w.id)
+
+const { data: xpMap } = await useFetch<Record<string, number>>(
+  '/api/word-progress',
+  {
+    query: {
+      wordIds: wordIds.join(',')
+    },
+    server: true,
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }
+)
+
+const getXp = (id: string) => xpMap.value?.[id] ?? 0
+
+
 </script>
 
 <template>
@@ -59,7 +83,7 @@ const categories = computed(() =>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <WordTile v-for="word in category.words" :key="word.id" :to="`/level/${slug}/word/${word.id}`" :word="word.word"
-          :jyutping="word.jyutping" :meaning="word.meaning" />
+          :jyutping="word.jyutping" :meaning="word.meaning" :xp="getXp(word.id)" />
       </div>
     </section>
   </main>

@@ -54,6 +54,7 @@ const current = ref(0)
 const score = ref(0)
 const answered = ref(false)
 const selectedIndex = ref<number | null>(null)
+const xpDelta = ref<number | null>(null)
 
 const question = computed(() => questions.value[current.value])
 
@@ -75,15 +76,64 @@ const LEVEL_TITLES: Record<string, string> = {
   'level-fiftheen': 'Level 15',
 }
 
-function answer(index: number) {
+// function answer(index: number) {
+//   if (answered.value) return
+//   selectedIndex.value = index
+//   answered.value = true
+//   if (index === question.value.correctIndex) {
+//     score.value++
+//     playCorrectJingle()
+//   } else {
+//     playIncorrectJingle()
+//   }
+// }
+
+const { getAccessToken } = await useAuth()
+
+async function answer(index: number) {
   if (answered.value) return
+  if (!question.value) return
+
   selectedIndex.value = index
   answered.value = true
-  if (index === question.value.correctIndex) {
+
+  const correct = index === question.value.correctIndex
+
+  // Update UI instantly
+  if (correct) {
     score.value++
     playCorrectJingle()
   } else {
     playIncorrectJingle()
+  }
+
+  try {
+    const token = await getAccessToken()
+
+    const res = await $fetch<{
+      success: boolean
+      delta: number
+      newXp: number
+      newStreak: number
+    }>('/api/word-progress/update', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: {
+        wordId: question.value.wordId,
+        correct
+      }
+    })
+
+    xpDelta.value = res.delta
+
+    setTimeout(() => {
+      xpDelta.value = null
+    }, 1000)
+
+  } catch (err) {
+    console.error('XP update failed', err)
   }
 }
 
@@ -143,9 +193,22 @@ watch(
 
     <div v-if="current < questions.length" class="space-y-6">
 
-      <p class="text-center text-4xl">
-        {{ question.prompt }}
-      </p>
+      <div class="text-center space-y-3">
+        <p class="text-4xl">
+          {{ question.prompt }}
+        </p>
+
+        <!-- fixed height container -->
+        <div class="h-8 relative flex items-center justify-center">
+          <transition name="xp-fall">
+            <div v-if="xpDelta !== null" class="absolute text-xl font-semibold pointer-events-none"
+              :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+              {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }} XP
+            </div>
+          </transition>
+        </div>
+      </div>
+
 
       <div class="grid grid-cols-2 gap-4">
         <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-lg border flex items-center justify-center
@@ -198,3 +261,29 @@ watch(
 
   </main>
 </template>
+
+
+<style scoped>
+.xp-fall-enter-active {
+  transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+.xp-fall-leave-active {
+  transition: transform 0.4s ease, opacity 0.4s ease
+}
+
+.xp-fall-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.9);
+}
+
+.xp-fall-enter-to {
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+}
+
+.xp-fall-leave-to {
+  opacity: 0;
+  transform: translateY(35px) scale(0.95);
+}
+</style>
