@@ -32,6 +32,8 @@ import {
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
+const { getAccessToken } = await useAuth()
+
 const { stop } = useGlobalAudio()
 
 const { data, error } = await useFetch<LevelData>(
@@ -96,15 +98,49 @@ const LEVEL_TITLES: Record<string, string> = {
   'level-fiftheen': 'Level 15',
 }
 
-function answer(index: number) {
+const xpDelta = ref<number | null>(null)
+
+async function answer(index: number) {
   if (answered.value) return
+  if (!question.value) return
+
   selectedIndex.value = index
   answered.value = true
-  if (index === question.value.correctIndex) {
+
+  const correct = index === question.value.correctIndex
+
+  // Update UI immediately
+  if (correct) {
     score.value++
-    playCorrectJingle() // ✅ here
+    playCorrectJingle()
   } else {
     playIncorrectJingle()
+  }
+
+  console.log(question.value)
+
+  try {
+    const token = await getAccessToken()
+
+    const res = await $fetch('/api/word-progress/update', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: {
+        wordId: question.value.wordId,
+        correct
+      }
+    })
+
+    xpDelta.value = res.delta
+
+    setTimeout(() => {
+      xpDelta.value = null
+    }, 1000)
+
+  } catch (err) {
+    console.error('XP update failed', err)
   }
 }
 
@@ -175,6 +211,15 @@ watch(
           <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
         </div>
 
+        <div class="h-8 relative flex items-center justify-center">
+          <transition name="xp-fall">
+            <div v-if="xpDelta !== null" class="absolute text-xl font-semibold pointer-events-none"
+              :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+              {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }} XP
+            </div>
+          </transition>
+        </div>
+
         <div class="grid grid-cols-2 gap-4">
           <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-lg border flex items-center justify-center
            text-2xl font-medium text-center p-6 transition" :class="[
@@ -228,3 +273,28 @@ watch(
 
   </main>
 </template>
+
+<style scoped>
+.xp-fall-enter-active {
+  transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+.xp-fall-leave-active {
+  transition: transform 0.4s ease, opacity 0.4s ease
+}
+
+.xp-fall-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.9);
+}
+
+.xp-fall-enter-to {
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+}
+
+.xp-fall-leave-to {
+  opacity: 0;
+  transform: translateY(35px) scale(0.95);
+}
+</style>

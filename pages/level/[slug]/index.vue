@@ -13,6 +13,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const slug = route.params.slug as string
 
+
 const levelNumber = getLevelNumber(slug)
 if (levelNumber === null) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
