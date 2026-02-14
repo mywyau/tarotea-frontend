@@ -2,6 +2,8 @@ import { createError, getHeader, readRawBody } from "h3";
 import Stripe from "stripe";
 import { db } from "~/server/db";
 
+const requestId = crypto.randomUUID();
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
@@ -107,6 +109,12 @@ export default defineEventHandler(async (event) => {
       sig,
       process.env.STRIPE_WEBHOOK_SECRET!,
     );
+
+    console.log("[STRIPE]", {
+      requestId,
+      eventId: stripeEvent.id,
+      type: stripeEvent.type,
+    });
   } catch (err) {
     console.error("Webhook verification failed", err);
     throw createError({ statusCode: 400, statusMessage: "Invalid signature" });
@@ -117,7 +125,13 @@ export default defineEventHandler(async (event) => {
       const invoice = stripeEvent.data.object as Stripe.Invoice;
 
       const subId = extractSubscriptionId(invoice);
-      if (!subId) break;
+      if (!subId) {
+        console.warn("[STRIPE] Missing subscription ID", {
+          requestId,
+          invoiceId: invoice.id,
+        });
+        break;
+      }
 
       const sub = await stripe.subscriptions.retrieve(subId);
       if (sub.status === "canceled") break;
@@ -126,6 +140,13 @@ export default defineEventHandler(async (event) => {
       if (!userId) break;
 
       const e = entitlementFromSubscription(sub);
+
+      console.log("[STRIPE] Updating entitlement", {
+        requestId,
+        userId,
+        plan: e.plan,
+        status: e.subscription_status,
+      });
 
       await db.query(
         `
@@ -148,26 +169,36 @@ export default defineEventHandler(async (event) => {
         ],
       );
 
+      console.log("[STRIPE] Entitlement updated successfully", {
+        requestId,
+        userId,
+      });
+
       return { received: true };
     }
     case "invoice.payment_failed": {
-      
       const invoice = stripeEvent.data.object as Stripe.Invoice;
       const subId =
         typeof invoice.subscription === "string" ? invoice.subscription : null;
-      if (!subId) break;
+      if (!subId) {
+        console.warn("[STRIPE] Missing subscription ID", {
+          requestId,
+          invoiceId: invoice.id,
+        });
+        break;
+      }
 
       const sub = await stripe.subscriptions.retrieve(subId);
       const userId = sub.metadata?.userId;
       if (!userId) break;
 
-      await db.query(
-        `
-          update entitlements
-          where user_id = $1
-        `,
-        [userId],
-      );
+      // await db.query(
+      //   `
+      //     update entitlements
+      //     where user_id = $1
+      //   `,
+      //   [userId],
+      // );
 
       return { received: true };
     }
