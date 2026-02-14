@@ -50,10 +50,11 @@ function upgrade(plan: 'monthly' | 'yearly') {
         <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
           <li>• Full access to growing content.</li>
           <li>• New topics and levels added regularly.</li>
+          <li>• New content added regularly.</li>
           <li>• Native Cantonese audio for every word</li>
           <li>• No fluff, neatly organised content</li>
-          <li>• New content added regularly</li>
           <li>• Randomised exercises and tests</li>
+          <li>• xp tracking for words</li>
         </ul>
 
         <!-- Plans -->

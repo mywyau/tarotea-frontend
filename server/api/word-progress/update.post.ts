@@ -22,7 +22,7 @@ export default defineEventHandler(async (event) => {
   // 1️⃣ Fetch existing row
   const { rows } = await db.query(
     `
-    select xp, streak, correct_count, wrong_count
+    select xp, streak, correct_count, wrong_count, last_seen_at
     from user_word_progress
     where user_id = $1 and word_id = $2
     `,
@@ -34,8 +34,29 @@ export default defineEventHandler(async (event) => {
   let correctCount = 0;
   let wrongCount = 0;
   const STREAK_CAP = 5;
+  const COOLDOWN_MS = 1500; // 1.5 seconds
 
   if (rows.length > 0) {
+    
+    const lastSeen = rows[0].last_seen_at
+      ? new Date(rows[0].last_seen_at)
+      : null;
+
+    if (lastSeen) {
+      const now = new Date();
+      const diff = now.getTime() - lastSeen.getTime();
+
+      if (diff < COOLDOWN_MS) {
+        return {
+          success: false,
+          delta: 0,
+          newXp: rows[0].xp,
+          newStreak: rows[0].streak,
+          cooldown: true,
+        };
+      }
+    }
+
     xp = rows[0].xp;
     streak = rows[0].streak;
     correctCount = rows[0].correct_count;
