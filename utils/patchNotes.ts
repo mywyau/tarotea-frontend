@@ -16,6 +16,14 @@ export const patchNotes: PatchNote[] = [
   },
   {
     date: "Feb 2026",
+    title: "Xp bars and xp awards for word quizzes",
+    items: [
+      "Added trial xp bars and xp awards for word quizzes",
+      "Added weak word mechanism to help drive weaker words in quizzes for logged in user",
+    ],
+  },
+  {
+    date: "Feb 2026",
     title: "February Dev Notes",
     items: [
       "Added topics 5 topics, 4 free topics, 1 paid",
