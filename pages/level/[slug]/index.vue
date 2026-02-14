@@ -45,26 +45,6 @@ const categories = computed(() =>
   }))
 )
 
-// const { getAccessToken } = await useAuth()
-// const token = await getAccessToken()
-
-// const wordIds = Object.values(topic.value.categories)
-//   .flat()
-//   .map((w: any) => w.id)
-
-// const { data: xpMap } = await useFetch<Record<string, number>>(
-//   '/api/word-progress',
-//   {
-//     query: {
-//       wordIds: wordIds.join(',')
-//     },
-//     server: true,
-//     headers: {
-//       Authorization: `Bearer ${token}`
-//     }
-//   }
-// )
-
 const xpMap = ref<Record<string, number>>({})
 
 onMounted(async () => {
@@ -87,7 +67,6 @@ onMounted(async () => {
     )
 
     xpMap.value = result
-
   } catch {
     xpMap.value = {}
   }

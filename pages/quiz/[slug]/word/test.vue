@@ -4,7 +4,6 @@ definePageMeta({
   middleware: ['level-access']
 })
 
-import { generateQuiz } from '@/utils/quiz/generateQuiz'
 import { computed, ref } from 'vue'
 
 type Word = {
@@ -26,6 +25,7 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
+import { generateQuiz } from '~/utils/quiz/generateQuiz'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -36,11 +36,75 @@ const wordsForLevel = computed<Word[]>(() => {
   return Object.values(data.value.categories).flat()
 })
 
+
+function shuffle<T>(arr: T[]): T[] {
+  return [...arr].sort(() => Math.random() - 0.5);
+}
+
+const weightedWords = computed(() => {
+  const words = wordsForLevel.value
+
+  console.log("----- QUIZ DEBUG -----")
+  console.log("Total words in level:", words.length)
+  console.log("Weakest IDs loaded:", weakestIds.value.length)
+
+  if (!words.length) {
+    console.log("No words loaded yet.")
+    return []
+  }
+
+  const totalQuestions = 20
+
+  if (!weakestIds.value.length) {
+    console.log("ℹ️ No weakest → normal random 20")
+    return shuffle(words).slice(0, totalQuestions)
+  }
+
+  const weakestPool = shuffle(
+    words.filter(w => weakestIds.value.includes(w.id))
+  )
+
+  const nonWeakestPool = shuffle(
+    words.filter(w => !weakestIds.value.includes(w.id))
+  )
+
+  console.log("Weakest pool size:", weakestPool.length)
+  console.log("Non-weakest pool size:", nonWeakestPool.length)
+
+  const weakestTarget = Math.floor(totalQuestions * 0.7)
+  console.log("Target weakest count:", weakestTarget)
+
+  const selected: Word[] = []
+
+  selected.push(...weakestPool.slice(0, weakestTarget))
+  selected.push(
+    ...nonWeakestPool.slice(0, totalQuestions - selected.length)
+  )
+
+  console.log("After fill step:", selected.length)
+
+  if (selected.length < totalQuestions) {
+    const remaining = shuffle(
+      words.filter(w => !selected.some(s => s.id === w.id))
+    )
+
+    selected.push(
+      ...remaining.slice(0, totalQuestions - selected.length)
+    )
+  }
+
+  console.log("Final selected size:", selected.length)
+  console.log("-----------------------")
+
+  return shuffle(selected)
+})
+
 const questions = computed(() =>
-  wordsForLevel.value.length
-    ? generateQuiz(wordsForLevel.value)
+  weightedWords.value.length
+    ? generateQuiz(weightedWords.value)
     : []
 )
+
 
 const { data, error } = await useFetch<LevelData>(
   () => `/api/vocab-quiz/${slug.value}`,
@@ -50,11 +114,17 @@ const { data, error } = await useFetch<LevelData>(
   }
 )
 
+
+const weakestIds = ref<string[]>([])
+
 const current = ref(0)
 const score = ref(0)
 const answered = ref(false)
 const selectedIndex = ref<number | null>(null)
 const xpDelta = ref<number | null>(null)
+const currentXp = ref<number | null>(null)
+const currentStreak = ref<number | null>(null)
+
 
 const question = computed(() => questions.value[current.value])
 
@@ -75,18 +145,6 @@ const LEVEL_TITLES: Record<string, string> = {
   'level-fourteen': 'Level 14',
   'level-fiftheen': 'Level 15',
 }
-
-// function answer(index: number) {
-//   if (answered.value) return
-//   selectedIndex.value = index
-//   answered.value = true
-//   if (index === question.value.correctIndex) {
-//     score.value++
-//     playCorrectJingle()
-//   } else {
-//     playIncorrectJingle()
-//   }
-// }
 
 const { getAccessToken } = await useAuth()
 
@@ -127,6 +185,8 @@ async function answer(index: number) {
     })
 
     xpDelta.value = res.delta
+    currentXp.value = res.newXp
+    currentStreak.value = res.newStreak
 
     setTimeout(() => {
       xpDelta.value = null
@@ -149,6 +209,71 @@ const percentage = computed(() => {
 })
 
 const completionSoundPlayed = ref(false)
+
+// const { getAccessToken } = await useAuth()
+
+onMounted(async () => {
+  try {
+    const token = await getAccessToken()
+
+    const weakest = await $fetch<{ id: string }[]>(
+      '/api/word-progress/weakest',
+      {
+        query: { level: slug.value },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    weakestIds.value = weakest.map(w => w.id)
+    console.log("🧠 Weakest words loaded:", weakestIds.value)
+
+  } catch {
+    weakestIds.value = []
+  }
+})
+
+watch(
+  () => question.value?.wordId,
+  async (wordId) => {
+    if (!wordId) return
+
+    try {
+      const token = await getAccessToken()
+
+      // const xpMap = await $fetch<Record<string, number>>(
+      //   '/api/word-progress',
+      //   {
+      //     query: { wordIds: wordId },
+      //     headers: { Authorization: `Bearer ${token}` }
+      //   }
+      // )
+
+      // currentXp.value = xpMap[wordId] ?? 0
+
+      currentXp.value = 0
+      currentStreak.value = 0
+
+      const progressMap = await $fetch<
+        Record<string, { xp: number; streak: number }>
+      >(
+        '/api/word-progress',
+        {
+          query: { wordIds: wordId },
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
+
+      currentXp.value = progressMap[wordId]?.xp ?? 0
+      currentStreak.value = progressMap[wordId]?.streak ?? 0
+    } catch {
+      currentXp.value = 0
+      currentStreak.value = 0
+    }
+  },
+  { immediate: true }
+)
 
 watch(
   () => current.value,
@@ -197,6 +322,21 @@ watch(
         <p class="text-4xl">
           {{ question.prompt }}
         </p>
+
+        <div v-if="currentXp !== null" class="text-sm text-gray-500">
+          {{ currentXp }} XP
+        </div>
+
+        <div class="w-32 mx-auto h-1 bg-gray-200 rounded mt-1">
+          <div class="h-1 bg-green-500 rounded transition-all duration-500"
+            :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+        </div>
+
+        <transition name="fade-streak" mode="out-in">
+          <div v-if="currentStreak && currentStreak > 0" :key="question.wordId" class="text-xs text-orange-500">
+            🔥 {{ currentStreak }} streak
+          </div>
+        </transition>
 
         <!-- fixed height container -->
         <div class="h-8 relative flex items-center justify-center">
@@ -254,7 +394,7 @@ watch(
         </NuxtLink>
 
         <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
-          ← Level {{ levelNumber }} Vocab
+          ← Level {{ LEVEL_TITLES[slug] }} Vocab
         </NuxtLink>
       </div>
     </div>
@@ -285,5 +425,16 @@ watch(
 .xp-fall-leave-to {
   opacity: 0;
   transform: translateY(35px) scale(0.95);
+}
+
+.fade-streak-enter-active,
+.fade-streak-leave-active {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-streak-enter-from,
+.fade-streak-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>
