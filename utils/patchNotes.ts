@@ -10,7 +10,7 @@ export const patchNotes: PatchNote[] = [
     title: "Upcoming",
     items: [
       "More content for topics 'time & dates' & 'money'",
-      "More content for level 5 & 6",
+      "Content for level 6",
       "Sentence based topic quiz to have a larger sentence pool, instead of just 20 questions",
     ],
   },
@@ -20,6 +20,7 @@ export const patchNotes: PatchNote[] = [
     items: [
       "Added trial xp bars and xp awards for word quizzes",
       "Added weak word mechanism to help drive weaker words in quizzes for logged in user",
+      "Added level 5 content",
     ],
   },
   {
