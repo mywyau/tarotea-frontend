@@ -8,7 +8,7 @@ defineProps<{
   mastered?: boolean
 }>()
 
-const MASTERY_XP = 1000
+const MASTERY_XP = 400
 
 </script>
 

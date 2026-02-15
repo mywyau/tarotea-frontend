@@ -76,7 +76,7 @@ const getXp = (id: string) =>
 const getStreak = (id: string) =>
   progressMap.value?.[id]?.streak ?? 0
 
-const MASTERY_XP = 1000
+const MASTERY_XP = 400
 
 const isMastered = (id: string) =>
   (progressMap.value?.[id]?.xp ?? 0) >= MASTERY_XP
