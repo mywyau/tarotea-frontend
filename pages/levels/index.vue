@@ -66,6 +66,34 @@ const levels = [
     comingSoon: true,
     description: 'Tell stories and describe past experiences naturally.'
   },
+  {
+    id: 'level-seven',
+    number: 7,
+    title: 'Level 7',
+    comingSoon: true,
+    description: 'Express opinions tactfully, disagree politely, persuade gently, and manage sensitive situations.'
+  },
+  {
+    id: 'level-eight',
+    number: 8,
+    title: 'Level 8',
+    comingSoon: true,
+    description: 'Understand and use common idioms, cultural expressions, and implied meanings in natural, informal speech.'
+  },
+  {
+    id: 'level-nine',
+    number: 9,
+    title: 'Level 9',
+    comingSoon: true,
+    description: 'Discuss news, social issues, trends, and abstract ideas clearly.'
+  },
+  {
+    id: 'level-ten',
+    number: 10,
+    title: 'Level 10',
+    comingSoon: true,
+    description: 'Speak naturally, react instinctively, and handle fast, casual conversations.'
+  },
 ]
 
 // --- helpers ---
@@ -141,4 +169,3 @@ const canEnterLevel = (level: any) => {
     </ul>
   </main>
 </template>
-
