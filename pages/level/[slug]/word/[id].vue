@@ -44,6 +44,8 @@ const masteryPercent = computed(() => {
 const xp = ref<number>(0)
 const streak = ref<number>(0)
 
+const isMastered = computed(() => xp.value >= MASTERY_XP)
+
 onMounted(async () => {
   try {
     const { getAccessToken } = await useAuth()
@@ -102,7 +104,10 @@ onMounted(async () => {
 
         <!-- XP + label -->
         <div class="flex justify-between text-sm text-gray-500 max-w-xs mx-auto">
-          {{ xp }} XP
+          <span>{{ xp }} XP</span>
+          <span v-if="isMastered" class="text-emerald-600 font-medium">
+            ✓
+          </span>
         </div>
 
         <!-- Progress bar -->

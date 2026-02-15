@@ -37,6 +37,9 @@ const masteryPercent = computed(() => {
     return Math.min((xp.value / MASTERY_XP) * 100, 100)
 })
 
+const isMastered = computed(() => xp.value >= MASTERY_XP)
+
+
 onMounted(async () => {
     try {
         const { getAccessToken } = await useAuth()
@@ -66,7 +69,6 @@ onMounted(async () => {
     }
 })
 
-
 </script>
 
 <template>
@@ -94,7 +96,10 @@ onMounted(async () => {
             <div class="pt-6 space-y-3">
 
                 <div class="flex justify-between text-sm text-gray-500 max-w-xs mx-auto">
-                    {{ xp }} XP
+                    <span>{{ xp }} XP</span>
+                    <span v-if="isMastered" class="text-emerald-600 font-medium">
+                        ✓
+                    </span>
                 </div>
 
                 <div class="w-full max-w-xs mx-auto h-2 bg-gray-200 rounded overflow-hidden">

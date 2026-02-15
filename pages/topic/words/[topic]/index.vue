@@ -76,6 +76,10 @@ const getXp = (id: string) =>
 const getStreak = (id: string) =>
   progressMap.value?.[id]?.streak ?? 0
 
+const MASTERY_XP = 1000
+
+const isMastered = (id: string) =>
+  (progressMap.value?.[id]?.xp ?? 0) >= MASTERY_XP
 
 </script>
 
@@ -93,7 +97,7 @@ const getStreak = (id: string) =>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <WordTile v-for="word in category.words" :key="word.id" :to="`/topic/word/${slug}/${word.id}`" :word="word.word"
-          :jyutping="word.jyutping" :meaning="word.meaning" :xp="getXp(word.id)" :streak="getStreak(word.id)" />
+          :jyutping="word.jyutping" :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)" />
       </div>
     </section>
   </main>
