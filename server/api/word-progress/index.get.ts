@@ -3,11 +3,9 @@ import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
-  // 🔐 Require authenticated user
   const userId = await requireUser(event);
 
   const query = getQuery(event);
-
   const wordIdsParam = query.wordIds;
 
   if (!wordIdsParam || typeof wordIdsParam !== "string") {
@@ -17,31 +15,25 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const wordIds = wordIdsParam.split(",");
+  const wordIds = wordIdsParam
+    .split(",")
+    .map(id => id.trim())
+    .filter(Boolean);
 
-  if (wordIds.length === 0) {
+  if (!wordIds.length) {
     return {};
   }
 
-  // 🔥 Use = ANY($2) for array binding
   const { rows } = await db.query(
     `
     select word_id, xp, streak
     from user_word_progress
     where user_id = $1
-    and word_id = any($2)
+    and word_id = any($2::text[])
     `,
     [userId, wordIds],
   );
 
-  // Convert rows → map
-  // const xpMap: Record<string, number> = {}
-
-  // for (const row of rows) {
-  //   xpMap[row.word_id] = row.xp
-  // }
-
-  // return xpMap
   const progressMap: Record<string, { xp: number; streak: number }> = {};
 
   for (const row of rows) {

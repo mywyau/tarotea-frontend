@@ -18,10 +18,14 @@ export default defineEventHandler(async (event) => {
       w.id,
       coalesce(p.xp, 0) as xp
     from words w
+    join word_levels wl
+      on wl.word_id = w.id
+    join levels l
+      on l.id = wl.level_id
     left join user_word_progress p
       on w.id = p.word_id
       and p.user_id = $1
-    where w.level_slug = $2
+    where l.slug = $2
     order by coalesce(p.xp, 0) asc
     `,
     [userId, levelSlug]

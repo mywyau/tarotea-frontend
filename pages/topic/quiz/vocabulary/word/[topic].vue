@@ -20,10 +20,17 @@ import {
     playQuizCompleteFanfareSong,
     playQuizCompleteOkaySong
 } from '@/utils/sounds'
-import { generateQuiz } from '~/utils/quiz/buildTopicQuiz'
+
+import { buildTopicQuiz } from '~/utils/quiz/buildTopicQuiz'
 
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)
+
+const { getAccessToken } = await useAuth()
+
+const xpDelta = ref<number | null>(null)
+const currentXp = ref<number | null>(null)
+const currentStreak = ref<number | null>(null)
 
 const { stop } = useGlobalAudio()
 
@@ -43,7 +50,7 @@ const wordsForTopic = computed(() => {
 
 const questions = computed(() =>
     wordsForTopic.value.length
-        ? generateQuiz(wordsForTopic.value)
+        ? buildTopicQuiz(wordsForTopic.value)
         : []
 )
 
@@ -54,18 +61,67 @@ const selectedIndex = ref<number | null>(null)
 
 const question = computed(() => questions.value[current.value])
 
-function answer(index: number) {
+// function answer(index: number) {
+//     if (answered.value) return
+//     selectedIndex.value = index
+//     answered.value = true
+
+//     if (index === question.value.correctIndex) {
+//         score.value++
+//         playCorrectJingle()
+//     } else {
+//         playIncorrectJingle()
+//     }
+// }
+
+async function answer(index: number) {
     if (answered.value) return
+    if (!question.value) return
+
     selectedIndex.value = index
     answered.value = true
 
-    if (index === question.value.correctIndex) {
+    const correct = index === question.value.correctIndex
+
+    if (correct) {
         score.value++
         playCorrectJingle()
     } else {
         playIncorrectJingle()
     }
+
+    try {
+        const token = await getAccessToken()
+
+        const res = await $fetch<{
+            success: boolean
+            delta: number
+            newXp: number
+            newStreak: number
+        }>('/api/word-progress/update', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            body: {
+                wordId: question.value.wordId,
+                correct
+            }
+        })
+
+        xpDelta.value = res.delta
+        currentXp.value = res.newXp
+        currentStreak.value = res.newStreak
+
+        setTimeout(() => {
+            xpDelta.value = null
+        }, 1000)
+
+    } catch (err) {
+        console.error('XP update failed', err)
+    }
 }
+
 
 function next() {
     stop()
@@ -80,6 +136,43 @@ const percentage = computed(() => {
 })
 
 const completionSoundPlayed = ref(false)
+
+onMounted(() => {
+    watch(
+        () => question.value?.wordId,
+        async (wordId) => {
+            if (!wordId) return
+
+            try {
+                const token = await getAccessToken()
+
+                const progressMap = await $fetch<
+                    Record<string, { xp: number; streak: number }>
+                >(
+                    '/api/word-progress',
+                    {
+                        query: { wordIds: wordId },
+                        headers: { Authorization: `Bearer ${token}` }
+                    }
+                )
+
+
+
+                currentXp.value = progressMap[wordId]?.xp ?? 0
+                currentStreak.value = progressMap[wordId]?.streak ?? 0
+
+                console.log(currentXp.value)
+                console.log(currentStreak.value)
+            } catch {
+                currentXp.value = 0
+                currentStreak.value = 0
+            }
+        },
+        { immediate: true }
+    )
+})
+
+
 
 watch(
     () => current.value,
@@ -122,8 +215,46 @@ watch(
             <div v-if="current < questions.length" class="space-y-6">
 
                 <!-- Show Cantonese word -->
-                <div class="text-4xl font-medium">
-                    {{ question.prompt }}
+                <div class="text-center">
+
+                    <p class="text-4xl mb-3">
+                        {{ question.prompt }}
+                    </p>
+
+                    <!-- Progress Block (fixed height) -->
+                    <div class="h-[80px] flex flex-col items-center justify-center">
+
+                        <div v-if="currentXp !== null" class="text-sm text-gray-500">
+                            {{ currentXp }} XP
+                        </div>
+
+                        <div class="w-32 h-1 bg-gray-200 rounded mt-1">
+                            <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                                :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+                        </div>
+
+                        <!-- streak reserved space -->
+                        <div class="h-5 flex items-center justify-center">
+                            <transition name="fade-streak" mode="out-in">
+                                <div v-if="currentStreak && currentStreak > 0" :key="question.wordId"
+                                    class="text-xs text-orange-500">
+                                    🔥 {{ currentStreak }} streak
+                                </div>
+                            </transition>
+                        </div>
+
+                    </div>
+
+                    <!-- XP delta reserved space -->
+                    <div class="h-8 relative flex items-center justify-center">
+                        <transition name="xp-fall">
+                            <div v-if="xpDelta !== null" class="absolute text-xl font-semibold pointer-events-none"
+                                :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                                {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }} XP
+                            </div>
+                        </transition>
+                    </div>
+
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -174,3 +305,39 @@ watch(
 
     </main>
 </template>
+
+<style scoped>
+.xp-fall-enter-active {
+    transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+.xp-fall-leave-active {
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.xp-fall-enter-from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+}
+
+.xp-fall-enter-to {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+}
+
+.xp-fall-leave-to {
+    opacity: 0;
+    transform: translateY(35px) scale(0.95);
+}
+
+.fade-streak-enter-active,
+.fade-streak-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-streak-enter-from,
+.fade-streak-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+</style>

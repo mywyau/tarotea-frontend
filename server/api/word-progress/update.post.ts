@@ -19,7 +19,19 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // 1️⃣ Fetch existing row
+  // ✅ 1️⃣ Validate word exists BEFORE touching progress
+  const wordCheck = await db.query(`select 1 from words where id = $1`, [
+    wordId,
+  ]);
+
+  if (!wordCheck.rowCount) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Word not found",
+    });
+  }
+
+  // 2 Fetch existing row
   const { rows } = await db.query(
     `
     select xp, streak, correct_count, wrong_count, last_seen_at
@@ -37,7 +49,6 @@ export default defineEventHandler(async (event) => {
   const COOLDOWN_MS = 1500; // 1.5 seconds
 
   if (rows.length > 0) {
-    
     const lastSeen = rows[0].last_seen_at
       ? new Date(rows[0].last_seen_at)
       : null;
