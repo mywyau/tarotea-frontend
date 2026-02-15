@@ -28,6 +28,45 @@ const cdnBase = runtimeConfig.public.cdnBase
 const word = computed(() => data.value)
 const notFound = computed(() => error.value?.statusCode === 404)
 
+const xp = ref<number>(0)
+const streak = ref<number>(0)
+
+const MASTERY_XP = 1000
+
+const masteryPercent = computed(() => {
+    return Math.min((xp.value / MASTERY_XP) * 100, 100)
+})
+
+onMounted(async () => {
+    try {
+        const { getAccessToken } = await useAuth()
+        const token = await getAccessToken()
+
+        const progressMap = await $fetch<
+            Record<string, { xp: number; streak: number }>
+        >(
+            '/api/word-progress',
+            {
+                query: { wordIds: slug.value },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        )
+
+        xp.value = progressMap[slug.value]?.xp ?? 0
+        streak.value = progressMap[slug.value]?.streak ?? 0
+
+        console.log("XP loaded:", xp.value)
+        console.log("Streak loaded:", streak.value)
+        console.log("Word ID:", slug.value)
+
+    } catch {
+        // not logged in or error → ignore
+    }
+})
+
+
 </script>
 
 <template>
@@ -51,7 +90,22 @@ const notFound = computed(() => error.value?.statusCode === 404)
                 {{ word.meaning }}
             </div>
 
-            <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" />
+            <!-- XP block -->
+            <div class="pt-6 space-y-3">
+
+                <div class="flex justify-between text-sm text-gray-500 max-w-xs mx-auto">
+                    {{ xp }} XP
+                </div>
+
+                <div class="w-full max-w-xs mx-auto h-2 bg-gray-200 rounded overflow-hidden">
+                    <div class="h-2 bg-green-500 transition-all duration-700 ease-out"
+                        :style="{ width: masteryPercent + '%' }" />
+                </div>
+            </div>
+
+            <div class="pt-8">
+                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" />
+            </div>
         </section>
 
         <!-- Usage -->
@@ -95,8 +149,6 @@ const notFound = computed(() => error.value?.statusCode === 404)
 
                             <AudioButton v-if="word.audio?.examples?.[index]"
                                 :src="`${cdnBase}/audio/${word.audio.examples[index]}`" />
-
-                            <!-- {{ `${cdnBase}/audio/${word.audio.examples[index]}` }} -->
                         </div>
 
                         <div class="text-sm text-gray-400">

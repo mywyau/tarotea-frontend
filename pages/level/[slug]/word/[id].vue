@@ -102,20 +102,13 @@ onMounted(async () => {
 
         <!-- XP + label -->
         <div class="flex justify-between text-sm text-gray-500 max-w-xs mx-auto">
-          <span v-if="xp === 0"></span>
-          <span v-else>{{ xp }} XP</span>
+          {{ xp }} XP
         </div>
 
         <!-- Progress bar -->
         <div class="w-full max-w-xs mx-auto h-2 bg-gray-200 rounded overflow-hidden">
           <div class="h-2 bg-green-500 transition-all duration-700 ease-out" :style="{ width: masteryPercent + '%' }" />
         </div>
-
-        <!-- Streak -->
-        <!-- <div v-if="streak > 0" class="text-xs text-orange-500">
-          🔥 {{ streak }} streak
-        </div> -->
-
       </div>
 
       <!-- Audio button with more breathing space -->
