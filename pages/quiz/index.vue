@@ -89,8 +89,12 @@ const canEnterLevel = (level: any) => {
 <template>
   <main class="max-w-3xl mx-auto py-12 px-4">
 
-    <p class="text-gray-600 mb-8">
-      Practice and test your cantonese with our quizzes
+    <p class="text-gray-500 text-sm">
+      Practice and test your cantonese with our level quizzes.
+    </p>
+
+    <p class="text-gray-500 text-sm mt-2 mb-8">
+      Your weakest words will appear more often as you practice and study.
     </p>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
