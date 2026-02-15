@@ -27,7 +27,7 @@ export default defineNuxtRouteMiddleware((to) => {
     return navigateTo("/coming-soon");
   }
 
-  // 🔒 Paid levels (3–4)
+  // 🔒 Paid levels (3+)
   if (!canAccessLevel(entitlement.value!)) {
     return navigateTo("/upgrade");
   }

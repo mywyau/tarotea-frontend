@@ -54,7 +54,7 @@ const quizLevels = [
     id: 'level-five',
     number: 5,
     title: 'Level 5',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Handle work situations, services, and expectations.'
   },
   {
