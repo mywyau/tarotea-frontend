@@ -323,7 +323,7 @@ watch(
           {{ question.prompt }}
         </p>
 
-        <div v-if="currentXp !== null" class="text-sm text-gray-500">
+        <div v-if="currentXp !== null" class="text-sm text-gray-500 text-center">
           {{ currentXp }} XP
         </div>
 

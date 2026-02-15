@@ -48,11 +48,11 @@ const wordsForTopic = computed(() => {
     return Object.values(data.value.categories).flat()
 })
 
-const questions = computed(() =>
-    wordsForTopic.value.length
-        ? buildTopicQuiz(wordsForTopic.value)
-        : []
-)
+// const questions = computed(() =>
+//     wordsForTopic.value.length
+//         ? buildTopicQuiz(wordsForTopic.value)
+//         : []
+// )
 
 const current = ref(0)
 const score = ref(0)
@@ -137,42 +137,151 @@ const percentage = computed(() => {
 
 const completionSoundPlayed = ref(false)
 
-onMounted(() => {
-    watch(
-        () => question.value?.wordId,
-        async (wordId) => {
-            if (!wordId) return
+const weakestIds = ref<string[]>([])
 
-            try {
-                const token = await getAccessToken()
+function shuffle<T>(arr: T[]): T[] {
+    return [...arr].sort(() => Math.random() - 0.5)
+}
 
-                const progressMap = await $fetch<
-                    Record<string, { xp: number; streak: number }>
-                >(
-                    '/api/word-progress',
-                    {
-                        query: { wordIds: wordId },
-                        headers: { Authorization: `Bearer ${token}` }
-                    }
-                )
+const weightedWords = computed(() => {
+    const words = wordsForTopic.value
+    if (!words.length) return []
 
+    const totalQuestions = 20
 
+    if (!weakestIds.value.length) {
+        return shuffle(words).slice(0, totalQuestions)
+    }
 
-                currentXp.value = progressMap[wordId]?.xp ?? 0
-                currentStreak.value = progressMap[wordId]?.streak ?? 0
-
-                console.log(currentXp.value)
-                console.log(currentStreak.value)
-            } catch {
-                currentXp.value = 0
-                currentStreak.value = 0
-            }
-        },
-        { immediate: true }
+    const weakestPool = shuffle(
+        words.filter(w => weakestIds.value.includes(w.id))
     )
+
+    const nonWeakestPool = shuffle(
+        words.filter(w => !weakestIds.value.includes(w.id))
+    )
+
+    const weakestTarget = Math.floor(totalQuestions * 0.7)
+
+    const selected: typeof words = []
+
+    selected.push(...weakestPool.slice(0, weakestTarget))
+    selected.push(
+        ...nonWeakestPool.slice(0, totalQuestions - selected.length)
+    )
+
+    if (selected.length < totalQuestions) {
+        const remaining = shuffle(
+            words.filter(w => !selected.some(s => s.id === w.id))
+        )
+
+        selected.push(
+            ...remaining.slice(0, totalQuestions - selected.length)
+        )
+    }
+
+    return shuffle(selected)
+})
+
+const questions = computed(() =>
+    weightedWords.value.length
+        ? buildTopicQuiz(weightedWords.value)
+        : []
+)
+
+
+onMounted(async () => {
+    try {
+        const token = await getAccessToken()
+
+        const weakest = await $fetch<{ id: string }[]>(
+            '/api/word-progress/weakest',
+            {
+                query: { topic: topicSlug.value },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        )
+
+        weakestIds.value = weakest.map(w => w.id)
+
+        console.log("🧠 Weakest topic words:", weakestIds.value)
+
+    } catch {
+        weakestIds.value = []
+    }
 })
 
 
+// onMounted(() => {
+//     watch(
+//         () => question.value?.wordId,
+//         async (wordId) => {
+//             if (!wordId) return
+
+//             try {
+//                 const token = await getAccessToken()
+
+//                 const progressMap = await $fetch<
+//                     Record<string, { xp: number; streak: number }>
+//                 >(
+//                     '/api/word-progress',
+//                     {
+//                         query: { wordIds: wordId },
+//                         headers: { Authorization: `Bearer ${token}` }
+//                     }
+//                 )
+
+
+
+//                 currentXp.value = progressMap[wordId]?.xp ?? 0
+//                 currentStreak.value = progressMap[wordId]?.streak ?? 0
+
+//                 console.log(currentXp.value)
+//                 console.log(currentStreak.value)
+//             } catch {
+//                 currentXp.value = 0
+//                 currentStreak.value = 0
+//             }
+//         },
+//         { immediate: true }
+//     )
+// })
+
+watch(
+  () => question.value?.wordId,
+  async (wordId) => {
+    if (!wordId) return
+
+    try {
+      const token = await getAccessToken()
+
+      const progressMap = await $fetch<
+        Record<string, { xp: number; streak: number }>
+      >(
+        '/api/word-progress',
+        {
+          query: { wordIds: wordId },
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
+
+      currentXp.value = progressMap[wordId]?.xp ?? 0
+      currentStreak.value = progressMap[wordId]?.streak ?? 0
+
+    } catch {
+      currentXp.value = 0
+      currentStreak.value = 0
+    }
+  },
+  { immediate: true }
+)
+
+watch(weakestIds, () => {
+  current.value = 0
+  score.value = 0
+})
 
 watch(
     () => current.value,
