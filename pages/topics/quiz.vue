@@ -330,11 +330,7 @@ function canEnterTopic(topic: Topic) {
     <main class="max-w-5xl mx-auto py-12 px-4">
 
         <p class="text-gray-500 text-sm">
-            Practice and test your cantonese with our topic quizzes.
-        </p>
-
-        <p class="text-gray-500 text-sm mt-2 mb-8">
-            Your weakest words will appear more often as you practice and study.
+            Practice and test your cantonese with our topic quizzes. Your weakest words will appear more often as you practice and study.
         </p>
 
         <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">

@@ -69,6 +69,7 @@ const { getAccessToken } = await useAuth()
 const currentXp = ref<number | null>(null)
 const currentStreak = ref<number | null>(null)
 const xpDelta = ref<number | null>(null)
+const showResult = ref<boolean>(false)
 
 const question = computed(() => questions.value[current.value])
 
@@ -158,6 +159,15 @@ const formattedTitle = computed(() => {
         .join(' ')
 })
 
+const progressPercent = computed(() => {
+    const answered =
+        showResult.value
+            ? current.value + 1
+            : current.value
+
+    return Math.round((answered / questions.value.length) * 100)
+})
+
 watch(
     () => question.value?.wordId,
     async (wordId) => {
@@ -224,9 +234,18 @@ watch(
                 {{ formattedTitle }} Audio Quiz
             </h1>
 
-            <p v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 text-center">
-                Question {{ current + 1 }} / {{ questions.length }}
-            </p>
+            <div class="flex items-center gap-3 mb-6">
+
+                <div class="flex-1 bg-gray-200 rounded-full h-3">
+                    <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
+                        :style="{ width: progressPercent + '%' }" />
+                </div>
+
+                <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
+                    {{ current + 1 }} / {{ questions.length }}
+                </span>
+
+            </div>
 
             <div v-if="current < questions.length" class="space-y-6">
 

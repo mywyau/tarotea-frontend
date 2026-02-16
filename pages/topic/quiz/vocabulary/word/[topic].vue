@@ -58,6 +58,7 @@ const current = ref(0)
 const score = ref(0)
 const answered = ref(false)
 const selectedIndex = ref<number | null>(null)
+const showResult = ref<boolean>(false)
 
 const question = computed(() => questions.value[current.value])
 
@@ -213,41 +214,14 @@ onMounted(async () => {
     }
 })
 
+const progressPercent = computed(() => {
+    const answered =
+        showResult.value
+            ? current.value + 1
+            : current.value
 
-// onMounted(() => {
-//     watch(
-//         () => question.value?.wordId,
-//         async (wordId) => {
-//             if (!wordId) return
-
-//             try {
-//                 const token = await getAccessToken()
-
-//                 const progressMap = await $fetch<
-//                     Record<string, { xp: number; streak: number }>
-//                 >(
-//                     '/api/word-progress',
-//                     {
-//                         query: { wordIds: wordId },
-//                         headers: { Authorization: `Bearer ${token}` }
-//                     }
-//                 )
-
-
-
-//                 currentXp.value = progressMap[wordId]?.xp ?? 0
-//                 currentStreak.value = progressMap[wordId]?.streak ?? 0
-
-//                 console.log(currentXp.value)
-//                 console.log(currentStreak.value)
-//             } catch {
-//                 currentXp.value = 0
-//                 currentStreak.value = 0
-//             }
-//         },
-//         { immediate: true }
-//     )
-// })
+    return Math.round((answered / questions.value.length) * 100)
+})
 
 watch(
     () => question.value?.wordId,
@@ -317,9 +291,18 @@ watch(
 
         <section class="text-center space-y-4">
 
-            <p v-if="current < questions.length" class="text-sm text-gray-500">
-                Question {{ current + 1 }} / {{ questions.length }}
-            </p>
+            <div class="flex items-center gap-3 mb-6">
+
+                <div class="flex-1 bg-gray-200 rounded-full h-3">
+                    <div class="bg-blue-300 h-3 rounded-full transition-all duration-300"
+                        :style="{ width: progressPercent + '%' }" />
+                </div>
+
+                <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
+                    {{ current + 1 }} / {{ questions.length }}
+                </span>
+
+            </div>
 
             <div v-if="current < questions.length" class="space-y-6">
 
