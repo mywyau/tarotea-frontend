@@ -324,19 +324,34 @@ watch(
           {{ question.prompt }}
         </p>
 
-        <div class="min-h-[110px] space-y-3">
+        <div class="min-h-[50px] space-y-3">
 
           <!-- XP -->
-          <div class="text-sm text-gray-500 h-5 flex items-center justify-center">
-            <span>
-              {{ currentXp ?? 0 }} XP
-            </span>
-          </div>
+          <!-- XP Row -->
+          <div class="flex items-center justify-center gap-3">
 
-          <!-- XP Bar -->
-          <div class="w-32 mx-auto h-1 bg-gray-200 rounded">
-            <div class="h-1 bg-green-500 rounded transition-all duration-500"
-              :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+            <!-- XP Bar -->
+            <div class="w-32 h-1 bg-gray-200 rounded">
+              <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+            </div>
+
+            <!-- XP Text + Delta Anchor -->
+            <div class="relative flex items-center">
+
+              <span class="text-sm text-gray-500 whitespace-nowrap">
+                {{ currentXp ?? 0 }} XP
+              </span>
+
+              <transition name="xp-fall">
+                <span v-if="xpDelta !== null" class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                  :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                  {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                </span>
+              </transition>
+
+            </div>
+
           </div>
 
           <!-- Streak -->
@@ -346,17 +361,6 @@ watch(
             </span>
           </div>
 
-        </div>
-
-
-        <!-- fixed height container -->
-        <div class="h-8 relative flex items-center justify-center">
-          <transition name="xp-fall">
-            <div v-if="xpDelta !== null" class="absolute text-xl font-semibold pointer-events-none"
-              :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-              {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }} XP
-            </div>
-          </transition>
         </div>
       </div>
 
@@ -417,38 +421,37 @@ watch(
 
 
 <style scoped>
-
 .xp-fall-enter-active {
-    transition: transform 0.45s ease-out, opacity 0.45s ease-out;
+  transition: transform 0.45s ease-out, opacity 0.45s ease-out;
 }
 
 .xp-fall-leave-active {
-    transition: transform 0.35s ease-in, opacity 0.35s ease-in;
+  transition: transform 0.35s ease-in, opacity 0.35s ease-in;
 }
 
 .xp-fall-enter-from {
-    opacity: 0;
-    transform: translateY(-10px) scale(0.9);
+  opacity: 0;
+  transform: translateY(-10px) scale(0.9);
 }
 
 .xp-fall-enter-to {
-    opacity: 1;
-    transform: translateY(0px) scale(0.95);
+  opacity: 1;
+  transform: translateY(0px) scale(0.95);
 }
 
 .xp-fall-leave-to {
-    opacity: 0;
-    transform: translateY(12px) scale(0.9);
+  opacity: 0;
+  transform: translateY(12px) scale(0.9);
 }
 
 .fade-streak-enter-active,
 .fade-streak-leave-active {
-    transition: opacity 0.3s ease, transform 0.3s ease;
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .fade-streak-enter-from,
 .fade-streak-leave-to {
-    opacity: 0;
-    transform: translateY(-4px);
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>

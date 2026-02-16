@@ -235,36 +235,42 @@ watch(
           <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
         </div>
 
-        <div class="text-center flex flex-col justify-center min-h-[90px]">
+        <div class="min-h-[50px] space-y-3">
 
-          <div class="text-sm text-gray-500 h-5 flex items-center justify-center">
-            <span v-if="currentXp !== null">
-              {{ currentXp }} XP
+          <!-- XP Row -->
+          <div class="flex items-center justify-center gap-3">
+
+            <!-- XP Bar -->
+            <div class="w-32 h-1 bg-gray-200 rounded">
+              <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+            </div>
+
+            <!-- XP Text + Delta Anchor -->
+            <div class="relative flex items-center">
+
+              <span class="text-sm text-gray-500 whitespace-nowrap">
+                {{ currentXp ?? 0 }} XP
+              </span>
+
+              <transition name="xp-fall">
+                <span v-if="xpDelta !== null" class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                  :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                  {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                </span>
+              </transition>
+
+            </div>
+
+          </div>
+
+          <!-- Streak -->
+          <div class="h-5 flex items-center justify-center">
+            <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
+              🔥 {{ currentStreak }} streak
             </span>
           </div>
 
-          <div class="w-32 mx-auto h-1 bg-gray-200 rounded">
-            <div class="h-1 bg-green-500 rounded transition-all duration-500"
-              :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
-          </div>
-
-          <transition name="fade-streak" mode="out-in">
-            <div class="mt-4 text-xs text-orange-500 h-4 flex items-center justify-center">
-              <span v-if="currentStreak && currentStreak > 0">
-                🔥 {{ currentStreak }} streak
-              </span>
-            </div>
-          </transition>
-
-        </div>
-
-        <div class="h-8 relative flex items-center justify-center">
-          <transition name="xp-fall">
-            <div v-if="xpDelta !== null" class="absolute text-xl font-semibold pointer-events-none"
-              :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-              {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }} XP
-            </div>
-          </transition>
         </div>
 
         <div class="grid grid-cols-2 gap-4">

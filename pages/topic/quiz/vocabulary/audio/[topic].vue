@@ -85,18 +85,6 @@ const {
 } = useMeStateV2();
 
 
-// function answer(index: number) {
-//     if (answered.value) return
-//     selectedIndex.value = index
-//     answered.value = true
-//     if (index === question.value.correctIndex) {
-//         score.value++
-//         playCorrectJingle() // ✅ here
-//     } else {
-//         playIncorrectJingle()
-//     }
-// }
-
 async function answer(index: number) {
     if (answered.value) return
     if (!question.value) return
@@ -246,37 +234,44 @@ watch(
                     <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
                 </div>
 
-                <div class="text-center space-y-3 min-h-[110px]">
-                    <!-- XP -->
-                    <div class="text-sm text-gray-500 h-5 flex items-center justify-center">
-                        <span v-if="currentXp !== null">
-                            {{ currentXp }} XP
-                        </span>
-                    </div>
+                <div class="min-h-[50px] space-y-3">
 
-                    <!-- XP Bar -->
-                    <div class="w-32 mx-auto h-1 bg-gray-200 rounded">
-                        <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                            :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+                    <!-- XP Row -->
+                    <div class="flex items-center justify-center gap-3">
+
+                        <!-- XP Bar -->
+                        <div class="w-32 h-1 bg-gray-200 rounded">
+                            <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                                :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+                        </div>
+
+                        <!-- XP Text + Delta Anchor -->
+                        <div class="relative flex items-center">
+
+                            <span class="text-sm text-gray-500 whitespace-nowrap">
+                                {{ currentXp ?? 0 }} XP
+                            </span>
+
+                            <transition name="xp-fall">
+                                <span v-if="xpDelta !== null"
+                                    class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                                    :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                                    {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                                </span>
+                            </transition>
+
+                        </div>
+
                     </div>
 
                     <!-- Streak -->
-                    <div class="h-3 flex items-center justify-center">
+                    <div class="h-5 flex items-center justify-center">
                         <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
                             🔥 {{ currentStreak }} streak
                         </span>
                     </div>
-                </div>
 
-                <div class="h-4 relative flex items-center justify-center">
-                    <transition name="xp-fall">
-                        <div v-if="xpDelta !== null" class="absolute text-xl font-semibold pointer-events-none"
-                            :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-                            {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }} XP
-                        </div>
-                    </transition>
                 </div>
-
 
                 <div class="grid grid-cols-2 gap-4">
                     <button v-for="(option, i) in question.options" :key="i"
