@@ -1,4 +1,11 @@
 <script setup lang="ts">
+
+definePageMeta({
+  middleware: ['coming-soon'],
+  ssr: true,
+})
+
+
 import { computed, ref } from 'vue'
 
 type DailyItem = {
