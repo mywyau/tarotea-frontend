@@ -329,7 +329,7 @@ function canEnterTopic(topic: Topic) {
 <template>
     <main class="max-w-5xl mx-auto py-12 px-4">
 
-        <p class="text-gray-500 text-sm">
+        <p class="text-gray-500 text-sm mb-6">
             Practice and test your cantonese with our topic quizzes. Your weakest words will appear more often as you practice and study.
         </p>
 
