@@ -235,10 +235,12 @@ watch(
           <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
         </div>
 
-        <div class="text-center space-y-3">
+        <div class="text-center flex flex-col justify-center min-h-[90px]">
 
-          <div v-if="currentXp !== null" class="text-sm text-gray-500">
-            {{ currentXp }} XP
+          <div class="text-sm text-gray-500 h-5 flex items-center justify-center">
+            <span v-if="currentXp !== null">
+              {{ currentXp }} XP
+            </span>
           </div>
 
           <div class="w-32 mx-auto h-1 bg-gray-200 rounded">
@@ -247,8 +249,10 @@ watch(
           </div>
 
           <transition name="fade-streak" mode="out-in">
-            <div v-if="currentStreak && currentStreak > 0" :key="question.wordId" class="text-xs text-orange-500">
-              🔥 {{ currentStreak }} streak
+            <div class="mt-4 text-xs text-orange-500 h-4 flex items-center justify-center">
+              <span v-if="currentStreak && currentStreak > 0">
+                🔥 {{ currentStreak }} streak
+              </span>
             </div>
           </transition>
 
@@ -278,9 +282,11 @@ watch(
           </button>
         </div>
 
-        <button v-if="answered" class="w-full mt-4 rounded bg-black text-white py-2" @click="next">
-          Next
-        </button>
+        <div class="h-10">
+          <button v-if="answered" class="w-full rounded bg-black text-white py-2" @click="next">
+            Next
+          </button>
+        </div>
 
       </div>
 

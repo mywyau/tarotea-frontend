@@ -318,13 +318,15 @@ watch(
 
     <div v-if="current < questions.length" class="space-y-6">
 
-      <div class="text-center space-y-3">
-        <p class="text-4xl">
+      <div class="text-center flex flex-col items-center justify-center min-h-[100px] space-y-3">
+        <p class="text-4xl min-h-[64px] flex items-center justify-center text-center">
           {{ question.prompt }}
         </p>
 
-        <div v-if="currentXp !== null" class="text-sm text-gray-500 text-center">
-          {{ currentXp }} XP
+        <div class="text-sm text-gray-500 h-5 flex items-center justify-center">
+          <span v-if="currentXp !== null">
+            {{ currentXp }} XP
+          </span>
         </div>
 
         <div class="w-32 mx-auto h-1 bg-gray-200 rounded mt-1">
@@ -332,11 +334,13 @@ watch(
             :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
         </div>
 
-        <transition name="fade-streak" mode="out-in">
-          <div v-if="currentStreak && currentStreak > 0" :key="question.wordId" class="text-xs text-orange-500">
-            🔥 {{ currentStreak }} streak
-          </div>
-        </transition>
+        <div class="h-4 flex items-center justify-center">
+          <transition name="fade-streak">
+            <span v-if="currentStreak && currentStreak > 0" :key="question.wordId" class="text-xs text-orange-500">
+              🔥 {{ currentStreak }} streak
+            </span>
+          </transition>
+        </div>
 
         <!-- fixed height container -->
         <div class="h-8 relative flex items-center justify-center">
@@ -365,9 +369,11 @@ watch(
         </button>
       </div>
 
-      <button v-if="answered" class="w-full mt-4 rounded bg-black text-white py-2" @click="next">
-        Next
-      </button>
+      <div class="h-12">
+        <button v-if="answered" class="w-full rounded bg-black text-white py-2" @click="next">
+          Next
+        </button>
+      </div>
 
     </div>
 

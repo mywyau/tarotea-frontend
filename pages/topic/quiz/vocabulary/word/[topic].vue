@@ -250,37 +250,37 @@ onMounted(async () => {
 // })
 
 watch(
-  () => question.value?.wordId,
-  async (wordId) => {
-    if (!wordId) return
+    () => question.value?.wordId,
+    async (wordId) => {
+        if (!wordId) return
 
-    try {
-      const token = await getAccessToken()
+        try {
+            const token = await getAccessToken()
 
-      const progressMap = await $fetch<
-        Record<string, { xp: number; streak: number }>
-      >(
-        '/api/word-progress',
-        {
-          query: { wordIds: wordId },
-          headers: { Authorization: `Bearer ${token}` }
+            const progressMap = await $fetch<
+                Record<string, { xp: number; streak: number }>
+            >(
+                '/api/word-progress',
+                {
+                    query: { wordIds: wordId },
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            )
+
+            currentXp.value = progressMap[wordId]?.xp ?? 0
+            currentStreak.value = progressMap[wordId]?.streak ?? 0
+
+        } catch {
+            currentXp.value = 0
+            currentStreak.value = 0
         }
-      )
-
-      currentXp.value = progressMap[wordId]?.xp ?? 0
-      currentStreak.value = progressMap[wordId]?.streak ?? 0
-
-    } catch {
-      currentXp.value = 0
-      currentStreak.value = 0
-    }
-  },
-  { immediate: true }
+    },
+    { immediate: true }
 )
 
 watch(weakestIds, () => {
-  current.value = 0
-  score.value = 0
+    current.value = 0
+    score.value = 0
 })
 
 watch(
@@ -326,36 +326,35 @@ watch(
                 <!-- Show Cantonese word -->
                 <div class="text-center">
 
-                    <p class="text-4xl mb-3">
+                    <p class="text-4xl mb-3 min-h-[64px] flex items-center justify-center text-center">
                         {{ question.prompt }}
                     </p>
 
                     <!-- Progress Block (fixed height) -->
-                    <div class="h-[80px] flex flex-col items-center justify-center">
-
-                        <div v-if="currentXp !== null" class="text-sm text-gray-500">
-                            {{ currentXp }} XP
+                    <div class="min-h-[110px] space-y-3">
+                        <!-- XP -->
+                        <div class="text-sm text-gray-500 h-5 flex items-center justify-center">
+                            <span>
+                                {{ currentXp ?? 0 }} XP
+                            </span>
                         </div>
 
-                        <div class="w-32 h-1 bg-gray-200 rounded mt-1">
+                        <!-- XP Bar -->
+                        <div class="w-32 mx-auto h-1 bg-gray-200 rounded">
                             <div class="h-1 bg-green-500 rounded transition-all duration-500"
                                 :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
                         </div>
 
-                        <!-- streak reserved space -->
+                        <!-- Streak -->
                         <div class="h-5 flex items-center justify-center">
-                            <transition name="fade-streak" mode="out-in">
-                                <div v-if="currentStreak && currentStreak > 0" :key="question.wordId"
-                                    class="text-xs text-orange-500">
-                                    🔥 {{ currentStreak }} streak
-                                </div>
-                            </transition>
+                            <span class="text-xs text-orange-500">
+                                {{ currentStreak && currentStreak > 0 ? `🔥 ${currentStreak} streak` : '' }}
+                            </span>
                         </div>
-
                     </div>
 
                     <!-- XP delta reserved space -->
-                    <div class="h-8 relative flex items-center justify-center">
+                    <div class="h-10 relative flex items-center justify-center">
                         <transition name="xp-fall">
                             <div v-if="xpDelta !== null" class="absolute text-xl font-semibold pointer-events-none"
                                 :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
@@ -367,23 +366,26 @@ watch(
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-lg border flex items-center justify-center
-              text-2xl font-medium text-center p-4 transition" :class="[
-                !answered && 'hover:bg-gray-100',
-                {
-                    'bg-green-100':
-                        answered && i === question.correctIndex,
-                    'bg-red-100 animate-shake':
-                        answered && i === selectedIndex && i !== question.correctIndex
-                }
-            ]" @click="answer(i)">
+                    <button v-for="(option, i) in question.options" :key="i"
+                        class="aspect-square rounded-lg border flex items-center justify-center font-medium text-center p-4 text-lg sm:text-xl md:text-2xl break-words leading-tight"
+                        :class="[
+                            !answered && 'hover:bg-gray-100',
+                            {
+                                'bg-green-100':
+                                    answered && i === question.correctIndex,
+                                'bg-red-100 animate-shake':
+                                    answered && i === selectedIndex && i !== question.correctIndex
+                            }
+                        ]" @click="answer(i)">
                         {{ option }}
                     </button>
                 </div>
 
-                <button v-if="answered" class="w-full mt-4 rounded bg-black text-white py-2" @click="next">
-                    Next
-                </button>
+                <div class="h-12">
+                    <button v-if="answered" class="w-full rounded bg-black text-white py-2" @click="next">
+                        Next
+                    </button>
+                </div>
 
             </div>
 
@@ -417,11 +419,11 @@ watch(
 
 <style scoped>
 .xp-fall-enter-active {
-    transition: transform 0.6s ease, opacity 0.6s ease;
+    transition: transform 0.45s ease-out, opacity 0.45s ease-out;
 }
 
 .xp-fall-leave-active {
-    transition: transform 0.4s ease, opacity 0.4s ease;
+    transition: transform 0.35s ease-in, opacity 0.35s ease-in;
 }
 
 .xp-fall-enter-from {
@@ -431,12 +433,12 @@ watch(
 
 .xp-fall-enter-to {
     opacity: 1;
-    transform: translateY(0px) scale(1);
+    transform: translateY(0px) scale(0.95);
 }
 
 .xp-fall-leave-to {
     opacity: 0;
-    transform: translateY(35px) scale(0.95);
+    transform: translateY(12px) scale(0.9);
 }
 
 .fade-streak-enter-active,
