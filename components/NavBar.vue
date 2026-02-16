@@ -90,6 +90,12 @@ async function handleLogout() {
     <div v-if="mobileOpen" class="md:hidden border-t bg-white px-4 py-5 space-y-4">
       <!-- Primary nav -->
 
+      <div>
+        <NuxtLink to="/daily" class="mobile-primary">
+          Daily
+        </NuxtLink>
+      </div>
+
 
       <div>
         <NuxtLink to="/topics" class="mobile-primary">
