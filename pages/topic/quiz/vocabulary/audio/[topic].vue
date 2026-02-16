@@ -64,6 +64,12 @@ const score = ref(0)
 const answered = ref(false)
 const selectedIndex = ref<number | null>(null)
 
+const { getAccessToken } = await useAuth()
+
+const currentXp = ref<number | null>(null)
+const currentStreak = ref<number | null>(null)
+const xpDelta = ref<number | null>(null)
+
 const question = computed(() => questions.value[current.value])
 
 const {
@@ -79,17 +85,68 @@ const {
 } = useMeStateV2();
 
 
-function answer(index: number) {
+// function answer(index: number) {
+//     if (answered.value) return
+//     selectedIndex.value = index
+//     answered.value = true
+//     if (index === question.value.correctIndex) {
+//         score.value++
+//         playCorrectJingle() // ✅ here
+//     } else {
+//         playIncorrectJingle()
+//     }
+// }
+
+async function answer(index: number) {
     if (answered.value) return
+    if (!question.value) return
+
     selectedIndex.value = index
     answered.value = true
-    if (index === question.value.correctIndex) {
+
+    const correct = index === question.value.correctIndex
+
+    if (correct) {
         score.value++
-        playCorrectJingle() // ✅ here
+        playCorrectJingle()
     } else {
         playIncorrectJingle()
     }
+
+    if (!isLoggedIn.value) return
+
+    try {
+        const token = await getAccessToken()
+
+        const res = await $fetch<{
+            success: boolean
+            delta: number
+            newXp: number
+            newStreak: number
+        }>('/api/word-progress/update', {
+            method: 'POST',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+            body: {
+                wordId: question.value.wordId,
+                correct
+            }
+        })
+
+        xpDelta.value = res.delta
+        currentXp.value = res.newXp
+        currentStreak.value = res.newStreak
+
+        setTimeout(() => {
+            xpDelta.value = null
+        }, 1000)
+
+    } catch (err) {
+        console.error('XP update failed', err)
+    }
 }
+
 
 function next() {
     stop() // 🔑 stop current word audio
@@ -112,6 +169,31 @@ const formattedTitle = computed(() => {
         .map(word => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
 })
+
+watch(
+    () => question.value?.wordId,
+    async (wordId) => {
+        if (!wordId || !isLoggedIn.value) return
+
+        try {
+            const token = await getAccessToken()
+
+            const progressMap = await $fetch<
+                Record<string, { xp: number; streak: number }>
+            >('/api/word-progress', {
+                query: { wordIds: wordId },
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            currentXp.value = progressMap[wordId]?.xp ?? 0
+            currentStreak.value = progressMap[wordId]?.streak ?? 0
+        } catch {
+            currentXp.value = 0
+            currentStreak.value = 0
+        }
+    },
+    { immediate: true }
+)
 
 watch(
     () => current.value,
@@ -163,6 +245,36 @@ watch(
                 <div v-if="question.type === 'audio'" class="text-center">
                     <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
                 </div>
+
+                <div class="text-center space-y-3">
+
+                    <div v-if="currentXp !== null" class="text-sm text-gray-500">
+                        {{ currentXp }} XP
+                    </div>
+
+                    <div class="w-32 mx-auto h-1 bg-gray-200 rounded">
+                        <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                            :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+                    </div>
+
+                    <transition name="fade-streak" mode="out-in">
+                        <div v-if="currentStreak && currentStreak > 0" :key="question.wordId"
+                            class="text-xs text-orange-500">
+                            🔥 {{ currentStreak }} streak
+                        </div>
+                    </transition>
+
+                </div>
+
+                <div class="h-8 relative flex items-center justify-center">
+                    <transition name="xp-fall">
+                        <div v-if="xpDelta !== null" class="absolute text-xl font-semibold pointer-events-none"
+                            :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                            {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }} XP
+                        </div>
+                    </transition>
+                </div>
+
 
                 <div class="grid grid-cols-2 gap-4">
                     <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-lg border flex items-center justify-center
