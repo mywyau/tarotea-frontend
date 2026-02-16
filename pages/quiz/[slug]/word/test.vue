@@ -318,29 +318,36 @@ watch(
 
     <div v-if="current < questions.length" class="space-y-6">
 
-      <div class="text-center flex flex-col items-center justify-center min-h-[100px] space-y-3">
-        <p class="text-4xl min-h-[64px] flex items-center justify-center text-center">
+      <div class="text-center">
+
+        <p class="text-4xl mb-3 min-h-[64px] flex items-center justify-center text-center">
           {{ question.prompt }}
         </p>
 
-        <div class="text-sm text-gray-500 h-5 flex items-center justify-center">
-          <span v-if="currentXp !== null">
-            {{ currentXp }} XP
-          </span>
-        </div>
+        <div class="min-h-[110px] space-y-3">
 
-        <div class="w-32 mx-auto h-1 bg-gray-200 rounded mt-1">
-          <div class="h-1 bg-green-500 rounded transition-all duration-500"
-            :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
-        </div>
-
-        <div class="h-4 flex items-center justify-center">
-          <transition name="fade-streak">
-            <span v-if="currentStreak && currentStreak > 0" :key="question.wordId" class="text-xs text-orange-500">
-              🔥 {{ currentStreak }} streak
+          <!-- XP -->
+          <div class="text-sm text-gray-500 h-5 flex items-center justify-center">
+            <span>
+              {{ currentXp ?? 0 }} XP
             </span>
-          </transition>
+          </div>
+
+          <!-- XP Bar -->
+          <div class="w-32 mx-auto h-1 bg-gray-200 rounded">
+            <div class="h-1 bg-green-500 rounded transition-all duration-500"
+              :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+          </div>
+
+          <!-- Streak -->
+          <div class="h-5 flex items-center justify-center">
+            <span class="text-xs text-orange-500">
+              {{ currentStreak && currentStreak > 0 ? `🔥 ${currentStreak} streak` : '' }}
+            </span>
+          </div>
+
         </div>
+
 
         <!-- fixed height container -->
         <div class="h-8 relative flex items-center justify-center">
@@ -410,37 +417,38 @@ watch(
 
 
 <style scoped>
+
 .xp-fall-enter-active {
-  transition: transform 0.6s ease, opacity 0.6s ease;
+    transition: transform 0.45s ease-out, opacity 0.45s ease-out;
 }
 
 .xp-fall-leave-active {
-  transition: transform 0.4s ease, opacity 0.4s ease
+    transition: transform 0.35s ease-in, opacity 0.35s ease-in;
 }
 
 .xp-fall-enter-from {
-  opacity: 0;
-  transform: translateY(-10px) scale(0.9);
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
 }
 
 .xp-fall-enter-to {
-  opacity: 1;
-  transform: translateY(0px) scale(1);
+    opacity: 1;
+    transform: translateY(0px) scale(0.95);
 }
 
 .xp-fall-leave-to {
-  opacity: 0;
-  transform: translateY(35px) scale(0.95);
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
 }
 
 .fade-streak-enter-active,
 .fade-streak-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
 .fade-streak-enter-from,
 .fade-streak-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
+    opacity: 0;
+    transform: translateY(-4px);
 }
 </style>

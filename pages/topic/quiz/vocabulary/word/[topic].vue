@@ -418,6 +418,7 @@ watch(
 </template>
 
 <style scoped>
+
 .xp-fall-enter-active {
     transition: transform 0.45s ease-out, opacity 0.45s ease-out;
 }
