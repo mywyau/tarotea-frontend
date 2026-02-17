@@ -339,7 +339,6 @@ watch(
                                         {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                                     </span>
                                 </transition>
-
                             </div>
 
 

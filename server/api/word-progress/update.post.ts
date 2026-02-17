@@ -7,11 +7,13 @@ export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
 
   const body = await readBody(event);
-  const { wordId, correct } = body as {
-    wordId: string;
-    correct: boolean;
-  };
 
+  const wordId = body.wordId as string;
+  const correct = body.correct as boolean;
+
+  // 🔒 Sanitize mode
+  const mode = body.mode === "daily" ? "daily" : "normal";
+  
   if (!wordId || typeof correct !== "boolean") {
     throw createError({
       statusCode: 400,
@@ -85,7 +87,10 @@ export default defineEventHandler(async (event) => {
     streak += 1;
     correctCount += 1;
   } else {
-    delta = -12;
+    delta =
+      mode === "daily"
+        ? 0 // 🔥 no negative xp in daily
+        : -5;
     xp = Math.max(0, xp + delta);
     streak = 0;
     wrongCount += 1;
