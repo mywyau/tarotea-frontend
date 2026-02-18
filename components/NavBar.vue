@@ -20,6 +20,10 @@ async function handleLogout() {
   await logout()
   await resolve({ force: true }) // re-sync global auth state
 }
+
+onMounted(() => {
+  resolve({ force: true })
+})
 </script>
 
 <template>
