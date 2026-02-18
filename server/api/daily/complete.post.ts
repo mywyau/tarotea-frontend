@@ -1,3 +1,4 @@
+import { readBody } from "h3";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
 
@@ -5,9 +6,7 @@ export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
   const body = await readBody(event);
 
-  const xpEarned = body.xpEarned ?? 0;
-  const correctCount = body.correctCount ?? 0;
-  const totalQuestions = body.totalQuestions ?? 0;
+  const { xpEarned, correctCount, totalQuestions } = body;
 
   await db.query(
     `

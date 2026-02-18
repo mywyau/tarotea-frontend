@@ -4,10 +4,10 @@ import { requireUser } from "~/server/utils/requireUser";
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
 
-  // 1️⃣ Check if today's session exists
+  // 1️⃣ Try get today's session
   const sessionResult = await db.query(
     `
-    select completed, xp_earned, correct_count, total_questions
+    select *
     from daily_sessions
     where user_id = $1
       and session_date = current_date
@@ -15,60 +15,84 @@ export default defineEventHandler(async (event) => {
     [userId],
   );
 
-  let completed = false;
-  let xpEarnedToday = 0;
+  let session;
 
-  // 2️⃣ If no session → create one
   if (sessionResult.rowCount === 0) {
-    await db.query(
+    // 2️⃣ Generate 20 weakest words
+    const wordsResult = await db.query(
       `
-      insert into daily_sessions (user_id, session_date)
-      values ($1, current_date)
+      select w.id, w.word, w.meaning
+      from user_word_progress p
+      join words w on w.id = p.word_id
+      where p.user_id = $1
+      order by
+        p.xp asc,
+        p.wrong_count desc,
+        p.last_seen_at asc
+      limit 20
       `,
       [userId],
     );
-  } else {
-    completed = sessionResult.rows[0].completed;
-    xpEarnedToday = sessionResult.rows[0].xp_earned;
+
+    const wordIds = wordsResult.rows.map((w) => w.id);
+
+    // 3️⃣ Insert locked session
+    const insertResult = await db.query(
+      `
+      insert into daily_sessions
+        (user_id, session_date, word_ids, total_questions)
+      values
+        ($1, current_date, $2, $3)
+      returning *
+      `,
+      [userId, wordIds, wordIds.length],
+    );
+
+    session = insertResult.rows[0];
+
+    return {
+      completed: false,
+      xpEarnedToday: 0,
+      correctCount: 0,
+      totalQuestions: wordIds.length,
+      answeredCount: 0,
+      words: wordsResult.rows,
+    };
   }
 
-  // 3️⃣ If already completed → return early
-  if (completed) {
+  session = sessionResult.rows[0];
+
+  // 4️⃣ Fetch locked words
+  if (!session.word_ids.length) {
     return {
       completed: true,
-      xpEarnedToday,
-      correctCount: sessionResult.rows[0]?.correct_count ?? 0,
-      totalQuestions: sessionResult.rows[0]?.total_questions ?? 0,
+      xpEarnedToday: session.xp_earned,
+      correctCount: session.correct_count,
+      totalQuestions: session.total_questions,
+      answeredCount: session.answered_count,
       words: [],
     };
   }
 
-  const DAILY_QUESTION_LIMIT = 20;
-
-  // 4️⃣ Fetch weakest words (your existing logic)
   const wordsResult = await db.query(
     `
-    select
-      w.id,
-      w.word,
-      w.meaning
-    from user_word_progress p
-    join words w on w.id = p.word_id
-    where p.user_id = $1
-    order by
-      p.xp asc,
-      p.wrong_count desc,
-      p.last_seen_at asc
-    limit $2
+      select id, word, meaning
+      from words
+      where id = any($1)
+      and NOT (id = any($2))
     `,
-    [userId, DAILY_QUESTION_LIMIT],
+    [session.word_ids, session.answered_word_ids ?? []],
   );
 
+  const remainingCount = session.total_questions - session.answered_count;
+
   return {
-    completed: false,
-    xpEarnedToday,
-    correctCount: sessionResult.rows[0]?.correct_count ?? 0,
-    totalQuestions: sessionResult.rows[0]?.total_questions ?? 0,
+    completed: session.completed,
+    xpEarnedToday: session.xp_earned,
+    correctCount: session.correct_count,
+    totalQuestions: session.total_questions,
+    answeredCount: session.answered_count,
+    remainingCount,
     words: wordsResult.rows,
   };
 });

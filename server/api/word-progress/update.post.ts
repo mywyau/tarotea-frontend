@@ -13,7 +13,7 @@ export default defineEventHandler(async (event) => {
 
   // 🔒 Sanitize mode
   const mode = body.mode === "daily" ? "daily" : "normal";
-  
+
   if (!wordId || typeof correct !== "boolean") {
     throw createError({
       statusCode: 400,
@@ -31,6 +31,35 @@ export default defineEventHandler(async (event) => {
       statusCode: 404,
       statusMessage: "Word not found",
     });
+  }
+
+  // 🛑 DAILY MODE PROTECTION
+  if (mode === "daily") {
+    const result = await db.query(
+      `
+      update daily_sessions
+      set
+        answered_word_ids = array_append(coalesce(answered_word_ids, '{}'), $2),
+        answered_count = answered_count + 1,
+        updated_at = now()
+      where user_id = $1
+        and session_date = current_date
+        and completed = false
+        and answered_count < total_questions
+        and NOT ($2 = ANY(coalesce(answered_word_ids, '{}')))
+      returning answered_count
+    `,
+      [userId, wordId],
+    );
+
+    // 🚫 If no row updated → block XP
+    if (result.rowCount === 0) {
+      return {
+        success: false,
+        delta: 0,
+        dailyBlocked: true,
+      };
+    }
   }
 
   // 2 Fetch existing row
@@ -89,7 +118,7 @@ export default defineEventHandler(async (event) => {
   } else {
     delta =
       mode === "daily"
-        ? 0 // 🔥 no negative xp in daily
+        ? 0 // no negative xp in daily
         : -5;
     xp = Math.max(0, xp + delta);
     streak = 0;
