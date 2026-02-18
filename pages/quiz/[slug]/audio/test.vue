@@ -287,7 +287,7 @@ watch(
           <!-- Streak -->
           <div class="h-5 flex items-center justify-center">
             <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
-              🔥 {{ currentStreak }} streak
+              {{ currentStreak }} streak
             </span>
           </div>
 

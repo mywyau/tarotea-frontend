@@ -5,7 +5,7 @@ definePageMeta({
     ssr: false
 })
 
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 type DailyItem = {
     id: string
@@ -16,8 +16,11 @@ type DailyItem = {
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-const questions = ref<DailyItem[]>([])
+// const questions = ref<DailyItem[]>([])
 const loading = ref(true)
+
+const dailyWords = ref<DailyItem[]>([])
+const questions = ref<DailyItem[]>([]) // remaining questions
 
 const currentIndex = ref(0)
 const selected = ref<string | null>(null)
@@ -25,6 +28,14 @@ const showResult = ref(false)
 
 const xpToday = ref(0)
 const correctCount = ref(0)
+
+const answeredCount = ref(0)
+const totalQuestions = ref(0)
+
+const remainingCount = computed(() =>
+    totalQuestions.value - answeredCount.value
+)
+
 
 const { getAccessToken } = await useAuth()
 
@@ -40,6 +51,8 @@ onMounted(async () => {
             xpEarnedToday: number
             correctCount: number
             totalQuestions: number
+            answeredCount: number
+            remainingCount: number
             words: DailyItem[]
         }>('/api/daily', {
             headers: {
@@ -50,12 +63,19 @@ onMounted(async () => {
         dailyCompleted.value = dailyData.completed
         xpToday.value = dailyData.xpEarnedToday
 
+        answeredCount.value = dailyData.answeredCount
+        totalQuestions.value = dailyData.totalQuestions
+        correctCount.value = dailyData.correctCount // ✅ ALWAYS restore
+
         if (dailyData.completed) {
             // restore completed session data
-            correctCount.value = dailyData.correctCount
+            // correctCount.value = dailyData.correctCount
             questions.value = new Array(dailyData.totalQuestions).fill(null)
         } else {
             // start fresh daily session
+            console.log('', dailyData.words.map(word => word.id))
+            // questions.value = shuffle(dailyData.words)
+            dailyWords.value = dailyData.words
             questions.value = shuffle(dailyData.words)
         }
 
@@ -72,24 +92,29 @@ function shuffle<T>(arr: T[]): T[] {
     return [...arr].sort(() => Math.random() - 0.5)
 }
 
-function generateOptions(correct: DailyItem, pool: DailyItem[]) {
-    const distractors = shuffle(pool.filter(w => w.id !== correct.id)).slice(0, 3)
-    return shuffle([correct, ...distractors])
-}
-
 const currentQuestion = computed(() =>
     questions.value.length
         ? questions.value[currentIndex.value]
         : null
 )
 
-const options = computed(() =>
-    currentQuestion.value
-        ? generateOptions(currentQuestion.value, questions.value)
-        : []
+const options = ref<DailyItem[]>([])
+
+
+watch(
+    currentQuestion,
+    async (q) => {
+        if (!q) return
+        console.log("Fetching distractors for:", q.id)
+        options.value = await fetchOptions(q)
+    },
+    { immediate: true }
 )
 
+
+
 async function selectAnswer(answer: string) {
+
     if (!currentQuestion.value || showResult.value) return
 
     selected.value = answer
@@ -108,6 +133,7 @@ async function selectAnswer(answer: string) {
             delta: number
             newXp: number
             newStreak: number
+            dailyBlocked?: boolean
         }>('/api/word-progress/update', {
             method: 'POST',
             headers: {
@@ -119,6 +145,12 @@ async function selectAnswer(answer: string) {
                 mode: 'daily'
             }
         })
+
+        if (res.dailyBlocked) {
+            return
+        }
+
+        answeredCount.value++
 
         console.log('', currentQuestion.value.id)
 
@@ -148,15 +180,22 @@ function nextQuestion() {
     }
 }
 
+// const progressPercent = computed(() => {
+//     if (!questions.value.length) return 0
+
+//     const answered =
+//         showResult.value
+//             ? currentIndex.value + 1
+//             : currentIndex.value
+
+//     return Math.round((answered / questions.value.length) * 100)
+// })
+
 const progressPercent = computed(() => {
-    if (!questions.value.length) return 0
-
-    const answered =
-        showResult.value
-            ? currentIndex.value + 1
-            : currentIndex.value
-
-    return Math.round((answered / questions.value.length) * 100)
+    if (!totalQuestions.value) return 0
+    return Math.round(
+        (answeredCount.value / totalQuestions.value) * 100
+    )
 })
 
 const justCompleted = ref(false)
@@ -201,6 +240,24 @@ function updateCountdown() {
 
 let countdownInterval: any = null
 
+async function fetchOptions(correct: DailyItem) {
+    const token = await getAccessToken()
+
+    const res = await $fetch('/api/daily/distractors', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`
+        },
+        body: {
+            wordId: correct.id,
+            limit: 3
+        }
+    })
+    console.log("DISTRACTOR API RESPONSE:", res)
+    return shuffle([correct, ...res.distractors])
+}
+
+
 onMounted(() => {
     updateCountdown()
     countdownInterval = setInterval(updateCountdown, 1000) // every 1 second
@@ -210,8 +267,6 @@ onUnmounted(() => {
     if (countdownInterval) clearInterval(countdownInterval)
 })
 
-
-import { watch } from 'vue'
 
 watch(
     () => currentQuestion.value?.id,
@@ -241,40 +296,72 @@ watch(
     { immediate: true }
 )
 
+// watch(
+//     () => ({
+//         index: currentIndex.value,
+//         show: showResult.value,
+//         total: questions.value.length
+//     }),
+//     async ({ index, show, total }) => {
+//         if (!show) return
+//         // if (index !== total - 1) return 
+//         if (answeredCount.value >= totalQuestions.value) return
+//         if (dailyCompleted.value) return
+
+//         try {
+//             const token = await getAccessToken()
+
+//             await $fetch('/api/daily/complete', {
+//                 method: 'POST',
+//                 headers: {
+//                     Authorization: `Bearer ${token}`
+//                 },
+//                 body: {
+//                     xpEarned: xpToday.value,
+//                     correctCount: correctCount.value,
+//                     totalQuestions: questions.value.length
+//                 }
+//             })
+
+//             dailyCompleted.value = true
+//             justCompleted.value = true
+
+//         } catch (err) {
+//             console.error('Daily complete failed', err)
+//         }
+//     }
+// )
+
 watch(
-    () => ({
-        index: currentIndex.value,
-        show: showResult.value,
-        total: questions.value.length
-    }),
-    async ({ index, show, total }) => {
-        if (!show) return
-        if (index !== total - 1) return
-        if (dailyCompleted.value) return
+  answeredCount,
+  async (count) => {
+    if (count !== totalQuestions.value) return
+    if (dailyCompleted.value) return
 
-        try {
-            const token = await getAccessToken()
+    try {
+      const token = await getAccessToken()
 
-            await $fetch('/api/daily/complete', {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                body: {
-                    xpEarned: xpToday.value,
-                    correctCount: correctCount.value,
-                    totalQuestions: questions.value.length
-                }
-            })
-
-            dailyCompleted.value = true
-            justCompleted.value = true
-
-        } catch (err) {
-            console.error('Daily complete failed', err)
+      await $fetch('/api/daily/complete', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: {
+          xpEarned: xpToday.value,
+          correctCount: correctCount.value,
+          totalQuestions: totalQuestions.value
         }
+      })
+
+      dailyCompleted.value = true
+      justCompleted.value = true
+
+    } catch (err) {
+      console.error('Daily complete failed', err)
     }
+  }
 )
+
 
 </script>
 
@@ -300,9 +387,8 @@ watch(
                         :style="{ width: progressPercent + '%' }" />
                 </div>
 
-                <!-- Counter -->
-                <span v-if="(currentIndex + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
-                    {{ currentIndex + 1 }} / {{ questions.length }}
+                <span class="text-sm text-gray-500 whitespace-nowrap">
+                    {{ answeredCount }} / {{ totalQuestions }}
                 </span>
 
             </div>
@@ -336,7 +422,7 @@ watch(
                     <!-- Streak -->
                     <div class="h-5 flex items-center justify-center">
                         <span class="text-xs text-orange-500">
-                            {{ currentStreak && currentStreak > 0 ? `🔥 ${currentStreak} streak` : '' }}
+                            {{ currentStreak && currentStreak > 0 ? `${currentStreak} streak` : '' }}
                         </span>
                     </div>
 
@@ -374,7 +460,7 @@ watch(
                 </h2>
 
                 <p class="mb-2">
-                    Correct: {{ correctCount }} / {{ questions.length }}
+                    Correct: {{ correctCount }} / {{ totalQuestions }}
                 </p>
 
                 <p class="mb-4">
