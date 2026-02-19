@@ -251,7 +251,7 @@ watch(
 
         <div v-else>
 
-            <div class="relative min-h-[600px]">
+            <div class="relative min-h-[700px]">
                 <div v-if="!showCompleteView && !finishing && currentQuestion" class="flex items-center gap-3 mb-6">
 
                     <div class="flex-1 bg-gray-200 rounded-full h-3 relative overflow-hidden">
