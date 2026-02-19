@@ -327,6 +327,22 @@ function canEnterTopic(topic: Topic) {
   return canAccessLevel(entitlement.value!)
 }
 
+function doNotShowUpgradeMessage(topic: Topic) {
+
+  if (!topic.requiresPaid) return true
+  if (!isLoggedIn.value) return false
+
+  const doesNotHaveFreePlan =
+    entitlement.value?.plan !== "free" &&
+    (
+      entitlement.value?.subscription_status === "active" ||
+      entitlement.value?.subscription_status === "trialing" ||
+      entitlement.value?.subscription_status === "past_due"
+    )
+
+  return doesNotHaveFreePlan
+}
+
 /**
  * Where should the link go?
  */
@@ -383,7 +399,7 @@ function topicLink(topic: Topic) {
           </p>
 
           <!-- Locked message -->
-          <p v-if="topic.requiresPaid && !canEnterTopic(topic)" class="text-xs text-gray-400 pt-1">
+          <p v-if="topic.requiresPaid && !doNotShowUpgradeMessage(topic)" class="text-xs text-gray-400 pt-1">
             Locked — upgrade to access
           </p>
         </NuxtLink>
