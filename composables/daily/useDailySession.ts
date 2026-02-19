@@ -46,37 +46,49 @@ export function shuffleDailyWords<T>(arr: T[]): T[] {
 // }
 
 export function useDailySession() {
-  const loading = ref(true)
-  const dailyCompleted = ref(false)
+  const loading = ref(true);
+  const dailyCompleted = ref(false);
 
-  const answeredCount = ref(0)
-  const totalQuestions = ref(0)
-  const correctCount = ref(0)
-  const xpToday = ref(0)
+  const answeredCount = ref(0);
+  const totalQuestions = ref(0);
+  const correctCount = ref(0);
+  const xpToday = ref(0);
 
-  const questions = ref<DailyWord[]>([])
+  const dailyLocked = ref(false);
+  const requiredWords = ref(20);
+  const currentWordCount = ref(0);
+
+  const questions = ref<DailyWord[]>([]);
 
   async function loadSession(token: string) {
     const dailyData = await $fetch<DailySessionResponse>("/api/daily", {
       headers: { Authorization: `Bearer ${token}` },
-    })
+    });
 
-    dailyCompleted.value = dailyData.completed
-    answeredCount.value = dailyData.answeredCount
-    totalQuestions.value = dailyData.totalQuestions
-    correctCount.value = dailyData.correctCount
-    xpToday.value = dailyData.xpEarnedToday
+    if (dailyData.locked) {
+      dailyLocked.value = true;
+      requiredWords.value = dailyData.required ?? 20;
+      currentWordCount.value = dailyData.current ?? 0;
+      loading.value = false;
+      return;
+    }
+
+    dailyCompleted.value = dailyData.completed;
+    answeredCount.value = dailyData.answeredCount;
+    totalQuestions.value = dailyData.totalQuestions;
+    correctCount.value = dailyData.correctCount;
+    xpToday.value = dailyData.xpEarnedToday;
 
     questions.value = dailyData.completed
       ? []
-      : shuffleDailyWords(dailyData.words)
+      : shuffleDailyWords(dailyData.words);
 
-    loading.value = false
+    loading.value = false;
   }
 
   async function completeSession(token: string) {
-    if (answeredCount.value < totalQuestions.value) return
-    if (dailyCompleted.value) return
+    if (answeredCount.value < totalQuestions.value) return;
+    if (dailyCompleted.value) return;
 
     await $fetch("/api/daily/complete", {
       method: "POST",
@@ -86,13 +98,16 @@ export function useDailySession() {
         correctCount: correctCount.value,
         totalQuestions: totalQuestions.value,
       },
-    })
+    });
 
-    dailyCompleted.value = true
+    dailyCompleted.value = true;
   }
 
   return {
     loading,
+    dailyLocked,
+    requiredWords,
+    currentWordCount,
     dailyCompleted,
     answeredCount,
     totalQuestions,
@@ -101,5 +116,5 @@ export function useDailySession() {
     questions,
     loadSession,
     completeSession, // 👈 expose it
-  }
+  };
 }

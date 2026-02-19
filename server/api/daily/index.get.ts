@@ -9,7 +9,35 @@ import { requireUser } from "~/server/utils/requireUser";
 export default defineEventHandler(
   async (event): Promise<DailySessionResponse> => {
     const userId = await requireUser(event);
+
+    const DAILY_MIN_WORDS_REQUIRED = 20;
     const dailyNumberOfQuesions = 20;
+
+    // 🔒 Check if user has enough studied words
+    const wordCountResult = await db.query(
+      `
+    select count(*)::int as count
+    from user_word_progress
+    where user_id = $1
+  `,
+      [userId],
+    );
+
+    const studiedWordCount = wordCountResult.rows[0].count;
+
+    if (studiedWordCount < DAILY_MIN_WORDS_REQUIRED) {
+      return {
+        locked: true,
+        required: DAILY_MIN_WORDS_REQUIRED,
+        current: studiedWordCount,
+        completed: false,
+        xpEarnedToday: 0,
+        correctCount: 0,
+        totalQuestions: 0,
+        answeredCount: 0,
+        words: [],
+      };
+    }
 
     // 1️⃣ Try get today's session
     const sessionResult = await db.query<DailySessionRow>(
@@ -58,6 +86,7 @@ export default defineEventHandler(
       session = insertResult.rows[0];
 
       return {
+        locked: false,
         completed: false,
         xpEarnedToday: 0,
         correctCount: 0,
@@ -72,6 +101,7 @@ export default defineEventHandler(
     // 4️⃣ Fetch locked words
     if (!session.word_ids.length) {
       return {
+        locked: false,
         completed: true,
         xpEarnedToday: session.xp_earned,
         correctCount: session.correct_count,
@@ -94,6 +124,7 @@ export default defineEventHandler(
     const remainingCount = session.total_questions - session.answered_count;
 
     return {
+      locked: false,
       completed: session.completed,
       xpEarnedToday: session.xp_earned,
       correctCount: session.correct_count,

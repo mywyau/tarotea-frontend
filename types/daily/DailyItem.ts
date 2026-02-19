@@ -11,6 +11,9 @@ export interface DailyWord {
 }
 
 export interface DailySessionResponse {
+    locked: boolean
+    required?: number
+    current?: number
     completed: boolean
     xpEarnedToday: number
     correctCount: number

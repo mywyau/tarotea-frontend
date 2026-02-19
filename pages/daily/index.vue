@@ -19,7 +19,6 @@ const cdnBase = runtimeConfig.public.cdnBase
 const currentIndex = ref(0)
 const selected = ref<string | null>(null)
 const showResult = ref(false)
-
 const showCompleteView = ref(false)
 
 const {
@@ -33,6 +32,9 @@ const { getAccessToken } = await useAuth()
 
 const {
     loading,
+    dailyLocked,
+    requiredWords,
+    currentWordCount,
     dailyCompleted,
     answeredCount,
     totalQuestions,
@@ -108,24 +110,6 @@ async function selectAnswer(answer: string) {
             answeredCount.value >= totalQuestions.value
 
         triggerXp(res.delta, isLastQuestion)
-
-        // if (isLastQuestion && !dailyCompleted.value) {
-        //     // await completeSession(token)
-
-        //     // const COMPLETE_DELAY_MS = 3000
-
-        //     // setTimeout(() => {
-        //     //     showCompleteView.value = true
-        //     // }, COMPLETE_DELAY_MS)
-
-        //     await completeSession(token)
-
-
-
-        //     await sleep(COMPLETE_DELAY_MS)
-
-        //     showCompleteView.value = true
-        // }
 
         if (isLastQuestion && !dailyCompleted.value) {
 
@@ -250,6 +234,32 @@ watch(
         </div>
 
         <div v-else>
+
+            <div v-if="dailyLocked" class="bg-white shadow p-8 rounded-xl text-center">
+
+                <h2 class="text-xl font-semibold mb-4">
+                    Daily Training Locked
+                </h2>
+
+                <p class="text-gray-600 mb-4">
+                    You need to have quizzed yourself on at least {{ requiredWords }} words
+                    to unlock Daily Training.
+                </p>
+
+                <div class="w-full bg-gray-200 h-3 rounded-full mb-4">
+                    <div class="bg-purple-500 h-3 rounded-full transition-all duration-500"
+                        :style="{ width: (currentWordCount / requiredWords) * 100 + '%' }" />
+                </div>
+
+                <p class="text-sm text-gray-500 mb-6">
+                    {{ currentWordCount }} / {{ requiredWords }} words studied
+                </p>
+
+                <NuxtLink to="/topics/quiz"
+                    class="text-gray-500 px-5 py-3 rounded-lg hover:scale-[1.03] transition">
+                    Test your self on more words first →
+                </NuxtLink>
+            </div>
 
             <div class="relative min-h-[700px]">
                 <div v-if="!showCompleteView && !finishing && currentQuestion" class="flex items-center gap-3 mb-6">
