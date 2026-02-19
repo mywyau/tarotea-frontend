@@ -36,16 +36,13 @@ const mergingXp = ref(false)
 const readyForNext = ref(false)
 const showCompleteView = ref(false)
 
-
 const remainingCount = computed(() =>
     totalQuestions.value - answeredCount.value
 )
 
+const dailyCompleted = ref(false)
 
 const { getAccessToken } = await useAuth()
-
-
-const dailyCompleted = ref(false)
 
 onMounted(async () => {
     try {
@@ -73,13 +70,9 @@ onMounted(async () => {
         correctCount.value = dailyData.correctCount // ✅ ALWAYS restore
 
         if (dailyData.completed) {
-            // restore completed session data
-            // correctCount.value = dailyData.correctCount
             questions.value = new Array(dailyData.totalQuestions).fill(null)
         } else {
             // start fresh daily session
-            console.log('', dailyData.words.map(word => word.id))
-            // questions.value = shuffle(dailyData.words)
             dailyWords.value = dailyData.words
             questions.value = shuffle(dailyData.words)
         }
@@ -110,7 +103,6 @@ watch(
     currentQuestion,
     async (q) => {
         if (!q) return
-        console.log("Fetching distractors for:", q.id)
         options.value = await fetchOptions(q)
     },
     { immediate: true }
@@ -163,8 +155,6 @@ async function selectAnswer(answer: string) {
             xpToday.value = res.daily.xpEarned
             totalQuestions.value = res.daily.totalQuestions
         }
-
-        console.log('', currentQuestion.value.id)
 
         // 🔥 Animate XP
         xpDelta.value = res.delta
@@ -269,7 +259,6 @@ async function fetchOptions(correct: DailyItem) {
             limit: 3
         }
     })
-    console.log("DISTRACTOR API RESPONSE:", res)
     return shuffle([correct, ...res.distractors])
 }
 
