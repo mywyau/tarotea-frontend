@@ -64,7 +64,14 @@ async function selectAnswer(answer: string) {
     selected.value = answer
     showResult.value = true
 
-    const correct = answer === currentQuestion.value.meaning
+    const correct: boolean = answer === currentQuestion.value.meaning
+
+     // Update UI immediately
+    if (correct) {
+      playCorrectJingle()
+    } else {
+      playIncorrectJingle()
+    }
 
     try {
         const token = await getAccessToken()
