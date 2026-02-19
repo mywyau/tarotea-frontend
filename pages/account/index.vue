@@ -13,7 +13,6 @@ const {
 
 import { useRouter } from 'vue-router'
 
-const router = useRouter()
 const deleting = ref(false)
 const deleteConfirmInput = ref('')
 

@@ -11,7 +11,7 @@ export function useXpAnimation() {
     if (!isLast) {
       setTimeout(() => {
         readyForNext.value = true
-      }, 250) // 0.25s instead of 1.2s
+      }, 180) // 0.25s instead of 1.2s
     }
 
     // animation continues independently
@@ -21,7 +21,7 @@ export function useXpAnimation() {
       setTimeout(() => {
         xpDelta.value = null
         mergingXp.value = false
-      }, 800)
+      }, 400)
     }, 1000)
   }
 
