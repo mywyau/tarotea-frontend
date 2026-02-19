@@ -31,6 +31,7 @@ const correctCount = ref(0)
 
 const answeredCount = ref(0)
 const totalQuestions = ref(0)
+const readyForNext = ref(false)
 
 const remainingCount = computed(() =>
     totalQuestions.value - answeredCount.value
@@ -119,6 +120,7 @@ async function selectAnswer(answer: string) {
 
     selected.value = answer
     showResult.value = true
+    readyForNext.value = false   // 🔥 block Next button initially
 
     const correct = answer === currentQuestion.value.meaning
 
@@ -175,6 +177,7 @@ async function selectAnswer(answer: string) {
 
         setTimeout(() => {
             xpDelta.value = null
+            readyForNext.value = true   // ✅ Now allow Next button
         }, 800)
 
     } catch (err) {
@@ -190,17 +193,6 @@ function nextQuestion() {
         showResult.value = false
     }
 }
-
-// const progressPercent = computed(() => {
-//     if (!questions.value.length) return 0
-
-//     const answered =
-//         showResult.value
-//             ? currentIndex.value + 1
-//             : currentIndex.value
-
-//     return Math.round((answered / questions.value.length) * 100)
-// })
 
 const progressPercent = computed(() => {
     if (!totalQuestions.value) return 0
@@ -458,7 +450,7 @@ watch(
                 </div>
 
 
-                <button v-if="showResult && currentIndex < questions.length - 1" @click="nextQuestion"
+                <button v-if="showResult && readyForNext && currentIndex < questions.length - 1" @click="nextQuestion"
                     class="mt-6 w-full bg-black text-white p-3 rounded-lg">
                     Next
                 </button>
