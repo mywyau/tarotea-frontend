@@ -122,10 +122,6 @@ async function selectAnswer(answer: string) {
 
     const correct = answer === currentQuestion.value.meaning
 
-    // if (correct) {
-    //     correctCount.value++
-    // }
-
     try {
         const token = await getAccessToken()
 
@@ -133,7 +129,13 @@ async function selectAnswer(answer: string) {
             delta: number
             newXp: number
             newStreak: number
-            dailyBlocked?: boolean
+            dailyBlocked?: boolean,
+            daily?: {
+                answeredCount: number
+                correctCount: number
+                xpEarned: number
+                totalQuestions: number
+            }
         }>('/api/word-progress/update', {
             method: 'POST',
             headers: {
@@ -150,7 +152,12 @@ async function selectAnswer(answer: string) {
             return
         }
 
-        // answeredCount.value++
+        if (res.daily) {
+            answeredCount.value = res.daily.answeredCount
+            correctCount.value = res.daily.correctCount
+            xpToday.value = res.daily.xpEarned
+            totalQuestions.value = res.daily.totalQuestions
+        }
 
         console.log('', currentQuestion.value.id)
 
@@ -160,12 +167,11 @@ async function selectAnswer(answer: string) {
         // update UI immediately
         currentXp.value = res.newXp
         currentStreak.value = res.newStreak
-        // xpToday.value += res.delta
 
-        answeredCount.value = res.daily.answeredCount
-        correctCount.value = res.daily.correctCount
-        xpToday.value = res.daily.xpEarned
-        totalQuestions.value = res.daily.totalQuestions
+        // answeredCount.value = res.daily.answeredCount
+        // correctCount.value = res.daily.correctCount
+        // xpToday.value = res.daily.xpEarned
+        // totalQuestions.value = res.daily.totalQuestions
 
         setTimeout(() => {
             xpDelta.value = null
@@ -340,7 +346,7 @@ watch(
 watch(
     answeredCount,
     async (count) => {
-        if (count !== totalQuestions.value) return
+        if (count < totalQuestions.value) return
         if (dailyCompleted.value) return
 
         try {
