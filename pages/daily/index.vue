@@ -5,9 +5,13 @@ definePageMeta({
     ssr: false
 })
 
+import { useCountdownToUtcMidnight } from '@/composables/daily/useCountdownToUtcMidnight'
+import { shuffleDailyWords, useDailySession } from '@/composables/daily/useDailySession'
+import { useXpAnimation } from '@/composables/daily/useXpAnimation'
 import { computed, onMounted, ref, watch } from 'vue'
-import { shuffleDailyWords, useDailySession } from '~/composables/daily/useDailySession'
+
 import type { DailyWord } from '~/types/daily/DailyItem'
+
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -16,10 +20,17 @@ const currentIndex = ref(0)
 const selected = ref<string | null>(null)
 const showResult = ref(false)
 
-const mergingXp = ref(false)
-const readyForNext = ref(false)
+// const mergingXp = ref(false)
+// const readyForNext = ref(false)
 const showCompleteView = ref(false)
-let countdownInterval: any = null
+// let countdownInterval: any = null
+
+const {
+    xpDelta,
+    mergingXp,
+    readyForNext,
+    triggerXp
+} = useXpAnimation()
 
 const { getAccessToken } = await useAuth()
 
@@ -90,40 +101,63 @@ async function selectAnswer(answer: string) {
         }
 
         // 🔥 Animate XP
-        xpDelta.value = res.delta
+        // xpDelta.value = res.delta
 
-        // update UI immediately
+        // // update UI immediately
+        // currentXp.value = res.newXp
+        // currentStreak.value = res.newStreak
+
+        // // Hold the delta visible
+        // // Hold XP fully visible
+        // setTimeout(() => {
+        //     mergingXp.value = true
+
+        //     const isLastQuestion = answeredCount.value >= totalQuestions.value
+        //     // Merge animation
+        //     setTimeout(() => {
+        //         xpDelta.value = null
+        //         mergingXp.value = false
+
+        //         if (!isLastQuestion) {
+        //             readyForNext.value = true
+        //         }
+        //     }, 220)
+
+        // }, 1000)
+
         currentXp.value = res.newXp
         currentStreak.value = res.newStreak
 
-        // Hold the delta visible
-        // Hold XP fully visible
-        setTimeout(() => {
-            mergingXp.value = true
+        const isLastQuestion =
+            answeredCount.value >= totalQuestions.value
 
-            const isLastQuestion = answeredCount.value >= totalQuestions.value
-            // Merge animation
+        triggerXp(res.delta, isLastQuestion)
+
+        if (isLastQuestion && !dailyCompleted.value) {
+            await completeSession(token)
+
+            const COMPLETE_DELAY_MS = 1420
+
             setTimeout(() => {
-                xpDelta.value = null
-                mergingXp.value = false
-
-                if (!isLastQuestion) {
-                    readyForNext.value = true
-                }
-            }, 220)
-
-        }, 1000)
+                showCompleteView.value = true
+            }, COMPLETE_DELAY_MS)
+        }
 
     } catch (err) {
         console.error('XP update failed', err)
     }
 }
 
+
 function nextQuestion() {
     if (currentIndex.value < questions.value.length - 1) {
         currentIndex.value++
         selected.value = null
         showResult.value = false
+
+        // 🔥 reset animation state
+        readyForNext.value = false
+        mergingXp.value = false
     }
 }
 
@@ -134,42 +168,44 @@ const progressPercent = computed(() => {
     )
 })
 
-const xpDelta = ref<number | null>(null)
+// const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
 const currentStreak = ref<number | null>(null)
-const timeRemaining = ref('')
+const { timeRemaining } = useCountdownToUtcMidnight()
 
-function updateCountdown() {
-    const now = new Date()
+// const timeRemaining = ref('')
 
-    // next UTC midnight
-    const nextMidnight = new Date(
-        Date.UTC(
-            now.getUTCFullYear(),
-            now.getUTCMonth(),
-            now.getUTCDate() + 1,
-            0, 0, 0
-        )
-    )
+// function updateCountdown() {
+//     const now = new Date()
 
-    const diff = nextMidnight.getTime() - now.getTime()
+//     // next UTC midnight
+//     const nextMidnight = new Date(
+//         Date.UTC(
+//             now.getUTCFullYear(),
+//             now.getUTCMonth(),
+//             now.getUTCDate() + 1,
+//             0, 0, 0
+//         )
+//     )
 
-    if (diff <= 0) {
-        timeRemaining.value = '00:00:00'
-        return
-    }
+//     const diff = nextMidnight.getTime() - now.getTime()
 
-    const totalSeconds = Math.floor(diff / 1000)
-    const hours = Math.floor(totalSeconds / 3600)
-    const minutes = Math.floor((totalSeconds % 3600) / 60)
-    const seconds = totalSeconds % 60
+//     if (diff <= 0) {
+//         timeRemaining.value = '00:00:00'
+//         return
+//     }
 
-    const hh = String(hours).padStart(2, '0')
-    const mm = String(minutes).padStart(2, '0')
-    const ss = String(seconds).padStart(2, '0')
+//     const totalSeconds = Math.floor(diff / 1000)
+//     const hours = Math.floor(totalSeconds / 3600)
+//     const minutes = Math.floor((totalSeconds % 3600) / 60)
+//     const seconds = totalSeconds % 60
 
-    timeRemaining.value = `${hh}:${mm}:${ss}`
-}
+//     const hh = String(hours).padStart(2, '0')
+//     const mm = String(minutes).padStart(2, '0')
+//     const ss = String(seconds).padStart(2, '0')
+
+//     timeRemaining.value = `${hh}:${mm}:${ss}`
+// }
 
 async function fetchOptions(correct: DailyWord) {
     const token = await getAccessToken()
@@ -194,14 +230,14 @@ onMounted(
     }
 )
 
-onMounted(() => {
-    updateCountdown()
-    countdownInterval = setInterval(updateCountdown, 1000) // every 1 second
-})
+// onMounted(() => {
+//     updateCountdown()
+//     countdownInterval = setInterval(updateCountdown, 1000) // every 1 second
+// })
 
-onUnmounted(() => {
-    if (countdownInterval) clearInterval(countdownInterval)
-})
+// onUnmounted(() => {
+//     if (countdownInterval) clearInterval(countdownInterval)
+// })
 
 watch(
     currentQuestion,
@@ -238,25 +274,25 @@ watch(
     { immediate: true }
 )
 
-watch(
-    answeredCount, async () => {
+// watch(
+//     answeredCount, async () => {
 
-        if (answeredCount.value < totalQuestions.value) return
-        if (dailyCompleted.value) return
-        const token = await getAccessToken()
+//         if (answeredCount.value < totalQuestions.value) return
+//         if (dailyCompleted.value) return
+//         const token = await getAccessToken()
 
-        await completeSession(token)
+//         await completeSession(token)
 
-        // UI animation delay stays in page
-        const COMPLETE_DELAY_MS = 1000 + 220 + 200
+//         // UI animation delay stays in page
+//         const COMPLETE_DELAY_MS = 1000 + 220 + 200
 
-        setTimeout(
-            () => {
-                showCompleteView.value = true
-            }, COMPLETE_DELAY_MS
-        )
-    }
-)
+//         setTimeout(
+//             () => {
+//                 showCompleteView.value = true
+//             }, COMPLETE_DELAY_MS
+//         )
+//     }
+// )
 </script>
 
 
