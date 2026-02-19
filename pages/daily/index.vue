@@ -100,31 +100,6 @@ async function selectAnswer(answer: string) {
             totalQuestions.value = res.daily.totalQuestions
         }
 
-        // 🔥 Animate XP
-        // xpDelta.value = res.delta
-
-        // // update UI immediately
-        // currentXp.value = res.newXp
-        // currentStreak.value = res.newStreak
-
-        // // Hold the delta visible
-        // // Hold XP fully visible
-        // setTimeout(() => {
-        //     mergingXp.value = true
-
-        //     const isLastQuestion = answeredCount.value >= totalQuestions.value
-        //     // Merge animation
-        //     setTimeout(() => {
-        //         xpDelta.value = null
-        //         mergingXp.value = false
-
-        //         if (!isLastQuestion) {
-        //             readyForNext.value = true
-        //         }
-        //     }, 220)
-
-        // }, 1000)
-
         currentXp.value = res.newXp
         currentStreak.value = res.newStreak
 
@@ -168,44 +143,10 @@ const progressPercent = computed(() => {
     )
 })
 
-// const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
 const currentStreak = ref<number | null>(null)
 const { timeRemaining } = useCountdownToUtcMidnight()
 
-// const timeRemaining = ref('')
-
-// function updateCountdown() {
-//     const now = new Date()
-
-//     // next UTC midnight
-//     const nextMidnight = new Date(
-//         Date.UTC(
-//             now.getUTCFullYear(),
-//             now.getUTCMonth(),
-//             now.getUTCDate() + 1,
-//             0, 0, 0
-//         )
-//     )
-
-//     const diff = nextMidnight.getTime() - now.getTime()
-
-//     if (diff <= 0) {
-//         timeRemaining.value = '00:00:00'
-//         return
-//     }
-
-//     const totalSeconds = Math.floor(diff / 1000)
-//     const hours = Math.floor(totalSeconds / 3600)
-//     const minutes = Math.floor((totalSeconds % 3600) / 60)
-//     const seconds = totalSeconds % 60
-
-//     const hh = String(hours).padStart(2, '0')
-//     const mm = String(minutes).padStart(2, '0')
-//     const ss = String(seconds).padStart(2, '0')
-
-//     timeRemaining.value = `${hh}:${mm}:${ss}`
-// }
 
 async function fetchOptions(correct: DailyWord) {
     const token = await getAccessToken()
@@ -229,15 +170,6 @@ onMounted(
         await loadSession(token)
     }
 )
-
-// onMounted(() => {
-//     updateCountdown()
-//     countdownInterval = setInterval(updateCountdown, 1000) // every 1 second
-// })
-
-// onUnmounted(() => {
-//     if (countdownInterval) clearInterval(countdownInterval)
-// })
 
 watch(
     currentQuestion,
@@ -274,25 +206,6 @@ watch(
     { immediate: true }
 )
 
-// watch(
-//     answeredCount, async () => {
-
-//         if (answeredCount.value < totalQuestions.value) return
-//         if (dailyCompleted.value) return
-//         const token = await getAccessToken()
-
-//         await completeSession(token)
-
-//         // UI animation delay stays in page
-//         const COMPLETE_DELAY_MS = 1000 + 220 + 200
-
-//         setTimeout(
-//             () => {
-//                 showCompleteView.value = true
-//             }, COMPLETE_DELAY_MS
-//         )
-//     }
-// )
 </script>
 
 
