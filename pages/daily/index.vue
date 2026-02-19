@@ -5,90 +5,46 @@ definePageMeta({
     ssr: false
 })
 
+import { useCountdownToUtcMidnight } from '@/composables/daily/useCountdownToUtcMidnight'
+import { shuffleDailyWords, useDailySession } from '@/composables/daily/useDailySession'
+import { useXpAnimation } from '@/composables/daily/useXpAnimation'
 import { computed, onMounted, ref, watch } from 'vue'
 
-type DailyItem = {
-    id: string
-    word: string
-    meaning: string
-}
+import type { DailyWord } from '~/types/daily/DailyItem'
+
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
-
-// const questions = ref<DailyItem[]>([])
-const loading = ref(true)
-
-const dailyWords = ref<DailyItem[]>([])
-const questions = ref<DailyItem[]>([]) // remaining questions
 
 const currentIndex = ref(0)
 const selected = ref<string | null>(null)
 const showResult = ref(false)
 
-const xpToday = ref(0)
-const correctCount = ref(0)
-
-const answeredCount = ref(0)
-const totalQuestions = ref(0)
-
-const mergingXp = ref(false)
-const readyForNext = ref(false)
+// const mergingXp = ref(false)
+// const readyForNext = ref(false)
 const showCompleteView = ref(false)
+// let countdownInterval: any = null
 
-const remainingCount = computed(() =>
-    totalQuestions.value - answeredCount.value
-)
-
-const dailyCompleted = ref(false)
+const {
+    xpDelta,
+    mergingXp,
+    readyForNext,
+    triggerXp
+} = useXpAnimation()
 
 const { getAccessToken } = await useAuth()
 
-onMounted(async () => {
-    try {
-        const token = await getAccessToken()
-
-        const dailyData = await $fetch<{
-            completed: boolean
-            xpEarnedToday: number
-            correctCount: number
-            totalQuestions: number
-            answeredCount: number
-            remainingCount: number
-            words: DailyItem[]
-        }>('/api/daily', {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-
-        dailyCompleted.value = dailyData.completed
-        xpToday.value = dailyData.xpEarnedToday
-
-        answeredCount.value = dailyData.answeredCount
-        totalQuestions.value = dailyData.totalQuestions
-        correctCount.value = dailyData.correctCount // ✅ ALWAYS restore
-
-        if (dailyData.completed) {
-            questions.value = new Array(dailyData.totalQuestions).fill(null)
-        } else {
-            // start fresh daily session
-            dailyWords.value = dailyData.words
-            questions.value = shuffle(dailyData.words)
-        }
-
-    } catch (err) {
-        console.error('Daily fetch failed', err)
-        questions.value = []
-    } finally {
-        loading.value = false
-    }
-})
-
-
-function shuffle<T>(arr: T[]): T[] {
-    return [...arr].sort(() => Math.random() - 0.5)
-}
+const {
+    loading,
+    dailyCompleted,
+    answeredCount,
+    totalQuestions,
+    correctCount,
+    xpToday,
+    questions,
+    loadSession,
+    completeSession
+} = useDailySession()
 
 const currentQuestion = computed(() =>
     questions.value.length
@@ -96,19 +52,7 @@ const currentQuestion = computed(() =>
         : null
 )
 
-const options = ref<DailyItem[]>([])
-
-
-watch(
-    currentQuestion,
-    async (q) => {
-        if (!q) return
-        options.value = await fetchOptions(q)
-    },
-    { immediate: true }
-)
-
-
+const options = ref<DailyWord[]>([])
 
 async function selectAnswer(answer: string) {
 
@@ -156,32 +100,23 @@ async function selectAnswer(answer: string) {
             totalQuestions.value = res.daily.totalQuestions
         }
 
-        // 🔥 Animate XP
-        xpDelta.value = res.delta
-
-        // update UI immediately
         currentXp.value = res.newXp
         currentStreak.value = res.newStreak
 
+        const isLastQuestion =
+            answeredCount.value >= totalQuestions.value
 
+        triggerXp(res.delta, isLastQuestion)
 
-        // Hold the delta visible
-        // Hold XP fully visible
-        setTimeout(() => {
-            mergingXp.value = true
+        if (isLastQuestion && !dailyCompleted.value) {
+            await completeSession(token)
 
-            const isLastQuestion = answeredCount.value >= totalQuestions.value
-            // Merge animation
+            const COMPLETE_DELAY_MS = 1420
+
             setTimeout(() => {
-                xpDelta.value = null
-                mergingXp.value = false
-
-                if (!isLastQuestion) {
-                    readyForNext.value = true
-                }
-            }, 220)
-
-        }, 1000)
+                showCompleteView.value = true
+            }, COMPLETE_DELAY_MS)
+        }
 
     } catch (err) {
         console.error('XP update failed', err)
@@ -194,6 +129,10 @@ function nextQuestion() {
         currentIndex.value++
         selected.value = null
         showResult.value = false
+
+        // 🔥 reset animation state
+        readyForNext.value = false
+        mergingXp.value = false
     }
 }
 
@@ -204,49 +143,12 @@ const progressPercent = computed(() => {
     )
 })
 
-const justCompleted = ref(false)
-const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
 const currentStreak = ref<number | null>(null)
+const { timeRemaining } = useCountdownToUtcMidnight()
 
 
-const timeRemaining = ref('')
-
-function updateCountdown() {
-    const now = new Date()
-
-    // next UTC midnight
-    const nextMidnight = new Date(
-        Date.UTC(
-            now.getUTCFullYear(),
-            now.getUTCMonth(),
-            now.getUTCDate() + 1,
-            0, 0, 0
-        )
-    )
-
-    const diff = nextMidnight.getTime() - now.getTime()
-
-    if (diff <= 0) {
-        timeRemaining.value = '00:00:00'
-        return
-    }
-
-    const totalSeconds = Math.floor(diff / 1000)
-    const hours = Math.floor(totalSeconds / 3600)
-    const minutes = Math.floor((totalSeconds % 3600) / 60)
-    const seconds = totalSeconds % 60
-
-    const hh = String(hours).padStart(2, '0')
-    const mm = String(minutes).padStart(2, '0')
-    const ss = String(seconds).padStart(2, '0')
-
-    timeRemaining.value = `${hh}:${mm}:${ss}`
-}
-
-let countdownInterval: any = null
-
-async function fetchOptions(correct: DailyItem) {
+async function fetchOptions(correct: DailyWord) {
     const token = await getAccessToken()
 
     const res = await $fetch('/api/daily/distractors', {
@@ -259,19 +161,24 @@ async function fetchOptions(correct: DailyItem) {
             limit: 3
         }
     })
-    return shuffle([correct, ...res.distractors])
+    return shuffleDailyWords([correct, ...res.distractors])
 }
 
+onMounted(
+    async () => {
+        const token = await getAccessToken()
+        await loadSession(token)
+    }
+)
 
-onMounted(() => {
-    updateCountdown()
-    countdownInterval = setInterval(updateCountdown, 1000) // every 1 second
-})
-
-onUnmounted(() => {
-    if (countdownInterval) clearInterval(countdownInterval)
-})
-
+watch(
+    currentQuestion,
+    async (q) => {
+        if (!q) return
+        options.value = await fetchOptions(q)
+    },
+    { immediate: true }
+)
 
 watch(
     () => currentQuestion.value?.id,
@@ -281,9 +188,7 @@ watch(
         try {
             const token = await getAccessToken()
 
-            const progressMap = await $fetch<
-                Record<string, { xp: number; streak: number }>
-            >('/api/word-progress', {
+            const progressMap = await $fetch<Record<string, { xp: number; streak: number }>>('/api/word-progress', {
                 query: { wordIds: wordId },
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -300,42 +205,6 @@ watch(
     },
     { immediate: true }
 )
-
-watch(
-    answeredCount,
-    async (count) => {
-        if (count < totalQuestions.value) return
-        if (dailyCompleted.value) return
-
-        try {
-            const token = await getAccessToken()
-
-            await $fetch('/api/daily/complete', {
-                method: 'POST',
-                headers: { Authorization: `Bearer ${token}` },
-                body: {
-                    xpEarned: xpToday.value,
-                    correctCount: correctCount.value,
-                    totalQuestions: totalQuestions.value
-                }
-            })
-
-            dailyCompleted.value = true
-
-            // ✅ wait until XP animation + next button timing is done
-            // hold (1000) + merge (220) + a little buffer
-            const COMPLETE_DELAY_MS = 1000 + 220 + 200
-
-            setTimeout(() => {
-                showCompleteView.value = true
-            }, COMPLETE_DELAY_MS)
-
-        } catch (err) {
-            console.error('Daily complete failed', err)
-        }
-    }
-)
-
 
 </script>
 
