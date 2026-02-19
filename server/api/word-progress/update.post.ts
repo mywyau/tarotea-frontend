@@ -3,15 +3,11 @@ import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
-  // 🔐 Require authenticated user
   const userId = await requireUser(event);
-
   const body = await readBody(event);
 
   const wordId = body.wordId as string;
   const correct = body.correct as boolean;
-
-  // 🔒 Sanitize mode
   const mode = body.mode === "daily" ? "daily" : "normal";
 
   if (!wordId || typeof correct !== "boolean") {
@@ -21,113 +17,96 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // ✅ 1️⃣ Validate word exists BEFORE touching progress
-  const wordCheck = await db.query(`select 1 from words where id = $1`, [
-    wordId,
-  ]);
+  const client = await db.connect();
+  await client.query("BEGIN");
 
-  if (!wordCheck.rowCount) {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Word not found",
-    });
-  }
+  try {
+    // 1️⃣ Validate word exists
+    const wordCheck = await client.query(`select 1 from words where id = $1`, [
+      wordId,
+    ]);
 
-  // 🛑 DAILY MODE PROTECTION
-  if (mode === "daily") {
-    const result = await db.query(
+    if (!wordCheck.rowCount) {
+      throw createError({ statusCode: 404, statusMessage: "Word not found" });
+    }
+
+    // 2️⃣ Fetch existing word progress
+    const { rows } = await client.query(
       `
-      update daily_sessions
-      set
-        answered_word_ids = array_append(coalesce(answered_word_ids, '{}'), $2),
-        answered_count = answered_count + 1,
-        updated_at = now()
-      where user_id = $1
-        and session_date = current_date
-        and completed = false
-        and answered_count < total_questions
-        and NOT ($2 = ANY(coalesce(answered_word_ids, '{}')))
-      returning answered_count
+    select xp, streak, correct_count, wrong_count
+    from user_word_progress
+    where user_id = $1 and word_id = $2
     `,
       [userId, wordId],
     );
 
-    // 🚫 If no row updated → block XP
-    if (result.rowCount === 0) {
-      return {
-        success: false,
-        delta: 0,
-        dailyBlocked: true,
-      };
+    let xp = 0;
+    let streak = 0;
+    let correctCount = 0;
+    let wrongCount = 0;
+
+    if (rows.length > 0) {
+      xp = rows[0].xp;
+      streak = rows[0].streak;
+      correctCount = rows[0].correct_count;
+      wrongCount = rows[0].wrong_count;
     }
-  }
 
-  // 2 Fetch existing row
-  const { rows } = await db.query(
-    `
-    select xp, streak, correct_count, wrong_count, last_seen_at
-    from user_word_progress
-    where user_id = $1 and word_id = $2
+    // 3️⃣ Compute delta FIRST
+    let delta = 0;
+    const STREAK_CAP = 5;
+
+    if (correct) {
+      const effectiveStreak = Math.min(streak, STREAK_CAP);
+      delta = 5 + effectiveStreak * 2;
+      xp += delta;
+      streak += 1;
+      correctCount += 1;
+    } else {
+      delta = mode === "daily" ? 0 : -5;
+      xp = Math.max(0, xp + delta);
+      streak = 0;
+      wrongCount += 1;
+    }
+
+    // 4️⃣ DAILY SESSION UPDATE (uses computed delta)
+    let dailySnapshot = null;
+
+    if (mode === "daily") {
+      const result = await client.query(
+        `
+    update daily_sessions
+    set
+      answered_word_ids = array_append(coalesce(answered_word_ids, '{}'), $2),
+      answered_count = answered_count + 1,
+      correct_count = correct_count + CASE WHEN $3 THEN 1 ELSE 0 END,
+      xp_earned = xp_earned + $4,
+      updated_at = now()
+    where user_id = $1
+      and session_date = current_date
+      and completed = false
+      and answered_count < total_questions
+      and NOT ($2 = ANY(coalesce(answered_word_ids, '{}')))
+    returning answered_count, correct_count, xp_earned, total_questions
     `,
-    [userId, wordId],
-  );
+        [userId, wordId, correct, delta],
+      );
 
-  let xp = 0;
-  let streak = 0;
-  let correctCount = 0;
-  let wrongCount = 0;
-  const STREAK_CAP = 5;
-  const COOLDOWN_MS = 1500; // 1.5 seconds
-
-  if (rows.length > 0) {
-    const lastSeen = rows[0].last_seen_at
-      ? new Date(rows[0].last_seen_at)
-      : null;
-
-    if (lastSeen) {
-      const now = new Date();
-      const diff = now.getTime() - lastSeen.getTime();
-
-      if (diff < COOLDOWN_MS) {
+      if (result.rowCount === 0) {
+        await client.query("ROLLBACK");
         return {
           success: false,
           delta: 0,
-          newXp: rows[0].xp,
-          newStreak: rows[0].streak,
-          cooldown: true,
+          dailyBlocked: true,
         };
       }
+
+      dailySnapshot = result.rows[0];
     }
 
-    xp = rows[0].xp;
-    streak = rows[0].streak;
-    correctCount = rows[0].correct_count;
-    wrongCount = rows[0].wrong_count;
-  }
-
-  // 🎯 XP Algorithm
-  let delta = 0;
-
-  if (correct) {
-    const effectiveStreak = Math.min(streak, STREAK_CAP);
-    delta = 5 + effectiveStreak * 2;
-
-    xp += delta;
-    streak += 1;
-    correctCount += 1;
-  } else {
-    delta =
-      mode === "daily"
-        ? 0 // no negative xp in daily
-        : -5;
-    xp = Math.max(0, xp + delta);
-    streak = 0;
-    wrongCount += 1;
-  }
-
-  // 2️⃣ Upsert
-  await db.query(
-    `
+    // 5️⃣ Upsert word progress
+    await client.query(
+      `
     insert into user_word_progress
       (user_id, word_id, xp, streak, correct_count, wrong_count, last_seen_at, updated_at)
     values
@@ -141,13 +120,29 @@ export default defineEventHandler(async (event) => {
       last_seen_at = now(),
       updated_at = now()
     `,
-    [userId, wordId, xp, streak, correctCount, wrongCount],
-  );
+      [userId, wordId, xp, streak, correctCount, wrongCount],
+    );
 
-  return {
-    success: true,
-    delta,
-    newXp: xp,
-    newStreak: streak,
-  };
+    await client.query("COMMIT");
+
+    return {
+      success: true,
+      delta,
+      newXp: xp,
+      newStreak: streak,
+      daily: dailySnapshot
+        ? {
+            answeredCount: dailySnapshot.answered_count,
+            correctCount: dailySnapshot.correct_count,
+            xpEarned: dailySnapshot.xp_earned,
+            totalQuestions: dailySnapshot.total_questions,
+          }
+        : null,
+    };
+  } catch (err) {
+    await client.query("ROLLBACK");
+    throw err;
+  } finally {
+    client.release();
+  }
 });

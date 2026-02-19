@@ -122,9 +122,9 @@ async function selectAnswer(answer: string) {
 
     const correct = answer === currentQuestion.value.meaning
 
-    if (correct) {
-        correctCount.value++
-    }
+    // if (correct) {
+    //     correctCount.value++
+    // }
 
     try {
         const token = await getAccessToken()
@@ -150,7 +150,7 @@ async function selectAnswer(answer: string) {
             return
         }
 
-        answeredCount.value++
+        // answeredCount.value++
 
         console.log('', currentQuestion.value.id)
 
@@ -160,7 +160,12 @@ async function selectAnswer(answer: string) {
         // update UI immediately
         currentXp.value = res.newXp
         currentStreak.value = res.newStreak
-        xpToday.value += res.delta
+        // xpToday.value += res.delta
+
+        answeredCount.value = res.daily.answeredCount
+        correctCount.value = res.daily.correctCount
+        xpToday.value = res.daily.xpEarned
+        totalQuestions.value = res.daily.totalQuestions
 
         setTimeout(() => {
             xpDelta.value = null
@@ -333,33 +338,33 @@ watch(
 // )
 
 watch(
-  answeredCount,
-  async (count) => {
-    if (count !== totalQuestions.value) return
-    if (dailyCompleted.value) return
+    answeredCount,
+    async (count) => {
+        if (count !== totalQuestions.value) return
+        if (dailyCompleted.value) return
 
-    try {
-      const token = await getAccessToken()
+        try {
+            const token = await getAccessToken()
 
-      await $fetch('/api/daily/complete', {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        body: {
-          xpEarned: xpToday.value,
-          correctCount: correctCount.value,
-          totalQuestions: totalQuestions.value
+            await $fetch('/api/daily/complete', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: {
+                    xpEarned: xpToday.value,
+                    correctCount: correctCount.value,
+                    totalQuestions: totalQuestions.value
+                }
+            })
+
+            dailyCompleted.value = true
+            justCompleted.value = true
+
+        } catch (err) {
+            console.error('Daily complete failed', err)
         }
-      })
-
-      dailyCompleted.value = true
-      justCompleted.value = true
-
-    } catch (err) {
-      console.error('Daily complete failed', err)
     }
-  }
 )
 
 
