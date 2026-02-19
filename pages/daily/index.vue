@@ -256,7 +256,7 @@ watch(
                 </p>
 
                 <NuxtLink to="/topics/quiz"
-                    class="text-gray-500 px-5 py-3 rounded-lg hover:scale-[1.03] transition">
+                    class="mt-2 inline-block bg-white text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
                     Test your self on more words first →
                 </NuxtLink>
             </div>
