@@ -15,7 +15,14 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
-    date: "Feb 2026",
+    date: "19 Feb 2026",
+    title: "Daily",
+    items: [
+      "Added daily exercises for logged in users who have seen more than 20 words in quizzes",
+    ],
+  },
+  {
+    date: "10 Feb 2026",
     title: "Xp bars and xp awards for word quizzes",
     items: [
       "Added trial xp bars and xp awards for word quizzes",
@@ -24,7 +31,7 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
-    date: "Feb 2026",
+    date: "1 Feb 2026",
     title: "February Dev Notes",
     items: [
       "Added topics 5 topics, 4 free topics, 1 paid",
@@ -35,7 +42,7 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
-    date: "Jan 2026",
+    date: "5 Jan 2026",
     title: "Create app and add content, quizzes and audio",
     items: [
       "Introduced word-only based quizzes",
