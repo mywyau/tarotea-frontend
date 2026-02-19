@@ -316,7 +316,7 @@ const topics = [
  */
 function canEnterTopic(topic: Topic) {
 
-  if (!authReady.value) return false
+  // if (!authReady.value) return false
   if (topic.comingSoon) return false
 
   // ✅ Free topic → always accessible
@@ -349,7 +349,7 @@ function topicLink(topic: Topic) {
 </script>
 
 <template>
-  <main class="max-w-5xl mx-auto py-12 px-4 space-y-8">
+  <main v-if="authReady" class="max-w-5xl mx-auto py-12 px-4 space-y-8">
 
     <header>
       <p class="text-gray-500 text-sm mt-2">
@@ -390,4 +390,8 @@ function topicLink(topic: Topic) {
       </li>
     </ul>
   </main>
+
+  <div v-else class="py-20 text-center text-gray-400">
+    Loading topics...
+  </div>
 </template>
