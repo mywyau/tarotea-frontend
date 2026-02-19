@@ -438,7 +438,7 @@ watch(
 
             <div v-else class="text-center bg-white p-6">
                 <h2 class="text-xl font-semibold mb-4">
-                    Daily Complete!
+                    Daily Exercise Complete!
                 </h2>
 
                 <p class="mb-2">
