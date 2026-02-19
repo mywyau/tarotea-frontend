@@ -322,6 +322,17 @@ function canEnterTopic(topic: Topic) {
     return canAccessLevel(entitlement.value!)
 }
 
+function hasPaidAccessCheck(topic: Topic) {
+
+    if (!authReady.value) return false
+
+    // ✅ Free topic → always accessible
+    if (!topic.requiresPaid) return true
+
+    // 🔒 Paid topic → requires login + entitlement
+    if (!isLoggedIn.value) return false
+    return canAccessLevel(entitlement.value!)
+}
 
 </script>
 
@@ -400,7 +411,7 @@ function canEnterTopic(topic: Topic) {
                         Sentence Audio
                     </NuxtLink> -->
                 </div>
-                <p v-if="!canEnterTopic(topic)" class="text-sm text-gray-400 text-center pt-4">Upgrade to unlock</p>
+                <p v-if="!hasPaidAccessCheck(topic)" class="text-sm text-gray-400 text-center pt-4">Upgrade to unlock</p>
             </li>
         </ul>
     </main>

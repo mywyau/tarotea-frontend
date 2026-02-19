@@ -327,6 +327,15 @@ function canEnterTopic(topic: Topic) {
   return canAccessLevel(entitlement.value!)
 }
 
+function hasPaidAccessCheck(topic: Topic) {
+
+  if (!authReady.value) return false
+  if (!topic.requiresPaid) return true
+  if (!isLoggedIn.value) return false
+
+  return canAccessLevel(entitlement.value!)
+}
+
 /**
  * Where should the link go?
  */
@@ -383,7 +392,7 @@ function topicLink(topic: Topic) {
           </p>
 
           <!-- Locked message -->
-          <p v-if="topic.requiresPaid && !canEnterTopic(topic)" class="text-xs text-gray-400 pt-1">
+          <p v-if="topic.requiresPaid && !hasPaidAccessCheck(topic)" class="text-xs text-gray-400 pt-1">
             Locked — upgrade to access
           </p>
         </NuxtLink>
