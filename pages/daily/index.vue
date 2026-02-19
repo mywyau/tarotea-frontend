@@ -32,6 +32,11 @@ const correctCount = ref(0)
 const answeredCount = ref(0)
 const totalQuestions = ref(0)
 
+const mergingXp = ref(false)
+const readyForNext = ref(false)
+const showCompleteView = ref(false)
+
+
 const remainingCount = computed(() =>
     totalQuestions.value - answeredCount.value
 )
@@ -168,14 +173,25 @@ async function selectAnswer(answer: string) {
         currentXp.value = res.newXp
         currentStreak.value = res.newStreak
 
-        // answeredCount.value = res.daily.answeredCount
-        // correctCount.value = res.daily.correctCount
-        // xpToday.value = res.daily.xpEarned
-        // totalQuestions.value = res.daily.totalQuestions
 
+
+        // Hold the delta visible
+        // Hold XP fully visible
         setTimeout(() => {
-            xpDelta.value = null
-        }, 800)
+            mergingXp.value = true
+
+            const isLastQuestion = answeredCount.value >= totalQuestions.value
+            // Merge animation
+            setTimeout(() => {
+                xpDelta.value = null
+                mergingXp.value = false
+
+                if (!isLastQuestion) {
+                    readyForNext.value = true
+                }
+            }, 220)
+
+        }, 1000)
 
     } catch (err) {
         console.error('XP update failed', err)
@@ -190,17 +206,6 @@ function nextQuestion() {
         showResult.value = false
     }
 }
-
-// const progressPercent = computed(() => {
-//     if (!questions.value.length) return 0
-
-//     const answered =
-//         showResult.value
-//             ? currentIndex.value + 1
-//             : currentIndex.value
-
-//     return Math.round((answered / questions.value.length) * 100)
-// })
 
 const progressPercent = computed(() => {
     if (!totalQuestions.value) return 0
@@ -307,42 +312,6 @@ watch(
     { immediate: true }
 )
 
-// watch(
-//     () => ({
-//         index: currentIndex.value,
-//         show: showResult.value,
-//         total: questions.value.length
-//     }),
-//     async ({ index, show, total }) => {
-//         if (!show) return
-//         // if (index !== total - 1) return 
-//         if (answeredCount.value >= totalQuestions.value) return
-//         if (dailyCompleted.value) return
-
-//         try {
-//             const token = await getAccessToken()
-
-//             await $fetch('/api/daily/complete', {
-//                 method: 'POST',
-//                 headers: {
-//                     Authorization: `Bearer ${token}`
-//                 },
-//                 body: {
-//                     xpEarned: xpToday.value,
-//                     correctCount: correctCount.value,
-//                     totalQuestions: questions.value.length
-//                 }
-//             })
-
-//             dailyCompleted.value = true
-//             justCompleted.value = true
-
-//         } catch (err) {
-//             console.error('Daily complete failed', err)
-//         }
-//     }
-// )
-
 watch(
     answeredCount,
     async (count) => {
@@ -354,9 +323,7 @@ watch(
 
             await $fetch('/api/daily/complete', {
                 method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
+                headers: { Authorization: `Bearer ${token}` },
                 body: {
                     xpEarned: xpToday.value,
                     correctCount: correctCount.value,
@@ -365,7 +332,14 @@ watch(
             })
 
             dailyCompleted.value = true
-            justCompleted.value = true
+
+            // ✅ wait until XP animation + next button timing is done
+            // hold (1000) + merge (220) + a little buffer
+            const COMPLETE_DELAY_MS = 1000 + 220 + 200
+
+            setTimeout(() => {
+                showCompleteView.value = true
+            }, COMPLETE_DELAY_MS)
 
         } catch (err) {
             console.error('Daily complete failed', err)
@@ -414,8 +388,10 @@ watch(
 
                     <!-- XP Bar -->
                     <div class="w-40 h-2 bg-gray-200 rounded">
-                        <div class="h-2 bg-green-500 rounded transition-all duration-500"
-                            :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+                        <div :class="[
+                            'h-2 bg-green-500 rounded transition-all duration-500',
+                            mergingXp ? 'ring-2 ring-green-300' : ''
+                        ]" :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
                     </div>
 
                     <!-- XP Text + Delta -->
@@ -423,8 +399,11 @@ watch(
                         {{ currentXp ?? 0 }} XP
 
                         <transition name="xp-fall">
-                            <span v-if="xpDelta !== null" class="absolute left-full ml-2 font-semibold"
-                                :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                            <span v-if="xpDelta !== null" :class="[
+                                'absolute left-full ml-2 font-semibold transition-all duration-200',
+                                xpDelta > 0 ? 'text-green-600' : 'text-red-600',
+                                mergingXp ? 'opacity-0 scale-75 -translate-y-2' : ''
+                            ]">
                                 {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                             </span>
                         </transition>
@@ -458,10 +437,13 @@ watch(
                 </div>
 
 
-                <button v-if="showResult && currentIndex < questions.length - 1" @click="nextQuestion"
-                    class="mt-6 w-full bg-black text-white p-3 rounded-lg">
-                    Next
-                </button>
+                <transition name="next-fade">
+                    <button v-if="showResult && readyForNext && currentIndex < questions.length - 1"
+                        @click="nextQuestion"
+                        class="mt-6 w-full bg-black text-white p-3 rounded-lg transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]">
+                        Next
+                    </button>
+                </transition>
 
             </div>
 
@@ -526,5 +508,28 @@ watch(
     opacity: 0;
     transform: translateY(-4px);
 }
-</style>
 
+
+.next-fade-enter-active {
+    transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+}
+
+.next-fade-leave-active {
+    transition: opacity 0.15s ease-in, transform 0.15s ease-in;
+}
+
+.next-fade-enter-from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.97);
+}
+
+.next-fade-enter-to {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+}
+
+.next-fade-leave-to {
+    opacity: 0;
+    transform: translateY(6px);
+}
+</style>
