@@ -67,6 +67,12 @@ onMounted(() => {
             Upgrade
           </NuxtLink>
 
+          <div>
+            <NuxtLink v-if="isLoggedIn" to="/xp" class="mobile-primary">
+              Xp
+            </NuxtLink>
+          </div>
+
           <NuxtLink to="/account" class="nav-link hover:text-gray-600">
             Account
           </NuxtLink>
@@ -99,7 +105,7 @@ onMounted(() => {
         </NuxtLink>
       </div>
 
-      <div class="border-t pt-2"></div>
+      <div v-if="isLoggedIn" class="border-t pt-2"></div>
 
       <div>
         <NuxtLink to="/topics" class="mobile-primary">
@@ -163,6 +169,15 @@ onMounted(() => {
           </div>
 
           <div class="border-t pt-2"></div>
+
+
+          <div>
+            <NuxtLink v-if="isLoggedIn" to="/xp" class="mobile-primary">
+              Xp
+            </NuxtLink>
+          </div>
+
+          <div v-if="isLoggedIn" class="border-t pt-2"></div>
 
           <div>
             <NuxtLink to="/account" class="mobile-secondary" @click="mobileOpen = false">
