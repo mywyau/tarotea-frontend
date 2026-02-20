@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-    // middleware: ['coming-soon'],
+    middleware: ['coming-soon'],
     ssr: false
 })
 
