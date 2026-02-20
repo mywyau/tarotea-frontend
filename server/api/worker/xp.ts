@@ -4,10 +4,6 @@ import { createError } from "h3";
 
 export default defineEventHandler(async (event) => {
 
-  if (!event.node.req.headers["x-vercel-cron"]) {
-    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
-  }
-
   console.log("XP worker triggered at:", new Date().toISOString());
 
   const ids = await redis.lrange("xp_queue", 0, 49);
