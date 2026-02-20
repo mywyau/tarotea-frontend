@@ -107,7 +107,7 @@ const canEnterLevel = (level: any) => {
   if (level.comingSoon) return false
 
   // Free levels (1–2)
-  if (isFreeLevel(level.number)) return true
+  // if (isFreeLevel(level.number)) return true
 
   // Paid levels
   if (!isLoggedIn.value) return false
@@ -137,7 +137,8 @@ const canEnterLevel = (level: any) => {
       ]">
 
         <!-- Accessible level -->
-        <NuxtLink v-if="canEnterLevel(level)" :to="`/level/${level.id}`" class="block">
+        <!-- <NuxtLink v-if="canEnterLevel(level)" :to="`/level/${level.id}`" class="block"> -->
+          <NuxtLink v-if="true" :to="`/level/${level.id}`" class="block">
           <div class="text-lg font-medium">
             {{ level.title }}
             <span v-if="level.comingSoon" class="text-sm text-gray-400 font-normal">

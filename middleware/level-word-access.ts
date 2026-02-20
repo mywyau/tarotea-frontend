@@ -20,9 +20,9 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // ✅ Free levels
-  if (levelNumber <= 2) {
-    return;
-  }
+  // if (levelNumber <= 2) {
+  //   return;
+  // }
 
   // 🚧 Coming soon
   if (levelNumber > 5) {
@@ -30,7 +30,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // 🔒 Paid levels (3–4)
-  if (!canAccessLevel(entitlement.value!)) {
-    return navigateTo("/upgrade");
-  }
+  // if (!canAccessLevel(entitlement.value!)) {
+    // return navigateTo("/upgrade");
+  // }
 });
