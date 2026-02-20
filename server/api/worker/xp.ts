@@ -1,7 +1,12 @@
-import { redis } from "~/server/redis";
 import { db } from "~/server/db";
+import { redis } from "~/server/redis";
+import { createError } from "h3";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
+
+  if (!event.node.req.headers["x-vercel-cron"]) {
+    throw createError({ statusCode: 401, statusMessage: "Unauthorized" });
+  }
 
   console.log("XP worker triggered at:", new Date().toISOString());
 
@@ -12,8 +17,8 @@ export default defineEventHandler(async () => {
   }
 
   const numericIds = ids
-    .map(id => Number(id))
-    .filter(n => !Number.isNaN(n));
+    .map((id) => Number(id))
+    .filter((n) => !Number.isNaN(n));
 
   if (!numericIds.length) {
     await redis.ltrim("xp_queue", ids.length, -1);
@@ -23,7 +28,6 @@ export default defineEventHandler(async () => {
   const client = await db.connect();
 
   try {
-
     await client.query("BEGIN");
 
     const eventsResult = await client.query(
@@ -34,7 +38,7 @@ export default defineEventHandler(async () => {
         and processed = false
       order by id asc
       `,
-      [numericIds]
+      [numericIds],
     );
 
     const events = eventsResult.rows;
@@ -46,7 +50,6 @@ export default defineEventHandler(async () => {
     }
 
     for (const event of events) {
-
       // UPSERT mutation
       await client.query(
         `
@@ -70,11 +73,11 @@ export default defineEventHandler(async () => {
           event.user_id,
           event.word_id,
           event.delta,
-          event.correct ? 1 : 0,  // streak initial
+          event.correct ? 1 : 0, // streak initial
           event.correct ? 1 : 0,
           event.correct ? 0 : 1,
-          event.correct
-        ]
+          event.correct,
+        ],
       );
 
       await client.query(
@@ -84,7 +87,7 @@ export default defineEventHandler(async () => {
             processed_at = now()
         where id = $1
         `,
-        [event.id]
+        [event.id],
       );
     }
 
@@ -94,7 +97,6 @@ export default defineEventHandler(async () => {
     await redis.ltrim("xp_queue", events.length, -1);
 
     return { processed: events.length };
-
   } catch (err) {
     await client.query("ROLLBACK");
     console.error("Worker error:", err);
