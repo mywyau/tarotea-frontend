@@ -41,6 +41,9 @@ onMounted(() => {
 
       <nav class="hidden md:flex items-center gap-6">
 
+
+
+        <NuxtLink v-if="isLoggedIn" to="/daily/v2" class="nav-link hover:text-gray-600">Daily V2</NuxtLink>
         <NuxtLink v-if="isLoggedIn" to="/daily" class="nav-link hover:text-gray-600">Daily</NuxtLink>
         <NuxtLink to="/topics" class="nav-link hover:text-gray-600">Topics</NuxtLink>
         <NuxtLink to="/topics/quiz" class="nav-link hover:text-gray-600">Topic Quiz</NuxtLink>
@@ -100,6 +103,14 @@ onMounted(() => {
       <!-- Primary nav -->
 
       <div>
+        <NuxtLink v-if="isLoggedIn" to="/daily/v2" class="mobile-primary">
+          Daily V2
+        </NuxtLink>
+      </div>
+
+      <div v-if="isLoggedIn" class="border-t pt-2"></div>
+
+      <div>
         <NuxtLink v-if="isLoggedIn" to="/daily" class="mobile-primary">
           Daily
         </NuxtLink>
@@ -136,14 +147,6 @@ onMounted(() => {
           Level Quiz
         </NuxtLink>
       </div>
-
-      <!-- <div class="border-t pt-2"></div> -->
-
-      <!-- <div>
-        <NuxtLink to="/exercises" class="mobile-primary">
-          Exercises
-        </NuxtLink>
-      </div> -->
 
       <!-- Account / upgrade -->
       <ClientOnly>

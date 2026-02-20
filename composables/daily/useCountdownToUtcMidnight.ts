@@ -41,12 +41,5 @@ export function useCountdownToUtcMidnight() {
     clearInterval(interval)
   })
 
-
-  // onMounted(() => {
-  //   updateCountdown();
-  //   const interval = setInterval(updateCountdown, 1000);
-  //   // onUnmounted(() => clearInterval(interval))
-  // });
-
   return { timeRemaining };
 }

@@ -1,4 +1,8 @@
 {
-  "path": "/api/worker/xp",
-  "schedule": "*/1 * * * *"
+  "crons": [
+    {
+      "path": "/api/worker/xp",
+      "schedule": "*/1 * * * *"
+    }
+  ]
 }
