@@ -34,7 +34,7 @@ const formattedLevel = computed(() => {
     .replace(/\b\w/g, c => c.toUpperCase())
 })
 
-const MASTERY_XP = 400
+const MASTERY_XP = 200
 
 const masteryPercent = computed(() => {
   const value = xp.value ?? 0

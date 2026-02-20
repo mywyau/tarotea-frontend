@@ -31,7 +31,7 @@ const notFound = computed(() => error.value?.statusCode === 404)
 const xp = ref<number>(0)
 const streak = ref<number>(0)
 
-const MASTERY_XP = 400
+const MASTERY_XP = 200
 
 const masteryPercent = computed(() => {
     return Math.min((xp.value / MASTERY_XP) * 100, 100)

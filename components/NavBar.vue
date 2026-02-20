@@ -68,8 +68,8 @@ onMounted(() => {
           </NuxtLink>
 
           <div>
-            <NuxtLink v-if="isLoggedIn" to="/xp" class="mobile-primary">
-              Xp
+            <NuxtLink v-if="isLoggedIn" to="/stats" class="mobile-primary">
+              Stats
             </NuxtLink>
           </div>
 
@@ -172,8 +172,8 @@ onMounted(() => {
 
 
           <div>
-            <NuxtLink v-if="isLoggedIn" to="/xp" class="mobile-primary">
-              Xp
+            <NuxtLink v-if="isLoggedIn" to="/stats" class="mobile-primary">
+              Stats
             </NuxtLink>
           </div>
 
