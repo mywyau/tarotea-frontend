@@ -8,16 +8,6 @@ definePageMeta({
 })
 
 
-/*
-|--------------------------------------------------------------------------
-| Composables
-|--------------------------------------------------------------------------
-|
-| These abstract domain logic away from the UI.
-| The page itself is mostly orchestration + presentation.
-|
-*/
-
 import { useCountdownToUtcMidnight } from '@/composables/daily/useCountdownToUtcMidnight'
 import { shuffleDailyWords, useDailySession } from '@/composables/daily/useDailySession'
 import { useXpAnimation } from '@/composables/daily/useXpAnimation'
@@ -27,46 +17,14 @@ import type { DailyWord } from '~/types/daily/DailyItem'
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-/*
-|--------------------------------------------------------------------------
-| Write Mode Toggle
-|--------------------------------------------------------------------------
-|
-| Allows safe migration from old synchronous XP system (v1)
-| to event-driven XP system (v2).
-|
-| v1 → API directly mutates DB
-| v2 → API writes event, worker mutates DB asynchronously
-|
-*/
-
-
 const useXpV2 = true
-
 const updateEndpoint = '/api/word-progress/update.v2'
 
-/*
-|--------------------------------------------------------------------------
-| Reactive UI State
-|--------------------------------------------------------------------------
-*/
-
-const currentIndex = ref(0)          // Which question user is on
-const selected = ref<string | null>(null) // Selected answer
-const showResult = ref(false)        // Show correct/incorrect styling
-const showCompleteView = ref(false)  // Final screen
-const finishing = ref(false)         // "Finalising score" loading state
-
-
-/*
-|--------------------------------------------------------------------------
-| XP Animation State
-|--------------------------------------------------------------------------
-|
-| Handles delta animation and XP bar merging.
-| This is purely presentation logic.
-|
-*/
+const currentIndex = ref(0)                     // Which question user is on
+const selected = ref<string | null>(null)       // Selected answer
+const showResult = ref(false)                   // Show correct/incorrect styling
+const showCompleteView = ref(false)             // Final screen
+const finishing = ref(false)                    // "Finalising score" loading state
 
 const {
     xpDelta,
@@ -75,35 +33,7 @@ const {
     triggerXp
 } = useXpAnimation()
 
-
-/*
-|--------------------------------------------------------------------------
-| Auth
-|--------------------------------------------------------------------------
-|
-| We need access tokens to call protected backend endpoints.
-|
-*/
-
 const { getAccessToken } = await useAuth()
-
-
-/*
-|--------------------------------------------------------------------------
-| Daily Session State
-|--------------------------------------------------------------------------
-|
-| This composable manages:
-| - Loading today's daily session
-| - Lock state
-| - Question list
-| - Daily counters
-|
-| Important:
-| Daily session updates remain synchronous even in v2.
-| Only word XP mutation is event-driven.
-|
-*/
 
 const {
     loading,
@@ -121,30 +51,11 @@ const {
 } = useDailySession()
 
 
-/*
-|--------------------------------------------------------------------------
-| Derived Current Question
-|--------------------------------------------------------------------------
-*/
-
 const currentQuestion = computed(() =>
     questions.value.length
         ? questions.value[currentIndex.value]
         : null
 )
-
-/*
-|--------------------------------------------------------------------------
-| XP Read Model State
-|--------------------------------------------------------------------------
-|
-| These values come from:
-|   /api/word-progress
-|
-| They represent the materialized DB state.
-| Worker updates this table asynchronously in v2.
-|
-*/
 
 const currentXp = ref<number>(0)
 const currentStreak = ref<number>(0)
@@ -152,37 +63,11 @@ const currentStreak = ref<number>(0)
 const { timeRemaining } = useCountdownToUtcMidnight()
 
 
-/*
-|--------------------------------------------------------------------------
-| Utility Sleep
-|--------------------------------------------------------------------------
-|
-| Used for small UX timing delays (e.g., finishing animation).
-|
-*/
-
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-
 const options = ref<DailyWord[]>([])
-
-
-/*
-|--------------------------------------------------------------------------
-| selectAnswer()
-|--------------------------------------------------------------------------
-|
-| Core interaction flow.
-|
-| In v2:
-| 1. UI reacts immediately (optimistic)
-| 2. API writes xp_event (does NOT mutate user_word_progress)
-| 3. Worker later materializes DB state
-| 4. UI optionally reconciles with DB
-|
-*/
 
 async function selectAnswer(answer: string) {
 
@@ -196,16 +81,6 @@ async function selectAnswer(answer: string) {
 
     try {
         const token = await getAccessToken()
-
-        /*
-        |--------------------------------------------------------------------------
-        | WRITE PATH (Event-Driven in v2)
-        |--------------------------------------------------------------------------
-        |
-        | v1 → direct DB mutation
-        | v2 → writes xp_event + pushes to Redis queue
-        |
-        */
 
         const res = await $fetch<{
             delta: number
@@ -231,28 +106,10 @@ async function selectAnswer(answer: string) {
         // Daily guard (e.g., duplicate answer or locked state)
         if (res.dailyBlocked) return
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Optimistic XP Update (v2 only)
-        |--------------------------------------------------------------------------
-        |
-        | We update XP immediately using API-calculated values.
-        | DB will catch up when worker processes event.
-        |
-        */
-
         if (useXpV2) {
             currentXp.value = res.optimisticXp
             currentStreak.value = res.optimisticStreak
         }
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Daily Session State (Still Synchronous)
-        |--------------------------------------------------------------------------
-        */
 
         if (res.daily) {
             answeredCount.value = res.daily.answeredCount
@@ -265,22 +122,6 @@ async function selectAnswer(answer: string) {
             answeredCount.value >= totalQuestions.value
 
         triggerXp(res.delta, isLastQuestion)
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | Optional Reconciliation
-        |--------------------------------------------------------------------------
-        |
-        | After ~1.2s, re-fetch DB state to ensure UI matches
-        | worker-applied values.
-        |
-        | This protects against:
-        | - Worker delay
-        | - Drift
-        | - Retry scenarios
-        |
-        */
 
         if (useXpV2) {
             setTimeout(async () => {
@@ -300,13 +141,6 @@ async function selectAnswer(answer: string) {
             }, 1200)
         }
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | Final Question Handling
-        |--------------------------------------------------------------------------
-        */
-
         if (isLastQuestion && !dailyCompleted.value) {
             finishing.value = true
             await completeSession(token)
@@ -320,12 +154,14 @@ async function selectAnswer(answer: string) {
     }
 }
 
+const progressPercent = computed(() => {
+    if (!totalQuestions.value || totalQuestions.value === 0) return 0
 
-/*
-|--------------------------------------------------------------------------
-| Move To Next Question
-|--------------------------------------------------------------------------
-*/
+    const percent = (answeredCount.value / totalQuestions.value) * 100
+
+    // Clamp between 0–100 just in case
+    return Math.min(Math.max(percent, 0), 100)
+})
 
 function nextQuestion() {
     if (currentIndex.value < questions.value.length - 1) {
@@ -336,13 +172,6 @@ function nextQuestion() {
         mergingXp.value = false
     }
 }
-
-
-/*
-|--------------------------------------------------------------------------
-| Fetch Distractor Options
-|--------------------------------------------------------------------------
-*/
 
 async function fetchOptions(correct: DailyWord) {
     const token = await getAccessToken()
@@ -357,15 +186,6 @@ async function fetchOptions(correct: DailyWord) {
 }
 
 
-/*
-|--------------------------------------------------------------------------
-| Page Mount
-|--------------------------------------------------------------------------
-|
-| Loads today's session and initial state.
-|
-*/
-
 onMounted(async () => {
     const token = await getAccessToken()
     await loadSession(token)
@@ -376,29 +196,11 @@ onMounted(async () => {
 })
 
 
-/*
-|--------------------------------------------------------------------------
-| Watch Question Change → Load Options
-|--------------------------------------------------------------------------
-*/
-
 watch(currentQuestion, async (q) => {
     if (!q) return
     options.value = await fetchOptions(q)
 }, { immediate: true })
 
-
-/*
-|--------------------------------------------------------------------------
-| Read Path
-|--------------------------------------------------------------------------
-|
-| Fetches XP + streak from materialized read model
-| (user_word_progress).
-|
-| Worker updates this asynchronously in v2.
-|
-*/
 
 watch(() => currentQuestion.value?.id, async (wordId) => {
     if (!wordId) return
@@ -447,7 +249,7 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                 </p>
 
                 <div class="w-full bg-gray-200 h-3 rounded-full mb-4">
-                    <div class="bg-purple-500 h-3 rounded-full transition-all duration-500"
+                    <div class="bg-purple-500 h-3 rounded-full transition-[width] duration-500 ease-out"
                         :style="{ width: (currentWordCount / requiredWords) * 100 + '%' }" />
                 </div>
 
@@ -467,7 +269,7 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                     <div class="flex-1 bg-gray-200 rounded-full h-3 relative overflow-hidden">
 
                         <div :class="[
-                            'h-3 rounded-full transition-all duration-500 relative',
+                            'h-3 rounded-full transition-[width] duration-500 ease-out relative',
                             progressPercent > 80
                                 ? 'bg-purple-500 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
                                 : 'bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]'
@@ -497,7 +299,7 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                         <!-- XP Bar -->
                         <div class="w-40 h-2 bg-gray-200 rounded">
                             <div :class="[
-                                'h-2 bg-green-500 rounded transition-all duration-500',
+                                'h-2 bg-green-500 rounded transition-[width] duration-500 ease-out',
                                 mergingXp ? 'ring-2 ring-green-300' : ''
                             ]" :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
                         </div>
