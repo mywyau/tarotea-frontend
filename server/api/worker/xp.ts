@@ -1,52 +1,38 @@
 import { db } from "~/server/db";
 import { redis } from "~/server/redis";
-import { createError } from "h3";
 
-export default defineEventHandler(async (event) => {
+export default defineEventHandler(async () => {
 
   console.log("XP worker triggered at:", new Date().toISOString());
-
-  const ids = await redis.lrange("xp_queue", 0, 49);
-
-  if (!ids.length) {
-    return { processed: 0 };
-  }
-
-  const numericIds = ids
-    .map((id) => Number(id))
-    .filter((n) => !Number.isNaN(n));
-
-  if (!numericIds.length) {
-    await redis.ltrim("xp_queue", ids.length, -1);
-    return { processed: 0 };
-  }
 
   const client = await db.connect();
 
   try {
     await client.query("BEGIN");
 
-    const eventsResult = await client.query(
-      `
-      select *
-      from xp_events
-      where id = any($1::bigint[])
-        and processed = false
-      order by id asc
-      `,
-      [numericIds],
-    );
+    let processedCount = 0;
 
-    const events = eventsResult.rows;
+    // Process up to 50 events per run
+    for (let i = 0; i < 50; i++) {
 
-    if (!events.length) {
-      await client.query("COMMIT");
-      await redis.ltrim("xp_queue", ids.length, -1);
-      return { processed: 0 };
-    }
+      const id = await redis.rpop("xp_queue");
+      if (!id) break;
 
-    for (const event of events) {
-      // UPSERT mutation
+      const eventResult = await client.query(
+        `
+        select *
+        from xp_events
+        where id = $1
+          and processed = false
+        for update skip locked
+        `,
+        [Number(id)]
+      );
+
+      if (!eventResult.rowCount) continue;
+
+      const event = eventResult.rows[0];
+
       await client.query(
         `
         insert into user_word_progress
@@ -55,7 +41,7 @@ export default defineEventHandler(async (event) => {
           ($1, $2, $3, $4, $5, $6, now(), now())
         on conflict (user_id, word_id)
         do update set
-          xp = user_word_progress.xp + $3,
+          xp = greatest(0, user_word_progress.xp + $3),
           streak = case
                     when $7 = true then user_word_progress.streak + 1
                     else 0
@@ -69,7 +55,7 @@ export default defineEventHandler(async (event) => {
           event.user_id,
           event.word_id,
           event.delta,
-          event.correct ? 1 : 0, // streak initial
+          event.correct ? 1 : 0,
           event.correct ? 1 : 0,
           event.correct ? 0 : 1,
           event.correct,
@@ -85,14 +71,14 @@ export default defineEventHandler(async (event) => {
         `,
         [event.id],
       );
+
+      processedCount++;
     }
 
     await client.query("COMMIT");
 
-    // trim only processed amount
-    await redis.ltrim("xp_queue", events.length, -1);
+    return { processed: processedCount };
 
-    return { processed: events.length };
   } catch (err) {
     await client.query("ROLLBACK");
     console.error("Worker error:", err);
