@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['coming-soon']
+  middleware: ['level-access']
 })
 
 import { computed, ref } from 'vue'
@@ -169,25 +169,32 @@ async function answer(index: number) {
   try {
     const token = await getAccessToken()
 
+    const updateEndpoint = '/api/word-progress/update.v2'
+
     const res = await $fetch<{
-      success: boolean
       delta: number
-      newXp: number
-      newStreak: number
-    }>('/api/word-progress/update', {
+      optimisticXp: number
+      optimisticStreak: number
+      dailyBlocked?: boolean
+      daily?: {
+        answeredCount: number
+        correctCount: number
+        xpEarned: number
+        totalQuestions: number
+      } | null
+    }>(updateEndpoint, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
       body: {
         wordId: question.value.wordId,
-        correct
+        correct,
+        mode: 'normal'
       }
     })
 
     xpDelta.value = res.delta
-    currentXp.value = res.newXp
-    currentStreak.value = res.newStreak
+    currentXp.value = res.optimisticXp
+    currentStreak.value = res.optimisticStreak
 
     setTimeout(() => {
       xpDelta.value = null
@@ -236,47 +243,6 @@ onMounted(async () => {
 })
 
 watch(
-  () => question.value?.wordId,
-  async (wordId) => {
-    if (!wordId) return
-
-    try {
-      const token = await getAccessToken()
-
-      // const xpMap = await $fetch<Record<string, number>>(
-      //   '/api/word-progress',
-      //   {
-      //     query: { wordIds: wordId },
-      //     headers: { Authorization: `Bearer ${token}` }
-      //   }
-      // )
-
-      // currentXp.value = xpMap[wordId] ?? 0
-
-      currentXp.value = 0
-      currentStreak.value = 0
-
-      const progressMap = await $fetch<
-        Record<string, { xp: number; streak: number }>
-      >(
-        '/api/word-progress',
-        {
-          query: { wordIds: wordId },
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      )
-
-      currentXp.value = progressMap[wordId]?.xp ?? 0
-      currentStreak.value = progressMap[wordId]?.streak ?? 0
-    } catch {
-      currentXp.value = 0
-      currentStreak.value = 0
-    }
-  },
-  { immediate: true }
-)
-
-watch(
   () => current.value,
   (newCurrent) => {
     if (
@@ -306,6 +272,27 @@ const progressPercent = computed(() => {
       : current.value
 
   return Math.round((answered / questions.value.length) * 100)
+})
+
+onMounted(async () => {
+  if (!questions.value.length) return
+
+  try {
+    const token = await getAccessToken()
+    const firstWordId = questions.value[0]?.wordId
+
+    if (!firstWordId) return
+
+    const progressMap = await $fetch<
+      Record<string, { xp: number; streak: number }>
+    >('/api/word-progress', {
+      query: { wordIds: firstWordId },
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    currentXp.value = progressMap[firstWordId]?.xp ?? 0
+    currentStreak.value = progressMap[firstWordId]?.streak ?? 0
+  } catch { }
 })
 
 

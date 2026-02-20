@@ -86,6 +86,56 @@ const {
 } = useMeStateV2();
 
 
+// async function answer(index: number) {
+//     if (answered.value) return
+//     if (!question.value) return
+
+//     selectedIndex.value = index
+//     answered.value = true
+
+//     const correct = index === question.value.correctIndex
+
+//     if (correct) {
+//         score.value++
+//         playCorrectJingle()
+//     } else {
+//         playIncorrectJingle()
+//     }
+
+//     if (!isLoggedIn.value) return
+
+//     try {
+//         const token = await getAccessToken()
+
+//         const res = await $fetch<{
+//             success: boolean
+//             delta: number
+//             newXp: number
+//             newStreak: number
+//         }>('/api/word-progress/update', {
+//             method: 'POST',
+//             headers: {
+//                 Authorization: `Bearer ${token}`,
+//             },
+//             body: {
+//                 wordId: question.value.wordId,
+//                 correct
+//             }
+//         })
+
+//         xpDelta.value = res.delta
+//         currentXp.value = res.newXp
+//         currentStreak.value = res.newStreak
+
+//         setTimeout(() => {
+//             xpDelta.value = null
+//         }, 1000)
+
+//     } catch (err) {
+//         console.error('XP update failed', err)
+//     }
+// }
+
 async function answer(index: number) {
     if (answered.value) return
     if (!question.value) return
@@ -108,24 +158,31 @@ async function answer(index: number) {
         const token = await getAccessToken()
 
         const res = await $fetch<{
-            success: boolean
             delta: number
-            newXp: number
-            newStreak: number
-        }>('/api/word-progress/update', {
+            optimisticXp: number
+            optimisticStreak: number
+            dailyBlocked?: boolean
+            daily?: {
+                answeredCount: number
+                correctCount: number
+                xpEarned: number
+                totalQuestions: number
+            } | null
+        }>('/api/word-progress/update.v2', {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
             },
             body: {
                 wordId: question.value.wordId,
-                correct
+                correct,
+                mode: 'normal' // topic audio quiz = normal mode
             }
         })
 
         xpDelta.value = res.delta
-        currentXp.value = res.newXp
-        currentStreak.value = res.newStreak
+        currentXp.value = res.optimisticXp
+        currentStreak.value = res.optimisticStreak
 
         setTimeout(() => {
             xpDelta.value = null
@@ -135,7 +192,6 @@ async function answer(index: number) {
         console.error('XP update failed', err)
     }
 }
-
 
 function next() {
     stop() // 🔑 stop current word audio

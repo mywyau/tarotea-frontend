@@ -74,7 +74,7 @@ watchEffect(() => {
         <li>• Cantonese ↔ English</li>
       </ul>
 
-      <NuxtLink :to="`/quiz/${slug}/audio/test`"
+      <NuxtLink :to="`/quiz/${slug}/audio/testV2`"
         class="block mt-6 w-full rounded-lg bg-black text-white py-3 font-medium text-center hover:bg-gray-800 transition">
         Start quiz
       </NuxtLink>
