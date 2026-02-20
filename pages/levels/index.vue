@@ -1,6 +1,9 @@
 <script setup lang="ts">
 
-
+definePageMeta({
+  // middleware: ['coming-soon'],
+  ssr: true,
+})
 
 import { onMounted } from 'vue'
 

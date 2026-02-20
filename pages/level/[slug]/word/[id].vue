@@ -72,6 +72,33 @@ onMounted(async () => {
   }
 })
 
+// ✅ SEO META (runs when word loads)
+watchEffect(() => {
+  if (!word.value) return
+
+  useSeoMeta({
+    title: `How to say "${word.value.meaning}" in Cantonese – ${word.value.word} (${word.value.jyutping}) | TaroTea`,
+    description: `Learn how to say "${word.value.meaning}" in Cantonese. Includes pronunciation (${word.value.jyutping}), example sentences and audio.`,
+    ogTitle: `How to say "${word.value.meaning}" in Cantonese`,
+    ogDescription: `Cantonese word: ${word.value.word} (${word.value.jyutping}). Includes audio and example sentences.`,
+    ogType: 'article',
+  })
+
+  useHead({
+    script: [
+      {
+        type: 'application/ld+json',
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "DefinedTerm",
+          name: word.value.word,
+          description: word.value.meaning,
+          inDefinedTermSet: "Cantonese Vocabulary",
+        })
+      }
+    ]
+  })
+})
 
 </script>
 
@@ -87,9 +114,9 @@ onMounted(async () => {
     <!-- Word header -->
     <section class="text-center space-y-4">
 
-      <div class="text-4xl font-medium">
+      <h1 class="text-4xl font-medium">
         {{ word.word }}
-      </div>
+      </h1>
 
       <div class="text-lg text-gray-400">
         {{ word.jyutping }}

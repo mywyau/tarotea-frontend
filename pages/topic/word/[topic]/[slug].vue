@@ -39,6 +39,12 @@ const masteryPercent = computed(() => {
 
 const isMastered = computed(() => xp.value >= MASTERY_XP)
 
+const formattedTopic = computed(() =>
+    topic.value
+        .replace(/-/g, " ")
+        .replace(/\b\w/g, c => c.toUpperCase())
+)
+
 
 onMounted(async () => {
     try {
@@ -69,21 +75,49 @@ onMounted(async () => {
     }
 })
 
+watchEffect(() => {
+    if (!word.value) return
+
+    const topicLabel = topic.value.replace(/-/g, " ")
+
+    useSeoMeta({
+        title: `How to say "${word.value.meaning}" in Cantonese (${topicLabel}) – ${word.value.word}`,
+        description: `Learn the Cantonese word for "${word.value.meaning}" in the ${topicLabel} topic. Includes pronunciation (${word.value.jyutping}) and example sentences.`,
+        ogTitle: `${word.value.word} (${word.value.jyutping}) – Cantonese meaning`,
+        ogDescription: `Cantonese vocabulary for "${word.value.meaning}" in ${topicLabel}.`,
+        ogType: 'article',
+    })
+
+    useHead({
+        script: [
+            {
+                type: 'application/ld+json',
+                children: JSON.stringify({
+                    "@context": "https://schema.org",
+                    "@type": "DefinedTerm",
+                    name: word.value.word,
+                    description: word.value.meaning,
+                    inDefinedTermSet: `Cantonese ${topicLabel} Vocabulary`,
+                })
+            }
+        ]
+    })
+})
+
 </script>
 
 <template>
     <main v-if="authReady && word" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
 
         <NuxtLink :to="`/topic/words/${topic}`" class="block text-gray-500 hover:underline">
-            ← {{ topic.replace("-", " ") }}
+            ← {{ formattedTopic }} Vocabulary
         </NuxtLink>
 
         <!-- Word header -->
         <section class="text-center space-y-2">
-            <div class="text-4xl font-medium">
+            <h1 class="text-4xl font-medium">
                 {{ word.word }}
-            </div>
-
+            </h1>
             <div class="text-lg text-gray-400">
                 {{ word.jyutping }}
             </div>
@@ -116,7 +150,7 @@ onMounted(async () => {
         <!-- Usage -->
         <section v-if="word.usage?.length">
             <h2 class="text-lg font-semibold mb-3">
-                Usage
+                Usage of {{ word.word }}
             </h2>
 
             <ul class="list-disc pl-5 space-y-2 text-gray-700">
@@ -140,7 +174,7 @@ onMounted(async () => {
         <!-- Examples -->
         <section v-if="word.examples?.length">
             <h2 class="text-lg font-semibold mb-3">
-                Examples
+                Example Sentences
             </h2>
 
             <ul class="space-y-4">
@@ -172,7 +206,7 @@ onMounted(async () => {
     <main v-else-if="notFound" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
 
         <NuxtLink :to="`/topic/words/${topic}`" class="block text-gray-500 hover:underline">
-            ← {{ topic.replace("-", " ") }}
+            ← {{ formattedTopic }} Vocabulary
         </NuxtLink>
         <!-- 404 -->
         <div class="max-w-xl mx-auto px-4 py-24 text-center text-gray-500">
