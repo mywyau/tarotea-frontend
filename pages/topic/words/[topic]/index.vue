@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['topic-access'],
+  // middleware: ['topic-access'],
   ssr: true,
 })
 
@@ -12,7 +12,7 @@ import { computed, onMounted, ref } from 'vue'
 const route = useRoute()
 const slug = route.params.topic as string
 
-const { authReady } = useMeStateV2()
+const { authReady, isLoggedIn, entitlement } = useMeStateV2()
 
 const { data: topic, error } = await useFetch(
   `/api/index/topics/${slug}`,
@@ -21,6 +21,13 @@ const { data: topic, error } = await useFetch(
     credentials: 'include',
   }
 )
+
+const FREE_TOPICS = ['survival-essentials', 'greetings-polite', 'fruits-vegetables', 'clothing', '']
+
+const isTopicFree = computed(() => {
+  return FREE_TOPICS.includes(slug)
+})
+
 
 if (error.value?.statusCode === 403) {
   throw createError({ statusCode: 403, statusMessage: 'Topic locked' })
@@ -81,6 +88,41 @@ const MASTERY_XP = 200
 const isMastered = (id: string) =>
   (progressMap.value?.[id]?.xp ?? 0) >= MASTERY_XP
 
+const FREE_WORD_LIMIT = 5
+
+const hasPaidAccess = computed(() => {
+  if (!authReady.value) return false
+  if (!isLoggedIn.value) return false
+
+  if (!isLoggedIn.value) return false
+
+  return canAccessLevel(entitlement.value!)
+})
+
+const gatedCategories = computed(() => {
+  let globalIndex = 0
+
+  return categories.value.map(category => {
+    return {
+      ...category,
+      words: category.words.map((word: any) => {
+
+        const shouldLock =
+          !isTopicFree.value &&
+          !hasPaidAccess.value &&
+          globalIndex >= FREE_WORD_LIMIT
+
+        globalIndex++
+
+        return {
+          ...word,
+          locked: shouldLock
+        }
+      })
+    }
+  })
+})
+
 </script>
 
 <template>
@@ -90,14 +132,19 @@ const isMastered = (id: string) =>
       <p class="text-gray-600">{{ topic.description }}</p>
     </header>
 
-    <section v-for="category in categories" :key="category.key" class="space-y-4">
+    <section v-for="category in gatedCategories" :key="category.key" class="space-y-4">
       <h2 class="text-xl font-medium capitalize">
         {{ category.title }}
       </h2>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        <WordTile v-for="word in category.words" :key="word.id" :to="`/topic/word/${slug}/${word.id}`" :word="word.word"
-          :jyutping="word.jyutping" :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)" />
+        <!-- <WordTile v-for="word in category.words" :key="word.id" :to="`/topic/word/${slug}/${word.id}`" :word="word.word"
+          :jyutping="word.jyutping" :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)" /> -->
+
+        <WordTile v-for="word in category.words" :key="word.id"
+          :to="word.locked ? undefined : `/topic/word/${slug}/${word.id}`" :word="word.word" :jyutping="word.jyutping"
+          :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)"
+          :class="word.locked ? 'opacity-40 pointer-events-none select-none' : ''" />
       </div>
     </section>
   </main>
