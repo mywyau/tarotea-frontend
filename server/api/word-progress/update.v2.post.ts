@@ -20,10 +20,9 @@ export default defineEventHandler(async (event) => {
 
   try {
     // 1️⃣ Validate word exists
-    const wordCheck = await client.query(
-      `select 1 from words where id = $1`,
-      [wordId]
-    );
+    const wordCheck = await client.query(`select 1 from words where id = $1`, [
+      wordId,
+    ]);
 
     if (!wordCheck.rowCount) {
       throw createError({ statusCode: 404, statusMessage: "Word not found" });
@@ -36,7 +35,7 @@ export default defineEventHandler(async (event) => {
       from user_word_progress
       where user_id = $1 and word_id = $2
     `,
-      [userId, wordId]
+      [userId, wordId],
     );
 
     let xp = rows[0]?.xp ?? 0;
@@ -77,7 +76,7 @@ export default defineEventHandler(async (event) => {
           and NOT ($2 = ANY(coalesce(answered_word_ids, '{}')))
         returning answered_count, correct_count, xp_earned, total_questions
         `,
-        [userId, wordId, correct, delta]
+        [userId, wordId, correct, delta],
       );
 
       if (!result.rowCount) {
@@ -101,7 +100,7 @@ export default defineEventHandler(async (event) => {
         ($1, $2, $3, $4, $5)
       returning id
       `,
-      [userId, wordId, delta, correct, mode]
+      [userId, wordId, delta, correct, mode],
     );
 
     const eventId = insertResult.rows[0].id;
@@ -111,8 +110,10 @@ export default defineEventHandler(async (event) => {
     // 6️⃣ Push to Redis queue (outside transaction)
     await redis.lpush("xp_queue", String(eventId));
 
+    const config = useRuntimeConfig();
+
     // 7️⃣ Optional: trigger worker immediately (fire and forget)
-    fetch(`${process.env.BASE_URL}/api/worker/xp`).catch(() => {});
+    fetch(`${config.public.siteUrl}/api/worker/xp`).catch(() => {});
 
     return {
       success: true,
