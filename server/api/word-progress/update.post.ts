@@ -33,9 +33,9 @@ export default defineEventHandler(async (event) => {
     // 2️⃣ Fetch existing word progress
     const { rows } = await client.query(
       `
-    select xp, streak, correct_count, wrong_count
-    from user_word_progress
-    where user_id = $1 and word_id = $2
+      select xp, streak, correct_count, wrong_count
+      from user_word_progress
+      where user_id = $1 and word_id = $2
     `,
       [userId, wordId],
     );
@@ -75,20 +75,20 @@ export default defineEventHandler(async (event) => {
     if (mode === "daily") {
       const result = await client.query(
         `
-    update daily_sessions
-    set
-      answered_word_ids = array_append(coalesce(answered_word_ids, '{}'), $2),
-      answered_count = answered_count + 1,
-      correct_count = correct_count + CASE WHEN $3 THEN 1 ELSE 0 END,
-      xp_earned = xp_earned + $4,
-      updated_at = now()
-    where user_id = $1
-      and session_date = current_date
-      and completed = false
-      and answered_count < total_questions
-      and NOT ($2 = ANY(coalesce(answered_word_ids, '{}')))
-    returning answered_count, correct_count, xp_earned, total_questions
-    `,
+          update daily_sessions
+          set
+            answered_word_ids = array_append(coalesce(answered_word_ids, '{}'), $2),
+            answered_count = answered_count + 1,
+            correct_count = correct_count + CASE WHEN $3 THEN 1 ELSE 0 END,
+            xp_earned = xp_earned + $4,
+            updated_at = now()
+          where user_id = $1
+            and session_date = current_date
+            and completed = false
+            and answered_count < total_questions
+            and NOT ($2 = ANY(coalesce(answered_word_ids, '{}')))
+          returning answered_count, correct_count, xp_earned, total_questions
+        `,
         [userId, wordId, correct, delta],
       );
 
@@ -107,19 +107,19 @@ export default defineEventHandler(async (event) => {
     // 5️⃣ Upsert word progress
     await client.query(
       `
-    insert into user_word_progress
-      (user_id, word_id, xp, streak, correct_count, wrong_count, last_seen_at, updated_at)
-    values
-      ($1, $2, $3, $4, $5, $6, now(), now())
-    on conflict (user_id, word_id)
-    do update set
-      xp = $3,
-      streak = $4,
-      correct_count = $5,
-      wrong_count = $6,
-      last_seen_at = now(),
-      updated_at = now()
-    `,
+        insert into user_word_progress
+          (user_id, word_id, xp, streak, correct_count, wrong_count, last_seen_at, updated_at)
+        values
+          ($1, $2, $3, $4, $5, $6, now(), now())
+        on conflict (user_id, word_id)
+        do update set
+          xp = $3,
+          streak = $4,
+          correct_count = $5,
+          wrong_count = $6,
+          last_seen_at = now(),
+          updated_at = now()
+      `,
       [userId, wordId, xp, streak, correctCount, wrongCount],
     );
 

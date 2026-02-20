@@ -1,0 +1,4 @@
+{
+  "path": "/api/worker/xp",
+  "schedule": "*/1 * * * *"
+}
