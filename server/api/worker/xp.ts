@@ -12,8 +12,8 @@ export default defineEventHandler(async () => {
 
     let processedCount = 0;
 
-    // Process up to 50 events per run
-    for (let i = 0; i < 50; i++) {
+    // Process up to 1000 events per run
+    for (let i = 0; i < 1000; i++) {
 
       const id = await redis.rpop("xp_queue");
       if (!id) break;

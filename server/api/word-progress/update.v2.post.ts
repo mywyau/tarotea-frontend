@@ -113,7 +113,32 @@ export default defineEventHandler(async (event) => {
     const config = useRuntimeConfig();
 
     // 7️⃣ Optional: trigger worker immediately (fire and forget)
-    fetch(`${config.public.siteUrl}/api/worker/xp`).catch(() => {});
+    // fetch(`${config.public.siteUrl}/api/worker/xp`).catch(() => {});
+
+    // fire event processing based on total number of events:
+    // const queueLength = await redis.llen("xp_queue");
+
+    // if (queueLength > 200) {
+    //   fetch(`${config.public.siteUrl}/api/worker/xp`).catch(() => {});
+    // }
+
+    //////////////////////////////
+
+    /// lock based firing
+
+    const lockTimer = 10 // lock redis to only run every 10s can change to 60s
+
+    const lock = await redis.set(
+      "xp_worker_lock",
+      "1",
+      { nx: true, ex: lockTimer }, // run at most once every 10s
+    );
+
+    if (lock) {
+      fetch(`${config.public.siteUrl}/api/worker/xp`).catch(() => {});
+    }
+
+    //////////////////////////////
 
     return {
       success: true,
