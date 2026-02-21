@@ -5,7 +5,15 @@ definePageMeta({
   ssr: false
 })
 
-import { computed, ref } from 'vue'
+
+import { computed, ref, watch } from 'vue'
+
+import {
+  playQuizCompleteFailSong,
+  playQuizCompleteFanfareSong,
+  playQuizCompleteOkaySong
+} from '@/utils/sounds'
+
 
 type Word = {
   id: string
@@ -253,14 +261,6 @@ async function next() {
   }
 }
 
-const percentage = computed(() => {
-  if (questions.value.length === 0) return 0
-  return (score.value / questions.value.length) * 100
-})
-
-const completionSoundPlayed = ref(false)
-
-
 onMounted(async () => {
   try {
     const token = await getAccessToken()
@@ -303,6 +303,40 @@ watch(
     const firstId = qs[0]?.wordId
     currentStreak.value = progressMap[firstId]?.streak ?? 0
     currentXp.value = progressMap[firstId]?.xp ?? 0
+  },
+  { immediate: true }
+)
+
+// optional if you have these already:
+// const { stop } = useGlobalAudio()
+
+const percentage = computed(() => {
+  const total = questions.value.length
+  if (!total) return 0
+  return (score.value / total) * 100
+})
+
+const isComplete = computed(() => current.value >= questions.value.length)
+
+const completionSoundPlayed = ref(false)
+
+watch(
+  isComplete,
+  (done) => {
+    if (!done || completionSoundPlayed.value) return
+    completionSoundPlayed.value = true
+
+    // if you have global audio (TTS etc), stop it so jingles are audible
+    // stop?.()
+
+    // small delay so the completion UI has rendered
+    setTimeout(() => {
+      const p = percentage.value
+
+      if (p >= 90) playQuizCompleteFanfareSong()
+      else if (p >= 50) playQuizCompleteOkaySong()
+      else playQuizCompleteFailSong()
+    }, 250)
   },
   { immediate: true }
 )

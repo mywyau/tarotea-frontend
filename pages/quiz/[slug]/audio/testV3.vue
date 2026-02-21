@@ -202,43 +202,12 @@ const percentage = computed(() => {
 
 const completionSoundPlayed = ref(false)
 
-// const progressPercent = computed(() => {
-//   const answered =
-//     showResult.value
-//       ? current.value + 1
-//       : current.value
-
-//   return Math.round((answered / questions.value.length) * 100)
-// })
-
 const progressPercent = computed(() => {
   const total = questions.value.length
   if (!total) return 0
   const position = Math.min(current.value + 1, total)
   return Math.round((position / total) * 100)
 })
-
-
-// onMounted(async () => {
-//   if (!questions.value.length) return
-
-//   const token = await getAccessToken()
-
-//   const wordIds = questions.value.map(q => q.wordId)
-
-//   const progressMap = await $fetch<
-//     Record<string, { xp: number; streak: number }>
-//   >('/api/word-progress', {
-//     query: { wordIds: wordIds.join(',') },
-//     headers: { Authorization: `Bearer ${token}` }
-//   })
-
-//   wordProgressMap.value = progressMap
-
-//   const firstId = questions.value[0]?.wordId
-//   currentXp.value = progressMap[firstId]?.xp ?? 0
-//   currentStreak.value = progressMap[firstId]?.streak ?? 0
-// })
 
 watch(
   () => questions.value,
@@ -264,52 +233,6 @@ watch(
   },
   { immediate: true }
 )
-
-
-// onMounted(async () => {
-//   if (!questions.value.length) return
-
-//   try {
-//     const token = await getAccessToken()
-//     const firstWordId = questions.value[0]?.wordId
-//     if (!firstWordId) return
-
-//     const progressMap = await $fetch<
-//       Record<string, { xp: number; streak: number }>
-//     >('/api/word-progress', {
-//       query: { wordIds: firstWordId },
-//       headers: { Authorization: `Bearer ${token}` }
-//     })
-
-//     currentXp.value = progressMap[firstWordId]?.xp ?? 0
-//     currentStreak.value = progressMap[firstWordId]?.streak ?? 0
-//   } catch { }
-// })
-
-// watch(
-//   () => question.value?.wordId,
-//   async (wordId) => {
-//     if (!wordId) return
-
-//     try {
-//       const token = await getAccessToken()
-
-//       const progressMap = await $fetch<
-//         Record<string, { xp: number; streak: number }>
-//       >('/api/word-progress', {
-//         query: { wordIds: wordId },
-//         headers: { Authorization: `Bearer ${token}` }
-//       })
-
-//       currentXp.value = progressMap[wordId]?.xp ?? 0
-//       currentStreak.value = progressMap[wordId]?.streak ?? 0
-//     } catch {
-//       currentXp.value = 0
-//       currentStreak.value = 0
-//     }
-//   },
-//   { immediate: true }
-// )
 
 watch(
   () => current.value,

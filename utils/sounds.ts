@@ -43,7 +43,7 @@ export function playCorrectJingle(volume = 0.8) {
 }
 
 export function playIncorrectJingle(volume = 0.5) {
-    const ctx = getAudioContext();
+  const ctx = getAudioContext();
 
   const now = ctx.currentTime;
 
@@ -65,7 +65,7 @@ export function playIncorrectJingle(volume = 0.5) {
 }
 
 export function playQuizCompleteFanfareSong(volume = 0.9) {
-    const ctx = getAudioContext();
+  const ctx = getAudioContext();
 
   const now = ctx.currentTime;
 
@@ -96,37 +96,30 @@ export function playQuizCompleteFanfareSong(volume = 0.9) {
   });
 }
 
-export function playQuizCompleteOkaySong(volume = 0.1) {
-    const ctx = getAudioContext();
-
+export function playQuizCompleteOkaySong(volume = 0.12) {
+  const ctx = getAudioContext();
   const now = ctx.currentTime;
 
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(volume, now + 0.05);
-  gain.gain.setValueAtTime(volume * 0.9, now + 3.0);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + 3.8);
+  gain.gain.exponentialRampToValueAtTime(volume, now + 0.04);
+  gain.gain.setValueAtTime(volume * 0.85, now + 0.9);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 1.4);
 
   gain.connect(ctx.destination);
 
-  // Repeated neutral confirmation pattern
   const notes = [
-    // confirmation 1
-    { t: 0.0, f: 660, d: 0.22 },
-    { t: 0.35, f: 660, d: 0.22 },
+    // soft confirmation
+    { t: 0.0, f: 660, d: 0.18 },
+    { t: 0.25, f: 660, d: 0.18 },
 
-    // confirmation 2
-    { t: 1.2, f: 660, d: 0.22 },
-    { t: 1.55, f: 660, d: 0.22 },
-
-    // confirmation 3
-    { t: 2.4, f: 660, d: 0.22 },
-    { t: 2.75, f: 740, d: 0.3 }, // tiny lift to finish
+    // slight lift to end
+    { t: 0.6, f: 740, d: 0.25 },
   ];
 
   notes.forEach(({ t, f, d }) => {
     const osc = ctx.createOscillator();
-    osc.type = "triangle"; // warm, non-alarming
+    osc.type = "triangle";
     osc.frequency.setValueAtTime(f, now + t);
 
     osc.connect(gain);
@@ -136,7 +129,7 @@ export function playQuizCompleteOkaySong(volume = 0.1) {
 }
 
 export function playQuizCompleteFailSong(volume = 0.55) {
-    const ctx = getAudioContext();
+  const ctx = getAudioContext();
 
   const now = ctx.currentTime;
 

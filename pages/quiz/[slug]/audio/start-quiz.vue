@@ -5,7 +5,6 @@ definePageMeta({
   ssr: false
 })
 
-
 import { getLevelNumber } from '@/utils/levels'
 
 const route = useRoute()

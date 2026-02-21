@@ -243,16 +243,6 @@ watch(
     try {
       const token = await getAccessToken()
 
-      // const xpMap = await $fetch<Record<string, number>>(
-      //   '/api/word-progress',
-      //   {
-      //     query: { wordIds: wordId },
-      //     headers: { Authorization: `Bearer ${token}` }
-      //   }
-      // )
-
-      // currentXp.value = xpMap[wordId] ?? 0
-
       currentXp.value = 0
       currentStreak.value = 0
 
