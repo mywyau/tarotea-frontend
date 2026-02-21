@@ -106,15 +106,7 @@ onMounted(() => {
       </div>
 
       <div v-if="isLoggedIn" class="border-t pt-2"></div>
-
-      <!-- <div>
-        <NuxtLink v-if="isLoggedIn" to="/daily" class="mobile-primary">
-          Daily
-        </NuxtLink>
-      </div>
-
-      <div v-if="isLoggedIn" class="border-t pt-2"></div> -->
-
+      
       <div>
         <NuxtLink to="/topics" class="mobile-primary">
           Topics
