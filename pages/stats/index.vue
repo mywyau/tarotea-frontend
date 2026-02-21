@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-    ssr: true // explicitly client-only
+    ssr: true
 })
 
 const statsData = ref<any | null>(null)
@@ -13,7 +13,7 @@ try {
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
 
-    const res = await $fetch('/api/stats', {
+    const res = await $fetch('/api/user/stats', {
         method: 'GET',
         headers: {
             Authorization: `Bearer ${token}`,
@@ -29,8 +29,14 @@ try {
     loading.value = false
 }
 
+
+
 const stats = computed(() => {
     if (!statsData.value) return []
+
+    const masteryPercent = Math.round(
+        (statsData.value.words_maxed / statsData.value.words_seen) * 100
+    )
 
     return [
         {
@@ -40,8 +46,8 @@ const stats = computed(() => {
             color: 'text-purple-600'
         },
         {
-            label: 'Words Mastered',
-            value: Number(statsData.value.words_mastered),
+            label: 'Words Maxed',
+            value: Number(statsData.value.words_maxed),
             suffix: '',
             color: 'text-green-600'
         },
@@ -56,6 +62,11 @@ const stats = computed(() => {
             value: Number(statsData.value.total_correct),
             suffix: '',
             color: 'text-emerald-600'
+        },
+        {
+            label: 'XP Last 7 days',
+            value: Number(statsData.value.xp_this_week),
+            color: 'text-orange-600'
         }
     ]
 })
