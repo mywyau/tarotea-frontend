@@ -41,7 +41,7 @@ onMounted(() => {
 
       <nav class="hidden md:flex items-center gap-6">
 
-        <NuxtLink v-if="isLoggedIn" to="/daily/v2" class="nav-link hover:text-gray-600">Daily</NuxtLink>
+        <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="nav-link hover:text-gray-600">Daily</NuxtLink>
         <!-- <NuxtLink v-if="isLoggedIn" to="/daily" class="nav-link hover:text-gray-600">Daily</NuxtLink> -->
         <NuxtLink to="/topics" class="nav-link hover:text-gray-600">Topics</NuxtLink>
         <NuxtLink to="/topics/quiz" class="nav-link hover:text-gray-600">Topic Quiz</NuxtLink>

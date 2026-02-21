@@ -1,3 +1,5 @@
+// api/daily/index.get.ts
+
 import type {
   DailySessionResponse,
   DailySessionRow,
