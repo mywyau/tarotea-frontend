@@ -149,9 +149,6 @@ async function answer(index: number) {
       }
     )
 
-    // xpDelta.value = res.delta
-    // currentXp.value = res.newXp
-    // currentStreak.value = res.newStreak
 
     xpDelta.value = res.delta
     currentXp.value = res.optimisticXp

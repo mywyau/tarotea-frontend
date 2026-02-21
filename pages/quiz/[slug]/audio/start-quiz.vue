@@ -21,11 +21,21 @@ const {
   isLoggedIn,
   user,
   entitlement,
-  hasPaidAccess,
   isCanceling,
   currentPeriodEnd,
   resolve,
 } = useMeStateV2()
+
+
+const canEnterLevel = () => {
+
+  if (!authReady.value) return false
+
+  // Paid levels
+  if (!isLoggedIn.value) return false
+
+  return canAccessLevel(entitlement.value!)
+}
 
 watchEffect(() => {
   if (slug.value && levelNumber.value === null) {
@@ -46,7 +56,7 @@ watchEffect(() => {
     </NuxtLink>
 
     <!-- 🔒 Locked -->
-    <section v-if="authReady && !hasPaidAccess.valueOf" class="text-center space-y-4">
+    <section v-if="authReady && canEnterLevel()" class="text-center space-y-4">
       <h1 class="text-2xl font-semibold">🔒 Quiz locked</h1>
       <p class="text-gray-600">
         Quizzes are part of TaroTeaMonthly or TaroTeaYearly.
@@ -74,7 +84,7 @@ watchEffect(() => {
         <li>• Cantonese ↔ English</li>
       </ul>
 
-      <NuxtLink :to="`/quiz/${slug}/audio/testV2`"
+      <NuxtLink :to="`/quiz/${slug}/audio/testV3`"
         class="block mt-6 w-full rounded-lg bg-black text-white py-3 font-medium text-center hover:bg-gray-800 transition">
         Start quiz
       </NuxtLink>

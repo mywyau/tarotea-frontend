@@ -1,7 +1,8 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-access']
+  middleware: ['level-access'],
+  ssr: false
 })
 
 import { getLevelNumber } from '@/utils/levels'
@@ -14,18 +15,14 @@ const levelNumber = computed(() => {
   return getLevelNumber(slug.value)
 })
 
-
 const {
-  state,
   authReady,
   isLoggedIn,
-  user,
   entitlement,
-  hasPaidAccess,
-  isCanceling,
-  currentPeriodEnd,
   resolve,
 } = useMeStateV2()
+
+
 
 watchEffect(() => {
   if (slug.value && levelNumber.value === null) {
@@ -35,6 +32,19 @@ watchEffect(() => {
     })
   }
 })
+
+
+// --- helpers ---
+
+const canEnterLevel = () => {
+
+  if (!authReady.value) return false
+
+  // Paid levels
+  if (!isLoggedIn.value) return false
+
+  return canAccessLevel(entitlement.value!)
+}
 
 </script>
 
@@ -46,7 +56,7 @@ watchEffect(() => {
     </NuxtLink>
 
     <!-- 🔒 Locked -->
-    <section v-if="(authReady && !hasPaidAccess.valueOf)" class="text-center space-y-4">
+    <section v-if="(authReady && canEnterLevel())" class="text-center space-y-4">
       <h1 class="text-2xl font-semibold">Quiz locked</h1>
       <p class="text-gray-600">
         Quizzes are part of TaroTeaMonthly or TaroTeaYearly.
@@ -74,7 +84,7 @@ watchEffect(() => {
         <li>• Cantonese ↔ English</li>
       </ul>
 
-      <NuxtLink :to="`/quiz/${slug}/word/testV2`" class="block mt-6 w-full rounded-lg bg-black text-white py-3 font-medium
+      <NuxtLink :to="`/quiz/${slug}/word/testV3`" class="block mt-6 w-full rounded-lg bg-black text-white py-3 font-medium
          text-center hover:bg-gray-800 transition">
         Start quiz
       </NuxtLink>
