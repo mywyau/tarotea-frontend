@@ -24,6 +24,7 @@ async function handleLogout() {
 onMounted(() => {
   resolve({ force: true })
 })
+
 </script>
 
 <template>
@@ -47,16 +48,9 @@ onMounted(() => {
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
         <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Level Quiz</NuxtLink>
 
-        <!-- <NuxtLink to="/exercises" class="nav-link hover:text-gray-600">
-          Exercises
-        </NuxtLink> -->
-
         <!-- Wait until auth is resolved -->
-        <template v-if="!authReady">
-          <span class="text-gray-400">…</span>
-        </template>
 
-        <template v-else-if="isLoggedIn">
+        <template v-if="isLoggedIn">
 
           <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" to="/upgrade"
             class="font-medium bg-clip-text text-transparent
@@ -138,7 +132,7 @@ onMounted(() => {
       </div>
 
       <!-- Account / upgrade -->
-      <template v-if="!authReady">
+      <template v-if="!isLoggedIn">
         <div class="text-gray-400">Loading…</div>
       </template>
 
@@ -189,7 +183,7 @@ onMounted(() => {
           Login
         </button>
       </div>
-      
+
     </div>
 
   </header>
