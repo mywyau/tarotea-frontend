@@ -6,7 +6,7 @@
 
 definePageMeta({
     ssr: false,
-    middleware: "coming-soon"
+    // middleware: "coming-soon"
 })
 
 
