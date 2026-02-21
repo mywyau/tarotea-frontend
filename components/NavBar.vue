@@ -106,7 +106,7 @@ onMounted(() => {
       </div>
 
       <div v-if="isLoggedIn" class="border-t pt-2"></div>
-      
+
       <div>
         <NuxtLink to="/topics" class="mobile-primary">
           Topics
@@ -138,60 +138,58 @@ onMounted(() => {
       </div>
 
       <!-- Account / upgrade -->
-      <ClientOnly>
-        <template v-if="!authReady">
-          <div class="text-gray-400">Loading…</div>
-        </template>
+      <template v-if="!authReady">
+        <div class="text-gray-400">Loading…</div>
+      </template>
 
-        <template v-else-if="isLoggedIn">
+      <template v-else-if="isLoggedIn">
 
-          <!-- Divider -->
-          <div v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'"
-            class="border-t pt-2"></div>
+        <!-- Divider -->
+        <div v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" class="border-t pt-2">
+        </div>
 
-          <div>
-            <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" to="/upgrade"
-              class="mobile-secondary font-medium bg-clip-text text-transparent
+        <div>
+          <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" to="/upgrade"
+            class="mobile-secondary font-medium bg-clip-text text-transparent
          bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600
          hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
          transition
          hover:scale-105 hover:saturate-150" @click="mobileOpen = false">
-              Upgrade
-            </NuxtLink>
-          </div>
-
-          <div class="border-t pt-2"></div>
-
-
-          <div>
-            <NuxtLink v-if="isLoggedIn" to="/stats" class="mobile-primary">
-              Stats
-            </NuxtLink>
-          </div>
-
-          <div v-if="isLoggedIn" class="border-t pt-2"></div>
-
-          <div>
-            <NuxtLink to="/account" class="mobile-secondary" @click="mobileOpen = false">
-              Account
-            </NuxtLink>
-          </div>
-
-          <div class="border-t pt-2"></div>
-
-          <button class="mobile-danger text-red-600 hover:text-red-400" @click="handleLogout">
-            Log out
-          </button>
-        </template>
-
-        <div v-else>
-          <div class="border-t pt-6"></div>
-          <button class="mobile-secondary text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
-            Login
-          </button>
+            Upgrade
+          </NuxtLink>
         </div>
 
-      </ClientOnly>
+        <div class="border-t pt-2"></div>
+
+
+        <div>
+          <NuxtLink v-if="isLoggedIn" to="/stats" class="mobile-primary">
+            Stats
+          </NuxtLink>
+        </div>
+
+        <div v-if="isLoggedIn" class="border-t pt-2"></div>
+
+        <div>
+          <NuxtLink to="/account" class="mobile-secondary" @click="mobileOpen = false">
+            Account
+          </NuxtLink>
+        </div>
+
+        <div class="border-t pt-2"></div>
+
+        <button class="mobile-danger text-red-600 hover:text-red-400" @click="handleLogout">
+          Log out
+        </button>
+      </template>
+
+      <div v-else>
+        <div class="border-t pt-6"></div>
+        <button class="mobile-secondary text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
+          Login
+        </button>
+      </div>
+      
     </div>
 
   </header>
