@@ -16,6 +16,15 @@ import { useXpAnimation } from '@/composables/daily/useXpAnimation'
 import { computed, onMounted, ref, watch } from 'vue'
 import type { DailyWord } from '~/types/daily/DailyItem'
 
+import {
+    playQuizCompleteFanfareSong
+} from '@/utils/sounds'
+
+import {
+    playCorrectJingle,
+    playIncorrectJingle
+} from '@/utils/sounds'
+
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
@@ -93,6 +102,12 @@ async function selectAnswer(answer: string) {
     const wordId = currentQuestion.value.id
     const correct = answer === currentQuestion.value.meaning
 
+    if (correct) {
+        playCorrectJingle()
+    } else {
+        playIncorrectJingle()
+    }
+
     // prevent double-answering same word in this session (client guard)
     if (!answerLog.value.some(a => a.wordId === wordId)) {
         answerLog.value.push({ wordId, correct })
@@ -138,6 +153,7 @@ async function selectAnswer(answer: string) {
 
                 await sleep(1800)
                 showCompleteView.value = true
+                playQuizCompleteFanfareSong()
             } catch (err) {
                 console.error('Daily finalize failed', err)
                 // TODO: show a retry button that calls /api/daily/finalize again

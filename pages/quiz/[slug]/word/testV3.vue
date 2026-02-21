@@ -333,7 +333,7 @@ watch(
     setTimeout(() => {
       const p = percentage.value
 
-      if (p >= 90) playQuizCompleteFanfareSong()
+      if (p >= 70) playQuizCompleteFanfareSong()
       else if (p >= 50) playQuizCompleteOkaySong()
       else playQuizCompleteFailSong()
     }, 250)

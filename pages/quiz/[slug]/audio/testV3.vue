@@ -247,7 +247,7 @@ watch(
       stop() // 🔑 stop last word audio
 
       setTimeout(() => {
-        if (percentage.value >= 90) {
+        if (percentage.value >= 70) {
           playQuizCompleteFanfareSong()
         } else if (percentage.value >= 50) {
           playQuizCompleteOkaySong()
