@@ -1,35 +1,12 @@
 <script setup lang="ts">
 
 definePageMeta({
-    ssr: true
+    ssr: false
 })
 
 const statsData = ref<any | null>(null)
 const loading = ref(true)
 const errorState = ref<string | null>(null)
-
-
-try {
-    const { getAccessToken } = await useAuth()
-    const token = await getAccessToken()
-
-    const res = await $fetch('/api/user/stats', {
-        method: 'GET',
-        headers: {
-            Authorization: `Bearer ${token}`,
-        },
-    })
-
-    statsData.value = res
-
-} catch (err) {
-    console.error('Stats fetch failed', err)
-    errorState.value = "Failed to load stats."
-} finally {
-    loading.value = false
-}
-
-
 
 const stats = computed(() => {
     if (!statsData.value) return []
@@ -71,33 +48,34 @@ const stats = computed(() => {
     ]
 })
 
-// const currentIndex = ref(0)
 
-// const currentStat = computed(() => {
-//     if (!stats.value.length) return null
-//     return stats.value[currentIndex.value]
-// })
+onMounted(async () => {
+    try {
+        const { getAccessToken } = await useAuth()
+        const token = await getAccessToken()
 
-// function nextStat() {
-//     if (!stats.value.length) return
-//     currentIndex.value =
-//         (currentIndex.value + 1) % stats.value.length
-// }
+        const res = await $fetch('/api/user/stats', {
+            method: 'GET',
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        })
 
-// function prevStat() {
-//     if (!stats.value.length) return
-//     currentIndex.value =
-//         (currentIndex.value - 1 + stats.value.length) % stats.value.length
-// }
+        statsData.value = res
+
+    } catch (err) {
+        console.error('Stats fetch failed', err)
+        errorState.value = "Failed to load stats."
+    } finally {
+        loading.value = false
+    }
+})
+
 
 </script>
 
 <template>
     <main class="max-w-4xl mx-auto px-4 py-16 space-y-12">
-
-        <h1 class="text-3xl font-semibold">
-            Your Stats
-        </h1>
 
         <div v-if="loading" class="text-center text-gray-400">
             Loading stats...
@@ -107,19 +85,24 @@ const stats = computed(() => {
             {{ errorState }}
         </div>
 
-        <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div v-for="stat in stats" :key="stat.label"
-                class="border rounded-xl p-6 text-center shadow-sm hover:shadow-md transition">
-                <p class="text-xs text-gray-500 uppercase tracking-wide">
-                    {{ stat.label }}
-                </p>
+        <div v-else>
+            <h1 class="text-3xl font-semibold">
+                Your Stats
+            </h1>
 
-                <p class="text-3xl font-bold mt-3" :class="stat.color">
-                    {{ stat.value.toLocaleString() }}
-                </p>
+            <div class="mt-8 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div v-for="stat in stats" :key="stat.label"
+                    class="border rounded-xl p-6 text-center shadow-sm hover:shadow-md transition">
+                    <p class="text-xs text-gray-500 uppercase tracking-wide">
+                        {{ stat.label }}
+                    </p>
+
+                    <p class="text-3xl font-bold mt-3" :class="stat.color">
+                        {{ stat.value.toLocaleString() }}
+                    </p>
+                </div>
             </div>
         </div>
-
     </main>
 </template>
 
