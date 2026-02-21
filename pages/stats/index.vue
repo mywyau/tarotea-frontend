@@ -19,7 +19,7 @@ const stats = computed(() => {
         {
             label: 'Total XP',
             value: Number(statsData.value.total_xp),
-            suffix: '',
+            suffix: 'xp',
             color: 'text-purple-600'
         },
         {
@@ -43,6 +43,7 @@ const stats = computed(() => {
         {
             label: 'XP Last 7 days',
             value: Number(statsData.value.xp_this_week),
+            suffix: 'xp',
             color: 'text-orange-600'
         }
     ]
@@ -98,7 +99,7 @@ onMounted(async () => {
                     </p>
 
                     <p class="text-3xl font-bold mt-3" :class="stat.color">
-                        {{ stat.value.toLocaleString() }}
+                        {{ stat.value.toLocaleString() }} {{ stat.suffix }}
                     </p>
                 </div>
             </div>
