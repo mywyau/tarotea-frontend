@@ -95,9 +95,10 @@ const LEVEL_TITLES: Record<string, string> = {
   'level-fiftheen': 'Level 15',
 }
 
+const WRONG_PENALTY = -12
 const STREAK_CAP = 5
 function deltaFor(correct: boolean, streakBefore: number) {
-  if (!correct) return 0
+  if (!correct) return WRONG_PENALTY
   return 5 + Math.min(streakBefore, STREAK_CAP) * 2
 }
 
@@ -127,7 +128,7 @@ async function answer(index: number) {
   const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
   const delta = deltaFor(correct, prev.streak)
   const newStreak = correct ? prev.streak + 1 : 0
-  const newXp = prev.xp + delta
+  const newXp = Math.max(0, prev.xp + delta)
 
   wordProgressMap.value[wordId] = { xp: newXp, streak: newStreak }
 

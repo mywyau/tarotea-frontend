@@ -171,11 +171,11 @@ const LEVEL_TITLES: Record<string, string> = {
   'level-fiftheen': 'Level 15',
 }
 
-
 const STREAK_CAP = 5
+const WRONG_PENALTY = -12
 
 function deltaFor(correct: boolean, streakBefore: number) {
-  if (!correct) return 0
+  if (!correct) return WRONG_PENALTY
   return 5 + Math.min(streakBefore, STREAK_CAP) * 2
 }
 
@@ -210,25 +210,25 @@ async function answer(index: number) {
   } else {
     playIncorrectJingle()
   }
+  
+  const wordId = question.value.wordId  //
 
-  // optimistic XP update
-  const delta = deltaFor(correct, currentStreak.value ?? 0)
+  const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
 
-  xpDelta.value = delta
-  currentXp.value = (currentXp.value ?? 0) + delta
+  const delta = deltaFor(correct, prev.streak)
 
-  const wordId = question.value.wordId
+  const newStreak = correct ? prev.streak + 1 : 0
+  const newXp = Math.max(0, prev.xp + delta) // ✅ clamp here
 
-  const prev = wordProgressMap.value[wordId]?.streak ?? 0
-  const newStreak = correct ? prev + 1 : 0
-
-  const prevXp = wordProgressMap.value[wordId]?.xp ?? 0
-  const newXp = prevXp + delta
 
   wordProgressMap.value[wordId] = {
     xp: newXp,
     streak: newStreak
   }
+
+  xpDelta.value = delta
+  currentXp.value = newXp
+  currentStreak.value = newStreak
 
   currentXp.value = newXp
   currentStreak.value = newStreak
