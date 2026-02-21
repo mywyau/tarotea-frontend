@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-access'],
+  middleware: ['topic-access'],
   ssr: false
 })
 
@@ -28,7 +28,7 @@ watchEffect(() => {
   if (slug.value && levelNumber.value === null) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Level not found'
+      statusMessage: 'Topic not found'
     })
   }
 })
@@ -36,11 +36,9 @@ watchEffect(() => {
 
 // --- helpers ---
 
-const canEnterLevel = () => {
+const canEnterTopic = () => {
 
   if (!authReady.value) return false
-
-  if (levelNumber.value! <= 2) return true
 
   // Paid levels
   if (!isLoggedIn.value) return false
