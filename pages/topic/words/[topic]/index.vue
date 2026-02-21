@@ -133,6 +133,7 @@ const gatedCategories = computed(() => {
     </header>
 
     <section v-for="category in gatedCategories" :key="category.key" class="space-y-4">
+      
       <h2 class="text-xl font-medium capitalize">
         {{ category.title }}
       </h2>

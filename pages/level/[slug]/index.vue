@@ -156,10 +156,7 @@ const gatedCategories = computed(() => {
         {{ category.title }}
       </h2>
 
-      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-
-        <!-- <WordTile v-for="word in category.words" :key="word.id" :to="`/level/${slug}/word/${word.id}`" :word="word.word"
-          :jyutping="word.jyutping" :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)" /> -->
+      <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 
         <WordTile v-for="word in category.words" :key="word.id"
           :to="word.locked ? undefined : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping"
