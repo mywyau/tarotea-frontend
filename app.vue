@@ -28,6 +28,13 @@ import { Analytics } from '@vercel/analytics/nuxt';
 
 const { resolve } = useMeStateV2();
 
+const router = useRouter()
+
+router.onError((err) => {
+  console.error('Router error:', err)
+  window.location.reload()
+})
+
 onMounted(() => {
   resolve();
 });

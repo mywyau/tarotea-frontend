@@ -7,6 +7,13 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: "vercel",
+    routeRules: {
+      "/**": {
+        headers: {
+          "Cache-Control": "no-store",
+        },
+      },
+    },
   },
 
   runtimeConfig: {
