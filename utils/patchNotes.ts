@@ -11,7 +11,6 @@ export const patchNotes: PatchNote[] = [
     items: [
       "More content for topics 'time & dates' & 'money'",
       "Content for level 6",
-      "Sentence based topic quiz to have a larger sentence pool, instead of just 20 questions",
     ],
   },
   {
@@ -19,6 +18,7 @@ export const patchNotes: PatchNote[] = [
     title: "Daily",
     items: [
       "Added daily exercises for logged in users who have seen more than 20 words in quizzes",
+      "Add stats page for user statistics",
     ],
   },
   {
