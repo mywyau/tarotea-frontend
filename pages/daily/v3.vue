@@ -401,22 +401,14 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                         <!-- Accuracy Card -->
                         <div class="mt-4 bg-white/10 backdrop-blur-sm rounded-xl p-5">
                             <p class="text-sm uppercase tracking-wider opacity-80 mb-2">
-                                Accuracy
-                            </p>
-                            <p class="text-3xl font-semibold">
-                                {{ totalQuestions
-                                    ? Math.round((correctCount / totalQuestions) * 100)
-                                    : 0
-                                }} %
-                            </p>
-                        </div>
-
-                        <div class="mt-4 bg-white/10 backdrop-blur-sm rounded-xl p-5">
-                            <p class="text-sm uppercase tracking-wider opacity-80 mb-2">
                                 Score
                             </p>
                             <p class="text-3xl font-semibold">
-                                {{ correctCount }} / {{ totalQuestions }}
+                                {{ correctCount }} / {{ totalQuestions }} - {{
+                                    totalQuestions
+                                        ? Math.round((correctCount / totalQuestions) * 100)
+                                        : 0
+                                }} %
                             </p>
                         </div>
 
@@ -426,7 +418,7 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                                 XP Earned
                             </p>
                             <p class="text-4xl font-bold text-green-500">
-                                +{{ xpToday }}
+                                +{{ xpToday }} xp
                             </p>
                         </div>
 
@@ -442,7 +434,7 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
 
                         <!-- CTA Button -->
                         <NuxtLink to="/"
-                            class="mt-8 inline-block bg-white text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
+                            class="mt-8 inline-block bg-white opacity-100 text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
                             Return Home →
                         </NuxtLink>
 
