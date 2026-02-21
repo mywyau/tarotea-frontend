@@ -368,7 +368,7 @@ const progressPercent = computed(() => {
           <!-- Streak -->
           <div class="h-5 flex items-center justify-center">
             <span class="text-xs text-orange-500">
-              {{ currentStreak && currentStreak > 0 ? `🔥 ${currentStreak} streak` : '' }}
+              {{ currentStreak && currentStreak > 0 ? `${currentStreak} streak` : '' }}
             </span>
           </div>
 
