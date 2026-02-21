@@ -16,6 +16,12 @@ export default defineNuxtConfig({
     },
   },
 
+  vite: {
+    build: {
+      cssCodeSplit: false,
+    },
+  },
+
   runtimeConfig: {
     public: {
       cdnBase: process.env.NUXT_PUBLIC_CDN_BASE,
