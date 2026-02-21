@@ -1,76 +1,112 @@
 <script setup lang="ts">
 
 definePageMeta({
-    middleware: ['coming-soon'],
-    ssr: true
+    ssr: true // explicitly client-only
 })
 
-/**
- * 🔥 MOCK DATA
- */
-const stats = [
-    {
-        label: 'Total XP',
-        value: 3420,
-        suffix: '',
-        color: 'text-purple-600'
-    },
-    {
-        label: 'Words Mastered',
-        value: 47,
-        suffix: '',
-        color: 'text-green-600'
-    }
-]
+const statsData = ref<any | null>(null)
+const loading = ref(true)
+const errorState = ref<string | null>(null)
 
-const currentIndex = ref(0)
 
-const currentStat = computed(() => stats[currentIndex.value])
+try {
+    const { getAccessToken } = await useAuth()
+    const token = await getAccessToken()
 
-function nextStat() {
-    currentIndex.value =
-        (currentIndex.value + 1) % stats.length
+    const res = await $fetch('/api/stats', {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    })
+
+    statsData.value = res
+
+} catch (err) {
+    console.error('Stats fetch failed', err)
+    errorState.value = "Failed to load stats."
+} finally {
+    loading.value = false
 }
 
-function prevStat() {
-    currentIndex.value =
-        (currentIndex.value - 1 + stats.length) % stats.length
-}
+const stats = computed(() => {
+    if (!statsData.value) return []
+
+    return [
+        {
+            label: 'Total XP',
+            value: Number(statsData.value.total_xp),
+            suffix: '',
+            color: 'text-purple-600'
+        },
+        {
+            label: 'Words Mastered',
+            value: Number(statsData.value.words_mastered),
+            suffix: '',
+            color: 'text-green-600'
+        },
+        {
+            label: 'Words Seen',
+            value: Number(statsData.value.words_seen),
+            suffix: '',
+            color: 'text-blue-600'
+        },
+        {
+            label: 'Correct Answers',
+            value: Number(statsData.value.total_correct),
+            suffix: '',
+            color: 'text-emerald-600'
+        }
+    ]
+})
+
+// const currentIndex = ref(0)
+
+// const currentStat = computed(() => {
+//     if (!stats.value.length) return null
+//     return stats.value[currentIndex.value]
+// })
+
+// function nextStat() {
+//     if (!stats.value.length) return
+//     currentIndex.value =
+//         (currentIndex.value + 1) % stats.value.length
+// }
+
+// function prevStat() {
+//     if (!stats.value.length) return
+//     currentIndex.value =
+//         (currentIndex.value - 1 + stats.value.length) % stats.value.length
+// }
+
 </script>
 
 <template>
-    <main class="max-w-2xl mx-auto px-4 py-16 space-y-10">
+    <main class="max-w-4xl mx-auto px-4 py-16 space-y-12">
 
         <h1 class="text-3xl font-semibold">
             Your Stats
         </h1>
 
-        <div class="space-y-8">
+        <div v-if="loading" class="text-center text-gray-400">
+            Loading stats...
+        </div>
 
-            <!-- Stat Card -->
-            <div class="border rounded-xl p-10 text-center shadow-sm transition-all duration-300">
-                <p class="text-sm text-gray-500 uppercase tracking-wide">
-                    {{ currentStat.label }}
+        <div v-else-if="errorState" class="text-center text-red-500">
+            {{ errorState }}
+        </div>
+
+        <div v-else class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            <div v-for="stat in stats" :key="stat.label"
+                class="border rounded-xl p-6 text-center shadow-sm hover:shadow-md transition">
+                <p class="text-xs text-gray-500 uppercase tracking-wide">
+                    {{ stat.label }}
                 </p>
 
-                <transition name="fade" mode="out-in">
-                    <p :key="currentStat.label" class="text-5xl font-bold mt-4" :class="currentStat.color">
-                        {{ currentStat.value.toLocaleString() }}
-                        {{ currentStat.suffix }}
-                    </p>
-                </transition>
-
-                <!-- Controls -->
-                <div class="flex justify-center gap-6 mt-8 text-sm text-gray-500">
-                    <button @click="prevStat" class="hover:text-black transition">
-                        ← Previous
-                    </button>
-                    <button @click="nextStat" class="hover:text-black transition">
-                        Next →
-                    </button>
-                </div>
+                <p class="text-3xl font-bold mt-3" :class="stat.color">
+                    {{ stat.value.toLocaleString() }}
+                </p>
             </div>
-
         </div>
 
     </main>
