@@ -11,7 +11,6 @@ definePageMeta({
 
 
 import { useCountdownToUtcMidnight } from '@/composables/daily/useCountdownToUtcMidnight'
-// import { shuffleDailyWords, useDailySession } from '@/composables/daily/useDailySession'
 import { shuffleDailyWords, useDailySession } from '@/composables/daily/useDailySessionV2'
 import { useXpAnimation } from '@/composables/daily/useXpAnimation'
 import { computed, onMounted, ref, watch } from 'vue'

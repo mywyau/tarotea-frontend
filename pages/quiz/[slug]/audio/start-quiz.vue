@@ -57,7 +57,7 @@ watchEffect(() => {
     </NuxtLink>
 
     <!-- 🔒 Locked -->
-    <section v-if="authReady && canEnterLevel()" class="text-center space-y-4">
+    <section v-if="authReady && !canEnterLevel()" class="text-center space-y-4">
       <h1 class="text-2xl font-semibold">🔒 Quiz locked</h1>
       <p class="text-gray-600">
         Quizzes are part of TaroTeaMonthly or TaroTeaYearly.
@@ -68,7 +68,7 @@ watchEffect(() => {
     </section>
 
     <!-- ✅ Quiz intro -->
-    <section class="text-center space-y-6">
+    <section v-else class="text-center space-y-6">
 
       <div class="text-4xl">📝</div>
 
