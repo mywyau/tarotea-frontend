@@ -80,6 +80,8 @@ const canEnterLevel = () => {
       </p>
 
       <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
+        <li>• XP is awarded when a quiz is completed</li>
+        <li>• Your weakest words will tend to appear more often</li>
         <li>• Randomised questions</li>
         <li>• Cantonese ↔ English</li>
       </ul>

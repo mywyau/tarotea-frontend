@@ -130,7 +130,6 @@ const { data, error } = await useFetch<LevelData>(
   }
 )
 
-
 const weakestIds = ref<string[]>([])
 
 const current = ref(0)
