@@ -272,12 +272,9 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                         <div :class="[
                             'h-3 rounded-full transition-[width] duration-500 ease-out relative',
                             progressPercent > 80
-                                ? 'bg-purple-500 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
+                                ? 'bg-purple-400 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
                                 : 'bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]'
                         ]" :style="{ width: progressPercent + '%' }">
-
-                            <!-- animated shimmer -->
-                            <div class="absolute inset-0 shimmer-layer"></div>
 
                         </div>
 
