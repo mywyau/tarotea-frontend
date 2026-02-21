@@ -5,7 +5,8 @@
 // real-time state, and user-specific session data.
 
 definePageMeta({
-    ssr: false
+    ssr: false,
+    middleware: "coming-soon"
 })
 
 
