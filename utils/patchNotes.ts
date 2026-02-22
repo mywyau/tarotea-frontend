@@ -19,6 +19,7 @@ export const patchNotes: PatchNote[] = [
     items: [
       "Added daily exercises for logged in users who have seen more than 20 words in quizzes",
       "Add stats page for user statistics",
+      "Update styling",
     ],
   },
   {
