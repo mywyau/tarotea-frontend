@@ -365,7 +365,7 @@ watch(
           <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-xl flex items-center justify-center
            text-2xl font-semibold text-center p-6
            transition-all duration-300 ease-out
-           shadow-sm active:scale-95 hover:brightness-110" :style="{
+           shadow-sm active:scale-95 hover:bri" :style="{
             backgroundColor:
               !answered
                 ? tileColors[i]

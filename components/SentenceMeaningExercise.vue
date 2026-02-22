@@ -26,6 +26,29 @@ function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5)
 }
 
+const BRAND_COLORS = [
+  '#EAB8E4',
+  '#A8CAE0',
+  '#F4C2D7',
+  '#F2CACA',
+  '#D6A3D1',
+  'rgba(244,205,39,0.35)',
+]
+
+const tileColors = ref<string[]>([])
+
+function generateTileColors() {
+  tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
+}
+
+watch(
+  () => currentIndex.value,
+  () => {
+    generateTileColors()
+  },
+  { immediate: true }
+)
+
 const encouragingMessages = [
   "Nice work",
   "Good job — keep going",
@@ -119,59 +142,92 @@ watch(
 
 <template>
 
-  <div v-if="currentSentence" class="max-w-xl mx-auto space-y-8">
+  <div v-if="currentSentence" class="max-w-xl mx-auto px-4 py-16 space-y-10">
 
     <!-- Prompt -->
-    <div class="text-center space-y-2">
-      <p class="text text-gray-500">What does this sentence mean?</p>
+    <div class="text-center space-y-3">
 
-      <div class="text-center space-y-1">
-        <p class="text-sm text-gray-400">
-          {{ progressText }}
-        </p>
-        <div class="text-3xl font-medium">
-          {{ currentSentence.text }}
-        </div>
-      </div>
+      <p class="text-sm text-gray-500 uppercase tracking-wide">
+        What does this sentence mean?
+      </p>
+
+      <p class="text-3xl sm:text-4xl font-semibold leading-relaxed">
+        {{ currentSentence.text }}
+      </p>
+
     </div>
+
+    <!-- Progress -->
+    <div class="space-y-3">
+
+      <div class="flex items-center gap-3">
+
+        <div class="flex-1 bg-gray-200 rounded-full h-3">
+          <div class="bg-purple-300 h-3 rounded-full transition-all duration-300" :style="{
+            width: ((currentIndex + 1) / props.sentences.length) * 100 + '%'
+          }" />
+        </div>
+
+        <span class="text-sm text-gray-500 whitespace-nowrap">
+          {{ progressText }}
+        </span>
+
+      </div>
+
+    </div>
+
 
 
     <!-- Options -->
-    <div class="grid gap-3">
-      <button v-for="option in options" :key="option" :disabled="showResult" @click="selectOption(option)"
-        class="rounded-lg border px-4 py-3 text-left transition disabled:opacity-60 disabled:cursor-not-allowed" :class="{
-          'hover:bg-gray-50': !showResult,
-          'bg-green-200 border-green-400': showResult && option === currentSentence.meaning,
-          'bg-red-200 border-red-400 animate-shake': showResult && option === selected && !isCorrect
-        }">
+    <div class="grid gap-4">
 
+      <button v-for="(option, i) in options" :key="option" :disabled="showResult" @click="selectOption(option)" class="rounded-xl px-6 py-4 text-left
+               transition-all duration-300 ease-out
+               shadow-sm active:scale-95 hover:brightness-110
+               disabled:opacity-70 disabled:cursor-not-allowed" :style="{
+                backgroundColor:
+                  !showResult
+                    ? tileColors[i]
+                    : option === currentSentence.meaning
+                      ? '#BBF7D0'
+                      : option === selected
+                        ? '#FECACA'
+                        : tileColors[i]
+              }" :class="[
+                showResult && option === currentSentence.meaning && 'ring-2 ring-emerald-400',
+                showResult && option === selected && !isCorrect && 'animate-shake ring-2 ring-rose-400'
+              ]">
         {{ option }}
       </button>
 
+      <!-- Next -->
       <div class="min-h-[3.5rem]">
-        <button v-if="showResult && currentIndex < props.sentences.length" class="w-full rounded-lg border border-gray-900 bg-gray-900
-           px-4 py-3 text-center text-white transition hover:bg-gray-800" @click="next">
+        <button v-if="showResult && currentIndex < props.sentences.length" class="w-full rounded-lg bg-black text-white py-3
+                 font-medium transition hover:bg-gray-800" @click="next">
           Next →
         </button>
       </div>
-    </div>
-  </div>
 
-  <!-- Done -->
-  <div v-else class="text-center">
-
-    <!-- Uses css styling -->
-    <div class="mt-4 min-h-[2rem]">
-      <Transition name="fade">
-        <p v-if="showEncouragement" class="text-2xl text-black">
-          {{ encouragement }}
-        </p>
-      </Transition>
     </div>
 
   </div>
+
+  <!-- Completion -->
+  <div v-else class="max-w-xl mx-auto px-4 py-20 text-center space-y-8">
+
+    <h2 class="text-2xl font-semibold">
+      Session Complete
+    </h2>
+
+    <Transition name="fade">
+      <p v-if="showEncouragement" class="text-xl text-gray-800">
+        {{ encouragement }}
+      </p>
+    </Transition>
+
+  </div>
+
 </template>
-
 
 <style scoped>
 .fade-enter-active {

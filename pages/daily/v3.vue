@@ -37,6 +37,21 @@ const finishing = ref(false)                    // "Finalising score" loading st
 type DailyAnswer = { wordId: string; correct: boolean }
 const answerLog = ref<DailyAnswer[]>([])
 
+const BRAND_COLORS = [
+    '#EAB8E4',
+    '#A8CAE0',
+    '#F4C2D7',
+    '#F2CACA',
+    '#D6A3D1',
+    'rgba(244,205,39,0.35)',
+]
+
+const tileColors = ref<string[]>([])
+
+function generateTileColors() {
+    tileColors.value = shuffleDailyWords([...BRAND_COLORS]).slice(0, 4)
+}
+
 // Use the SAME rule as your daily delta in update.v2:
 // correct -> 5 + effectiveStreak*2 (but you were calculating streak from DB)
 // wrong -> 0
@@ -199,6 +214,12 @@ async function fetchOptions(correct: DailyWord) {
     return shuffleDailyWords([correct, ...res.distractors])
 }
 
+const percentage = computed(() =>
+    totalQuestions.value
+        ? Math.round((correctCount.value / totalQuestions.value) * 100)
+        : 0
+)
+
 onMounted(async () => {
     const token = await getAccessToken()
     await loadSession(token)
@@ -234,6 +255,10 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
     currentXp.value = progressMap[wordId]?.xp ?? 0
     currentStreak.value = progressMap[wordId]?.streak ?? 0
 }, { immediate: true })
+
+watch(currentQuestion, () => {
+    generateTileColors()
+})
 
 </script>
 
@@ -273,7 +298,7 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                 </p>
 
                 <NuxtLink to="/topics/quiz"
-                    class="mt-2 inline-block bg-white text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
+                    class="mt-2 inline-block text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
                     Test your self on more words first →
                 </NuxtLink>
             </div>
@@ -281,10 +306,10 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
             <div class="relative min-h-[700px]">
                 <div v-if="!showCompleteView && !finishing && currentQuestion" class="flex items-center gap-3 mb-6">
 
-                    <div class="flex-1 bg-gray-200 rounded-full h-3 relative overflow-hidden">
+                    <div class="flex-1 bg-gray-200 rounded-lg h-3 relative overflow-hidden">
 
                         <div :class="[
-                            'h-3 rounded-full transition-[width] duration-500 ease-out relative',
+                            'h-3 rounded-lg transition-[width] duration-500 ease-out relative',
                             progressPercent > 80
                                 ? 'bg-purple-400 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
                                 : 'bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]'
@@ -300,7 +325,7 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
 
                 </div>
 
-                <div v-if="!showCompleteView && !finishing && currentQuestion" class="bg-white shadow p-6 rounded-xl">
+                <div v-if="!showCompleteView && !finishing && currentQuestion" class="p-8 rounded-2xl transition-all">
 
                     <p class="text-3xl font-medium text-center mb-2">
                         {{ currentQuestion.word }}
@@ -344,20 +369,28 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                         </div>
                     </div>
 
-                    <div class="grid gap-3">
-                        <button v-for="option in options" :key="option.id" @click="selectAnswer(option.meaning)"
-                            class="p-3 rounded-lg border transition" :class="{
-                                'bg-green-100 border-green-500':
-                                    showResult && option.meaning === currentQuestion.meaning,
-                                'bg-red-100 border-red-500':
-                                    showResult &&
-                                    selected === option.meaning &&
-                                    option.meaning !== currentQuestion.meaning
-                            }">
+                    <div class="grid gap-4">
+
+                        <button v-for="(option, i) in options" :key="option.id" @click="selectAnswer(option.meaning)"
+                            class="rounded-lg px-6 py-4 text-left
+           transition-all duration-300 ease-out
+           shadow-sm active:scale-95 hover:brightness-110" :style="{
+            backgroundColor:
+                !showResult
+                    ? tileColors[i]
+                    : option.meaning === currentQuestion.meaning
+                        ? '#BBF7D0'
+                        : selected === option.meaning
+                            ? '#FECACA'
+                            : tileColors[i]
+        }" :class="[
+            showResult && option.meaning === currentQuestion.meaning && 'ring-2 ring-emerald-400',
+            showResult && selected === option.meaning && option.meaning !== currentQuestion.meaning && 'animate-shake ring-2 ring-rose-400'
+        ]">
                             {{ option.meaning }}
                         </button>
-                    </div>
 
+                    </div>
 
                     <transition name="next-fade">
                         <button v-if="showResult && readyForNext && currentIndex < questions.length - 1"
@@ -371,7 +404,7 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
 
                 <transition name="finalise-fade">
                     <div v-if="finishing"
-                        class="absolute inset-0 flex flex-col items-center justify-center text-center bg-white">
+                        class="absolute inset-0 flex flex-col items-center justify-center text-center">
                         <div class="loader mb-6"></div>
 
                         <p class="text-lg font-semibold text-purple-600">
@@ -384,57 +417,77 @@ watch(() => currentQuestion.value?.id, async (wordId) => {
                     </div>
                 </transition>
 
+                <!-- Completion block -->
                 <transition name="complete-fade">
                     <div v-if="showCompleteView"
-                        class="absolute inset-0 overflow-hidden rounded-2xl p-8 text-center text-black bg-white">
+                        class="absolute inset-0 overflow-hidden rounded-2xl p-8 text-center text-black">
 
-                        <!-- Subtle Glow Background -->
-                        <div
-                            class="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_top,_white,_transparent_60%)] pointer-events-none">
-                        </div>
-
-
-                        <h2 class="text-2xl font-bold mb-2 tracking-wide">
+                        <h2 class="text-2xl font-bold mb-2 tracking-wide text-black">
                             Daily Exercise Complete!
                         </h2>
 
                         <!-- Accuracy Card -->
-                        <div class="mt-4 bg-white/10 backdrop-blur-sm rounded-xl p-5">
-                            <p class="text-sm uppercase tracking-wider opacity-80 mb-2">
+                        <div class="mt-4 p-6">
+
+                            <p class="text-sm uppercase tracking-wide text-gray-700 mb-3">
                                 Score
                             </p>
-                            <p class="text-3xl font-semibold">
-                                {{ correctCount }} / {{ totalQuestions }} - {{
-                                    totalQuestions
-                                        ? Math.round((correctCount / totalQuestions) * 100)
-                                        : 0
-                                }} %
-                            </p>
+
+                            <div class="text-4xl font-bold leading-tight">
+
+                                <!-- Raw Score -->
+                                <span class="text-[#7FB9D8]">
+                                    {{ correctCount }} / {{ totalQuestions }}
+                                </span>
+
+                                <span class="text-gray-400 mx-2">—</span>
+
+                                <!-- Percentage -->
+                                <span :class="[
+                                    percentage >= 90
+                                        ? 'text-[#C48CC3]'   // stronger purple
+                                        : percentage >= 50
+                                            ? 'text-[#DFA0D8]'   // stronger lavender
+                                            : 'text-[#E9A7C6]'   // stronger pink
+                                ]">
+                                    {{ percentage }}%
+                                </span>
+
+                            </div>
+
                         </div>
 
                         <!-- XP Card -->
-                        <div class="mt-4 bg-white/10 backdrop-blur-sm rounded-xl p-5">
-                            <p class="text-sm uppercase tracking-wider opacity-80 mb-2">
+                        <div class="mt-4 backdrop-blur-sm rounded-xl p-5">
+                            <p class="text-sm text-gray-700 uppercase tracking-wider opacity-100 mb-2">
                                 XP Earned
                             </p>
-                            <p class="text-4xl font-bold text-green-500">
+                            <p class="text-4xl font-bold text-emerald-500">
                                 +{{ xpToday }} xp
                             </p>
                         </div>
 
                         <!-- Countdown -->
-                        <div class="mt-8 text-sm opacity-90">
-                            <p class="uppercase tracking-wide text-xs opacity-70 mb-1">
+                        <div class="mt-8 text-sm opacity-100">
+                            <p class="text-sm text-gray-700 uppercase tracking-wide opacity-100 mb-4">
                                 Next daily unlocks in
                             </p>
-                            <p class="text-lg font-semibold text-purple-400">
-                                {{ timeRemaining }}
+
+                            <p class="bg-black rounded-lg py-4 px-3">
+                                <span class="text-3xl font-semibold
+                                    bg-gradient-to-r
+                                    from-[#EAB8E4]
+                                    via-[#A8CAE0]
+                                    to-[#D6A3D1]
+                                    bg-clip-text text-transparent hover:brightness-125">
+                                    {{ timeRemaining }}
+                                </span>
                             </p>
                         </div>
 
                         <!-- CTA Button -->
                         <NuxtLink to="/"
-                            class="mt-8 inline-block bg-white opacity-100 text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
+                            class="mt-8 inline-block opacity-100 text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
                             Return Home →
                         </NuxtLink>
 

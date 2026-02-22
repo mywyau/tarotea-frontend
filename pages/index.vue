@@ -133,10 +133,6 @@ const { data: stats } = await useFetch('/api/stats', {
             </div>
           </div>
         </NuxtLink>
-
-
-
-
       </div>
     </div>
 

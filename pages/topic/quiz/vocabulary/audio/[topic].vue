@@ -45,6 +45,25 @@ const { data, error } = await useFetch<LevelData>(
     }
 )
 
+const BRAND_COLORS = [
+    '#EAB8E4',
+    '#A8CAE0',
+    '#F4C2D7',
+    '#F2CACA',
+    '#D6A3D1',
+    'rgba(244,205,39,0.35)',
+]
+
+const tileColors = ref<string[]>([])
+
+function shuffle<T>(arr: T[]): T[] {
+    return [...arr].sort(() => Math.random() - 0.5)
+}
+
+function generateTileColors() {
+    tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
+}
+
 const wordsForLevel = computed<Word[]>(() => {
     if (!data.value) return []
     return Object.values(data.value.categories).flat()
@@ -273,23 +292,31 @@ watch(
     }
 )
 
+watch(
+    () => question.value?.wordId,
+    () => {
+        generateTileColors()
+    },
+    { immediate: true }
+)
 
 </script>
 
-<template>
 
+<template>
     <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
-        <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-gray-500 hover:underline">
+        <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black hover:underline">
             ← Back to topic quizzes
         </NuxtLink>
 
         <section class="text-center space-y-4">
 
-            <h1 class="text-2xl font-semibold text-center">
+            <h1 class="text-2xl font-semibold">
                 {{ formattedTitle }} Audio Quiz
             </h1>
 
+            <!-- Progress -->
             <div class="flex items-center gap-3 mb-6">
 
                 <div class="flex-1 bg-gray-200 rounded-full h-3">
@@ -303,26 +330,25 @@ watch(
 
             </div>
 
+            <!-- Active Question -->
             <div v-if="current < questions.length" class="space-y-6">
 
+                <!-- Audio -->
                 <div v-if="question.type === 'audio'" class="text-center">
                     <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
                 </div>
 
+                <!-- XP + Streak -->
                 <div class="min-h-[50px] space-y-3">
 
-                    <!-- XP Row -->
                     <div class="flex items-center justify-center gap-3">
 
-                        <!-- XP Bar -->
                         <div class="w-32 h-1 bg-gray-200 rounded">
                             <div class="h-1 bg-green-500 rounded transition-all duration-500"
                                 :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
                         </div>
 
-                        <!-- XP Text + Delta Anchor -->
                         <div class="relative flex items-center">
-
                             <span class="text-sm text-gray-500 whitespace-nowrap">
                                 {{ currentXp ?? 0 }} XP
                             </span>
@@ -334,48 +360,57 @@ watch(
                                     {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                                 </span>
                             </transition>
-
                         </div>
 
                     </div>
 
-                    <!-- Streak -->
                     <div class="h-5 flex items-center justify-center">
                         <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
-                            {{ currentStreak }} streak
+                            🔥 {{ currentStreak }} streak
                         </span>
                     </div>
 
                 </div>
 
+                <!-- Answer Tiles -->
                 <div class="grid grid-cols-2 gap-4">
-                    <button v-for="(option, i) in question.options" :key="i"
-                        class="aspect-square rounded-lg border flex items-center justify-center text-xl font-medium text-center p-6 transition break-words leading-tight"
-                        :class="[
-                            !answered && 'hover:bg-gray-100',
-                            {
-                                'bg-green-100':
-                                    answered && i === question.correctIndex,
-                                'bg-red-100 animate-shake':
-                                    answered && i === selectedIndex && i !== question.correctIndex
-                            }
-                        ]" @click="answer(i)">
+
+                    <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-xl flex items-center justify-center
+                   text-2xl font-semibold text-center p-6
+                   transition-all duration-300 ease-out
+                   shadow-sm active:scale-95 hover:brightness-110" :style="{
+                    backgroundColor:
+                        !answered
+                            ? tileColors[i]
+                            : i === question.correctIndex
+                                ? '#BBF7D0'
+                                : i === selectedIndex
+                                    ? '#FECACA'
+                                    : tileColors[i]
+                }" :class="[
+                answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+                answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+            ]" @click="answer(i)">
                         {{ option }}
                     </button>
+
                 </div>
 
-                <div class="h-12">
-                    <button v-if="answered" class="w-full rounded bg-black text-white py-2" @click="next">
+                <!-- Next Button -->
+                <div class="h-10">
+                    <button v-if="answered" class="w-full rounded bg-black text-white py-2 transition hover:bg-gray-800"
+                        @click="next">
                         Next
                     </button>
                 </div>
 
             </div>
 
+            <!-- Completion Screen -->
             <div v-else class="text-center space-y-6">
 
                 <h2 class="text-2xl font-semibold">
-                    Quiz complete
+                    Quiz Complete
                 </h2>
 
                 <p class="text-gray-600">
@@ -383,30 +418,31 @@ watch(
                 </p>
 
                 <p class="text-gray-600">
-                    You scored {{ score === questions.length
-                        ? '100%'
-                        : ((score / questions.length) * 100).toFixed(2) + '%' }}
+                    You scored {{
+                        score === questions.length
+                            ? '100%'
+                            : ((score / questions.length) * 100).toFixed(0) + '%'
+                    }}
                 </p>
 
                 <div class="pt-4 space-y-4">
-                    <!-- <NuxtLink :to="`/topics/quiz/${slug}`" -->
+
                     <NuxtLink :to="`/topics/quiz`"
                         class="block w-full rounded bg-black text-white py-2 text-center font-medium hover:bg-gray-800 transition">
                         Restart Quiz
                     </NuxtLink>
 
-
-                    <NuxtLink :to="`/topic/words/${slug}`" class="block text-gray-500 hover:underline">
-                        ← Topic {{ slug }}
+                    <NuxtLink :to="`/topic/words/${slug}`" class="block text-black hover:underline">
+                        ← Back to Topic
                     </NuxtLink>
 
                 </div>
-            </div>
-        </section>
 
+            </div>
+
+        </section>
     </main>
 </template>
-
 
 <style scoped>
 .xp-fall-enter-active {

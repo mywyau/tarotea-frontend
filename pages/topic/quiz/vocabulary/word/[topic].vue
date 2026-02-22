@@ -56,53 +56,24 @@ const showResult = ref<boolean>(false)
 
 const question = computed(() => questions.value[current.value])
 
-// async function answer(index: number) {
-//     if (answered.value) return
-//     if (!question.value) return
+const BRAND_COLORS = [
+    '#EAB8E4',
+    '#A8CAE0',
+    '#F4C2D7',
+    '#F2CACA',
+    '#D6A3D1',
+    'rgba(244,205,39,0.35)',
+]
 
-//     selectedIndex.value = index
-//     answered.value = true
+const tileColors = ref<string[]>([])
 
-//     const correct = index === question.value.correctIndex
+function shuffle<T>(arr: T[]): T[] {
+    return [...arr].sort(() => Math.random() - 0.5)
+}
 
-//     if (correct) {
-//         score.value++
-//         playCorrectJingle()
-//     } else {
-//         playIncorrectJingle()
-//     }
-
-//     try {
-//         const token = await getAccessToken()
-
-//         const res = await $fetch<{
-//             success: boolean
-//             delta: number
-//             newXp: number
-//             newStreak: number
-//         }>('/api/word-progress/update', {
-//             method: 'POST',
-//             headers: {
-//                 Authorization: `Bearer ${token}`,
-//             },
-//             body: {
-//                 wordId: question.value.wordId,
-//                 correct
-//             }
-//         })
-
-//         xpDelta.value = res.delta
-//         currentXp.value = res.newXp
-//         currentStreak.value = res.newStreak
-
-//         setTimeout(() => {
-//             xpDelta.value = null
-//         }, 1000)
-
-//     } catch (err) {
-//         console.error('XP update failed', err)
-//     }
-// }
+function generateTileColors() {
+    tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
+}
 
 async function answer(index: number) {
     if (answered.value) return
@@ -174,10 +145,6 @@ const percentage = computed(() => {
 const completionSoundPlayed = ref(false)
 
 const weakestIds = ref<string[]>([])
-
-function shuffle<T>(arr: T[]): T[] {
-    return [...arr].sort(() => Math.random() - 0.5)
-}
 
 const weightedWords = computed(() => {
     const words = wordsForTopic.value
@@ -314,22 +281,34 @@ watch(
         }
     }
 )
+
+watch(
+    () => question.value?.wordId,
+    () => {
+        generateTileColors()
+    },
+    { immediate: true }
+)
 </script>
 
 <template>
     <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
-        <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-gray-500 hover:underline">
+        <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black hover:underline">
             ← Back to topic quizzes
         </NuxtLink>
 
-
         <section class="text-center space-y-4">
 
+            <h1 class="text-2xl font-semibold capitalize">
+                {{ topicSlug.replace('-', ' ') }}
+            </h1>
+
+            <!-- Progress -->
             <div class="flex items-center gap-3 mb-6">
 
                 <div class="flex-1 bg-gray-200 rounded-full h-3">
-                    <div class="bg-blue-300 h-3 rounded-full transition-all duration-300"
+                    <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
                         :style="{ width: progressPercent + '%' }" />
                 </div>
 
@@ -339,82 +318,83 @@ watch(
 
             </div>
 
+            <!-- Active Question -->
             <div v-if="current < questions.length" class="space-y-6">
 
-                <!-- Show Cantonese word -->
-                <div class="text-center">
+                <!-- Prompt -->
+                <p class="text-4xl font-semibold min-h-[64px] flex items-center justify-center">
+                    {{ question.prompt }}
+                </p>
 
-                    <p class="text-4xl mb-3 min-h-[64px] flex items-center justify-center text-center">
-                        {{ question.prompt }}
-                    </p>
+                <!-- XP + Streak -->
+                <div class="min-h-[50px] space-y-3">
 
-                    <!-- Progress Block (fixed height) -->
-                    <div class="min-h-[50px] space-y-3">
+                    <div class="flex items-center justify-center gap-3">
 
-                        <!-- XP Row -->
-                        <div class="flex items-center justify-center gap-3">
-
-                            <!-- XP Bar -->
-                            <div class="w-32 h-1 bg-gray-200 rounded">
-                                <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                                    :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
-                            </div>
-
-                            <!-- XP Text (relative anchor) -->
-                            <div class="relative flex items-center">
-
-                                <span class="text-sm text-gray-500 whitespace-nowrap">
-                                    {{ currentXp ?? 0 }} XP
-                                </span>
-
-                                <transition name="xp-fall">
-                                    <span v-if="xpDelta !== null"
-                                        class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                                        :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-                                        {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
-                                    </span>
-                                </transition>
-                            </div>
-
-
-
+                        <div class="w-32 h-1 bg-gray-200 rounded">
+                            <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                                :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
                         </div>
 
-
-                        <!-- Streak -->
-                        <div class="h-5 flex items-center justify-center">
-                            <span class="text-xs text-orange-500">
-                                {{ currentStreak && currentStreak > 0 ? `${currentStreak} streak` : '' }}
+                        <div class="relative flex items-center">
+                            <span class="text-sm text-gray-500 whitespace-nowrap">
+                                {{ currentXp ?? 0 }} XP
                             </span>
+
+                            <transition name="xp-fall">
+                                <span v-if="xpDelta !== null"
+                                    class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                                    :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                                    {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                                </span>
+                            </transition>
                         </div>
+
                     </div>
+
+                    <div class="h-5 flex items-center justify-center">
+                        <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
+                            🔥 {{ currentStreak }} streak
+                        </span>
+                    </div>
+
                 </div>
 
+                <!-- Answer Tiles -->
                 <div class="grid grid-cols-2 gap-4">
-                    <button v-for="(option, i) in question.options" :key="i"
-                        class="aspect-square rounded-lg border flex items-center justify-center font-medium text-center p-4 text-lg sm:text-xl md:text-2xl break-words leading-tight"
-                        :class="[
-                            !answered && 'hover:bg-gray-100',
-                            {
-                                'bg-green-100':
-                                    answered && i === question.correctIndex,
-                                'bg-red-100 animate-shake':
-                                    answered && i === selectedIndex && i !== question.correctIndex
-                            }
-                        ]" @click="answer(i)">
+
+                    <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-xl flex items-center justify-center
+                   text-2xl font-semibold text-center p-6
+                   transition-all duration-300 ease-out
+                   shadow-sm active:scale-95 hover:brightness-110" :style="{
+                    backgroundColor:
+                        !answered
+                            ? tileColors[i]
+                            : i === question.correctIndex
+                                ? '#BBF7D0'
+                                : i === selectedIndex
+                                    ? '#FECACA'
+                                    : tileColors[i]
+                }" :class="[
+                    answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+                    answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+                ]" @click="answer(i)">
                         {{ option }}
                     </button>
+
                 </div>
 
-                <div class="h-12">
-                    <button v-if="answered" class="w-full rounded bg-black text-white py-2" @click="next">
+                <div class="h-10">
+                    <button v-if="answered" class="w-full rounded bg-black text-white py-2 transition hover:bg-gray-800"
+                        @click="next">
                         Next
                     </button>
                 </div>
 
             </div>
 
-            <div v-else class="space-y-6">
+            <!-- Completion Screen -->
+            <div v-else class="text-center space-y-6">
 
                 <h2 class="text-2xl font-semibold">
                     Quiz Complete
@@ -428,13 +408,19 @@ watch(
                     {{ percentage.toFixed(0) }}%
                 </p>
 
-                <NuxtLink :to="`/topics/quiz`" class="block w-full rounded bg-black text-white py-2">
-                    Restart Quiz
-                </NuxtLink>
+                <div class="pt-4 space-y-4">
 
-                <NuxtLink :to="`/topic/words/${topicSlug}`" class="block text-gray-500 hover:underline">
-                    ← Topic {{ topicSlug }}
-                </NuxtLink>
+                    <NuxtLink :to="`/topics/quiz`"
+                        class="block w-full rounded bg-black text-white py-2 text-center font-medium hover:bg-gray-800 transition">
+                        Restart Quiz
+                    </NuxtLink>
+
+                    <NuxtLink :to="`/topic/words/${topicSlug}`" class="block text-black hover:underline">
+                        ← Back to topic
+                    </NuxtLink>
+
+                </div>
+
             </div>
 
         </section>
