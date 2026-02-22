@@ -28,6 +28,14 @@ const isTopicFree = computed(() => {
   return FREE_TOPICS.includes(slug)
 })
 
+const TILE_COLORS = [
+  'rgba(234, 184, 228, 0.75)', // pink
+  'rgba(214, 163, 209, 0.75)', // purple
+  'rgba(168, 202, 224, 0.75)', // blue
+  'rgba(246, 225, 225, 0.75)', // blush
+  'rgba(244, 194, 215, 0.75)', // rose
+  'rgba(244, 205, 39, 0.35)'  // yellow 
+]
 
 if (error.value?.statusCode === 403) {
   throw createError({ statusCode: 403, statusMessage: 'Topic locked' })
@@ -99,6 +107,17 @@ const hasPaidAccess = computed(() => {
   return canAccessLevel(entitlement.value!)
 })
 
+function getColorFromId(id: string) {
+  let hash = 0
+
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash)
+  }
+
+  const index = Math.abs(hash) % TILE_COLORS.length
+  return TILE_COLORS[index]
+}
+
 const gatedCategories = computed(() => {
   let globalIndex = 0
 
@@ -112,11 +131,15 @@ const gatedCategories = computed(() => {
           !hasPaidAccess.value &&
           globalIndex >= FREE_WORD_LIMIT
 
+
+        // const color = TILE_COLORS[globalIndex % TILE_COLORS.length]
+
         globalIndex++
 
         return {
           ...word,
-          locked: shouldLock
+          locked: shouldLock,
+          tileColor: getColorFromId(word.id)
         }
       })
     }
@@ -126,14 +149,19 @@ const gatedCategories = computed(() => {
 </script>
 
 <template>
-  <main v-if="authReady" class="max-w-4xl mx-auto px-4 py-12 space-y-12">
+  <main v-if="authReady" class="max-w-4xl mx-auto px-4 py-12 space-y-6">
+
+    <NuxtLink :to="`/topics`" class="inline-block text-sm text-black hover:underline">
+      ← Topics
+    </NuxtLink>
+
     <header class="space-y-2">
       <h1 class="text-3xl font-semibold">{{ topic.title }}</h1>
       <p class="text-gray-600">{{ topic.description }}</p>
     </header>
 
     <section v-for="category in gatedCategories" :key="category.key" class="space-y-4">
-      
+
       <h2 class="text-xl font-medium capitalize">
         {{ category.title }}
       </h2>
@@ -143,7 +171,8 @@ const gatedCategories = computed(() => {
         <WordTile v-for="word in category.words" :key="word.id"
           :to="word.locked ? undefined : `/topic/word/${slug}/${word.id}`" :word="word.word" :jyutping="word.jyutping"
           :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)"
-          :class="word.locked ? 'opacity-40 pointer-events-none select-none' : ''" />
+          :class="word.locked ? 'opacity-40 pointer-events-none select-none' : ''"
+          :style="{ background: word.tileColor }" />
       </div>
     </section>
   </main>

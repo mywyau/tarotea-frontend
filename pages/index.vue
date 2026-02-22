@@ -19,11 +19,21 @@ const { data: stats } = await useFetch('/api/stats', {
         build real understanding.
       </p>
 
-      <NuxtLink to="/topics" class="mt-8 inline-block text-gray-900 font-semibold px-8 py-3 rounded-lg
-               shadow-sm hover:shadow-md active:scale-[0.98] transition
-               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        style="background-color:#A8CAE0;">
-        Start Learning →
+      <NuxtLink to="/topics" class="mt-8 inline-block font-semibold px-8 py-3 rounded-lg
+         bg-black
+         shadow-md hover:shadow-lg
+         hover:-translate-y-0.5
+         active:scale-[0.98]
+         transition-all duration-300">
+        <span class="bg-gradient-to-r
+           from-[#EAB8E4]
+           via-[#A8CAE0]
+           to-[#D6A3D1]
+           bg-clip-text text-transparent
+           transition-all duration-300
+           hover:brightness-125">
+          Start Learning →
+        </span>
       </NuxtLink>
     </div>
 
@@ -51,15 +61,16 @@ const { data: stats } = await useFetch('/api/stats', {
     </div>
 
     <!-- Navigation Tiles -->
-    <div class="mt-6">
-      <div class="grid grid-cols-4 auto-rows-[120px] gap-5">
+    <div class="mt-10">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[120px] gap-5">
 
-        <!-- Large Wide Tile -->
-        <NuxtLink to="/topics" class="col-span-4 row-span-2 rounded-xl p-8 flex flex-col justify-end
-                  shadow-sm hover:shadow-md transition
-                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          style="background-color:#EAB8E4; border-color:rgba(0,0,0,0.08);">
-          <div class="text-xl font-semibold text-gray-900">
+        <!-- Explore Topics -->
+        <NuxtLink to="/topics" class="rounded-xl p-6 flex flex-col justify-end
+             shadow-sm hover:shadow-md transition
+             hover:brightness-110
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+             lg:col-span-4 lg:row-span-2" style="background-color:#EAB8E4;">
+          <div class="text-lg font-semibold text-black">
             Explore Topics
           </div>
           <div class="text-sm text-gray-800 mt-2">
@@ -67,11 +78,12 @@ const { data: stats } = await useFetch('/api/stats', {
           </div>
         </NuxtLink>
 
-        <!-- Tall Tile -->
-        <NuxtLink to="/levels" class="col-span-2 row-span-2 rounded-xl p-6 flex items-end
-                  shadow-sm hover:shadow-md transition
-                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          style="background-color:#A8CAE0; border-color:rgba(0,0,0,0.08);">
+        <!-- Levels -->
+        <NuxtLink to="/levels" class="rounded-xl p-6 flex items-end
+             shadow-sm hover:shadow-md transition
+             hover:brightness-110
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+             lg:col-span-2 lg:row-span-2" style="background-color:#A8CAE0;">
           <div>
             <div class="font-semibold text-gray-900">Levels</div>
             <div class="text-xs text-gray-800 mt-1">
@@ -80,11 +92,12 @@ const { data: stats } = await useFetch('/api/stats', {
           </div>
         </NuxtLink>
 
-        <!-- Small Tile -->
-        <NuxtLink to="/topics/quiz" class="col-span-2 rounded-xl p-6 flex items-end
-                shadow-sm hover:shadow-md transition
-                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          style="background-color:#F4C2D7; border-color:rgba(0,0,0,0.10);">
+        <!-- Topic Quiz -->
+        <NuxtLink to="/topics/quiz" class="rounded-xl p-6 flex items-end
+             shadow-sm hover:shadow-md transition
+             hover:brightness-110
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+             lg:col-span-2" style="background-color:#F4C2D7;">
           <div>
             <div class="font-semibold text-gray-900">Topic Quiz</div>
             <div class="text-xs text-gray-900/80 mt-1">
@@ -93,11 +106,26 @@ const { data: stats } = await useFetch('/api/stats', {
           </div>
         </NuxtLink>
 
-        <!-- Small Tile -->
-        <NuxtLink to="/quiz" class="col-span-2 rounded-xl p-6 flex items-end
-                  shadow-sm hover:shadow-md transition
-                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          style="background-color:#D6A3D1; border-color:rgba(0,0,0,0.08);">
+        <!-- Daily -->
+        <NuxtLink to="/daily/v3" class="rounded-xl p-6 flex items-end
+             shadow-sm hover:shadow-md transition
+             hover:brightness-105
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+             lg:col-span-2 lg:row-span-2" style="background-color:#F6E1E1;">
+          <div>
+            <div class="font-semibold text-gray-900">Daily</div>
+            <div class="text-xs text-gray-800 mt-1">
+              Practice with our daily exercise
+            </div>
+          </div>
+        </NuxtLink>
+
+        <!-- Level Quiz -->
+        <NuxtLink to="/quiz" class="rounded-xl p-6 flex items-end
+             shadow-sm hover:shadow-md transition
+             hover:brightness-110
+             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+             lg:col-span-2" style="background-color:#D6A3D1;">
           <div>
             <div class="font-semibold text-gray-900">Level Quiz</div>
             <div class="text-xs text-gray-800 mt-1">
@@ -107,18 +135,8 @@ const { data: stats } = await useFetch('/api/stats', {
         </NuxtLink>
 
 
-        <!-- Tall Tile -->
-        <NuxtLink to="/daily/v3" class="col-span-2 row-span-2 rounded-xl p-6 flex items-end
-                  shadow-sm hover:shadow-md transition
-                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-          style="background-color:#F6E1E1; border-color:rgba(0,0,0,0.08);">
-          <div>
-            <div class="font-semibold text-gray-900">Daily</div>
-            <div class="text-xs text-gray-800 mt-1">
-              Practice with our daily exercise
-            </div>
-          </div>
-        </NuxtLink>
+
+
       </div>
     </div>
 

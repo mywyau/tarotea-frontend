@@ -107,22 +107,22 @@ watchEffect(() => {
   <main v-if="word" class="word-page max-w-2xl mx-auto px-4 py-8 space-y-6 sm:space-y-8">
 
     <!-- Back link -->
-    <NuxtLink :to="`/level/${level}`" class="inline-block text-sm text-gray-700 hover:underline">
+    <NuxtLink :to="`/level/${level}`" class="inline-block text-sm text-black hover:underline">
       ← {{ formattedLevel }} Vocab
     </NuxtLink>
 
     <!-- Word header -->
     <section class="text-center space-y-3 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">
 
-      <h1 class="text-4xl font-semibold text-gray-900">
+      <h1 class="text-4xl font-semibold text-black">
         {{ word.word }}
       </h1>
 
-      <div class="text-lg text-gray-500">
+      <div class="text-lg text-black">
         {{ word.jyutping }}
       </div>
 
-      <div class="text-lg text-gray-700">
+      <div class="text-lg text-black">
         {{ word.meaning }}
       </div>
 
@@ -138,7 +138,7 @@ watchEffect(() => {
 
         <!-- Progress bar -->
         <div class="w-full max-w-xs mx-auto h-2 rounded-full overflow-hidden bg-gray-300">
-          <div class="h-2 progress-bar transition-all duration-700 ease-out" :style="{ width: masteryPercent + '%' }" />
+          <div class="h-2 bg-green-500 transition-all duration-700 ease-out" :style="{ width: masteryPercent + '%' }" />
         </div>
       </div>
 

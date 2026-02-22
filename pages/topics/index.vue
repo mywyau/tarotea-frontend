@@ -376,16 +376,11 @@ function topicLink(topic: Topic) {
     </header>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-      <li
-        v-for="topic in topics"
-        :key="topic.id"
-        class="topic-card rounded-lg p-4 space-y-3 transition"
-        :class="[
-          topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
-            ? 'is-disabled'
-            : 'is-active'
-        ]"
-      >
+      <li v-for="topic in topics" :key="topic.id" class="topic-card rounded-lg p-4 space-y-3 transition" :class="[
+        topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
+          ? 'is-disabled'
+          : 'is-active'
+      ]">
         <NuxtLink :to="canEnterTopic(topic) ? topicLink(topic) : undefined" class="block space-y-3">
           <!-- Title row -->
           <div class="flex items-start justify-between gap-3">
@@ -428,7 +423,8 @@ function topicLink(topic: Topic) {
 .topics-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;
-  --blue: #A8CAE0;   /* assuming this is what you meant */
+  --blue: #A8CAE0;
+  /* assuming this is what you meant */
   --yellow: #F4CD27;
   --blush: #F6E1E1;
 
@@ -444,7 +440,7 @@ function topicLink(topic: Topic) {
 
 /* Header card */
 .header-card {
-  background: rgba(255,255,255,0.65);
+  /* background: rgba(255,255,255,0.65); */
   /* border-color: rgba(214, 163, 209, 0.40);  */
   backdrop-filter: blur(6px);
 }
@@ -452,22 +448,22 @@ function topicLink(topic: Topic) {
 /* Topic cards */
 .topic-card {
   /* border: 1px solid rgba(214, 163, 209, 0.35); */
-  background: rgba(255,255,255,0.72);
+  background: rgba(165, 213, 245, 0.441);
   backdrop-filter: blur(6px);
-  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
 }
 
 .topic-card.is-active:hover {
   transform: translateY(-1px);
-  /* border-color: rgba(234, 184, 228, 0.65);   */
-  background: rgba(255,255,255,0.85);
-  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+    background: rgba(215, 239, 255, 0.893);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 
 .topic-card.is-disabled {
   opacity: 0.65;
   cursor: not-allowed;
-  background: rgba(246,225,225,0.35); /* blush wash */
+  background: rgba(246, 225, 225, 0.35);
+  /* blush wash */
   /* border-color: rgba(0,0,0,0.08); */
 }
 
@@ -484,12 +480,12 @@ function topicLink(topic: Topic) {
 /* Coming soon = blue tint */
 .pill-soon {
   /* background: rgba(168, 202, 224, 0.55); */
-  color: rgba(0,0,0,0.75);
+  color: rgba(0, 0, 0, 0.75);
 }
 
 /* Locked = yellow tint (use sparingly) */
 .pill-locked {
   background: rgba(244, 205, 39, 0.60);
-  color: rgba(0,0,0,0.80);
+  color: rgba(0, 0, 0, 0.80);
 }
 </style>

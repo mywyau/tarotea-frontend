@@ -107,6 +107,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.35s ease, transform 0.35s ease;
@@ -155,21 +156,23 @@ main {
 }
 
 /* Colour variations using your palette */
+/* Total XP */
 .stat-0 {
     background: rgba(234, 184, 228, 0.45);
 }
 
-/* Total XP */
+
+/* Words Maxed */
 .stat-1 {
     background: rgba(168, 202, 224, 0.45);
 }
 
-/* Words Maxed */
+
+/* Words Seen */
 .stat-2 {
     background: rgba(244, 205, 39, 0.35);
 }
 
-/* Words Seen */
 .stat-3 {
     background: rgba(246, 225, 225, 0.75);
 }

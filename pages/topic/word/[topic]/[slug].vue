@@ -110,7 +110,7 @@ watchEffect(() => {
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-6 sm:space-y-8">
 
         <!-- Back link -->
-        <NuxtLink :to="`/topic/words/${topic}`" class="inline-block text-sm text-gray-700 hover:underline">
+        <NuxtLink :to="`/topic/words/${topic}`" class="inline-block text-sm text-black hover:underline">
             ← {{ formattedTopic }} Vocabulary
         </NuxtLink>
 
@@ -140,7 +140,7 @@ watchEffect(() => {
                 </div>
 
                 <div class="w-full max-w-xs mx-auto h-2 rounded-full overflow-hidden bg-gray-300">
-                    <div class="h-2 progress-bar transition-all duration-700 ease-out"
+                    <div class="h-2 bg-green-500 transition-all duration-700 ease-out"
                         :style="{ width: masteryPercent + '%' }" />
                 </div>
 

@@ -47,19 +47,14 @@ if (!topic.value) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
 
-
-// const allWordsFlat = computed(() =>
-//   Object.values(topic.value.categories).flat()
-// )
-
-// const freePreviewIds = computed(() =>
-//   allWordsFlat.value.slice(0, 5).map((w: any) => w.id)
-// )
-
-// const canViewWord = (wordId: string) => {
-//   if (hasFullAccess.value) return true
-//   return freePreviewIds.value.includes(wordId)
-// }
+const TILE_COLORS = [
+  'rgba(234, 184, 228, 0.75)', // pink
+  'rgba(214, 163, 209, 0.75)', // purple
+  'rgba(168, 202, 224, 0.75)', // blue
+  'rgba(246, 225, 225, 0.75)', // blush
+  'rgba(244, 194, 215, 0.75)', // soft rose
+  'rgba(244, 205, 39, 0.35)'  // yellow 
+]
 
 const categories = computed(() =>
   Object.entries(topic.value.categories).map(([key, words]) => ({
@@ -117,6 +112,17 @@ const hasPaidAccess = computed(() => {
   return entitlement.value ? canAccessLevel(entitlement.value) : false
 })
 
+function getColorFromId(id: string) {
+  let hash = 0
+
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash)
+  }
+
+  const index = Math.abs(hash) % TILE_COLORS.length
+  return TILE_COLORS[index]
+}
+
 const gatedCategories = computed(() => {
   let globalIndex = 0
 
@@ -130,11 +136,14 @@ const gatedCategories = computed(() => {
           !hasPaidAccess.value &&
           globalIndex >= FREE_WORD_LIMIT
 
+        // const color = TILE_COLORS[globalIndex % TILE_COLORS.length]
+
         globalIndex++
 
         return {
           ...word,
-          locked: shouldLock
+          locked: shouldLock,
+          tileColor: getColorFromId(word.id)
         }
       })
     }
@@ -144,7 +153,11 @@ const gatedCategories = computed(() => {
 </script>
 
 <template>
-  <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-10">
+  <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-6">
+
+    <NuxtLink :to="`/levels`" class="inline-block text-sm text-black hover:underline">
+      ← Levels
+    </NuxtLink>
 
     <header class="header-card rounded-xl p-6 sm:p-7 space-y-2">
       <h1 class="text-3xl font-semibold text-gray-900">{{ topic.title }}</h1>
@@ -162,7 +175,7 @@ const gatedCategories = computed(() => {
         <WordTile v-for="word in category.words" :key="word.id"
           :to="word.locked ? undefined : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping"
           :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)"
-          :class="word.locked ? 'locked-tile' : ''" />
+          :class="word.locked ? 'locked-tile' : ''" :style="{ background: word.tileColor }" />
       </div>
     </section>
 
@@ -187,14 +200,14 @@ const gatedCategories = computed(() => {
 }
 
 .header-card {
-  background: rgba(255, 255, 255, 0.72);
+  /* background: rgba(255, 255, 255, 0.72); */
   /* border: 1px solid rgba(214, 163, 209, 0.38); */
   /* purple border */
   backdrop-filter: blur(6px);
 }
 
 .category-card {
-  background: rgba(255, 255, 255, 0.72);
+  /* background: rgba(255, 255, 255, 0.72); */
   /* border: 1px solid rgba(234, 184, 228, 0.30); */
   /* pink border */
   backdrop-filter: blur(6px);

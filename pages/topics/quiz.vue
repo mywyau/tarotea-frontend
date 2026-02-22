@@ -343,7 +343,7 @@ function hasPaidAccessCheck(topic: Topic) {
         <!-- Intro -->
         <header class="text-center space-y-3 max-w-2xl mx-auto">
             <h1 class="text-3xl font-semibold text-gray-900">
-                Topic Practice
+                Topic Quiz
             </h1>
             <p class="text-gray-600 text-sm sm:text-base">
                 Practice Cantonese by topic. Your weakest words appear more often as you improve.
