@@ -45,6 +45,25 @@ const wordsForLevel = computed<Word[]>(() => {
 })
 
 
+const BRAND_COLORS = [
+  '#EAB8E4',                // lavender blush
+  '#A8CAE0',                // soft blue
+  '#F4C2D7',                // pink
+  '#F6E1E1',                // blush
+  '#D6A3D1',                // deeper purple
+  'rgba(244,205,39,0.35)',  // yellow
+]
+
+const tileColors = ref<string[]>([])
+
+function generateTileColors() {
+  tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
+}
+
+// function getTileColor(index: number) {
+//   return BRAND_COLORS[index % BRAND_COLORS.length].bg
+// }
+
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }
@@ -341,6 +360,14 @@ watch(
   { immediate: true }
 )
 
+watch(
+  () => question.value?.wordId,
+  () => {
+    generateTileColors()
+  },
+  { immediate: true }
+)
+
 </script>
 
 <template>
@@ -417,18 +444,22 @@ watch(
         </div>
       </div>
 
-
       <div class="grid grid-cols-2 gap-4">
-        <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-lg border flex items-center justify-center
-           text-2xl font-medium text-center p-6 transition" :class="[
-            !answered && 'hover:bg-gray-100',
-            {
-              'bg-green-100':
-                answered && i === question.correctIndex,
-              'bg-red-100 animate-shake':
-                answered && i === selectedIndex && i !== question.correctIndex
-            }
-          ]" @click="answer(i)">
+        <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-xl flex items-center justify-center
+           text-2xl font-semibold text-center p-6
+           transition-all duration-200 shadow-sm active:scale-95" :style="{
+            backgroundColor:
+              !answered
+                ? tileColors[i]
+                : i === question.correctIndex
+                  ? '#BBF7D0'   // soft green
+                  : i === selectedIndex
+                    ? '#FECACA' // soft red
+                    : tileColors[i]
+          }" :class="[
+      answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+      answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-red-400'
+    ]" @click="answer(i)">
           {{ option }}
         </button>
       </div>
