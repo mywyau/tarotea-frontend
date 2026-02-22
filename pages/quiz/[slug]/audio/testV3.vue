@@ -50,6 +50,8 @@ const { data, error } = await useFetch<LevelData>(
   }
 )
 
+
+
 const wordsForLevel = computed<Word[]>(() => {
   if (!data.value) return []
   return Object.values(data.value.categories).flat()
@@ -76,6 +78,25 @@ const showResult = ref<boolean>(false)
 const question = computed(() => questions.value[current.value])
 
 const levelNumber = getLevelNumber(slug.value)
+
+const BRAND_COLORS = [
+  '#EAB8E4',                // lavender blush
+  '#A8CAE0',                // soft blue
+  '#F4C2D7',                // pink
+  '#F2CACA',                // blush
+  '#D6A3D1',                // deeper purple
+  'rgba(244,205,39,0.35)',  // yellow
+]
+
+const tileColors = ref<string[]>([])
+
+function shuffle<T>(arr: T[]): T[] {
+  return [...arr].sort(() => Math.random() - 0.5)
+}
+
+function generateTileColors() {
+  tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
+}
 
 const LEVEL_TITLES: Record<string, string> = {
   'level-one': 'Level 1',
@@ -258,6 +279,14 @@ watch(
     }
   }
 )
+
+watch(
+  () => question.value?.wordId,
+  () => {
+    generateTileColors()
+  },
+  { immediate: true }
+)
 </script>
 
 <template>
@@ -333,15 +362,21 @@ watch(
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-lg border flex items-center justify-center
-           text-2xl font-medium text-center p-6 transition" :class="[
-            !answered && 'hover:bg-gray-100',
-            {
-              'bg-green-100':
-                answered && i === question.correctIndex,
-              'bg-red-100 animate-shake':
-                answered && i === selectedIndex && i !== question.correctIndex
-            }
+          <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-xl flex items-center justify-center
+           text-2xl font-semibold text-center p-6
+           transition-all duration-300 ease-out
+           shadow-sm active:scale-95 hover:brightness-110" :style="{
+            backgroundColor:
+              !answered
+                ? tileColors[i]
+                : i === question.correctIndex
+                  ? '#BBF7D0'   // soft green success
+                  : i === selectedIndex
+                    ? '#FECACA' // soft red fail
+                    : tileColors[i]
+          }" :class="[
+            answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+            answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
           ]" @click="answer(i)">
             {{ option }}
           </button>

@@ -49,7 +49,7 @@ const BRAND_COLORS = [
   '#EAB8E4',                // lavender blush
   '#A8CAE0',                // soft blue
   '#F4C2D7',                // pink
-  '#F6E1E1',                // blush
+  '#F2CACA',                // blush
   '#D6A3D1',                // deeper purple
   'rgba(244,205,39,0.35)',  // yellow
 ]
@@ -447,7 +447,7 @@ watch(
       <div class="grid grid-cols-2 gap-4">
         <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-xl flex items-center justify-center
            text-2xl font-semibold text-center p-6
-           transition-all duration-200 shadow-sm active:scale-95" :style="{
+           transition-all duration-200 shadow-sm active:scale-95 hover:brightness-110" :style="{
             backgroundColor:
               !answered
                 ? tileColors[i]
@@ -458,7 +458,7 @@ watch(
                     : tileColors[i]
           }" :class="[
       answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-      answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-red-400'
+      answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
     ]" @click="answer(i)">
           {{ option }}
         </button>
