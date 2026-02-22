@@ -2,13 +2,7 @@
 import { loginWithGoogle, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
 
-const {
-  authReady,
-  isLoggedIn,
-  user,
-  entitlement,
-  resolve
-} = useMeStateV2()
+const { isLoggedIn, entitlement, resolve } = useMeStateV2()
 
 const mobileOpen = ref(false)
 
@@ -16,21 +10,25 @@ function toggleMobile() {
   mobileOpen.value = !mobileOpen.value
 }
 
+function closeMobile() {
+  mobileOpen.value = false
+}
+
 async function handleLogout() {
   await logout()
-  await resolve({ force: true }) // re-sync global auth state
+  await resolve({ force: true })
+  closeMobile()
 }
 
 onMounted(() => {
   resolve({ force: true })
 })
-
 </script>
 
 <template>
-
   <header class="border-b bg-white shadow-sm">
 
+    <!-- Top Bar -->
     <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
 
       <!-- Logo -->
@@ -38,153 +36,128 @@ onMounted(() => {
         TaroTea
       </NuxtLink>
 
-      <!-- Desktop nav -->
-
+      <!-- Desktop Navigation -->
       <nav class="hidden md:flex items-center gap-6">
 
-        <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="nav-link hover:text-gray-600">Daily</NuxtLink>
+        <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="nav-link hover:text-gray-600">
+          Daily
+        </NuxtLink>
+
         <NuxtLink to="/topics" class="nav-link hover:text-gray-600">Topics</NuxtLink>
         <NuxtLink to="/topics/quiz" class="nav-link hover:text-gray-600">Topic Quiz</NuxtLink>
         <NuxtLink to="/levels" class="nav-link hover:text-gray-600">Levels</NuxtLink>
         <NuxtLink to="/quiz" class="nav-link hover:text-gray-600">Level Quiz</NuxtLink>
 
-        <!-- Wait until auth is resolved -->
-
+        <!-- Logged In Desktop -->
         <template v-if="isLoggedIn">
 
-          <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" to="/upgrade"
+          <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status !== 'active'" to="/upgrade"
             class="font-medium bg-clip-text text-transparent
-         bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
-         hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
-         transition
-         hover:scale-105 hover:saturate-150">
+                   bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500
+                   hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
+                   transition hover:scale-105 hover:saturate-150">
             Upgrade
           </NuxtLink>
 
-          <div>
-            <NuxtLink v-if="isLoggedIn" to="/stats" class="mobile-primary">
-              Stats
-            </NuxtLink>
-          </div>
+          <NuxtLink to="/stats" class="nav-link hover:text-gray-600">
+            Stats
+          </NuxtLink>
 
           <NuxtLink to="/account" class="nav-link hover:text-gray-600">
             Account
           </NuxtLink>
 
-          <button class="text-red-600 hover:text-red-400" @click="handleLogout">
+          <button type="button" class="text-red-600 hover:text-red-400" @click="handleLogout">
             Log out
           </button>
         </template>
 
-        <button v-else class="text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
+        <!-- Logged Out Desktop -->
+        <button v-else type="button" class="text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
           Login
         </button>
+
       </nav>
 
-
-      <!-- Mobile menu button -->
-      <button class="md:hidden text-2xl" @click="toggleMobile" aria-label="Open menu">
+      <!-- Mobile Hamburger -->
+      <button type="button" class="md:hidden text-2xl relative z-50 shrink-0" @click="toggleMobile"
+        aria-label="Toggle menu">
         ☰
       </button>
 
     </div>
 
-    <!-- Mobile menu -->
-    <div v-if="mobileOpen" class="md:hidden border-t bg-white px-4 py-5 space-y-4">
-      <!-- Primary nav -->
+    <!-- Mobile Menu -->
+    <div v-if="mobileOpen" class="md:hidden border-t bg-white px-4 py-5 divide-gray-200">
 
-      <div>
-        <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="mobile-primary">
+      <!-- Primary Links -->
+      <div class="space-y-4 py-4">
+
+        <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="mobile-primary block" @click="closeMobile">
           Daily
         </NuxtLink>
-      </div>
 
-      <div v-if="isLoggedIn" class="border-t pt-2"></div>
-
-      <div>
-        <NuxtLink to="/topics" class="mobile-primary">
+        <NuxtLink to="/topics" class="mobile-primary block" @click="closeMobile">
           Topics
         </NuxtLink>
-      </div>
 
-      <div class="border-t pt-2"></div>
-
-      <div>
-        <NuxtLink to="/topics/quiz" class="mobile-primary">
+        <NuxtLink to="/topics/quiz" class="mobile-primary block" @click="closeMobile">
           Topic Quiz
         </NuxtLink>
-      </div>
 
-      <div class="border-t pt-2"></div>
-
-      <div>
-        <NuxtLink to="/levels" class="mobile-primary" @click="mobileOpen = false">
+        <NuxtLink to="/levels" class="mobile-primary block" @click="closeMobile">
           Levels
         </NuxtLink>
-      </div>
 
-      <div class="border-t pt-2"></div>
-
-      <div>
-        <NuxtLink to="/quiz" class="mobile-primary" @click="mobileOpen = false">
+        <NuxtLink to="/quiz" class="mobile-primary block" @click="closeMobile">
           Level Quiz
         </NuxtLink>
+
       </div>
 
-      <!-- Account / upgrade -->
-      <template v-if="!isLoggedIn">
-        <div class="text-gray-400">Loading…</div>
-      </template>
+      <!-- Account Section -->
+      <div class="space-y-4 py-4">
 
-      <template v-else-if="isLoggedIn">
+        <template v-if="isLoggedIn">
 
-        <!-- Divider -->
-        <div v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" class="border-t pt-2">
-        </div>
-
-        <div>
-          <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status != 'active'" to="/upgrade"
-            class="mobile-secondary font-medium bg-clip-text text-transparent
-         bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600
-         hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
-         transition
-         hover:scale-105 hover:saturate-150" @click="mobileOpen = false">
+          <NuxtLink v-if="entitlement?.plan === 'free' || entitlement?.subscription_status !== 'active'" to="/upgrade"
+            class="mobile-secondary font-medium block bg-clip-text text-transparent
+               bg-gradient-to-r from-pink-600 via-purple-600 to-indigo-600
+               hover:from-pink-700 hover:via-purple-700 hover:to-indigo-700
+               transition hover:scale-105 hover:saturate-150" @click="closeMobile">
             Upgrade
           </NuxtLink>
-        </div>
 
-        <div class="border-t pt-2"></div>
-
-
-        <div>
-          <NuxtLink v-if="isLoggedIn" to="/stats" class="mobile-primary">
+          <NuxtLink to="/stats" class="mobile-primary block" @click="closeMobile">
             Stats
           </NuxtLink>
-        </div>
 
-        <div v-if="isLoggedIn" class="border-t pt-2"></div>
-
-        <div>
-          <NuxtLink to="/account" class="mobile-secondary" @click="mobileOpen = false">
+          <NuxtLink to="/account" class="mobile-secondary block" @click="closeMobile">
             Account
           </NuxtLink>
-        </div>
 
-        <div class="border-t pt-2"></div>
+          <button type="button" class="mobile-danger text-red-600 hover:text-red-400 block text-left w-full"
+            @click="handleLogout">
+            Log out
+          </button>
 
-        <button class="mobile-danger text-red-600 hover:text-red-400" @click="handleLogout">
-          Log out
-        </button>
-      </template>
+        </template>
 
-      <div v-else>
-        <div class="border-t pt-6"></div>
-        <button class="mobile-secondary text-blue-600 hover:text-blue-400" @click="loginWithGoogle">
-          Login
-        </button>
+        <template v-else>
+          <button type="button" class="mobile-secondary text-blue-600 hover:text-blue-400 block text-left w-full"
+            @click="loginWithGoogle">
+            Login
+          </button>
+        </template>
+
       </div>
 
     </div>
 
   </header>
 </template>
+
+<style>
+
+
+</style>

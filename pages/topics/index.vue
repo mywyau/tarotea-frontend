@@ -364,50 +364,132 @@ function topicLink(topic: Topic) {
 
 </script>
 
-<template>
-  <main v-if="authReady" class="max-w-5xl mx-auto py-12 px-4 space-y-8">
 
-    <header>
-      <p class="text-gray-500 text-sm mt-2">
+<template>
+  <main v-if="authReady" class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-8">
+
+    <header class="rounded-lg p-5 header-card">
+      <h1 class="text-2xl font-semibold text-gray-900">Topics</h1>
+      <p class="text-gray-700 text-sm mt-2">
         Vocabulary and sentences grouped by subject matter.
       </p>
     </header>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
-      <li v-for="topic in topics" :key="topic.id" class="border rounded-lg p-4 space-y-3 transition" :class="[
-        topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
-          ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-70'
-          : 'hover:bg-gray-50 cursor-pointer'
-      ]">
-
-        <NuxtLink :to="canEnterTopic(topic) ? topicLink(topic) : undefined" class="block space-y-2">
+      <li
+        v-for="topic in topics"
+        :key="topic.id"
+        class="topic-card rounded-lg p-4 space-y-3 transition"
+        :class="[
+          topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
+            ? 'is-disabled'
+            : 'is-active'
+        ]"
+      >
+        <NuxtLink :to="canEnterTopic(topic) ? topicLink(topic) : undefined" class="block space-y-3">
           <!-- Title row -->
-          <div class="flex items-center justify-between">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-semibold text-gray-900 leading-snug">
+                {{ topic.title }}
+              </h2>
 
-            <h2 class="text-lg font-medium">
-              {{ topic.title }}
-              <p v-if="topic.comingSoon" class="text-sm text-gray-400 font-normal">
-                (Coming soon)
+              <p v-if="topic.comingSoon" class="mt-2">
+                <span class="pill pill-soon">Coming soon</span>
               </p>
-            </h2>
 
+              <p v-else-if="topic.requiresPaid && !doNotShowUpgradeMessage(topic)" class="mt-2">
+                <span class="pill pill-locked">Locked</span>
+              </p>
+            </div>
           </div>
 
           <!-- Description -->
-          <p class="text-sm text-gray-600">
+          <p class="text-sm text-gray-700">
             {{ topic.description }}
           </p>
 
           <!-- Locked message -->
-          <p v-if="topic.requiresPaid && !doNotShowUpgradeMessage(topic)" class="text-xs text-gray-400 pt-1">
-            Locked — upgrade to access
+          <p v-if="topic.requiresPaid && !doNotShowUpgradeMessage(topic)" class="text-xs text-gray-700 pt-1">
+            Upgrade to access this topic.
           </p>
         </NuxtLink>
       </li>
     </ul>
   </main>
 
-  <div v-else class="py-20 text-center text-gray-400">
+  <div v-else class="py-20 text-center text-gray-500">
     Loading topics...
   </div>
 </template>
+
+<style scoped>
+/* Palette variables */
+.topics-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;   /* assuming this is what you meant */
+  --yellow: #F4CD27;
+  --blush: #F6E1E1;
+
+  /* Soft page background */
+  /* background: linear-gradient(
+    180deg,
+    rgba(246, 225, 225, 0.70) 0%,
+    rgba(255, 255, 255, 0.85) 45%,
+    rgba(168, 202, 224, 0.40) 100%
+  ); */
+  border-radius: 16px;
+}
+
+/* Header card */
+.header-card {
+  background: rgba(255,255,255,0.65);
+  /* border-color: rgba(214, 163, 209, 0.40);  */
+  backdrop-filter: blur(6px);
+}
+
+/* Topic cards */
+.topic-card {
+  /* border: 1px solid rgba(214, 163, 209, 0.35); */
+  background: rgba(255,255,255,0.72);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.03);
+}
+
+.topic-card.is-active:hover {
+  transform: translateY(-1px);
+  /* border-color: rgba(234, 184, 228, 0.65);   */
+  background: rgba(255,255,255,0.85);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+}
+
+.topic-card.is-disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: rgba(246,225,225,0.35); /* blush wash */
+  /* border-color: rgba(0,0,0,0.08); */
+}
+
+/* Pills (badges) */
+.pill {
+  display: inline-block;
+  /* padding: 0.2rem 0.6rem; */
+  /* border-radius: 999px; */
+  font-size: 0.75rem;
+  font-weight: 700;
+  /* border: 1px solid rgba(0,0,0,0.06); */
+}
+
+/* Coming soon = blue tint */
+.pill-soon {
+  /* background: rgba(168, 202, 224, 0.55); */
+  color: rgba(0,0,0,0.75);
+}
+
+/* Locked = yellow tint (use sparingly) */
+.pill-locked {
+  background: rgba(244, 205, 39, 0.60);
+  color: rgba(0,0,0,0.80);
+}
+</style>

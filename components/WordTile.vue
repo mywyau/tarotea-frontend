@@ -37,9 +37,17 @@ const MASTERY_XP = 200
     </div>
 
     <div class="w-full h-1 bg-gray-200 rounded mt-2">
-      <div class="h-1 bg-green-500 rounded transition-all duration-500"
+      <div class="h-1 progress-bar rounded transition-all duration-500"
         :style="{ width: Math.min((xp ?? 0) / MASTERY_XP * 100, 100) + '%' }" />
     </div>
 
   </NuxtLink>
 </template>
+
+<style scoped>
+.progress-bar {
+  background: linear-gradient(90deg,
+      #D6A3D1,
+      #EAB8E4);
+}
+</style>

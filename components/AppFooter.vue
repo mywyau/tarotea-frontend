@@ -1,12 +1,12 @@
 <template>
-    <footer class="border-t bg-white mt-8">
-        <div class="max-w-5xl mx-auto px-4 py-4 text-sm text-gray-600">
+    <footer class="mt-8">
+        <div class="max-w-5xl mx-auto px-4 py-4 text-sm text-black">
 
             <div class="flex flex-col sm:flex-row justify-between gap-4">
 
                 <!-- Left -->
                 <div>
-                    <div class="font-semibold text-gray-800">
+                    <div class="font-semibold text-black">
                         TaroTea
                     </div>
                     <p class="mt-1 max-w-sm hidden sm:block">
@@ -39,7 +39,7 @@
                 </div>
             </div>
 
-            <div class="mt-3 text-xs text-gray-400">
+            <div class="mt-3 text-xs text-gray-600">
                 © {{ new Date().getFullYear() }} TaroTea
             </div>
 

@@ -104,55 +104,53 @@ watchEffect(() => {
 
 <template>
 
-  <main v-if="word" class="max-w-2xl mx-auto px-4 py-12 space-y-10">
+  <main v-if="word" class="word-page max-w-2xl mx-auto px-4 py-8 space-y-6 sm:space-y-8">
 
     <!-- Back link -->
-    <NuxtLink :to="`/level/${level}`" class="block text-gray-500 hover:underline">
+    <NuxtLink :to="`/level/${level}`" class="inline-block text-sm text-gray-700 hover:underline">
       ← {{ formattedLevel }} Vocab
     </NuxtLink>
 
     <!-- Word header -->
-    <section class="text-center space-y-4">
+    <section class="text-center space-y-3 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">
 
-      <h1 class="text-4xl font-medium">
+      <h1 class="text-4xl font-semibold text-gray-900">
         {{ word.word }}
       </h1>
 
-      <div class="text-lg text-gray-400">
+      <div class="text-lg text-gray-500">
         {{ word.jyutping }}
       </div>
 
-      <div class="text-lg text-gray-600">
+      <div class="text-lg text-gray-700">
         {{ word.meaning }}
       </div>
 
       <!-- XP block -->
       <div class="pt-6 space-y-3">
 
-        <!-- XP + label -->
-        <div class="flex justify-between text-sm text-gray-500 max-w-xs mx-auto">
+        <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
           <span>{{ xp }} XP</span>
-          <span v-if="isMastered" class="text-emerald-600 font-medium">
-            ✓
+          <span v-if="isMastered" class="font-semibold text-yellow-600">
+            ✓ Maxed
           </span>
         </div>
 
         <!-- Progress bar -->
-        <div class="w-full max-w-xs mx-auto h-2 bg-gray-200 rounded overflow-hidden">
-          <div class="h-2 bg-green-500 transition-all duration-700 ease-out" :style="{ width: masteryPercent + '%' }" />
+        <div class="w-full max-w-xs mx-auto h-2 rounded-full overflow-hidden bg-gray-300">
+          <div class="h-2 progress-bar transition-all duration-700 ease-out" :style="{ width: masteryPercent + '%' }" />
         </div>
       </div>
 
-      <!-- Audio button with more breathing space -->
-      <div class="pt-8">
-        <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" />
+      <div class="pt-5 sm:pt-6">
+        <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
       </div>
 
     </section>
 
     <!-- Usage -->
-    <section v-if="word.usage?.length">
-      <h2 class="text-lg font-semibold mb-3">
+    <section v-if="word.usage?.length" class="section-card rounded-xl p-6">
+      <h2 class="text-lg font-semibold mb-3 text-gray-900">
         Usage
       </h2>
 
@@ -164,40 +162,38 @@ watchEffect(() => {
     </section>
 
     <!-- Volume -->
-    <div class="flex items-center justify-center gap-3 pt-2 text-sm text-gray-500">
-      <span class="select-none">Volume</span>
-
+    <div class="flex items-center justify-center gap-3 text-sm text-gray-600">
+      <span>Volume</span>
       <input type="range" min="0" max="1" step="0.01" v-model="volume" class="w-32 accent-black" />
-
-      <span class="w-8 text-left tabular-nums">
+      <span class="w-8 tabular-nums">
         {{ Math.round(volume * 100) }}%
       </span>
     </div>
 
     <!-- Examples -->
-    <section v-if="word.examples?.length">
-      <h2 class="text-lg font-semibold mb-3">
+    <section v-if="word.examples?.length" class="section-card rounded-xl p-6">
+
+      <h2 class="text-lg font-semibold mb-4 text-gray-900">
         Examples
       </h2>
 
-      <ul class="space-y-4">
-        <li v-for="(example, index) in word.examples" :key="example.sentence"
-          class="border-l-4 border-gray-200 pl-4 py-2">
-          <div class="space-y-1">
+      <ul class="space-y-5">
+        <li v-for="(example, index) in word.examples" :key="example.sentence" class="example-card rounded-lg p-4">
+          <div class="space-y-2">
             <div class="flex items-center justify-between gap-4">
-              <span class="text-lg">
+              <span class="text-lg text-gray-900">
                 {{ example.sentence }}
               </span>
 
-              <AudioButton v-if="word.audio?.examples?.[index]"
-                :src="`${cdnBase}/audio/${word.audio.examples[index]}`" />
+              <AudioButton v-if="word.audio?.examples?.[index]" :src="`${cdnBase}/audio/${word.audio.examples[index]}`"
+                size="sm" />
             </div>
 
-            <div class="text-sm text-gray-400">
+            <div class="text-sm text-gray-500">
               {{ example.jyutping }}
             </div>
 
-            <div class="text-sm text-gray-600">
+            <div class="text-sm text-gray-700">
               {{ example.meaning }}
             </div>
           </div>
@@ -207,8 +203,52 @@ watchEffect(() => {
 
   </main>
 
-  <!-- 404 -->
-  <div v-else-if="notFound" class="max-w-xl mx-auto px-4 py-24 text-center text-gray-500">
+  <div v-else-if="notFound" class="max-w-xl mx-auto px-4 py-24 text-center text-gray-600">
     Word not found
   </div>
 </template>
+
+<style scoped>
+.word-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  --yellow: #F4CD27;
+  --blush: #F6E1E1;
+
+  /* background: linear-gradient(180deg,
+      rgba(246, 225, 225, 0.65) 0%,
+      rgba(255, 255, 255, 0.85) 45%,
+      rgba(168, 202, 224, 0.35) 100%); */
+
+  border-radius: 18px;
+  padding-bottom: 2rem;
+}
+
+/* Main word card */
+.word-card {
+  /* background: rgba(255, 255, 255, 0.75); */
+  /* border: 1px solid rgba(214, 163, 209, 0.35); */
+  backdrop-filter: blur(6px);
+}
+
+/* Section cards */
+.section-card {
+  /* background: rgba(255, 255, 255, 0.75); */
+  /* border: 1px solid rgba(234, 184, 228, 0.30); */
+  backdrop-filter: blur(6px);
+}
+
+/* Examples */
+.example-card {
+  background: rgba(168, 202, 224, 0.20);
+  border-left: 4px solid rgba(168, 202, 224, 0.70);
+}
+
+/* Progress bar */
+.progress-bar {
+  background: linear-gradient(90deg,
+      #D6A3D1,
+      #EAB8E4);
+}
+</style>

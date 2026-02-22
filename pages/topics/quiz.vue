@@ -338,80 +338,141 @@ function hasPaidAccessCheck(topic: Topic) {
 
 
 <template>
-    <main class="max-w-5xl mx-auto py-12 px-4">
+    <main class="topics-page max-w-6xl mx-auto py-10 px-4 space-y-8">
 
-        <p class="text-gray-500 text-sm mb-6">
-            Practice and test your cantonese with our topic quizzes. Your weakest words will appear more often as you practice and study.
-        </p>
+        <!-- Intro -->
+        <header class="text-center space-y-3 max-w-2xl mx-auto">
+            <h1 class="text-3xl font-semibold text-gray-900">
+                Topic Practice
+            </h1>
+            <p class="text-gray-600 text-sm sm:text-base">
+                Practice Cantonese by topic. Your weakest words appear more often as you improve.
+            </p>
+        </header>
 
-        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+        <!-- Grid -->
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-            <li v-for="topic in topics" :key="topic.id"
-                class="group bg-white border border-gray-200 rounded-lg p-5 shadow-sm transition-all duration-200"
-                :class="[
-                    topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
-                        ? 'opacity-60 cursor-not-allowed'
-                        : ''
-                ]">
+            <li v-for="topic in topics" :key="topic.id" class="topic-card" :class="[
+                topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
+                    ? 'topic-locked'
+                    : ''
+            ]">
 
                 <!-- Header -->
                 <div class="space-y-2">
-                    <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-gray-900">
-                            {{ topic.title }}
-                            <p v-if="topic.comingSoon" class="text-sm text-gray-400 font-normal">
-                                (Coming soon)
-                            </p>
-                        </h2>
-                    </div>
+                    <h2 class="text-lg font-semibold text-gray-900">
+                        {{ topic.title }}
+                    </h2>
+
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        {{ topic.description }}
+                    </p>
+
+                    <p v-if="topic.comingSoon" class="text-xs text-gray-400 font-medium">
+                        Coming soon
+                    </p>
                 </div>
 
-                <!-- Divider -->
-                <div class="h-px bg-gray-100 my-4"></div>
+                <!-- Buttons -->
+                <div class="grid grid-cols-2 gap-3 pt-4">
 
-                <!-- Quiz Buttons -->
-                <div class="flex grid grid-cols-2  gap-3">
-
-
-                    <!-- :to="canEnterTopic(topic) ? topicLink(topic) : undefined" -->
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/word/${topic.id}` : undefined" :class="[
-                        'flex-1 text-center px-4 py-2.5 text-sm rounded-lg transition whitespace-nowrap',
-                        topic.comingSoon
-                            ? 'opacity-60 cursor-not-allowed pointer-events-none bg-gray-100 text-gray-400'
-                            : 'bg-blue-50 text-blue-700 hover:bg-blue-100'
-                    ]">
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/word/${topic.id}` : undefined"
+                        class="topic-btn topic-btn-blue"
+                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Vocab
                     </NuxtLink>
 
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/audio/${topic.id}` : undefined"
-                        :class="[
-                            'flex-1 text-center px-4 py-2.5 text-sm rounded-lg transition whitespace-nowrap',
-                            topic.comingSoon
-                                ? 'opacity-60 cursor-not-allowed pointer-events-none bg-gray-100 text-gray-400'
-                                : 'bg-purple-50 text-purple-700 hover:bg-purple-100'
-                        ]">
-                        Vocab Audio
+                        class="topic-btn topic-btn-purple"
+                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
+                        Audio
                     </NuxtLink>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}` : undefined" :class="[
-                        'flex-1 text-center px-4 py-2.5 text-sm rounded-lg transition whitespace-nowrap',
-                        topic.comingSoon
-                            ? 'opacity-60 cursor-not-allowed pointer-events-none bg-gray-100 text-gray-400'
-                            : 'bg-green-50 text-green-700 hover:bg-green-100'
-                    ]">
-                        Sentence
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}` : undefined"
+                        class="topic-btn topic-btn-yellow col-span-2"
+                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
+                        Sentences
                     </NuxtLink>
 
-                    <!-- <NuxtLink :to="`/topic/quiz/sentences/audio/${topic.id}`" :class="[
-                        topic.comingSoon
-                            ? 'flex-1 text-center px-4 py-2.5 text-sm rounded-lg opacity-60 cursor-not-allowed transition whitespace-nowrap'
-                            : `flex-1 text-center px-4 py-2.5 text-sm rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition whitespace-nowrap`
-                    ]">
-                        Sentence Audio
-                    </NuxtLink> -->
                 </div>
-                <p v-if="!hasPaidAccessCheck(topic)" class="text-sm text-gray-400 text-center pt-4">Upgrade to unlock</p>
+
+                <p v-if="!hasPaidAccessCheck(topic)" class="text-xs text-center text-gray-500 pt-3">
+                    Upgrade to unlock
+                </p>
+
             </li>
+
         </ul>
     </main>
 </template>
+
+<style scoped>
+.topics-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  --yellow: #F4CD27;
+  --blush: #F6E1E1;
+}
+
+/* Card */
+.topic-card {
+  border-radius: 24px;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.topic-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+}
+
+.topic-locked {
+  opacity: 0.6;
+}
+
+/* Buttons */
+.topic-btn {
+  text-align: center;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 14px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+/* Colour variations */
+.topic-btn-blue {
+  background: rgba(168, 202, 224, 0.45);
+  color: #1f2937;
+}
+
+.topic-btn-blue:hover {
+  background: rgba(168, 202, 224, 0.65);
+}
+
+.topic-btn-purple {
+  background: rgba(214, 163, 209, 0.45);
+  color: #1f2937;
+}
+
+.topic-btn-purple:hover {
+  background: rgba(214, 163, 209, 0.65);
+}
+
+.topic-btn-yellow {
+  background: rgba(244, 205, 39, 0.45);
+  color: #1f2937;
+}
+
+.topic-btn-yellow:hover {
+  background: rgba(244, 205, 39, 0.65);
+}
+</style>

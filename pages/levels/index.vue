@@ -117,54 +117,68 @@ const canEnterLevel = (level: any) => {
 
 </script>
 
-
 <template>
-  <main class="max-w-3xl mx-auto py-12 px-4">
+  <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-8">
 
-    <p class="text-gray-500 text-sm mb-8">
-      Explore Cantonese words and sentence patterns organised by level
-    </p>
+    <header class="rounded-lg p-5 header-card">
+      <h1 class="text-2xl font-semibold text-gray-900">Levels</h1>
+      <p class="text-gray-700 text-sm mt-2">
+        Explore Cantonese words and sentence patterns organised by level.
+      </p>
+    </header>
 
     <ul class="space-y-4">
 
-
-      <li v-for="level in levels" :key="level.id" class="border rounded-lg p-4 space-y-3 transition" :class="[
+      <li v-for="level in levels" :key="level.id" class="level-card rounded-lg p-4 transition" :class="[
         level.comingSoon
-          ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
+          ? 'is-disabled'
           : canEnterLevel(level)
-            ? 'hover:bg-gray-50'
-            : 'opacity-80'
+            ? 'is-active'
+            : 'is-locked'
       ]">
-
         <!-- Accessible level -->
-        <!-- <NuxtLink v-if="canEnterLevel(level)" :to="`/level/${level.id}`" class="block"> -->
-          <NuxtLink v-if="true" :to="`/level/${level.id}`" class="block">
-          <div class="text-lg font-medium">
-            {{ level.title }}
-            <span v-if="level.comingSoon" class="text-sm text-gray-400 font-normal">
-              (Coming soon)
-            </span>
+        <!-- Use your real gating when ready: v-if="canEnterLevel(level)" -->
+        <NuxtLink v-if="true" :to="`/level/${level.id}`" class="block space-y-3">
+
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-lg font-semibold text-gray-900">
+                {{ level.title }}
+              </div>
+
+              <div class="text-sm text-gray-700 mt-1">
+                {{ level.description }}
+              </div>
+            </div>
+
+            <div class="shrink-0">
+              <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
+              <span v-else-if="!canEnterLevel(level)" class="pill pill-locked">Locked</span>
+            </div>
           </div>
 
-          <div class="text-sm text-gray-600">
-            {{ level.description }}
-          </div>
         </NuxtLink>
 
-        <!-- Locked level -->
-        <div v-else class="space-y-2 cursor-not-allowed">
-          <div class="text-lg font-medium">
-            {{ level.title }}
-            <span v-if="level.comingSoon" class="text-sm text-gray-400 font-normal">
-              (Coming soon)
-            </span>
+        <!-- Locked level (kept for later when you re-enable gating) -->
+        <div v-else class="space-y-3 cursor-not-allowed">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <div class="text-lg font-semibold text-gray-900">
+                {{ level.title }}
+              </div>
+
+              <div class="text-sm text-gray-700 mt-1">
+                {{ level.description }}
+              </div>
+            </div>
+
+            <div class="shrink-0">
+              <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
+              <span v-else class="pill pill-locked">Locked</span>
+            </div>
           </div>
 
-          <div class="text-sm text-gray-600">
-            {{ level.description }}
-          </div>
-
-          <p v-if="!isFreeLevel(level.number)" class="text-sm text-gray-500">
+          <p class="text-sm text-gray-700">
             Upgrade to unlock
           </p>
         </div>
@@ -172,4 +186,85 @@ const canEnterLevel = (level: any) => {
       </li>
     </ul>
   </main>
+
+  <div v-else class="py-20 text-center text-gray-500">
+    Loading levels...
+  </div>
 </template>
+
+<style scoped>
+/* Palette variables */
+.levels-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  /* assuming this is what you meant */
+  --yellow: #F4CD27;
+  --blush: #F6E1E1;
+
+  /* background: linear-gradient(180deg,
+      rgba(246, 225, 225, 0.70) 0%,
+      rgba(255, 255, 255, 0.85) 45%,
+      rgba(168, 202, 224, 0.40) 100%); */
+  border-radius: 16px;
+  padding-bottom: 2rem;
+}
+
+/* Header card */
+.header-card {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: rgba(214, 163, 209, 0.40);
+  backdrop-filter: blur(6px);
+}
+
+/* Level card base */
+.level-card {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: rgba(214, 163, 209, 0.35);
+  backdrop-filter: blur(6px);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+}
+
+/* Active hover */
+.level-card.is-active:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(234, 184, 228, 0.65);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+}
+
+/* Coming soon */
+.level-card.is-disabled {
+  opacity: 0.70;
+  cursor: not-allowed;
+  background: rgba(168, 202, 224, 0.18);
+  /* slight blue wash */
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+/* Locked (not coming soon) */
+.level-card.is-locked {
+  opacity: 0.85;
+  border-color: rgba(244, 205, 39, 0.30);
+  /* subtle yellow border hint */
+}
+
+/* Pills */
+.pill {
+  display: inline-block;
+  /* padding: 0.2rem 0.6rem; */
+  /* border-radius: 999px; */
+  font-size: 0.75rem;
+  font-weight: 700;
+  /* border: 1px solid rgba(0, 0, 0, 0.06); */
+  color: rgba(0, 0, 0, 0.78);
+}
+
+.pill-soon {
+  /* background: rgba(168, 202, 224, 0.55); */
+}
+
+.pill-locked {
+  /* background: rgba(244, 205, 39, 0.60); */
+}
+</style>
