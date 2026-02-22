@@ -97,7 +97,7 @@ watchEffect(() => {
     <SentenceMeaningExercise :key="quizKey" :sentences="sessionSentences" :all-sentences="allSentences" />
 
     <!-- same container size as the exercises -->
-    <div class="max-w-xl mx-auto pt-6 text-center">
+    <div class="max-w-xl mx-auto pt-2 text-center">
       <button class="text-base text-gray-400 hover:text-gray-600 hover:underline transition" @click="resetQuiz">
         Reset quiz
       </button>

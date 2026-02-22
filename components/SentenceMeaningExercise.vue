@@ -142,7 +142,7 @@ watch(
 
 <template>
 
-  <div v-if="currentSentence" class="max-w-xl mx-auto px-4 py-16 space-y-10">
+  <div v-if="currentSentence" class="max-w-xl mx-auto px-4 py-8 space-y-10">
 
     <!-- Prompt -->
     <div class="text-center space-y-3">
@@ -175,8 +175,6 @@ watch(
       </div>
 
     </div>
-
-
 
     <!-- Options -->
     <div class="grid gap-4">

@@ -50,7 +50,7 @@ onBeforeUnmount(() => {
   <header class="header-shell">
     <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
 
-      <NuxtLink to="/" class="text-2xl font-bold text-gray-900 hover:opacity-80">
+      <NuxtLink to="/" class="text-2xl font-bold text-black hover:opacity-70">
         TaroTea
       </NuxtLink>
 

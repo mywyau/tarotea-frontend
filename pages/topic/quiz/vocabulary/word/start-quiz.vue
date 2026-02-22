@@ -80,8 +80,9 @@ const canEnterTopic = () => {
       </p>
 
       <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
-        <li>• XP is awarded when a quiz is completed</li>
+        <li>XP is awarded when you complete the quiz</li>
         <li>• Your weakest words will tend to appear more often</li>
+        <li>• Streaks gain you more xp per answer</li>
         <li>• Randomised questions</li>
         <li>• Cantonese ↔ English</li>
       </ul>

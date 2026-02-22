@@ -104,7 +104,7 @@ watchEffect(() => {
 
 <template>
 
-  <main v-if="word" class="word-page max-w-2xl mx-auto px-4 py-8 space-y-6 sm:space-y-8">
+  <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
     <!-- Back link -->
     <NuxtLink :to="`/level/${level}`" class="inline-block text-sm text-black hover:underline">
@@ -112,7 +112,7 @@ watchEffect(() => {
     </NuxtLink>
 
     <!-- Word header -->
-    <section class="text-center space-y-3 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">
+    <section class="text-center space-y-2 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">
 
       <h1 class="text-4xl font-semibold text-black">
         {{ word.word }}
@@ -127,7 +127,7 @@ watchEffect(() => {
       </div>
 
       <!-- XP block -->
-      <div class="pt-6 space-y-3">
+      <div class="pt-4 space-y-3">
 
         <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
           <span>{{ xp }} XP</span>
@@ -142,7 +142,7 @@ watchEffect(() => {
         </div>
       </div>
 
-      <div class="pt-5 sm:pt-6">
+      <div class="pt-4 sm:pt-4">
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
       </div>
 

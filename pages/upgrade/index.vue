@@ -32,7 +32,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
 </script>
 
 <template>
-  <main class="min-h-[70vh] px-4 pt-20 pb-16">
+  <main class="min-h-[70vh] px-4 pt-6 pb-6">
 
     <div class="max-w-md mx-auto">
 
@@ -77,10 +77,10 @@ function upgrade(plan: 'monthly' | 'yearly') {
           </button>
 
           <!-- Yearly (KEEP BLACK) -->
-          <button class="block w-full rounded-xl bg-black text-white py-3 font-medium transition shadow-md" :class="isSubscribed
+          <button class="block w-full rounded-xl bg-black text-white px-4 py-4 font-medium transition shadow-md" :class="isSubscribed
             ? 'opacity-60 cursor-not-allowed'
             : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')">
-            Yearly plan · £59.99 · Best value
+            Yearly plan · £59.99 
           </button>
 
         </div>

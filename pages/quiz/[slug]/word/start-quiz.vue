@@ -33,6 +33,42 @@ watchEffect(() => {
   }
 })
 
+const features = [
+  "XP is awarded when you complete the quiz",
+  "Your weakest words will tend to appear more often",
+  "Streaks gain you more XP per answer",
+  "Randomised questions",
+  "Cantonese to English and vice versa"
+]
+
+const featureIndex = ref(0)
+
+function nextFeature() {
+  featureIndex.value =
+    (featureIndex.value + 1) % features.length
+}
+
+function prevFeature() {
+  featureIndex.value =
+    (featureIndex.value - 1 + features.length) % features.length
+}
+
+let interval: ReturnType<typeof setInterval> | null = null
+
+function startAutoScroll() {
+  stopAutoScroll()
+  interval = setInterval(nextFeature, 3500)
+}
+
+function stopAutoScroll() {
+  if (interval) {
+    clearInterval(interval)
+    interval = null
+  }
+}
+
+onMounted(startAutoScroll)
+onBeforeUnmount(stopAutoScroll)
 
 // --- helpers ---
 
@@ -48,6 +84,26 @@ const canEnterLevel = () => {
   return canAccessLevel(entitlement.value!)
 }
 
+watch(featureIndex, (newVal) => {
+  if (newVal === features.length) {
+    // We reached the cloned slide
+
+    setTimeout(() => {
+      // Disable animation
+      isTransitioning.value = false
+      featureIndex.value = 0
+
+      // Re-enable animation on next frame
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          isTransitioning.value = true
+        })
+      })
+
+    }, 500) // MUST match your transition duration
+  }
+})
+
 </script>
 
 
@@ -60,7 +116,7 @@ const canEnterLevel = () => {
 
     <!-- 🔒 Locked -->
     <section v-if="authReady && !canEnterLevel()" class="quiz-card text-center space-y-4">
-    
+
       <h1 class="text-2xl font-semibold text-gray-900">
         Quiz locked
       </h1>
@@ -82,19 +138,45 @@ const canEnterLevel = () => {
     <section v-else class="quiz-card text-center space-y-6">
 
       <h1 class="text-3xl font-semibold text-gray-900">
-        Level {{ levelNumber }} Word Quiz
+        Level {{ levelNumber }}
       </h1>
 
       <p class="text-black">
         Test your understanding of the words from this level.
       </p>
 
-      <ul class="features-list text-base text-black">
-        <li>XP is awarded when a quiz is completed</li>
+      <!-- <ul class="features-list text-base text-black">
+        <li>XP is awarded when you complete the quiz</li>
         <li>Your weakest words will tend to appear more often</li>
+        <li>Streaks gain you more xp per answer</li>
         <li>Randomised questions</li>
         <li>Cantonese ↔ English</li>
-      </ul>
+      </ul> -->
+
+      <div class="relative max-w-sm mx-auto" @mouseenter="stopAutoScroll" @mouseleave="startAutoScroll">
+        <div class="relative h-[120px]">
+
+          <transition name="fade" mode="out-in">
+            <div :key="featureIndex" class="absolute inset-0 rounded-xl p-6 bg-[#F6E1E1] flex items-center">
+              <p class="text-gray-800 text-left">
+                {{ features[featureIndex] }}
+              </p>
+            </div>
+          </transition>
+
+        </div>
+
+        <!-- Controls -->
+        <div class="flex justify-center gap-4 mt-4">
+          <button @click="prevFeature" class="px-3 py-1 rounded-lg bg-[#EAB8E4] hover:brightness-110">
+            ←
+          </button>
+
+          <button @click="nextFeature" class="px-3 py-1 rounded-lg bg-[#A8CAE0] hover:brightness-110">
+            →
+          </button>
+        </div>
+      </div>
 
       <NuxtLink :to="`/quiz/${slug}/word/testV3`" class="start-btn">
         Start quiz
@@ -112,6 +194,16 @@ const canEnterLevel = () => {
 </template>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.35s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 .quiz-intro-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;

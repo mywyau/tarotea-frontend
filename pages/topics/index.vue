@@ -403,11 +403,6 @@ function topicLink(topic: Topic) {
           <p class="text-sm text-gray-700">
             {{ topic.description }}
           </p>
-
-          <!-- Locked message -->
-          <p v-if="topic.requiresPaid && !doNotShowUpgradeMessage(topic)" class="text-xs text-gray-700 pt-1">
-            Upgrade to access this topic.
-          </p>
         </NuxtLink>
       </li>
     </ul>

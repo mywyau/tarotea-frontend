@@ -81,7 +81,7 @@ watchEffect(() => {
     <section v-else class="quiz-card text-center space-y-6">
 
       <h1 class="text-3xl font-semibold text-black">
-        Level {{ levelNumber }} Audio Quiz
+        Level {{ levelNumber }}
       </h1>
 
       <p class="text-black">
@@ -91,6 +91,7 @@ watchEffect(() => {
       <ul class="features-list text-base">
         <li>XP awarded on completion</li>
         <li>Cantonese audio, English answers</li>
+        <li>Streaks gain you more xp per answer</li>
         <li>Weakest words appear more often</li>
         <li>Randomised questions</li>
       </ul>
