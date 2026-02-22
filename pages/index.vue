@@ -10,7 +10,7 @@ const { data: stats } = await useFetch('/api/stats', {
     <!-- Hero Section -->
     <div class="text-center">
 
-      <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
+      <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-black">
         Learn Everyday Cantonese
       </h1>
 
