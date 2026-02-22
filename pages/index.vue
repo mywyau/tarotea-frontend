@@ -6,8 +6,7 @@ const { data: stats } = await useFetch('/api/stats', {
 </script>
 
 <template>
-  <main class="max-w-3xl mx-auto py-20 px-6">
-
+  <main class="max-w-3xl mx-auto py-20 px-6 min-h-screen">
     <!-- Hero Section -->
     <div class="text-center">
 
@@ -15,18 +14,15 @@ const { data: stats } = await useFetch('/api/stats', {
         Learn Everyday Cantonese
       </h1>
 
-      <p class="mt-4 text-lg text-gray-600 max-w-xl mx-auto">
+      <p class="mt-4 text-lg text-gray-700 max-w-xl mx-auto">
         Structured vocabulary, audio practice, and quizzes designed to help you
         build real understanding.
       </p>
 
-      <NuxtLink
-        to="/topics"
-        class="mt-8 inline-block bg-gray-900 text-white
-               font-medium px-8 py-3 rounded-lg
-               hover:bg-gray-800 active:bg-gray-900
-               transition"
-      >
+      <NuxtLink to="/topics" class="mt-8 inline-block text-gray-900 font-semibold px-8 py-3 rounded-lg
+               shadow-sm hover:shadow-md active:scale-[0.98] transition
+               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+        style="background-color:#D6A3D1;">
         Start Learning →
       </NuxtLink>
 
@@ -35,20 +31,22 @@ const { data: stats } = await useFetch('/api/stats', {
     <!-- Stats -->
     <div class="mt-16 grid grid-cols-2 gap-6">
 
-      <div class="rounded-lg bg-gray-50 border border-gray-200 p-6 text-center">
+      <div class="rounded-lg p-6 text-center"
+        style="background-color:#F6E1E1; border-color:#F6E1E1;">
         <div class="text-2xl font-semibold text-gray-900">
           {{ stats?.totalUsers ?? '—' }}
         </div>
-        <div class="text-sm text-gray-500 mt-1">
+        <div class="text-sm text-gray-700 mt-1">
           Learners
         </div>
       </div>
 
-      <div class="rounded-lg bg-gray-50 border border-gray-200 p-6 text-center">
+      <div class="rounded-lg p-6 text-center"
+        style="background-color:#F6E1E1; border-color:#F6E1E1;">
         <div class="text-2xl font-semibold text-gray-900">
           {{ stats?.paidUsers ?? '—' }}
         </div>
-        <div class="text-sm text-gray-500 mt-1">
+        <div class="text-sm text-gray-700 mt-1">
           Active Subscribers
         </div>
       </div>
@@ -57,70 +55,61 @@ const { data: stats } = await useFetch('/api/stats', {
 
     <!-- Navigation Tiles -->
     <div class="mt-20">
+      <div class="grid grid-cols-4 auto-rows-[120px] gap-5">
 
-      <div class="grid grid-cols-2 gap-5">
-
-        <!-- Primary Tile (Now Subtle) -->
-        <NuxtLink
-          to="/topics"
-          class="col-span-2 rounded-lg bg-gray-100
-                 text-gray-900 p-10 border border-gray-200
-                 hover:bg-gray-200
-                 transition"
-        >
-          <div class="text-2xl font-semibold">
+        <!-- Large Wide Tile -->
+        <NuxtLink to="/topics" class="col-span-4 row-span-2 rounded-xl p-8 flex flex-col justify-end
+                  shadow-sm hover:shadow-md transition
+                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style="background-color:#EAB8E4; border-color:rgba(0,0,0,0.08);">
+          <div class="text-xl font-semibold text-gray-900">
             Explore Topics
           </div>
-          <div class="text-sm text-gray-600 mt-2">
-            Browse vocabulary categories with audio examples.
+          <div class="text-sm text-gray-800 mt-2">
+            Browse structured vocabulary
           </div>
         </NuxtLink>
 
-        <!-- Secondary Tiles -->
-        <NuxtLink
-          to="/levels"
-          class="rounded-lg border border-gray-200 bg-white p-6
-                 hover:bg-gray-50
-                 transition"
-        >
-          <div class="font-medium text-gray-900">
-            Levels
-          </div>
-          <div class="text-xs text-gray-500 mt-2">
-            Structured progression
+        <!-- Tall Tile -->
+        <NuxtLink to="/levels" class="col-span-2 row-span-2 rounded-xl p-6 flex items-end
+                  shadow-sm hover:shadow-md transition
+                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style="background-color:#A8CAE0; border-color:rgba(0,0,0,0.08);">
+          <div>
+            <div class="font-semibold text-gray-900">Levels</div>
+            <div class="text-xs text-gray-800 mt-1">
+              Structured progression
+            </div>
           </div>
         </NuxtLink>
 
-        <NuxtLink
-          to="/topics/quiz"
-          class="rounded-lg border border-gray-200 bg-white p-6
-                 hover:bg-gray-50
-                 transition"
-        >
-          <div class="font-medium text-gray-900">
-            Topic Quiz
-          </div>
-          <div class="text-xs text-gray-500 mt-2">
-            Test vocabulary knowledge
+        <!-- Small Tile -->
+        <NuxtLink to="/topics/quiz" class="col-span-2 rounded-xl p-6 flex items-end
+                shadow-sm hover:shadow-md transition
+                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style="background-color:#F4C2D7; border-color:rgba(0,0,0,0.10);">
+          <div>
+            <div class="font-semibold text-gray-900">Topic Quiz</div>
+            <div class="text-xs text-gray-900/80 mt-1">
+              Test knowledge
+            </div>
           </div>
         </NuxtLink>
 
-        <NuxtLink
-          to="/quiz"
-          class="rounded-lg border border-gray-200 bg-white p-6
-                 hover:bg-gray-50
-                 transition"
-        >
-          <div class="font-medium text-gray-900">
-            Level Quiz
-          </div>
-          <div class="text-xs text-gray-500 mt-2">
-            Practice by level
+        <!-- Small Tile -->
+        <NuxtLink to="/quiz" class="col-span-2 rounded-xl p-6 flex items-end
+                  shadow-sm hover:shadow-md transition
+                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style="background-color:#D6A3D1; border-color:rgba(0,0,0,0.08);">
+          <div>
+            <div class="font-semibold text-gray-900">Level Quiz</div>
+            <div class="text-xs text-gray-800 mt-1">
+              Practice by level
+            </div>
           </div>
         </NuxtLink>
 
       </div>
-
     </div>
 
   </main>

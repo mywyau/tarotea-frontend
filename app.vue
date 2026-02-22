@@ -38,7 +38,14 @@ onMounted(() => {
   <div class="min-h-screen flex flex-col overflow-x-hidden">
     <!-- <NavBar /> -->
     <BlankNavBar />
-    <main class="flex-1">
+    <main class="flex-1" style="
+    background: linear-gradient(
+      180deg,
+      rgba(246,225,225,0.6) 0%,
+      rgba(255,255,255,0.8) 50%,
+      rgba(168,202,224,0.4) 100%
+    );
+  ">
       <Analytics />
       <NuxtPage />
     </main>
