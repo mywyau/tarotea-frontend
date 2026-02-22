@@ -113,61 +113,123 @@ const canEnterLevel = (level: any) => {
 
 </script>
 
-
 <template>
-  <main class="max-w-3xl mx-auto py-12 px-4">
+  <main class="levels-page max-w-5xl mx-auto py-10 px-4 space-y-8">
 
-    <p class="text-gray-500 text-sm mb-6">
-      Practice and test your cantonese with our level quizzes. Your weakest words will appear more often as you practice and study.
-    </p>
+    <!-- Header -->
+    <header class="text-center space-y-3 max-w-2xl mx-auto">
+      <h1 class="text-3xl font-semibold text-gray-900">
+        Level Practice
+      </h1>
+      <p class="text-gray-600 text-sm sm:text-base">
+        Progress through structured Cantonese levels. Your weakest words appear more often as you improve.
+      </p>
+    </header>
 
-    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <!-- Grid -->
+    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-      <li v-for="quizLevel in quizLevels" :key="quizLevel.id" class="border rounded-lg p-4 space-y-3 transition" :class="[
+      <li v-for="quizLevel in quizLevels" :key="quizLevel.id" class="level-card" :class="[
         quizLevel.comingSoon
-          ? 'bg-gray-50 text-gray-400 cursor-not-allowed opacity-80'
-          : canEnterLevel(quizLevel)
-            ? ''
-            : 'opacity-80'
+          ? 'level-locked'
+          : (!canEnterLevel(quizLevel) ? 'level-locked' : '')
       ]">
 
-        <div class="text-lg font-medium">
-          {{ quizLevel.title }}
-          <span v-if="quizLevel.comingSoon" class="text-sm text-gray-400 font-normal">
-            (Coming soon)
-          </span>
-        </div>
+        <!-- Title -->
+        <div class="space-y-2">
+          <h2 class="text-lg font-semibold text-gray-900">
+            {{ quizLevel.title }}
+          </h2>
 
-        <div class="text-sm text-gray-600">
-          {{ quizLevel.description }}
-        </div>
+          <p class="text-sm text-gray-600 leading-relaxed">
+            {{ quizLevel.description }}
+          </p>
 
-        <!-- ✅ Available & accessible -->
-        <div v-if="canEnterLevel(quizLevel) && !isComingSoon(quizLevel)" class="flex gap-3 pt-2">
-          <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`"
-            class="flex-1 rounded px-3 py-2 text-sm text-center bg-blue-50 text-blue-700 hover:bg-blue-100">
-            Word quiz
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/audio/start-quiz`"
-            class="flex-1 rounded px-3 py-2 text-sm text-center bg-purple-50 text-purple-700 hover:bg-purple-100">
-            Audio quiz
-          </NuxtLink>
-        </div>
-
-        <!-- 🚧 Coming soon (paid OR free) -->
-        <div v-else-if="isComingSoon(quizLevel)" class="pt-2 text-sm text-gray-400">
-          Coming soon
-        </div>
-
-        <!-- 🔒 Locked (not paid) -->
-        <div v-else class="pt-2">
-          <p class="text-sm text-gray-500">
-            Upgrade to unlock
+          <p v-if="quizLevel.comingSoon" class="text-xs text-gray-400 font-medium">
+            Coming soon
           </p>
         </div>
+
+        <!-- Buttons -->
+        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
+          <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`" class="level-btn level-btn-blue">
+            Word Quiz
+          </NuxtLink>
+
+          <NuxtLink :to="`/quiz/${quizLevel.id}/audio/start-quiz`" class="level-btn level-btn-purple">
+            Audio Quiz
+          </NuxtLink>
+        </div>
+
+        <!-- Locked -->
+        <p v-else-if="!quizLevel.comingSoon" class="text-xs text-center text-gray-500 pt-4">
+          Upgrade to unlock
+        </p>
+
       </li>
+
     </ul>
 
   </main>
 </template>
+
+<style>
+.levels-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  --yellow: #F4CD27;
+  --blush: #F6E1E1;
+}
+
+/* Card */
+.level-card {
+  border-radius: 20px;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.level-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
+}
+
+.level-locked {
+  opacity: 0.6;
+}
+
+/* Buttons */
+.level-btn {
+  text-align: center;
+  padding: 0.6rem 0.75rem;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+/* Colour variations */
+.level-btn-blue {
+  background: rgba(168, 202, 224, 0.45);
+  color: #1f2937;
+}
+
+.level-btn-blue:hover {
+  background: rgba(168, 202, 224, 0.65);
+}
+
+.level-btn-purple {
+  background: rgba(214, 163, 209, 0.45);
+  color: #1f2937;
+}
+
+.level-btn-purple:hover {
+  background: rgba(214, 163, 209, 0.65);
+}
+</style>
