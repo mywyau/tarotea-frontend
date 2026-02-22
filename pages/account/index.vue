@@ -1,5 +1,4 @@
 <script setup lang="ts">
-
 const {
     authReady,
     isLoggedIn,
@@ -10,9 +9,6 @@ const {
     resolve
 } = useMeStateV2()
 
-
-import { useRouter } from 'vue-router'
-
 const deleting = ref(false)
 const deleteConfirmInput = ref('')
 
@@ -21,41 +17,29 @@ async function deleteAccount() {
     if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
 
     deleting.value = true
-
     try {
         const auth = await useAuth()
         const token = await auth.getAccessToken()
 
         await $fetch('/api/account', {
             method: 'DELETE',
-            headers: {
-                Authorization: `Bearer ${token}`
-            },
-            body: {
-                confirm: 'DELETE'
-            }
+            headers: { Authorization: `Bearer ${token}` },
+            body: { confirm: 'DELETE' }
         })
 
         await auth.client?.logout({
-            logoutParams: {
-                returnTo: window.location.origin
-            }
+            logoutParams: { returnTo: window.location.origin }
         })
     } catch (err: any) {
         console.error('Account deletion failed', err)
-        alert(
-            err?.data?.statusMessage ??
-            'Something went wrong deleting your account. Please try again.'
-        )
+        alert(err?.data?.statusMessage ?? 'Something went wrong deleting your account. Please try again.')
     } finally {
         deleting.value = false
         deleteConfirmInput.value = ''
     }
 }
 
-
 async function openBillingPortal() {
-    // Extra guard (defensive, but nice)
     if (!isLoggedIn.value) return
 
     const auth = await useAuth()
@@ -63,116 +47,167 @@ async function openBillingPortal() {
 
     const { url } = await $fetch<{ url: string }>('/api/stripe/portal', {
         method: 'POST',
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
     })
 
     window.location.href = url
 }
 </script>
 
-
 <template>
-    <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
+    <main class="min-h-[calc(100vh-56px)]">
+        <!-- Soft page background -->
+        <div class="px-4 py-14 sm:py-16">
+            <div class="max-w-xl mx-auto space-y-8">
+                <!-- Header -->
+                <header class="space-y-2">
+                    <h1 class="text-3xl font-semibold text-gray-900">Account</h1>
+                    <p class="text-sm text-gray-600">
+                        Manage your plan, billing, and account settings.
+                    </p>
+                </header>
 
-        <h1 class="text-3xl font-semibold">
-            Account
-        </h1>
-
-        <!-- Loading -->
-        <p v-if="!authReady" class="text-gray-500">
-            Loading…
-        </p>
-
-        <!-- Account details -->
-        <div v-else-if="isLoggedIn" class="space-y-6">
-
-            <div class="border rounded-lg p-4 space-y-2">
-                <p class="text-sm text-gray-500">Signed in as</p>
-                <p class="font-medium">{{ user.email }}</p>
-            </div>
-
-            <div class="border rounded-lg p-4 space-y-2">
-                <p class="text-sm text-gray-500">Plan</p>
-
-                <p class="font-medium">
-                    <span
-                        v-if="entitlement?.plan === 'monthly' && entitlement?.subscription_status == 'active'">Monthly</span>
-                    <span
-                        v-else-if="entitlement?.plan === 'yearly' && entitlement?.subscription_status == 'active'">Yearly</span>
-                    <span v-else>Free</span>
-                </p>
-
-                <p v-if="isCanceling && currentPeriodEnd" class="text-sm text-gray-500">
-                    Cancels on {{ currentPeriodEnd.toLocaleDateString() }}
-                </p>
-
-                <p v-else-if="entitlement?.subscription_status === 'active' && currentPeriodEnd"
-                    class="text-sm text-gray-500">
-                    Renews on {{ currentPeriodEnd.toLocaleDateString() }}
-                </p>
-
-                <p v-else-if="entitlement?.subscription_status === 'past_due'" class="text-sm text-red-600">
-                    Payment issue — update your card to keep access
-                </p>
-
-            </div>
-
-            <!-- Billing -->
-            <button v-if="entitlement && entitlement.plan !== 'free'"
-                class="w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
-                @click="openBillingPortal">
-                Manage billing
-            </button>
-
-            <NuxtLink v-else to="/upgrade"
-                class="bg-black rounded-lg text-white block text-center py-3 font-medium hover:bg-gray-800 transition">
-                Upgrade plan
-            </NuxtLink>
-
-            <!-- Danger zone -->
-            <div class="border border-red-200 rounded-lg p-4 space-y-4">
-
-                <p class="text-sm text-red-600">
-                    Deleting your account permanently removes your account, data and subscription.
-                    This action cannot be undone.
-                </p>
-
-                <p class="text-sm text-red-600">
-                    It will also cancel any active subscription so it won’t renew upon account deletion.
-                </p>
-
-                <p class="text-sm text-red-600">
-                    We do not issue automatic refunds for unused subscription time.
-                    If you believe you were charged in error, please contact support.
-                </p>
-
-                <div class="space-y-2">
-                    <label class="block text-sm text-gray-700">
-                        Type <span class="font-mono font-semibold">delete</span> to confirm
-                    </label>
-
-                    <input v-model="deleteConfirmInput" type="text" placeholder="delete"
-                        class="w-full rounded-lg border px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-red-400" />
+                <!-- Loading -->
+                <div v-if="!authReady"
+                    class="rounded-lg border border-black/5 bg-white/70 backdrop-blur p-5 text-gray-600">
+                    Loading…
                 </div>
 
-                <button
-                    class="w-full rounded-lg border border-red-500 text-red-600 py-3 font-medium hover:bg-red-50 transition disabled:opacity-50"
-                    :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'" @click="deleteAccount">
-                    {{ deleting ? 'Deleting account…' : 'Delete account' }}
-                </button>
+                <!-- Account details -->
+                <div v-else-if="isLoggedIn" class="space-y-6">
+                    <!-- Signed in card -->
+                    <section class="rounded-lg border border-black/5 bg-white/75 backdrop-blur p-5">
+                        <div class="text-sm text-gray-500">Signed in as</div>
+                        <div class="mt-1 font-medium text-gray-900 break-all">{{ user.email }}</div>
+                    </section>
+
+                    <!-- Plan card -->
+                    <section class="rounded-lg border border-black/5 bg-white/75 backdrop-blur p-5 space-y-3">
+                        <div class="flex items-center justify-between gap-3">
+                            <div>
+                                <div class="text-sm text-gray-500">Plan</div>
+                                <div class="mt-1 font-medium text-gray-900">
+                                    <span
+                                        v-if="entitlement?.plan === 'monthly' && entitlement?.subscription_status === 'active'">Monthly</span>
+                                    <span
+                                        v-else-if="entitlement?.plan === 'yearly' && entitlement?.subscription_status === 'active'">Yearly</span>
+                                    <span v-else>Free</span>
+                                </div>
+                            </div>
+
+                            <!-- Plan badge -->
+                            <!-- <span
+                class="shrink-0 inline-flex items-center px-3 py-1 text-xs font-semibold"
+                :style="entitlement?.subscription_status === 'active'
+                  ? 'color: rgba(17,24,39,0.9);'
+                  : 'color: rgba(17,24,39,0.85);'
+                "
+              >
+                {{ entitlement?.subscription_status === 'active' ? 'Active' : 'Free' }}
+              </span> -->
+                        </div>
+
+                        <p v-if="isCanceling && currentPeriodEnd" class="text-sm text-gray-600">
+                            Cancels on <span class="font-medium">{{ currentPeriodEnd.toLocaleDateString() }}</span>
+                        </p>
+
+                        <p v-else-if="entitlement?.subscription_status === 'active' && currentPeriodEnd"
+                            class="text-sm text-gray-600">
+                            Renews on <span class="font-medium">{{ currentPeriodEnd.toLocaleDateString() }}</span>
+                        </p>
+
+                        <p v-else-if="entitlement?.subscription_status === 'past_due'" class="text-sm text-red-700">
+                            Payment issue — update your card to keep access.
+                        </p>
+                    </section>
+
+                    <!-- Primary action -->
+                    <div class="space-y-3">
+                        <button v-if="entitlement && entitlement.plan !== 'free'" type="button" class="w-full rounded-lg py-3 font-semibold text-white border border-black/10
+                     bg-black backdrop-blur
+                     hover:bg-gray-800 transition shadow-sm" @click="openBillingPortal">
+                            Manage billing
+                        </button>
+
+                        <NuxtLink v-else to="/upgrade" class="w-full block text-center rounded-lg py-3 font-semibold text-gray-900
+                     bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
+                            <span 
+                            class="bg-gradient-to-r
+                                from-[#d48fd0]
+                                via-[#b57bc3]
+                                via-[#6faed6]
+                                to-[#d48fd0]
+                                bg-clip-text text-transparent
+                                hover:brightness-125 transition"
+                                >
+                                Upgrade plan
+                            </span>
+                        </NuxtLink>
+
+                        <!-- Optional: make upgrade feel “special” via text -->
+                        <p class="text-xs text-gray-500 text-center">
+                            Upgrade to unlock more topics, levels, and practice tools.
+                        </p>
+                    </div>
+
+                    <!-- Danger zone -->
+                    <section class="rounded-lg border p-5 space-y-4"
+                        style="background: rgba(246,225,225,0.55); border-color: rgba(185,28,28,0.25);">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h2 class="text-base font-semibold text-gray-900">Danger zone</h2>
+
+                                <p class="text-sm text-red-800 mt-4">
+                                    Deleting your account permanently removes your account, data and subscription.
+                                </p>
+                            </div>
+
+                            <span class="text-xs font-semibold text-red-800 rounded-lg px-3 py-1"
+                                style="background: rgba(244,205,39,0.25);">
+                                Permanent
+                            </span>
+                        </div>
+
+                        <div class="space-y-2 text-sm text-red-800/90">
+                            <p>This action cannot be undone.</p>
+                            <p>It will also cancel any active subscription so it won’t renew.</p>
+                            <p>No automatic refunds for unused time.</p>
+                        </div>
+
+                        <div class="space-y-2 pt-2">
+                            <label class="block text-sm text-gray-900">
+                                Type <span class="font-mono font-semibold">delete</span> to confirm
+                            </label>
+
+                            <input v-model="deleteConfirmInput" type="text" placeholder="delete" class="w-full rounded-lg border px-4 py-2 text-sm
+                       bg-white/80 backdrop-blur
+                       border-red-300/60
+                       focus:outline-none focus:ring-2 focus:ring-red-300" />
+                        </div>
+
+                        <button type="button" class="w-full rounded-lg py-3 font-semibold
+                     border border-red-400/70 text-red-800
+                     bg-white/70 backdrop-blur
+                     hover:bg-white transition
+                     disabled:opacity-50 disabled:cursor-not-allowed"
+                            :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'"
+                            @click="deleteAccount">
+                            {{ deleting ? 'Deleting account…' : 'Delete account' }}
+                        </button>
+                    </section>
+                </div>
+
+                <!-- Not signed in -->
+                <div v-else
+                    class="rounded-lg border border-black/5 bg-white/75 backdrop-blur p-6 text-center space-y-3">
+                    <p class="text-gray-700 font-medium">You’re not signed in.</p>
+                    <p class="text-sm text-gray-500">Sign in to manage your account and subscription.</p>
+                    <NuxtLink to="/" class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
+                   border border-black/10 bg-white/80 hover:bg-white transition">
+                        Go home
+                    </NuxtLink>
+                </div>
             </div>
-
-
         </div>
-
-        <!-- Not signed in -->
-        <div v-else class="text-center space-y-4">
-            <p class="text-gray-600">
-                You’re not signed in.
-            </p>
-        </div>
-
     </main>
 </template>
