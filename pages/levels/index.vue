@@ -19,12 +19,20 @@ const {
   resolve,
 } = useMeStateV2()
 
-// Resolve auth once on mount (safe + idempotent)
-onMounted(async () => {
-  if (!authReady.value) {
-    await resolve()
-  }
-})
+
+
+const BRAND_COLORS = [
+  '#EAB8E4',                // lavender blush
+  '#A8CAE0',                // soft blue
+  '#F4C2D7',                // pink
+  '#F2CACA',                // blush
+  '#D6A3D1',                // deeper purple
+  'rgba(244,205,39,0.35)',  // yellow
+]
+
+function getLevelColor(index: number) {
+  return BRAND_COLORS[index % BRAND_COLORS.length]
+}
 
 const levels = [
   {
@@ -115,12 +123,19 @@ const canEnterLevel = (level: any) => {
   return canAccessLevel(entitlement.value!)
 }
 
+// Resolve auth once on mount (safe + idempotent)
+onMounted(async () => {
+  if (!authReady.value) {
+    await resolve()
+  }
+})
+
 </script>
 
 <template>
   <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-8">
 
-    <header class="rounded-lg p-5 header-card">
+    <header class="rounded-lg header-card">
       <h1 class="text-2xl font-semibold text-gray-900">Levels</h1>
       <p class="text-gray-700 text-sm mt-2">
         Explore Cantonese words and sentence patterns organised by level.
@@ -129,13 +144,14 @@ const canEnterLevel = (level: any) => {
 
     <ul class="space-y-4">
 
-      <li v-for="level in levels" :key="level.id" class="level-card rounded-lg p-4 transition" :class="[
-        level.comingSoon
-          ? 'is-disabled'
-          : canEnterLevel(level)
-            ? 'is-active'
-            : 'is-locked'
-      ]">
+      <li v-for="(level, index) in levels" :key="level.id" class="rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110"
+      
+        :style="{
+          backgroundColor: level.comingSoon
+            ? 'rgba(0,0,0,0.03)'
+            : getLevelColor(index)
+        }">
+
         <!-- Accessible level -->
         <!-- Use your real gating when ready: v-if="canEnterLevel(level)" -->
         <NuxtLink v-if="true" :to="`/level/${level.id}`" class="block space-y-3">
@@ -212,7 +228,7 @@ const canEnterLevel = (level: any) => {
 
 /* Header card */
 .header-card {
-  background: rgba(255, 255, 255, 0.65);
+  /* background: rgba(255, 255, 255, 0.65); */
   border-color: rgba(214, 163, 209, 0.40);
   backdrop-filter: blur(6px);
 }

@@ -7,20 +7,20 @@ definePageMeta({
 <template>
   <main class="max-w-xl mx-auto px-4 py-20 space-y-8 text-center">
 
-    <h1 class="text-3xl font-semibold">
+    <h1 class="text-3xl text-black font-semibold">
       🚧 Coming soon
     </h1>
 
-    <p class="text-gray-600">
+    <p class="text-gray-800">
       Sit tight, new cantonese content and app features are on the way.
     </p>
 
-    <p class="text-sm text-gray-500 pt-4">
+    <p class="text-sm text-gray-600 pt-4">
       You can already explore free levels while we finish preparing and cooking up new content :)
     </p>
 
     <div class="text-lg pt-4">
-      <NuxtLink to="/levels" class="pt-4 text-sm text-gray-500 hover:underline">
+      <NuxtLink to="/levels" class="pt-4 text-sm text-black hover:underline">
         Browse free levels →
       </NuxtLink>
     </div>

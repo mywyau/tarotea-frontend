@@ -155,7 +155,7 @@ const gatedCategories = computed(() => {
 <template>
   <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-6">
 
-    <NuxtLink :to="`/levels`" class="inline-block text-sm text-black hover:underline">
+    <NuxtLink :to="`/levels`" class="inline-block text-base text-black hover:underline">
       ← Levels
     </NuxtLink>
 

@@ -28,27 +28,25 @@ const MASTERY_XP = 200
       {{ jyutping }}
     </div>
 
-<!-- Meaning -->
-<div class="text-xs text-black text-center">
-  {{ meaning }}
-</div>
+    <!-- Meaning -->
+    <div class="text-xs text-black text-center">
+      {{ meaning }}
+    </div>
 
-<!-- XP Section -->
-<div class="mt-5 space-y-1">
+    <!-- XP Section -->
+    <div class="mt-5 space-y-1">
 
-  <!-- XP Text -->
-  <div class="text-[11px] text-black text-center">
-    {{ xp ?? 0 }} XP
-  </div>
+      <!-- XP Text -->
+      <div class="text-[11px] text-black text-center">
+        {{ xp ?? 0 }} XP
+      </div>
 
-  <!-- Progress Bar -->
-  <div class="w-full h-1 bg-gray-300 rounded">
-    <div
-      class="h-1 bg-green-500 rounded transition-all duration-500"
-      :style="{ width: Math.min((xp ?? 0) / MASTERY_XP * 100, 100) + '%' }"
-    />
-  </div>
-</div>
+      <!-- Progress Bar -->
+      <div class="w-full h-1 bg-gray-300 rounded">
+        <div class="h-1 bg-green-500 rounded transition-all duration-500"
+          :style="{ width: Math.min((xp ?? 0) / MASTERY_XP * 100, 100) + '%' }" />
+      </div>
+    </div>
 
   </NuxtLink>
 </template>
