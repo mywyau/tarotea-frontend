@@ -2,8 +2,8 @@
 const props = defineProps<{
   src: string
   autoplay?: boolean
+  size?: 'sm' | 'md' | 'lg'
 }>()
-
 
 const { volume } = useAudioVolume()
 const { play: playGlobal } = useGlobalAudio()
@@ -22,9 +22,21 @@ const play = () => {
 
 }
 
+const sizeClass = computed(() => {
+  switch (props.size) {
+    case 'sm':
+      return 'text-xs px-2 py-1 rounded-md'
+    case 'lg':
+      return 'text-base px-5 py-3 rounded-md'
+    case 'md':
+    default:
+      return 'text-sm px-3 py-2 rounded-md'
+  }
+})
+
 onMounted(() => {
   if (props.autoplay) {
-    play() 
+    play()
   }
 })
 
@@ -37,8 +49,14 @@ watch(volume, v => {
 </script>
 
 <template>
-  <button @click="play" class="inline-flex items-center justify-center rounded p-2
-           bg-gray-100 hover:bg-gray-200 border border-black transition" aria-label="Play audio">
-    ▶︎ Play
+  <button @click="play" :class="[
+    'inline-flex items-center justify-center transition border',
+    'bg-white/70 hover:bg-white',
+    sizeClass
+  ]" aria-label="Play audio">
+    ▶︎
+    <span v-if="props.size !== 'sm'" class="ml-2">
+      Play
+    </span>
   </button>
 </template>
