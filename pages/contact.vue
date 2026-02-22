@@ -5,29 +5,68 @@ definePageMeta({
 </script>
 
 <template>
-  <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
+  <main class="contact-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
-    <h1 class="text-3xl font-semibold">
-      Contact
-    </h1>
+    <!-- Header -->
+    <header class="text-center space-y-3">
+      <h1 class="text-3xl font-semibold text-gray-900">
+        Contact
+      </h1>
 
-    <p class="text-gray-700">
-      Have a question, found an issue, or want to share feedback?
-      We'd love to hear from you.
-    </p>
+      <p class="text-gray-600 text-sm sm:text-base">
+        Have a question, found an issue, or want to share feedback?
+        We’d love to hear from you.
+      </p>
+    </header>
 
-    <div class="border rounded-lg p-4 space-y-2">
-      <p class="text-sm text-gray-500">
+    <!-- Contact Card -->
+    <section class="contact-card text-center space-y-4">
+
+      <p class="text-xs uppercase tracking-wide text-gray-600">
         Email
       </p>
 
-      <a
-        href="mailto:contact@tarotea.dev"
-        class="font-medium text-black hover:underline"
-      >
+      <a href="mailto:contact@tarotea.dev" class="email-link">
         contact@tarotea.dev
       </a>
-    </div>
+
+      <p class="text-xs text-gray-600">
+        We usually respond in a few days.
+      </p>
+
+    </section>
 
   </main>
 </template>
+
+
+<style>
+.contact-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  --yellow: #F4CD27;
+  --blush: #F6E1E1;
+}
+
+/* Clean block card */
+.contact-card {
+  border-radius: 24px;
+  padding: 2rem;
+  background: #F6E1E1;
+  /* soft blush block */
+}
+
+/* Simple email accent */
+.email-link {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111827;
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.email-link:hover {
+  opacity: 0.7;
+}
+</style>
