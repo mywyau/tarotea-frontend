@@ -153,7 +153,7 @@ const canEnterLevel = (level: any) => {
 
             <div class="shrink-0">
               <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
-              <span v-else-if="!canEnterLevel(level)" class="pill pill-locked">Locked</span>
+              <!-- <span v-else-if="!canEnterLevel(level)" class="pill pill-locked">Locked</span> -->
             </div>
           </div>
 
