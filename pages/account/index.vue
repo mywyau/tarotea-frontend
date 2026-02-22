@@ -129,25 +129,25 @@ async function openBillingPortal() {
                             Manage billing
                         </button>
 
-                        <NuxtLink v-else to="/upgrade" class="w-full block text-center rounded-lg py-3 font-semibold text-gray-900
+                        <div v-else>
+                            <NuxtLink to="/upgrade" class="w-full block text-center rounded-lg py-3 font-semibold text-gray-900
                      bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
-                            <span 
-                            class="bg-gradient-to-r
+                                <span class="bg-gradient-to-r
                                 from-[#d48fd0]
                                 via-[#b57bc3]
                                 via-[#6faed6]
                                 to-[#d48fd0]
                                 bg-clip-text text-transparent
-                                hover:brightness-125 transition"
-                                >
-                                Upgrade plan
-                            </span>
-                        </NuxtLink>
+                                hover:brightness-125 transition">
+                                    Upgrade plan
+                                </span>
+                            </NuxtLink>
 
-                        <!-- Optional: make upgrade feel “special” via text -->
-                        <p class="text-xs text-gray-500 text-center">
-                            Upgrade to unlock more topics, levels, and practice tools.
-                        </p>
+                            <!-- Optional: make upgrade feel “special” via text -->
+                            <p class="mt-4 text-xs text-gray-500 text-center">
+                                Upgrade to unlock more topics, levels, and practice tools.
+                            </p>
+                        </div>
                     </div>
 
                     <!-- Danger zone -->
