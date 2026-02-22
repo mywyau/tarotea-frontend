@@ -34,11 +34,19 @@ function upgrade(plan: 'monthly' | 'yearly') {
 <template>
   <main class="min-h-[70vh] px-4 pt-20 pb-16">
 
-    <div class="max-w-md w-full mx-auto text-center space-y-6">
-      <div class="max-w-md w-full text-center space-y-6">
+    <div class="max-w-md mx-auto">
 
-        <div class="text-5xl">🍵</div>
+      <!-- Card -->
+      <div class="p-10 text-center space-y-6">
 
+        <!-- Icon -->
+        <div class="flex justify-center">
+          <div class="w-20 h-20 flex items-center justify-center rounded-full" style="background-color:#EAB8E4;">
+            <span class="text-4xl">🍵</span>
+          </div>
+        </div>
+
+        <!-- Title -->
         <h1 class="text-2xl font-semibold">
           Upgrade your plan
         </h1>
@@ -47,44 +55,47 @@ function upgrade(plan: 'monthly' | 'yearly') {
           Unlock all content and learn Cantonese without limits.
         </p>
 
+        <!-- Benefits -->
         <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
-          <li>• Full access to growing content.</li>
-          <li>• New topics and levels added regularly.</li>
-          <li>• New content added regularly.</li>
+          <li>• Full access to growing content</li>
+          <li>• New topics and levels added regularly</li>
           <li>• Native Cantonese audio for every word</li>
-          <li>• No fluff, neatly organised content</li>
+          <li>• Neatly organised structured content</li>
           <li>• Randomised exercises and tests</li>
-          <li>• xp tracking for words</li>
+          <li>• XP tracking for words</li>
         </ul>
 
         <!-- Plans -->
         <div v-if="isLoggedIn" class="space-y-3 pt-4">
-          <!-- Monthly -->
-          <button class="block w-full rounded-lg border border-gray-300 py-3 font-medium transition"
-            :class="isSubscribed ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-50'" :disabled="isSubscribed"
-            @click="upgrade('monthly')">
+
+          <!-- Monthly (Pastel themed) -->
+          <button class="block w-full rounded-xl py-3 font-medium transition shadow-sm"
+            style="background-color:#A8CAE0;" :class="isSubscribed
+              ? 'opacity-60 cursor-not-allowed'
+              : 'hover:brightness-110 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('monthly')">
             Monthly plan · £5.99
           </button>
 
-          <!-- Yearly -->
-          <button class="block w-full rounded-lg bg-black text-white py-3 font-medium transition"
-            :class="isSubscribed ? 'opacity-60 cursor-not-allowed' : 'hover:bg-gray-800'" :disabled="isSubscribed"
-            @click="upgrade('yearly')">
+          <!-- Yearly (KEEP BLACK) -->
+          <button class="block w-full rounded-xl bg-black text-white py-3 font-medium transition shadow-md" :class="isSubscribed
+            ? 'opacity-60 cursor-not-allowed'
+            : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')">
             Yearly plan · £59.99 · Best value
           </button>
+
         </div>
 
+        <!-- Subscribed -->
         <p v-if="isSubscribed" class="text-sm text-gray-600">
           You’re already subscribed.
-          <NuxtLink to="/account" class="text-blue-600 hover:underline">
+          <NuxtLink to="/account" class="text-purple-500 hover:underline">
             Manage your plan
           </NuxtLink>
         </p>
 
-
-        <p v-if="!isSubscribed" class="text-sm text-gray-600">
-          <!-- Secondary -->
-          <NuxtLink to="/levels" class="pt-4 text-sm text-gray-500 hover:underline">
+        <!-- Continue without upgrading -->
+        <p v-if="!isSubscribed" class="text-sm text-gray-500">
+          <NuxtLink to="/levels" class="hover:underline">
             ← Continue learning without upgrading
           </NuxtLink>
         </p>
