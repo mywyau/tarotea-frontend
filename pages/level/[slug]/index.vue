@@ -144,25 +144,85 @@ const gatedCategories = computed(() => {
 </script>
 
 <template>
-  <main class="max-w-4xl mx-auto px-4 py-12 space-y-12">
-    <header class="space-y-2">
-      <h1 class="text-3xl font-semibold">{{ topic.title }}</h1>
-      <p class="text-gray-600">{{ topic.description }}</p>
+  <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-10">
+
+    <header class="header-card rounded-xl p-6 sm:p-7 space-y-2">
+      <h1 class="text-3xl font-semibold text-gray-900">{{ topic.title }}</h1>
+      <p class="text-gray-700">{{ topic.description }}</p>
     </header>
 
-    <section v-for="category in gatedCategories" :key="category.key">
-
-      <h2 class="text-xl font-medium capitalize">
-        {{ category.title }}
-      </h2>
+    <section v-for="category in gatedCategories" :key="category.key" class="category-card rounded-xl p-5 sm:p-6">
+      <div class="flex items-baseline justify-between gap-4">
+        <h2 class="text-xl font-semibold capitalize text-gray-900">
+          {{ category.title }}
+        </h2>
+      </div>
 
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-
         <WordTile v-for="word in category.words" :key="word.id"
           :to="word.locked ? undefined : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping"
           :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)"
-          :class="word.locked ? 'opacity-40 pointer-events-none select-none' : ''" />
+          :class="word.locked ? 'locked-tile' : ''" />
       </div>
     </section>
+
   </main>
 </template>
+
+<style scoped>
+.level-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  --yellow: #F4CD27;
+  --blush: #F6E1E1;
+
+  /* background: linear-gradient(180deg,
+      rgba(246, 225, 225, 0.70) 0%,
+      rgba(255, 255, 255, 0.85) 45%,
+      rgba(168, 202, 224, 0.40) 100%); */
+
+  /* border-radius: 18px; */
+  padding-bottom: 2rem;
+}
+
+.header-card {
+  background: rgba(255, 255, 255, 0.72);
+  /* border: 1px solid rgba(214, 163, 209, 0.38); */
+  /* purple border */
+  backdrop-filter: blur(6px);
+}
+
+.category-card {
+  background: rgba(255, 255, 255, 0.72);
+  /* border: 1px solid rgba(234, 184, 228, 0.30); */
+  /* pink border */
+  backdrop-filter: blur(6px);
+}
+
+.category-card:hover {
+  border-color: rgba(214, 163, 209, 0.55);
+}
+
+.locked-tile {
+  opacity: 0.38;
+  pointer-events: none;
+  user-select: none;
+  filter: grayscale(0.15);
+}
+
+/* Small “Pro” pill */
+.pill {
+  display: inline-block;
+  /* padding: 0.2rem 0.55rem; */
+  /* border-radius: 999px; */
+  font-size: 0.75rem;
+  font-weight: 700;
+  /* border: 1px solid rgba(0, 0, 0, 0.06); */
+  color: rgba(0, 0, 0, 0.78);
+}
+
+.pill-locked {
+  background: rgba(244, 205, 39, 0.60);
+}
+</style>
