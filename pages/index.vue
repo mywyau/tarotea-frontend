@@ -22,14 +22,13 @@ const { data: stats } = await useFetch('/api/stats', {
       <NuxtLink to="/topics" class="mt-8 inline-block text-gray-900 font-semibold px-8 py-3 rounded-lg
                shadow-sm hover:shadow-md active:scale-[0.98] transition
                focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
-        style="background-color:#D6A3D1;">
+        style="background-color:#A8CAE0;">
         Start Learning →
       </NuxtLink>
-
     </div>
 
     <!-- Stats -->
-    <div class="mt-16 grid grid-cols-2 gap-6">
+    <div class="mt-6 grid grid-cols-2 gap-6">
 
       <div class="rounded-lg p-6 text-center"
         style="background-color:#F6E1E1; border-color:#F6E1E1;">
@@ -54,7 +53,7 @@ const { data: stats } = await useFetch('/api/stats', {
     </div>
 
     <!-- Navigation Tiles -->
-    <div class="mt-20">
+    <div class="mt-6">
       <div class="grid grid-cols-4 auto-rows-[120px] gap-5">
 
         <!-- Large Wide Tile -->

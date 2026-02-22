@@ -26,13 +26,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <header class="bg-white">
+  <header>
     <!-- Top Bar -->
-    <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-      <!-- Logo -->
-      <NuxtLink to="/" class="text-2xl font-bold text-primary-600 hover:text-gray-600">
-        TaroTea
-      </NuxtLink>
+    <div class=" max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
+    <!-- Logo -->
+    <NuxtLink to="/" class="text-2xl font-bold text-primary-600 hover:text-gray-600">
+      TaroTea
+    </NuxtLink>
     </div>
   </header>
 </template>
