@@ -30,8 +30,7 @@ const { data: stats } = await useFetch('/api/stats', {
     <!-- Stats -->
     <div class="mt-6 grid grid-cols-2 gap-6">
 
-      <div class="rounded-lg p-6 text-center"
-        style="background-color:#F6E1E1; border-color:#F6E1E1;">
+      <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
         <div class="text-2xl font-semibold text-gray-900">
           {{ stats?.totalUsers ?? '—' }}
         </div>
@@ -40,8 +39,7 @@ const { data: stats } = await useFetch('/api/stats', {
         </div>
       </div>
 
-      <div class="rounded-lg p-6 text-center"
-        style="background-color:#F6E1E1; border-color:#F6E1E1;">
+      <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
         <div class="text-2xl font-semibold text-gray-900">
           {{ stats?.paidUsers ?? '—' }}
         </div>
@@ -108,6 +106,19 @@ const { data: stats } = await useFetch('/api/stats', {
           </div>
         </NuxtLink>
 
+
+        <!-- Tall Tile -->
+        <NuxtLink to="/daily/v3" class="col-span-2 row-span-2 rounded-xl p-6 flex items-end
+                  shadow-sm hover:shadow-md transition
+                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+          style="background-color:#F6E1E1; border-color:rgba(0,0,0,0.08);">
+          <div>
+            <div class="font-semibold text-gray-900">Daily</div>
+            <div class="text-xs text-gray-800 mt-1">
+              Practice with our daily exercise
+            </div>
+          </div>
+        </NuxtLink>
       </div>
     </div>
 
