@@ -36,7 +36,8 @@ onMounted(() => {
 
 <template>
   <div class="min-h-screen flex flex-col overflow-x-hidden">
-    <NavBar />
+    <!-- <NavBar /> -->
+    <BlankNavBar />
     <main class="flex-1">
       <Analytics />
       <NuxtPage />
