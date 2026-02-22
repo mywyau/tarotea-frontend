@@ -53,7 +53,7 @@ watchEffect(() => {
 <template>
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
-    <NuxtLink :to="`/quiz/`" class="text-base text-gray-600 hover:underline">
+    <NuxtLink :to="`/quiz/`" class="text-base text-black hover:underline">
       ← All quizzes
     </NuxtLink>
 
@@ -64,7 +64,7 @@ watchEffect(() => {
         Quiz locked
       </h1>
 
-      <p class="text-gray-600">
+      <p class="text-black">
         This quiz is part of TaroTea Monthly or Yearly.
       </p>
 
@@ -80,11 +80,11 @@ watchEffect(() => {
     <!-- ✅ Quiz intro -->
     <section v-else class="quiz-card text-center space-y-6">
 
-      <h1 class="text-3xl font-semibold text-gray-900">
+      <h1 class="text-3xl font-semibold text-black">
         Level {{ levelNumber }} Audio Quiz
       </h1>
 
-      <p class="text-gray-600">
+      <p class="text-black">
         Test your listening skills from this level.
       </p>
 
@@ -100,7 +100,7 @@ watchEffect(() => {
       </NuxtLink>
 
       <div class="pt-6">
-        <NuxtLink :to="`/level/${slug}`" class="text-sm text-gray-600 hover:underline">
+        <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
           ← Level {{ levelNumber }} Vocab
         </NuxtLink>
       </div>

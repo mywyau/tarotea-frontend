@@ -63,13 +63,13 @@ onBeforeUnmount(() => {
           <!-- Logged in -->
           <template v-if="isLoggedIn">
             <NuxtLink to="/account"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-gray-900 hover:bg-black/5 transition"
+              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
               @click="closeMenu">
               Account
             </NuxtLink>
 
             <NuxtLink to="/stats"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-gray-900 hover:bg-black/5 transition"
+              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
               @click="closeMenu">
               Stats
             </NuxtLink>

@@ -210,7 +210,7 @@ async function answer(index: number) {
   } else {
     playIncorrectJingle()
   }
-  
+
   const wordId = question.value.wordId  //
 
   const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
@@ -347,7 +347,7 @@ watch(
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
     <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/word/start-quiz`"
-      class="text-gray-500 hover:underline">
+      class="text-black hover:underline">
       ← Restart Quiz
     </NuxtLink>
 
@@ -463,7 +463,7 @@ watch(
           Restart Quiz
         </NuxtLink>
 
-        <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
+        <NuxtLink :to="`/level/${slug}`" class="block text-black hover:underline">
           ← {{ LEVEL_TITLES[slug] }} Vocab
         </NuxtLink>
       </div>

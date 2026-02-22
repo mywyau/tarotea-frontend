@@ -13,7 +13,7 @@ const MASTERY_XP = 200
 </script>
 
 <template>
-  <NuxtLink :to="to" external class="relative word-tile">
+  <NuxtLink :to="to" external class="relative word-tile hover:brightness-110">
 
     <!-- ✅ Mastered badge -->
     <div v-if="mastered" class="absolute top-2 right-2 text-[10px] px-2 py-0.5 text-emerald-600 font-medium">

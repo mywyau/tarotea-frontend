@@ -265,7 +265,7 @@ watch(
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
 
     <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/audio/start-quiz`"
-      class="text-gray-500 hover:underline">
+      class="text-black hover:underline">
       ← Restart Quiz
     </NuxtLink>
 
@@ -377,7 +377,7 @@ watch(
             Restart Quiz
           </NuxtLink>
 
-          <NuxtLink :to="`/level/${slug}`" class="block text-gray-500 hover:underline">
+          <NuxtLink :to="`/level/${slug}`" class="block text-black hover:underline">
             ← {{ levelNumber }} Vocab
           </NuxtLink>
 

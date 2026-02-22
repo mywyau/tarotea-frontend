@@ -51,7 +51,7 @@ watch(volume, v => {
 <template>
   <button @click="play" :class="[
     'inline-flex items-center justify-center transition border',
-    'bg-white/70 hover:bg-white',
+    'bg-white/70 hover:bg-white hover:brightness-110',
     sizeClass
   ]" aria-label="Play audio">
     ▶︎

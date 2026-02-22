@@ -54,7 +54,7 @@ const canEnterLevel = () => {
 <template>
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
-    <NuxtLink :to="`/quiz/`" class="text-base text-gray-600 hover:underline">
+    <NuxtLink :to="`/quiz/`" class="text-base text-black hover:underline">
       ← All quizzes
     </NuxtLink>
 
@@ -65,11 +65,11 @@ const canEnterLevel = () => {
         Quiz locked
       </h1>
 
-      <p class="text-gray-600">
+      <p class="text-black">
         This quiz is part of TaroTea Monthly or Yearly.
       </p>
 
-      <p class="text-sm text-gray-500">
+      <p class="text-sm text-black">
         Sign in and upgrade to unlock advanced levels.
       </p>
 
@@ -85,11 +85,11 @@ const canEnterLevel = () => {
         Level {{ levelNumber }} Word Quiz
       </h1>
 
-      <p class="text-gray-600">
+      <p class="text-black">
         Test your understanding of the words from this level.
       </p>
 
-      <ul class="features-list text-base">
+      <ul class="features-list text-base text-black">
         <li>XP is awarded when a quiz is completed</li>
         <li>Your weakest words will tend to appear more often</li>
         <li>Randomised questions</li>
@@ -101,7 +101,7 @@ const canEnterLevel = () => {
       </NuxtLink>
 
       <div class="pt-6">
-        <NuxtLink :to="`/level/${slug}`" class="text-sm text-gray-600 hover:underline">
+        <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
           ← Level {{ levelNumber }} Vocab
         </NuxtLink>
       </div>
