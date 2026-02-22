@@ -133,7 +133,11 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-8">
+  <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-4">
+
+    <NuxtLink :to="`/`" class="inline-block text-sm text-black hover:underline">
+      ← Home
+    </NuxtLink>
 
     <header class="rounded-lg header-card">
       <h1 class="text-2xl font-semibold text-gray-900">Levels</h1>
@@ -144,9 +148,8 @@ onMounted(async () => {
 
     <ul class="space-y-4">
 
-      <li v-for="(level, index) in levels" :key="level.id" class="rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110"
-      
-        :style="{
+      <li v-for="(level, index) in levels" :key="level.id"
+        class="rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :style="{
           backgroundColor: level.comingSoon
             ? 'rgba(0,0,0,0.03)'
             : getLevelColor(index)

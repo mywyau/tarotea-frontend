@@ -366,7 +366,11 @@ function topicLink(topic: Topic) {
 
 
 <template>
-  <main v-if="authReady" class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-8">
+  <main v-if="authReady" class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-2">
+
+    <NuxtLink :to="`/`" class="inline-block text-sm text-black hover:underline">
+      ← Home
+    </NuxtLink>
 
     <header class="rounded-lg p-5 header-card">
       <h1 class="text-2xl font-semibold text-gray-900">Topics</h1>
@@ -450,7 +454,7 @@ function topicLink(topic: Topic) {
 
 .topic-card.is-active:hover {
   transform: translateY(-1px);
-    background: rgba(215, 239, 255, 0.893);
+  background: rgba(215, 239, 255, 0.893);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 
