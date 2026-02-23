@@ -94,10 +94,10 @@ const { data: stats } = await useFetch('/api/stats', {
 
         <!-- Topic Quiz -->
         <NuxtLink to="/topics/quiz" class="rounded-xl p-6 flex items-end
-             shadow-sm hover:shadow-md transition
-             hover:brightness-110
-             focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
-             lg:col-span-2" style="background-color:#F4C2D7;">
+            shadow-sm hover:shadow-md transition
+            hover:brightness-110
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+            lg:col-span-2" style="background-color:rgba(244,205,39,0.35);">
           <div>
             <div class="font-semibold text-gray-900">Topic Quiz</div>
             <div class="text-xs text-gray-900/80 mt-1">
