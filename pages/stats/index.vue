@@ -19,37 +19,40 @@ const stats = computed(() => {
         {
             label: 'Total XP',
             value: Number(statsData.value.total_xp),
+            prefix: '',
             suffix: 'xp',
             color: 'text-purple-600'
         },
         {
             label: 'Words Maxed',
             value: Number(statsData.value.words_maxed),
+            prefix: '',
             suffix: '',
             color: 'text-green-600'
         },
         {
             label: 'Words Seen',
             value: Number(statsData.value.words_seen),
+            prefix: '',
             suffix: '',
             color: 'text-blue-600'
         },
         {
             label: 'Correct Answers',
             value: Number(statsData.value.total_correct),
+            prefix: '',
             suffix: '',
             color: 'text-emerald-600'
         },
         {
             label: 'XP Last 7 days',
             value: Number(statsData.value.xp_this_week),
+            prefix: '+',
             suffix: 'xp',
             color: 'text-orange-600'
         }
     ]
 })
-
-const animatedValue = ref(0)
 
 function animateCount(
     target: Ref<number>,
@@ -64,7 +67,7 @@ function animateCount(
         const progress = Math.min(elapsed / duration, 1)
 
         // easeOutCubic (smooth finish)
-        const eased = 1 - Math.pow(1 - progress, 3)
+        const eased = 1 - Math.pow(1 - progress, 4)
 
         target.value = Math.floor(startValue + (endValue - startValue) * eased)
 
@@ -79,10 +82,6 @@ function animateCount(
 }
 
 const animatedStats = ref<number[]>([])
-
-watch(() => statsData.value?.total_xp, (newVal) => {
-    animateCount(animatedValue, newVal)
-})
 
 onMounted(async () => {
     try {
@@ -148,7 +147,9 @@ onMounted(async () => {
                 Your Stats
             </h1>
 
-            <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+            <transition-group name="card-fade" tag="div"
+                class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+
                 <div v-for="(stat, index) in stats" :key="stat.label" class="stat-card hover:brightness-110"
                     :class="`stat-${index}`">
                     <p class="stat-label">
@@ -156,24 +157,25 @@ onMounted(async () => {
                     </p>
 
                     <p class="stat-value">
-                        {{ (animatedStats[index] ?? stat.value).toLocaleString() }} {{ stat.suffix }}
+                        {{ stat.prefix }}{{ (animatedStats[index] ?? stat.value).toLocaleString() }} {{ stat.suffix
+                        }}
                     </p>
                 </div>
-            </div>
+
+            </transition-group>
+
         </div>
     </main>
 </template>
 
 <style scoped>
-.fade-enter-active,
-.fade-leave-active {
-    transition: opacity 0.35s ease, transform 0.35s ease;
+.card-fade-enter-active {
+    transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
-.fade-enter-from,
-.fade-leave-to {
+.card-fade-enter-from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
 }
 
 /* Page background (soft like homepage) */
