@@ -57,7 +57,7 @@ export async function loginWithGoogle() {
   });
 }
 
-export async function loginWithEmail() {
+export async function login() {
   if (!process.client) return;
 
   const { client } = await useAuth();

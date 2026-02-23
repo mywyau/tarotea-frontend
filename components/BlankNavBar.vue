@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { loginWithGoogle, logout } from '@/composables/useAuth'
+import { loginWithGoogle, login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
@@ -101,7 +101,7 @@ onBeforeUnmount(() => {
           <template v-else>
             <button type="button"
               class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-gray-900 hover:bg-black/5 transition"
-              @click="loginWithGoogle">
+              @click="login()">
               Login
             </button>
 
