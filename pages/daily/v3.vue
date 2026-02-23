@@ -136,8 +136,11 @@ async function selectAnswer(answer: string) {
         currentXp.value = Math.max(0, currentXp.value + delta)
         currentStreak.value = correct ? currentStreak.value + 1 : 0
 
-        const total = totalQuestions.value || questions.value.length
-        const isLastQuestion = answeredCount.value >= total
+        // const total = totalQuestions.value || questions.value.length
+        // const isLastQuestion = answeredCount.value >= total
+
+        const isLastQuestion =
+            answerLog.value.length >= questions.value.length
 
         triggerXp(delta, isLastQuestion)
 
