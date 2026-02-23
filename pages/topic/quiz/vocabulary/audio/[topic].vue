@@ -1,6 +1,10 @@
 <script setup lang="ts">
 
 definePageMeta({
+    middleware: ['coming-soon']
+})
+
+definePageMeta({
     middleware: ['topic-access'],
     ssr: true,
 })

@@ -5,7 +5,6 @@ definePageMeta({
     ssr: true,
 })
 
-
 type Word = {
     id: string
     word: string
