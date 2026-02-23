@@ -377,7 +377,7 @@ function hasPaidAccessCheck(topic: Topic) {
                 <!-- Buttons -->
                 <div class="grid grid-cols-2 gap-3 pt-4">
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/word/${topic.id}` : undefined"
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/word/v3/${topic.id}` : undefined"
                         class="topic-btn topic-btn-blue"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Vocab

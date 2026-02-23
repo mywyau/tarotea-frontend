@@ -5,7 +5,6 @@ definePageMeta({
   ssr: false
 })
 
-
 import { computed, ref, watch } from 'vue'
 
 import {
@@ -457,9 +456,9 @@ watch(
                     ? '#FECACA' // soft red
                     : tileColors[i]
           }" :class="[
-      answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-      answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-    ]" @click="answer(i)">
+            answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+            answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+          ]" @click="answer(i)">
           {{ option }}
         </button>
       </div>

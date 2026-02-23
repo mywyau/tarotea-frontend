@@ -1,49 +1,77 @@
 <script setup lang="ts">
 
+// definePageMeta({
+//     middleware: ['coming-soon']
+// })
+
 definePageMeta({
     middleware: ['topic-access'],
     ssr: true,
 })
 
 
-type Word = {
-    id: string
-    word: string
-    jyutping: string
-    meaning: string
-}
-
-type LevelData = {
-    topic: number
-    title: string
-    description: string
-    categories: Record<string, Word[]>
-}
-
-
-import { computed, ref } from 'vue'
-
-import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz'
+import type { TopicData } from '@/types/topic'
+import { computed, ref, watch } from 'vue'
 
 import {
+    playCorrectJingle,
+    playIncorrectJingle,
     playQuizCompleteFailSong,
     playQuizCompleteFanfareSong,
     playQuizCompleteOkaySong
 } from '@/utils/sounds'
 
-const route = useRoute()
+import { buildTopicQuiz } from '~/utils/quiz/buildTopicQuiz'
 
-const slug = computed(() => route.params.topic as string)
+const route = useRoute()
+const topicSlug = computed(() => route.params.topic as string)
+
+const { getAccessToken } = await useAuth()
+
+type QuizAnswer = { wordId: string; correct: boolean }
+
+const answerLog = ref<QuizAnswer[]>([])
+const finishing = ref(false)
+
+const wordProgressMap = ref<
+    Record<string, { xp: number; streak: number }>
+>({})
+
+const STREAK_CAP = 5
+const WRONG_PENALTY = -12
+
+function deltaFor(correct: boolean, streakBefore: number) {
+    if (!correct) return WRONG_PENALTY
+    return 5 + Math.min(streakBefore, STREAK_CAP) * 2
+}
+
+const xpDelta = ref<number | null>(null)
+const currentXp = ref<number | null>(null)
+const currentStreak = ref<number | null>(null)
 
 const { stop } = useGlobalAudio()
 
-const { data, error } = await useFetch<LevelData>(
-    () => `/api/topic/${slug.value}`,
+const { data, error } = await useFetch<TopicData>(
+    () => `/api/index/topics/${topicSlug.value}`,
     {
-        key: () => `audio-quiz-${slug.value}`,
-        server: true
+        key: () => `topic-quiz-${topicSlug.value}`,
+        server: true,
+        credentials: 'include'
     }
 )
+
+const wordsForTopic = computed(() => {
+    if (!data.value) return []
+    return Object.values(data.value.categories).flat()
+})
+
+const current = ref(0)
+const score = ref(0)
+const answered = ref(false)
+const selectedIndex = ref<number | null>(null)
+const showResult = ref<boolean>(false)
+
+const question = computed(() => questions.value[current.value])
 
 const BRAND_COLORS = [
     '#EAB8E4',
@@ -64,47 +92,6 @@ function generateTileColors() {
     tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
 }
 
-const wordsForLevel = computed<Word[]>(() => {
-    if (!data.value) return []
-    return Object.values(data.value.categories).flat()
-})
-
-const questions = computed(() =>
-    wordsForLevel.value.length
-        ? generateAudioQuiz(wordsForLevel.value)
-        : []
-)
-
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
-
-const current = ref(0)
-const score = ref(0)
-const answered = ref(false)
-const selectedIndex = ref<number | null>(null)
-
-const { getAccessToken } = await useAuth()
-
-const currentXp = ref<number | null>(null)
-const currentStreak = ref<number | null>(null)
-const xpDelta = ref<number | null>(null)
-const showResult = ref<boolean>(false)
-
-const question = computed(() => questions.value[current.value])
-
-const {
-    state,
-    authReady,
-    isLoggedIn,
-    user,
-    entitlement,
-    hasPaidAccess,
-    isCanceling,
-    currentPeriodEnd,
-    resolve,
-} = useMeStateV2();
-
-
 async function answer(index: number) {
     if (answered.value) return
     if (!question.value) return
@@ -114,6 +101,12 @@ async function answer(index: number) {
 
     const correct = index === question.value.correctIndex
 
+    // 🔥 Store answer for batch persistence
+    answerLog.value.push({
+        wordId: question.value.wordId,
+        correct
+    })
+
     if (correct) {
         score.value++
         playCorrectJingle()
@@ -121,67 +114,153 @@ async function answer(index: number) {
         playIncorrectJingle()
     }
 
-    if (!isLoggedIn.value) return
+    const wordId = question.value.wordId
+    const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
+
+    const delta = deltaFor(correct, prev.streak)
+    const newStreak = correct ? prev.streak + 1 : 0
+    const newXp = Math.max(0, prev.xp + delta)
+
+    wordProgressMap.value[wordId] = {
+        xp: newXp,
+        streak: newStreak
+    }
+
+    xpDelta.value = delta
+    currentXp.value = newXp
+    currentStreak.value = newStreak
+
+    setTimeout(() => {
+        xpDelta.value = null
+    }, 1000)
+}
+
+async function finalizeTopicQuiz() {
+    if (finishing.value) return
+    finishing.value = true
 
     try {
         const token = await getAccessToken()
 
-        const res = await $fetch<{
-            delta: number
-            optimisticXp: number
-            optimisticStreak: number
-            dailyBlocked?: boolean
-            daily?: {
-                answeredCount: number
-                correctCount: number
-                xpEarned: number
-                totalQuestions: number
-            } | null
-        }>('/api/word-progress/update.v2', {
+        await $fetch('/api/quiz/grind/finalize', {
             method: 'POST',
             headers: {
-                Authorization: `Bearer ${token}`,
+                Authorization: `Bearer ${token}`
             },
             body: {
-                wordId: question.value.wordId,
-                correct,
-                mode: 'normal' // topic audio quiz = normal mode
+                topic: topicSlug.value,
+                answers: answerLog.value
             }
         })
 
-        xpDelta.value = res.delta
-        currentXp.value = res.optimisticXp
-        currentStreak.value = res.optimisticStreak
-
-        setTimeout(() => {
-            xpDelta.value = null
-        }, 1000)
-
     } catch (err) {
-        console.error('XP update failed', err)
+        console.error('Finalize topic quiz failed', err)
+    } finally {
+        finishing.value = false
     }
 }
 
-function next() {
-    stop() // 🔑 stop current word audio
-    answered.value = false
-    selectedIndex.value = null
-    current.value++
+async function next() {
+  stop()
+  answered.value = false
+  selectedIndex.value = null
+
+  current.value++
+
+  if (current.value >= questions.value.length) {
+    if (answerLog.value.length > 0) {
+      await finalizeTopicQuiz()
+    }
+    return
+  }
+
+  const nextWordId = questions.value[current.value]?.wordId
+
+  if (nextWordId) {
+    currentStreak.value =
+      wordProgressMap.value[nextWordId]?.streak ?? 0
+
+    currentXp.value =
+      wordProgressMap.value[nextWordId]?.xp ?? 0
+  }
 }
 
-
 const percentage = computed(() => {
-    if (questions.value.length === 0) return 0
+    if (!questions.value.length) return 0
     return (score.value / questions.value.length) * 100
 })
 
 const completionSoundPlayed = ref(false)
 
-const formattedTitle = computed(() => {
-    return slug.value
-        .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-        .join(' ')
+const weakestIds = ref<string[]>([])
+
+const weightedWords = computed(() => {
+    const words = wordsForTopic.value
+    if (!words.length) return []
+
+    const totalQuestions = 20
+
+    if (!weakestIds.value.length) {
+        return shuffle(words).slice(0, totalQuestions)
+    }
+
+    const weakestPool = shuffle(
+        words.filter(w => weakestIds.value.includes(w.id))
+    )
+
+    const nonWeakestPool = shuffle(
+        words.filter(w => !weakestIds.value.includes(w.id))
+    )
+
+    const weakestTarget = Math.floor(totalQuestions * 0.7)
+
+    const selected: typeof words = []
+
+    selected.push(...weakestPool.slice(0, weakestTarget))
+    selected.push(
+        ...nonWeakestPool.slice(0, totalQuestions - selected.length)
+    )
+
+    if (selected.length < totalQuestions) {
+        const remaining = shuffle(
+            words.filter(w => !selected.some(s => s.id === w.id))
+        )
+
+        selected.push(
+            ...remaining.slice(0, totalQuestions - selected.length)
+        )
+    }
+
+    return shuffle(selected)
+})
+
+const questions = computed(() =>
+    weightedWords.value.length
+        ? buildTopicQuiz(weightedWords.value)
+        : []
+)
+
+onMounted(async () => {
+    try {
+        const token = await getAccessToken()
+
+        const weakest = await $fetch<{ id: string }[]>(
+            '/api/word-progress/weakest',
+            {
+                query: { topic: topicSlug.value },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        )
+
+        weakestIds.value = weakest.map(w => w.id)
+
+        console.log("🧠 Weakest topic words:", weakestIds.value)
+
+    } catch {
+        weakestIds.value = []
+    }
 })
 
 const progressPercent = computed(() => {
@@ -194,29 +273,33 @@ const progressPercent = computed(() => {
 })
 
 watch(
-    () => question.value?.wordId,
-    async (wordId) => {
-        if (!wordId || !isLoggedIn.value) return
+  () => questions.value,
+  async (qs) => {
+    if (!qs.length) return
 
-        try {
-            const token = await getAccessToken()
+    const token = await getAccessToken()
+    const wordIds = qs.map(q => q.wordId)
 
-            const progressMap = await $fetch<
-                Record<string, { xp: number; streak: number }>
-            >('/api/word-progress', {
-                query: { wordIds: wordId },
-                headers: { Authorization: `Bearer ${token}` }
-            })
+    const progressMap = await $fetch<
+      Record<string, { xp: number; streak: number }>
+    >('/api/word-progress', {
+      query: { wordIds: wordIds.join(',') },
+      headers: { Authorization: `Bearer ${token}` }
+    })
 
-            currentXp.value = progressMap[wordId]?.xp ?? 0
-            currentStreak.value = progressMap[wordId]?.streak ?? 0
-        } catch {
-            currentXp.value = 0
-            currentStreak.value = 0
-        }
-    },
-    { immediate: true }
+    wordProgressMap.value = progressMap
+
+    const firstId = qs[0]?.wordId
+    currentStreak.value = progressMap[firstId]?.streak ?? 0
+    currentXp.value = progressMap[firstId]?.xp ?? 0
+  },
+  { immediate: true }
 )
+
+watch(weakestIds, () => {
+    current.value = 0
+    score.value = 0
+})
 
 watch(
     () => current.value,
@@ -226,8 +309,7 @@ watch(
             !completionSoundPlayed.value
         ) {
             completionSoundPlayed.value = true
-
-            stop() // 🔑 stop last word audio
+            stop()
 
             setTimeout(() => {
                 if (percentage.value >= 90) {
@@ -249,9 +331,7 @@ watch(
     },
     { immediate: true }
 )
-
 </script>
-
 
 <template>
     <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
@@ -262,8 +342,8 @@ watch(
 
         <section class="text-center space-y-4">
 
-            <h1 class="text-2xl font-semibold">
-                {{ formattedTitle }} Audio Quiz
+            <h1 class="text-2xl font-semibold capitalize">
+                {{ topicSlug.replace('-', ' ') }}
             </h1>
 
             <!-- Progress -->
@@ -283,10 +363,10 @@ watch(
             <!-- Active Question -->
             <div v-if="current < questions.length" class="space-y-6">
 
-                <!-- Audio -->
-                <div v-if="question.type === 'audio'" class="text-center">
-                    <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
-                </div>
+                <!-- Prompt -->
+                <p class="text-4xl font-semibold min-h-[64px] flex items-center justify-center">
+                    {{ question.prompt }}
+                </p>
 
                 <!-- XP + Streak -->
                 <div class="min-h-[50px] space-y-3">
@@ -338,15 +418,14 @@ watch(
                                     ? '#FECACA'
                                     : tileColors[i]
                 }" :class="[
-                answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-                answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-            ]" @click="answer(i)">
+                    answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+                    answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+                ]" @click="answer(i)">
                         {{ option }}
                     </button>
 
                 </div>
 
-                <!-- Next Button -->
                 <div class="h-10">
                     <button v-if="answered" class="w-full rounded bg-black text-white py-2 transition hover:bg-gray-800"
                         @click="next">
@@ -368,11 +447,7 @@ watch(
                 </p>
 
                 <p class="text-gray-600">
-                    You scored {{
-                        score === questions.length
-                            ? '100%'
-                            : ((score / questions.length) * 100).toFixed(0) + '%'
-                    }}
+                    {{ percentage.toFixed(0) }}%
                 </p>
 
                 <div class="pt-4 space-y-4">
@@ -382,8 +457,8 @@ watch(
                         Restart Quiz
                     </NuxtLink>
 
-                    <NuxtLink :to="`/topic/words/${slug}`" class="block text-black hover:underline">
-                        ← Back to Topic
+                    <NuxtLink :to="`/topic/words/${topicSlug}`" class="block text-black hover:underline">
+                        ← Back to topic
                     </NuxtLink>
 
                 </div>
@@ -391,6 +466,7 @@ watch(
             </div>
 
         </section>
+
     </main>
 </template>
 
@@ -417,7 +493,6 @@ watch(
     opacity: 0;
     transform: translateY(12px) scale(0.9);
 }
-
 
 .fade-streak-enter-active,
 .fade-streak-leave-active {
