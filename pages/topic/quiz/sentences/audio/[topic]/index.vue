@@ -88,7 +88,7 @@ watchEffect(() => {
 <template>
   <main class="max-w-3xl mx-auto px-4 py-12 space-y-10">
 
-    <NuxtLink :to="`/topics/quiz`" class="text-sm text-gray-500 hover:underline">
+    <NuxtLink :to="`/topics/quiz`" class="text-black text-sm hover:underline">
       ← Back to all topic quizzes
     </NuxtLink>
     
@@ -96,7 +96,7 @@ watchEffect(() => {
     <SentenceMeaningExercise :key="quizKey" :sentences="sessionSentences" :all-sentences="allSentences" />
 
     <!-- same container size as the exercises -->
-    <div class="max-w-xl mx-auto pt-6 text-center">
+    <div class="max-w-xl mx-auto pt-2 text-center">
       <button class="text-base text-gray-400 hover:text-gray-600 hover:underline transition" @click="resetQuiz">
         Reset quiz
       </button>

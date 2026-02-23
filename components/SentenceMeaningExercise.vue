@@ -51,21 +51,17 @@ watch(
 
 const encouragingMessages = [
   "Nice work",
-  "Good job — keep going",
+  "Good job! Keep going!",
   "That was solid practice",
   "Well done. This kind of repetition helps",
   "Another one done",
   "Good effort today",
   "You’re making steady progress",
-  "That’s moving in the right direction",
+  "You’re moving in the right direction",
   "This kind of practice adds up",
-  "Well done — consistency matters",
+  "Well done, the consistency matters",
   "You’re getting more comfortable with this",
-  "That went well",
-  "You’re building a real feel for it",
   "Each session makes the next easier",
-  "Good focus there",
-  "You showed up and practiced",
   "Nicely handled.",
   "That’s good progress",
   "Keep going"
@@ -199,7 +195,7 @@ watch(
       </button>
 
       <!-- Next -->
-      <div class="min-h-[3.5rem]">
+      <div class="min-h-[3.0rem]">
         <button v-if="showResult && currentIndex < props.sentences.length" class="w-full rounded-lg bg-black text-white py-3
                  font-medium transition hover:bg-gray-800" @click="next">
           Next →

@@ -74,7 +74,7 @@ watchEffect(() => {
 <template>
   <main class="max-w-3xl mx-auto px-4 py-10 space-y-4">
 
-    <NuxtLink :to="`/topics/quiz`" class="text-sm text-gray-500 hover:underline">
+    <NuxtLink :to="`/topics/quiz`" class="text-black text-sm hover:underline">
       ← Back to all topic quizzes
     </NuxtLink>
 
