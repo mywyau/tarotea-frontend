@@ -16,7 +16,7 @@ definePageMeta({
     </p>
 
     <p class="text-sm text-gray-600 pt-4">
-      You can already explore free levels while we finish preparing and cooking up new content :)
+      You can already explore free levels while we finish preparing and cooking up new content.
     </p>
 
     <div class="text-lg pt-4">
