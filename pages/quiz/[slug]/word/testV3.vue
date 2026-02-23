@@ -59,10 +59,6 @@ function generateTileColors() {
   tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
 }
 
-// function getTileColor(index: number) {
-//   return BRAND_COLORS[index % BRAND_COLORS.length].bg
-// }
-
 function shuffle<T>(arr: T[]): T[] {
   return [...arr].sort(() => Math.random() - 0.5);
 }

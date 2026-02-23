@@ -35,6 +35,7 @@ watchEffect(() => {
 
 const features = [
   "XP is awarded when you complete the quiz",
+  "Each word has a max xp cap of 500xp, you cannot exceed 500xp per word",
   "New or your weakest words will tend to appear more often",
   "You gain at least 5xp for every correct answer",
   "Streaks gain you more XP per answer",
