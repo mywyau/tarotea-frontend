@@ -35,10 +35,15 @@ watchEffect(() => {
 
 const features = [
   "XP is awarded when you complete the quiz",
-  "Your weakest words will tend to appear more often",
+  "New or your weakest words will tend to appear more often",
+  "You gain at least 5xp for every correct answer",
   "Streaks gain you more XP per answer",
-  "Randomised questions",
-  "Cantonese to English and vice versa"
+  "Questions are randomised",
+  "Cantonese to English and vice versa",
+  "No audio to help with reading recognition and comprehension",
+  "You lose 12xp and your streak for every wrong answer",
+  "Streak cap out at 5 correct in a row",
+  "5xp, 7xp, 9xp, 13xp and finally 15xp is the max cap at 5 streak.",
 ]
 
 const featureIndex = ref(0)
@@ -57,7 +62,7 @@ let interval: ReturnType<typeof setInterval> | null = null
 
 function startAutoScroll() {
   stopAutoScroll()
-  interval = setInterval(nextFeature, 3500)
+  interval = setInterval(nextFeature, 4000)
 }
 
 function stopAutoScroll() {
@@ -145,14 +150,6 @@ watch(featureIndex, (newVal) => {
         Test your understanding of the words from this level.
       </p>
 
-      <!-- <ul class="features-list text-base text-black">
-        <li>XP is awarded when you complete the quiz</li>
-        <li>Your weakest words will tend to appear more often</li>
-        <li>Streaks gain you more xp per answer</li>
-        <li>Randomised questions</li>
-        <li>Cantonese ↔ English</li>
-      </ul> -->
-
       <div class="relative max-w-sm mx-auto" @mouseenter="stopAutoScroll" @mouseleave="startAutoScroll">
         <div class="relative h-[120px]">
 
@@ -179,7 +176,7 @@ watch(featureIndex, (newVal) => {
       </div>
 
       <NuxtLink :to="`/quiz/${slug}/word/testV3`" class="start-btn">
-        Start quiz
+        Start vocabulary quiz
       </NuxtLink>
 
       <div class="pt-6">
