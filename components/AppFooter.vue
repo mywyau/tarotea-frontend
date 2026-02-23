@@ -1,5 +1,5 @@
 <template>
-  <footer class="mt-12 border-t border-gray-200 bg-[#FFF9E6]">
+  <footer class="mt-12 border-t border-gray-200">
     <div class="max-w-5xl mx-auto px-5 py-8 text-sm text-black">
 
       <!-- Brand -->
