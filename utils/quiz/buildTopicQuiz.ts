@@ -40,7 +40,7 @@ export function buildTopicQuiz(
       ]);
 
       return {
-        wordId: word.id, // 🔥 ADD THIS
+        wordId: word.id,
         prompt: word.word,
         options,
         correctIndex: options.indexOf(word.meaning),
@@ -58,7 +58,7 @@ export function buildTopicQuiz(
     ]);
 
     return {
-      wordId: word.id, // 🔥 ADD THIS
+      wordId: word.id,
       prompt: word.meaning,
       options,
       correctIndex: options.indexOf(word.word),
