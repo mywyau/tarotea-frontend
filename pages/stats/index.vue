@@ -49,6 +49,40 @@ const stats = computed(() => {
     ]
 })
 
+const animatedValue = ref(0)
+
+function animateCount(
+    target: Ref<number>,
+    endValue: number,
+    duration = 800
+) {
+    const startValue = 0
+    const startTime = performance.now()
+
+    function update(now: number) {
+        const elapsed = now - startTime
+        const progress = Math.min(elapsed / duration, 1)
+
+        // easeOutCubic (smooth finish)
+        const eased = 1 - Math.pow(1 - progress, 3)
+
+        target.value = Math.floor(startValue + (endValue - startValue) * eased)
+
+        if (progress < 1) {
+            requestAnimationFrame(update)
+        } else {
+            target.value = endValue
+        }
+    }
+
+    requestAnimationFrame(update)
+}
+
+const animatedStats = ref<number[]>([])
+
+watch(() => statsData.value?.total_xp, (newVal) => {
+    animateCount(animatedValue, newVal)
+})
 
 onMounted(async () => {
     try {
@@ -63,6 +97,29 @@ onMounted(async () => {
         })
 
         statsData.value = res
+
+        // Initialize animated values
+        animatedStats.value = stats.value.map(() => 0)
+
+        // Delay slightly so DOM renders first
+        setTimeout(() => {
+            stats.value.forEach((stat, index) => {
+                const value = Number(stat.value)
+                const tempRef = ref(0)
+
+                // Bind animation to array slot
+                Object.defineProperty(tempRef, "value", {
+                    get() {
+                        return animatedStats.value[index]
+                    },
+                    set(v) {
+                        animatedStats.value[index] = v
+                    }
+                })
+
+                animateCount(tempRef as any, value, 900 + index * 120)
+            })
+        }, 100)
 
     } catch (err) {
         console.error('Stats fetch failed', err)
@@ -92,13 +149,14 @@ onMounted(async () => {
             </h1>
 
             <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-                <div v-for="(stat, index) in stats" :key="stat.label" class="stat-card" :class="`stat-${index}`">
+                <div v-for="(stat, index) in stats" :key="stat.label" class="stat-card hover:brightness-110"
+                    :class="`stat-${index}`">
                     <p class="stat-label">
                         {{ stat.label }}
                     </p>
 
                     <p class="stat-value">
-                        {{ stat.value.toLocaleString() }} {{ stat.suffix }}
+                        {{ (animatedStats[index] ?? stat.value).toLocaleString() }} {{ stat.suffix }}
                     </p>
                 </div>
             </div>
@@ -107,7 +165,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-
 .fade-enter-active,
 .fade-leave-active {
     transition: opacity 0.35s ease, transform 0.35s ease;
