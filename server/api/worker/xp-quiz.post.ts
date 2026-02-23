@@ -7,6 +7,8 @@ type Payload = {
 export default defineEventHandler(async () => {
   console.log("[xp-quiz worker] invoked");
 
+  const MASTERY_CAP = 500;
+
   const client = await db.connect();
   await client.query("BEGIN");
 
@@ -85,7 +87,10 @@ export default defineEventHandler(async () => {
               as u(word_id, delta, correct)
             on conflict (user_id, word_id)
             do update set
-              xp = greatest(0, user_word_progress.xp + excluded.xp),
+              xp = least(
+                      $5::int,
+                      greatest(0, user_word_progress.xp + excluded.xp)
+                    ),
               streak = case
                 when excluded.correct_count = 1 then user_word_progress.streak + 1
                 else 0
@@ -99,7 +104,7 @@ export default defineEventHandler(async () => {
               end,
               updated_at = now()
         `,
-        [userId, wordIds, deltas, corrects],
+        [userId, wordIds, deltas, corrects, MASTERY_CAP],
       );
 
       applied += wordIds.length; // count unique words applied
