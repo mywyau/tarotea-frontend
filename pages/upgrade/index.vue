@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useUpgrade } from '@/composables/useUpgrade';
+import { hasPaidAccess } from '@/utils/canAccessLevel';
 
 definePageMeta({ layout: 'default' })
 
@@ -9,14 +10,14 @@ const {
   isLoggedIn,
   user,
   entitlement,
-  hasPaidAccess,
+  // hasPaidAccess,
   isCanceling,
   currentPeriodEnd,
   resolve,
 } = useMeStateV2();
 
 const isSubscribed = computed(() =>
-  authReady.value && hasPaidAccess.value
+  authReady.value && hasPaidAccess(entitlement.value!)
 )
 
 function upgrade(plan: 'monthly' | 'yearly') {
@@ -77,10 +78,11 @@ function upgrade(plan: 'monthly' | 'yearly') {
           </button>
 
           <!-- Yearly (KEEP BLACK) -->
-          <button class="block w-full rounded-xl bg-black text-white px-4 py-4 font-medium transition shadow-md" :class="isSubscribed
+          <button class="block w-full rounded-xl text-black px-3 py-3 font-medium transition shadow-md" :class="isSubscribed
             ? 'opacity-60 cursor-not-allowed'
-            : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')">
-            Yearly plan · £59.99 
+            : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
+            style="background-color:rgba(244,205,39,0.35);">
+            Yearly plan · £59.99
           </button>
 
         </div>

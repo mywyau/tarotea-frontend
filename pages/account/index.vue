@@ -76,13 +76,14 @@ async function openBillingPortal() {
                 <!-- Account details -->
                 <div v-else-if="isLoggedIn" class="space-y-6">
                     <!-- Signed in card -->
-                    <section class="rounded-lg border border-black/5 bg-white/75 backdrop-blur p-5">
-                        <div class="text-sm text-gray-500">Signed in as</div>
+                    <section class="rounded-lg backdrop-blur p-5" style="background-color:#A8CAE0;">
+                        <div class="text-sm text-gray-700">Signed in as</div>
                         <div class="mt-1 font-medium text-gray-900 break-all">{{ user.email }}</div>
                     </section>
 
                     <!-- Plan card -->
-                    <section class="rounded-lg border border-black/5 bg-white/75 backdrop-blur p-5 space-y-3">
+                    <section class="rounded-lg backdrop-blur p-5 space-y-3"
+                        style="background-color:rgba(244,205,39,0.35);">
                         <div class="flex items-center justify-between gap-3">
                             <div>
                                 <div class="text-sm text-gray-500">Plan</div>
@@ -198,14 +199,16 @@ async function openBillingPortal() {
                 </div>
 
                 <!-- Not signed in -->
-                <div v-else
-                    class="rounded-lg border border-black/5 bg-white/75 backdrop-blur p-6 text-center space-y-3">
-                    <p class="text-gray-700 font-medium">You’re not signed in.</p>
-                    <p class="text-sm text-gray-500">Sign in to manage your account and subscription.</p>
-                    <NuxtLink to="/" class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-                   border border-black/10 bg-white/80 hover:bg-white transition">
-                        Go home
-                    </NuxtLink>
+                <div v-else class="rounded-lg backdrop-blur p-6 text-center space-y-6"
+                    style="background-color:#EAB8E4;">
+                    <p class="text-black font-medium">You’re not signed in.</p>
+                    <p class="text-sm text-black">Sign in to manage your account and subscription.</p>
+                    <div class="mt-">
+                        <NuxtLink to="/" class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
+                    transition bg-black text-white">
+                            Go home
+                        </NuxtLink>
+                    </div>
                 </div>
             </div>
         </div>

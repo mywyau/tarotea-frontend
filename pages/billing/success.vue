@@ -12,7 +12,7 @@ definePageMeta({
 <template>
   <main class="min-h-[70vh] flex items-center justify-center px-4">
     <div class="max-w-md w-full text-center space-y-6">
-      
+
       <div class="text-5xl">🎉</div>
 
       <h1 class="text-2xl font-semibold">
@@ -24,17 +24,13 @@ definePageMeta({
       </p>
 
       <div class="space-y-3 pt-4">
-        <NuxtLink
-          to="/levels"
-          class="block w-full rounded-lg bg-black text-white py-3 font-medium hover:bg-gray-800 transition"
-        >
+        <NuxtLink to="/levels"
+          class="block w-full rounded-lg text-black py-3 font-medium hover:brightness-110 transition"
+          style="background-color:#D6A3D1;">
           Continue learning
         </NuxtLink>
 
-        <NuxtLink
-          to="/account"
-          class="block text-sm text-gray-500 hover:underline"
-        >
+        <NuxtLink to="/account" class="block text-sm text-gray-500 hover:underline">
           View account
         </NuxtLink>
       </div>

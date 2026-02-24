@@ -128,7 +128,7 @@ const {
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
               <div class="text-xs text-gray-800 mt-1">
-               
+                It's a mystery
               </div>
             </div>
           </NuxtLink>
