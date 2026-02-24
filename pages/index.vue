@@ -131,7 +131,7 @@ const {
             </div>
           </NuxtLink>
 
-          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+          <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
         shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:rgba(244,205,39,0.35);">
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
@@ -170,7 +170,7 @@ const {
                 Awesome
               </div>
             </div>
-          </NuxtLink>
+          </NuxtLink> -->
 
 
         </div>
