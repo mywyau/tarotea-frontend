@@ -42,7 +42,7 @@ const MASTERY_XP = 200
       </div>
 
       <!-- Progress Bar -->
-      <div class="w-full h-1 bg-gray-300 rounded">
+      <div class="w-full h-1 bg-gray-400 rounded">
         <div class="h-1 bg-green-500 rounded transition-all duration-500"
           :style="{ width: Math.min((xp ?? 0) / MASTERY_XP * 100, 100) + '%' }" />
       </div>
