@@ -280,13 +280,13 @@ watch(currentQuestion, () => {
 
         <div v-else>
 
-            <div v-if="dailyLocked" class="bg-white shadow p-8 rounded-xl text-center">
+            <div v-if="dailyLocked" class="shadow p-10 rounded-lg text-center" style="background-color:#A8CAE0;">
 
                 <h2 class="text-xl font-semibold mb-4">
                     Daily Training Locked
                 </h2>
 
-                <p class="text-gray-600 mb-4">
+                <p class="text-gray-700 mb-4">
                     You need to have quizzed yourself on at least {{ requiredWords }} words
                     to unlock Daily Training.
                 </p>
@@ -296,12 +296,12 @@ watch(currentQuestion, () => {
                         :style="{ width: (currentWordCount / requiredWords) * 100 + '%' }" />
                 </div>
 
-                <p class="text-sm text-gray-500 mb-6">
-                    {{ currentWordCount }} / {{ requiredWords }} words studied
+                <p class="text-sm text-gray-700 mb-6">
+                    {{ currentWordCount }} / {{ requiredWords }} words tested
                 </p>
 
                 <NuxtLink to="/topics/quiz"
-                    class="mt-2 inline-block text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
+                    class="mt-2 inline-block text-gray-800 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
                     Test your self on more words first →
                 </NuxtLink>
             </div>

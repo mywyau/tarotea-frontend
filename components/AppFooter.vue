@@ -4,11 +4,11 @@
 
       <!-- Brand -->
       <div class="text-center sm:text-left">
-        <div class="font-semibold text-lg">
+        <NuxtLink to="/" class="font-semibold text-lg hover:underline"">
           TaroTea
-        </div>
+        </NuxtLink>
 
-        <p class="mt-2 text-gray-700 text-sm sm:max-w-sm">
+        <p class="mt-2 text-gray-800 text-sm sm:max-w-sm">
           Learn and understand everyday Cantonese.
         </p>
       </div>
@@ -38,7 +38,7 @@
       </div>
 
       <!-- Copyright -->
-      <div class="mt-8 text-center text-xs text-gray-600">
+      <div class="mt-8 text-center text-xs text-gray-700">
         © {{ new Date().getFullYear() }} TaroTea
       </div>
 
