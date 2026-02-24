@@ -86,7 +86,7 @@ async function openBillingPortal() {
                         style="background-color:rgba(244,205,39,0.35);">
                         <div class="flex items-center justify-between gap-3">
                             <div>
-                                <div class="text-sm text-gray-500">Plan</div>
+                                <div class="text-sm text-gray-700">Plan</div>
                                 <div class="mt-1 font-medium text-gray-900">
                                     <span
                                         v-if="entitlement?.plan === 'monthly' && entitlement?.subscription_status === 'active'">Monthly</span>
@@ -113,7 +113,7 @@ async function openBillingPortal() {
                         </p>
 
                         <p v-else-if="entitlement?.subscription_status === 'active' && currentPeriodEnd"
-                            class="text-sm text-gray-600">
+                            class="text-sm text-gray-700">
                             Renews on <span class="font-medium">{{ currentPeriodEnd.toLocaleDateString() }}</span>
                         </p>
 
