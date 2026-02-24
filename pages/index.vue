@@ -128,7 +128,7 @@ const {
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
               <div class="text-xs text-gray-800 mt-1">
-                It's a mystery
+                What could it be?
               </div>
             </div>
           </NuxtLink>
@@ -138,7 +138,7 @@ const {
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
               <div class="text-xs text-gray-800 mt-1">
-                
+                Something cool
               </div>
             </div>
           </NuxtLink>
@@ -149,7 +149,7 @@ const {
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
               <div class="text-xs text-gray-800 mt-1">
-               
+               Awesome
               </div>
             </div>
           </NuxtLink>
