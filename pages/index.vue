@@ -3,6 +3,19 @@ const { data: stats } = await useFetch('/api/stats', {
   server: true,
   lazy: true,
 })
+
+const {
+  state,
+  authReady,
+  isLoggedIn,
+  user,
+  entitlement,
+  hasPaidAccess,  // this is dodgy use entitlements instead please :) to determine access
+  isCanceling,
+  currentPeriodEnd,
+  resolve,
+} = useMeStateV2();
+
 </script>
 
 <template>
@@ -100,6 +113,48 @@ const { data: stats } = await useFetch('/api/stats', {
             </div>
           </NuxtLink>
 
+          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+        shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:rgba(244,205,39,0.35);">
+            <div>
+              <div class="font-semibold text-gray-900">Coming soon</div>
+              <div class="text-xs text-gray-800 mt-1">
+                It's a mystery
+              </div>
+            </div>
+          </NuxtLink>
+
+          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+        shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#F6E1E1;">
+            <div>
+              <div class="font-semibold text-gray-900">Coming soon</div>
+              <div class="text-xs text-gray-800 mt-1">
+               
+              </div>
+            </div>
+          </NuxtLink>
+
+          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+        shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#D6A3D1;">
+            <div>
+              <div class="font-semibold text-gray-900">Coming soon</div>
+              <div class="text-xs text-gray-800 mt-1">
+                
+              </div>
+            </div>
+          </NuxtLink>
+
+
+          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+        shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#A8CAE0;">
+            <div>
+              <div class="font-semibold text-gray-900">Coming soon</div>
+              <div class="text-xs text-gray-800 mt-1">
+               
+              </div>
+            </div>
+          </NuxtLink>
+
+
         </div>
       </div>
 
@@ -138,7 +193,7 @@ const { data: stats } = await useFetch('/api/stats', {
       </div>
 
       <!-- DAILY -->
-      <div>
+      <div v-if="isLoggedIn">
         <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
           Daily Exercise
         </h2>
