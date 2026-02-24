@@ -172,7 +172,7 @@ const {
             <div>
               <div class="font-semibold text-gray-900">Level Quiz</div>
               <div class="text-xs text-gray-800 mt-1">
-                Practice by level
+                Practice content based on our levels
               </div>
             </div>
           </NuxtLink>
