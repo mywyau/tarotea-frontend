@@ -81,6 +81,24 @@ const {
     <!-- Navigation Tiles -->
     <div class="mt-12 space-y-10">
 
+      <!-- DAILY -->
+      <div v-if="isLoggedIn">
+        <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
+          Daily Exercise
+        </h2>
+
+        <NuxtLink to="/daily/v3" class="rounded-xl p-6 flex items-end
+      shadow-sm hover:shadow-md transition hover:brightness-105" style="background-color:#F6E1E1;">
+          <div>
+            <div class="font-semibold text-gray-900">Daily</div>
+            <div class="text-xs text-gray-800 mt-1">
+              Practice with our daily exercise
+            </div>
+          </div>
+        </NuxtLink>
+
+      </div>
+
       <!-- START LEARNING -->
       <div>
         <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
@@ -149,7 +167,7 @@ const {
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
               <div class="text-xs text-gray-800 mt-1">
-               Awesome
+                Awesome
               </div>
             </div>
           </NuxtLink>
@@ -190,24 +208,6 @@ const {
 
 
         </div>
-      </div>
-
-      <!-- DAILY -->
-      <div v-if="isLoggedIn">
-        <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
-          Daily Exercise
-        </h2>
-
-        <NuxtLink to="/daily/v3" class="rounded-xl p-6 flex items-end
-      shadow-sm hover:shadow-md transition hover:brightness-105" style="background-color:#F6E1E1;">
-          <div>
-            <div class="font-semibold text-gray-900">Daily</div>
-            <div class="text-xs text-gray-800 mt-1">
-              Practice with our daily exercise
-            </div>
-          </div>
-        </NuxtLink>
-
       </div>
 
     </div>
