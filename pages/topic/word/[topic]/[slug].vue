@@ -134,7 +134,7 @@ watchEffect(() => {
 
                 <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
                     <span>{{ xp }} XP</span>
-                    <span v-if="isMastered" class="font-semibold text-yellow-600">
+                    <span v-if="isMastered" class="font-semibold text-green-600">
                         ✓ Maxed
                     </span>
                 </div>
