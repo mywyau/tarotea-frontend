@@ -23,7 +23,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // 🚧 Coming soon
-  if (levelNumber > 6) {
+  if (levelNumber > 7) {
     return navigateTo("/coming-soon");
   }
 

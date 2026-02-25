@@ -79,7 +79,7 @@ const levels = [
     id: 'level-seven',
     number: 7,
     title: 'Level 7',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Express opinions tactfully, disagree politely, persuade gently, and manage sensitive situations.'
   },
   {
