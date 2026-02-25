@@ -61,7 +61,7 @@ const quizLevels = [
     id: 'level-six',
     number: 6,
     title: 'Level 6',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Tell stories and describe past experiences naturally.'
   },
   {

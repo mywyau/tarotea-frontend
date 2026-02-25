@@ -104,7 +104,7 @@ const MASTERY_XP = 200
 const isMastered = (id: string) =>
   (progressMap.value?.[id]?.xp ?? 0) >= MASTERY_XP
 
-const FREE_WORD_LIMIT = 5
+const FREE_WORD_LIMIT = 10
 
 const hasPaidAccess = computed(() => {
   if (!authReady.value) return false

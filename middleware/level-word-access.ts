@@ -22,7 +22,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (levelNumber <= 2) return;
 
   // 🚧 Coming soon
-  if (levelNumber > 5) {
+  if (levelNumber > 6) {
     return navigateTo("/coming-soon");
   }
 
@@ -37,7 +37,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const topic = await $fetch(`/api/index/levels/${slug}`);
 
   const allWords = Object.values(topic.categories).flat();
-  const freePreviewIds = allWords.slice(0, 5).map((w: any) => w.id);
+  const freePreviewIds = allWords.slice(0, 10).map((w: any) => w.id);
 
   if (freePreviewIds.includes(id)) {
     return; // allow preview
