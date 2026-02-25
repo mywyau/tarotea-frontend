@@ -88,20 +88,20 @@ watchEffect(() => {
         ogType: 'article',
     })
 
-    useHead({
-        script: [
-            {
-                type: 'application/ld+json',
-                children: JSON.stringify({
-                    "@context": "https://schema.org",
-                    "@type": "DefinedTerm",
-                    name: word.value.word,
-                    description: word.value.meaning,
-                    inDefinedTermSet: `Cantonese ${topicLabel} Vocabulary`,
-                })
-            }
-        ]
-    })
+    // useHead({
+    //     script: [
+    //         {
+    //             type: 'application/ld+json',
+    //             children: JSON.stringify({
+    //                 "@context": "https://schema.org",
+    //                 "@type": "DefinedTerm",
+    //                 name: word.value.word,
+    //                 description: word.value.meaning,
+    //                 inDefinedTermSet: `Cantonese ${topicLabel} Vocabulary`,
+    //             })
+    //         }
+    //     ]
+    // })
 })
 
 </script>
