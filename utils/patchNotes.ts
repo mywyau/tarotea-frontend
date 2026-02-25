@@ -9,8 +9,15 @@ export const patchNotes: PatchNote[] = [
     date: "Feb 2026",
     title: "Upcoming",
     items: [
-      "More content for topics 'Time & Dates' and 'Money'",
-      "Content for Level 6",
+      "Expand content for topics",
+      "Content review to fix dodgy translations, jyutping, chinese characters and audio",
+    ],
+  },
+  {
+    date: "25 Feb 2026",
+    title: "Daily",
+    items: [
+      "Added Content for Level 6 and 7",
     ],
   },
   {
