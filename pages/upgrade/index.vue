@@ -103,7 +103,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         </p>
 
         <p class="text-xs text-gray-400 pt-4">
-          You can change or cancel your plan at any time.
+          You can cancel your plan at any time.
         </p>
 
       </div>
