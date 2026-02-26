@@ -1,0 +1,73 @@
+TaroTea Commercial License (TCL) v1.0
+Copyright (c) 2026 Michael Yi-wing Yau
+All Rights Reserved.
+
+1. DEFINITIONS
+
+"Software" means the source code, object code, configuration, and any
+associated materials contained in this repository.
+
+"Licensor" means Michael Yi-wing Yau.
+
+"Commercial Use" means any use of the Software:
+  (a) in a business environment,
+  (b) for monetary gain,
+  (c) to provide services to third parties,
+  (d) as part of a hosted service,
+  (e) in production systems,
+  (f) or in any environment generating revenue directly or indirectly.
+
+2. GRANT OF RIGHTS
+
+Subject to the terms of this License, Licensor grants you a limited,
+non-exclusive, non-transferable, revocable license to:
+
+  - View the Software
+  - Clone the repository
+  - Evaluate and test the Software locally for personal,
+    non-commercial purposes only
+
+3. RESTRICTIONS
+
+You may NOT, without explicit written permission from the Licensor:
+
+  - Use the Software for Commercial Use
+  - Deploy the Software in production
+  - Offer the Software as a service
+  - Modify the Software and distribute derivative works
+  - Redistribute the Software in any form
+  - Sublicense or sell the Software
+  - Remove or alter copyright notices
+
+4. COMMERCIAL LICENSE
+
+Commercial Use requires a separate paid commercial license agreement
+directly with the Licensor.
+
+To obtain a commercial license, contact:
+m.yw.yau@gmail.com
+
+5. OWNERSHIP
+
+The Software is licensed, not sold.
+All rights, title, and interest in the Software remain exclusively
+with the Licensor.
+
+6. TERMINATION
+
+Any violation of this License automatically terminates your rights
+under this License.
+
+Upon termination, you must immediately cease all use of the Software
+and delete all copies in your possession.
+
+7. NO WARRANTY
+
+The Software is provided "AS IS", without warranty of any kind,
+express or implied, including but not limited to merchantability,
+fitness for a particular purpose, and noninfringement.
+
+8. LIMITATION OF LIABILITY
+
+In no event shall the Licensor be liable for any claim, damages,
+or other liability arising from the use of the Software.
