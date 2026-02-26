@@ -67,7 +67,7 @@ const {
             Learners
           </div>
         </div>
-<!-- 
+        <!-- 
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
             {{ stats?.paidUsers ?? '—' }}

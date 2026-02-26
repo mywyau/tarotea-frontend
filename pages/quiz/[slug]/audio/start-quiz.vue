@@ -31,7 +31,7 @@ const canEnterLevel = () => {
 
   if (!authReady.value) return false
 
-  if (levelNumber.value! <= 2) return true
+  if (levelNumber.value! <= 3) return true
 
   // Paid levels
   if (!isLoggedIn.value) return false

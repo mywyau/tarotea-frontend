@@ -24,10 +24,6 @@ const {
   entitlement,
 } = useMeStateV2()
 
-// const isFreeLevel = (level: number) => {
-//   return level <= 2 // adjust if needed
-// }
-
 
 // SSR-safe fetch (no gating, no nulls)
 const { data: topic, error } = await useFetch(
