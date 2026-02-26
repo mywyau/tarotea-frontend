@@ -84,13 +84,6 @@ const topics = [
         requiresPaid: true
     },
     {
-        id: 'money',
-        title: 'Money & Payments',
-        comingSoon: true,
-        description: 'Discuss prices, paying, change, costs, and money-related situations.',
-        requiresPaid: true
-    },
-    {
         id: 'dim-sum',   // new topic
         title: 'Dim Sum',
         comingSoon: false,
@@ -102,6 +95,13 @@ const topics = [
         title: 'Resturant Menu',
         comingSoon: true,
         description: 'Study and learn to order your favourite dishes.',
+        requiresPaid: true
+    },
+    {
+        id: 'money',
+        title: 'Money & Payments',
+        comingSoon: true,
+        description: 'Discuss prices, paying, change, costs, and money-related situations.',
         requiresPaid: true
     },
     {
