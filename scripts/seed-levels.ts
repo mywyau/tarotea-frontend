@@ -20,6 +20,10 @@ const LEVELS = [
   "level-four",
   "level-five",
   "level-six",
+  "level-seven",
+  "level-eight",
+  "level-nine",
+  "level-ten",
 ]
 
 async function seed() {
