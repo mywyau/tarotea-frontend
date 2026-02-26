@@ -30,7 +30,7 @@ const topics = [
   {
     id: 'greetings',
     title: 'Greetings & Politeness',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Say hello, goodbye, thank people, apologise, and handle basic polite interactions.'
   },
   {
@@ -60,7 +60,7 @@ const topics = [
   {
     id: 'dim-sum',
     title: 'Dim Sum',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Learn to order your favourite dim sum.'
   },
   {
@@ -257,9 +257,7 @@ const topics = [
   },
 ]
 
-
 const isComingSoon = (topic: any) => topic.comingSoon === true
-
 const canEnterTopic = (topic: any) => {
 
   if (!authReady.value) return false

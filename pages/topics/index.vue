@@ -85,6 +85,18 @@ const topics = [
     requiresPaid: false
   },
   {
+    id: 'dim-sum',   // new topic
+    title: 'Dim Sum',
+    comingSoon: false,
+    description: 'Learn to order your favourite dim sum.'
+  },
+  {
+    id: 'resturant-menu',
+    title: 'Resturant Menu',
+    comingSoon: true,
+    description: 'Study and learn to order your favourite dishes.'
+  },
+  {
     id: 'money',
     title: 'Money & Payments',
     comingSoon: true,
