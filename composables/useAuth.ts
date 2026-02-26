@@ -63,7 +63,11 @@ export async function login() {
   const { client } = await useAuth();
   if (!client) return;
 
-  await client.loginWithRedirect();
+  await client.loginWithRedirect({
+    authorizationParams: {
+      prompt: "select_account",
+    },
+  });
 }
 
 export async function logout() {
