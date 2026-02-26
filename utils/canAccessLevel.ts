@@ -10,7 +10,7 @@ export function hasPaidAccess(entitlement: Entitlement) {
 }
 
 export function isFreeLevel(level: number) {
-  return level <= 2;
+  return level <= 3;
 }
 
 export function canAccessLevel(entitlement: Entitlement): boolean {
