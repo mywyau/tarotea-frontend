@@ -75,21 +75,21 @@ const quizLevels = [
     id: 'level-eight',
     number: 8,
     title: 'Level 8',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Understand and use common idioms, cultural expressions, and implied meanings in natural, informal speech.'
   },
   {
     id: 'level-nine',
     number: 9,
     title: 'Level 9',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Discuss news, social issues, trends, and abstract ideas clearly.'
   },
   {
     id: 'level-ten',
     number: 10,
     title: 'Level 10',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Speak naturally, react instinctively, and handle fast, casual conversations.'
   },
 ]
