@@ -20,6 +20,7 @@ const TOPICS = [
   "measure-quantities",
   "survival-essentials",
   "time-dates",
+  "dim-sum",
 ];
 
 async function seed() {

@@ -19,7 +19,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // ✅ Free levels (1–2)
-  if (levelNumber <= 2) return;
+  if (levelNumber <= 3) return;
 
   // 🚧 Coming soon
   if (levelNumber > 11) {

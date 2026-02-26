@@ -57,7 +57,8 @@ const {
         Online user stats
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+      <!-- <div class="grid grid-cols-1 sm:grid-cols-2 gap-5"> -->
+      <div class="grid grid-cols-1 sm:grid-cols-1 gap-5">
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
             {{ stats?.totalUsers ?? '—' }}
@@ -66,7 +67,7 @@ const {
             Learners
           </div>
         </div>
-
+<!-- 
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
             {{ stats?.paidUsers ?? '—' }}
@@ -74,7 +75,7 @@ const {
           <div class="text-sm text-gray-700 mt-1">
             Active Subscribers
           </div>
-        </div>
+        </div> -->
       </div>
     </div>
 

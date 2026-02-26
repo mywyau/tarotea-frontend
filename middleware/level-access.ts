@@ -18,7 +18,7 @@ export default defineNuxtRouteMiddleware((to) => {
   }
 
   // ✅ Free levels
-  if (levelNumber <= 2) {
+  if (levelNumber <= 3) {
     return;
   }
 
