@@ -17,6 +17,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
     "greetings-polite",
     "fruits-vegetables",
     "clothing",
+    "dim-sum",
+    "resturant-menu",
   ];
 
   // ✅ Fully free topics

@@ -42,20 +42,32 @@ const topics = [
   {
     id: 'clothing',
     title: 'Clothing',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Name and describe items of clothing.'
   },
   {
     id: 'measurements',
     title: 'Measurements & Quantities',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Describe amounts, sizes, prices, and quantities used in daily life and shopping.'
   },
   {
     id: 'time',
     title: 'Time & Dates',
-    comingSoon: true,
+    comingSoon: false,
     description: 'Talk about time, days, dates, schedules, and when things happen.'
+  },
+  {
+    id: 'dim-sum',
+    title: 'Dim Sum',
+    comingSoon: true,
+    description: 'Learn to order your favourite dim sum.'
+  },
+  {
+    id: 'resturant-menu',
+    title: 'Resturant Menu',
+    comingSoon: true,
+    description: 'Study and learn to order your favourite dishes.'
   },
   {
     id: 'money',
@@ -283,7 +295,7 @@ const canEnterTopic = (topic: any) => {
             ? 'hover:bg-gray-50'
             : 'opacity-80'
       ]">
-      
+
         <NuxtLink :to="`topics/words/${topic.id}`" class="block space-y-3">
 
           <div class="text-lg font-medium">

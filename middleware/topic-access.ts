@@ -3,6 +3,8 @@ const FREE_TOPICS = new Set([
   "greetings-polite",
   "fruits-vegetables",
   "clothing",
+  "dim-sum",
+  "resturant-menu",
 ]);
 
 export default defineNuxtRouteMiddleware(async (to) => {
