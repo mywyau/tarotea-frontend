@@ -7,6 +7,11 @@ definePageMeta({
 
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 
+import {
+    playCorrectJingle
+} from '@/utils/sounds'
+
+
 type TrainWord = {
     wordId: string
     word: string
@@ -428,21 +433,20 @@ async function finalizeBatch() {
     }
 }
 
-const successAudio = ref<HTMLAudioElement | null>(null)
+const wordAudio = ref<HTMLAudioElement | null>(null)
 
 function playCurrentAudio() {
     if (!current.value) return
 
     const src = `${cdnBase}/audio/${current.value.wordId}.mp3`
 
-    if (!successAudio.value) {
-        successAudio.value = new Audio()
+    if (!wordAudio.value) {
+        wordAudio.value = new Audio()
     }
 
-    successAudio.value.src = src
-    successAudio.value.currentTime = 0
-
-    successAudio.value.play().catch(() => { })
+    wordAudio.value.src = src
+    wordAudio.value.currentTime = 0
+    wordAudio.value.play().catch(() => { })
 }
 
 function advance() {
@@ -484,7 +488,6 @@ watch(
 
         advancing = true
 
-        // ✅ only record first perfect per word
         if (!batchAttempts.value.some(a => a.wordId === current.value!.wordId)) {
             batchAttempts.value.push({
                 wordId: current.value.wordId,
@@ -493,24 +496,33 @@ watch(
             })
         }
 
-        playCurrentAudio()
+        // 🔔 Play procedural jingle
+        playCorrectJingle(0.7)
 
-        if (successAudio.value) {
-            successAudio.value.onended = async () => {
-                await new Promise(r => setTimeout(r, 200))
+        // Wait for jingle envelope (~400ms)
+        await new Promise(r => setTimeout(r, 420))
 
-                // ✅ If batch full → finalize
-                if (batchAttempts.value.length >= BATCH_SIZE) {
-                    await finalizeBatch()
-                    advancing = false   // ← important
-                    return
-                }
-
-                advance()
-                advancing = false
-            }
+        if (batchAttempts.value.length >= BATCH_SIZE) {
+            await finalizeBatch()
+            advancing = false
+            return
         }
+
+        advance()
+        advancing = false
     }
+)
+watch(
+    () => current.value?.wordId,
+    (id) => {
+        if (!id || isComplete.value) return
+
+        // small delay feels natural
+        setTimeout(() => {
+            playCurrentAudio()
+        }, 300)
+    },
+    { immediate: true }
 )
 
 onMounted(() => {
