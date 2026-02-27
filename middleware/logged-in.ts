@@ -3,6 +3,7 @@ export default defineNuxtRouteMiddleware(() => {
     state,
     authReady,
     isLoggedIn,
+    isLoggedOut,
     user,
     entitlement,
     hasPaidAccess, // this is dodgy use entitlements instead please :) to determine access
@@ -11,7 +12,15 @@ export default defineNuxtRouteMiddleware(() => {
     resolve,
   } = useMeStateV2();
 
-  if (authReady && isLoggedIn.value) {
+  if (isLoggedOut.value) {
+    return navigateTo("/please-sign-in");        
+  }
+
+  if (!isLoggedIn.value) {
+    return resolve();
+  }
+
+  if (isLoggedIn.value) {
     return;
   } else {
     return navigateTo("/please-sign-in");

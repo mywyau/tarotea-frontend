@@ -64,6 +64,8 @@ export function useMeStateV2() {
 
   const isLoggedIn = computed(() => state.value.status === "logged-in");
 
+  const isLoggedOut = computed(() => state.value.status === "logged-out");
+
   const user = computed<MeUser | null>(() =>
     state.value.status === "logged-in" ? state.value.user : null,
   );
@@ -97,6 +99,7 @@ export function useMeStateV2() {
     state,
     authReady,
     isLoggedIn,
+    isLoggedOut,
     user,
     entitlement,
     hasPaidAccess,  // this is dodgy use entitlements instead please :) to determine access
