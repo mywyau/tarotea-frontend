@@ -1,5 +1,10 @@
 <script setup lang="ts">
 
+definePageMeta({
+  ssr: false,
+  middleware: ['logged-in'],
+})
+
 import { onMounted } from 'vue'
 
 const {
@@ -115,6 +120,12 @@ const canEnterLevel = (level: any) => {
 
 <template>
   <main class="levels-page max-w-5xl mx-auto py-10 px-4 space-y-8">
+
+    <div class="mb-6">
+      <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
+        ← Home
+      </NuxtLink>
+    </div>
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">

@@ -83,7 +83,7 @@ const {
     <div class="mt-12 space-y-10">
 
       <!-- DAILY -->
-      <div v-if="isLoggedIn">
+      <div v-if="true">
         <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
           Daily Exercise
         </h2>

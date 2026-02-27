@@ -11,9 +11,5 @@ definePageMeta({
     <p class="text-gray-600">
       This content isn’t available yet.
     </p>
-
-    <p class="text-gray-500 text-sm">
-      Sign in and upgrade to unlock advanced levels as they’re released.
-    </p>
   </main>
 </template>

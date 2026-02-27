@@ -2,7 +2,7 @@
 
 definePageMeta({
     ssr: false,
-    // middleware: ['coming-soon'], // optional
+    middleware: ['logged-in'],
 })
 
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
@@ -390,26 +390,26 @@ function resetTraining(options?: { reshuffle?: boolean }) {
 const successAudio = ref<HTMLAudioElement | null>(null)
 
 function playCurrentAudio() {
-  if (!current.value) return
+    if (!current.value) return
 
-  const src = `${cdnBase}/audio/${current.value.wordId}.mp3`
+    const src = `${cdnBase}/audio/${current.value.wordId}.mp3`
 
-  if (!successAudio.value) {
-    successAudio.value = new Audio()
-  }
+    if (!successAudio.value) {
+        successAudio.value = new Audio()
+    }
 
-  successAudio.value.src = src
-  successAudio.value.currentTime = 0
+    successAudio.value.src = src
+    successAudio.value.currentTime = 0
 
-  successAudio.value.play().catch(() => {})
+    successAudio.value.play().catch(() => { })
 }
 
 function advance() {
-  if (idx.value < words.value.length - 1) {
-    idx.value++
-    input.value = ''
-    attempts.value = []
-  }
+    if (idx.value < words.value.length - 1) {
+        idx.value++
+        input.value = ''
+        attempts.value = []
+    }
 }
 
 onMounted(fetchWords)
@@ -425,25 +425,25 @@ watchEffect(() => {
 })
 
 watch(
-  () => live.value.state,
-  (state) => {
-    if (state !== 'perfect') return
-    if (advancing) return
+    () => live.value.state,
+    (state) => {
+        if (state !== 'perfect') return
+        if (advancing) return
 
-    advancing = true
+        advancing = true
 
-    playCurrentAudio()
+        playCurrentAudio()
 
-    if (successAudio.value) {
-      successAudio.value.onended = async () => {
-        await new Promise(r => setTimeout(r, 200)) // tiny natural pause
+        if (successAudio.value) {
+            successAudio.value.onended = async () => {
+                await new Promise(r => setTimeout(r, 200)) // tiny natural pause
 
-        advance()
+                advance()
 
-        advancing = false
-      }
+                advancing = false
+            }
+        }
     }
-  }
 )
 
 </script>
@@ -478,7 +478,7 @@ watch(
             <div v-else-if="current" class="space-y-5">
                 <!-- Progress + controls -->
                 <div class="flex items-center justify-between">
-                    <div class="text-xs text-gray-600">
+                    <div class="text-xs text-black">
                         Word {{ idx + 1 }} / {{ words.length }}
                     </div>
 
@@ -507,7 +507,7 @@ watch(
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                             'text-green-600 font-semibold': charStates[i] === 'perfect',
                             'text-amber-500 font-medium': charStates[i] === 'base',
-                            'text-gray-700': charStates[i] === 'idle'
+                            'text-gray-900': charStates[i] === 'idle'
                         }">
                             {{ char }}
                         </span>
@@ -543,7 +543,7 @@ watch(
                     <input v-model="input" autocomplete="off" inputmode="text" placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
 
-                    <div class="flex items-center justify-between">
+                    <!-- <div class="flex items-center justify-between">
 
                         <div class="flex gap-2">
                             <button
@@ -557,7 +557,7 @@ watch(
                                 Next
                             </button>
                         </div>
-                    </div>
+                    </div> -->
                 </form>
 
                 <!-- Attempts log (optional, but useful) -->
