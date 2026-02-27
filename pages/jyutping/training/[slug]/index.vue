@@ -37,10 +37,23 @@ function shuffle<T>(arr: T[]): T[] {
     return a
 }
 
+const BATCH_SIZE = 5
+
 const loading = ref(true)
 const errorState = ref<string | null>(null)
 
 const words = ref<TrainWord[]>([])
+
+const sessionKey = ref<string>('')
+
+type BatchAttempt = {
+    wordId: string
+    passed: boolean
+    perfect: boolean
+}
+
+const batchAttempts = ref<BatchAttempt[]>([])
+
 
 const idx = ref(0)
 
@@ -387,6 +400,34 @@ function resetTraining(options?: { reshuffle?: boolean }) {
     }
 }
 
+const sessionResult = ref<{
+    xpEarned: number
+    correctCount: number
+} | null>(null)
+
+async function finalizeBatch() {
+    try {
+        const { getAccessToken } = await useAuth()
+        const token = await getAccessToken()
+
+        const res = await $fetch('/api/jyutping/finalize', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: {
+                level: slug.value,
+                sessionKey: sessionKey.value,
+                attempts: batchAttempts.value
+            }
+        })
+
+        sessionResult.value = res.session
+    } catch (err) {
+        console.error('Finalize failed', err)
+    } finally {
+        idx.value = BATCH_SIZE
+    }
+}
+
 const successAudio = ref<HTMLAudioElement | null>(null)
 
 function playCurrentAudio() {
@@ -405,11 +446,21 @@ function playCurrentAudio() {
 }
 
 function advance() {
-    if (idx.value < words.value.length - 1) {
+    if (isComplete.value) return
+    if (idx.value < BATCH_SIZE - 1) {
         idx.value++
         input.value = ''
         attempts.value = []
     }
+}
+
+const isComplete = computed(() => idx.value >= BATCH_SIZE)
+
+function startNewSession() {
+    sessionKey.value = crypto.randomUUID()
+    batchAttempts.value = []
+    sessionResult.value = null
+    fetchWords()
 }
 
 onMounted(fetchWords)
@@ -426,25 +477,45 @@ watchEffect(() => {
 
 watch(
     () => live.value.state,
-    (state) => {
+    async (state) => {
         if (state !== 'perfect') return
         if (advancing) return
+        if (!current.value) return
 
         advancing = true
+
+        // ✅ only record first perfect per word
+        if (!batchAttempts.value.some(a => a.wordId === current.value!.wordId)) {
+            batchAttempts.value.push({
+                wordId: current.value.wordId,
+                passed: true,
+                perfect: true
+            })
+        }
 
         playCurrentAudio()
 
         if (successAudio.value) {
             successAudio.value.onended = async () => {
-                await new Promise(r => setTimeout(r, 200)) // tiny natural pause
+                await new Promise(r => setTimeout(r, 200))
+
+                // ✅ If batch full → finalize
+                if (batchAttempts.value.length >= BATCH_SIZE) {
+                    await finalizeBatch()
+                    advancing = false   // ← important
+                    return
+                }
 
                 advance()
-
                 advancing = false
             }
         }
     }
 )
+
+onMounted(() => {
+    sessionKey.value = crypto.randomUUID()
+})
 
 </script>
 
@@ -477,9 +548,9 @@ watch(
 
             <div v-else-if="current" class="space-y-5">
                 <!-- Progress + controls -->
-                <div class="flex items-center justify-between">
+                <div v-if="!isComplete" class="flex items-center justify-between">
                     <div class="text-xs text-black">
-                        Word {{ idx + 1 }} / {{ words.length }}
+                        Word {{ idx + 1 }} / {{ BATCH_SIZE }}
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -501,7 +572,7 @@ watch(
                 </div>
 
                 <!-- Word display -->
-                <div class="rounded-2xl bg-gray-50 p-5">
+                <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5">
 
                     <div class="text-4xl font-medium flex gap-1">
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
@@ -535,12 +606,12 @@ watch(
                 </div>
 
                 <!-- Input -->
-                <form class="space-y-3" @submit.prevent="submit">
+                <form v-if="!isComplete" class="space-y-3" @submit.prevent="submit">
                     <label class="block text-sm font-medium text-gray-800">
                         Type here:
                     </label>
 
-                    <input v-model="input" autocomplete="off" inputmode="text" placeholder=""
+                    <input :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text" placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
 
                     <!-- <div class="flex items-center justify-between">
@@ -560,26 +631,28 @@ watch(
                     </div> -->
                 </form>
 
-                <!-- Attempts log (optional, but useful) -->
-                <!-- <div v-if="attempts.length" class="pt-2">
-                    <div class="text-xs font-medium text-gray-700 mb-2">Attempts</div>
-                    <ul class="space-y-2">
-                        <li v-for="(a, i) in attempts" :key="i"
-                            class="rounded-xl border border-gray-100 bg-white px-3 py-2">
-                            <div class="flex items-center justify-between">
-                                <span class="font-mono text-sm text-gray-900">{{ a.input }}</span>
-                                <span class="text-xs"
-                                    :class="a.perfect ? 'text-emerald-700' : a.passed ? 'text-amber-700' : 'text-gray-500'">
-                                    <span v-if="a.perfect">Perfect</span>
-                                    <span v-else-if="a.passed">Sound OK</span>
-                                    <span v-else>Try</span>
-                                </span>
-                            </div>
-                        </li>
-                    </ul>
-                </div> -->
+                <div v-if="isComplete && sessionResult" class="space-y-6 text-center">
 
-                <div class="pt-2 text-xs text-gray-500">
+                    <h2 class="text-2xl font-semibold">
+                        Session Complete
+                    </h2>
+
+                    <p class="text-gray-600">
+                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} correct
+                    </p>
+
+                    <p class="text-gray-600">
+                        +{{ sessionResult.xpEarned }} XP
+                    </p>
+
+                    <button class="rounded-xl bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
+                        @click="startNewSession">
+                        Start New Session
+                    </button>
+
+                </div>
+
+                <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
                     Tip: try typing without spaces
                 </div>
             </div>

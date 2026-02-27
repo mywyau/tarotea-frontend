@@ -408,7 +408,7 @@ watch(
             <!-- XP Bar -->
             <div class="w-32 h-1 bg-gray-200 rounded">
               <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                :style="{ width: Math.min((currentXp ?? 0) / 1000 * 100, 100) + '%' }" />
+                :style="{ width: Math.min((currentXp ?? 0) / 200 * 100, 100) + '%' }" />
             </div>
 
             <!-- XP Text + Delta Anchor -->
