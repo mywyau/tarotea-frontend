@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
     ssr: false,
-    // middleware: ['coming-soon'], // optional if you want gating
+    middleware: ['coming-soon'], // optional if you want gating
 })
 
 type DailyDecode = {

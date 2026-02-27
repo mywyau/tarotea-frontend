@@ -2,7 +2,7 @@
 
 definePageMeta({
     ssr: false,
-    middleware: ['coming-soon'], // optional
+    // middleware: ['coming-soon'], // optional
 })
 
 type TrainWord = {
