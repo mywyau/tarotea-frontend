@@ -378,15 +378,15 @@ function topicLink(topic: Topic) {
 
 
 <template>
-  <main v-if="authReady" class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-2">
+  <main v-if="authReady" class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-4">
 
     <NuxtLink :to="`/`" class="inline-block text-sm text-black hover:underline">
       ← Home
     </NuxtLink>
 
-    <header class="rounded-lg p-5 header-card">
+    <header class="rounded-lg header-card">
       <h1 class="text-2xl font-semibold text-gray-900">Topics</h1>
-      <p class="text-gray-700 text-sm mt-2">
+      <p class="text-gray-700 text-sm mt-2 ">
         Vocabulary and sentences grouped by subject matter.
       </p>
     </header>

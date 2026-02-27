@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
     ssr: false,
-    middleware: ['coming-soon'], // optional
+    // middleware: ['coming-soon'], // optional
 })
 
 type TrainWord = {
@@ -292,7 +292,7 @@ watch(
             </p>
         </header>
 
-        <section class="mt-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <section class="mt-8 rounded-2xl bg-white p-5 shadow-sm">
             <div v-if="loading" class="text-sm text-gray-600">
                 Loading training words…
             </div>
@@ -324,17 +324,14 @@ watch(
                 </div>
 
                 <!-- Word display -->
-                <div class="rounded-2xl border border-gray-100 bg-gray-50 p-5">
-                    <!-- <div class="text-4xl font-medium text-gray-900">
-            {{ current.word }}
-          </div> -->
+                <div class="rounded-2xl bg-gray-50 p-5">
 
                     <div class="text-4xl font-medium transition-all duration-200" :class="{
-                        'text-gray-900': live.state === 'idle',
-                        'text-gray-900 drop-shadow-sm': live.state === 'partial',
-                        'text-emerald-700 drop-shadow-md': live.state === 'perfect',
-                        'text-amber-700 drop-shadow-md': live.state === 'pass',
-                        'text-gray-500': live.state === 'miss',
+                        'text-gray-600': live.state === 'idle',
+                        'text-gray-900': live.state === 'partial',
+                        'text-green-600 brightness-110': live.state === 'perfect',
+                        'text-amber-600': live.state === 'pass',
+                        'text-gray-700': live.state === 'miss',
                     }">
                         {{ current.word }}
                     </div>
@@ -359,15 +356,15 @@ watch(
                         Type jyutping
                     </label>
 
-                    <input v-model="input" autocomplete="off" inputmode="text" placeholder="e.g. gwai6"
+                    <input v-model="input" autocomplete="off" inputmode="text" placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
 
                     <div class="flex items-center justify-between">
-                        <button
+                        <!-- <button
                             class="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:brightness-110 active:scale-[0.99] transition disabled:opacity-40"
                             :disabled="!input.trim()" type="submit">
                             Check
-                        </button>
+                        </button> -->
 
                         <div class="flex gap-2">
                             <button
@@ -375,11 +372,11 @@ watch(
                                 type="button" :disabled="idx === 0" @click="prev">
                                 Prev
                             </button>
-                            <button
+                            <!-- <button
                                 class="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition disabled:opacity-40"
                                 type="button" :disabled="idx === words.length - 1" @click="next">
                                 Next
-                            </button>
+                            </button> -->
                         </div>
                     </div>
 
@@ -409,7 +406,7 @@ watch(
                 </div>
 
                 <div class="pt-2 text-xs text-gray-500">
-                    Tip: use this as warm-up. You’re training character → sound mapping.
+                    Tip: try typing without spaces, if you want
                 </div>
             </div>
         </section>
