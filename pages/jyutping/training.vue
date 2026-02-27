@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
     ssr: false,
-    middleware: ['level-access'], // optional
+    middleware: ['coming-soon'], // optional
 })
 
 type TrainWord = {
