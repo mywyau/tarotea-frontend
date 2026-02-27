@@ -1,7 +1,8 @@
 <script setup lang="ts">
+
 definePageMeta({
     ssr: false,
-    // middleware: ['coming-soon'], // optional
+    middleware: ['coming-soon'], // optional
 })
 
 type TrainWord = {
@@ -18,6 +19,9 @@ type AttemptLog = {
     perfect: boolean
     message: string
 }
+
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
 
 const loading = ref(true)
 const errorState = ref<string | null>(null)
@@ -82,7 +86,20 @@ function stripToneToken(token: string): string {
 }
 
 const answerSyllables = computed(() => splitSyllables(current.value?.jyutping ?? ''))
-const userSyllables = computed(() => splitSyllables(input.value))
+// const userSyllables = computed(() => splitSyllables(input.value))
+
+function splitUserJyutping(raw: string): string[] {
+  const normalized = normalizeJyutping(raw).replace(/\s+/g, '')
+
+  // Match sequences like: mou5, so2, wai6
+  const matches = normalized.match(/[a-z]+[1-6]/g)
+
+  return matches ?? []
+}
+
+const userSyllables = computed(() =>
+  splitUserJyutping(input.value)
+)
 
 type SylState = 'idle' | 'partial' | 'pass' | 'perfect' | 'miss'
 
@@ -163,6 +180,33 @@ const inputNoSpace = computed(() =>
     normalizedInput.value.replace(/\s+/g, '')
 )
 
+const chineseChars = computed(() =>
+    current.value?.word.split('') ?? []
+)
+
+type CharState = 'idle' | 'base' | 'perfect'
+
+const charStates = computed<CharState[]>(() => {
+  const chars = chineseChars.value
+  const ans = answerSyllables.value
+  const usr = userSyllables.value
+
+  return chars.map((_, i) => {
+    const ansTok = ans[i]
+    const usrTok = usr[i] ?? ''
+
+    if (!ansTok || !usrTok) return 'idle'
+
+    const ansBase = stripToneToken(ansTok)
+    const usrBase = stripToneToken(usrTok)
+
+    if (usrTok === ansTok) return 'perfect'
+    if (usrBase === ansBase) return 'base'
+
+    return 'idle'
+  })
+})
+
 // ---------- Fetch mocked words ----------
 
 async function fetchWords() {
@@ -227,20 +271,39 @@ const lastAttempt = computed(() => attempts.value[attempts.value.length - 1] ?? 
 const answerChars = computed(() => normalizedAnswer.value.split(''))
 
 function getCharClass(char: string, index: number) {
-  if (char === ' ') return ''
+    if (char === ' ') return ''
 
-  // Count how many non-space characters exist before this index
-  const answerBefore = answerRaw.value
-    .slice(0, index)
-    .replace(/\s+/g, '')
+    // Count how many non-space characters exist before this index
+    const answerBefore = answerRaw.value
+        .slice(0, index)
+        .replace(/\s+/g, '')
 
-  const compareIndex = answerBefore.length
+    const compareIndex = answerBefore.length
 
-  if (inputNoSpace.value[compareIndex] === char) {
-    return 'text-green-600 font-semibold'
-  }
+    if (inputNoSpace.value[compareIndex] === char) {
+        return 'text-green-600 font-semibold'
+    }
 
-  return 'text-gray-400'
+    return 'text-gray-400'
+}
+
+const copied = ref(false)
+
+async function copyJyutping() {
+    if (!current.value?.jyutping) return
+
+    try {
+        await navigator.clipboard.writeText(current.value.jyutping)
+        copied.value = true
+
+        // Reset after 1.2s
+        setTimeout(() => {
+            copied.value = false
+        }, 1200)
+
+    } catch (err) {
+        console.error('Clipboard failed:', err)
+    }
 }
 
 onMounted(fetchWords)
@@ -287,8 +350,7 @@ watch(
                 Jyutping Training
             </h1>
             <p class="text-sm text-gray-600">
-                Calm practice. Type the jyutping for each word.
-                A faint hint is shown so you can learn by doing.
+                Type the jyutping for each word shown
             </p>
         </header>
 
@@ -309,24 +371,21 @@ watch(
                     </div>
 
                     <div class="flex items-center gap-2">
+
                         <button
-                            class="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                            class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                             type="button" @click="showHint = !showHint">
                             {{ showHint ? 'Hide hint' : 'Show hint' }}
                         </button>
 
-                        <button
-                            class="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                            type="button" @click="resetCurrent">
-                            Reset
-                        </button>
+                        <AudioButton :key="'gwai6'" :src="`${cdnBase}/audio/ngo5-me.mp3`" />
                     </div>
                 </div>
 
                 <!-- Word display -->
                 <div class="rounded-2xl bg-gray-50 p-5">
 
-                    <div class="text-4xl font-medium transition-all duration-200" :class="{
+                    <!-- <div class="text-4xl font-medium transition-all duration-200" :class="{
                         'text-gray-600': live.state === 'idle',
                         'text-gray-900': live.state === 'partial',
                         'text-green-600 brightness-110': live.state === 'perfect',
@@ -334,6 +393,16 @@ watch(
                         'text-gray-700': live.state === 'miss',
                     }">
                         {{ current.word }}
+                    </div> -->
+
+                    <div class="text-4xl font-medium flex gap-1">
+                        <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
+                            'text-green-600 font-semibold': charStates[i] === 'perfect',
+                            'text-amber-500 font-medium': charStates[i] === 'base',
+                            'text-gray-700': charStates[i] === 'idle'
+                        }">
+                            {{ char }}
+                        </span>
                     </div>
 
                     <div v-if="current.meaning" class="mt-2 text-lg text-gray-700">
@@ -341,11 +410,18 @@ watch(
                     </div>
 
                     <!-- Faint hint -->
-                    <div v-if="showHint" class="mt-3 text-lg font-mono select-none">
-                        <span v-for="(char, i) in answerRaw" :key="i" class="transition-colors duration-150"
-                            :class="getCharClass(char, i)">
-                            {{ char }}
-                        </span>
+                    <div v-if="showHint" class="mt-3 flex items-center gap-3">
+                        <div class="text-lg font-mono select-none">
+                            <span v-for="(char, i) in answerRaw" :key="i" class="transition-colors duration-150"
+                                :class="getCharClass(char, i)">
+                                {{ char }}
+                            </span>
+                        </div>
+
+                        <button type="button" @click="copyJyutping"
+                            class="bg-white text-xs px-2 py-1 rounded-md border border-gray-200 hover:bg-gray-100 transition">
+                            {{ copied ? '✓' : '📋' }}
+                        </button>
                     </div>
 
                 </div>
@@ -353,18 +429,13 @@ watch(
                 <!-- Input -->
                 <form class="space-y-3" @submit.prevent="submit">
                     <label class="block text-sm font-medium text-gray-800">
-                        Type jyutping
+                        Type here:
                     </label>
 
                     <input v-model="input" autocomplete="off" inputmode="text" placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
 
                     <div class="flex items-center justify-between">
-                        <!-- <button
-                            class="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:brightness-110 active:scale-[0.99] transition disabled:opacity-40"
-                            :disabled="!input.trim()" type="submit">
-                            Check
-                        </button> -->
 
                         <div class="flex gap-2">
                             <button
