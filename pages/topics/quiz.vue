@@ -354,6 +354,12 @@ function hasPaidAccessCheck(topic: Topic) {
 <template>
     <main class="topics-page max-w-6xl mx-auto py-10 px-4 space-y-8">
 
+        <div class="mb-6">
+            <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
+                ← Home
+            </NuxtLink>
+        </div>
+
         <!-- Intro -->
         <header class="text-center space-y-3 max-w-2xl mx-auto">
             <h1 class="text-3xl font-semibold text-gray-900">

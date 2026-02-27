@@ -116,19 +116,13 @@ const canEnterLevel = (level: any) => {
 <template>
   <main class="levels-page max-w-5xl mx-auto py-10 px-4 space-y-8">
 
-    <div class="mb-6">
-      <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
-        ← Home
-      </NuxtLink>
-    </div>
-
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
       <h1 class="text-3xl font-semibold text-gray-900">
-        Level Quiz
+        Jyutping Dojo
       </h1>
       <p class="text-gray-600 text-sm sm:text-base">
-        Progress through structured Cantonese levels. Your weakest words appear more often as you improve.
+        Train your Jyutping with simple type along exercises
       </p>
     </header>
 
@@ -157,13 +151,9 @@ const canEnterLevel = (level: any) => {
         </div>
 
         <!-- Buttons -->
-        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`" class="level-btn level-btn-blue">
-            Word Quiz
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/audio/start-quiz`" class="level-btn level-btn-purple">
-            Audio Quiz
+        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-1 gap-3 pt-4">
+          <NuxtLink :to="`/jyutping/training/${quizLevel.id}`" class="level-btn level-btn-blue">
+            Start
           </NuxtLink>
         </div>
 

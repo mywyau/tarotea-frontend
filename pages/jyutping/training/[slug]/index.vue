@@ -5,6 +5,8 @@ definePageMeta({
     // middleware: ['coming-soon'], // optional
 })
 
+import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
+
 type TrainWord = {
     wordId: string
     word: string
@@ -19,6 +21,9 @@ type AttemptLog = {
     perfect: boolean
     message: string
 }
+
+const route = useRoute()
+const slug = computed(() => route.params.slug as string)
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -213,20 +218,72 @@ const charStates = computed<CharState[]>(() => {
     })
 })
 
-// ---------- Fetch mocked words ----------
+type LevelData = {
+    level: number
+    title: string
+    description: string
+    categories: Record<string, {
+        id: string
+        word: string
+        jyutping: string
+        meaning: string
+    }[]>
+}
 
 async function fetchWords() {
     loading.value = true
     errorState.value = null
 
     try {
-        const res = await $fetch<TrainWord[]>('/api/training/jyutping', { method: 'GET' })
-        words.value = shuffle(res)
+        // 1️⃣ Fetch vocab for level
+        const levelData = await $fetch<LevelData>(
+            `/api/vocab-quiz/${slug.value}`
+        )
+
+        const allWords = Object.values(levelData.categories).flat()
+
+        // 2️⃣ Fetch weakest IDs for this user + level
+        const { getAccessToken } = await useAuth()
+        const token = await getAccessToken()
+
+        let weakestIds: string[] = []
+
+        try {
+            const weakest = await $fetch<{ id: string }[]>(
+                '/api/word-progress/weakest',
+                {
+                    query: { level: slug.value },
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            )
+
+            weakestIds = weakest.map(w => w.id)
+        } catch {
+            weakestIds = []
+        }
+
+        // 3️⃣ Generate weighted words
+        const selected = generateWeightedWordsLevel(
+            allWords,
+            weakestIds,
+            { totalQuestions: 20, weakestRatio: 0.8 }
+        )
+
+        // 4️⃣ Map to your TrainWord format
+        words.value = selected.map(w => ({
+            wordId: w.id,
+            word: w.word,
+            jyutping: w.jyutping,
+            meaning: w.meaning
+        }))
+
         idx.value = 0
         input.value = ''
         attempts.value = []
+
     } catch (e: any) {
-        errorState.value = e?.data?.message || e?.message || 'Failed to load training words.'
+        errorState.value =
+            e?.data?.message || e?.message || 'Failed to load training words.'
     } finally {
         loading.value = false
     }
@@ -271,10 +328,6 @@ function canonicalNoSpace(jp: string): string {
     return normalizeJyutping(jp)
         .replace(/\s+/g, '')
 }
-
-const lastAttempt = computed(() => attempts.value[attempts.value.length - 1] ?? null)
-
-const answerChars = computed(() => normalizedAnswer.value.split(''))
 
 function getCharClass(char: string, index: number) {
     if (char === ' ') return ''
@@ -334,6 +387,30 @@ function resetTraining(options?: { reshuffle?: boolean }) {
     }
 }
 
+const successAudio = ref<HTMLAudioElement | null>(null)
+
+function playCurrentAudio() {
+  if (!current.value) return
+
+  const src = `${cdnBase}/audio/${current.value.wordId}.mp3`
+
+  if (!successAudio.value) {
+    successAudio.value = new Audio()
+  }
+
+  successAudio.value.src = src
+  successAudio.value.currentTime = 0
+
+  successAudio.value.play().catch(() => {})
+}
+
+function advance() {
+  if (idx.value < words.value.length - 1) {
+    idx.value++
+    input.value = ''
+    attempts.value = []
+  }
+}
 
 onMounted(fetchWords)
 
@@ -347,35 +424,42 @@ watchEffect(() => {
     })
 })
 
-
 watch(
-    () => live.value.state,
-    async (state) => {
-        if (state !== 'perfect') return
-        if (advancing) return
+  () => live.value.state,
+  (state) => {
+    if (state !== 'perfect') return
+    if (advancing) return
 
-        advancing = true
+    advancing = true
 
-        // Small delay so user sees the green highlight
-        await new Promise(resolve => setTimeout(resolve, 1300))
+    playCurrentAudio()
 
-        if (idx.value < words.value.length - 1) {
-            idx.value++
-            input.value = ''
-            attempts.value = []
-        }
+    if (successAudio.value) {
+      successAudio.value.onended = async () => {
+        await new Promise(r => setTimeout(r, 200)) // tiny natural pause
+
+        advance()
 
         advancing = false
+      }
     }
+  }
 )
 
 </script>
 
 <template>
     <main class="mx-auto max-w-xl px-6 py-12">
+
+        <div class="mb-6">
+            <NuxtLink :to="`/jyutping/training`" class="text-black text-sm hover:underline">
+                ← Back to Dojo
+            </NuxtLink>
+        </div>
+
         <header class="space-y-2">
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Jyutping Training
+                Jyutping Dojo
             </h1>
             <p class="text-sm text-gray-600">
                 Type the jyutping for each word shown
@@ -411,8 +495,8 @@ watch(
                             type="button" @click="resetTraining({ reshuffle: true })">
                             Reset
                         </button>
-                        
-                        <AudioButton :key="'gwai6'" :src="`${cdnBase}/audio/${current.wordId}.mp3`" />
+
+                        <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
                     </div>
                 </div>
 
