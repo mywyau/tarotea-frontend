@@ -14,12 +14,24 @@ export default defineEventHandler(async (event) => {
         coalesce(sum(p.correct_count), 0) as total_correct,
         coalesce(sum(p.wrong_count), 0) as total_wrong,
 
-        -- XP gained this week (from quiz events)
+        -- XP gained last 7 days (quiz + jyutping)
         coalesce((
-          select sum(q.total_delta)
-          from xp_quiz_events q
-          where q.user_id = $1
-            and q.created_at >= now() - interval '7 days'
+          select sum(delta)
+          from (
+            -- Quiz XP
+            select q.total_delta as delta
+            from xp_quiz_events q
+            where q.user_id = $1
+              and q.created_at >= now() - interval '7 days'
+
+            union all
+
+            -- Jyutping XP
+            select j.total_delta as delta
+            from xp_jyutping_events j
+            where j.user_id = $1
+              and j.created_at >= now() - interval '7 days'
+          ) combined
         ), 0) as xp_this_week
 
       from user_word_progress p

@@ -6,6 +6,7 @@ type Attempt = {
   wordId: string;
   passed: boolean;
   perfect: boolean;
+  hintUsed?: boolean;
 };
 
 export default defineEventHandler(async (event) => {
@@ -30,6 +31,7 @@ export default defineEventHandler(async (event) => {
         wordId: a.wordId,
         passed: !!a.passed,
         perfect: !!a.perfect,
+        hintUsed: !!(a as any).hintUsed,
       });
     }
   }
@@ -63,11 +65,11 @@ export default defineEventHandler(async (event) => {
     function deltaFor(a: Attempt) {
       if (!a.passed) return 0;
 
-      if (a.perfect) {
-        return 3; // perfect tone + base
+      if (a.hintUsed) {
+        return a.perfect ? 1 : 1;
       }
 
-      // base correct but tone wrong
+      if (a.perfect) return 7;
       return 1;
     }
 
@@ -84,15 +86,22 @@ export default defineEventHandler(async (event) => {
     await client.query(
       `
       insert into xp_jyutping_events
-        (user_id, level, session_key, payload, total_delta, correct_count, total_words)
-      values
+        (
+          user_id,
+          level,
+          session_key,
+          payload, 
+          total_delta,
+          correct_count,
+          total_words
+        ) values
         ($1, $2, $3, $4::jsonb, $5, $6, $7)
       `,
       [
         userId,
         body.level,
         body.sessionKey,
-        JSON.stringify({ attempts: payloadAttempts }),
+        JSON.stringify({ answers: payloadAttempts }),
         totalDelta,
         correctCount,
         payloadAttempts.length,

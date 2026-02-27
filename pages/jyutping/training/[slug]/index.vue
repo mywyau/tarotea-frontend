@@ -73,6 +73,7 @@ type BatchAttempt = {
     wordId: string
     passed: boolean
     perfect: boolean
+    hintUsed: boolean
 }
 
 const batchAttempts = ref<BatchAttempt[]>([])
@@ -83,7 +84,7 @@ const idx = ref(0)
 const input = ref('')
 const attempts = ref<AttemptLog[]>([])
 
-const showHint = ref(true) // faint jyutping
+const showHint = ref(false) // faint jyutping
 
 const current = computed(() => words.value[idx.value] ?? null)
 
@@ -95,6 +96,8 @@ const answerBase = computed(() => baseSound(normalizedAnswer.value))
 
 const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
+
+const usedHintForCurrent = ref(false)
 
 const live = computed(() => {
     if (!current.value) return { state: 'idle' as const }
@@ -344,25 +347,6 @@ function submit() {
     input.value = ''
 }
 
-function next() {
-    if (!words.value.length) return
-    idx.value = Math.min(words.value.length - 1, idx.value + 1)
-    input.value = ''
-    attempts.value = []
-}
-
-function prev() {
-    if (!words.value.length) return
-    idx.value = Math.max(0, idx.value - 1)
-    input.value = ''
-    attempts.value = []
-}
-
-function resetCurrent() {
-    input.value = ''
-    attempts.value = []
-}
-
 function canonicalNoSpace(jp: string): string {
     return normalizeJyutping(jp)
         .replace(/\s+/g, '')
@@ -476,6 +460,7 @@ function advance() {
         idx.value++
         input.value = ''
         attempts.value = []
+        usedHintForCurrent.value = false   // 👈 RESET HERE
     }
 }
 
@@ -489,6 +474,12 @@ function startNewSession() {
 }
 
 onMounted(fetchWords)
+
+watch(showHint, (val) => {
+  if (val) {
+    usedHintForCurrent.value = true
+  }
+})
 
 watchEffect(() => {
     console.log({
@@ -548,7 +539,13 @@ watch(
         if (!batchAttempts.value.some(a => a.wordId === current.value!.wordId)) {
 
             // Example scoring logic (match your backend logic)
-            const delta = 3  // or compute properly based on streak logic
+
+            let delta = 7
+
+            if (usedHintForCurrent.value) {
+                delta = 1
+            }
+
 
             xpDelta.value = delta
 
@@ -558,7 +555,8 @@ watch(
             batchAttempts.value.push({
                 wordId: current.value.wordId,
                 passed: true,
-                perfect: true
+                perfect: true,
+                hintUsed: usedHintForCurrent.value
             })
 
             // Clear floating delta after animation
@@ -727,7 +725,7 @@ onMounted(() => {
                 </form>
 
                 <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
-                <!-- <div v-if="true" class="space-y-8 text-center"> -->
+                    <!-- <div v-if="true" class="space-y-8 text-center"> -->
 
                     <h2 class="text-2xl font-semibold">
                         Good job! Keep going!
@@ -743,16 +741,16 @@ onMounted(() => {
                         +{{ 60 }} XP
                     </p>
 
-                    <button class="rounded-xl bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
+                    <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
                         @click="startNewSession">
                         Play again
                     </button>
-
                 </div>
 
                 <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
                     Tip: try typing without spaces
                 </div>
+
             </div>
         </section>
     </main>
