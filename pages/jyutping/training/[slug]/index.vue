@@ -580,7 +580,7 @@ watch(
                 </div> -->
 
                 <div class="pt-2 text-xs text-gray-500">
-                    Tip: try typing without spaces, if you want
+                    Tip: try typing without spaces
                 </div>
             </div>
         </section>

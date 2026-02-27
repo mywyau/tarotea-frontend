@@ -163,7 +163,8 @@ const canEnterLevel = (level: any) => {
 
         <!-- Buttons -->
         <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-1 gap-3 pt-4">
-          <NuxtLink :to="`/jyutping/training/${quizLevel.id}`" class="level-btn level-btn-blue">
+          <NuxtLink :to="`/jyutping/training/${quizLevel.id}`" class="rounded-lg text-black px-2 py-2 font-medium text-center hover:brightness-110"
+            style="background-color:rgba(244,205,39,0.35);">
             Start
           </NuxtLink>
         </div>
@@ -181,11 +182,11 @@ const canEnterLevel = (level: any) => {
 </template>
 
 <style>
-.levels-page {
+:root {
   --pink: #EAB8E4;
   --purple: #D6A3D1;
   --blue: #A8CAE0;
-  --yellow: #F4CD27;
+  --yellow: #ffec95;
   --blush: #F6E1E1;
 }
 
@@ -222,21 +223,8 @@ const canEnterLevel = (level: any) => {
 }
 
 /* Colour variations */
-.level-btn-blue {
-  background: rgba(168, 202, 224, 0.45);
+.level-btn-yellow {
+  background: var(--yellow);
   color: #1f2937;
-}
-
-.level-btn-blue:hover {
-  background: rgba(168, 202, 224, 0.65);
-}
-
-.level-btn-purple {
-  background: rgba(214, 163, 209, 0.45);
-  color: #1f2937;
-}
-
-.level-btn-purple:hover {
-  background: rgba(214, 163, 209, 0.65);
 }
 </style>
