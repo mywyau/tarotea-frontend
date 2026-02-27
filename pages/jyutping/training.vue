@@ -23,10 +23,20 @@ type AttemptLog = {
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+function shuffle<T>(arr: T[]): T[] {
+    const a = [...arr]
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1))
+            ;[a[i], a[j]] = [a[j], a[i]]
+    }
+    return a
+}
+
 const loading = ref(true)
 const errorState = ref<string | null>(null)
 
 const words = ref<TrainWord[]>([])
+
 const idx = ref(0)
 
 const input = ref('')
@@ -35,7 +45,6 @@ const attempts = ref<AttemptLog[]>([])
 const showHint = ref(true) // faint jyutping
 
 const current = computed(() => words.value[idx.value] ?? null)
-
 
 const normalizedInput = computed(() => normalizeJyutping(input.value))
 const normalizedAnswer = computed(() => (current.value ? normalizeJyutping(current.value.jyutping) : ''))
@@ -172,9 +181,6 @@ function scoreAttempt(userRaw: string, answerRaw: string) {
 }
 
 const answerRaw = computed(() => normalizedAnswer.value)
-const answerNoSpace = computed(() =>
-    normalizedAnswer.value.replace(/\s+/g, '')
-)
 
 const inputNoSpace = computed(() =>
     normalizedInput.value.replace(/\s+/g, '')
@@ -215,7 +221,7 @@ async function fetchWords() {
 
     try {
         const res = await $fetch<TrainWord[]>('/api/training/jyutping', { method: 'GET' })
-        words.value = res
+        words.value = shuffle(res)
         idx.value = 0
         input.value = ''
         attempts.value = []
@@ -306,6 +312,29 @@ async function copyJyutping() {
     }
 }
 
+let advancing = false
+
+let advanceTimer: ReturnType<typeof setTimeout> | null = null
+
+function resetTraining(options?: { reshuffle?: boolean }) {
+    // cancel pending auto-advance
+    advancing = false
+    if (advanceTimer) {
+        clearTimeout(advanceTimer)
+        advanceTimer = null
+    }
+
+    input.value = ''
+    attempts.value = []
+    showHint.value = true
+    idx.value = 0
+
+    if (options?.reshuffle) {
+        words.value = shuffle(words.value)
+    }
+}
+
+
 onMounted(fetchWords)
 
 watchEffect(() => {
@@ -318,7 +347,6 @@ watchEffect(() => {
     })
 })
 
-let advancing = false
 
 watch(
     () => live.value.state,
@@ -380,9 +408,10 @@ watch(
 
                         <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                            type="button" @click="resetCurrent()">
+                            type="button" @click="resetTraining({ reshuffle: true })">
                             Reset
                         </button>
+                        
                         <AudioButton :key="'gwai6'" :src="`${cdnBase}/audio/${current.wordId}.mp3`" />
                     </div>
                 </div>
@@ -414,8 +443,8 @@ watch(
                         </div>
 
                         <button type="button" @click="copyJyutping"
-                            class="bg-white text-xs px-2 py-1 rounded-md border border-gray-200 hover:bg-gray-100 transition">
-                            {{ copied ? '✓' : '📋' }}
+                            class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
+                            {{ copied ? '✓' : 'copy' }}
                         </button>
                     </div>
 
@@ -438,22 +467,17 @@ watch(
                                 type="button" :disabled="idx === 0" @click="prev">
                                 Prev
                             </button>
-                            <!-- <button
+                            <button
                                 class="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition disabled:opacity-40"
                                 type="button" :disabled="idx === words.length - 1" @click="next">
                                 Next
-                            </button> -->
+                            </button>
                         </div>
                     </div>
-
-                    <p v-if="lastAttempt" class="text-sm"
-                        :class="lastAttempt.perfect ? 'text-emerald-700' : lastAttempt.passed ? 'text-amber-700' : 'text-gray-700'">
-                        {{ lastAttempt.message }}
-                    </p>
                 </form>
 
                 <!-- Attempts log (optional, but useful) -->
-                <div v-if="attempts.length" class="pt-2">
+                <!-- <div v-if="attempts.length" class="pt-2">
                     <div class="text-xs font-medium text-gray-700 mb-2">Attempts</div>
                     <ul class="space-y-2">
                         <li v-for="(a, i) in attempts" :key="i"
@@ -469,7 +493,7 @@ watch(
                             </div>
                         </li>
                     </ul>
-                </div>
+                </div> -->
 
                 <div class="pt-2 text-xs text-gray-500">
                     Tip: try typing without spaces, if you want

@@ -36,8 +36,6 @@ export default defineEventHandler(() => {
       audioUrl: "",
     },
 
-    // --- New 20 examples ---
-
     {
       wordId: "hou2-good",
       word: "好",
