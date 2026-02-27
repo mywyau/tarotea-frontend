@@ -14,11 +14,17 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
-    date: "25 Feb 2026",
-    title: "Daily",
+    date: "27 Feb 2026",
+    title: "More content and prototype jyutping training",
     items: [
-      "Added Content for Level 6 and 7",
+      "Add level 8-10 and dim sum content",
+      "Work in progress add jyutping training",
     ],
+  },
+  {
+    date: "25 Feb 2026",
+    title: "Add more content",
+    items: ["Added Content for Level 6 and 7"],
   },
   {
     date: "19 Feb 2026",
