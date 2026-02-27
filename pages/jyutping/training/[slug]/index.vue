@@ -37,7 +37,7 @@ function shuffle<T>(arr: T[]): T[] {
     return a
 }
 
-const BATCH_SIZE = 5
+const BATCH_SIZE = 20
 
 const loading = ref(true)
 const errorState = ref<string | null>(null)

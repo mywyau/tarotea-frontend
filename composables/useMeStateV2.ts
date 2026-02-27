@@ -62,6 +62,8 @@ export function useMeStateV2() {
 
   const authReady = computed(() => state.value.status !== "loading");
 
+  const isLoading = computed(() => state.value.status !== "loading");
+
   const isLoggedIn = computed(() => state.value.status === "logged-in");
 
   const isLoggedOut = computed(() => state.value.status === "logged-out");
@@ -98,6 +100,7 @@ export function useMeStateV2() {
   return {
     state,
     authReady,
+    isLoading,
     isLoggedIn,
     isLoggedOut,
     user,

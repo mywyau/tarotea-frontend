@@ -5,12 +5,13 @@ definePageMeta({
   middleware: ['logged-in'],
 })
 
-import { onMounted } from 'vue'
 
 const {
   state,
   authReady,
+  isLoading,
   isLoggedIn,
+  isLoggedOut,
   user,
   entitlement,
   hasPaidAccess,
@@ -19,12 +20,6 @@ const {
   resolve,
 } = useMeStateV2()
 
-// // Resolve auth once on mount (safe + idempotent)
-// onMounted(async () => {
-//   if (!authReady.value) {
-//     await resolve()
-//   }
-// })
 
 const quizLevels = [
   {
@@ -103,11 +98,10 @@ const isComingSoon = (level: any) => level.comingSoon === true
 
 const canEnterLevel = (level: any) => {
 
-  if (!authReady.value) return false
+  if (isLoggedOut.value) return false
 
   if (isComingSoon(level)) return false
 
-  // ✅ Free levels are always accessible
   if (isFreeLevel(level.number)) return true
 
   // 🔒 Paid levels require login
@@ -140,8 +134,7 @@ const canEnterLevel = (level: any) => {
     <!-- Grid -->
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-      <li v-for="quizLevel in quizLevels" :key="quizLevel.id" 
-        class="
+      <li v-for="quizLevel in quizLevels" :key="quizLevel.id" class="
           rounded-2xl
           p-6
           bg-white/75
@@ -155,10 +148,10 @@ const canEnterLevel = (level: any) => {
           hover:-translate-y-1
           hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)]
         " :class="[
-    (!canEnterLevel(quizLevel) || quizLevel.comingSoon)
-      ? 'opacity-60'
-      : ''
-  ]">
+          (!canEnterLevel(quizLevel) || quizLevel.comingSoon)
+            ? 'opacity-60'
+            : ''
+        ]">
 
         <!-- Title -->
         <div class="space-y-2">
@@ -176,12 +169,18 @@ const canEnterLevel = (level: any) => {
         </div>
 
         <!-- Buttons -->
-        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-1 gap-3 pt-4">
+        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
           <NuxtLink :to="`/jyutping/training/${quizLevel.id}`"
-            class="rounded-lg text-black px-2 py-2 font-medium text-center hover:brightness-110"
+            class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
             style="background-color:rgba(244,205,39,0.35);">
             Start
           </NuxtLink>
+
+          <!-- <NuxtLink :to="`/coming-soon`"
+            class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
+            style="background-color:rgba(244,205,39,0.35);">
+            It's a mystery...
+          </NuxtLink> -->
         </div>
 
         <!-- Locked -->
