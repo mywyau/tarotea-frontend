@@ -89,16 +89,16 @@ const answerSyllables = computed(() => splitSyllables(current.value?.jyutping ??
 // const userSyllables = computed(() => splitSyllables(input.value))
 
 function splitUserJyutping(raw: string): string[] {
-  const normalized = normalizeJyutping(raw).replace(/\s+/g, '')
+    const normalized = normalizeJyutping(raw).replace(/\s+/g, '')
 
-  // Match sequences like: mou5, so2, wai6
-  const matches = normalized.match(/[a-z]+[1-6]/g)
+    // Match sequences like: mou5, so2, wai6
+    const matches = normalized.match(/[a-z]+[1-6]/g)
 
-  return matches ?? []
+    return matches ?? []
 }
 
 const userSyllables = computed(() =>
-  splitUserJyutping(input.value)
+    splitUserJyutping(input.value)
 )
 
 type SylState = 'idle' | 'partial' | 'pass' | 'perfect' | 'miss'
@@ -187,24 +187,24 @@ const chineseChars = computed(() =>
 type CharState = 'idle' | 'base' | 'perfect'
 
 const charStates = computed<CharState[]>(() => {
-  const chars = chineseChars.value
-  const ans = answerSyllables.value
-  const usr = userSyllables.value
+    const chars = chineseChars.value
+    const ans = answerSyllables.value
+    const usr = userSyllables.value
 
-  return chars.map((_, i) => {
-    const ansTok = ans[i]
-    const usrTok = usr[i] ?? ''
+    return chars.map((_, i) => {
+        const ansTok = ans[i]
+        const usrTok = usr[i] ?? ''
 
-    if (!ansTok || !usrTok) return 'idle'
+        if (!ansTok || !usrTok) return 'idle'
 
-    const ansBase = stripToneToken(ansTok)
-    const usrBase = stripToneToken(usrTok)
+        const ansBase = stripToneToken(ansTok)
+        const usrBase = stripToneToken(usrTok)
 
-    if (usrTok === ansTok) return 'perfect'
-    if (usrBase === ansBase) return 'base'
+        if (usrTok === ansTok) return 'perfect'
+        if (usrBase === ansBase) return 'base'
 
-    return 'idle'
-  })
+        return 'idle'
+    })
 })
 
 // ---------- Fetch mocked words ----------
@@ -378,22 +378,17 @@ watch(
                             {{ showHint ? 'Hide hint' : 'Show hint' }}
                         </button>
 
-                        <AudioButton :key="'gwai6'" :src="`${cdnBase}/audio/ngo5-me.mp3`" />
+                        <button
+                            class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                            type="button" @click="resetCurrent()">
+                            Reset
+                        </button>
+                        <AudioButton :key="'gwai6'" :src="`${cdnBase}/audio/${current.wordId}.mp3`" />
                     </div>
                 </div>
 
                 <!-- Word display -->
                 <div class="rounded-2xl bg-gray-50 p-5">
-
-                    <!-- <div class="text-4xl font-medium transition-all duration-200" :class="{
-                        'text-gray-600': live.state === 'idle',
-                        'text-gray-900': live.state === 'partial',
-                        'text-green-600 brightness-110': live.state === 'perfect',
-                        'text-amber-600': live.state === 'pass',
-                        'text-gray-700': live.state === 'miss',
-                    }">
-                        {{ current.word }}
-                    </div> -->
 
                     <div class="text-4xl font-medium flex gap-1">
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
