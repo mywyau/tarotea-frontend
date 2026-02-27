@@ -44,6 +44,24 @@ function shuffle<T>(arr: T[]): T[] {
 
 const BATCH_SIZE = 20
 
+const LEVEL_TITLES: Record<string, string> = {
+    'level-one': 'Level 1',
+    'level-two': 'Level 2',
+    'level-three': 'Level 3',
+    'level-four': 'Level 4',
+    'level-five': 'Level 5',
+    'level-six': 'Level 6',
+    'level-seven': 'Level 7',
+    'level-eight': 'Level 8',
+    'level-nine': 'Level 9',
+    'level-ten': 'Level 10',
+    'level-eleven': 'Level 11',
+    'level-twelve': 'Level 12',
+    'level-thirteen': 'Level 13',
+    'level-fourteen': 'Level 14',
+    'level-fiftheen': 'Level 15',
+}
+
 const loading = ref(true)
 const errorState = ref<string | null>(null)
 
@@ -74,6 +92,9 @@ const normalizedAnswer = computed(() => (current.value ? normalizeJyutping(curre
 
 const inputBase = computed(() => baseSound(normalizedInput.value))     // no tones/spaces
 const answerBase = computed(() => baseSound(normalizedAnswer.value))
+
+const xpDelta = ref<number | null>(null)
+const currentXp = ref<number | null>(null)
 
 const live = computed(() => {
     if (!current.value) return { state: 'idle' as const }
@@ -479,6 +500,42 @@ watchEffect(() => {
     })
 })
 
+const wordProgressMap = ref<Record<string, { xp: number }>>({})
+
+watch(
+    () => words.value,
+    async (ws) => {
+        if (!ws.length) return
+
+        const { getAccessToken } = await useAuth()
+        const token = await getAccessToken()
+
+        const wordIds = ws.map(w => w.wordId)
+
+        const progressMap = await $fetch<
+            Record<string, { xp: number }>
+        >('/api/word-progress', {
+            query: { wordIds: wordIds.join(',') },
+            headers: { Authorization: `Bearer ${token}` }
+        })
+
+        wordProgressMap.value = progressMap
+
+        const firstId = ws[0]?.wordId
+        currentXp.value = progressMap[firstId]?.xp ?? 0
+    },
+    { immediate: true }
+)
+
+watch(
+    () => current.value?.wordId,
+    (id) => {
+        if (!id) return
+        currentXp.value = wordProgressMap.value[id]?.xp ?? 0
+        xpDelta.value = null
+    }
+)
+
 watch(
     () => live.value.state,
     async (state) => {
@@ -489,18 +546,32 @@ watch(
         advancing = true
 
         if (!batchAttempts.value.some(a => a.wordId === current.value!.wordId)) {
+
+            // Example scoring logic (match your backend logic)
+            const delta = 3  // or compute properly based on streak logic
+
+            xpDelta.value = delta
+
+            // Optimistic UI update
+            currentXp.value = Math.min((currentXp.value ?? 0) + delta, 500)
+
             batchAttempts.value.push({
                 wordId: current.value.wordId,
                 passed: true,
                 perfect: true
             })
+
+            // Clear floating delta after animation
+            setTimeout(() => {
+                xpDelta.value = null
+            }, 1000)
         }
 
         // 🔔 Play procedural jingle
         playCorrectJingle(0.7)
 
         // Wait for jingle envelope (~400ms)
-        await new Promise(r => setTimeout(r, 420))
+        await new Promise(r => setTimeout(r, 800))
 
         if (batchAttempts.value.length >= BATCH_SIZE) {
             await finalizeBatch()
@@ -542,7 +613,7 @@ onMounted(() => {
 
         <header class="space-y-2">
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Jyutping Dojo
+                Jyutping Dojo - {{ LEVEL_TITLES[slug] }}
             </h1>
             <p class="text-sm text-gray-600">
                 Type the jyutping for each word shown
@@ -558,7 +629,7 @@ onMounted(() => {
                 {{ errorState }}
             </div>
 
-            <div v-else-if="current" class="space-y-5">
+            <div v-else class="space-y-5">
                 <!-- Progress + controls -->
                 <div v-if="!isComplete" class="flex items-center justify-between">
                     <div class="text-xs text-black">
@@ -617,6 +688,34 @@ onMounted(() => {
 
                 </div>
 
+                <!-- XP Row -->
+                <div v-if="!isComplete" class="flex items-center justify-between max-w-xs">
+
+                    <!-- XP Bar -->
+                    <div class="flex-1 mr-3">
+                        <div class="h-1 bg-gray-200 rounded">
+                            <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                                :style="{ width: Math.min((currentXp ?? 0) / 200 * 100, 100) + '%' }" />
+                        </div>
+                    </div>
+
+                    <!-- XP Text + Delta -->
+                    <div class="relative flex items-center">
+                        <span class="text-sm text-gray-600 whitespace-nowrap">
+                            {{ currentXp ?? 0 }} XP
+                        </span>
+
+                        <transition name="xp-fall">
+                            <span v-if="xpDelta !== null"
+                                class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                                :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                                {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                            </span>
+                        </transition>
+                    </div>
+
+                </div>
+
                 <!-- Input -->
                 <form v-if="!isComplete" class="space-y-3" @submit.prevent="submit">
                     <label class="block text-sm font-medium text-gray-800">
@@ -627,23 +726,26 @@ onMounted(() => {
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
                 </form>
 
-                <div v-if="isComplete && sessionResult" class="space-y-6 text-center">
+                <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
+                <!-- <div v-if="true" class="space-y-8 text-center"> -->
 
                     <h2 class="text-2xl font-semibold">
-                        Session Complete
+                        Good job! Keep going!
                     </h2>
 
-                    <p class="text-gray-600">
-                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} correct
+                    <p class="text-gray-600 text-base uppercase">
+                        <!-- {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed  -->
+                        {{ 20 }} / {{ 20 }} words completed
                     </p>
 
-                    <p class="text-gray-600">
-                        +{{ sessionResult.xpEarned }} XP
+                    <p class="text-green-600 text-2xl font-semibold">
+                        <!-- +{{ sessionResult.xpEarned }} XP -->
+                        +{{ 60 }} XP
                     </p>
 
                     <button class="rounded-xl bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
                         @click="startNewSession">
-                        Start New Session
+                        Play again
                     </button>
 
                 </div>
@@ -655,3 +757,40 @@ onMounted(() => {
         </section>
     </main>
 </template>
+
+
+<style scoped>
+.xp-fall-enter-active {
+    transition: transform 0.45s ease-out, opacity 0.45s ease-out;
+}
+
+.xp-fall-leave-active {
+    transition: transform 0.35s ease-in, opacity 0.35s ease-in;
+}
+
+.xp-fall-enter-from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+}
+
+.xp-fall-enter-to {
+    opacity: 1;
+    transform: translateY(0px) scale(0.95);
+}
+
+.xp-fall-leave-to {
+    opacity: 0;
+    transform: translateY(12px) scale(0.9);
+}
+
+.fade-streak-enter-active,
+.fade-streak-leave-active {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-streak-enter-from,
+.fade-streak-leave-to {
+    opacity: 0;
+    transform: translateY(-4px);
+}
+</style>
