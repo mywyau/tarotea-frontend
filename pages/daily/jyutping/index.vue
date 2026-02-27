@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
     ssr: false,
-    middleware: ['coming-soon'], // optional if you want gating
+    // middleware: ['coming-soon'], // optional if you want gating
 })
 
 type DailyDecode = {
@@ -73,26 +73,30 @@ function scoreAttempt(userRaw: string, answerRaw: string) {
     const user = normalizeJyutping(userRaw)
     const ans = normalizeJyutping(answerRaw)
 
-    if (!user) {
-        return { passed: false, perfect: false, message: 'Type the jyutping (with tone numbers 1–6).' }
-    }
-
-    if (!hasToneNumbers(user)) {
-        return { passed: false, perfect: false, message: 'Include tone numbers (1–6).' }
-    }
-
     const passed = baseSound(user) === baseSound(ans)
     const perfect = canonicalSound(user) === canonicalSound(ans)
 
+    if (!user) {
+        return { passed: false, perfect: false, message: 'Type the jyutping with tone numbers 1–6.' }
+    }
+
+    if (!passed) {
+        return { passed: false, perfect: false, message: 'The sound spelling was wrong and possibly missing tone' }
+    }
+
+    if (!hasToneNumbers(user)) {
+        return { passed: false, perfect: false, message: 'Try to include tone numbers 1–6.' }
+    }
+
     if (perfect) {
-        return { passed: true, perfect: true, message: 'Correct sound and tone.' }
+        return { passed: true, perfect: true, message: 'Well Done! Congratulations you nailed the correct sound and tone.' }
     }
 
     if (passed) {
-        return { passed: true, perfect: false, message: 'Correct sound. Tone differs.' }
+        return { passed: true, perfect: false, message: 'Close it was the correct sound but wrong tone.' }
     }
 
-    return { passed: false, perfect: false, message: 'Not quite. Try again — focus on the syllable shape and ending.' }
+    return { passed: false, perfect: false, message: 'Not quite. Next time focus on the syllable shape and ending.' }
 }
 
 // ---------- Persistence ----------
@@ -178,12 +182,20 @@ const lastAttempt = computed(() => attempts.value[attempts.value.length - 1] || 
 
 const revealAllowed = computed(() => attemptsLeft.value === 0 && !done.value)
 
+const everpassed = computed(() =>
+    attempts.value.some(a => a.passed)
+)
+
+const everPerfect = computed(() =>
+    attempts.value.some(a => a.perfect)
+)
+
 const xpAward = computed(() => {
     // Flat XP approach (still “flat”, but optionally scaled by attempts)
     // If you want strictly flat, set both to the same number.
     return {
         perfect: 30,
-        pass: 10,
+        passed: 10,
     }
 })
 
@@ -211,6 +223,7 @@ async function submit() {
     if (attemptsLeft.value <= 0) return
 
     const result = scoreAttempt(input.value, challenge.value.jyutping)
+
     attempts.value.push({
         input: input.value.trim(),
         passed: result.passed,
@@ -218,19 +231,32 @@ async function submit() {
         message: result.message,
     })
 
-    // Clear input to keep it calm + quick
     input.value = ''
 
-    // If passed/perfect, mark done and award XP once
-    if (result.passed) {
+    // 1️⃣ Perfect → finish immediately
+    if (result.perfect) {
         done.value = true
         save()
         await awardXp(result)
         return
     }
 
-    // If exhausted attempts without passing, save state
-    save()
+    // 2️⃣ Base match only → allow more attempts
+    if (result.passed && !result.perfect) {
+        // move cursor to end automatically
+        nextTick(() => {
+            const el = document.querySelector('input')
+            el?.focus()
+        })
+        save()
+        return
+    }
+
+    // 3️⃣ Wrong answer → check if exhausted
+    if (attemptsLeft.value === 0) {
+        done.value = true
+        save()
+    }
 }
 
 function revealAnswer() {
@@ -333,7 +359,7 @@ onMounted(async () => {
                     </label>
 
                     <input v-model="input" :disabled="done || attemptsLeft <= 0" autocomplete="off" inputmode="text"
-                        placeholder="e.g. gwai6"
+                        placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
 
                     <div class="flex items-center justify-between">
@@ -349,31 +375,32 @@ onMounted(async () => {
                     </div>
 
                     <p v-if="lastAttempt" class="text-sm"
-                        :class="lastAttempt.perfect ? 'text-emerald-700' : lastAttempt.passed ? 'text-amber-700' : 'text-gray-700'">
+                        :class="lastAttempt.perfect ? 'text-emerald-700' : lastAttempt.passed ? 'text-amber-500' : 'text-red-700'">
                         {{ lastAttempt.message }}
                     </p>
                 </form>
 
                 <!-- Attempts log -->
                 <div v-if="attempts.length" class="pt-2">
-                    <div class="text-xs font-medium text-gray-700 mb-2">Attempts</div>
+                    <div class="text-xs font-semibold text-gray-700 mb-2">Attempts</div>
                     <ul class="space-y-2">
                         <li v-for="(a, idx) in attempts" :key="idx"
                             class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
                             <div class="flex items-center justify-between">
                                 <div class="text-sm text-gray-900">
-                                    <span class="font-mono">{{ a.input }}</span>
+                                    <span class="font-mono">You answered: {{ a.input }}</span>
                                 </div>
                                 <div class="text-xs"
-                                    :class="a.perfect ? 'text-emerald-700' : a.passed ? 'text-amber-700' : 'text-gray-500'">
+                                    :class="a.perfect ? 'text-emerald-700' : a.passed ? 'text-amber-500' : 'text-red-500'">
                                     <span v-if="a.perfect">Perfect</span>
-                                    <span v-else-if="a.passed">Pass</span>
-                                    <span v-else>Try {{ idx + 1 }}</span>
+                                    <span v-else-if="a.passed">Attempt {{ idx + 1 }}</span>
+                                    <span v-else>Attempt {{ idx + 1 }}</span>
                                 </div>
                             </div>
-                            <div class="mt-1 text-xs text-gray-600">
+                            <!-- <div class="mt-1 text-sm"
+                                :class="a.perfect ? 'text-emerald-700' : a.passed ? 'text-amber-500' : 'text-red-500'">
                                 {{ a.message }}
-                            </div>
+                            </div> -->
                         </li>
                     </ul>
                 </div>
@@ -386,22 +413,30 @@ onMounted(async () => {
                     </div>
 
                     <div class="mt-3 text-sm text-gray-600">
-                        <span v-if="attempts.some(a => a.perfect)">
+                        <!-- <span v-if="attempts.some(a => a.perfect)">
                             +{{ xpAward.perfect }} XP (perfect)
-                        </span>
-                        <span v-else-if="attempts.some(a => a.passed)">
+                        </span> -->
+                        <!-- <span v-else-if="lastAttempt?.passed && !lastAttempt?.perfect">
                             +{{ xpAward.pass }} XP (pass)
-                        </span>
-                        <span class="pt-1" v-else>
+                        </span> -->
+                        <!-- <span class="pt-1" v-else>
                             Come back tomorrow for a new word.
+                        </span> -->
+
+                        <span class="pt-1">
+                            Come back tomorrow for your new word.
                         </span>
                     </div>
                 </div>
 
                 <!-- Reveal (only if failed all attempts and not done) -->
                 <div v-if="revealAllowed" class="pt-1">
-                    <p class="mt-2 text-xs text-gray-500 mb-4">
-                        Failed daily challenge. Try again tomorrow.
+                    <p v-if="!everpassed" class="mt-2 text-xs text-black mb-4">
+                         Daily challenge failed. Try again tomorrow.
+                    </p>
+
+                    <p v-else-if="everpassed && !everPerfect" class="mt-2 text-xs text-black mb-4">
+                        You were very close. Check the tone and try again tomorrow.
                     </p>
                     <button
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition pt-4"
@@ -413,7 +448,7 @@ onMounted(async () => {
 
                 <!-- Calm tip turn this into a carousel -->
                 <div class="pt-2 text-xs text-gray-500">
-                    Tip: tone accuracy improves with exposure.
+                    Tip: There is no downside to making attempts
                 </div>
             </div>
         </section>

@@ -88,16 +88,28 @@ const {
           Daily Exercise
         </h2>
 
-        <NuxtLink to="/daily/v3" class="rounded-xl p-6 flex items-end
-      shadow-sm hover:shadow-md transition hover:brightness-105" style="background-color:#F6E1E1;">
-          <div>
-            <div class="font-semibold text-gray-900">Daily</div>
-            <div class="text-xs text-gray-800 mt-1">
-              Practice with our daily exercise
-            </div>
-          </div>
-        </NuxtLink>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
 
+          <NuxtLink to="/daily/v3" class="rounded-xl p-6 flex items-end
+      shadow-sm hover:shadow-md transition hover:brightness-105" style="background-color:#F6E1E1;">
+            <div>
+              <div class="font-semibold text-gray-900">Daily</div>
+              <div class="text-xs text-gray-800 mt-1">
+                Practice with our daily exercise
+              </div>
+            </div>
+          </NuxtLink>
+
+          <NuxtLink to="/daily/jyutping" class="rounded-xl p-6 flex items-end
+      shadow-sm hover:shadow-md transition hover:brightness-105" style="background-color:#F6E1E1;">
+            <div>
+              <div class="font-semibold text-gray-900">Jyutping Daily</div>
+              <div class="text-xs text-gray-800 mt-1">
+                Practice your jyutping daily 
+              </div>
+            </div>
+          </NuxtLink>
+        </div>
       </div>
 
       <!-- START LEARNING -->
@@ -132,17 +144,18 @@ const {
             </div>
           </NuxtLink>
 
-          <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
-        shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:rgba(244,205,39,0.35);">
+          <NuxtLink to="/jyutping/training"
+            class="rounded-xl p-6 flex items-end shadow-sm hover:shadow-md transition hover:brightness-110"
+            style="background-color:rgba(244,205,39,0.35);">
             <div>
-              <div class="font-semibold text-gray-900">Coming soon</div>
+              <div class="text-xs font-semibold text-gray-900">Jyutping practice</div>
               <div class="text-xs text-gray-800 mt-1">
-                It's a mystery
+                Train your typing skills
               </div>
             </div>
           </NuxtLink>
 
-          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+          <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
         shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#F6E1E1;">
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
@@ -150,9 +163,9 @@ const {
                 What could it be?
               </div>
             </div>
-          </NuxtLink>
+          </NuxtLink> -->
 
-          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+          <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
         shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#D6A3D1;">
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
@@ -160,10 +173,10 @@ const {
                 Something cool
               </div>
             </div>
-          </NuxtLink>
+          </NuxtLink> -->
 
 
-          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+          <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
         shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#A8CAE0;">
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
@@ -171,7 +184,7 @@ const {
                 Awesome
               </div>
             </div>
-          </NuxtLink> -->
+          </NuxtLink>  -->
 
 
         </div>
