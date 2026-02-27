@@ -613,22 +613,6 @@ onMounted(() => {
 
                     <input :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text" placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
-
-                    <!-- <div class="flex items-center justify-between">
-
-                        <div class="flex gap-2">
-                            <button
-                                class="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition disabled:opacity-40"
-                                type="button" :disabled="idx === 0" @click="prev">
-                                Prev
-                            </button>
-                            <button
-                                class="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition disabled:opacity-40"
-                                type="button" :disabled="idx === words.length - 1" @click="next">
-                                Next
-                            </button>
-                        </div>
-                    </div> -->
                 </form>
 
                 <div v-if="isComplete && sessionResult" class="space-y-6 text-center">

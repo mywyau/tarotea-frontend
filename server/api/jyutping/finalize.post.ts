@@ -60,17 +60,15 @@ export default defineEventHandler(async (event) => {
       streakMap.set(r.word_id, Number(r.streak ?? 0));
     }
 
-    const STREAK_CAP = 5;
-
     function deltaFor(a: Attempt) {
       if (!a.passed) return 0;
 
       if (a.perfect) {
-        return 2; // perfect tone + base
+        return 3; // perfect tone + base
       }
 
       // base correct but tone wrong
-      return 4;
+      return 1;
     }
 
     const payloadAttempts = attempts.map((a) => ({
