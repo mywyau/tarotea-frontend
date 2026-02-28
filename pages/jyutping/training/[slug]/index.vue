@@ -8,7 +8,6 @@ definePageMeta({
 import type {
     AttemptLog,
     BatchAttempt,
-    CharState,
     LevelData,
     TrainWord
 } from '@/types/jyutping/jyutping-training-types'
@@ -119,61 +118,49 @@ const answerSyllables = computed(() => splitSyllables(current.value?.jyutping ??
 
 const userSyllables = computed(() => splitUserJyutping(input.value))
 
-// type SylState = 'idle' | 'partial' | 'pass' | 'perfect' | 'miss'
-
-// const syllableStates = computed<SylState[]>(() => {
-//     const ans = answerSyllables.value
-//     const usr = userSyllables.value
-
-//     const currentTypingIndex = Math.min(usr.length - 1, ans.length - 1)
-
-//     return ans.map((ansTok, i) => {
-//         const usrTok = usr[i] ?? ''
-
-//         if (!usrTok) return 'idle'
-
-//         const ansBase = stripToneToken(ansTok)
-//         const usrBase = stripToneToken(usrTok)
-
-//         if (usrTok === ansTok) return 'perfect'
-//         if (usrBase && usrBase === ansBase) return 'pass'
-
-//         const isCurrentTypingSyl = i === currentTypingIndex
-//         if (isCurrentTypingSyl && usrBase && ansBase.startsWith(usrBase)) return 'partial'
-
-//         return 'miss'
-//     })
-// })
-
-const answerRaw = computed(() => normalizedAnswer.value)
-
-const inputNoSpace = computed(() =>
-    normalizedInput.value.replace(/\s+/g, '')
+const answerBaseNoSpace = computed(() =>
+    baseSound(current.value?.jyutping ?? '')
 )
+
+const userBaseNoSpace = computed(() =>
+    baseSound(input.value)
+)
+
+
+
+type LetterState = 'idle' | 'correct'
+
+const letterStates = computed<LetterState[]>(() => {
+    const ans = answerBaseNoSpace.value
+    const usr = userBaseNoSpace.value
+
+    return ans.split('').map((letter, i) => {
+        if (!usr[i]) return 'idle'
+        if (usr[i] === letter) return 'correct'
+        return 'idle'
+    })
+})
 
 const chineseChars = computed(() =>
     current.value?.word.split('') ?? []
 )
 
-
-const charStates = computed<CharState[]>(() => {
-    const chars = chineseChars.value
+const charStates = computed(() => {
     const ans = answerSyllables.value
-    const usr = userSyllables.value
+    const usrBase = userBaseNoSpace.value
 
-    return chars.map((_, i) => {
-        const ansTok = ans[i]
-        const usrTok = usr[i] ?? ''
+    let cursor = 0
 
-        if (!ansTok || !usrTok) return 'idle'
-
+    return ans.map((ansTok) => {
         const ansBase = stripToneToken(ansTok)
-        const usrBase = stripToneToken(usrTok)
 
-        if (usrTok === ansTok) return 'perfect'
-        if (usrBase === ansBase) return 'base'
+        const segment = usrBase.slice(cursor, cursor + ansBase.length)
 
-        return 'idle'
+        const fullyCorrect = segment === ansBase
+
+        cursor += ansBase.length
+
+        return fullyCorrect ? 'correct' : 'idle'
     })
 })
 
@@ -252,39 +239,60 @@ function submit() {
     input.value = ''
 }
 
-// function getCharClass(char: string, index: number) {
-//     if (char === ' ') return ''
+const fullJyutping = computed(() =>
+    current.value?.jyutping ?? ''
+)
 
-//     // Count how many non-space characters exist before this index
-//     const answerBefore = answerRaw.value
-//         .slice(0, index)
-//         .replace(/\s+/g, '')
+type RenderState = 'idle' | 'correct'
 
-//     const compareIndex = answerBefore.length
+const jyutpingRenderStates = computed<RenderState[]>(() => {
+    const full = fullJyutping.value
+    const usr = userBaseNoSpace.value
 
-//     if (inputNoSpace.value[compareIndex] === char) {
-//         return 'text-green-600 font-semibold'
-//     }
+    let letterIndex = 0
 
-//     return 'text-gray-400'
-// }
+    return full.split('').map((char) => {
+        // if not a-z letter, don't compare
+        if (!/[a-z]/i.test(char)) {
+            return 'idle'
+        }
 
-type SylState = 'idle' | 'base' | 'perfect' | 'pass'
+        const userChar = usr[letterIndex]
+
+        if (userChar && userChar === char.toLowerCase()) {
+            letterIndex++
+            return 'correct'
+        }
+
+        return 'idle'
+    })
+})
+
+type SylState = 'idle' | 'correct'
 
 const syllableStates = computed<SylState[]>(() => {
     const ans = answerSyllables.value
     const usr = userSyllables.value
 
-    return ans.map((ansTok, i) => {
-        const usrTok = usr[i] ?? ''
+    const currentTypingIndex = usr.length - 1
 
+    return ans.map((ansTok, i) => {
+        const usrTok = usr[i]
         if (!usrTok) return 'idle'
 
         const ansBase = stripToneToken(ansTok)
         const usrBase = stripToneToken(usrTok)
 
-        if (usrTok === ansTok) return 'perfect'
-        if (usrBase === ansBase) return 'base'
+        // fully correct syllable
+        if (usrBase === ansBase) return 'correct'
+
+        // only allow prefix match on the currently typing syllable
+        if (
+            i === currentTypingIndex &&
+            ansBase.startsWith(usrBase)
+        ) {
+            return 'correct'
+        }
 
         return 'idle'
     })
@@ -568,9 +576,8 @@ onMounted(() => {
 
                     <div class="text-4xl font-medium flex gap-1">
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
-                            'text-green-600 font-semibold': charStates[i] === 'perfect',
-                            'text-amber-500 font-medium': charStates[i] === 'base',
-                            'text-gray-900': charStates[i] === 'idle'
+                            'text-green-600 font-semibold': charStates[i] === 'correct',
+                            'text-gray-400': syllableStates[i] === 'idle'
                         }">
                             {{ char }}
                         </span>
@@ -583,16 +590,15 @@ onMounted(() => {
                     <!-- Faint hint -->
                     <div v-if="showHint" class="mt-3 flex items-center gap-3">
                         <div class="text-lg font-mono select-none">
-                            <span v-for="(syl, i) in answerSyllables" :key="i" class="mr-1" :class="{
-                                'text-green-600 font-semibold': syllableStates[i] === 'pass',
-                                'text-amber-500 font-medium': syllableStates[i] === 'base',
-                                'text-gray-400': syllableStates[i] === 'idle'
+                            <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
+                                'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
+                                'text-gray-400': jyutpingRenderStates[i] === 'idle'
                             }">
-                                {{ syl }}
+                                {{ char }}
                             </span>
                         </div>
 
-                        <button type="button" @click="copyJyutping"
+                        <button type=" button" @click="copyJyutping"
                             class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
                             {{ copied ? '✓' : 'copy' }}
                         </button>
@@ -645,7 +651,7 @@ onMounted(() => {
                     </h2>
 
                     <p class="text-gray-600 text-base uppercase">
-                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed 
+                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed
                     </p>
 
                     <p class="text-green-600 text-2xl font-semibold">
@@ -659,7 +665,7 @@ onMounted(() => {
                 </div>
 
                 <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
-                    Tip: try typing without spaces
+                    Tip: try typing without spaces, do not worry about tones.
                 </div>
 
             </div>

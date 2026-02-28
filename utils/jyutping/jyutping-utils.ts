@@ -34,7 +34,7 @@ export function splitSyllables(jp: string): string[] {
 
 export function splitUserJyutping(raw: string): string[] {
   const normalized = normalizeJyutping(raw).replace(/\s+/g, "");
-  return normalized.match(/[a-z]+[1-6]/g) ?? [];
+  return normalized.match(/[a-z]+[1-6]?/g) ?? [];
 }
 
 export function stripToneToken(token: string): string {
