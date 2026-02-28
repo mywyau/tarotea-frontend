@@ -1,18 +1,14 @@
 import { createError, getHeader, readBody } from "h3";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
-
-type Attempt = {
-  wordId: string;
-  passed: boolean;
-  perfect: boolean;
-  hintUsed?: boolean;
-};
+import type {
+  BatchAttempt
+} from "~/types/jyutping/jyutping-training-types";
 
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
   const body = (await readBody(event)) as {
-    attempts: Attempt[];
+    attempts: BatchAttempt[];
     level: string;
     sessionKey: string;
   };
@@ -22,7 +18,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // de-dupe by wordId (first occurrence wins)
-  const map = new Map<string, Attempt>();
+  const map = new Map<string, BatchAttempt>();
 
   for (const a of body.attempts) {
     if (!a?.wordId) continue;
@@ -30,8 +26,7 @@ export default defineEventHandler(async (event) => {
       map.set(a.wordId, {
         wordId: a.wordId,
         passed: !!a.passed,
-        perfect: !!a.perfect,
-        hintUsed: !!(a as any).hintUsed,
+        hintUsed: !!a.hintUsed
       });
     }
   }
@@ -62,21 +57,17 @@ export default defineEventHandler(async (event) => {
       streakMap.set(r.word_id, Number(r.streak ?? 0));
     }
 
-    function deltaFor(a: Attempt) {
+    function deltaFor(a: BatchAttempt) {
       if (!a.passed) return 0;
 
-      if (a.hintUsed) {
-        return a.perfect ? 1 : 1;
-      }
+      if (a.hintUsed) return 1;
 
-      if (a.perfect) return 7;
-      return 1;
+      return 5;
     }
 
     const payloadAttempts = attempts.map((a) => ({
       wordId: a.wordId,
       passed: a.passed,
-      perfect: a.perfect,
       delta: deltaFor(a),
     }));
 

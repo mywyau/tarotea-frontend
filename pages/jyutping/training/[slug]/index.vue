@@ -246,7 +246,6 @@ function submit() {
     attempts.value.push({
         input: input.value.trim(),
         passed: result.passed,
-        perfect: result.perfect,
         message: result.message,
     })
 
@@ -452,10 +451,6 @@ watch(() => live.value.state, async (state) => {
 
         let delta = 5  // base correct
 
-        if (live.value.state === 'perfect') {
-            delta += 2  // tone bonus
-        }
-
         if (hintWasUsed) {
             delta = 1
         }
@@ -465,12 +460,10 @@ watch(() => live.value.state, async (state) => {
         // Optimistic UI update
         currentXp.value = Math.min((currentXp.value ?? 0) + delta, 500)
 
-        const isPerfect = live.value.state === 'perfect'
 
         batchAttempts.value.push({
             wordId: current.value.wordId,
             passed: true,
-            perfect: isPerfect,
             hintUsed: hintWasUsed
         })
 
