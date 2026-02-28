@@ -18,9 +18,22 @@ type AttemptLog = {
     passed: boolean
     perfect: boolean
     message: string
+    letters?: string[]
+    letterStates?: ('correct' | 'wrong')[]
 }
 
 const MAX_ATTEMPTS = 6
+
+const tips = [
+    'No need to be perfect first try.',
+    'Correct answers do not need tones, we\'re not that mean ;)',
+    'Focus on the sound shape first, add tones later if you want.',
+    'Break the word into syllables.',
+    'Try saying it out loud before typing.',
+    'Wrong guesses still improve recall.'
+]
+
+const currentTipIndex = ref(0)
 
 const loading = ref(true)
 const errorState = ref<string | null>(null)
@@ -37,6 +50,29 @@ const todayKey = computed(() => {
     const dd = String(d.getDate()).padStart(2, '0')
     return `${yyyy}-${mm}-${dd}`
 })
+
+const totalLetters = computed(() => {
+    if (!challenge.value) return 0
+    return baseSound(challenge.value.jyutping).length
+})
+
+function scoreLetters(userRaw: string, answerRaw: string) {
+    const userBase = baseSound(userRaw)
+    const answerBase = baseSound(answerRaw)
+
+    const letters = userBase.split('')
+    const states: ('correct' | 'wrong')[] = []
+
+    for (let i = 0; i < letters.length; i++) {
+        if (i < answerBase.length && letters[i] === answerBase[i]) {
+            states.push('correct')
+        } else {
+            states.push('wrong')
+        }
+    }
+
+    return { letters, states }
+}
 
 const storageKey = computed(() => `tarotea:daily-decode:${todayKey.value}`)
 
@@ -70,30 +106,40 @@ function scoreAttempt(userRaw: string, answerRaw: string) {
     const user = normalizeJyutping(userRaw)
     const ans = normalizeJyutping(answerRaw)
 
-    const passed = baseSound(user) === baseSound(ans)
-    const perfect = canonicalSound(user) === canonicalSound(ans)
-
     if (!user) {
-        return { passed: false, perfect: false, message: 'Type the jyutping with tone numbers 1–6.' }
+        return { passed: false, perfect: false, message: 'Type the jyutping.' }
     }
 
-    if (!passed) {
-        return { passed: false, perfect: false, message: 'The sound spelling was wrong and possibly missing tone' }
+    const userBase = user.replace(/[1-6]/g, '').replace(/\s+/g, '')
+    const ansBase = ans.replace(/[1-6]/g, '').replace(/\s+/g, '')
+
+    const userNoSpace = user.replace(/\s+/g, '')
+    const ansNoSpace = ans.replace(/\s+/g, '')
+
+    const baseMatch = userBase === ansBase
+    const toneMatch = userNoSpace === ansNoSpace
+
+    if (!baseMatch) {
+        return {
+            passed: false,
+            perfect: false,
+            message: 'The sound spelling was wrong.'
+        }
     }
 
-    if (!hasToneNumbers(user)) {
-        return { passed: false, perfect: false, message: 'Try to include tone numbers 1–6.' }
+    if (toneMatch) {
+        return {
+            passed: true,
+            perfect: true,
+            message: 'Perfect! You also got the sound and tone correct.'
+        }
     }
 
-    if (perfect) {
-        return { passed: true, perfect: true, message: 'Well Done! Congratulations you nailed the correct sound and tone.' }
+    return {
+        passed: true,
+        perfect: false,
+        message: 'Pretty good. Correct sound but tone was not quite right.'
     }
-
-    if (passed) {
-        return { passed: true, perfect: false, message: 'Close it was the correct sound but wrong tone.' }
-    }
-
-    return { passed: false, perfect: false, message: 'Not quite. Next time focus on the syllable shape and ending.' }
 }
 
 // ---------- Persistence ----------
@@ -215,23 +261,32 @@ async function awardXp(result: { passed: boolean; perfect: boolean }) {
     }
 }
 
+const answerLetters = computed(() => {
+    if (!challenge.value) return []
+    return baseSound(challenge.value.jyutping).split('')
+})
+
 async function submit() {
     if (!challenge.value || done.value) return
     if (attemptsLeft.value <= 0) return
 
     const result = scoreAttempt(input.value, challenge.value.jyutping)
 
+    const letterScore = scoreLetters(input.value, challenge.value.jyutping)
+
     attempts.value.push({
         input: input.value.trim(),
         passed: result.passed,
         perfect: result.perfect,
         message: result.message,
+        letters: letterScore.letters,
+        letterStates: letterScore.states
     })
 
     input.value = ''
 
     // 1️⃣ Perfect → finish immediately
-    if (result.perfect) {
+    if (result.passed) {
         done.value = true
         save()
         await awardXp(result)
@@ -239,7 +294,7 @@ async function submit() {
     }
 
     // 2️⃣ Base match only → allow more attempts
-    if (result.passed && !result.perfect) {
+    if (!result.passed && !result.perfect) {
         // move cursor to end automatically
         nextTick(() => {
             const el = document.querySelector('input')
@@ -301,17 +356,61 @@ onMounted(async () => {
     await fetchChallenge()
     save()
 })
+
+let tipInterval: number | undefined
+
+onMounted(() => {
+    tipInterval = window.setInterval(() => {
+        currentTipIndex.value =
+            (currentTipIndex.value + 1) % tips.length
+    }, 5000) // rotate every 4 seconds
+})
+
+onUnmounted(() => {
+    if (tipInterval) clearInterval(tipInterval)
+})
+
+watch(input, (val) => {
+    if (!challenge.value) return
+
+    const cleaned = normalizeJyutping(val)
+    const base = cleaned.replace(/[1-6]/g, '').replace(/\s+/g, '')
+
+    if (base.length > totalLetters.value) {
+        // trim extra characters
+        let trimmed = ''
+        let count = 0
+
+        for (const char of cleaned) {
+            if (/[1-6]/.test(char)) {
+                trimmed += char
+                continue
+            }
+
+            if (char === ' ') continue
+
+            if (count < totalLetters.value) {
+                trimmed += char
+                count++
+            }
+        }
+
+        input.value = trimmed
+    }
+})
+
+
 </script>
 
 <template>
     <main class="mx-auto max-w-xl px-6 py-12">
-        <header class="space-y-2">
+
+        <header class="space-y-3">
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Daily Jyutping Decode
+                Daily Phonetic Jyutping Decode
             </h1>
             <p class="text-sm text-gray-600">
-                One word per day. Type the jyutping with tone numbers (1–6).
-                If your sound is right, you pass. Tone accuracy earns you a better score.
+                Guess the correct phonetic. If your sound is right, you pass.
             </p>
         </header>
 
@@ -334,7 +433,18 @@ onMounted(async () => {
                         <div v-if="challenge.meaning" class="mt-1 text-sm text-gray-600">
                             {{ challenge.meaning }}
                         </div>
+                        <div class="flex gap-1 mt-2 font-mono">
+                            <div v-for="(letter, i) in answerLetters" :key="i"
+                                class="w-5 h-6 border-b flex items-end justify-center text-sm"
+                                :class="done ? 'border-gray-600 text-gray-900' : 'border-gray-400 text-transparent'">
+                                {{ done ? letter : '•' }}
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-2">
+                            {{ totalLetters }} letters
+                        </div>
                     </div>
+
 
                     <button v-if="challenge.audioUrl"
                         class="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 active:scale-[0.99] transition"
@@ -352,7 +462,7 @@ onMounted(async () => {
                 <!-- Input -->
                 <form class="space-y-3" @submit.prevent="submit">
                     <label class="block text-sm font-medium text-gray-800">
-                        Your jyutping
+                        Your answer:
                     </label>
 
                     <input v-model="input" :disabled="done || attemptsLeft <= 0" autocomplete="off" inputmode="text"
@@ -372,7 +482,7 @@ onMounted(async () => {
                     </div>
 
                     <p v-if="lastAttempt" class="text-sm"
-                        :class="lastAttempt.perfect ? 'text-emerald-700' : lastAttempt.passed ? 'text-amber-500' : 'text-red-700'">
+                        :class="lastAttempt.passed ? 'text-emerald-700' : 'text-red-700'">
                         {{ lastAttempt.message }}
                     </p>
                 </form>
@@ -385,10 +495,30 @@ onMounted(async () => {
                             class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
                             <div class="flex items-center justify-between">
                                 <div class="text-sm text-gray-900">
-                                    <span class="font-mono">You answered: {{ a.input }}</span>
+                                    <!-- <span class="font-mono">You answered: {{ a.input }}</span> -->
+
+                                    <!-- <div class="flex flex-wrap gap-1 font-mono">
+                                        <span v-for="(letter, i) in a.letters" :key="i" :class="[
+                                            'px-1 rounded',
+                                            a.letterStates?.[i] === 'correct'
+                                                ? 'text-green-500'
+                                                : 'text-red-500'
+                                        ]">
+                                            {{ letter }}
+                                        </span>
+                                    </div> -->
+
+                                    <div class="flex gap-1 font-mono">
+                                        <div v-for="(letter, i) in a.letters" :key="i"
+                                            class="w-5 h-6 border-b flex items-end justify-center text-sm" :class="a.letterStates?.[i] === 'correct'
+                                                ? 'border-green-500 text-green-600'
+                                                : 'border-red-300 text-red-500'">
+                                            {{ letter }}
+                                        </div>
+                                    </div>
+
                                 </div>
-                                <div class="text-xs"
-                                    :class="a.perfect ? 'text-emerald-700' : a.passed ? 'text-amber-500' : 'text-red-500'">
+                                <div class="text-xs" :class="a.passed ? 'text-emerald-700' : 'text-red-500'">
                                     <span v-if="a.perfect">Perfect</span>
                                     <span v-else-if="a.passed">Attempt {{ idx + 1 }}</span>
                                     <span v-else>Attempt {{ idx + 1 }}</span>
@@ -419,7 +549,7 @@ onMounted(async () => {
                 <!-- Reveal (only if failed all attempts and not done) -->
                 <div v-if="revealAllowed" class="pt-1">
                     <p v-if="!everpassed" class="mt-2 text-xs text-black mb-4">
-                         Daily challenge failed. Try again tomorrow.
+                        Daily challenge failed. Try again tomorrow.
                     </p>
 
                     <p v-else-if="everpassed && !everPerfect" class="mt-2 text-xs text-black mb-4">
@@ -434,9 +564,14 @@ onMounted(async () => {
                 </div>
 
                 <!-- Calm tip turn this into a carousel -->
-                <div class="pt-2 text-xs text-gray-500">
-                    Tip: There is no downside to making attempts
+                <div class="pt-4 text-xs text-gray-500 h-5 relative overflow-hidden">
+                    <transition name="fade" mode="out-in">
+                        <div :key="currentTipIndex" class="absolute inset-0">
+                            Tip: {{ tips[currentTipIndex] }}
+                        </div>
+                    </transition>
                 </div>
+
             </div>
         </section>
     </main>
