@@ -11,9 +11,6 @@ type DailyDecode = {
     jyutping: string // canonical answer, e.g. "gwai6" or "mou5 so2 wai6"
     meaning?: string
     audioUrl?: string // optional if you host audio assets
-    // Optional: extra hints you may want later
-    // level?: number
-    // topic?: string
 }
 
 type AttemptLog = {
@@ -413,16 +410,6 @@ onMounted(async () => {
                     </div>
 
                     <div class="mt-3 text-sm text-gray-600">
-                        <!-- <span v-if="attempts.some(a => a.perfect)">
-                            +{{ xpAward.perfect }} XP (perfect)
-                        </span> -->
-                        <!-- <span v-else-if="lastAttempt?.passed && !lastAttempt?.perfect">
-                            +{{ xpAward.pass }} XP (pass)
-                        </span> -->
-                        <!-- <span class="pt-1" v-else>
-                            Come back tomorrow for a new word.
-                        </span> -->
-
                         <span class="pt-1">
                             Come back tomorrow for your new word.
                         </span>

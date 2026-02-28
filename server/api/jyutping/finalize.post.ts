@@ -62,7 +62,7 @@ export default defineEventHandler(async (event) => {
 
       if (a.hintUsed) return 1;
 
-      return 5;
+      return 3;
     }
 
     const payloadAttempts = attempts.map((a) => ({

@@ -457,7 +457,7 @@ watch(() => live.value.state, async (state) => {
 
         const hintWasUsed = hintUsedThisQuestion.value
 
-        let delta = 5  // base correct
+        let delta = 3  // base correct
 
         if (hintWasUsed) {
             delta = 1
@@ -525,10 +525,12 @@ onMounted(() => {
             </NuxtLink>
         </div>
 
-        <header class="space-y-2">
+        <header class="space-y-4">
+
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
                 Jyutping Dojo - {{ LEVEL_TITLES[slug] }}
             </h1>
+
             <p class="text-sm text-gray-600">
                 Type the jyutping for each word shown
             </p>

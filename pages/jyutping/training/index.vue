@@ -127,7 +127,7 @@ const canEnterLevel = (level: any) => {
         Jyutping Dojo
       </h1>
       <p class="text-gray-600 text-sm sm:text-base">
-        Train your Jyutping with simple type along exercises
+        Strenghten your proficieny with our exercises
       </p>
     </header>
 
