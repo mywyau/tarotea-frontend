@@ -79,7 +79,10 @@ export function useDailySession() {
     const startRes = await $fetch<DailyStartResponse>("/api/daily/start", {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
-      body: { totalQuestions: 20 }, // optional
+      body: { 
+        mode: 'quiz',
+        totalQuestions: 20 
+      }, // optional
     });
 
     // 2) Locked state (no progress rows)
