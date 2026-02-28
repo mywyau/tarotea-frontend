@@ -5,6 +5,25 @@ definePageMeta({
     middleware: ['logged-in'],
 })
 
+import type {
+    AttemptLog,
+    BatchAttempt,
+    CharState,
+    LevelData,
+    TrainWord
+} from '@/types/jyutping/jyutping-training-types'
+
+import {
+    baseSound,
+    canonicalNoSpace,
+    normalizeJyutping,
+    scoreJyutpingAttempt,
+    shuffle,
+    splitSyllables,
+    splitUserJyutping,
+    stripToneToken
+} from '@/utils/jyutping/jyutping-utils'
+
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 
 import {
@@ -12,35 +31,12 @@ import {
 } from '@/utils/sounds'
 
 
-type TrainWord = {
-    wordId: string
-    word: string
-    jyutping: string
-    meaning?: string
-    audioUrl?: string
-}
-
-type AttemptLog = {
-    input: string
-    passed: boolean
-    perfect: boolean
-    message: string
-}
-
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-function shuffle<T>(arr: T[]): T[] {
-    const a = [...arr]
-    for (let i = a.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1))
-            ;[a[i], a[j]] = [a[j], a[i]]
-    }
-    return a
-}
 
 const BATCH_SIZE = 20
 
@@ -69,15 +65,7 @@ const words = ref<TrainWord[]>([])
 
 const sessionKey = ref<string>('')
 
-type BatchAttempt = {
-    wordId: string
-    passed: boolean
-    perfect: boolean
-    hintUsed: boolean
-}
-
 const batchAttempts = ref<BatchAttempt[]>([])
-
 
 const idx = ref(0)
 
@@ -91,13 +79,10 @@ const current = computed(() => words.value[idx.value] ?? null)
 const normalizedInput = computed(() => normalizeJyutping(input.value))
 const normalizedAnswer = computed(() => (current.value ? normalizeJyutping(current.value.jyutping) : ''))
 
-const inputBase = computed(() => baseSound(normalizedInput.value))     // no tones/spaces
-const answerBase = computed(() => baseSound(normalizedAnswer.value))
-
 const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
 
-const usedHintForCurrent = ref(false)
+const hintUsedThisQuestion = ref(false)
 
 const live = computed(() => {
     if (!current.value) return { state: 'idle' as const }
@@ -122,7 +107,7 @@ const live = computed(() => {
 
     // 👀 Partial: they are typing the right “shape” (prefix match)
     // e.g. user typed "gw" and answerBase starts with "gw"
-    if (uBase && aBase.includes(uBase)) {
+    if (uBase && aBase.startsWith(uBase)) {
         return { state: 'partial' as const }
     }
 
@@ -130,102 +115,35 @@ const live = computed(() => {
     return { state: 'miss' as const }
 })
 
-function splitSyllables(jp: string): string[] {
-    // Normalize first so spaces/hyphens collapse nicely
-    const n = normalizeJyutping(jp)
-    if (!n) return []
-    return n.split(' ').filter(Boolean)
-}
-
-function stripToneToken(token: string): string {
-    return token.replace(/[1-6]/g, '')
-}
-
 const answerSyllables = computed(() => splitSyllables(current.value?.jyutping ?? ''))
-// const userSyllables = computed(() => splitSyllables(input.value))
 
-function splitUserJyutping(raw: string): string[] {
-    const normalized = normalizeJyutping(raw).replace(/\s+/g, '')
+const userSyllables = computed(() => splitUserJyutping(input.value))
 
-    // Match sequences like: mou5, so2, wai6
-    const matches = normalized.match(/[a-z]+[1-6]/g)
+// type SylState = 'idle' | 'partial' | 'pass' | 'perfect' | 'miss'
 
-    return matches ?? []
-}
+// const syllableStates = computed<SylState[]>(() => {
+//     const ans = answerSyllables.value
+//     const usr = userSyllables.value
 
-const userSyllables = computed(() =>
-    splitUserJyutping(input.value)
-)
+//     const currentTypingIndex = Math.min(usr.length - 1, ans.length - 1)
 
-type SylState = 'idle' | 'partial' | 'pass' | 'perfect' | 'miss'
+//     return ans.map((ansTok, i) => {
+//         const usrTok = usr[i] ?? ''
 
-const syllableStates = computed<SylState[]>(() => {
-    const ans = answerSyllables.value
-    const usr = userSyllables.value
+//         if (!usrTok) return 'idle'
 
-    const currentTypingIndex = Math.min(usr.length - 1, ans.length - 1)
+//         const ansBase = stripToneToken(ansTok)
+//         const usrBase = stripToneToken(usrTok)
 
-    return ans.map((ansTok, i) => {
-        const usrTok = usr[i] ?? ''
+//         if (usrTok === ansTok) return 'perfect'
+//         if (usrBase && usrBase === ansBase) return 'pass'
 
-        if (!usrTok) return 'idle'
+//         const isCurrentTypingSyl = i === currentTypingIndex
+//         if (isCurrentTypingSyl && usrBase && ansBase.startsWith(usrBase)) return 'partial'
 
-        const ansBase = stripToneToken(ansTok)
-        const usrBase = stripToneToken(usrTok)
-
-        if (usrTok === ansTok) return 'perfect'
-        if (usrBase && usrBase === ansBase) return 'pass'
-
-        const isCurrentTypingSyl = i === currentTypingIndex
-        if (isCurrentTypingSyl && usrBase && ansBase.startsWith(usrBase)) return 'partial'
-
-        return 'miss'
-    })
-})
-
-// ---------- Normalization & scoring (reuse your daily logic) ----------
-
-function normalizeJyutping(raw: string): string {
-    return raw
-        .toLowerCase()
-        .trim()
-        .replace(/[，。,.;:!?]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .replace(/-/g, ' ')
-}
-
-function hasToneNumbers(jp: string): boolean {
-    return /[1-6]/.test(jp)
-}
-
-function baseSound(jp: string): string {
-    return normalizeJyutping(jp).replace(/[1-6]/g, '').replace(/\s+/g, '')
-}
-
-function canonicalSound(jp: string): string {
-    return normalizeJyutping(jp).replace(/\s+/g, ' ')
-}
-
-function scoreAttempt(userRaw: string, answerRaw: string) {
-    const user = normalizeJyutping(userRaw)
-    const ans = normalizeJyutping(answerRaw)
-
-    if (!user) {
-        return { passed: false, perfect: false, message: 'Type the jyutping (with tone numbers 1–6).' }
-    }
-
-    // For “easy practice”, still require tone numbers, but keep feedback gentle
-    if (!hasToneNumbers(user)) {
-        return { passed: false, perfect: false, message: 'Include tone numbers (1–6). It’s okay if the tone is wrong.' }
-    }
-
-    const passed = baseSound(user) === baseSound(ans)
-    const perfect = canonicalNoSpace(user) === canonicalNoSpace(ans)
-
-    if (perfect) return { passed: true, perfect: true, message: 'Correct sound and tone.' }
-    if (passed) return { passed: true, perfect: false, message: 'Correct sound. Tone differs.' }
-    return { passed: false, perfect: false, message: 'Not quite — try again.' }
-}
+//         return 'miss'
+//     })
+// })
 
 const answerRaw = computed(() => normalizedAnswer.value)
 
@@ -237,7 +155,6 @@ const chineseChars = computed(() =>
     current.value?.word.split('') ?? []
 )
 
-type CharState = 'idle' | 'base' | 'perfect'
 
 const charStates = computed<CharState[]>(() => {
     const chars = chineseChars.value
@@ -259,18 +176,6 @@ const charStates = computed<CharState[]>(() => {
         return 'idle'
     })
 })
-
-type LevelData = {
-    level: number
-    title: string
-    description: string
-    categories: Record<string, {
-        id: string
-        word: string
-        jyutping: string
-        meaning: string
-    }[]>
-}
 
 async function fetchWords() {
     loading.value = true
@@ -336,7 +241,8 @@ async function fetchWords() {
 function submit() {
     if (!current.value) return
 
-    const result = scoreAttempt(input.value, current.value.jyutping)
+    const result = scoreJyutpingAttempt(input.value, current.value.jyutping)
+
     attempts.value.push({
         input: input.value.trim(),
         passed: result.passed,
@@ -347,27 +253,43 @@ function submit() {
     input.value = ''
 }
 
-function canonicalNoSpace(jp: string): string {
-    return normalizeJyutping(jp)
-        .replace(/\s+/g, '')
-}
+// function getCharClass(char: string, index: number) {
+//     if (char === ' ') return ''
 
-function getCharClass(char: string, index: number) {
-    if (char === ' ') return ''
+//     // Count how many non-space characters exist before this index
+//     const answerBefore = answerRaw.value
+//         .slice(0, index)
+//         .replace(/\s+/g, '')
 
-    // Count how many non-space characters exist before this index
-    const answerBefore = answerRaw.value
-        .slice(0, index)
-        .replace(/\s+/g, '')
+//     const compareIndex = answerBefore.length
 
-    const compareIndex = answerBefore.length
+//     if (inputNoSpace.value[compareIndex] === char) {
+//         return 'text-green-600 font-semibold'
+//     }
 
-    if (inputNoSpace.value[compareIndex] === char) {
-        return 'text-green-600 font-semibold'
-    }
+//     return 'text-gray-400'
+// }
 
-    return 'text-gray-400'
-}
+type SylState = 'idle' | 'base' | 'perfect' | 'pass'
+
+const syllableStates = computed<SylState[]>(() => {
+    const ans = answerSyllables.value
+    const usr = userSyllables.value
+
+    return ans.map((ansTok, i) => {
+        const usrTok = usr[i] ?? ''
+
+        if (!usrTok) return 'idle'
+
+        const ansBase = stripToneToken(ansTok)
+        const usrBase = stripToneToken(usrTok)
+
+        if (usrTok === ansTok) return 'perfect'
+        if (usrBase === ansBase) return 'base'
+
+        return 'idle'
+    })
+})
 
 const copied = ref(false)
 
@@ -389,7 +311,6 @@ async function copyJyutping() {
 }
 
 let advancing = false
-
 let advanceTimer: ReturnType<typeof setTimeout> | null = null
 
 function resetTraining(options?: { reshuffle?: boolean }) {
@@ -402,7 +323,7 @@ function resetTraining(options?: { reshuffle?: boolean }) {
 
     input.value = ''
     attempts.value = []
-    showHint.value = true
+    showHint.value = false
     idx.value = 0
 
     if (options?.reshuffle) {
@@ -460,11 +381,15 @@ function advance() {
         idx.value++
         input.value = ''
         attempts.value = []
-        usedHintForCurrent.value = false   // 👈 RESET HERE
+        hintUsedThisQuestion.value = false   // 🔥 reset here
+        showHint.value = false
     }
 }
 
 const isComplete = computed(() => idx.value >= BATCH_SIZE)
+
+const wordProgressMap = ref<Record<string, { xp: number }>>({})
+
 
 function startNewSession() {
     sessionKey.value = crypto.randomUUID()
@@ -475,23 +400,6 @@ function startNewSession() {
 
 onMounted(fetchWords)
 
-watch(showHint, (val) => {
-  if (val) {
-    usedHintForCurrent.value = true
-  }
-})
-
-watchEffect(() => {
-    console.log({
-        input: input.value,
-        normalizedInput: normalizedInput.value,
-        inputBase: inputBase.value,
-        answerBase: answerBase.value,
-        state: live.value.state,
-    })
-})
-
-const wordProgressMap = ref<Record<string, { xp: number }>>({})
 
 watch(
     () => words.value,
@@ -527,59 +435,66 @@ watch(
     }
 )
 
-watch(
-    () => live.value.state,
-    async (state) => {
-        if (state !== 'perfect') return
-        if (advancing) return
-        if (!current.value) return
+watch(() => live.value.state, async (state) => {
 
-        advancing = true
+    if (state !== 'pass' && state !== 'perfect') return
 
-        if (!batchAttempts.value.some(a => a.wordId === current.value!.wordId)) {
+    if (advancing) return
+    if (!current.value) return
 
-            // Example scoring logic (match your backend logic)
+    advancing = true
 
-            let delta = 7
+    if (!batchAttempts.value.some(a => a.wordId === current.value!.wordId)) {
 
-            if (usedHintForCurrent.value) {
-                delta = 1
-            }
+        // Example scoring logic (match your backend logic)
 
+        const hintWasUsed = hintUsedThisQuestion.value
 
-            xpDelta.value = delta
+        let delta = 5  // base correct
 
-            // Optimistic UI update
-            currentXp.value = Math.min((currentXp.value ?? 0) + delta, 500)
-
-            batchAttempts.value.push({
-                wordId: current.value.wordId,
-                passed: true,
-                perfect: true,
-                hintUsed: usedHintForCurrent.value
-            })
-
-            // Clear floating delta after animation
-            setTimeout(() => {
-                xpDelta.value = null
-            }, 1000)
+        if (live.value.state === 'perfect') {
+            delta += 2  // tone bonus
         }
 
-        // 🔔 Play procedural jingle
-        playCorrectJingle(0.7)
-
-        // Wait for jingle envelope (~400ms)
-        await new Promise(r => setTimeout(r, 800))
-
-        if (batchAttempts.value.length >= BATCH_SIZE) {
-            await finalizeBatch()
-            advancing = false
-            return
+        if (hintWasUsed) {
+            delta = 1
         }
 
-        advance()
-        advancing = false
+        xpDelta.value = delta
+
+        // Optimistic UI update
+        currentXp.value = Math.min((currentXp.value ?? 0) + delta, 500)
+
+        const isPerfect = live.value.state === 'perfect'
+
+        batchAttempts.value.push({
+            wordId: current.value.wordId,
+            passed: true,
+            perfect: isPerfect,
+            hintUsed: hintWasUsed
+        })
+
+        // Clear floating delta after animation
+        setTimeout(() => {
+            xpDelta.value = null
+        }, 1000)
     }
+
+    // 🔔 Play procedural jingle
+    playCorrectJingle(0.7)
+
+    // Wait for jingle envelope (~400ms)
+    await new Promise(r => setTimeout(r, 600))
+
+    if (batchAttempts.value.length >= BATCH_SIZE) {
+        await finalizeBatch()
+        advancing = false
+        return
+    }
+
+    advance()
+    advancing = false
+}
 )
 watch(
     () => current.value?.wordId,
@@ -638,7 +553,10 @@ onMounted(() => {
 
                         <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                            type="button" @click="showHint = !showHint">
+                            type="button" @click="() => {
+                                showHint = !showHint
+                                if (showHint) hintUsedThisQuestion = true
+                            }">
                             {{ showHint ? 'Hide hint' : 'Show hint' }}
                         </button>
 
@@ -672,9 +590,12 @@ onMounted(() => {
                     <!-- Faint hint -->
                     <div v-if="showHint" class="mt-3 flex items-center gap-3">
                         <div class="text-lg font-mono select-none">
-                            <span v-for="(char, i) in answerRaw" :key="i" class="transition-colors duration-150"
-                                :class="getCharClass(char, i)">
-                                {{ char }}
+                            <span v-for="(syl, i) in answerSyllables" :key="i" class="mr-1" :class="{
+                                'text-green-600 font-semibold': syllableStates[i] === 'pass',
+                                'text-amber-500 font-medium': syllableStates[i] === 'base',
+                                'text-gray-400': syllableStates[i] === 'idle'
+                            }">
+                                {{ syl }}
                             </span>
                         </div>
 
@@ -687,12 +608,12 @@ onMounted(() => {
                 </div>
 
                 <!-- XP Row -->
-                <div v-if="!isComplete" class="flex items-center justify-between max-w-xs">
+                <div v-if="!isComplete" class="flex items-center max-w-xs">
 
                     <!-- XP Bar -->
-                    <div class="flex-1 mr-3">
-                        <div class="h-1 bg-gray-200 rounded">
-                            <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                    <div class="w-28 mr-2">
+                        <div class="h-[3px] bg-gray-200 rounded">
+                            <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
                                 :style="{ width: Math.min((currentXp ?? 0) / 200 * 100, 100) + '%' }" />
                         </div>
                     </div>
@@ -725,20 +646,17 @@ onMounted(() => {
                 </form>
 
                 <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
-                    <!-- <div v-if="true" class="space-y-8 text-center"> -->
 
                     <h2 class="text-2xl font-semibold">
                         Good job! Keep going!
                     </h2>
 
                     <p class="text-gray-600 text-base uppercase">
-                        <!-- {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed  -->
-                        {{ 20 }} / {{ 20 }} words completed
+                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed 
                     </p>
 
                     <p class="text-green-600 text-2xl font-semibold">
-                        <!-- +{{ sessionResult.xpEarned }} XP -->
-                        +{{ 60 }} XP
+                        +{{ sessionResult.xpEarned }} XP
                     </p>
 
                     <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
