@@ -6,17 +6,20 @@ definePageMeta({
 })
 
 import WordTile from '@/components/WordTile.vue'
-import { getLevelNumber } from '~/utils/levels/levels'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
+import { tileColours } from '~/utils/branding/helpers'
 
 const route = useRoute()
 const slug = route.params.slug as string
 
-const levelNumber = getLevelNumber(slug)
-if (levelNumber === null) {
-  throw createError({ statusCode: 404, statusMessage: 'Level not found' })
+// we check the path slug
+if (!isLevelId(slug)) {
+  throw createError({ statusCode: 404 })
 }
+
+const levelNumber: number  = levelIdToNumbers(slug)
 
 const {
   authReady,
@@ -42,15 +45,6 @@ if (error.value?.statusCode === 403) {
 if (!topic.value) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
-
-const TILE_COLORS = [
-  'rgba(234, 184, 228, 0.75)', // pink
-  'rgba(214, 163, 209, 0.75)', // purple
-  'rgba(168, 202, 224, 0.75)', // blue
-  'rgba(246, 225, 225, 0.75)', // blush
-  'rgba(244, 194, 215, 0.75)', // soft rose
-  'rgba(244, 205, 39, 0.35)'  // yellow 
-]
 
 const categories = computed(() =>
   Object.entries(topic.value.categories).map(([key, words]) => ({
@@ -86,14 +80,10 @@ async function loadProgress() {
   }
 }
 
-onMounted(loadProgress)
+
 
 const getXp = (id: string) =>
   progressMap.value?.[id]?.xp ?? 0
-
-const getStreak = (id: string) =>
-  progressMap.value?.[id]?.streak ?? 0
-
 
 const MASTERY_XP = 200
 
@@ -115,8 +105,8 @@ function getColorFromId(id: string) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash)
   }
 
-  const index = Math.abs(hash) % TILE_COLORS.length
-  return TILE_COLORS[index]
+  const index = Math.abs(hash) % tileColours.length
+  return tileColours[index]
 }
 
 const gatedCategories = computed(() => {
@@ -132,7 +122,7 @@ const gatedCategories = computed(() => {
           !hasPaidAccess.value &&
           globalIndex >= FREE_WORD_LIMIT
 
-        // const color = TILE_COLORS[globalIndex % TILE_COLORS.length]
+        // const color = tileColours[globalIndex % tileColours.length]
 
         globalIndex++
 
@@ -145,6 +135,8 @@ const gatedCategories = computed(() => {
     }
   })
 })
+
+onMounted(loadProgress)
 
 </script>
 
@@ -186,26 +178,14 @@ const gatedCategories = computed(() => {
   --yellow: #F4CD27;
   --blush: #F6E1E1;
 
-  /* background: linear-gradient(180deg,
-      rgba(246, 225, 225, 0.70) 0%,
-      rgba(255, 255, 255, 0.85) 45%,
-      rgba(168, 202, 224, 0.40) 100%); */
-
-  /* border-radius: 18px; */
   padding-bottom: 2rem;
 }
 
 .header-card {
-  /* background: rgba(255, 255, 255, 0.72); */
-  /* border: 1px solid rgba(214, 163, 209, 0.38); */
-  /* purple border */
   backdrop-filter: blur(6px);
 }
 
 .category-card {
-  /* background: rgba(255, 255, 255, 0.72); */
-  /* border: 1px solid rgba(234, 184, 228, 0.30); */
-  /* pink border */
   backdrop-filter: blur(6px);
 }
 
@@ -218,20 +198,5 @@ const gatedCategories = computed(() => {
   pointer-events: none;
   user-select: none;
   filter: grayscale(0.15);
-}
-
-/* Small “Pro” pill */
-.pill {
-  display: inline-block;
-  /* padding: 0.2rem 0.55rem; */
-  /* border-radius: 999px; */
-  font-size: 0.75rem;
-  font-weight: 700;
-  /* border: 1px solid rgba(0, 0, 0, 0.06); */
-  color: rgba(0, 0, 0, 0.78);
-}
-
-.pill-locked {
-  background: rgba(244, 205, 39, 0.60);
 }
 </style>

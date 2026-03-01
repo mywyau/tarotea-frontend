@@ -5,7 +5,7 @@ definePageMeta({
   ssr: false
 })
 
-import { getLevelNumber } from '~/utils/levels/levels'
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel } from '~/utils/levels/quiz_helpers'
 
 const route = useRoute()
@@ -13,7 +13,9 @@ const slug = computed(() => route.params.slug as string | undefined)
 
 const levelNumber = computed(() => {
   if (!slug.value) return null
-  return getLevelNumber(slug.value)
+  if (isLevelId(slug.value)) {
+    return levelIdToNumbers(slug.value)
+  }
 })
 
 const {

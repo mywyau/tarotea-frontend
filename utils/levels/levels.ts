@@ -1,43 +1,22 @@
-type LevelId =
-  | "level-one"
-  | "level-two"
-  | "level-three"
-  | "level-four"
-  | "level-five"
-  | "level-six"
-  | "level-seven"
-  | "level-eight"
-  | "level-nine"
-  | "level-ten"
-  | "level-eleven"
-  | "level-twelve"
-  | "level-thirteen"
-  | "level-fourteen"
-  | "level-fifthteen";
+export const levelIdToNumberMap = {
+  "level-one": 1,
+  "level-two": 2,
+  "level-three": 3,
+  "level-four": 4,
+  "level-five": 5,
+  "level-six": 6,
+  "level-seven": 7,
+  "level-eight": 8,
+  "level-nine": 9,
+  "level-ten": 10,
+} as const
 
-type LevelMapping = {
-  id: LevelId;
-  number: number;
-};
+type LevelId = keyof typeof levelIdToNumberMap
 
-export const levelIdToNumbersList: LevelMapping[] = [
-  { id: "level-one", number: 1 },
-  { id: "level-two", number: 2 },
-  { id: "level-three", number: 3 },
-  { id: "level-four", number: 4 },
-  { id: "level-five", number: 5 },
-  { id: "level-six", number: 6 },
-  { id: "level-seven", number: 7 },
-  { id: "level-eight", number: 8 },
-  { id: "level-nine", number: 9 },
-  { id: "level-ten", number: 10 },
-  { id: "level-eleven", number: 11 },
-  { id: "level-twelve", number: 12 },
-  { id: "level-thirteen", number: 13 },
-  { id: "level-fourteen", number: 14 },
-  { id: "level-fifthteen", number: 15 },
-];
+export function isLevelId(value: string): value is LevelId {
+  return value in levelIdToNumberMap
+}
 
 export function levelIdToNumbers(id: LevelId): number {
-  return levelIdToNumbersList.find((level) => level.id === id)!.number;
+  return levelIdToNumberMap[id]
 }

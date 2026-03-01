@@ -1,24 +1,25 @@
-export default defineNuxtRouteMiddleware(async (to) => {
+import {
+  levelIdToNumbers,
+  isLevelId
+} from "@/utils/levels/levels";
 
+export default defineNuxtRouteMiddleware(async (to) => {
   const slug = to.params.slug as string | undefined;
   const id = to.params.id as string | undefined;
 
   if (!slug || !id) return;
 
-  const {
-    authReady,
-    isLoggedIn,
-    entitlement,
-  } = useMeStateV2();
-
+  const { authReady, isLoggedIn, entitlement } = useMeStateV2();
   if (!authReady.value) return;
 
-  const levelNumber = getLevelNumber(slug);
-  if (!levelNumber) {
+  // ✅ Validate slug
+  if (!isLevelId(slug)) {
     throw createError({ statusCode: 404 });
   }
 
-  // ✅ Free levels (1–2)
+  const levelNumber = levelIdToNumbers(slug);
+
+  // ✅ Free levels
   if (levelNumber <= 3) return;
 
   // 🚧 Coming soon
@@ -27,22 +28,22 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // ✅ Paid users → full access
-  if (isLoggedIn.value && entitlement.value && canAccessLevel(entitlement.value)) {
+  if (
+    isLoggedIn.value &&
+    entitlement.value &&
+    canAccessLevel(entitlement.value)
+  ) {
     return;
   }
 
-  // 🔓 Free preview logic (first 5 words only)
+  // 🔓 Free preview logic (first 10 words)
 
-  // Fetch level data
-  const topic = await $fetch(`/api/index/levels/${slug}`);
+  const levels = await $fetch(`/api/index/levels/${slug}`);
 
-  const allWords = Object.values(topic.categories).flat();
+  const allWords = Object.values(levels.categories).flat();
   const freePreviewIds = allWords.slice(0, 10).map((w: any) => w.id);
 
-  if (freePreviewIds.includes(id)) {
-    return; // allow preview
-  }
+  if (freePreviewIds.includes(id)) return;
 
-  // Otherwise block
   return navigateTo("/upgrade");
 });

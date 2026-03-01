@@ -27,20 +27,6 @@ function getLevelColor(index: number) {
 
 // --- helpers ---
 
-const canEnterLevel = (level: any) => {
-
-  if (!authReady.value) return false
-  if (level.comingSoon) return false
-
-  // Free levels (1–2)
-  // if (isFreeLevel(level.number)) return true
-
-  // Paid levels
-  if (!isLoggedIn.value) return false
-
-  return canAccessLevel(entitlement.value!)
-}
-
 // Resolve auth once on mount (safe + idempotent)
 onMounted(async () => {
   if (!authReady.value) {
@@ -74,7 +60,6 @@ onMounted(async () => {
         }">
 
         <!-- Accessible level -->
-        <!-- Use your real gating when ready: v-if="canEnterLevel(level)" -->
         <NuxtLink v-if="true" :to="`/level/${level.id}`" class="block space-y-3">
 
           <div class="flex items-start justify-between gap-4">
@@ -90,7 +75,6 @@ onMounted(async () => {
 
             <div class="shrink-0">
               <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
-              <!-- <span v-else-if="!canEnterLevel(level)" class="pill pill-locked">Locked</span> -->
             </div>
           </div>
 
@@ -135,14 +119,9 @@ onMounted(async () => {
   --pink: #EAB8E4;
   --purple: #D6A3D1;
   --blue: #A8CAE0;
-  /* assuming this is what you meant */
   --yellow: #F4CD27;
   --blush: #F6E1E1;
 
-  /* background: linear-gradient(180deg,
-      rgba(246, 225, 225, 0.70) 0%,
-      rgba(255, 255, 255, 0.85) 45%,
-      rgba(168, 202, 224, 0.40) 100%); */
   border-radius: 16px;
   padding-bottom: 2rem;
 }
