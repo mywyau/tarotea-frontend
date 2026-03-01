@@ -1,6 +1,4 @@
 <script setup lang="ts">
-
-
 const { data: stats } = await useFetch('/api/stats', {
   server: true,
   lazy: true,
@@ -18,47 +16,6 @@ const {
   resolve,
 } = useMeStateV2();
 
-const animatedTotalUsers = ref(0)
-
-onMounted(() => {
-  if (typeof window === 'undefined') return
-
-  function animateCount(
-    target: Ref<number>,
-    endValue: number,
-    duration = 800
-  ) {
-    const startValue = 0
-    const startTime = performance.now()
-
-    function update(now: number) {
-      const elapsed = now - startTime
-      const progress = Math.min(elapsed / duration, 1)
-
-      const eased = 1 - Math.pow(1 - progress, 4)
-
-      target.value = Math.floor(startValue + (endValue - startValue) * eased)
-
-      if (progress < 1) {
-        window.requestAnimationFrame(update)
-      } else {
-        target.value = endValue
-      }
-    }
-
-    window.requestAnimationFrame(update)
-  }
-
-  watch(
-    () => stats?.value?.totalUsers,
-    (val) => {
-      if (typeof val === 'number') {
-        animateCount(animatedTotalUsers, val, 1200)
-      }
-    },
-    { immediate: true }
-  )
-})
 
 </script>
 
@@ -105,7 +62,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 sm:grid-cols-1 gap-5">
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
-            {{ animatedTotalUsers.toLocaleString() }}
+            {{ stats?.totalUsers ?? '—' }}
           </div>
           <div class="text-sm text-gray-700 mt-1">
             Learners
@@ -196,7 +153,7 @@ onMounted(() => {
             </div>
           </NuxtLink>
 
-          <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
+          <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
         shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#F6E1E1;">
             <div>
               <div class="font-semibold text-gray-900">Coming soon</div>
@@ -204,7 +161,7 @@ onMounted(() => {
                 What could it be?
               </div>
             </div>
-          </NuxtLink> -->
+          </NuxtLink>
 
           <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
         shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#D6A3D1;">
