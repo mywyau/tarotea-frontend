@@ -93,6 +93,11 @@ export default defineEventHandler(async (event) => {
 
     let session = upsert.rows[0];
 
+    if (session.completed) {
+      await client.query("COMMIT");
+      return { session };
+    }
+
     // if already has words for today, return
     if (Array.isArray(session.word_ids) && session.word_ids.length > 0) {
       await client.query("COMMIT");

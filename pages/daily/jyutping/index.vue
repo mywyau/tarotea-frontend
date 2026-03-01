@@ -2,7 +2,7 @@
 
 definePageMeta({
     ssr: false,
-    middleware: ['coming-soon'],
+    // middleware: ['coming-soon'],
 })
 
 type DailyDecode = {
@@ -28,7 +28,7 @@ const MAX_ATTEMPTS = 6
 const tips = [
     'No need to be perfect first try.',
     'Correct answers do not need tones, we\'re not that mean ;)',
-    'Focus on the sound shape first, add tones later if you want.',
+    'Focus on the sound shape.',
     'Break the word into syllables.',
     'Try saying it out loud before typing.',
     'Wrong guesses still improve recall.'
@@ -126,7 +126,7 @@ function scoreAttempt(userRaw: string, answerRaw: string) {
         return {
             passed: false,
             perfect: false,
-            message: 'The sound spelling was wrong.'
+            message: 'The spelling was wrong. Try again'
         }
     }
 
@@ -141,7 +141,7 @@ function scoreAttempt(userRaw: string, answerRaw: string) {
     return {
         passed: true,
         perfect: false,
-        message: 'Pretty good. Correct sound but tone was not quite right.'
+        message: 'Pretty good.'
     }
 }
 
@@ -187,160 +187,6 @@ function playAudio() {
     void audio.value.play()
 }
 
-// ---------- Fetch challenge ----------
-
-// async function fetchChallenge() {
-//     loading.value = true
-//     errorState.value = null
-
-//     try {
-//         // If you have auth/entitlement, you can add token here.
-//         // const { getAccessToken } = await useAuth()
-//         // const token = await getAccessToken()
-
-//         const res = await $fetch<DailyDecode>('/api/daily/jyutping', {
-//             method: 'GET',
-//             // headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-//         })
-
-//         // If we already loaded a saved challenge for today, keep it
-//         if (!challenge.value) challenge.value = res
-
-//         // Safety: if saved challenge exists but different date, reset
-//         if (challenge.value?.date && challenge.value.date !== todayKey.value) {
-//             attempts.value = []
-//             done.value = false
-//             challenge.value = res
-//             save()
-//         }
-//     } catch (e: any) {
-//         errorState.value = e?.data?.message || e?.message || 'Failed to load today’s challenge.'
-//     } finally {
-//         loading.value = false
-//     }
-// }
-
-// async function fetchChallenge() {
-//     loading.value = true
-//     errorState.value = null
-
-//     try {
-//         // 1️⃣ Create or fetch daily session
-//         const daily = await $fetch<{
-//             session: {
-//                 word_ids: string[]
-//             }
-//         }>('/api/daily', {
-//             method: 'POST',
-//             body: {
-//                 mode: 'jyutping',
-//                 totalQuestions: 1
-//             }
-//         })
-
-//         const wordIds = daily.session.word_ids
-
-//         const id = daily.session.word_ids[0]
-
-//         const word = await $fetch(`${cdnBase}/words/${id}.json`)
-
-//         if (!wordIds || wordIds.length === 0) {
-//             errorState.value = 'No words available.'
-//             return
-//         }
-
-//         // 2️⃣ Fetch actual word data
-//         // const words = await $fetch<{
-//         //     id: string
-//         //     word: string
-//         //     jyutping: string
-//         //     meaning: string
-//         // }[]>('/api/words/by-ids', {
-//         //     method: 'POST',
-//         //     body: { ids: wordIds }
-//         // })
-
-//         // const word = word
-
-//         challenge.value = {
-//             date: todayKey.value,
-//             wordId: word.id,
-//             word: word.word,
-//             jyutping: word.jyutping,
-//             meaning: word.meaning
-//         }
-
-//     } catch (e: any) {
-//         errorState.value =
-//             e?.data?.message ||
-//             e?.message ||
-//             'Failed to load today’s challenge.'
-//     } finally {
-//         loading.value = false
-//     }
-// }
-
-// async function fetchChallenge() {
-//     loading.value = true
-//     errorState.value = null
-
-//     const { getAccessToken } = await useAuth()
-//     const token = await getAccessToken()
-
-//     try {
-//         // 1️⃣ Create or fetch deterministic daily session
-//         const daily = await $fetch<{
-//             session: {
-//                 word_ids: string[]
-//             }
-//         }>('/api/daily/start', {
-//             method: 'POST',
-//             headers: { Authorization: `Bearer ${token}` },
-//             body: {
-//                 mode: 'jyutping',
-//                 totalQuestions: 20
-//             }, // optional
-//         })
-
-//         const wordIds = daily.session?.word_ids
-
-//         if (!wordIds || wordIds.length === 0) {
-//             errorState.value = 'No daily word available.'
-//             return
-//         }
-
-//         const id = wordIds[0]
-
-//         // Fetch word data
-//         const { data, error } = await useFetch(
-//             () => `/api/words/${id}`,
-//             {
-//                 key: () => `word-${id}`,
-//                 server: true,
-//             }
-//         )
-
-//         const word = computed(() => data.value)
-
-//         challenge.value = {
-//             date: todayKey.value,
-//             wordId: word.value.id,
-//             word: word.value.word,
-//             jyutping: word.value.jyutping,
-//             meaning: word.value.meaning,
-//             audioUrl: word.value.audioUrl
-//         }
-
-//     } catch (e: any) {
-//         errorState.value =
-//             e?.data?.message ||
-//             e?.message ||
-//             'Failed to load today’s challenge.'
-//     } finally {
-//         loading.value = false
-//     }
-// }
-
 async function loadWord(id: string) {
     const { data } = await useFetch(
         () => `/api/words/${id}`,
@@ -367,6 +213,18 @@ async function loadWord(id: string) {
     done.value = false
 }
 
+type DailyStartResponse = {
+    session: {
+        completed: boolean
+        word_ids: string[]
+        answered_count: number
+        correct_count: number
+        xp_earned: number
+        total_questions: number
+    }
+    dailyLocked?: boolean
+}
+
 async function fetchChallenge() {
     loading.value = true
     errorState.value = null
@@ -375,16 +233,27 @@ async function fetchChallenge() {
     const token = await getAccessToken()
 
     try {
-        const daily = await $fetch<{
-            session: { word_ids: string[] }
-        }>('/api/daily/start', {
+        const daily = await $fetch<DailyStartResponse>(
+            '/api/daily/start', {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
             body: {
                 mode: 'jyutping',
-                totalQuestions: 5
+                totalQuestions: 20
             }
         })
+
+        if (daily.session.completed) {
+            done.value = true
+            finalized.value = true
+
+            xpEarned.value = daily.session.xp_earned ?? 0
+            correctCount.value = daily.session.correct_count ?? 0
+            totalQuestions.value = daily.session.total_questions ?? 0
+
+            // Do NOT load words
+            return
+        }
 
         const ids = daily.session?.word_ids
 
@@ -416,6 +285,10 @@ const lastAttempt = computed(() => attempts.value[attempts.value.length - 1] || 
 
 const revealAllowed = computed(() => attemptsLeft.value === 0 && !done.value)
 
+const xpEarned = ref(0)
+const correctCount = ref(0)
+const totalQuestions = ref(0)
+
 const wordIds = ref<string[]>([])
 const currentIndex = ref(0)
 
@@ -427,33 +300,24 @@ const everPerfect = computed(() =>
     attempts.value.some(a => a.perfect)
 )
 
-const xpAward = computed(() => {
-    // Flat XP approach (still “flat”, but optionally scaled by attempts)
-    // If you want strictly flat, set both to the same number.
-    return {
-        perfect: 30,
-        passed: 10,
-    }
-})
-
-async function awardXp(result: { passed: boolean; perfect: boolean }) {
-    // optional: call backend to award XP / log daily completion
-    // Keep it safe: only award once when first completed.
-    try {
-        if (!challenge.value) return
-        await $fetch('/api/daily/jyutping/complete', {
-            method: 'POST',
-            body: {
-                date: todayKey.value,
-                wordId: challenge.value.wordId,
-                passed: result.passed,
-                perfect: result.perfect,
-            },
-        })
-    } catch {
-        // don’t block UI if XP logging fails
-    }
-}
+// async function awardXp(result: { passed: boolean; perfect: boolean }) {
+//     // optional: call backend to award XP / log daily completion
+//     // Keep it safe: only award once when first completed.
+//     try {
+//         if (!challenge.value) return
+//         await $fetch('/api/daily/jyutping/complete', {
+//             method: 'POST',
+//             body: {
+//                 date: todayKey.value,
+//                 wordId: challenge.value.wordId,
+//                 passed: result.passed,
+//                 perfect: result.perfect,
+//             },
+//         })
+//     } catch {
+//         // don’t block UI if XP logging fails
+//     }
+// }
 
 const answerLetters = computed(() => {
     if (!challenge.value) return []
@@ -461,11 +325,10 @@ const answerLetters = computed(() => {
 })
 
 async function submit() {
-    if (!challenge.value || done.value) return
+    if (!challenge.value || done.value || finalizing.value) return
     if (attemptsLeft.value <= 0) return
 
     const result = scoreAttempt(input.value, challenge.value.jyutping)
-
     const letterScore = scoreLetters(input.value, challenge.value.jyutping)
 
     attempts.value.push({
@@ -479,38 +342,43 @@ async function submit() {
 
     input.value = ''
 
-    // 1️⃣ Perfect → finish immediately
+    // ✅ CASE 1: Correct (perfect or base match)
     if (result.passed) {
-        await awardXp(result)
 
-        // Move to next word
+        sessionAnswers.value.push({
+            wordId: challenge.value.wordId,
+            correct: true
+        })
+
         currentIndex.value++
 
         if (currentIndex.value < wordIds.value.length) {
             await loadWord(wordIds.value[currentIndex.value])
         } else {
-            done.value = true // Entire session finished
+            done.value = true
+            await finalizeDaily()
         }
 
         return
     }
 
-    // 2️⃣ Base match only → allow more attempts
-    if (!result.passed && !result.perfect) {
-        // move cursor to end automatically
-        nextTick(() => {
-            const el = document.querySelector('input')
-            el?.focus()
-        })
+    // ❌ CASE 2: Wrong but still attempts left
+    if (attemptsLeft.value > 0) {
+        await nextTick()
+        const el = document.querySelector('input')
+        el?.focus()
         save()
         return
     }
 
-    // 3️⃣ Wrong answer → check if exhausted
-    if (attemptsLeft.value === 0) {
-        done.value = true
-        save()
-    }
+    // ❌ CASE 3: Wrong and no attempts left
+    sessionAnswers.value.push({
+        wordId: challenge.value.wordId,
+        correct: false
+    })
+
+    done.value = true
+    await finalizeDaily()
 }
 
 function revealAnswer() {
@@ -524,42 +392,57 @@ function revealAnswer() {
     save()
 }
 
-function resetForToday(options?: { refetch?: boolean }) {
-    // Stop any playing audio
-    if (audio.value) {
-        audio.value.pause()
-        audio.value.currentTime = 0
-    }
+let tipInterval: number | undefined
 
-    // Clear UI state
-    input.value = ''
-    attempts.value = []
-    done.value = false
+type SessionAnswer = {
+    wordId: string
+    correct: boolean
+}
 
-    // Clear persisted state for today
+const sessionAnswers = ref<SessionAnswer[]>([])
+const finalizing = ref(false)
+const finalized = ref(false)
+
+
+async function finalizeDaily() {
+    if (finalized.value) return
+    if (sessionAnswers.value.length === 0) return
+
+    finalizing.value = true
+
     try {
-        localStorage.removeItem(storageKey.value)
-    } catch {
-        // ignore
-    }
+        const { getAccessToken } = await useAuth()
+        const token = await getAccessToken()
 
-    // Optional: also clear cached challenge so fetch can re-hydrate it
-    if (options?.refetch) {
-        challenge.value = null
-        void fetchChallenge()
-    } else {
-        // keep the same challenge, just reset progress
-        save()
+        const res = await $fetch<{
+            daily: {
+                answeredCount: number
+                correctCount: number
+                xpEarned: number
+                totalQuestions: number
+            }
+        }>('/api/daily/jyutping/finalize', {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` },
+            body: {
+                answers: sessionAnswers.value
+            }
+        })
+
+        // ✅ Update summary only now
+        xpEarned.value = res.daily.xpEarned
+        correctCount.value = res.daily.correctCount
+        totalQuestions.value = res.daily.totalQuestions
+
+        finalized.value = true
+
+    } catch (err) {
+        console.error('Daily jyutping finalize failed', err)
+    } finally {
+        finalizing.value = false
     }
 }
 
-// onMounted(async () => {
-//     loadSaved()
-//     await fetchChallenge()
-//     save()
-// })
-
-let tipInterval: number | undefined
 
 onMounted(async () => {
     await fetchChallenge()
@@ -569,13 +452,6 @@ onMounted(async () => {
             (currentTipIndex.value + 1) % tips.length
     }, 5000)
 })
-
-// onMounted(() => {
-//     tipInterval = window.setInterval(() => {
-//         currentTipIndex.value =
-//             (currentTipIndex.value + 1) % tips.length
-//     }, 5000) // rotate every 4 seconds
-// })
 
 onUnmounted(() => {
     if (tipInterval) clearInterval(tipInterval)
@@ -626,8 +502,9 @@ watch(input, (val) => {
         </header>
 
         <section class="mt-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+
             <div v-if="loading" class="text-sm text-gray-600">
-                Loading today’s word…
+                Loading today’s words…
             </div>
 
             <div v-else-if="errorState" class="text-sm text-red-700">
@@ -666,12 +543,6 @@ watch(input, (val) => {
                     <div class="text-xs text-gray-500">
                         Word {{ currentIndex + 1 }} / {{ wordIds.length }}
                     </div>
-
-                    <!-- <button
-                        class="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 active:scale-[0.99] transition"
-                        @click="resetForToday()" type="button">
-                        Reset
-                    </button> -->
                 </div>
 
                 <!-- Input -->
@@ -710,18 +581,6 @@ watch(input, (val) => {
                             class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
                             <div class="flex items-center justify-between">
                                 <div class="text-sm text-gray-900">
-                                    <!-- <span class="font-mono">You answered: {{ a.input }}</span> -->
-
-                                    <!-- <div class="flex flex-wrap gap-1 font-mono">
-                                        <span v-for="(letter, i) in a.letters" :key="i" :class="[
-                                            'px-1 rounded',
-                                            a.letterStates?.[i] === 'correct'
-                                                ? 'text-green-500'
-                                                : 'text-red-500'
-                                        ]">
-                                            {{ letter }}
-                                        </span>
-                                    </div> -->
 
                                     <div class="flex gap-1 font-mono">
                                         <div v-for="(letter, i) in a.letters" :key="i"
@@ -739,10 +598,7 @@ watch(input, (val) => {
                                     <span v-else>Attempt {{ idx + 1 }}</span>
                                 </div>
                             </div>
-                            <!-- <div class="mt-1 text-sm"
-                                :class="a.perfect ? 'text-emerald-700' : a.passed ? 'text-amber-500' : 'text-red-500'">
-                                {{ a.message }}
-                            </div> -->
+
                         </li>
                     </ul>
                 </div>
@@ -756,7 +612,7 @@ watch(input, (val) => {
 
                     <div class="mt-3 text-sm text-gray-600">
                         <span class="pt-1">
-                            Come back tomorrow for your new word.
+                            Come back tomorrow for your new words.
                         </span>
                     </div>
                 </div>
@@ -785,6 +641,26 @@ watch(input, (val) => {
                             Tip: {{ tips[currentTipIndex] }}
                         </div>
                     </transition>
+                </div>
+            </div>
+
+
+            <div v-else-if="done && finalized" class="bg-white p-4 space-y-2">
+
+                <div class="text-lg font-semibold text-gray-900">
+                    Daily Session Complete
+                </div>
+
+                <div class="text-sm text-gray-700">
+                    Correct: {{ correctCount }} / {{ totalQuestions }}
+                </div>
+
+                <div class="text-sm text-gray-700">
+                    XP Earned: {{ xpEarned }}
+                </div>
+
+                <div class="text-sm text-gray-600">
+                    Come back tomorrow for your new words.
                 </div>
 
             </div>

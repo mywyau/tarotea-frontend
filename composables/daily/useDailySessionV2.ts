@@ -58,6 +58,7 @@ async function fetchWordsByIdsIndividually(
 }
 
 export function useDailySession() {
+  
   const loading = ref(true);
   const dailyCompleted = ref(false);
 
