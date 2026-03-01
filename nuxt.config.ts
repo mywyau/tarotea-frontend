@@ -8,9 +8,17 @@ export default defineNuxtConfig({
   nitro: {
     preset: "vercel",
     routeRules: {
+      // HTML pages
       "/**": {
         headers: {
-          "Cache-Control": "no-store",
+          "Cache-Control": "no-cache",
+        },
+      },
+
+      // Static Nuxt assets (hashed, safe to cache)
+      "/_nuxt/**": {
+        headers: {
+          "Cache-Control": "public, max-age=31536000, immutable",
         },
       },
     },
@@ -24,6 +32,7 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
+      appVersion: process.env.VERCEL_GIT_COMMIT_SHA || Date.now().toString(),
       cdnBase: process.env.NUXT_PUBLIC_CDN_BASE,
       auth0Domain: process.env.AUTH0_DOMAIN,
       auth0ClientId: process.env.AUTH0_CLIENT_ID,
