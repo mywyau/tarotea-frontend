@@ -320,6 +320,34 @@ const topics = [
     description: 'Learn slang used in everyday life and in real situations.',
     requiresPaid: false
   },
+  {
+    id: 'animals',
+    title: 'Animals',
+    comingSoon: true,
+    description: 'Learn the name of various animals.',
+    requiresPaid: false
+  },
+  {
+    id: 'plants',
+    title: 'Plants',
+    comingSoon: true,
+    description: 'Learn the name of various plants.',
+    requiresPaid: false
+  },
+  {
+    id: 'verbs',
+    title: 'Verbs',
+    comingSoon: true,
+    description: 'Study and learn common everyday verbs.',
+    requiresPaid: false
+  },
+  {
+    id: 'cutlery',
+    title: 'Cutlery',
+    comingSoon: true,
+    description: 'Know the words of everyday cutlery and dining items.',
+    requiresPaid: false
+  },
 ]
 
 
