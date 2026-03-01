@@ -18,44 +18,47 @@ const {
   resolve,
 } = useMeStateV2();
 
-function animateCount(
-  target: Ref<number>,
-  endValue: number,
-  duration = 800
-) {
-  const startValue = 0
-  const startTime = performance.now()
-
-  function update(now: number) {
-    const elapsed = now - startTime
-    const progress = Math.min(elapsed / duration, 1)
-
-    // easeOutCubic (smooth finish)
-    const eased = 1 - Math.pow(1 - progress, 4)
-
-    target.value = Math.floor(startValue + (endValue - startValue) * eased)
-
-    if (progress < 1) {
-      requestAnimationFrame(update)
-    } else {
-      target.value = endValue
-    }
-  }
-
-  requestAnimationFrame(update)
-}
-
 const animatedTotalUsers = ref(0)
 
-watch(
-  () => stats?.value?.totalUsers,
-  (val) => {
-    if (typeof val === 'number') {
-      animateCount(animatedTotalUsers, val, 1200)
+onMounted(() => {
+  if (typeof window === 'undefined') return
+
+  function animateCount(
+    target: Ref<number>,
+    endValue: number,
+    duration = 800
+  ) {
+    const startValue = 0
+    const startTime = performance.now()
+
+    function update(now: number) {
+      const elapsed = now - startTime
+      const progress = Math.min(elapsed / duration, 1)
+
+      const eased = 1 - Math.pow(1 - progress, 4)
+
+      target.value = Math.floor(startValue + (endValue - startValue) * eased)
+
+      if (progress < 1) {
+        window.requestAnimationFrame(update)
+      } else {
+        target.value = endValue
+      }
     }
-  },
-  { immediate: true }
-)
+
+    window.requestAnimationFrame(update)
+  }
+
+  watch(
+    () => stats?.value?.totalUsers,
+    (val) => {
+      if (typeof val === 'number') {
+        animateCount(animatedTotalUsers, val, 1200)
+      }
+    },
+    { immediate: true }
+  )
+})
 
 </script>
 
