@@ -16,12 +16,12 @@ definePageMeta({
     </p>
 
     <p class="text-sm text-gray-600 pt-4">
-      You can already explore free levels while we finish preparing and cooking up new content.
+      You can already explore some free content while we finish preparing and cooking up new features.
     </p>
 
     <div class="text-lg pt-4">
       <NuxtLink to="/levels" class="pt-4 text-sm text-black hover:underline">
-        Browse free levels →
+        Browse levels →
       </NuxtLink>
     </div>
 
