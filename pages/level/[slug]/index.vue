@@ -6,7 +6,7 @@ definePageMeta({
 })
 
 import WordTile from '@/components/WordTile.vue'
-import { getLevelNumber } from '@/utils/levels'
+import { getLevelNumber } from '~/utils/levels/levels'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
 

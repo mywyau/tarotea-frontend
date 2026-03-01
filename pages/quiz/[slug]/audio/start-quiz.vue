@@ -5,7 +5,8 @@ definePageMeta({
   ssr: false
 })
 
-import { getLevelNumber } from '@/utils/levels'
+import { getLevelNumber } from '~/utils/levels/levels'
+import { canAccessLevel } from '~/utils/levels/quiz_helpers'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string | undefined)
@@ -26,18 +27,7 @@ const {
   resolve,
 } = useMeStateV2()
 
-
-const canEnterLevel = () => {
-
-  if (!authReady.value) return false
-
-  if (levelNumber.value! <= 3) return true
-
-  // Paid levels
-  if (!isLoggedIn.value) return false
-
-  return canAccessLevel(entitlement.value!)
-}
+const canEnterLevel = canAccessLevel(authReady.value, levelNumber.value!, isLoggedIn.value, entitlement.value!)
 
 watchEffect(() => {
   if (slug.value && levelNumber.value === null) {
@@ -59,7 +49,7 @@ watchEffect(() => {
 
     <!-- 🔒 Locked -->
     <section v-if="authReady && !canEnterLevel()" class="quiz-card text-center space-y-4">
-    
+
       <h1 class="text-2xl font-semibold text-gray-900">
         Quiz locked
       </h1>

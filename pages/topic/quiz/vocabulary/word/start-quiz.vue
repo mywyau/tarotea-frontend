@@ -5,7 +5,7 @@ definePageMeta({
   ssr: false
 })
 
-import { getLevelNumber } from '@/utils/levels'
+import { getLevelNumber } from '~/utils/levels/levels'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string | undefined)

@@ -1,45 +1,46 @@
-import { db } from '~/server/db'
-import { getRouterParam, getHeader, createError } from 'h3'
-import { getLevelNumber } from '@/utils/levels' // or '~/utils/levels' depending on your alias
-import levelData from '@/server/api/index/levels/[id]' // <- replace with however you're currently loading the level JSON
+import { db } from "~/server/db";
+import { getRouterParam, getHeader, createError } from "h3";
+import { getLevelNumber } from "~/utils/levels/levels"; // or '~/utils/levels' depending on your alias
+import levelData from "@/server/api/index/levels/[id]"; // <- replace with however you're currently loading the level JSON
 
 export default defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug");
 
-  const slug = getRouterParam(event, 'slug')
-  
   if (!slug) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing level slug' })
+    throw createError({ statusCode: 400, statusMessage: "Missing level slug" });
   }
 
-  const levelNumber = getLevelNumber(slug)
+  const levelNumber = getLevelNumber(slug);
   if (!levelNumber) {
-    throw createError({ statusCode: 404, statusMessage: 'Level not found' })
+    throw createError({ statusCode: 404, statusMessage: "Level not found" });
   }
 
   // ✅ Free levels (adjust this rule however you like)
-  const FREE_UP_TO_LEVEL = 1
+  const FREE_UP_TO_LEVEL = 1;
   if (levelNumber <= FREE_UP_TO_LEVEL) {
-    return levelData[slug] // <- return your existing level payload
+    return levelData[slug]; // <- return your existing level payload
   }
 
   // 🔒 Locked levels require a user id (MVP approach)
-  const userId = getHeader(event, 'x-user-id')
+  const userId = getHeader(event, "x-user-id");
   if (!userId) {
-    throw createError({ statusCode: 401, statusMessage: 'Sign in required' })
+    throw createError({ statusCode: 401, statusMessage: "Sign in required" });
   }
 
   // 🔒 Require pro entitlement
   const { rows } = await db.query(
     `select plan, subscription_plan from entitlements where user_id = $1`,
-    [userId]
-  )
+    [userId],
+  );
 
-  const ent = rows[0]
-  const isPro = (ent?.plan === 'monthly' && ent?.subscription_plan === 'active') || (ent?.plan === 'yearly' && ent?.subscription_plan === 'active')
+  const ent = rows[0];
+  const isPro =
+    (ent?.plan === "monthly" && ent?.subscription_plan === "active") ||
+    (ent?.plan === "yearly" && ent?.subscription_plan === "active");
 
   if (!isPro) {
-    throw createError({ statusCode: 403, statusMessage: 'Upgrade required' })
+    throw createError({ statusCode: 403, statusMessage: "Upgrade required" });
   }
 
-  return levelData[slug]
-})
+  return levelData[slug];
+});

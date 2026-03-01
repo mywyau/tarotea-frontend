@@ -6,7 +6,7 @@ definePageMeta({
 })
 
 import SentenceMeaningExercise from '@/components/SentenceMeaningExercise.vue'
-import { getLevelNumber } from '@/utils/levels'
+import { getLevelNumber } from '~/utils/levels/levels'
 
 interface SentenceLevelPayload {
   level: number
