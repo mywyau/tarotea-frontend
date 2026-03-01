@@ -6,11 +6,19 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
-    date: "Feb 2026",
+    date: "March 2026",
     title: "Upcoming",
     items: [
-      "Expand content for topics",
+      "Expanding content",
       "Content review to fix dodgy translations, jyutping, chinese characters and audio",
+    ],
+  },
+  {
+    date: "1 March 2026",
+    title: "Polish, fixing bugs, UX changes",
+    items: [
+      "Daily Jyutping challenge, styling and UX changes upcoming",
+      "Jyutping dojo version 1 completed, future work on stytling and polish",
     ],
   },
   {
