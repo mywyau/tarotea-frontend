@@ -528,7 +528,7 @@ onMounted(() => {
         <header class="space-y-4">
 
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                PhoJyut Dojo - {{ LEVEL_TITLES[slug] }}
+                Jyutping Dojo - {{ LEVEL_TITLES[slug] }}
             </h1>
 
             <p class="text-sm text-gray-600">
