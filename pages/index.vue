@@ -1,4 +1,6 @@
 <script setup lang="ts">
+
+
 const { data: stats } = await useFetch('/api/stats', {
   server: true,
   lazy: true,
@@ -15,6 +17,45 @@ const {
   currentPeriodEnd,
   resolve,
 } = useMeStateV2();
+
+function animateCount(
+  target: Ref<number>,
+  endValue: number,
+  duration = 800
+) {
+  const startValue = 0
+  const startTime = performance.now()
+
+  function update(now: number) {
+    const elapsed = now - startTime
+    const progress = Math.min(elapsed / duration, 1)
+
+    // easeOutCubic (smooth finish)
+    const eased = 1 - Math.pow(1 - progress, 4)
+
+    target.value = Math.floor(startValue + (endValue - startValue) * eased)
+
+    if (progress < 1) {
+      requestAnimationFrame(update)
+    } else {
+      target.value = endValue
+    }
+  }
+
+  requestAnimationFrame(update)
+}
+
+const animatedTotalUsers = ref(0)
+
+watch(
+  () => stats?.value?.totalUsers,
+  (val) => {
+    if (typeof val === 'number') {
+      animateCount(animatedTotalUsers, val, 1200)
+    }
+  },
+  { immediate: true }
+)
 
 </script>
 
@@ -61,7 +102,7 @@ const {
       <div class="grid grid-cols-1 sm:grid-cols-1 gap-5">
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
-            {{ stats?.totalUsers ?? '—' }}
+            {{ animatedTotalUsers.toLocaleString() }}
           </div>
           <div class="text-sm text-gray-700 mt-1">
             Learners
