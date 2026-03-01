@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { shuffleDailyWords } from '~/composables/daily/useDailySessionV2'
+
 
 definePageMeta({
     ssr: false,
@@ -262,7 +264,7 @@ async function fetchChallenge() {
             return
         }
 
-        wordIds.value = ids
+        wordIds.value = shuffleDailyWords(ids)
         currentIndex.value = 0
 
         await loadWord(ids[0])
@@ -610,11 +612,11 @@ watch(input, (val) => {
                         <span class="font-mono font-bold ml-2">{{ challenge.jyutping }}</span>
                     </div>
 
-                    <div class="mt-3 text-sm text-gray-600">
+                    <!-- <div class="mt-3 text-sm text-gray-600">
                         <span class="pt-1">
                             Come back tomorrow for your new words.
                         </span>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Reveal (only if failed all attempts and not done) -->
@@ -635,7 +637,7 @@ watch(input, (val) => {
                 </div>
 
                 <!-- Calm tip turn this into a carousel -->
-                <div class="pt-4 text-xs text-gray-500 h-5 relative overflow-hidden">
+                <div class="text-xs text-gray-500 h-5 relative overflow-hidden">
                     <transition name="fade" mode="out-in">
                         <div :key="currentTipIndex" class="absolute inset-0">
                             Tip: {{ tips[currentTipIndex] }}
