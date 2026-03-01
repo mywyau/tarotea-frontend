@@ -392,6 +392,7 @@ function topicLink(topic: Topic) {
     </header>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+      
       <li v-for="topic in topics" :key="topic.id" class="topic-card rounded-lg p-4 space-y-3 transition" :class="[
         topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
           ? 'is-disabled'
