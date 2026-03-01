@@ -165,10 +165,14 @@ const gatedCategories = computed(() => {
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 
-        <WordTile v-for="word in category.words" :key="word.id"
-          :to="word.locked ? undefined : `/topic/word/${slug}/${word.id}`" :word="word.word" :jyutping="word.jyutping"
-          :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)"
-          :class="word.locked ? 'opacity-40 pointer-events-none select-none' : ''"
+        <WordTile v-for="word in category.words" :key="word.id" v-bind="{
+          word: word.word,
+          jyutping: word.jyutping,
+          meaning: word.meaning,
+          xp: getXp(word.id),
+          mastered: isMastered(word.id),
+          ...(word.locked ? {} : { to: `/topic/word/${slug}/${word.id}` })
+        }" :class="word.locked ? 'opacity-40 pointer-events-none select-none' : ''"
           :style="{ background: word.tileColor }" />
       </div>
     </section>

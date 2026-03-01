@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { loginWithGoogle, login, logout } from '@/composables/useAuth'
+import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
@@ -75,15 +75,11 @@ onBeforeUnmount(() => {
               Stats
             </NuxtLink>
 
-            <NuxtLink to="/upgrade" class="w-full flex items-center rounded-xl px-3 py-2 text-sm font-semibold
-         hover:bg-black transition hover:brightness-125 transition" @click="closeMenu">
-              <span class="bg-gradient-to-r
-           from-[#d48fd0]
-           via-[#b57bc3]
-           via-[#6faed6]
-           to-[#d48fd0]
-           bg-clip-text text-transparent
-           ">
+            <NuxtLink to="/upgrade"
+              class="w-full flex items-center rounded-xl px-3 py-2 text-sm font-semibold hover:bg-black hover:brightness-125 transition"
+              @click="closeMenu">
+
+              <span class="bg-gradient-to-r from-[#d48fd0] via-[#b57bc3] via-[#6faed6] to-[#d48fd0] bg-clip-text text-transparent">
                 Upgrade
               </span>
             </NuxtLink>

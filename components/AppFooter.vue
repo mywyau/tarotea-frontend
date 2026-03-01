@@ -4,7 +4,7 @@
 
       <!-- Brand -->
       <div class="text-center sm:text-left">
-        <NuxtLink to="/" class="font-semibold text-lg hover:underline"">
+        <NuxtLink to="/" class="font-semibold text-lg hover:underline">
           TaroTea
         </NuxtLink>
 
