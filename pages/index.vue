@@ -17,41 +17,6 @@ const {
   resolve,
 } = useMeStateV2();
 
-import { onMounted, ref } from 'vue';
-
-const animatedTotalUsers = ref(0)
-
-function animateCount(endValue: number, duration = 900) {
-  const startValue = 0
-  const startTime = performance.now()
-
-  function update(now: number) {
-    const elapsed = now - startTime
-    const progress = Math.min(elapsed / duration, 1)
-
-    // smooth ease-out
-    const eased = 1 - Math.pow(1 - progress, 4)
-
-    animatedTotalUsers.value = Math.floor(
-      startValue + (endValue - startValue) * eased
-    )
-
-    if (progress < 1) {
-      requestAnimationFrame(update)
-    } else {
-      animatedTotalUsers.value = endValue
-    }
-  }
-
-  requestAnimationFrame(update)
-}
-
-onMounted(() => {
-  if (stats.value?.totalUsers) {
-    animateCount(Number(stats.value.totalUsers))
-  }
-})
-
 
 </script>
 
@@ -98,9 +63,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 sm:grid-cols-1 gap-5">
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
-            <ClientOnly>
-              {{ animatedTotalUsers.toLocaleString() }}
-            </ClientOnly>
+            {{ stats?.totalUsers ?? '—' }}
           </div>
           <div class="text-sm text-gray-700 mt-1">
             Learners
@@ -185,7 +148,8 @@ onMounted(() => {
 
           <NuxtLink to="/jyutping/training"
             class="rounded-xl p-6 flex items-end shadow-sm hover:shadow-md transition hover:brightness-110"
-            style="background-color:rgba(244,205,39,0.35);">
+            style="background-color:rgba(244,205,39,0.35);"
+            >
             <div>
               <div class="text-sm font-semibold text-gray-900">Jyutping Dojo</div>
             </div>
