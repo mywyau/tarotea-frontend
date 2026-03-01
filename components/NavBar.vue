@@ -145,7 +145,7 @@ onMounted(() => {
 
         <template v-else>
           <button type="button" class="mobile-secondary text-blue-600 hover:text-blue-400 block text-left w-full"
-            @click="loginWithGoogle">
+            @click="login">
             Login
           </button>
         </template>
