@@ -19,13 +19,26 @@ const {
     resolve,
 } = useMeStateV2()
 
-// Resolve auth once on mount (safe + idempotent)
-onMounted(async () => {
-    if (!authReady.value) {
-        await resolve()
-    }
+import { computed, ref, watch } from 'vue'
+
+const ITEMS_PER_PAGE = 9
+const currentPage = ref(1)
+
+const totalPages = computed(() =>
+    Math.ceil(topics.length / ITEMS_PER_PAGE)
+)
+
+const paginatedTopics = computed(() => {
+    const start = (currentPage.value - 1) * ITEMS_PER_PAGE
+    const end = start + ITEMS_PER_PAGE
+    return topics.slice(start, end)
 })
 
+function goToPage(page: number) {
+    if (page < 1 || page > totalPages.value) return
+    currentPage.value = page
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+}
 
 /**
  * Topic model
@@ -348,6 +361,17 @@ function hasPaidAccessCheck(topic: Topic) {
     return canAccessLevel(entitlement.value!)
 }
 
+watch(topics, () => {
+    currentPage.value = 1
+})
+
+// Resolve auth once on mount (safe + idempotent)
+onMounted(async () => {
+    if (!authReady.value) {
+        await resolve()
+    }
+})
+
 </script>
 
 
@@ -370,10 +394,25 @@ function hasPaidAccessCheck(topic: Topic) {
             </p>
         </header>
 
+        <div v-if="totalPages > 1" class="flex justify-center items-center gap-3 pt-8">
+            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
+                ←
+            </button>
+
+            <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="pagination-page"
+                :class="{ 'is-active': page === currentPage }">
+                {{ page }}
+            </button>
+
+            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
+                →
+            </button>
+        </div>
+
         <!-- Grid -->
         <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
-            <li v-for="topic in topics" :key="topic.id" class="topic-card" :class="[
+            <li v-for="topic in paginatedTopics" :key="topic.id" class="topic-card" :class="[
                 topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
                     ? 'topic-locked'
                     : ''
@@ -494,5 +533,55 @@ function hasPaidAccessCheck(topic: Topic) {
 
 .topic-btn-yellow:hover {
     background: rgba(244, 205, 39, 0.65);
+}
+
+/* Pagination */
+
+.pagination-page {
+    min-width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    font-weight: 600;
+    font-size: 0.9rem;
+
+    background-color: #F6E1E1;
+    /* blush */
+    color: #1f2937;
+
+    transition: all 0.18s ease;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+}
+
+.pagination-page:hover {
+    background-color: #EAB8E4;
+    transform: translateY(-2px);
+}
+
+.pagination-page.is-active {
+    background-color: #D6A3D1;
+    box-shadow: 0 8px 20px rgba(214, 163, 209, 0.35);
+    transform: translateY(-2px);
+}
+
+.pagination-arrow {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    font-weight: 600;
+
+    background-color: rgba(244, 205, 39, 0.45);
+    color: #1f2937;
+
+    transition: all 0.18s ease;
+}
+
+.pagination-arrow:hover:not(:disabled) {
+    background-color: rgba(244, 205, 39, 0.65);
+    transform: translateY(-2px);
+}
+
+.pagination-arrow:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 </style>
