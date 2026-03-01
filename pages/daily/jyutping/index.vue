@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { shuffleDailyWords } from '~/composables/daily/useDailySessionV2'
-
 
 definePageMeta({
     ssr: false,
-    // middleware: ['coming-soon'],
+    middleware: ['logged-in'],
 })
+
+import { shuffleDailyWords } from '~/composables/daily/useDailySessionV2'
 
 type DailyDecode = {
     date: string // "YYYY-MM-DD"
@@ -663,6 +663,23 @@ watch(input, (val) => {
 
                 <div class="text-sm text-gray-600">
                     Come back tomorrow for your new words.
+                </div>
+
+                <div class="mt-8 text-sm opacity-100">
+                    <p class="text-sm text-gray-700 uppercase tracking-wide opacity-100 mb-4">
+                        Next daily unlocks in
+                    </p>
+
+                    <p class="bg-black rounded-lg py-4 px-3">
+                        <span class="text-3xl font-semibold
+                                    bg-gradient-to-r
+                                    from-[#EAB8E4]
+                                    via-[#A8CAE0]
+                                    to-[#D6A3D1]
+                                    bg-clip-text text-transparent hover:brightness-125">
+                            {{ timeRemaining }}
+                        </span>
+                    </p>
                 </div>
 
             </div>

@@ -132,7 +132,7 @@ const canEnterLevel = (level: any) => {
     </header>
 
     <!-- Grid -->
-    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <ul class="grid grid-cols-1 sm:grid-cols-3 gap-6">
 
       <li v-for="quizLevel in quizLevels" :key="quizLevel.id" class="
           rounded-2xl
