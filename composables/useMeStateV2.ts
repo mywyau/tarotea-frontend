@@ -37,9 +37,6 @@ export function useMeStateV2() {
     resolved.value = false;
     state.value = { status: "loading" };
 
-    console.log("Running on server?", process.server);
-    console.log("Entitlement:", entitlement.value);
-
     if (process.server) return;
 
     const auth = await useAuth();

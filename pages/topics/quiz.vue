@@ -20,6 +20,7 @@ const {
 } = useMeStateV2()
 
 import { computed, ref, watch } from 'vue'
+import { canAccessLevel } from '~/utils/levels/permissions'
 
 const ITEMS_PER_PAGE = 9
 const currentPage = ref(1)
@@ -346,7 +347,7 @@ function canEnterTopic(topic: Topic) {
 
     // 🔒 Paid topic → requires login + entitlement
     if (!isLoggedIn.value) return false
-    return canAccessLevel(entitlement.value!)
+    return canAccessLevel(isLoggedIn.value, entitlement.value!)
 }
 
 function hasPaidAccessCheck(topic: Topic) {
@@ -358,7 +359,7 @@ function hasPaidAccessCheck(topic: Topic) {
 
     // 🔒 Paid topic → requires login + entitlement
     if (!isLoggedIn.value) return false
-    return canAccessLevel(entitlement.value!)
+    return canAccessLevel(isLoggedIn.value, entitlement.value!)
 }
 
 watch(topics, () => {

@@ -9,12 +9,14 @@ export const freeTopics = new Set([
   "resturant-menu",
 ]);
 
-export function hasPaidAccess(entitlement: Entitlement) {
+export function hasPaidAccess(entitlement: Entitlement | null): boolean {
+  if (!entitlement) {
+    return false;
+  }
+
   return (
     entitlement.plan !== "free" &&
-    (entitlement.subscription_status === "active" ||
-      entitlement.subscription_status === "trialing" ||
-      entitlement.subscription_status === "past_due")
+    ["active", "trialing", "past_due"].includes(entitlement.subscription_status)
   );
 }
 
@@ -35,5 +37,19 @@ export function canAccessTopic(
   // Paid levels
   if (!isLoggedIn) return false;
   
-  return hasPaidAccess(userEntitlement!);
+  return hasPaidAccess(userEntitlement);
+}
+
+export function canAccessTopicuQuiz(
+  isLoggedIn: boolean,
+  userEntitlement: Entitlement | null,
+  topic: string,
+): boolean {
+
+  if(isFreeTopic(topic)) return true;
+
+  // Paid levels
+  if (!isLoggedIn) return false;
+  
+  return hasPaidAccess(userEntitlement);
 }

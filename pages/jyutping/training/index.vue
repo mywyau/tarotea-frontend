@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
+
 
 definePageMeta({
   ssr: false,
@@ -107,7 +109,7 @@ const canEnterLevel = (level: any) => {
   // 🔒 Paid levels require login
   if (!isLoggedIn.value) return false
 
-  return canAccessLevel(entitlement.value!)
+  return canAccessLevel(isLoggedIn.value, entitlement.value!)
 }
 
 </script>
@@ -124,7 +126,7 @@ const canEnterLevel = (level: any) => {
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
       <h1 class="text-3xl font-semibold text-gray-900">
-          Jyutping Dojo
+        Jyutping Dojo
       </h1>
       <p class="text-gray-600 text-sm sm:text-base">
         Strenghten your phonetic proficiency with our exercises

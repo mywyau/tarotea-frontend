@@ -2,7 +2,6 @@ import { createError, getHeader } from "h3";
 import { verifyAuth0Token } from "./auth0";
 
 export async function requireUser(event: any) {
-  
   const authHeader = getHeader(event, "authorization");
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -13,6 +12,13 @@ export async function requireUser(event: any) {
   }
 
   const token = authHeader.slice("Bearer ".length);
+
+  if (!token || token === "undefined" || !token.includes(".")) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Malformed token",
+    });
+  }
 
   try {
     const payload = await verifyAuth0Token(token);

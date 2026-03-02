@@ -3,6 +3,7 @@ import { db } from "~/server/db"
 import { requireUser } from "~/server/utils/requireUser"
 
 export default defineEventHandler(async (event) => {
+  
   const userId = await requireUser(event)
 
   const query = getQuery(event)
