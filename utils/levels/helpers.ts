@@ -18,7 +18,7 @@ export const levelSelectMetaData = [
     number: 3,
     title: 'Level 3',
     comingSoon: false,
-    description: 'Intermediate Cantonese, expressing thoughts and reasons naturally.'
+    description: 'Expressing thoughts, reasons, and everyday abstract concepts naturally.'
   },
   {
     id: 'level-four',

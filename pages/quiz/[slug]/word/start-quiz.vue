@@ -5,15 +5,24 @@ definePageMeta({
   ssr: false
 })
 
-import { getLevelNumber } from '~/utils/levels/levels'
+// import { getLevelNumber } from '~/utils/levels/levels'
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 
 const route = useRoute()
-const slug = computed(() => route.params.slug as string | undefined)
+// const slug = computed(() => route.params.slug as string | undefined)
+const slug = route.params.slug as string
 
-const levelNumber = computed(() => {
-  if (!slug.value) return null
-  return getLevelNumber(slug.value)
-})
+// we check the path slug
+if (!isLevelId(slug)) {
+  throw createError({ statusCode: 404 })
+}
+
+// const levelNumber = computed(() => {
+//   if (!slug.value) return null
+//   return getLevelNumber(slug.value)
+// })
+
+const levelNumber: number = levelIdToNumbers(slug)
 
 const {
   authReady,
@@ -23,9 +32,8 @@ const {
 } = useMeStateV2()
 
 
-
 watchEffect(() => {
-  if (slug.value && levelNumber.value === null) {
+  if (slug && levelNumber === null) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Level not found'
@@ -82,7 +90,7 @@ const canEnterLevel = () => {
 
   if (!authReady.value) return false
 
-  if (levelNumber.value! <= 3) return true
+  if (levelNumber! <= 3) return true
 
   // Paid levels
   if (!isLoggedIn.value) return false

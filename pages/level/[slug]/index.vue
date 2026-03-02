@@ -27,9 +27,8 @@ const {
   entitlement,
 } = useMeStateV2()
 
-
 // SSR-safe fetch (no gating, no nulls)
-const { data: topic, error } = await useFetch(
+const { data: levelCdnData, error } = await useFetch(
   `/api/index/levels/${slug}`,
   {
     server: true,
@@ -42,12 +41,12 @@ if (error.value?.statusCode === 403) {
   throw createError({ statusCode: 403, statusMessage: 'Level locked' })
 }
 
-if (!topic.value) {
+if (!levelCdnData.value) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
 
 const categories = computed(() =>
-  Object.entries(topic.value.categories).map(([key, words]) => ({
+  Object.entries(levelCdnData.value.categories).map(([key, words]) => ({
     key,
     title: key.replace(/_/g, ' '),
     words,
@@ -79,8 +78,6 @@ async function loadProgress() {
     progressMap.value = {}
   }
 }
-
-
 
 const getXp = (id: string) =>
   progressMap.value?.[id]?.xp ?? 0
@@ -148,8 +145,8 @@ onMounted(loadProgress)
     </NuxtLink>
 
     <header class="header-card rounded-xl p-6 sm:p-7 space-y-2">
-      <h1 class="text-3xl font-semibold text-gray-900">{{ topic.title }}</h1>
-      <p class="text-gray-700">{{ topic.description }}</p>
+      <h1 class="text-3xl font-semibold text-gray-900">{{ levelCdnData.title }}</h1>
+      <p class="text-gray-700">{{ levelCdnData.description }}</p>
     </header>
 
     <section v-for="category in gatedCategories" :key="category.key" class="category-card rounded-xl p-5 sm:p-6">
