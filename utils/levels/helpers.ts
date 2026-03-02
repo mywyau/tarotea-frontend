@@ -53,7 +53,7 @@ export const levelSelectMetaData = [
     number: 8,
     title: 'Level 8',
     comingSoon: false,
-    description: 'Understand and use common idioms, cultural expressions, and implied meanings in natural, informal speech.'
+    description: 'Study reactions, exaggeration, judgement, and the subtle meanings hidden inside everyday phrases.'
   },
   {
     id: 'level-nine',
@@ -67,6 +67,6 @@ export const levelSelectMetaData = [
     number: 10,
     title: 'Level 10',
     comingSoon: false,
-    description: 'Speak naturally, react instinctively, and handle fast, casual conversations.'
+    description: 'Master commonly used idioms, fixed phrases, and expressive Cantonese expressions.'
   },
 ]
