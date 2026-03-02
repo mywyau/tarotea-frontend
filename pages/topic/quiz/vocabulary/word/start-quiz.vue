@@ -1,19 +1,21 @@
 <script setup lang="ts">
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
+
 
 definePageMeta({
   middleware: ['topic-access'],
   ssr: false
 })
 
-import { getLevelNumber } from '~/utils/levels/levels'
-
 const route = useRoute()
-const slug = computed(() => route.params.slug as string | undefined)
 
-const levelNumber = computed(() => {
-  if (!slug.value) return null
-  return getLevelNumber(slug.value)
-})
+const slug = route.params.slug as string
+
+if (!isLevelId(slug)) {
+  throw createError({ statusCode: 404 })
+}
+
+const levelNumber: number = levelIdToNumbers(slug)
 
 const {
   authReady,
@@ -25,14 +27,13 @@ const {
 
 
 watchEffect(() => {
-  if (slug.value && levelNumber.value === null) {
+  if (slug && levelNumber === null) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Topic not found'
     })
   }
 })
-
 
 // --- helpers ---
 

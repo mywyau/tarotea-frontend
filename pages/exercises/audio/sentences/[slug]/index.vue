@@ -6,7 +6,8 @@ definePageMeta({
 })
 
 import SentenceMeaningExercise from '@/components/SentenceMeaningExercise.vue'
-import { getLevelNumber } from '~/utils/levels/levels'
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
+
 
 interface SentenceLevelPayload {
   level: number
@@ -27,18 +28,22 @@ interface Sentence {
 }
 
 const route = useRoute()
-const slug = computed(() => route.params.slug as string)
+const slug = route.params.slug as string
 
-const levelNumber = computed(() => getLevelNumber(slug.value))
+if (!isLevelId(slug)) {
+  throw createError({ statusCode: 404 })
+}
 
-if (!levelNumber.value) {
+const levelNumber: number = levelIdToNumbers(slug)
+
+if (!levelNumber) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
 
 const { data, error } = await useFetch(
-  () => `/api/sentences/${slug.value}`,
+  () => `/api/sentences/${slug}`,
   {
-    key: () => `sentences-${slug.value}`,
+    key: () => `sentences-${slug}`,
     server: true
   }
 )

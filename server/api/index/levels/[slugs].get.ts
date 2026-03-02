@@ -2,8 +2,7 @@
 import { createError, getHeader, getRouterParam } from "h3";
 import { db } from "~/server/db";
 import { isLevelId, levelIdToNumberMap } from "~/utils/levels/levels";
-
-const FREE_UP_TO_LEVEL = 1;
+import { isFreeLevel } from "~/utils/levels/permissions";
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, "slug");
@@ -26,8 +25,8 @@ export default defineEventHandler(async (event) => {
   const levelNumber = levelIdToNumberMap[slug];
 
   // ✅ Free levels
-  if (levelNumber <= FREE_UP_TO_LEVEL) {
-    return  await $fetch(`/api/index/levels/${slug}`);
+  if (isFreeLevel(levelNumber)) {
+    return await $fetch(`/api/index/levels/${slug}`);
   }
 
   // 🔒 Require user
@@ -49,14 +48,14 @@ export default defineEventHandler(async (event) => {
 
   const ent = rows[0];
 
-  const isPro =
+  const isSubscribed =
     ent?.subscription_plan === "active" &&
     (ent?.plan === "monthly" || ent?.plan === "yearly");
 
-  if (!isPro) {
+  if (!isSubscribed) {
     throw createError({
       statusCode: 403,
-      statusMessage: "Upgrade required",
+      statusMessage: "Subscription Upgrade required",
     });
   }
 

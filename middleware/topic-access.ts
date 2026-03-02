@@ -1,31 +1,25 @@
-const FREE_TOPICS = new Set([
-  "survival-essentials",
-  "greetings-polite",
-  "fruits-vegetables",
-  "clothing",
-  "dim-sum",
-  "resturant-menu",
-]);
+import { canAccessTopic, freeTopics } from "~/utils/topics/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const topic = to.params.topic as string | undefined;
   if (!topic) return;
 
-  const { authReady, resolve, entitlement } = useMeStateV2();
+  const { authReady, isLoggedIn, resolve, entitlement } = useMeStateV2();
 
-  if (!authReady.value) {
-    return
-    // await resolve();
-  }
+  if (!authReady.value) return;
 
-  // ✅ Free topics always allowed
-  if (FREE_TOPICS.has(topic)) {
+  if (!entitlement.value) {
     return;
   }
 
-  if (!authReady.value) return;
-  
-  if (!canAccessLevel(entitlement.value!)) {
+  // ✅ Free topics always allowed
+  if (freeTopics.has(topic)) {
+    return;
+  }
+
+  if (
+    !canAccessTopic(authReady.value, isLoggedIn.value, entitlement.value, topic)
+  ) {
     return navigateTo("/upgrade");
   }
 });

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useUpgrade } from '@/composables/useUpgrade';
-import { hasPaidAccess } from '@/utils/canAccessLevel';
+import { hasPaidAccess } from '~/utils/levels/permissions';
+// import { hasPaidAccess } from '@/utils/canAccessLevel';
 
 definePageMeta({ layout: 'default' })
 

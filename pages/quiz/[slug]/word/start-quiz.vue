@@ -7,6 +7,7 @@ definePageMeta({
 
 // import { getLevelNumber } from '~/utils/levels/levels'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
+import { canAccessLevel } from '~/utils/levels/permissions'
 
 const route = useRoute()
 // const slug = computed(() => route.params.slug as string | undefined)
@@ -16,11 +17,6 @@ const slug = route.params.slug as string
 if (!isLevelId(slug)) {
   throw createError({ statusCode: 404 })
 }
-
-// const levelNumber = computed(() => {
-//   if (!slug.value) return null
-//   return getLevelNumber(slug.value)
-// })
 
 const levelNumber: number = levelIdToNumbers(slug)
 
@@ -95,7 +91,7 @@ const canEnterLevel = () => {
   // Paid levels
   if (!isLoggedIn.value) return false
 
-  return canAccessLevel(entitlement.value!)
+  return canAccessLevel(isLoggedIn.value, entitlement.value)
 }
 
 watch(featureIndex, (newVal) => {

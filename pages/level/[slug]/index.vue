@@ -1,15 +1,16 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-access'],
+  // middleware: ['level-access'],
   ssr: true,
 })
 
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
-import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { tileColours } from '~/utils/branding/helpers'
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
+import { canAccessLevel, hasPaidAccess, isFreeLevel } from '~/utils/levels/permissions'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -19,13 +20,17 @@ if (!isLevelId(slug)) {
   throw createError({ statusCode: 404 })
 }
 
-const levelNumber: number  = levelIdToNumbers(slug)
+const levelNumber: number = levelIdToNumbers(slug)
 
 const {
   authReady,
   isLoggedIn,
   entitlement,
 } = useMeStateV2()
+
+if (!entitlement.value === null) {
+  throw createError({ statusCode: 404 })
+}
 
 // SSR-safe fetch (no gating, no nulls)
 const { data: levelCdnData, error } = await useFetch(
@@ -89,11 +94,15 @@ const isMastered = (id: string) =>
 
 const FREE_WORD_LIMIT = 10
 
-const hasPaidAccess = computed(() => {
+const canAccessLevel = computed(() => {
   if (!authReady.value) return false
   if (!isLoggedIn.value) return false
-  return entitlement.value ? canAccessLevel(entitlement.value) : false
+  return entitlement.value ? hasPaidAccess(entitlement.value) : false
 })
+
+// const canAccessLevel = computed(() => {
+//   return entitlement.value ? hasPaidAccess(entitlement.value) : false
+// })
 
 function getColorFromId(id: string) {
   let hash = 0
@@ -107,6 +116,7 @@ function getColorFromId(id: string) {
 }
 
 const gatedCategories = computed(() => {
+
   let globalIndex = 0
 
   return categories.value.map(category => {
@@ -116,11 +126,10 @@ const gatedCategories = computed(() => {
 
         const shouldLock =
           !isFreeLevel(levelNumber) &&
-          !hasPaidAccess.value &&
+          !canAccessLevel.value &&
           globalIndex >= FREE_WORD_LIMIT
 
-        // const color = tileColours[globalIndex % tileColours.length]
-
+          
         globalIndex++
 
         return {

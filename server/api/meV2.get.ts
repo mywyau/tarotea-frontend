@@ -22,7 +22,7 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
 
   console.log(
     JSON.stringify({
-      event: "me_endpoint_called",
+      event: "[meV2.get.ts][defineEventHandler] - meV2_endpoint_called",
       userId,
       timestamp: new Date().toISOString(),
     }),
@@ -76,14 +76,14 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
       };
 
   // ✅ 3️⃣ Log resolved entitlement (safe summary only)
-  console.log(
-    JSON.stringify({
-      event: "entitlement_resolved",
-      userId,
-      plan: entitlement.plan,
-      subscription_status: entitlement.subscription_status,
-    }),
-  );
+  // console.log(
+  //   JSON.stringify({
+  //     event: "entitlement_resolved",
+  //     userId,
+  //     plan: entitlement.plan,
+  //     subscription_status: entitlement.subscription_status,
+  //   }),
+  // );
 
   return {
     id: row.id,

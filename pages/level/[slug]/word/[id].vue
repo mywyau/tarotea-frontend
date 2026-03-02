@@ -1,12 +1,13 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-word-access'],
+  middleware: ['level-word-access-client'],
   ssr: true,
 })
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
+
 
 // Dynamic params
 const level = computed(() => route.params.slug as string)
@@ -21,7 +22,7 @@ const { data, error } = await useFetch(
   }
 )
 
-const cdnBase = runtimeConfig.public.cdnBase
+
 const { volume } = useAudioVolume()
 
 const word = computed(() => data.value)

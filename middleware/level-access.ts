@@ -1,4 +1,5 @@
-import { levelIdToNumbers, isLevelId } from "@/utils/levels/levels";
+import { isLevelId, levelIdToNumbers } from "@/utils/levels/levels";
+import { isComingSoon, isFreeLevel } from "~/utils/levels/permissions";
 
 export default defineNuxtRouteMiddleware((to) => {
   const slug = to.params.slug as string | undefined;
@@ -13,15 +14,13 @@ export default defineNuxtRouteMiddleware((to) => {
     throw createError({ statusCode: 404 });
   }
 
-  const levelNumber = levelIdToNumbers(slug);
+  const levelNumber: number = levelIdToNumbers(slug);
 
-  // ✅ Free levels
-  if (levelNumber <= 3) return;
-
-  // 🚧 Coming soon
-  if (levelNumber > 11) {
-    return navigateTo("/coming-soon");
+  if (isFreeLevel(levelNumber)) {
+    return;
   }
 
-  // 🔒 Paid logic here
+  if (isComingSoon(levelNumber)) {
+    return navigateTo("/coming-soon");
+  }
 });

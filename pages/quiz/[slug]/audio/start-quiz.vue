@@ -6,7 +6,7 @@ definePageMeta({
 })
 
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
-import { canAccessLevel } from '~/utils/levels/quiz_helpers'
+import { canAccessLevelWord } from '~/utils/levels/permissions'
 
 const route = useRoute()
 // const slug = computed(() => route.params.slug as string | undefined)
@@ -30,7 +30,7 @@ const {
   resolve,
 } = useMeStateV2()
 
-const canEnterLevel = canAccessLevel(authReady.value, levelNumber, isLoggedIn.value, entitlement.value!)
+const canEnterLevel = canAccessLevelWord(levelNumber, entitlement.value!)
 
 watchEffect(() => {
   if (slug && levelNumber === null) {

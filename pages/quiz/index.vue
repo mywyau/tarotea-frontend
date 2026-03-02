@@ -2,6 +2,7 @@
 
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { onMounted } from 'vue'
+import { canAccessLevelQuiz, isComingSoon, isFreeLevel } from '~/utils/levels/permissions'
 
 
 const {
@@ -23,21 +24,13 @@ onMounted(async () => {
   }
 })
 
-const isComingSoon = (level: any) => level.comingSoon === true
-
 const canEnterLevel = (level: any) => {
-
-  if (!authReady.value) return false
 
   if (isComingSoon(level)) return false
 
-  // ✅ Free levels are always accessible
   if (isFreeLevel(level.number)) return true
-
-  // 🔒 Paid levels require login
-  if (!isLoggedIn.value) return false
-
-  return canAccessLevel(entitlement.value!)
+  
+  return canAccessLevelQuiz(level, entitlement.value!)
 }
 
 </script>
