@@ -498,8 +498,8 @@ onMounted(() => {
     <main class="mx-auto max-w-xl px-6 py-12">
 
         <div class="mb-6">
-            <NuxtLink :to="`/jyutping/level/training`" class="text-black text-sm hover:underline">
-                ← Back to Dojo
+            <NuxtLink :to="`/dojo/level/`" class="text-black text-sm hover:underline">
+                ← Back to Level Dojo
             </NuxtLink>
         </div>
 

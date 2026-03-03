@@ -24,9 +24,9 @@ import {
     stripToneToken
 } from '@/utils/jyutping/jyutping-utils'
 
-import { levelTitles } from '~/utils/levels/levels'
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
+import { levelTitles } from '~/utils/levels/levels'
 
 
 const route = useRoute()
@@ -499,8 +499,8 @@ onMounted(() => {
     <main class="mx-auto max-w-xl px-6 py-12">
 
         <div class="mb-6">
-            <NuxtLink :to="`/jyutping/training`" class="text-black text-sm hover:underline">
-                ← Back to Dojo
+            <NuxtLink :to="`/dojo/topic`" class="text-black text-sm hover:underline">
+                ← Back to Topic Dojo
             </NuxtLink>
         </div>
 
