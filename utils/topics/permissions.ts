@@ -47,6 +47,19 @@ export function canAccessTopic(
   return hasPaidAccess(userEntitlement);
 }
 
+export function canAccessTopicWord(
+  isLoggedIn: boolean,
+  userEntitlement: Entitlement | null,
+  topic: string,
+): boolean {
+
+  // isFreeTopic(topic);
+  // Paid levels
+  if (!isLoggedIn) return false;
+
+  return hasPaidAccess(userEntitlement);
+}
+
 export function canAccessTopicQuiz(
   isLoggedIn: boolean,
   userEntitlement: Entitlement | null,

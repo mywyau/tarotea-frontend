@@ -1,22 +1,30 @@
-import { canAccessTopic, freeTopics } from "~/utils/topics/permissions";
+import {
+  canAccessTopic,
+  canAccessTopicWord,
+  freeTopics,
+} from "~/utils/topics/permissions";
+
+// http://localhost:3000/topic/word/dim-sum/haa1coeng4fan2-shrimp-rice-noodle-roll
 
 export default defineNuxtRouteMiddleware(async (to) => {
+  if (process.server) return; // middleware runs on client only
+
   const topicSlug = to.params.topic as string | undefined;
-  const wordId = to.params.slug as string | undefined;
+  const wordIdSlug = to.params.slug as string | undefined;
 
-  if (!topicSlug || !wordId) return;
+  if (!topicSlug || !wordIdSlug) return;
 
-  const { authReady, isLoggedIn, entitlement } = useMeStateV2();
+  const { authReady, isLoggedIn, entitlement, resolve } = useMeStateV2();
 
-  if (!authReady.value) return;
+  await resolve();
 
   // ✅ Fully free topics
-  if (freeTopics.has(topicSlug)) {
-    return;
-  }
+  // if (freeTopics.has(topicSlug)) {
+  //   return;
+  // }
 
   // ✅ Paid users → full access
-  if (canAccessTopic(isLoggedIn.value, entitlement.value, topicSlug)) {
+  if (canAccessTopicWord(isLoggedIn.value, entitlement.value, topicSlug)) {
     return;
   }
 
@@ -27,7 +35,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const allWords = Object.values(topic.categories).flat();
   const freePreviewIds = allWords.slice(0, 10).map((w: any) => w.id);
 
-  if (freePreviewIds.includes(wordId)) {
+  if (freePreviewIds.includes(wordIdSlug)) {
     return; // allow preview
   }
 
