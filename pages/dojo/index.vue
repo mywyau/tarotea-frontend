@@ -29,7 +29,7 @@ definePageMeta({
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
 
       <!-- Level Training -->
-      <NuxtLink to="/jyutping/level/training" class="rounded-2xl p-8 shadow-sm hover:shadow-md transition
+      <NuxtLink to="/dojo/level" class="rounded-2xl p-8 shadow-sm hover:shadow-md transition
                hover:-translate-y-1 active:scale-[0.99]" style="background-color:#A8CAE0;">
         <div class="space-y-3">
           <div class="text-xl font-semibold text-black">
@@ -42,7 +42,7 @@ definePageMeta({
       </NuxtLink>
 
       <!-- Topic Training -->
-      <NuxtLink to="/jyutping/topic/training" class="rounded-2xl p-8 shadow-sm hover:shadow-md transition
+      <NuxtLink to="/dojo/topic" class="rounded-2xl p-8 shadow-sm hover:shadow-md transition
                hover:-translate-y-1 active:scale-[0.99]" style="background-color:#EAB8E4;">
         <div class=" space-y-3">
           <div class="text-xl font-semibold text-black">
@@ -53,7 +53,6 @@ definePageMeta({
           </p>
         </div>
       </NuxtLink>
-
     </div>
 
   </main>

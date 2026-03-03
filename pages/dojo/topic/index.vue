@@ -80,7 +80,7 @@ const paginatedTopics = computed(() => {
   <main class="topics-page max-w-5xl mx-auto py-10 px-4 space-y-8">
 
     <div class="mb-6">
-      <NuxtLink :to="`/jyutping/dojo`" class="text-black text-sm hover:underline">
+      <NuxtLink :to="`/dojo`" class="text-black text-sm hover:underline">
         ← Dojo
       </NuxtLink>
     </div>
@@ -149,7 +149,7 @@ const paginatedTopics = computed(() => {
 
         <!-- Buttons -->
         <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/jyutping/topic/training/${quizTopic.id}`"
+          <NuxtLink :to="`/dojo/topic/jyutping/training/${quizTopic.id}`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
             style="background-color:#EAB8E4;">
             Start
