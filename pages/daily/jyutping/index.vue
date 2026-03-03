@@ -5,6 +5,7 @@ definePageMeta({
     middleware: ['logged-in'],
 })
 
+import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
 import { shuffleDailyWords } from '~/composables/daily/useDailySessionV2'
 
 type DailyDecode = {
@@ -301,6 +302,8 @@ const everpassed = computed(() =>
 const everPerfect = computed(() =>
     attempts.value.some(a => a.perfect)
 )
+
+const { timeRemaining } = useCountdownToUtcMidnight()
 
 
 const answerLetters = computed(() => {
@@ -646,13 +649,9 @@ watch(input, (val) => {
                         Next daily unlocks in
                     </p>
 
-                    <p class="bg-black rounded-lg py-4 px-3">
-                        <span class="text-3xl font-semibold
-                                    bg-gradient-to-r
-                                    from-[#EAB8E4]
-                                    via-[#A8CAE0]
-                                    to-[#D6A3D1]
-                                    bg-clip-text text-transparent hover:brightness-125">
+                    <p class="bg-black rounded-lg py-4 px-3 text-center">
+                        <span
+                            class="text-3xl font-semibold bg-gradient-to-r from-[#EAB8E4] via-[#A8CAE0] to-[#D6A3D1] bg-clip-text text-transparent hover:brightness-125">
                             {{ timeRemaining }}
                         </span>
                     </p>
