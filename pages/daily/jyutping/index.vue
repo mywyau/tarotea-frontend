@@ -2,7 +2,8 @@
 
 definePageMeta({
     ssr: false,
-    middleware: ['logged-in'],
+    // middleware: ['logged-in'],
+    middleware: ['coming-soon'],
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
@@ -241,8 +242,8 @@ async function fetchChallenge() {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
             body: {
+                totalQuestions: 5,
                 mode: 'jyutping',
-                totalQuestions: 5
             }
         })
 

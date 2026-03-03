@@ -81,9 +81,9 @@ export function useDailySession() {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: { 
-        mode: 'quiz',
-        totalQuestions: 20 
-      }, // optional
+        totalQuestions: 20,
+        mode: 'daily_meaning_quiz', 
+      },
     });
 
     // 2) Locked state (no progress rows)

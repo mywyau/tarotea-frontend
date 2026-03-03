@@ -6,11 +6,13 @@ type Answer = { wordId: string; correct: boolean };
 
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
-  const body = (await readBody(event)) as { answers: Answer[] };
+  const body = (await readBody(event)) as { answers: Answer[]; mode?: string };
 
   if (!body || !Array.isArray(body.answers)) {
     throw createError({ statusCode: 400, statusMessage: "Invalid payload" });
   }
+
+  const mode = body.mode ?? "daily_meaning_quiz";
 
   // de-dupe by wordId
   const map = new Map<string, boolean>();
@@ -35,10 +37,12 @@ export default defineEventHandler(async (event) => {
       `
         select completed, word_ids, total_questions, session_date
         from daily_sessions
-        where user_id = $1 and session_date = current_date
+        where user_id = $1 
+            and session_date = current_date 
+            and mode = $2
         for update
       `,
-      [userId],
+      [userId, mode],
     );
 
     if (!sessRes.rowCount) {
@@ -55,7 +59,7 @@ export default defineEventHandler(async (event) => {
       session_date: string; // date comes back like '2026-02-21'
     };
 
-    const sessionKey = `daily:${sess.session_date}:${userId}`;
+    const sessionKey = `daily:${mode}:${sess.session_date}:${userId}`;
 
     // idempotent: if already completed, just return snapshot
     if (sess.completed) {
@@ -63,9 +67,9 @@ export default defineEventHandler(async (event) => {
         `
         select answered_count, correct_count, xp_earned, total_questions
         from daily_sessions
-        where user_id = $1 and session_date = current_date
+        where user_id = $1 and session_date = current_date and mode = $2
         `,
-        [userId],
+        [userId, mode],
       );
       await client.query("COMMIT");
       return {
@@ -136,31 +140,18 @@ export default defineEventHandler(async (event) => {
         statusMessage: "Answers do not match today's word list",
       });
     }
-
-    // const payloadAnswers = filtered.map((a) => ({
-    //   wordId: a.wordId,
-    //   correct: a.correct,
-    //   delta: deltaForDaily(a.correct),
-    // }));
-
-    // const answeredCount = payloadAnswers.length;
-    // const correctCount = payloadAnswers.reduce(
-    //   (acc, a) => acc + (a.correct ? 1 : 0),
-    //   0,
-    // );
-    // const totalDelta = payloadAnswers.reduce((acc, a) => acc + a.delta, 0);
-
     // Insert single quiz event (idempotent)
     await client.query(
       `
       insert into xp_quiz_events
         (user_id, mode, session_key, payload, total_delta, correct_count, total_questions)
       values
-        ($1, 'daily', $2, $3::jsonb, $4, $5, $6)
+        ($1, $2, $3, $4::jsonb, $5, $6, $7)
       on conflict (session_key) do nothing
       `,
       [
         userId,
+        mode,
         sessionKey,
         JSON.stringify({ answers: payloadAnswers }),
         totalDelta,
@@ -175,15 +166,16 @@ export default defineEventHandler(async (event) => {
       update daily_sessions
       set
         completed = true,
-        answered_word_ids = $2::text[],
-        answered_count = $3,
-        correct_count = $4,
-        xp_earned = $5,
+        answered_word_ids = $3::text[],
+        answered_count = $4,
+        correct_count = $5,
+        xp_earned = $6,
         updated_at = now()
-      where user_id = $1 and session_date = current_date
+      where user_id = $1 and session_date = current_date and mode = $2
       `,
       [
         userId,
+        mode,
         payloadAnswers.map((a) => a.wordId),
         answeredCount,
         correctCount,

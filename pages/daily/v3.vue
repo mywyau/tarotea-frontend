@@ -159,7 +159,7 @@ async function selectAnswer(answer: string) {
                 }>('/api/daily/finalize', {
                     method: 'POST',
                     headers: { Authorization: `Bearer ${token}` },
-                    body: { answers: answerLog.value }
+                    body: { answers: answerLog.value, mode: 'daily_meaning_quiz' }
                 })
 
                 answeredCount.value = res.daily.answeredCount

@@ -10,20 +10,18 @@ function utcDayString(d = new Date()): string {
 }
 
 export default defineEventHandler(async (event) => {
+
   const userId = await requireUser(event);
-  // const body = (await readBody(event).catch(() => ({}))) as {
-  //   totalQuestions?: number;
-  // };
 
   const body = (await readBody(event).catch(() => ({}))) as {
     totalQuestions?: number;
     mode?: string;
   };
 
-  const allowedModes = ["quiz", "jyutping", "listening"] as const;
+  const allowedModes = ["daily_meaning_quiz", "jyutping", "listening"] as const;
   type Mode = (typeof allowedModes)[number];
 
-  const mode = allowedModes.includes(body.mode as Mode) ? body.mode : "quiz";
+  const mode = allowedModes.includes(body.mode as Mode) ? body.mode : "daily_meaning_quiz";
 
   const totalQuestions = Number(body.totalQuestions ?? 20);
   if (
