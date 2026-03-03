@@ -11,6 +11,7 @@ export const patchNotes: PatchNote[] = [
     items: [
       "Expanding content",
       "Content review to fix dodgy translations, jyutping, chinese characters and audio",
+      "Topics dojo for typing and familiarising with phonetics",
     ],
   },
   {
