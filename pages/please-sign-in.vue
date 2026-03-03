@@ -16,7 +16,7 @@ definePageMeta({
 
       <p class="text-gray-600 text-sm max-w-md mx-auto">
         Sign in to continue your Cantonese journey and unlock
-        daily exercises, quizzes, streak tracking and more.
+        daily exercises, quizzes, xp tracking and more.
       </p>
     </div>
 
