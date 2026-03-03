@@ -19,9 +19,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   await resolve();
 
   // ✅ Fully free topics
-  // if (freeTopics.has(topicSlug)) {
-  //   return;
-  // }
+  if (freeTopics.has(topicSlug)) {
+    return;
+  }
 
   // ✅ Paid users → full access
   if (canAccessTopicWord(isLoggedIn.value, entitlement.value, topicSlug)) {
