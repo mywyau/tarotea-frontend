@@ -3,7 +3,7 @@
 definePageMeta({ layout: 'default' })
 
 import { useUpgrade } from '@/composables/useUpgrade';
-import { hasPaidAccess } from '@/utils/canAccessLevel';
+import { hasPaidAccess } from '~/utils/levels/permissions';
 
 const {
   state,
