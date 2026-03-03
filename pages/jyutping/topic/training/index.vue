@@ -151,15 +151,15 @@ const paginatedTopics = computed(() => {
         <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
           <NuxtLink :to="`/jyutping/topic/training/${quizTopic.id}`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
-            style="background-color:rgba(244,205,39,0.35);">
+            style="background-color:#EAB8E4;">
             Start
           </NuxtLink>
 
-          <!-- <NuxtLink :to="`/coming-soon`"
+          <NuxtLink :to="`/coming-soon`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
-            style="background-color:rgba(244,205,39,0.35);">
-            It's a mystery...
-          </NuxtLink> -->
+            style="background-color:#EAB8E4;">
+            Chinese only
+          </NuxtLink>
         </div>
 
         <!-- Locked -->

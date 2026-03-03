@@ -100,15 +100,15 @@ const canEnterLevel = (level: any) => {
         <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
           <NuxtLink :to="`/jyutping/level/training/${quizLevel.id}`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
-            style="background-color:rgba(244,205,39,0.35);">
-            Start
+            style="background-color:#A8CAE0;">
+            Jyutping
           </NuxtLink>
 
-          <!-- <NuxtLink :to="`/coming-soon`"
+          <NuxtLink :to="`/coming-soon`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
-            style="background-color:rgba(244,205,39,0.35);">
-            It's a mystery...
-          </NuxtLink> -->
+            style="background-color:#A8CAE0;">
+            Chinese only
+          </NuxtLink>
         </div>
 
         <!-- Locked -->
