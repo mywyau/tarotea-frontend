@@ -1,37 +1,26 @@
+import { canAccessTopic, freeTopics } from "~/utils/topics/permissions";
+
 export default defineNuxtRouteMiddleware(async (to) => {
   const topicSlug = to.params.topic as string | undefined;
   const wordId = to.params.slug as string | undefined;
 
   if (!topicSlug || !wordId) return;
 
-  const {
-    authReady,
-    isLoggedIn,
-    entitlement,
-  } = useMeStateV2();
+  const { authReady, isLoggedIn, entitlement } = useMeStateV2();
 
   if (!authReady.value) return;
 
-  const FREE_TOPICS = [
-    "survival-essentials",
-    "greetings-polite",
-    "fruits-vegetables",
-    "clothing",
-    "dim-sum",
-    "resturant-menu",
-  ];
-
   // ✅ Fully free topics
-  if (FREE_TOPICS.includes(topicSlug)) {
+  if (freeTopics.has(topicSlug)) {
     return;
   }
 
   // ✅ Paid users → full access
-  if (isLoggedIn.value && entitlement.value && canAccessLevel(entitlement.value)) {
+  if (canAccessTopic(isLoggedIn.value, entitlement.value, topicSlug)) {
     return;
   }
 
-  // 🔓 Free preview logic (first 5 words only)
+  // 🔓 Free preview logic (first 10 words only)
 
   const topic = await $fetch(`/api/index/topics/${topicSlug}`);
 

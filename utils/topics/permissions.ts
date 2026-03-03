@@ -9,6 +9,16 @@ export const freeTopics = new Set([
   "resturant-menu",
 ]);
 
+export const freeTopicsList = [
+  "survival-essentials",
+  "greetings-polite",
+  "fruits-vegetables",
+  "clothing",
+  "dim-sum",
+  "resturant-menu",
+];
+
+
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {
   if (!entitlement) {
     return false;
@@ -25,31 +35,27 @@ export function isFreeTopic(topic: string): boolean {
 }
 
 export function canAccessTopic(
-  authReady: boolean,
-  isLoggedIn: boolean,
-  userEntitlement: Entitlement,
-  topic: string,
-): boolean {
-  if (!authReady) return false;
-
-  isFreeTopic(topic)
-
-  // Paid levels
-  if (!isLoggedIn) return false;
-  
-  return hasPaidAccess(userEntitlement);
-}
-
-export function canAccessTopicuQuiz(
   isLoggedIn: boolean,
   userEntitlement: Entitlement | null,
   topic: string,
 ): boolean {
 
-  if(isFreeTopic(topic)) return true;
+  isFreeTopic(topic);
+  // Paid levels
+  if (!isLoggedIn) return false;
+
+  return hasPaidAccess(userEntitlement);
+}
+
+export function canAccessTopicQuiz(
+  isLoggedIn: boolean,
+  userEntitlement: Entitlement | null,
+  topic: string,
+): boolean {
+  if (isFreeTopic(topic)) return true;
 
   // Paid levels
   if (!isLoggedIn) return false;
-  
+
   return hasPaidAccess(userEntitlement);
 }

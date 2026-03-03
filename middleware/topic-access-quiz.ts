@@ -1,7 +1,4 @@
-import {
-  canAccessTopicuQuiz,
-  freeTopics
-} from "~/utils/topics/permissions";
+import { canAccessTopicQuiz, freeTopics } from "~/utils/topics/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return; // middleware runs on client only
@@ -19,7 +16,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // Full paid access
-  if (canAccessTopicuQuiz(isLoggedIn.value, entitlement.value, topic)) {
+  if (canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic)) {
     return;
   }
 
