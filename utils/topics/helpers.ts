@@ -1,11 +1,4 @@
-export const freeTopics = [
-  "survival-essentials",
-  "greetings-polite",
-  "fruits-vegetables",
-  "clothing",
-];
-
-export const topics = [
+export const topicJyutpingQuizMeta = [
     {
         id: 'survival-essentials',
         title: 'Survival & Essentials',

@@ -17,6 +17,11 @@ const {
   resolve,
 } = useMeStateV2();
 
+const showTopicTraining = ref(false)
+
+function toggleTrainingMode() {
+  showTopicTraining.value = !showTopicTraining.value
+}
 
 </script>
 
@@ -69,6 +74,7 @@ const {
             Learners
           </div>
         </div>
+
         <!-- 
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
@@ -146,7 +152,7 @@ const {
             </div>
           </NuxtLink>
 
-          <NuxtLink to="/jyutping/training"
+          <NuxtLink to="/jyutping/dojo"
             class="rounded-xl p-6 flex items-end shadow-sm hover:shadow-md transition hover:brightness-110"
             style="background-color:rgba(244,205,39,0.35);"
             >

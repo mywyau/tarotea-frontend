@@ -44,15 +44,15 @@ const canEnterLevel = (level: any) => {
   <main class="levels-page max-w-5xl mx-auto py-10 px-4 space-y-8">
 
     <div class="mb-6">
-      <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
-        ← Home
+      <NuxtLink :to="`/jyutping/dojo`" class="text-black text-sm hover:underline">
+        ← Dojo
       </NuxtLink>
     </div>
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
       <h1 class="text-3xl font-semibold text-gray-900">
-        Jyutping Dojo
+        Level Dojo
       </h1>
       <p class="text-gray-600 text-sm sm:text-base">
         Strenghten your phonetic proficiency with our exercises
@@ -98,7 +98,7 @@ const canEnterLevel = (level: any) => {
 
         <!-- Buttons -->
         <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/jyutping/training/${quizLevel.id}`"
+          <NuxtLink :to="`/jyutping/level/training/${quizLevel.id}`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
             style="background-color:rgba(244,205,39,0.35);">
             Start

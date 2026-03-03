@@ -26,6 +26,13 @@ export const freeTopicsQuiz = [
   "clothing",
 ];
 
+export const freeTopicsJyutpingDojo = [
+  "survival-essentials",
+  "greetings-polite",
+  "fruits-vegetables",
+  "clothing",
+];
+
 
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {
   if (!entitlement) {
@@ -44,6 +51,10 @@ export function isFreeTopic(topic: string): boolean {
 
 export function isFreeTopicQuiz(topic: string): boolean {
   return freeTopicsQuiz.includes(topic);
+}
+
+export function isFreeTopicsJyutpingDojo(topic: string): boolean {
+  return freeTopicsJyutpingDojo.includes(topic);
 }
 
 export function canAccessTopic(
