@@ -50,7 +50,7 @@ const canEnterLevel = (level: any) => {
         Level Quiz
       </h1>
       <p class="text-gray-600 text-sm sm:text-base">
-        Progress through structured Cantonese levels. Your weakest words appear more often as you improve.
+        Progress through structured and progressively trickier Cantonese content. 
       </p>
     </header>
 

@@ -23,13 +23,6 @@ const {
 
 await resolve()
 
-// function canEnterTopic(topic: Topic) {
-
-//   if (topic.comingSoon) return false
-
-//   return canAccessTopic(isLoggedIn.value, entitlement.value, topic.id)
-// }
-
 function doNotShowUpgradeMessage(topic: Topic) {
 
   if (!topic.requiresPaid) return true
@@ -53,7 +46,6 @@ function topicLink(topic: Topic) {
     return `/topic/words/${topic.id}`
   }
 }
-
 
 const ITEMS_PER_PAGE = 12
 const currentPage = ref(1)

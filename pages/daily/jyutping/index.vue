@@ -302,24 +302,6 @@ const everPerfect = computed(() =>
     attempts.value.some(a => a.perfect)
 )
 
-// async function awardXp(result: { passed: boolean; perfect: boolean }) {
-//     // optional: call backend to award XP / log daily completion
-//     // Keep it safe: only award once when first completed.
-//     try {
-//         if (!challenge.value) return
-//         await $fetch('/api/daily/jyutping/complete', {
-//             method: 'POST',
-//             body: {
-//                 date: todayKey.value,
-//                 wordId: challenge.value.wordId,
-//                 passed: result.passed,
-//                 perfect: result.perfect,
-//             },
-//         })
-//     } catch {
-//         // don’t block UI if XP logging fails
-//     }
-// }
 
 const answerLetters = computed(() => {
     if (!challenge.value) return []
@@ -611,12 +593,6 @@ watch(input, (val) => {
                         <span class="text-gray-500">Answer:</span>
                         <span class="font-mono font-bold ml-2">{{ challenge.jyutping }}</span>
                     </div>
-
-                    <!-- <div class="mt-3 text-sm text-gray-600">
-                        <span class="pt-1">
-                            Come back tomorrow for your new words.
-                        </span>
-                    </div> -->
                 </div>
 
                 <!-- Reveal (only if failed all attempts and not done) -->
