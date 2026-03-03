@@ -5,7 +5,11 @@
 //   ssr: true,
 // })
 
-import { onMounted } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useMeStateV2 } from '~/composables/useMeStateV2'
+import type { Topic } from '~/types/topic'
+import { canAccessLevel } from '~/utils/levels/permissions'
+import { topics } from '~/utils/topics/topics'
 
 const {
     state,
@@ -18,9 +22,6 @@ const {
     currentPeriodEnd,
     resolve,
 } = useMeStateV2()
-
-import { computed, ref, watch } from 'vue'
-import { canAccessLevel } from '~/utils/levels/permissions'
 
 const ITEMS_PER_PAGE = 9
 const currentPage = ref(1)
@@ -44,13 +45,13 @@ function goToPage(page: number) {
 /**
  * Topic model
  */
-type Topic = {
-    id: string
-    title: string
-    description: string,
-    comingSoon: boolean
-    requiresPaid?: boolean
-}
+// type Topic = {
+//     id: string
+//     title: string
+//     description: string,
+//     comingSoon: boolean
+//     requiresPaid?: boolean
+// }
 
 
 function canEnterTopic(topic: Topic) {

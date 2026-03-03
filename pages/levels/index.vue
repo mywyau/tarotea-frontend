@@ -5,9 +5,10 @@ definePageMeta({
   ssr: true,
 })
 
-import { onMounted } from 'vue'
-import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { brandColours } from '@/utils/branding/helpers'
+import { levelSelectMetaData } from '@/utils/levels/helpers'
+import { onMounted } from 'vue'
+import { useMeStateV2 } from '~/composables/useMeStateV2'
 
 const {
   state,

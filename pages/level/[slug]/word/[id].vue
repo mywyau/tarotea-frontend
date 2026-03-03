@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useAudioVolume } from '~/composables/useAudioVolume'
+import { useAuth } from '~/composables/useAuth'
+
 
 definePageMeta({
   middleware: ['level-word-access-client'],
@@ -7,11 +10,7 @@ definePageMeta({
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
-<<<<<<< Updated upstream
-=======
 const cdnBase = runtimeConfig.public.cdnBase
->>>>>>> Stashed changes
-
 
 // Dynamic params
 const level = computed(() => route.params.slug as string)
@@ -89,20 +88,20 @@ watchEffect(() => {
     ogType: 'article',
   })
 
-  useHead({
-    script: [
-      {
-        type: 'application/ld+json',
-        children: JSON.stringify({
-          "@context": "https://schema.org",
-          "@type": "DefinedTerm",
-          name: word.value.word,
-          description: word.value.meaning,
-          inDefinedTermSet: "Cantonese Vocabulary",
-        })
-      }
-    ]
-  })
+  // useHead({
+  //   script: [
+  //     {
+  //       type: 'application/ld+json',
+  //       children: JSON.stringify({
+  //         "@context": "https://schema.org",
+  //         "@type": "DefinedTerm",
+  //         name: word.value.word,
+  //         description: word.value.meaning,
+  //         inDefinedTermSet: "Cantonese Vocabulary",
+  //       })
+  //     }
+  //   ]
+  // })
 })
 
 </script>
@@ -221,26 +220,17 @@ watchEffect(() => {
   --yellow: #F4CD27;
   --blush: #F6E1E1;
 
-  /* background: linear-gradient(180deg,
-      rgba(246, 225, 225, 0.65) 0%,
-      rgba(255, 255, 255, 0.85) 45%,
-      rgba(168, 202, 224, 0.35) 100%); */
-
   border-radius: 18px;
   padding-bottom: 2rem;
 }
 
 /* Main word card */
 .word-card {
-  /* background: rgba(255, 255, 255, 0.75); */
-  /* border: 1px solid rgba(214, 163, 209, 0.35); */
   backdrop-filter: blur(6px);
 }
 
 /* Section cards */
 .section-card {
-  /* background: rgba(255, 255, 255, 0.75); */
-  /* border: 1px solid rgba(234, 184, 228, 0.30); */
   backdrop-filter: blur(6px);
 }
 

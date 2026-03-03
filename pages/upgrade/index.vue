@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { useUpgrade } from '@/composables/useUpgrade';
-import { hasPaidAccess } from '~/utils/levels/permissions';
-// import { hasPaidAccess } from '@/utils/canAccessLevel';
 
 definePageMeta({ layout: 'default' })
+
+import { useUpgrade } from '@/composables/useUpgrade';
+import { useMeStateV2 } from '~/composables/useMeStateV2';
+import { hasPaidAccess } from '~/utils/levels/permissions';
 
 const {
   state,
