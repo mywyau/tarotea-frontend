@@ -1,45 +1,63 @@
-import { db } from '~/server/db'
-import { getRouterParam, getHeader, createError } from 'h3'
-import { getLevelNumber } from '@/utils/levels' // or '~/utils/levels' depending on your alias
-import levelData from '@/server/api/index/levels/[id]' // <- replace with however you're currently loading the level JSON
+// import levelData from "@/server/api/index/levels/[id]";
+import { createError, getHeader, getRouterParam } from "h3";
+import { db } from "~/server/db";
+import { isLevelId, levelIdToNumberMap } from "~/utils/levels/levels";
+import { isFreeLevel } from "~/utils/levels/permissions";
 
 export default defineEventHandler(async (event) => {
+  const slug = getRouterParam(event, "slug");
 
-  const slug = getRouterParam(event, 'slug')
-  
   if (!slug) {
-    throw createError({ statusCode: 400, statusMessage: 'Missing level slug' })
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing level slug",
+    });
   }
 
-  const levelNumber = getLevelNumber(slug)
-  if (!levelNumber) {
-    throw createError({ statusCode: 404, statusMessage: 'Level not found' })
+  // ✅ Validate slug (type guard)
+  if (!isLevelId(slug)) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "Level not found",
+    });
   }
 
-  // ✅ Free levels (adjust this rule however you like)
-  const FREE_UP_TO_LEVEL = 1
-  if (levelNumber <= FREE_UP_TO_LEVEL) {
-    return levelData[slug] // <- return your existing level payload
+  const levelNumber = levelIdToNumberMap[slug];
+
+  // ✅ Free levels
+  if (isFreeLevel(levelNumber)) {
+    return await $fetch(`/api/index/levels/${slug}`);
   }
 
-  // 🔒 Locked levels require a user id (MVP approach)
-  const userId = getHeader(event, 'x-user-id')
+  // 🔒 Require user
+  const userId = getHeader(event, "x-user-id");
   if (!userId) {
-    throw createError({ statusCode: 401, statusMessage: 'Sign in required' })
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Sign in required",
+    });
   }
 
-  // 🔒 Require pro entitlement
+  // 🔒 Fetch entitlement
   const { rows } = await db.query(
-    `select plan, subscription_plan from entitlements where user_id = $1`,
-    [userId]
-  )
+    `select plan, subscription_plan 
+     from entitlements 
+     where user_id = $1`,
+    [userId],
+  );
 
-  const ent = rows[0]
-  const isPro = (ent?.plan === 'monthly' && ent?.subscription_plan === 'active') || (ent?.plan === 'yearly' && ent?.subscription_plan === 'active')
+  const ent = rows[0];
 
-  if (!isPro) {
-    throw createError({ statusCode: 403, statusMessage: 'Upgrade required' })
+  const isSubscribed =
+    ent?.subscription_plan === "active" &&
+    (ent?.plan === "monthly" || ent?.plan === "yearly");
+
+  if (!isSubscribed) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Subscription Upgrade required",
+    });
   }
 
-  return levelData[slug]
-})
+  return await $fetch(`/api/index/levels/${slug}`);
+});

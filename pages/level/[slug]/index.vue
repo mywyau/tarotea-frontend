@@ -1,22 +1,26 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-access'],
+  // middleware: ['level-access'],
   ssr: true,
 })
 
 import WordTile from '@/components/WordTile.vue'
-import { getLevelNumber } from '@/utils/levels'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
+import { tileColours } from '~/utils/branding/helpers'
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
+import { canAccessLevel, hasPaidAccess, isFreeLevel } from '~/utils/levels/permissions'
 
 const route = useRoute()
 const slug = route.params.slug as string
 
-const levelNumber = getLevelNumber(slug)
-if (levelNumber === null) {
-  throw createError({ statusCode: 404, statusMessage: 'Level not found' })
+// we check the path slug
+if (!isLevelId(slug)) {
+  throw createError({ statusCode: 404 })
 }
+
+const levelNumber: number = levelIdToNumbers(slug)
 
 const {
   authReady,
@@ -24,9 +28,12 @@ const {
   entitlement,
 } = useMeStateV2()
 
+if (!entitlement.value === null) {
+  throw createError({ statusCode: 404 })
+}
 
 // SSR-safe fetch (no gating, no nulls)
-const { data: topic, error } = await useFetch(
+const { data: levelCdnData, error } = await useFetch(
   `/api/index/levels/${slug}`,
   {
     server: true,
@@ -39,21 +46,12 @@ if (error.value?.statusCode === 403) {
   throw createError({ statusCode: 403, statusMessage: 'Level locked' })
 }
 
-if (!topic.value) {
+if (!levelCdnData.value) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
 
-const TILE_COLORS = [
-  'rgba(234, 184, 228, 0.75)', // pink
-  'rgba(214, 163, 209, 0.75)', // purple
-  'rgba(168, 202, 224, 0.75)', // blue
-  'rgba(246, 225, 225, 0.75)', // blush
-  'rgba(244, 194, 215, 0.75)', // soft rose
-  'rgba(244, 205, 39, 0.35)'  // yellow 
-]
-
 const categories = computed(() =>
-  Object.entries(topic.value.categories).map(([key, words]) => ({
+  Object.entries(levelCdnData.value.categories).map(([key, words]) => ({
     key,
     title: key.replace(/_/g, ' '),
     words,
@@ -86,14 +84,8 @@ async function loadProgress() {
   }
 }
 
-onMounted(loadProgress)
-
 const getXp = (id: string) =>
   progressMap.value?.[id]?.xp ?? 0
-
-const getStreak = (id: string) =>
-  progressMap.value?.[id]?.streak ?? 0
-
 
 const MASTERY_XP = 200
 
@@ -102,11 +94,15 @@ const isMastered = (id: string) =>
 
 const FREE_WORD_LIMIT = 10
 
-const hasPaidAccess = computed(() => {
+const canAccessLevel = computed(() => {
   if (!authReady.value) return false
   if (!isLoggedIn.value) return false
-  return entitlement.value ? canAccessLevel(entitlement.value) : false
+  return entitlement.value ? hasPaidAccess(entitlement.value) : false
 })
+
+// const canAccessLevel = computed(() => {
+//   return entitlement.value ? hasPaidAccess(entitlement.value) : false
+// })
 
 function getColorFromId(id: string) {
   let hash = 0
@@ -115,11 +111,12 @@ function getColorFromId(id: string) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash)
   }
 
-  const index = Math.abs(hash) % TILE_COLORS.length
-  return TILE_COLORS[index]
+  const index = Math.abs(hash) % tileColours.length
+  return tileColours[index]
 }
 
 const gatedCategories = computed(() => {
+
   let globalIndex = 0
 
   return categories.value.map(category => {
@@ -129,11 +126,10 @@ const gatedCategories = computed(() => {
 
         const shouldLock =
           !isFreeLevel(levelNumber) &&
-          !hasPaidAccess.value &&
+          !canAccessLevel.value &&
           globalIndex >= FREE_WORD_LIMIT
 
-        // const color = TILE_COLORS[globalIndex % TILE_COLORS.length]
-
+          
         globalIndex++
 
         return {
@@ -146,6 +142,8 @@ const gatedCategories = computed(() => {
   })
 })
 
+onMounted(loadProgress)
+
 </script>
 
 <template>
@@ -156,8 +154,8 @@ const gatedCategories = computed(() => {
     </NuxtLink>
 
     <header class="header-card rounded-xl p-6 sm:p-7 space-y-2">
-      <h1 class="text-3xl font-semibold text-gray-900">{{ topic.title }}</h1>
-      <p class="text-gray-700">{{ topic.description }}</p>
+      <h1 class="text-3xl font-semibold text-gray-900">{{ levelCdnData.title }}</h1>
+      <p class="text-gray-700">{{ levelCdnData.description }}</p>
     </header>
 
     <section v-for="category in gatedCategories" :key="category.key" class="category-card rounded-xl p-5 sm:p-6">
@@ -186,26 +184,14 @@ const gatedCategories = computed(() => {
   --yellow: #F4CD27;
   --blush: #F6E1E1;
 
-  /* background: linear-gradient(180deg,
-      rgba(246, 225, 225, 0.70) 0%,
-      rgba(255, 255, 255, 0.85) 45%,
-      rgba(168, 202, 224, 0.40) 100%); */
-
-  /* border-radius: 18px; */
   padding-bottom: 2rem;
 }
 
 .header-card {
-  /* background: rgba(255, 255, 255, 0.72); */
-  /* border: 1px solid rgba(214, 163, 209, 0.38); */
-  /* purple border */
   backdrop-filter: blur(6px);
 }
 
 .category-card {
-  /* background: rgba(255, 255, 255, 0.72); */
-  /* border: 1px solid rgba(234, 184, 228, 0.30); */
-  /* pink border */
   backdrop-filter: blur(6px);
 }
 
@@ -218,20 +204,5 @@ const gatedCategories = computed(() => {
   pointer-events: none;
   user-select: none;
   filter: grayscale(0.15);
-}
-
-/* Small “Pro” pill */
-.pill {
-  display: inline-block;
-  /* padding: 0.2rem 0.55rem; */
-  /* border-radius: 999px; */
-  font-size: 0.75rem;
-  font-weight: 700;
-  /* border: 1px solid rgba(0, 0, 0, 0.06); */
-  color: rgba(0, 0, 0, 0.78);
-}
-
-.pill-locked {
-  background: rgba(244, 205, 39, 0.60);
 }
 </style>

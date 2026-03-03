@@ -1,11 +1,12 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-access'],
+  middleware: ['level-quiz-access'],
   ssr: false
 })
 
 import { computed, ref, watch } from 'vue'
+import { generateQuiz } from '~/utils/quiz/generateQuiz'
 
 import {
   playQuizCompleteFailSong,
@@ -28,7 +29,6 @@ type LevelData = {
   categories: Record<string, Word[]>
 }
 
-import { generateQuiz } from '~/utils/quiz/generateQuiz'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -42,7 +42,6 @@ const wordsForLevel = computed<Word[]>(() => {
 
   return Object.values(data.value.categories).flat()
 })
-
 
 const BRAND_COLORS = [
   '#EAB8E4',                // lavender blush

@@ -1,5 +1,4 @@
 export default defineEventHandler(async (event) => {
-  
   const id = getRouterParam(event, "id");
 
   if (!id) {
@@ -8,13 +7,10 @@ export default defineEventHandler(async (event) => {
       statusMessage: "Missing id",
     });
   }
-
   const cdnBase = useRuntimeConfig().public.cdnBase;
 
   try {
-    return await $fetch(
-      `${cdnBase}/levels/${id}.json`
-    );
+    return await $fetch(`${cdnBase}/levels/${id}.json`);
   } catch {
     throw createError({
       statusCode: 404,

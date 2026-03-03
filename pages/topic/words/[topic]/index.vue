@@ -8,6 +8,8 @@ definePageMeta({
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
+import { canAccessTopic } from '~/utils/topics/permissions'
+import { topics } from '~/utils/topics/topics'
 
 const route = useRoute()
 const slug = route.params.topic as string
@@ -99,12 +101,7 @@ const isMastered = (id: string) =>
 const FREE_WORD_LIMIT = 10
 
 const hasPaidAccess = computed(() => {
-  if (!authReady.value) return false
-  if (!isLoggedIn.value) return false
-
-  if (!isLoggedIn.value) return false
-
-  return canAccessLevel(entitlement.value!)
+  return canAccessTopic(isLoggedIn.value, entitlement.value, topic.id)
 })
 
 function getColorFromId(id: string) {

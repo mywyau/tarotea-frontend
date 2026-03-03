@@ -5,15 +5,19 @@ definePageMeta({
   ssr: false
 })
 
-import { getLevelNumber } from '@/utils/levels'
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
+import { canAccessLevelWord } from '~/utils/levels/permissions'
 
 const route = useRoute()
-const slug = computed(() => route.params.slug as string | undefined)
+// const slug = computed(() => route.params.slug as string | undefined)
+const slug = route.params.slug as string
 
-const levelNumber = computed(() => {
-  if (!slug.value) return null
-  return getLevelNumber(slug.value)
-})
+// we check the path slug
+if (!isLevelId(slug)) {
+  throw createError({ statusCode: 404 })
+}
+
+const levelNumber: number = levelIdToNumbers(slug)
 
 const {
   state,
@@ -26,21 +30,10 @@ const {
   resolve,
 } = useMeStateV2()
 
-
-const canEnterLevel = () => {
-
-  if (!authReady.value) return false
-
-  if (levelNumber.value! <= 3) return true
-
-  // Paid levels
-  if (!isLoggedIn.value) return false
-
-  return canAccessLevel(entitlement.value!)
-}
+const canEnterLevel = canAccessLevelWord(levelNumber, entitlement.value!)
 
 watchEffect(() => {
-  if (slug.value && levelNumber.value === null) {
+  if (slug && levelNumber === null) {
     throw createError({
       statusCode: 404,
       statusMessage: 'Level not found'
@@ -58,8 +51,8 @@ watchEffect(() => {
     </NuxtLink>
 
     <!-- 🔒 Locked -->
-    <section v-if="authReady && !canEnterLevel()" class="quiz-card text-center space-y-4">
-    
+    <section v-if="authReady && !canEnterLevel" class="quiz-card text-center space-y-4">
+
       <h1 class="text-2xl font-semibold text-gray-900">
         Quiz locked
       </h1>

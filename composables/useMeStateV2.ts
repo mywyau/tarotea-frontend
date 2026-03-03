@@ -72,8 +72,9 @@ export function useMeStateV2() {
     state.value.status === "logged-in" ? state.value.user : null,
   );
 
-  const entitlement = computed(() =>
-    state.value.status === "logged-in" ? state.value.user.entitlement : null,
+  const entitlement: globalThis.ComputedRef<Entitlement | null> = computed(
+    () =>
+      state.value.status === "logged-in" ? state.value.user.entitlement : null,
   );
 
   const hasPaidAccess = computed(() => {
@@ -105,7 +106,7 @@ export function useMeStateV2() {
     isLoggedOut,
     user,
     entitlement,
-    hasPaidAccess,  // this is dodgy use entitlements instead please :) to determine access
+    hasPaidAccess, // this is dodgy use entitlements instead please :) to determine access
     isCanceling,
     currentPeriodEnd,
     resolve,

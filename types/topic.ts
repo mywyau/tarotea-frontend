@@ -11,3 +11,12 @@ export interface TopicData {
   description: string
   categories: Record<string, TopicWord[]>
 }
+
+
+export type Topic = {
+  id: string
+  title: string
+  description: string,
+  comingSoon: boolean
+  requiresPaid?: boolean
+}

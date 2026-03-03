@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-access'],
+  middleware: ['level-quiz-access'],
   ssr: false
 })
 
@@ -19,6 +19,7 @@ type LevelData = {
   categories: Record<string, Word[]>
 }
 
+type QuizAnswer = { wordId: string; correct: boolean }
 
 import { computed, ref } from 'vue'
 
@@ -29,11 +30,18 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
+import { brandColours } from '~/utils/branding/helpers'
+import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels'
 
 const route = useRoute()
-const slug = computed(() => route.params.slug as string)
+// const slug = computed(() => route.params.slug as string)
+const slug = route.params.slug as string
 
-type QuizAnswer = { wordId: string; correct: boolean }
+if (!isLevelId(slug)) {
+  throw createError({ statusCode: 404 })
+}
+
+const levelNumber: number = levelIdToNumbers(slug)
 
 const answerLog = ref<QuizAnswer[]>([])
 const finishing = ref(false)
@@ -43,14 +51,12 @@ const { getAccessToken } = await useAuth()
 const { stop } = useGlobalAudio()
 
 const { data, error } = await useFetch<LevelData>(
-  () => `/api/vocab-quiz/${slug.value}`,
+  () => `/api/vocab-quiz/${slug}`,
   {
-    key: () => `audio-quiz-${slug.value}`,
+    key: () => `audio-quiz-${slug}`,
     server: true
   }
 )
-
-
 
 const wordsForLevel = computed<Word[]>(() => {
   if (!data.value) return []
@@ -73,20 +79,8 @@ const selectedIndex = ref<number | null>(null)
 
 const currentXp = ref<number | null>(null)
 const currentStreak = ref<number | null>(null)
-const showResult = ref<boolean>(false)
 
 const question = computed(() => questions.value[current.value])
-
-const levelNumber = getLevelNumber(slug.value)
-
-const BRAND_COLORS = [
-  '#EAB8E4',                // lavender blush
-  '#A8CAE0',                // soft blue
-  '#F4C2D7',                // pink
-  '#F2CACA',                // blush
-  '#D6A3D1',                // deeper purple
-  'rgba(244,205,39,0.35)',  // yellow
-]
 
 const tileColors = ref<string[]>([])
 
@@ -95,25 +89,7 @@ function shuffle<T>(arr: T[]): T[] {
 }
 
 function generateTileColors() {
-  tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
-}
-
-const LEVEL_TITLES: Record<string, string> = {
-  'level-one': 'Level 1',
-  'level-two': 'Level 2',
-  'level-three': 'Level 3',
-  'level-four': 'Level 4',
-  'level-five': 'Level 5',
-  'level-six': 'Level 6',
-  'level-seven': 'Level 7',
-  'level-eight': 'Level 8',
-  'level-nine': 'Level 9',
-  'level-ten': 'Level 10',
-  'level-eleven': 'Level 11',
-  'level-twelve': 'Level 12',
-  'level-thirteen': 'Level 13',
-  'level-fourteen': 'Level 14',
-  'level-fiftheen': 'Level 15',
+  tileColors.value = shuffle(brandColours).slice(0, 4)
 }
 
 const WRONG_PENALTY = -12
@@ -301,7 +277,7 @@ watch(
     <section class="text-center space-y-4">
 
       <h1 class="text-2xl font-semibold text-center">
-        {{ LEVEL_TITLES[slug] ?? 'Unknown level' }}
+        {{ levelTitles[slug] ?? 'Unknown level' }}
       </h1>
 
       <div class="flex items-center gap-3 mb-6">

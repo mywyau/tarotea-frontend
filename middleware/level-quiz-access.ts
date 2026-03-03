@@ -1,0 +1,40 @@
+import { isLevelId, levelIdToNumbers } from "@/utils/levels/levels";
+import {
+  canAccessLevelQuiz,
+  isComingSoon,
+  isFreeLevel
+} from "~/utils/levels/permissions";
+
+export default defineNuxtRouteMiddleware(async (to) => {
+  if (process.server) return; // middleware runs on client only
+
+  const slug = to.params.slug as string;
+
+  if (!slug) return;
+
+  const { authReady, isLoggedIn, entitlement, resolve } = useMeStateV2();
+
+  await resolve();
+
+  if (!isLevelId(slug)) {
+    throw createError({ statusCode: 404 });
+  }
+
+  const levelNumber:number = levelIdToNumbers(slug);
+
+  // Free levels
+  if (isFreeLevel(levelNumber)) return;
+
+  // Coming soon
+  if (isComingSoon(levelNumber)) {
+    return navigateTo("/coming-soon");
+  }
+
+  // Full paid access
+  if (canAccessLevelQuiz(levelNumber, entitlement.value)) {
+    return;
+  }
+
+  // Final fallback
+  return navigateTo("/upgrade");
+});
