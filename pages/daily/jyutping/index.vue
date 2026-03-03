@@ -241,7 +241,7 @@ async function fetchChallenge() {
             headers: { Authorization: `Bearer ${token}` },
             body: {
                 mode: 'jyutping',
-                totalQuestions: 20
+                totalQuestions: 5
             }
         })
 

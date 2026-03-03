@@ -34,7 +34,7 @@ const slug = computed(() => route.params.slug as string)
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-const BATCH_SIZE = 5
+const BATCH_SIZE = 20
 
 const loading = ref(true)
 const errorState = ref<string | null>(null)
