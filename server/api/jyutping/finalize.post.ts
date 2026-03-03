@@ -2,15 +2,19 @@ import { createError, getHeader, readBody } from "h3";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
 import type {
-  BatchAttempt
+  Attempt,
+  BatchAttempt,
 } from "~/types/jyutping/jyutping-training-types";
 
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
+
+  const mode = 'grind'
+
   const body = (await readBody(event)) as {
-    attempts: BatchAttempt[];
     level: string;
     sessionKey: string;
+    attempts: BatchAttempt[];
   };
 
   if (!body || !Array.isArray(body.attempts)) {
@@ -26,7 +30,7 @@ export default defineEventHandler(async (event) => {
       map.set(a.wordId, {
         wordId: a.wordId,
         passed: !!a.passed,
-        hintUsed: !!a.hintUsed
+        hintUsed: !!a.hintUsed,
       });
     }
   }
@@ -59,13 +63,11 @@ export default defineEventHandler(async (event) => {
 
     function deltaFor(a: BatchAttempt) {
       if (!a.passed) return 0;
-
       if (a.hintUsed) return 1;
-
       return 3;
     }
 
-    const payloadAttempts = attempts.map((a) => ({
+    const payloadAttempts: Attempt[] = attempts.map((a) => ({
       wordId: a.wordId,
       passed: a.passed,
       delta: deltaFor(a),
@@ -79,17 +81,19 @@ export default defineEventHandler(async (event) => {
       insert into xp_jyutping_events
         (
           user_id,
+          mode,
           level,
           session_key,
           payload, 
           total_delta,
           correct_count,
-          total_words
+          total_questions
         ) values
-        ($1, $2, $3, $4::jsonb, $5, $6, $7)
+        ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)
       `,
       [
         userId,
+        mode,
         body.level,
         body.sessionKey,
         JSON.stringify({ answers: payloadAttempts }),

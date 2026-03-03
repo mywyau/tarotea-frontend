@@ -1,10 +1,5 @@
 <script setup lang="ts">
 
-// definePageMeta({
-//   middleware: ['coming-soon'],
-//   ssr: true,
-// })
-
 import { computed, onMounted, ref, watch } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 import type { TopicQuiz } from '~/types/topic'
@@ -54,24 +49,18 @@ function canEnterTopic(topic: TopicQuiz): boolean {
 
     return canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic.id)
 }
-// function hasPaidAccessCheck(topic: TopicQuiz) {
-//     // ✅ Free topic → always accessible
-//     // 🔒 Paid topic → requires login + entitlement
-//     if (!isLoggedIn.value) return false
-//     return canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic.id)
-// }
+
 
 watch(topics, () => {
     currentPage.value = 1
 })
 
-// Resolve auth once on mount (safe + idempotent)
 onMounted(async () => {
+    // Resolve auth once on mount (safe + idempotent)
     await resolve()
 })
 
 </script>
-
 
 <template>
     <main class="topics-page max-w-6xl mx-auto py-10 px-4 space-y-8">
@@ -135,7 +124,8 @@ onMounted(async () => {
                 <div class="grid grid-cols-2 gap-3 pt-4">
 
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/word/v3/${topic.id}` : undefined"
-                        class="topic-btn topic-btn-blue" :class="{ 'pointer-events-none opacity-60': topic.comingSoon}">
+                        class="topic-btn topic-btn-blue"
+                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Vocab
                     </NuxtLink>
 

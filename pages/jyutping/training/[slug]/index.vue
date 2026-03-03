@@ -23,11 +23,9 @@ import {
     stripToneToken
 } from '@/utils/jyutping/jyutping-utils'
 
+import { levelTitles } from '~/utils/levels/levels'
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
-
-import {
-    playCorrectJingle
-} from '@/utils/sounds'
+import { playCorrectJingle } from '@/utils/sounds'
 
 
 const route = useRoute()
@@ -36,26 +34,7 @@ const slug = computed(() => route.params.slug as string)
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-
-const BATCH_SIZE = 20
-
-const LEVEL_TITLES: Record<string, string> = {
-    'level-one': 'Level 1',
-    'level-two': 'Level 2',
-    'level-three': 'Level 3',
-    'level-four': 'Level 4',
-    'level-five': 'Level 5',
-    'level-six': 'Level 6',
-    'level-seven': 'Level 7',
-    'level-eight': 'Level 8',
-    'level-nine': 'Level 9',
-    'level-ten': 'Level 10',
-    'level-eleven': 'Level 11',
-    'level-twelve': 'Level 12',
-    'level-thirteen': 'Level 13',
-    'level-fourteen': 'Level 14',
-    'level-fiftheen': 'Level 15',
-}
+const BATCH_SIZE = 5
 
 const loading = ref(true)
 const errorState = ref<string | null>(null)
@@ -125,7 +104,6 @@ const answerBaseNoSpace = computed(() =>
 const userBaseNoSpace = computed(() =>
     baseSound(input.value)
 )
-
 
 
 type LetterState = 'idle' | 'correct'
@@ -528,7 +506,7 @@ onMounted(() => {
         <header class="space-y-4">
 
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Jyutping Dojo - {{ LEVEL_TITLES[slug] }}
+                Jyutping Dojo - {{ levelTitles[slug] }}
             </h1>
 
             <p class="text-sm text-gray-600">

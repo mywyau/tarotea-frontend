@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { jyutPingQuizSelectMetaData } from '~/utils/levels/helpers'
 import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
 
 
@@ -6,7 +7,6 @@ definePageMeta({
   ssr: false,
   middleware: ['logged-in'],
 })
-
 
 const {
   state,
@@ -21,80 +21,6 @@ const {
   currentPeriodEnd,
   resolve,
 } = useMeStateV2()
-
-
-const quizLevels = [
-  {
-    id: 'level-one',
-    number: 1,
-    title: 'Level 1',
-    comingSoon: false,
-    description: 'Foundation vocabulary: identity, actions, daily life, and simple needs.'
-  },
-  {
-    id: 'level-two',
-    number: 2,
-    title: 'Level 2',
-    comingSoon: false,
-    description: 'Daily situations, intentions, feelings, and simple reasoning.'
-  },
-  {
-    id: 'level-three',
-    number: 3,
-    title: 'Level 3',
-    comingSoon: false,
-    description: 'Intermediate Cantonese, expressing thoughts and reasons naturally.'
-  },
-  {
-    id: 'level-four',
-    number: 4,
-    title: 'Level 4',
-    comingSoon: false,
-    description: 'Express opinions, explain situations, discuss experiences.'
-  },
-  {
-    id: 'level-five',
-    number: 5,
-    title: 'Level 5',
-    comingSoon: false,
-    description: 'Handle work situations, services, and expectations.'
-  },
-  {
-    id: 'level-six',
-    number: 6,
-    title: 'Level 6',
-    comingSoon: false,
-    description: 'Tell stories and describe past experiences naturally.'
-  },
-  {
-    id: 'level-seven',
-    number: 7,
-    title: 'Level 7',
-    comingSoon: false,
-    description: 'Express opinions tactfully, disagree politely, persuade gently, and manage sensitive situations.'
-  },
-  {
-    id: 'level-eight',
-    number: 8,
-    title: 'Level 8',
-    comingSoon: false,
-    description: 'Understand and use common idioms, cultural expressions, and implied meanings in natural, informal speech.'
-  },
-  {
-    id: 'level-nine',
-    number: 9,
-    title: 'Level 9',
-    comingSoon: false,
-    description: 'Discuss news, social issues, trends, and abstract ideas clearly.'
-  },
-  {
-    id: 'level-ten',
-    number: 10,
-    title: 'Level 10',
-    comingSoon: false,
-    description: 'Speak naturally, react instinctively, and handle fast, casual conversations.'
-  },
-]
 
 const isComingSoon = (level: any) => level.comingSoon === true
 
@@ -136,7 +62,7 @@ const canEnterLevel = (level: any) => {
     <!-- Grid -->
     <ul class="grid grid-cols-1 sm:grid-cols-3 gap-6">
 
-      <li v-for="quizLevel in quizLevels" :key="quizLevel.id" class="
+      <li v-for="quizLevel in jyutPingQuizSelectMetaData" :key="quizLevel.id" class="
           rounded-2xl
           p-6
           bg-white/75

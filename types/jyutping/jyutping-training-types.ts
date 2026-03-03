@@ -8,6 +8,12 @@ export type AttemptLog = {
   message: string;
 };
 
+export type Attempt = {
+  wordId: string;
+  passed: boolean;
+  delta: number;
+};
+
 export type BatchAttempt = {
   wordId: string;
   passed: boolean;
