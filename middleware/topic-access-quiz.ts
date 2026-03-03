@@ -1,6 +1,10 @@
-import { canAccessTopicQuiz, freeTopics } from "~/utils/topics/permissions";
+import {
+  canAccessTopicQuiz,
+  freeTopicsQuiz
+} from "~/utils/topics/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
+  
   if (process.server) return; // middleware runs on client only
 
   const topic = to.params.topic as string;
@@ -11,7 +15,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   await resolve();
 
   // ✅ Free topics always allowed
-  if (freeTopics.has(topic)) {
+  if (freeTopicsQuiz.includes(topic)) {
     return;
   }
 

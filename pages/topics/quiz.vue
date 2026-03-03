@@ -7,8 +7,8 @@
 
 import { computed, onMounted, ref, watch } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
-import type { Topic } from '~/types/topic'
-import { canAccessLevel } from '~/utils/levels/permissions'
+import type { TopicQuiz } from '~/types/topic'
+import { canAccessTopicQuiz } from '~/utils/topics/permissions'
 import { topics } from '~/utils/topics/topics'
 
 const {
@@ -42,42 +42,24 @@ function goToPage(page: number) {
     window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-/**
- * Topic model
- */
-// type Topic = {
-//     id: string
-//     title: string
-//     description: string,
-//     comingSoon: boolean
-//     requiresPaid?: boolean
-// }
+function canEnterTopic(topic: TopicQuiz): boolean {
 
-
-function canEnterTopic(topic: Topic) {
-
-    if (!authReady.value) return false
     if (topic.comingSoon) return false
 
     // ✅ Free topic → always accessible
-    if (!topic.requiresPaid) return true
+    if (!topic.quizRequiresPaid) return true
 
     // 🔒 Paid topic → requires login + entitlement
     if (!isLoggedIn.value) return false
-    return canAccessLevel(isLoggedIn.value, entitlement.value!)
+
+    return canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic.id)
 }
-
-function hasPaidAccessCheck(topic: Topic) {
-
-    if (!authReady.value) return false
-
-    // ✅ Free topic → always accessible
-    if (!topic.requiresPaid) return true
-
-    // 🔒 Paid topic → requires login + entitlement
-    if (!isLoggedIn.value) return false
-    return canAccessLevel(isLoggedIn.value, entitlement.value!)
-}
+// function hasPaidAccessCheck(topic: TopicQuiz) {
+//     // ✅ Free topic → always accessible
+//     // 🔒 Paid topic → requires login + entitlement
+//     if (!isLoggedIn.value) return false
+//     return canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic.id)
+// }
 
 watch(topics, () => {
     currentPage.value = 1
@@ -85,9 +67,7 @@ watch(topics, () => {
 
 // Resolve auth once on mount (safe + idempotent)
 onMounted(async () => {
-    if (!authReady.value) {
-        await resolve()
-    }
+    await resolve()
 })
 
 </script>
@@ -131,7 +111,7 @@ onMounted(async () => {
         <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
 
             <li v-for="topic in paginatedTopics" :key="topic.id" class="topic-card" :class="[
-                topic.comingSoon || (topic.requiresPaid && !canEnterTopic(topic))
+                topic.comingSoon || (topic.quizRequiresPaid && !canEnterTopic(topic))
                     ? 'topic-locked'
                     : ''
             ]">
@@ -155,8 +135,7 @@ onMounted(async () => {
                 <div class="grid grid-cols-2 gap-3 pt-4">
 
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/word/v3/${topic.id}` : undefined"
-                        class="topic-btn topic-btn-blue"
-                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
+                        class="topic-btn topic-btn-blue" :class="{ 'pointer-events-none opacity-60': topic.comingSoon}">
                         Vocab
                     </NuxtLink>
 
@@ -174,7 +153,7 @@ onMounted(async () => {
 
                 </div>
 
-                <p v-if="!hasPaidAccessCheck(topic)" class="text-xs text-center text-gray-500 pt-3">
+                <p v-if="!canEnterTopic(topic)" class="text-xs text-center text-gray-500 pt-3">
                     Upgrade to unlock
                 </p>
 

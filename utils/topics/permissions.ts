@@ -19,6 +19,14 @@ export const freeTopicsList = [
 ];
 
 
+export const freeTopicsQuiz = [
+  "survival-essentials",
+  "greetings-polite",
+  "fruits-vegetables",
+  "clothing",
+];
+
+
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {
   if (!entitlement) {
     return false;
@@ -32,6 +40,10 @@ export function hasPaidAccess(entitlement: Entitlement | null): boolean {
 
 export function isFreeTopic(topic: string): boolean {
   return freeTopics.has(topic);
+}
+
+export function isFreeTopicQuiz(topic: string): boolean {
+  return freeTopicsQuiz.includes(topic);
 }
 
 export function canAccessTopic(
@@ -53,7 +65,6 @@ export function canAccessTopicWord(
   topic: string,
 ): boolean {
 
-  // isFreeTopic(topic);
   // Paid levels
   if (!isLoggedIn) return false;
 
@@ -65,8 +76,8 @@ export function canAccessTopicQuiz(
   userEntitlement: Entitlement | null,
   topic: string,
 ): boolean {
-  if (isFreeTopic(topic)) return true;
 
+  if (isFreeTopicQuiz(topic)) return true;
   // Paid levels
   if (!isLoggedIn) return false;
 

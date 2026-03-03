@@ -20,3 +20,12 @@ export type Topic = {
   comingSoon: boolean
   requiresPaid?: boolean
 }
+
+export type TopicQuiz = {
+  id: string
+  title: string
+  description: string,
+  comingSoon: boolean
+  requiresPaid: boolean
+  quizRequiresPaid: boolean
+}

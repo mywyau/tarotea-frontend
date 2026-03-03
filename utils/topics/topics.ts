@@ -3,8 +3,8 @@ export const freeTopics = [
   "greetings-polite",
   "fruits-vegetables",
   "clothing",
-  "dim-sum",
-  "resturant-menu",
+//   "dim-sum",
+//   "resturant-menu",
 ];
 
 export const topics = [
@@ -13,279 +13,319 @@ export const topics = [
         title: 'Survival & Essentials',
         comingSoon: false,
         description: 'Essential phrases for getting by: toilets, emergencies, asking for help, and basic needs.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'greetings-polite',
         title: 'Greetings & Politeness',
         comingSoon: false,
         description: 'Say hello, goodbye, thank people, apologise, and handle basic polite interactions.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'fruits-vegetables',
         title: 'Fruit & Vegetables',
         comingSoon: false,
         description: 'Name and describe fruits and vegetables.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'clothing',
         title: 'Clothing',
         comingSoon: false,
         description: 'Name and describe items of clothing.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'measure-quantities',
         title: 'Measurements & Quantities',
         comingSoon: false,
         description: 'Describe amounts, sizes, prices, and quantities used in daily life and shopping.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: true,
     },
     {
         id: 'time-dates',
         title: 'Time & Dates',
         comingSoon: false,
         description: 'Talk about time, days, dates, schedules, and when things happen.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: true,
     },
     {
         id: 'dim-sum',   // new topic
         title: 'Dim Sum',
         comingSoon: false,
         description: 'Learn to order your favourite dim sum.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: true,
     },
     {
         id: 'resturant-menu',
         title: 'Resturant Menu',
         comingSoon: true,
         description: 'Study and learn to order your favourite dishes.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'money',
         title: 'Money & Payments',
         comingSoon: true,
         description: 'Discuss prices, paying, change, costs, and money-related situations.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'countries-nationalities',
         title: 'Countries & Nationalities',
         comingSoon: true,
         description: 'Talk about where you are from, countries, languages, and cultural background.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'transport-travel',
         title: 'Transport & Travel',
         comingSoon: true,
         description: 'Use transport, ask for directions, talk about travel plans, and get around the city.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'family-relationships',
         title: 'Family & Relationships',
         comingSoon: true,
         description: 'Talk about family members, relatives, and personal relationships.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'furniture',
         title: 'Home & Furniture',
         comingSoon: true,
         description: 'Describe your home, rooms, furniture, and everyday household items.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'food-ordering',
         title: 'Food & Ordering',
         comingSoon: true,
         description: 'Talk about food, order at restaurants, express preferences, and ask for recommendations.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'shopping',
         title: 'Shopping & Services',
         comingSoon: true,
         description: 'Shop for items, ask for help, compare options, and use everyday services.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'health',
         title: 'Health & Wellbeing',
         comingSoon: true,
         description: 'Describe how you feel, talk about common health issues, and seek basic help.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'emotions',
         title: 'Feelings & Emotions',
         comingSoon: true,
         description: 'Express emotions, moods, opinions, and personal reactions naturally.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'daily-life',
         title: 'Daily Life & Routines',
         comingSoon: true,
         description: 'Talk about daily habits, routines, plans, and everyday activities.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'professions',
         title: 'Work & Professions',
         comingSoon: true,
         description: 'Talk about jobs, workplaces, roles, and what people do for work.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'directions',
         title: 'Directions & Locations',
         comingSoon: true,
         description: 'Ask for directions, describe locations, and navigate places confidently.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'weather',
         title: 'Weather & Seasons',
         comingSoon: true,
         description: 'Talk about the weather, seasons, temperature, and climate.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'emergencies',
         title: 'Emergencies & Safety',
         comingSoon: true,
         description: 'Handle urgent situations, ask for help, and explain problems clearly.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'phone-internet',
         title: 'Phone & Internet',
         comingSoon: true,
         description: 'Use phone-related language, internet services, and digital communication.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'appointments',
         title: 'Appointments & Scheduling',
         comingSoon: true,
         description: 'Make appointments, arrange meetings, and talk about availability.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'housing',
         title: 'Housing & Renting',
         comingSoon: true,
         description: 'Discuss renting, housing issues, utilities, and living arrangements.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'school-education',
         title: 'School & Education',
         comingSoon: true,
         description: 'Talk about studying, classes, learning, and educational experiences.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'hobbies',
         title: 'Hobbies & Interests',
         comingSoon: true,
         description: 'Discuss hobbies, interests, and things you enjoy doing.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'sports-fitness',
         title: 'Sports & Fitness',
         comingSoon: true,
         description: 'Talk about exercise, sports, health routines, and physical activities.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'entertainment',
         title: 'Movies, TV & Entertainment',
         comingSoon: true,
         description: 'Discuss movies, TV shows, music, and entertainment preferences.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'social-media',
         title: 'Social Media & Online Life',
         comingSoon: true,
         description: 'Talk about social platforms, posting, messaging, and online habits.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'opinions',
         title: 'Opinions & Preferences',
         comingSoon: true,
         description: 'Express likes, dislikes, opinions, and personal preferences.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'complaints',
         title: 'Complaints & Problems',
         comingSoon: true,
         description: 'Raise issues, complain politely, and explain problems.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'celebrations',
         title: 'Celebrations & Festivals',
         comingSoon: true,
         description: 'Talk about festivals, holidays, celebrations, and special occasions.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'culture',
         title: 'Culture & Customs',
         comingSoon: true,
         description: 'Understand cultural habits, customs, and social expectations.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'dating',
         title: 'Dating & Relationships',
         comingSoon: true,
         description: 'Talk about dating, relationships, and social connections.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'news',
         title: 'News & Current Events',
         comingSoon: true,
         description: 'Discuss news topics and everyday current events casually.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'technology',
         title: 'Technology & Devices',
         comingSoon: true,
         description: 'Talk about phones, computers, apps, and everyday tech usage.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'food-cooking',
         title: 'Cooking & Recipes',
         comingSoon: true,
         description: 'Describe cooking methods, ingredients, and food preparation.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'travel-abroad',
         title: 'Travel Abroad',
         comingSoon: true,
         description: 'Handle airports, hotels, overseas travel, and travel-related conversations.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
     {
         id: 'slang',
         title: 'Slang',
         comingSoon: true,
         description: 'Learn slang used in everyday life and in real situations.',
-        requiresPaid: false
+        requiresPaid: false,
+        quizRequiresPaid: false,
     },
 ]

@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
-
 
 definePageMeta({
-  middleware: ['topic-access'],
+  middleware: ['topic-access-quiz'],
   ssr: false
 })
+
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 
 const route = useRoute()
 

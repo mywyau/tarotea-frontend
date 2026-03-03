@@ -5,7 +5,6 @@ definePageMeta({
     ssr: true,
 })
 
-
 import type { TopicData } from '@/types/topic'
 import { computed, ref, watch } from 'vue'
 
