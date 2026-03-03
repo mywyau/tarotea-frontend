@@ -2,30 +2,21 @@
 
 definePageMeta({
     ssr: false,
-    middleware: ['logged-in'],
+    // middleware: ['logged-in'], 
+    middleware: ['coming-soon'], 
 })
 
 import type {
-    AttemptLog,
     BatchAttempt,
     LevelData,
     TrainWord
 } from '@/types/jyutping/jyutping-training-types'
 
-import {
-    baseSound,
-    canonicalNoSpace,
-    normalizeJyutping,
-    scoreJyutpingAttempt,
-    shuffle,
-    splitSyllables,
-    splitUserJyutping,
-    stripToneToken
-} from '@/utils/jyutping/jyutping-utils'
+import { shuffle } from '@/utils/jyutping/jyutping-utils'
 
-import { levelTitles } from '~/utils/levels/levels'
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
+import { levelTitles } from '~/utils/levels/levels'
 
 
 const route = useRoute()
@@ -54,9 +45,6 @@ const showHint = ref(false) // faint jyutping
 
 const current = computed(() => words.value[idx.value] ?? null)
 
-const normalizedInput = computed(() => normalizeJyutping(input.value))
-const normalizedAnswer = computed(() => (current.value ? normalizeJyutping(current.value.jyutping) : ''))
-
 const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
 
@@ -70,75 +58,40 @@ const live = computed(() => {
 
     if (!u) return { state: 'idle' as const }
 
-    const uBase = baseSound(u)
-    const aBase = baseSound(a)
-
-    // ✅ Perfect: exact canonical match including tones/spaces
-    if (canonicalNoSpace(u) === canonicalNoSpace(a)) {
+    if (u === a) {
         return { state: 'perfect' as const }
     }
 
-    // ✅ Pass: base sound matches (tone may differ)
-    if (uBase && uBase === aBase) {
-        return { state: 'pass' as const }
-    }
-
-    // 👀 Partial: they are typing the right “shape” (prefix match)
-    // e.g. user typed "gw" and answerBase starts with "gw"
-    if (uBase && aBase.startsWith(uBase)) {
+    if (a.startsWith(u)) {
         return { state: 'partial' as const }
     }
 
-    // Otherwise: not matching
     return { state: 'miss' as const }
 })
 
-const answerSyllables = computed(() => splitSyllables(current.value?.jyutping ?? ''))
+// const letterStates = computed<LetterState[]>(() => {
+//     const ans = answerBaseNoSpace.value
+//     const usr = userBaseNoSpace.value
 
-const userSyllables = computed(() => splitUserJyutping(input.value))
-
-const answerBaseNoSpace = computed(() =>
-    baseSound(current.value?.jyutping ?? '')
-)
-
-const userBaseNoSpace = computed(() =>
-    baseSound(input.value)
-)
-
-
-type LetterState = 'idle' | 'correct'
-
-const letterStates = computed<LetterState[]>(() => {
-    const ans = answerBaseNoSpace.value
-    const usr = userBaseNoSpace.value
-
-    return ans.split('').map((letter, i) => {
-        if (!usr[i]) return 'idle'
-        if (usr[i] === letter) return 'correct'
-        return 'idle'
-    })
-})
+//     return ans.split('').map((letter, i) => {
+//         if (!usr[i]) return 'idle'
+//         if (usr[i] === letter) return 'correct'
+//         return 'idle'
+//     })
+// })
 
 const chineseChars = computed(() =>
     current.value?.word.split('') ?? []
 )
 
 const charStates = computed(() => {
-    const ans = answerSyllables.value
-    const usrBase = userBaseNoSpace.value
+    const answer = normalizedAnswer.value
+    const user = normalizedInput.value
 
-    let cursor = 0
-
-    return ans.map((ansTok) => {
-        const ansBase = stripToneToken(ansTok)
-
-        const segment = usrBase.slice(cursor, cursor + ansBase.length)
-
-        const fullyCorrect = segment === ansBase
-
-        cursor += ansBase.length
-
-        return fullyCorrect ? 'correct' : 'idle'
+    return answer.split('').map((char, i) => {
+        if (!user[i]) return 'idle'
+        if (user[i] === char) return 'correct'
+        return 'idle'
     })
 })
 
@@ -206,75 +159,21 @@ async function fetchWords() {
 function submit() {
     if (!current.value) return
 
-    const result = scoreJyutpingAttempt(input.value, current.value.jyutping)
+    const correct = normalizedInput.value === normalizedAnswer.value
 
     attempts.value.push({
         input: input.value.trim(),
-        passed: result.passed,
-        message: result.message,
+        passed: correct,
+        message: correct ? 'Correct!' : 'Not quite, try again.'
     })
 
     input.value = ''
 }
 
+
 const fullJyutping = computed(() =>
     current.value?.jyutping ?? ''
 )
-
-type RenderState = 'idle' | 'correct'
-
-const jyutpingRenderStates = computed<RenderState[]>(() => {
-    const full = fullJyutping.value
-    const usr = userBaseNoSpace.value
-
-    let letterIndex = 0
-
-    return full.split('').map((char) => {
-        // if not a-z letter, don't compare
-        if (!/[a-z]/i.test(char)) {
-            return 'idle'
-        }
-
-        const userChar = usr[letterIndex]
-
-        if (userChar && userChar === char.toLowerCase()) {
-            letterIndex++
-            return 'correct'
-        }
-
-        return 'idle'
-    })
-})
-
-type SylState = 'idle' | 'correct'
-
-const syllableStates = computed<SylState[]>(() => {
-    const ans = answerSyllables.value
-    const usr = userSyllables.value
-
-    const currentTypingIndex = usr.length - 1
-
-    return ans.map((ansTok, i) => {
-        const usrTok = usr[i]
-        if (!usrTok) return 'idle'
-
-        const ansBase = stripToneToken(ansTok)
-        const usrBase = stripToneToken(usrTok)
-
-        // fully correct syllable
-        if (usrBase === ansBase) return 'correct'
-
-        // only allow prefix match on the currently typing syllable
-        if (
-            i === currentTypingIndex &&
-            ansBase.startsWith(usrBase)
-        ) {
-            return 'correct'
-        }
-
-        return 'idle'
-    })
-})
 
 const copied = ref(false)
 
@@ -383,6 +282,15 @@ function startNewSession() {
     fetchWords()
 }
 
+const normalizedInput = computed(() =>
+    input.value.trim()
+)
+
+const normalizedAnswer = computed(() =>
+    current.value?.word.trim() ?? ''
+)
+
+
 onMounted(fetchWords)
 
 
@@ -422,7 +330,7 @@ watch(
 
 watch(() => live.value.state, async (state) => {
 
-    if (state !== 'pass' && state !== 'perfect') return
+    if (state !== 'perfect') return
 
     if (advancing) return
     if (!current.value) return
@@ -506,11 +414,11 @@ onMounted(() => {
         <header class="space-y-4">
 
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Jyutping Dojo - {{ levelTitles[slug] }}
+                Chinese Dojo - {{ levelTitles[slug] }}
             </h1>
 
             <p class="text-sm text-gray-600">
-                Type the jyutping for each word shown
+                Type the Chinese characters for each word
             </p>
         </header>
 
@@ -557,7 +465,7 @@ onMounted(() => {
                     <div class="text-4xl font-medium flex gap-1">
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                             'text-green-600 font-semibold': charStates[i] === 'correct',
-                            'text-gray-400': syllableStates[i] === 'idle'
+                            'text-gray-400': charStates[i] === 'idle'
                         }">
                             {{ char }}
                         </span>
