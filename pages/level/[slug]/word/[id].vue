@@ -7,6 +7,10 @@ definePageMeta({
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
+<<<<<<< Updated upstream
+=======
+const cdnBase = runtimeConfig.public.cdnBase
+>>>>>>> Stashed changes
 
 
 // Dynamic params

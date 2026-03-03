@@ -7,6 +7,7 @@ definePageMeta({
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
 
 const { authReady } = useMeStateV2() // for now just to prevent hydration redirect jitters
 
@@ -23,10 +24,8 @@ const { data, error } = await useFetch(
 
 const { volume } = useAudioVolume()
 
-const cdnBase = runtimeConfig.public.cdnBase
 
 const word = computed(() => data.value)
-const notFound = computed(() => error.value?.statusCode === 404)
 
 const xp = ref<number>(0)
 const streak = ref<number>(0)
@@ -51,9 +50,7 @@ onMounted(async () => {
         const { getAccessToken } = await useAuth()
         const token = await getAccessToken()
 
-        const progressMap = await $fetch<
-            Record<string, { xp: number; streak: number }>
-        >(
+        const progressMap = await $fetch<Record<string, { xp: number; streak: number }>>(
             '/api/word-progress',
             {
                 query: { wordIds: slug.value },
@@ -66,9 +63,9 @@ onMounted(async () => {
         xp.value = progressMap[slug.value]?.xp ?? 0
         streak.value = progressMap[slug.value]?.streak ?? 0
 
-        console.log("XP loaded:", xp.value)
-        console.log("Streak loaded:", streak.value)
-        console.log("Word ID:", slug.value)
+        // console.log("XP loaded:", xp.value)
+        // console.log("Streak loaded:", streak.value)
+        // console.log("Word ID:", slug.value)
 
     } catch {
         // not logged in or error → ignore
