@@ -321,8 +321,10 @@ function resetTraining(options?: { reshuffle?: boolean }) {
 }
 
 const sessionResult = ref<{
+
+    correctCount: number,
+    totalWords: number,
     xpEarned: number
-    correctCount: number
 } | null>(null)
 
 async function finalizeBatch() {
@@ -336,7 +338,8 @@ async function finalizeBatch() {
             body: {
                 level: slug.value,
                 sessionKey: sessionKey.value,
-                attempts: batchAttempts.value
+                attempts: batchAttempts.value,
+                mode: 'grind'
             }
         })
 
@@ -344,7 +347,7 @@ async function finalizeBatch() {
     } catch (err) {
         console.error('Finalize failed', err)
     } finally {
-        idx.value = BATCH_SIZE
+        idx.value = words.value.length
     }
 }
 
@@ -379,7 +382,7 @@ function advance() {
     }
 }
 
-const isComplete = computed(() => idx.value >= BATCH_SIZE)
+const isComplete = computed(() => idx.value >= words.value.length)
 
 const wordProgressMap = ref<Record<string, { xp: number }>>({})
 
@@ -392,8 +395,8 @@ function startNewSession() {
 }
 
 onMounted(() => {
-  sessionKey.value = crypto.randomUUID()
-  fetchWords()
+    sessionKey.value = crypto.randomUUID()
+    fetchWords()
 })
 
 watch(
@@ -475,7 +478,7 @@ watch(() => live.value.state, async (state) => {
     // Wait for jingle envelope (~400ms)
     await new Promise(r => setTimeout(r, 600))
 
-    if (batchAttempts.value.length >= BATCH_SIZE) {
+    if (batchAttempts.value.length >= words.value.length) {
         await finalizeBatch()
         advancing = false
         return
@@ -637,30 +640,30 @@ watch(
 
                     <div class="h-24 sm:h-0"></div>
 
-                    <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
-
-                        <h2 class="text-2xl font-semibold">
-                            Good job! Keep going!
-                        </h2>
-
-                        <p class="text-gray-600 text-base uppercase">
-                            {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed
-                        </p>
-
-                        <p class="text-green-600 text-2xl font-semibold">
-                            +{{ sessionResult.xpEarned }} XP
-                        </p>
-
-                        <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
-                            @click="startNewSession">
-                            Play again
-                        </button>
-                    </div>
-
                     <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
                         Tip: try typing without spaces, do not worry about tones.
                     </div>
 
+                </div>
+
+                <div v-else-if="sessionResult" class="space-y-8 text-center">
+
+                    <h2 class="text-2xl font-semibold">
+                        Good job! Keep going!
+                    </h2>
+
+                    <p class="text-gray-600 text-base uppercase">
+                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed
+                    </p>
+
+                    <p class="text-green-600 text-2xl font-semibold">
+                        +{{ sessionResult.xpEarned }} XP
+                    </p>
+
+                    <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
+                        @click="startNewSession">
+                        Play again
+                    </button>
                 </div>
             </div>
         </section>

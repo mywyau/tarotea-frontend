@@ -3,7 +3,7 @@
 definePageMeta({
     ssr: false,
     // middleware: ['logged-in'], 
-    middleware: ['coming-soon'], 
+    // middleware: ['coming-soon'], 
 })
 
 import type {

@@ -94,7 +94,7 @@ export default defineEventHandler(async (event) => {
       `,
       [
         userId,
-        mode,
+        body.mode,
         body.level,
         body.sessionKey,
         JSON.stringify({ answers: payloadAttempts }),
