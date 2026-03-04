@@ -3,7 +3,7 @@
 definePageMeta({
     ssr: false,
     // middleware: ['logged-in'], 
-    middleware: ['coming-soon'], 
+    // middleware: ['coming-soon'], 
 })
 
 import type {
@@ -39,9 +39,6 @@ const batchAttempts = ref<BatchAttempt[]>([])
 const idx = ref(0)
 
 const input = ref('')
-const attempts = ref<AttemptLog[]>([])
-
-const showHint = ref(false) // faint jyutping
 
 const current = computed(() => words.value[idx.value] ?? null)
 
@@ -49,6 +46,12 @@ const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
 
 const hintUsedThisQuestion = ref(false)
+
+const showHint = ref(false)
+
+const fullJyutping = computed(() =>
+    current.value?.jyutping ?? ''
+)
 
 const live = computed(() => {
     if (!current.value) return { state: 'idle' as const }
@@ -68,17 +71,6 @@ const live = computed(() => {
 
     return { state: 'miss' as const }
 })
-
-// const letterStates = computed<LetterState[]>(() => {
-//     const ans = answerBaseNoSpace.value
-//     const usr = userBaseNoSpace.value
-
-//     return ans.split('').map((letter, i) => {
-//         if (!usr[i]) return 'idle'
-//         if (usr[i] === letter) return 'correct'
-//         return 'idle'
-//     })
-// })
 
 const chineseChars = computed(() =>
     current.value?.word.split('') ?? []
@@ -144,7 +136,7 @@ async function fetchWords() {
 
         idx.value = 0
         input.value = ''
-        attempts.value = []
+        // attempts.value = []
 
     } catch (e: any) {
         errorState.value =
@@ -170,14 +162,9 @@ function submit() {
     input.value = ''
 }
 
-
-const fullJyutping = computed(() =>
-    current.value?.jyutping ?? ''
-)
-
 const copied = ref(false)
 
-async function copyJyutping() {
+async function copyChinese() {
     if (!current.value?.jyutping) return
 
     try {
@@ -231,7 +218,8 @@ async function finalizeBatch() {
             body: {
                 level: slug.value,
                 sessionKey: sessionKey.value,
-                attempts: batchAttempts.value
+                attempts: batchAttempts.value,
+                mode: 'chinese'
             }
         })
 
@@ -264,7 +252,7 @@ function advance() {
     if (idx.value < BATCH_SIZE - 1) {
         idx.value++
         input.value = ''
-        attempts.value = []
+        // attempts.value = []
         hintUsedThisQuestion.value = false   // 🔥 reset here
         showHint.value = false
     }
@@ -440,14 +428,14 @@ onMounted(() => {
 
                     <div class="flex items-center gap-2">
 
-                        <button
+                        <!-- <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                             type="button" @click="() => {
                                 showHint = !showHint
                                 if (showHint) hintUsedThisQuestion = true
                             }">
                             {{ showHint ? 'Hide hint' : 'Show hint' }}
-                        </button>
+                        </button> -->
 
                         <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
@@ -474,22 +462,18 @@ onMounted(() => {
                     <div v-if="current.meaning" class="mt-2 text-lg text-gray-700">
                         {{ current.meaning }}
                     </div>
-
-                    <!-- Faint hint -->
-                    <div v-if="showHint" class="mt-3 flex items-center gap-3">
-                        <div class="text-lg font-mono select-none">
-                            <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
-                                'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
-                                'text-gray-400': jyutpingRenderStates[i] === 'idle'
-                            }">
-                                {{ char }}
-                            </span>
-                        </div>
-
-                        <button type=" button" @click="copyJyutping"
-                            class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
-                            {{ copied ? '✓' : 'copy' }}
+                    <!-- Hint Section -->
+                    <div class="mt-4">
+                        <button type="button" @click="() => {
+                            showHint = !showHint
+                            if (showHint) hintUsedThisQuestion = true
+                        }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
+                            {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
                         </button>
+
+                        <div v-if="showHint" class="mt-2 text-lg font-mono text-gray-500">
+                            {{ fullJyutping }}
+                        </div>
                     </div>
 
                 </div>
@@ -525,7 +509,7 @@ onMounted(() => {
                 <!-- Input -->
                 <form v-if="!isComplete" class="space-y-3" @submit.prevent="submit">
                     <label class="block text-sm font-medium text-gray-800">
-                        Type here:
+                        Type chinese here:
                     </label>
 
                     <input :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text" placeholder=""
@@ -553,7 +537,7 @@ onMounted(() => {
                 </div>
 
                 <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
-                    Tip: try typing without spaces, do not worry about tones.
+                    Tip: try typing without spaces, only chinese is accepted, flex those typing skills :)
                 </div>
 
             </div>

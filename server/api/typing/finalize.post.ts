@@ -1,21 +1,25 @@
 import { createError, getHeader, readBody } from "h3";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
+
 import type {
-  Attempt,
-  BatchAttempt,
-} from "~/types/jyutping/jyutping-training-types";
+  TypingAttempt,
+  TypingBatchAttempt,
+} from "~/types/typing/typing-types";
 
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
 
-  // const mode = 'grind'
+  const allowedModes = ["jyutping", "chinese", "meaning"] as const;
+  type Mode = (typeof allowedModes)[number];
+
+  const mode: Mode = allowedModes.includes(body.mode) ? body.mode : "jyutping"; // safe fallback
 
   const body = (await readBody(event)) as {
     level: string;
     sessionKey: string;
-    attempts: BatchAttempt[];
-    mode: string
+    attempts: TypingBatchAttempt[];
+    mode: string;
   };
 
   if (!body || !Array.isArray(body.attempts)) {
@@ -23,7 +27,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // de-dupe by wordId (first occurrence wins)
-  const map = new Map<string, BatchAttempt>();
+  const map = new Map<string, TypingBatchAttempt>();
 
   for (const a of body.attempts) {
     if (!a?.wordId) continue;
@@ -62,13 +66,13 @@ export default defineEventHandler(async (event) => {
       streakMap.set(r.word_id, Number(r.streak ?? 0));
     }
 
-    function deltaFor(a: BatchAttempt) {
+    function deltaFor(a: TypingBatchAttempt) {
       if (!a.passed) return 0;
       if (a.hintUsed) return 1;
       return 3;
     }
 
-    const payloadAttempts: Attempt[] = attempts.map((a) => ({
+    const payloadAttempts: TypingAttempt[] = attempts.map((a) => ({
       wordId: a.wordId,
       passed: a.passed,
       delta: deltaFor(a),
