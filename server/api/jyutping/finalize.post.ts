@@ -83,7 +83,7 @@ export default defineEventHandler(async (event) => {
     const payloadAttempts: Attempt[] = attempts.map((a) => ({
       wordId: a.wordId,
       passed: a.passed,
-      delta: deltaFor(a),
+      delta: deltaFor(a, body.mode),
     }));
 
     const correctCount = payloadAttempts.filter((a) => a.passed).length;
