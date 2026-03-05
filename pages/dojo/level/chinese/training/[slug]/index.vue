@@ -2,8 +2,8 @@
 
 definePageMeta({
     ssr: false,
-    // middleware: ['logged-in'], 
-    middleware: ['coming-soon'], 
+    middleware: ['logged-in'],
+    // middleware: ['coming-soon'],
 })
 
 import type {
@@ -87,6 +87,8 @@ const charStates = computed(() => {
     })
 })
 
+const inputRef = ref<HTMLInputElement | null>(null)
+
 async function fetchWords() {
     loading.value = true
     errorState.value = null
@@ -148,19 +150,19 @@ async function fetchWords() {
 
 // ---------- Actions ----------
 
-function submit() {
-    if (!current.value) return
+// function submit() {
+//     if (!current.value) return
 
-    const correct = normalizedInput.value === normalizedAnswer.value
+//     const correct = normalizedInput.value === normalizedAnswer.value
 
-    attempts.value.push({
-        input: input.value.trim(),
-        passed: correct,
-        message: correct ? 'Correct!' : 'Not quite, try again.'
-    })
+//     // attempts.value.push({
+//     //     input: input.value.trim(),
+//     //     passed: correct,
+//     //     message: correct ? 'Correct!' : 'Not quite, try again.'
+//     // })
 
-    input.value = ''
-}
+//     input.value = ''
+// }
 
 const copied = ref(false)
 
@@ -193,7 +195,7 @@ function resetTraining(options?: { reshuffle?: boolean }) {
     }
 
     input.value = ''
-    attempts.value = []
+    // attempts.value = []
     showHint.value = false
     idx.value = 0
 
@@ -205,6 +207,7 @@ function resetTraining(options?: { reshuffle?: boolean }) {
 const sessionResult = ref<{
     xpEarned: number
     correctCount: number
+    totalWords: number
 } | null>(null)
 
 async function finalizeBatch() {
@@ -227,7 +230,7 @@ async function finalizeBatch() {
     } catch (err) {
         console.error('Finalize failed', err)
     } finally {
-        idx.value = BATCH_SIZE
+        idx.value = words.value.length
     }
 }
 
@@ -249,16 +252,19 @@ function playCurrentAudio() {
 
 function advance() {
     if (isComplete.value) return
-    if (idx.value < BATCH_SIZE - 1) {
+    if (idx.value < words.value.length - 1) {
         idx.value++
         input.value = ''
         // attempts.value = []
         hintUsedThisQuestion.value = false   // 🔥 reset here
         showHint.value = false
+        nextTick(() => {
+            inputRef.value?.focus()
+        })
     }
 }
 
-const isComplete = computed(() => idx.value >= BATCH_SIZE)
+const isComplete = computed(() => idx.value >= words.value.length)
 
 const wordProgressMap = ref<Record<string, { xp: number }>>({})
 
@@ -271,16 +277,14 @@ function startNewSession() {
 }
 
 const normalizedInput = computed(() =>
-    input.value.trim()
+    input.value.replace(/\s+/g, '').trim()
 )
 
 const normalizedAnswer = computed(() =>
-    current.value?.word.trim() ?? ''
+    current.value?.word.replace(/\s+/g, '').trim() ?? ''
 )
 
-
 onMounted(fetchWords)
-
 
 watch(
     () => words.value,
@@ -361,7 +365,7 @@ watch(() => live.value.state, async (state) => {
     // Wait for jingle envelope (~400ms)
     await new Promise(r => setTimeout(r, 600))
 
-    if (batchAttempts.value.length >= BATCH_SIZE) {
+    if (batchAttempts.value.length >= words.value.length) {
         await finalizeBatch()
         advancing = false
         return
@@ -369,8 +373,8 @@ watch(() => live.value.state, async (state) => {
 
     advance()
     advancing = false
-}
-)
+})
+
 watch(
     () => current.value?.wordId,
     (id) => {
@@ -384,8 +388,17 @@ watch(
     { immediate: true }
 )
 
+// onMounted(() => {
+//     sessionKey.value = crypto.randomUUID()
+// })
+
 onMounted(() => {
     sessionKey.value = crypto.randomUUID()
+    fetchWords()
+
+    nextTick(() => {
+        inputRef.value?.focus()
+    })
 })
 
 </script>
@@ -423,7 +436,7 @@ onMounted(() => {
                 <!-- Progress + controls -->
                 <div v-if="!isComplete" class="flex items-center justify-between">
                     <div class="text-xs text-black">
-                        Word {{ idx + 1 }} / {{ BATCH_SIZE }}
+                        Word {{ idx + 1 }} / {{ words.length }}
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -507,14 +520,23 @@ onMounted(() => {
                 </div>
 
                 <!-- Input -->
-                <form v-if="!isComplete" class="space-y-3" @submit.prevent="submit">
+                <div v-if="!isComplete" class="space-y-3">
                     <label class="block text-sm font-medium text-gray-800">
                         Type chinese here:
                     </label>
 
-                    <input :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text" placeholder=""
+
+                    <input ref="inputRef" :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text"
+                        placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
-                </form>
+
+
+
+                    <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
+                        Tip: try typing without spaces, only chinese is accepted, flex those typing skills :)
+                    </div>
+
+                </div>
 
                 <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
 
@@ -523,7 +545,7 @@ onMounted(() => {
                     </h2>
 
                     <p class="text-gray-600 text-base uppercase">
-                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed
+                        {{ sessionResult.correctCount }} / {{ words.length }} words completed
                     </p>
 
                     <p class="text-green-600 text-2xl font-semibold">
@@ -535,11 +557,6 @@ onMounted(() => {
                         Play again
                     </button>
                 </div>
-
-                <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
-                    Tip: try typing without spaces, only chinese is accepted, flex those typing skills :)
-                </div>
-
             </div>
         </section>
     </main>
