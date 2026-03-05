@@ -26,6 +26,15 @@ type AttemptLog = {
     letterStates?: ('correct' | 'wrong')[]
 }
 
+type QuizState =
+    | 'loading'
+    | 'playing'
+    | 'finalizing'
+    | 'complete'
+    | 'error'
+
+const state = ref<QuizState>('loading')
+
 const MAX_ATTEMPTS = 6
 
 const tips = [
@@ -41,13 +50,14 @@ const currentTipIndex = ref(0)
 
 const { public: { cdnBase } } = useRuntimeConfig();
 
-const loading = ref(true)
-const errorState = ref<string | null>(null)
 const challenge = ref<DailyDecode | null>(null)
 
 const input = ref('')
 const attempts = ref<AttemptLog[]>([])
-const done = ref(false)
+
+const inputRef = ref<HTMLInputElement | null>(null)
+
+const errorMessage = ref('')
 
 const todayKey = computed(() => {
     const d = new Date()
@@ -210,10 +220,12 @@ async function loadWord(id: string) {
         audioUrl: data.value.audioUrl
     }
 
+    save()
+
     // reset per-word state
     input.value = ''
     attempts.value = []
-    done.value = false
+    // done.value = false
 }
 
 type DailyStartResponse = {
@@ -229,40 +241,39 @@ type DailyStartResponse = {
 }
 
 async function fetchChallenge() {
-    loading.value = true
-    errorState.value = null
+    state.value = 'loading'
 
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
 
     try {
         const daily = await $fetch<DailyStartResponse>(
-            '/api/daily/start', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-            body: {
-                totalQuestions: 5,
-                mode: 'daily-jyutping',
+            '/api/daily/start',
+            {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: {
+                    totalQuestions: 5,
+                    mode: 'daily-jyutping'
+                }
             }
-        })
-
+        )
 
         if (daily.session.completed) {
-            done.value = true
-            finalized.value = true
 
             xpEarned.value = daily.session.xp_earned ?? 0
             correctCount.value = daily.session.correct_count ?? 0
             totalQuestions.value = daily.session.total_questions ?? 0
 
-            // Do NOT load words
+            state.value = 'complete'
             return
         }
 
-        const ids = [...new Set(daily.session?.word_ids ?? [])]
+        const ids = [...new Set(daily.session.word_ids ?? [])]
 
-        if (!ids || ids.length === 0) {
-            errorState.value = 'No daily words available.'
+        if (!ids.length) {
+            errorMessage.value = 'No daily words available'
+            state.value = 'error'
             return
         }
 
@@ -271,13 +282,16 @@ async function fetchChallenge() {
 
         await loadWord(wordIds.value[0])
 
+        state.value = 'playing'
+
     } catch (e: any) {
-        errorState.value =
-            e?.data?.message ||
-            e?.message ||
-            'Failed to load today’s challenge.'
-    } finally {
-        loading.value = false
+
+        errorMessage.value =
+            e?.data?.message ??
+            e?.message ??
+            'Failed to load challenge'
+
+        state.value = 'error'
     }
 }
 
@@ -287,7 +301,9 @@ const attemptsLeft = computed(() => Math.max(0, MAX_ATTEMPTS - attempts.value.le
 
 const lastAttempt = computed(() => attempts.value[attempts.value.length - 1] || null)
 
-const revealAllowed = computed(() => attemptsLeft.value === 0 && !done.value)
+const revealAllowed = computed(() =>
+    attemptsLeft.value === 0 && state.value === 'playing'
+)
 
 const xpEarned = ref(0)
 const correctCount = ref(0)
@@ -313,7 +329,9 @@ const answerLetters = computed(() => {
 })
 
 async function submit() {
-    if (!challenge.value || done.value || finalizing.value) return
+
+    if (!challenge.value) return
+    if (state.value !== 'playing') return
     if (attemptsLeft.value <= 0) return
 
     const result = scoreAttempt(input.value, challenge.value.jyutping)
@@ -327,6 +345,8 @@ async function submit() {
         letters: letterScore.letters,
         letterStates: letterScore.states
     })
+
+    save()
 
     input.value = ''
 
@@ -343,9 +363,14 @@ async function submit() {
         if (currentIndex.value < wordIds.value.length) {
             await loadWord(wordIds.value[currentIndex.value])
         } else {
-            done.value = true
+
+            state.value = 'finalizing'
+
             await finalizeDaily()
-            await new Promise(r => setTimeout(r, 1200))
+
+            challenge.value = null
+
+            state.value = 'complete'
         }
         return
     }
@@ -371,8 +396,9 @@ async function submit() {
     if (currentIndex.value < wordIds.value.length) {
         await loadWord(wordIds.value[currentIndex.value])
     } else {
-        done.value = true
+
         await finalizeDaily()
+        challenge.value = null
         await new Promise(r => setTimeout(r, 1200))
     }
 }
@@ -380,7 +406,7 @@ async function submit() {
 function revealAnswer() {
     if (!challenge.value) return
 
-    done.value = true
+
     input.value = ''
 
     // ✅ Don't add "(reveal)" into attempts anymore.
@@ -397,28 +423,16 @@ type SessionAnswer = {
 
 const sessionAnswers = ref<SessionAnswer[]>([])
 
-const finalizing = ref(false)
-const finalized = ref(false)
-
-
 async function finalizeDaily() {
-    if (finalized.value) return
+
     if (sessionAnswers.value.length === 0) return
 
-    finalizing.value = true
-
     try {
+
         const { getAccessToken } = await useAuth()
         const token = await getAccessToken()
 
-        const res = await $fetch<{
-            daily: {
-                answeredCount: number
-                correctCount: number
-                xpEarned: number
-                totalQuestions: number
-            }
-        }>('/api/daily/jyutping/finalize', {
+        const res = await $fetch('/api/daily/jyutping/finalize', {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
             body: {
@@ -426,28 +440,28 @@ async function finalizeDaily() {
             }
         })
 
-        // ✅ Update summary only now
         xpEarned.value = res.daily.xpEarned
         correctCount.value = res.daily.correctCount
         totalQuestions.value = res.daily.totalQuestions
 
-        finalized.value = true
+        localStorage.removeItem(storageKey.value)
 
     } catch (err) {
-        console.error('Daily jyutping finalize failed', err)
-    } finally {
-        finalizing.value = false
+        console.error('Daily finalize failed', err)
     }
 }
 
-
 onMounted(async () => {
+
+    loadSaved()
+
     await fetchChallenge()
 
     tipInterval = window.setInterval(() => {
         currentTipIndex.value =
             (currentTipIndex.value + 1) % tips.length
     }, 5000)
+
 })
 
 onUnmounted(() => {
@@ -498,15 +512,15 @@ watch(input, (val) => {
 
         <section class="mt-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
 
-            <div v-if="loading" class="text-sm text-gray-600">
+            <div v-if="state === 'loading'" class="text-sm text-gray-600">
                 Loading today’s words…
             </div>
 
-            <div v-else-if="errorState" class="text-sm text-red-700">
-                {{ errorState }}
+            <div v-else-if="state === 'error'" class="text-sm text-red-700">
+                {{ errorMessage }}
             </div>
 
-            <div v-else-if="finalizing" class="flex flex-col items-center justify-center text-center py-10">
+            <div v-else-if="state === 'finalizing'" class="flex flex-col items-center justify-center text-center py-10">
 
                 <div class="loader mb-6"></div>
 
@@ -520,7 +534,7 @@ watch(input, (val) => {
 
             </div>
 
-            <div v-else-if="done && finalized" class="bg-white p-4 space-y-2">
+            <div v-else-if="state === 'complete'" class="bg-white p-4 space-y-2">
 
                 <div class="text-lg font-semibold text-gray-900">
                     Daily Session Complete
@@ -552,7 +566,7 @@ watch(input, (val) => {
                 </div>
             </div>
 
-            <div v-else-if="challenge" class="space-y-5">
+            <div v-else-if="state === 'playing'" class="space-y-5">
                 <!-- Word display -->
                 <div class="flex items-start justify-between gap-4">
                     <div>
@@ -564,8 +578,9 @@ watch(input, (val) => {
                         </div>
                         <div class="flex gap-1 mt-2 font-mono">
                             <div v-for="(letter, i) in answerLetters" :key="i"
-                                class="w-5 h-6 border-b flex items-end justify-center text-sm"
-                                :class="done ? 'border-gray-600 text-gray-900' : 'border-gray-400 text-transparent'">
+                                class="w-5 h-6 border-b flex items-end justify-center text-sm" :class="state === 'complete'
+                                    ? 'border-gray-600 text-gray-900'
+                                    : 'border-gray-400 text-transparent'">
                                 {{ done ? letter : '•' }}
                             </div>
                         </div>
@@ -592,8 +607,8 @@ watch(input, (val) => {
                         Your answer:
                     </label>
 
-                    <input v-model="input" :disabled="done || attemptsLeft <= 0" autocomplete="off" inputmode="text"
-                        placeholder=""
+                    <input ref="inputRef" v-model="input" :disabled="state !== 'playing' || attemptsLeft <= 0" autocomplete="off"
+                        inputmode="text" placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
 
                     <div class="flex items-center justify-between">
@@ -603,7 +618,7 @@ watch(input, (val) => {
 
                         <button
                             class="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:brightness-110 active:scale-[0.99] transition disabled:opacity-40"
-                            :disabled="done || attemptsLeft <= 0 || !input.trim()" type="submit">
+                            :disabled="state !== 'playing' || attemptsLeft <= 0 || !input.trim()" type="submit">
                             Submit
                         </button>
                     </div>
@@ -644,14 +659,6 @@ watch(input, (val) => {
                     </ul>
                 </div>
 
-                <!-- Completion -->
-                <div v-if="done" class="mt-4 rounded-xl border border-gray-200 bg-white p-4">
-                    <div class="mt-1 text-sm text-gray-700" v-if="challenge?.jyutping">
-                        <span class="text-gray-500">Answer:</span>
-                        <span class="font-mono font-bold ml-2">{{ challenge.jyutping }}</span>
-                    </div>
-                </div>
-
                 <!-- Reveal (only if failed all attempts and not done) -->
                 <div v-if="revealAllowed" class="pt-1">
                     <p v-if="!everpassed" class="mt-2 text-xs text-black mb-4">
@@ -678,9 +685,6 @@ watch(input, (val) => {
                     </transition>
                 </div>
             </div>
-
-
-
         </section>
     </main>
 </template>

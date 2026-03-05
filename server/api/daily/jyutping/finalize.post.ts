@@ -2,7 +2,10 @@ import { createError, getHeader, readBody } from "h3";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
 
-type Answer = { wordId: string; correct: boolean };
+type SessionAnswer = {
+  wordId: string;
+  correct: boolean;
+};
 
 function utcDayString(d = new Date()): string {
   const yyyy = d.getUTCFullYear();
@@ -12,15 +15,17 @@ function utcDayString(d = new Date()): string {
 }
 
 export default defineEventHandler(async (event) => {
+  console.log("[finalize][dailyJyutping] quiz");
+
   const userId = await requireUser(event);
-  const body = (await readBody(event)) as { answers: Answer[] };
+  const body = (await readBody(event)) as { answers: SessionAnswer[] };
 
   if (!body || !Array.isArray(body.answers)) {
     throw createError({ statusCode: 400, statusMessage: "Invalid payload" });
   }
 
   const sessionDate = utcDayString();
-  const mode = "jyutping";
+  const mode = "daily-jyutping";
 
   // de-dupe answers
   const map = new Map<string, boolean>();
@@ -52,7 +57,7 @@ export default defineEventHandler(async (event) => {
         and mode = $3
       for update
       `,
-      [userId, sessionDate, mode]
+      [userId, sessionDate, mode],
     );
 
     if (!sessRes.rowCount) {
@@ -76,7 +81,7 @@ export default defineEventHandler(async (event) => {
           and session_date = $2::date
           and mode = $3
         `,
-        [userId, sessionDate, mode]
+        [userId, sessionDate, mode],
       );
 
       await client.query("COMMIT");
@@ -102,16 +107,12 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-
     function deltaFor(correct: boolean, streakBefore: number) {
       if (!correct) return 0;
-      return 10
+      return 10;
     }
 
     const payloadAnswers = filtered.map((a) => {
-
-    //   const streakBefore = streakMap.get(a.wordId) ?? 0;
-
       return {
         wordId: a.wordId,
         correct: a.correct,
@@ -122,12 +123,9 @@ export default defineEventHandler(async (event) => {
     const answeredCount = payloadAnswers.length;
     const correctCount = payloadAnswers.reduce(
       (acc, a) => acc + (a.correct ? 1 : 0),
-      0
+      0,
     );
-    const totalDelta = payloadAnswers.reduce(
-      (acc, a) => acc + a.delta,
-      0
-    );
+    const totalDelta = payloadAnswers.reduce((acc, a) => acc + a.delta, 0);
 
     // 📝 Insert XP event (idempotent)
     await client.query(
@@ -146,7 +144,7 @@ export default defineEventHandler(async (event) => {
         totalDelta,
         correctCount,
         sess.total_questions,
-      ]
+      ],
     );
 
     // 🏁 Complete session
@@ -172,7 +170,7 @@ export default defineEventHandler(async (event) => {
         answeredCount,
         correctCount,
         totalDelta,
-      ]
+      ],
     );
 
     await client.query("COMMIT");
