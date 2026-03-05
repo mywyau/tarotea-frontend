@@ -541,19 +541,9 @@ watch(
 
                         <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                            type="button" @click="() => {
-                                showHint = !showHint
-                                if (showHint) hintUsedThisQuestion = true
-                            }">
-                            {{ showHint ? 'Hide hint' : 'Show hint' }}
-                        </button>
-
-                        <button
-                            class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                             type="button" @click="resetTraining({ reshuffle: true })">
                             Reset
                         </button>
-
 
                         <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
                     </div>
@@ -579,27 +569,38 @@ watch(
 
                     <!-- Faint hint -->
                     <!-- <div v-if="showHint" class="mt-3 flex items-center gap-3"> -->
-                    <div class="mt-3 min-h-[32px]">
-                        <div v-if="showHint" class="flex items-center gap-3">
-                            <div class="text-lg font-mono select-none">
+                    <!-- Hint Section -->
+                    <div class="mt-4 min-h-[36px]">
+
+                        <button type="button" @click="() => {
+                            showHint = !showHint
+                            if (showHint) hintUsedThisQuestion = true
+                        }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
+                            {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
+                        </button>
+
+                        <transition name="fade-word">
+                            <div v-if="showHint" class="mt-2 text-lg font-mono flex gap-2">
+
                                 <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
                                     'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
                                     'text-gray-400': jyutpingRenderStates[i] === 'idle'
                                 }">
                                     {{ char }}
                                 </span>
-                            </div>
 
-                            <button type=" button" @click="copyJyutping"
-                                class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
-                                {{ copied ? '✓' : 'copy' }}
-                            </button>
-                        </div>
+                                <button type="button" @click="copyJyutping"
+                                    class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
+                                    {{ copied ? '✓' : 'copy' }}
+                                </button>
+
+                            </div>
+                        </transition>
 
                     </div>
 
                     <!-- XP Row -->
-                    <div v-if="!isComplete" class="flex items-center max-w-xs">
+                    <div v-if="!isComplete" class="flex items-center max-w-xs mt-4">
 
                         <!-- XP Bar -->
                         <div class="w-28 mr-2">
