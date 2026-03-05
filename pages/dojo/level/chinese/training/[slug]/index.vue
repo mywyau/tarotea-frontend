@@ -335,10 +335,10 @@ watch(() => live.value.state, async (state) => {
 
         const hintWasUsed = hintUsedThisQuestion.value
 
-        let delta = 3  // base correct
+        let delta = 10  // base correct
 
         if (hintWasUsed) {
-            delta = 1
+            delta = 3
         }
 
         xpDelta.value = delta

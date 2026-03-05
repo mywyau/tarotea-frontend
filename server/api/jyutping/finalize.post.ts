@@ -70,10 +70,10 @@ export default defineEventHandler(async (event) => {
           return a.hintUsed ? 1 : 3;
 
         case "grind-chinese-level":
-          return a.hintUsed ? 1 : 10; // slightly harder
+          return a.hintUsed ? 3 : 10; // slightly harder
 
         case "grind-chinese-topic":
-          return a.hintUsed ? 1 : 10; // slightly harder
+          return a.hintUsed ? 3 : 10; // slightly harder
 
         default:
           return a.hintUsed ? 1 : 3;
