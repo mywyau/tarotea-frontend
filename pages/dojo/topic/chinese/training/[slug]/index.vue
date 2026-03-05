@@ -14,7 +14,7 @@ import type {
 
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
-import { levelTitles } from '~/utils/levels/levels'
+import { topicJyutpingQuizMeta } from '~/utils/topics/helpers'
 
 
 const route = useRoute()
@@ -47,6 +47,14 @@ const showHint = ref(false)
 
 const fullJyutping = computed(() =>
     current.value?.jyutping ?? ''
+)
+
+const topicMeta = computed(() =>
+    topicJyutpingQuizMeta.find(t => t.id === slug.value)
+)
+
+const topicTitle = computed(() =>
+    topicMeta.value?.title ?? slug.value
 )
 
 const live = computed(() => {
@@ -200,7 +208,7 @@ async function finalizeBatch() {
                 level: slug.value,
                 sessionKey: sessionKey.value,
                 attempts: batchAttempts.value,
-                mode: 'grind-chinese-topic]'
+                mode: 'grind-chinese-topic'
             }
         })
 
@@ -374,18 +382,18 @@ onMounted(() => {
 </script>
 
 <template>
-    <main class="mx-auto max-w-xl px-6 py-12">
+    <main class="mx-auto max-w-xl px-6 pt-12 pb-28 sm:pb-12">
 
         <div class="mb-6">
             <NuxtLink :to="`/dojo/topic/`" class="text-black text-sm hover:underline">
-                ← Back to Level Dojo
+                ← Back to Topic Dojo
             </NuxtLink>
         </div>
 
         <header class="space-y-4">
 
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Chinese Dojo - {{ levelTitles[slug] }}
+                Chinese Dojo - {{ topicTitle }}
             </h1>
 
             <p class="text-sm text-gray-600">
@@ -404,13 +412,12 @@ onMounted(() => {
 
             <div v-else class="space-y-5">
                 <!-- Progress + controls -->
-                <div v-if="!isComplete" class="flex items-center justify-between">
+                <div v-if="!isComplete" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div class="text-xs text-black">
                         Word {{ idx + 1 }} / {{ words.length }}
                     </div>
 
                     <div class="flex items-center gap-2">
-
                         <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                             type="button" @click="resetTraining({ reshuffle: true })">
@@ -422,9 +429,9 @@ onMounted(() => {
                 </div>
 
                 <!-- Word display -->
-                <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5">
+                <div class="rounded-2xl bg-gray-50 p-5">
 
-                    <div class="text-4xl font-medium flex gap-1">
+                    <div class="text-4xl font-medium flex gap-1 leading-none">
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                             'text-green-600 font-semibold': charStates[i] === 'correct',
                             'text-gray-400': charStates[i] === 'idle'
@@ -437,7 +444,7 @@ onMounted(() => {
                         {{ current.meaning }}
                     </div>
                     <!-- Hint Section -->
-                    <div class="mt-4">
+                    <div class="mt-4 min-h-[36px]">
                         <button type="button" @click="() => {
                             showHint = !showHint
                             if (showHint) hintUsedThisQuestion = true
@@ -483,8 +490,6 @@ onMounted(() => {
                         <label class="block text-sm font-medium text-gray-800">
                             Type chinese here:
                         </label>
-
-
                         <input ref="inputRef" :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text"
                             placeholder=""
                             class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition" />
@@ -496,27 +501,26 @@ onMounted(() => {
                     </div>
 
                     <div class="h-24 sm:h-0"></div>
+                </div>
 
+                <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
 
-                    <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
+                    <h2 class="text-2xl font-semibold">
+                        Good job! Keep going!
+                    </h2>
 
-                        <h2 class="text-2xl font-semibold">
-                            Good job! Keep going!
-                        </h2>
+                    <p class="text-gray-600 text-base uppercase">
+                        {{ sessionResult.correctCount }} / {{ words.length }} words completed
+                    </p>
 
-                        <p class="text-gray-600 text-base uppercase">
-                            {{ sessionResult.correctCount }} / {{ words.length }} words completed
-                        </p>
+                    <p class="text-green-600 text-2xl font-semibold">
+                        +{{ sessionResult.xpEarned }} XP
+                    </p>
 
-                        <p class="text-green-600 text-2xl font-semibold">
-                            +{{ sessionResult.xpEarned }} XP
-                        </p>
-
-                        <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
-                            @click="startNewSession">
-                            Play again
-                        </button>
-                    </div>
+                    <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
+                        @click="startNewSession">
+                        Play again
+                    </button>
                 </div>
             </div>
         </section>

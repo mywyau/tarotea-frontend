@@ -501,7 +501,6 @@ onMounted(() => {
                             Type chinese here:
                         </label>
 
-
                         <input ref="inputRef" v-model="input" autofocus autocomplete="off" inputmode="text"
                             class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition" />
 

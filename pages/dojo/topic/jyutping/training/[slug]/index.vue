@@ -383,8 +383,6 @@ function startNewSession() {
     fetchWords()
 }
 
-onMounted(fetchWords)
-
 
 watch(
     () => words.value,
@@ -490,12 +488,13 @@ watch(
 
 onMounted(() => {
     sessionKey.value = crypto.randomUUID()
+    fetchWords()
 })
 
 </script>
 
 <template>
-    <main class="mx-auto max-w-xl px-6 py-12">
+    <main class="mx-auto max-w-xl px-6 pt-12 pb-28 sm:pb-12">
 
         <div class="mb-6">
             <NuxtLink :to="`/dojo/topic`" class="text-black text-sm hover:underline">
@@ -525,21 +524,21 @@ onMounted(() => {
 
             <div v-else class="space-y-5">
                 <!-- Progress + controls -->
-                <div v-if="!isComplete" class="flex items-center justify-between">
+                <div v-if="!isComplete" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div class="text-xs text-black">
                         Word {{ idx + 1 }} / {{ words.length }}
                     </div>
 
                     <div class="flex items-center gap-2">
 
-                        <button
+                        <!-- <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                             type="button" @click="() => {
                                 showHint = !showHint
                                 if (showHint) hintUsedThisQuestion = true
                             }">
                             {{ showHint ? 'Hide hint' : 'Show hint' }}
-                        </button>
+                        </button> -->
 
                         <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
@@ -554,7 +553,7 @@ onMounted(() => {
                 <!-- Word display -->
                 <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5">
 
-                    <div class="text-4xl font-medium flex gap-1">
+                    <div class="text-4xl font-medium flex gap-1 leading-none tracking-wide">
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                             'text-green-600 font-semibold': charStates[i] === 'correct',
                             'text-gray-400': syllableStates[i] === 'idle'
@@ -567,62 +566,74 @@ onMounted(() => {
                         {{ current.meaning }}
                     </div>
 
-                    <!-- Faint hint -->
-                    <div v-if="showHint" class="mt-3 flex items-center gap-3">
-                        <div class="text-lg font-mono select-none">
-                            <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
-                                'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
-                                'text-gray-400': jyutpingRenderStates[i] === 'idle'
-                            }">
-                                {{ char }}
-                            </span>
-                        </div>
+                    <div class="mt-4 mb-6 min-h-[36px]">
 
-                        <button type=" button" @click="copyJyutping"
-                            class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
-                            {{ copied ? '✓' : 'copy' }}
+                        <button type="button" @click="() => {
+                            showHint = !showHint
+                            if (showHint) hintUsedThisQuestion = true
+                        }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
+                            {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
                         </button>
-                    </div>
 
-                </div>
+                        <transition name="fade-word">
+                            <div v-if="showHint" class="mt-2 text-lg font-mono flex gap-2">
 
-                <!-- XP Row -->
-                <div v-if="!isComplete" class="flex items-center max-w-xs">
+                                <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
+                                    'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
+                                    'text-gray-400': jyutpingRenderStates[i] === 'idle'
+                                }">
+                                    {{ char }}
+                                </span>
 
-                    <!-- XP Bar -->
-                    <div class="w-28 mr-2">
-                        <div class="h-[3px] bg-gray-200 rounded">
-                            <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
-                                :style="{ width: Math.min((currentXp ?? 0) / 200 * 100, 100) + '%' }" />
-                        </div>
-                    </div>
+                                <button type="button" @click="copyJyutping"
+                                    class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
+                                    {{ copied ? '✓' : 'copy' }}
+                                </button>
 
-                    <!-- XP Text + Delta -->
-                    <div class="relative flex items-center">
-                        <span class="text-sm text-gray-600 whitespace-nowrap">
-                            {{ currentXp ?? 0 }} XP
-                        </span>
-
-                        <transition name="xp-fall">
-                            <span v-if="xpDelta !== null"
-                                class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                                :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-                                {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
-                            </span>
+                            </div>
                         </transition>
                     </div>
 
+                    <!-- XP Row -->
+                    <div v-if="!isComplete" class="flex items-center max-w-xs">
+
+                        <!-- XP Bar -->
+                        <div class="w-28 mr-2">
+                            <div class="h-[3px] bg-gray-200 rounded">
+                                <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
+                                    :style="{ width: Math.min((currentXp ?? 0) / 200 * 100, 100) + '%' }" />
+                            </div>
+                        </div>
+
+                        <!-- XP Text + Delta -->
+                        <div class="relative flex items-center">
+                            <span class="text-sm text-gray-600 whitespace-nowrap">
+                                {{ currentXp ?? 0 }} XP
+                            </span>
+
+                            <transition name="xp-fall">
+                                <span v-if="xpDelta !== null"
+                                    class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                                    :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                                    {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                                </span>
+                            </transition>
+                        </div>
+
+                    </div>
+
+                    <!-- Input -->
+                    <div v-if="!isComplete" class="space-y-3 mt-2">
+                        <label class=" hidden sm:block text-sm font-medium text-gray-800">
+                            Type here:
+                        </label>
+                        <input ref="inputRef" autofocus v-model="input" :disabled="isComplete" autocomplete="off"
+                            inputmode="text"
+                            class="w-full rounded-xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition" />
+                    </div>
+
                 </div>
 
-                <!-- Input -->
-                <div v-if="!isComplete" class="space-y-3">
-                    <label class="block text-sm font-medium text-gray-800">
-                        Type here:
-                    </label>
-
-                    <input :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text" placeholder=""
-                        class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
-                </div>
 
                 <div class="h-24 sm:h-0"></div>
 

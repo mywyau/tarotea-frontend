@@ -35,8 +35,6 @@ const slug = computed(() => route.params.slug as string)
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-const BATCH_SIZE = 20
-
 const loading = ref(true)
 const errorState = ref<string | null>(null)
 
@@ -299,15 +297,10 @@ async function copyJyutping() {
 }
 
 let advancing = false
-let advanceTimer: ReturnType<typeof setTimeout> | null = null
 
 function resetTraining(options?: { reshuffle?: boolean }) {
     // cancel pending auto-advance
     advancing = false
-    if (advanceTimer) {
-        clearTimeout(advanceTimer)
-        advanceTimer = null
-    }
 
     input.value = ''
     attempts.value = []
@@ -502,7 +495,7 @@ watch(
 </script>
 
 <template>
-    <main class="mx-auto max-w-xl px-6 py-12">
+    <main class="mx-auto max-w-xl px-6 pt-12 pb-28 sm:pb-12">
 
         <div class="mb-6">
             <NuxtLink :to="`/dojo/level/`" class="text-black text-sm hover:underline">
@@ -553,10 +546,10 @@ watch(
                 <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5">
 
                     <transition name="fade-word" mode="out-in">
-                        <div :key="current?.wordId" class="text-4xl sm:text-4xl text-center font-medium flex gap-1">
+                        <div :key="current?.wordId" class="text-4xl text-center font-medium flex gap-1 leading-none">
                             <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                                 'text-green-600 font-semibold': charStates[i] === 'correct',
-                                'text-gray-400': syllableStates[i] === 'idle'
+                                'text-gray-400': charStates[i] === 'idle'
                             }">
                                 {{ char }}
                             </span>
@@ -567,10 +560,8 @@ watch(
                         {{ current.meaning }}
                     </div>
 
-                    <!-- Faint hint -->
-                    <!-- <div v-if="showHint" class="mt-3 flex items-center gap-3"> -->
                     <!-- Hint Section -->
-                    <div class="mt-4 min-h-[36px]">
+                    <div class="mt-4 mb-6 min-h-[36px]">
 
                         <button type="button" @click="() => {
                             showHint = !showHint
@@ -596,11 +587,10 @@ watch(
 
                             </div>
                         </transition>
-
                     </div>
 
                     <!-- XP Row -->
-                    <div v-if="!isComplete" class="flex items-center max-w-xs mt-4">
+                    <div v-if="!isComplete" class="flex items-center max-w-xs mt-2">
 
                         <!-- XP Bar -->
                         <div class="w-28 mr-2">
@@ -624,11 +614,10 @@ watch(
                                 </span>
                             </transition>
                         </div>
-
                     </div>
 
                     <!-- Input -->
-                    <form v-if="!isComplete" class="space-y-3" @submit.prevent="submit">
+                    <div v-if="!isComplete" class="space-y-3">
                         <label class=" hidden sm:block text-sm font-medium text-gray-800">
                             Type here:
                         </label>
@@ -636,7 +625,7 @@ watch(
                         <input ref="inputRef" v-model="input" autofocus autocomplete="off" inputmode="text"
                             class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition" />
 
-                    </form>
+                    </div>
 
                     <div class="h-24 sm:h-0"></div>
 
