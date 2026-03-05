@@ -12,8 +12,6 @@ import type {
     TrainWord
 } from '@/types/jyutping/jyutping-training-types'
 
-import { shuffle } from '@/utils/jyutping/jyutping-utils'
-
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
 import { levelTitles } from '~/utils/levels/levels'
@@ -200,7 +198,7 @@ function resetTraining(options?: { reshuffle?: boolean }) {
     idx.value = 0
 
     if (options?.reshuffle) {
-        words.value = shuffle(words.value)
+        words.value = shuffleFisherYates(words.value)
     }
 }
 

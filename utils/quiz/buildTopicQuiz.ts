@@ -2,10 +2,6 @@ import type { TopicWord } from "@/types/topic";
 import type { Word } from "@/types/word";
 import type { QuizQuestion } from "./generateQuiz";
 
-function shuffle<T>(array: T[]): T[] {
-  return [...array].sort(() => Math.random() - 0.5);
-}
-
 
 export type QuizQuestion = {
   wordId: string
@@ -19,7 +15,7 @@ export function buildTopicQuiz(
   count = 20
 ): QuizQuestion[] {
 
-  const selected = shuffle(words).slice(0, count);
+  const selected = shuffleFisherYates(words).slice(0, count);
 
   return selected.map((word) => {
 
@@ -30,11 +26,11 @@ export function buildTopicQuiz(
 
     if (direction === "word-to-meaning") {
 
-      const distractors = shuffle(
+      const distractors = shuffleFisherYates(
         words.filter((w) => w.id !== word.id)
       ).slice(0, 3);
 
-      const options = shuffle([
+      const options = shuffleFisherYates([
         word.meaning,
         ...distractors.map((w) => w.meaning),
       ]);
@@ -48,11 +44,11 @@ export function buildTopicQuiz(
     }
 
     // meaning → word
-    const distractors = shuffle(
+    const distractors = shuffleFisherYates(
       words.filter((w) => w.id !== word.id)
     ).slice(0, 3);
 
-    const options = shuffle([
+    const options = shuffleFisherYates([
       word.word,
       ...distractors.map((w) => w.word),
     ]);

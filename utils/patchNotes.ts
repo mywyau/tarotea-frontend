@@ -10,8 +10,17 @@ export const patchNotes: PatchNote[] = [
     title: "Upcoming",
     items: [
       "Expanding content",
-      "Content review to fix dodgy translations, jyutping, chinese characters and audio",
-      "Topics dojo for typing and familiarising with phonetics",
+      "Content review to fix dodgy/missing translations, jyutping, chinese characters and audio",
+      "Fix UX across site",
+    ],
+  },
+  {
+    date: "5 March 2026",
+    title: "Sweep up and fix dojo quizzes",
+    items: [
+      "Fixed randomness shuffling of words in quizzes",
+      "Added chinese only dojo typing quiz, play for bigger and more rewarding xp gains",
+      "General sweep up of inconsistencies",
     ],
   },
   {

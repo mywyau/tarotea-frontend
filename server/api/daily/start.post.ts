@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     mode?: string;
   };
 
-  const allowedModes = ["daily_meaning_quiz", "jyutping", "listening"] as const;
+  const allowedModes = ["daily_meaning_quiz", "daily-jyutping", "listening"] as const;
   type Mode = (typeof allowedModes)[number];
 
   const mode = allowedModes.includes(body.mode as Mode) ? body.mode : "daily_meaning_quiz";

@@ -1,5 +1,7 @@
 <script setup lang="ts">
+
 import { NuxtLink } from '#components';
+import { masteryXp } from '@/utils/xp /helpers';
 
 defineProps<{
   to?: string
@@ -10,7 +12,7 @@ defineProps<{
   mastered?: boolean
 }>()
 
-const MASTERY_XP = 200
+
 </script>
 
 <template>
@@ -39,7 +41,7 @@ const MASTERY_XP = 200
 
       <div class="w-full h-1 bg-gray-400 rounded">
         <div class="h-1 bg-green-500 rounded transition-all duration-500"
-          :style="{ width: Math.min((xp ?? 0) / MASTERY_XP * 100, 100) + '%' }" />
+          :style="{ width: Math.min((xp ?? 0) / masteryXp * 100, 100) + '%' }" />
       </div>
     </div>
   </component>

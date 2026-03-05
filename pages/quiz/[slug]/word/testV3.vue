@@ -13,6 +13,7 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
+import { masteryXp } from '~/utils/xp /helpers'
 
 
 type Word = {
@@ -55,11 +56,7 @@ const BRAND_COLORS = [
 const tileColors = ref<string[]>([])
 
 function generateTileColors() {
-  tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
-}
-
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
+  tileColors.value = shuffleFisherYates(BRAND_COLORS).slice(0, 4)
 }
 
 const { getAccessToken } = await useAuth()
@@ -100,14 +97,14 @@ const weightedWords = computed(() => {
   const totalQuestions = 20
 
   if (!weakestIds.value.length) {
-    return shuffle(words).slice(0, totalQuestions)
+    return shuffleFisherYates(words).slice(0, totalQuestions)
   }
 
-  const weakestPool = shuffle(
+  const weakestPool = shuffleFisherYates(
     words.filter(w => weakestIds.value.includes(w.id))
   )
 
-  const nonWeakestPool = shuffle(
+  const nonWeakestPool = shuffleFisherYates(
     words.filter(w => !weakestIds.value.includes(w.id))
   )
 
@@ -123,7 +120,7 @@ const weightedWords = computed(() => {
 
 
   if (selected.length < totalQuestions) {
-    const remaining = shuffle(
+    const remaining = shuffleFisherYates(
       words.filter(w => !selected.some(s => s.id === w.id))
     )
 
@@ -133,7 +130,7 @@ const weightedWords = computed(() => {
   }
 
 
-  return shuffle(selected)
+  return shuffleFisherYates(selected)
 })
 
 const questions = computed(() =>
@@ -414,7 +411,7 @@ watch(
             <div class="relative flex items-center">
 
               <span class="text-sm text-gray-500 whitespace-nowrap">
-                {{ currentXp ?? 0 }} XP
+                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
               </span>
 
               <transition name="xp-fall">

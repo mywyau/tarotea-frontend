@@ -22,10 +22,6 @@ const currentSentence = computed(() => {
   return props.sentences[currentIndex.value]
 })
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5)
-}
-
 const BRAND_COLORS = [
   '#EAB8E4',
   '#A8CAE0',
@@ -38,7 +34,7 @@ const BRAND_COLORS = [
 const tileColors = ref<string[]>([])
 
 function generateTileColors() {
-  tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
+  tileColors.value = shuffleFisherYates(BRAND_COLORS).slice(0, 4)
 }
 
 watch(
@@ -85,11 +81,11 @@ const options = computed(() => {
     .filter(s => s.id !== currentSentence.value.id)
     .map(s => s.meaning)
 
-  const uniqueDistractors = shuffle(
+  const uniqueDistractors = shuffleFisherYates(
     Array.from(new Set(distractors))
   ).slice(0, 3)
 
-  return shuffle([correct, ...uniqueDistractors])
+  return shuffleFisherYates([correct, ...uniqueDistractors])
 })
 
 function selectOption(option: string) {

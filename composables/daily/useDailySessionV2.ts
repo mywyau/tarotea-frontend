@@ -1,8 +1,5 @@
 import type { DailyWord } from "@/types/daily/DailyItem";
 
-export function shuffleDailyWords<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
 
 type DailyStartResponse = {
   dailyLocked?: boolean;
@@ -132,7 +129,7 @@ export function useDailySession() {
       return await fetchWordsByIdsIndividually(token, wordIds);
     });
 
-    questions.value = shuffleDailyWords(words);
+    questions.value = shuffleFisherYates(words);
     loading.value = false;
   }
 

@@ -5,23 +5,19 @@ export type QuizQuestion = {
   correctIndex: number;
 };
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
-
 export function generateQuiz(words: Word[], count = 20): QuizQuestion[] {
-  const selected = shuffle(words).slice(0, count);
+  const selected = shuffleFisherYates(words).slice(0, count);
 
   return selected.map((word) => {
     const direction =
       Math.random() > 0.5 ? "word-to-meaning" : "meaning-to-word";
 
     if (direction === "word-to-meaning") {
-      const distractors = shuffle(
+      const distractors = shuffleFisherYates(
         words.filter((w) => w.id !== word.id)
       ).slice(0, 3);
 
-      const options = shuffle([
+      const options = shuffleFisherYates([
         word.meaning,
         ...distractors.map((w) => w.meaning),
       ]);
@@ -35,11 +31,11 @@ export function generateQuiz(words: Word[], count = 20): QuizQuestion[] {
     }
 
     // meaning → word
-    const distractors = shuffle(
+    const distractors = shuffleFisherYates(
       words.filter((w) => w.id !== word.id)
     ).slice(0, 3);
 
-    const options = shuffle([
+    const options = shuffleFisherYates([
       word.word,
       ...distractors.map((w) => w.word),
     ]);

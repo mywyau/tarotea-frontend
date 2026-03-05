@@ -39,10 +39,6 @@ const { data, error } = await useFetch(
 
 const QUESTIONS_PER_SESSION = 20
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5)
-}
-
 const quizKey = ref(0)
 
 function resetQuiz() {
@@ -61,7 +57,7 @@ function generateSession() {
     meaning: s.meaning
   }))
 
-  sessionSentences.value = shuffle(mapped).slice(0, QUESTIONS_PER_SESSION)
+  sessionSentences.value = shuffleFisherYates(mapped).slice(0, QUESTIONS_PER_SESSION)
 }
 
 const allSentences = computed(() =>

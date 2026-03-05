@@ -18,7 +18,6 @@ import {
     canonicalNoSpace,
     normalizeJyutping,
     scoreJyutpingAttempt,
-    shuffle,
     splitSyllables,
     splitUserJyutping,
     stripToneToken
@@ -313,7 +312,7 @@ function resetTraining(options?: { reshuffle?: boolean }) {
     idx.value = 0
 
     if (options?.reshuffle) {
-        words.value = shuffle(words.value)
+        words.value = shuffleFisherYates(words.value)
     }
 }
 

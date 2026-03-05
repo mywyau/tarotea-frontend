@@ -10,6 +10,7 @@ import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
 import { canAccessTopic } from '~/utils/topics/permissions'
 import { topics } from '~/utils/topics/topics'
+import { masteryXp } from '~/utils/xp /helpers'
 
 const route = useRoute()
 const slug = route.params.topic as string
@@ -93,10 +94,8 @@ const getXp = (id: string) =>
 const getStreak = (id: string) =>
   progressMap.value?.[id]?.streak ?? 0
 
-const MASTERY_XP = 200
-
 const isMastered = (id: string) =>
-  (progressMap.value?.[id]?.xp ?? 0) >= MASTERY_XP
+  (progressMap.value?.[id]?.xp ?? 0) >= masteryXp
 
 const FREE_WORD_LIMIT = 10
 

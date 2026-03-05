@@ -11,6 +11,7 @@ import { useRoute } from 'vue-router'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel, hasPaidAccess, isFreeLevel } from '~/utils/levels/permissions'
+import { masteryXp } from '~/utils/xp /helpers'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -87,18 +88,16 @@ async function loadProgress() {
 const getXp = (id: string) =>
   progressMap.value?.[id]?.xp ?? 0
 
-const MASTERY_XP = 200
-
 const isMastered = (id: string) =>
-  (progressMap.value?.[id]?.xp ?? 0) >= MASTERY_XP
+  (progressMap.value?.[id]?.xp ?? 0) >= masteryXp
 
 const FREE_WORD_LIMIT = 10
 
-const canAccessLevel = computed(() => {
-  if (!authReady.value) return false
-  if (!isLoggedIn.value) return false
-  return entitlement.value ? hasPaidAccess(entitlement.value) : false
-})
+// const canAccessLevel = computed(() => {
+//   if (!authReady.value) return false
+//   if (!isLoggedIn.value) return false
+//   return entitlement.value ? hasPaidAccess(entitlement.value) : false
+// })
 
 // const canAccessLevel = computed(() => {
 //   return entitlement.value ? hasPaidAccess(entitlement.value) : false
@@ -126,7 +125,7 @@ const gatedCategories = computed(() => {
 
         const shouldLock =
           !isFreeLevel(levelNumber) &&
-          !canAccessLevel.value &&
+          !canAccessLevel(isLoggedIn.value, entitlement.value) &&
           globalIndex >= FREE_WORD_LIMIT
 
           

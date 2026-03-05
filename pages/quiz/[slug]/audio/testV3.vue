@@ -32,6 +32,7 @@ import {
 } from '@/utils/sounds'
 import { brandColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels'
+import { masteryXp } from '~/utils/xp /helpers'
 
 const route = useRoute()
 // const slug = computed(() => route.params.slug as string)
@@ -84,12 +85,9 @@ const question = computed(() => questions.value[current.value])
 
 const tileColors = ref<string[]>([])
 
-function shuffle<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5)
-}
 
 function generateTileColors() {
-  tileColors.value = shuffle(brandColours).slice(0, 4)
+  tileColors.value = shuffleFisherYates(brandColours).slice(0, 4)
 }
 
 const WRONG_PENALTY = -12
@@ -314,7 +312,7 @@ watch(
             <div class="relative flex items-center">
 
               <span class="text-sm text-gray-500 whitespace-nowrap">
-                {{ currentXp ?? 0 }} XP
+                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
               </span>
 
               <transition name="xp-fall">

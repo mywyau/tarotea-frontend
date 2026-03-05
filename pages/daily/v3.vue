@@ -11,7 +11,7 @@ definePageMeta({
 
 
 import { useCountdownToUtcMidnight } from '@/composables/daily/useCountdownToUtcMidnight'
-import { shuffleDailyWords, useDailySession } from '@/composables/daily/useDailySessionV2'
+import { useDailySession } from '@/composables/daily/useDailySessionV2'
 import { useXpAnimation } from '@/composables/daily/useXpAnimation'
 import { computed, onMounted, ref, watch } from 'vue'
 import type { DailyWord } from '~/types/daily/DailyItem'
@@ -49,7 +49,7 @@ const BRAND_COLORS = [
 const tileColors = ref<string[]>([])
 
 function generateTileColors() {
-    tileColors.value = shuffleDailyWords([...BRAND_COLORS]).slice(0, 4)
+    tileColors.value = shuffleFisherYates([...BRAND_COLORS]).slice(0, 4)
 }
 
 // Use the SAME rule as your daily delta in update.v2:
@@ -214,7 +214,7 @@ async function fetchOptions(correct: DailyWord) {
         body: { wordId: correct.id, limit: 3 }
     })
 
-    return shuffleDailyWords([correct, ...res.distractors])
+    return shuffleFisherYates([correct, ...res.distractors])
 }
 
 const percentage = computed(() =>

@@ -28,6 +28,7 @@ import {
     playQuizCompleteFanfareSong,
     playQuizCompleteOkaySong
 } from '@/utils/sounds'
+import { masteryXp } from '~/utils/xp /helpers'
 
 const route = useRoute()
 
@@ -54,12 +55,8 @@ const BRAND_COLORS = [
 
 const tileColors = ref<string[]>([])
 
-function shuffle<T>(arr: T[]): T[] {
-    return [...arr].sort(() => Math.random() - 0.5)
-}
-
 function generateTileColors() {
-    tileColors.value = shuffle(BRAND_COLORS).slice(0, 4)
+    tileColors.value = shuffleFisherYates(BRAND_COLORS).slice(0, 4)
 }
 
 const wordsForLevel = computed<Word[]>(() => {
@@ -350,7 +347,7 @@ watch(
 
                         <div class="relative flex items-center">
                             <span class="text-sm text-gray-500 whitespace-nowrap">
-                                {{ currentXp ?? 0 }} XP
+                                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
                             </span>
 
                             <transition name="xp-fall">

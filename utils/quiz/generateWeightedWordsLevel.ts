@@ -1,11 +1,3 @@
-export function shuffle<T>(arr: T[]): T[] {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    ;[a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
 export interface WeightedWord {
   id: string
 }
@@ -27,16 +19,16 @@ export function generateWeightedWordsLevel<T extends WeightedWord>(
 
   // No weakest words → simple random
   if (!weakestIds.length) {
-    return shuffle(words).slice(0, totalQuestions)
+    return shuffleFisherYates(words).slice(0, totalQuestions)
   }
 
   const weakestSet = new Set(weakestIds)
 
-  const weakestPool = shuffle(
+  const weakestPool = shuffleFisherYates(
     words.filter(w => weakestSet.has(w.id))
   )
 
-  const nonWeakestPool = shuffle(
+  const nonWeakestPool = shuffleFisherYates(
     words.filter(w => !weakestSet.has(w.id))
   )
 
@@ -52,7 +44,7 @@ export function generateWeightedWordsLevel<T extends WeightedWord>(
 
   // Fill remaining if needed
   if (selected.length < totalQuestions) {
-    const remaining = shuffle(
+    const remaining = shuffleFisherYates(
       words.filter(w => !selected.some(s => s.id === w.id))
     )
 
@@ -61,5 +53,5 @@ export function generateWeightedWordsLevel<T extends WeightedWord>(
     )
   }
 
-  return shuffle(selected)
+  return shuffleFisherYates(selected)
 }

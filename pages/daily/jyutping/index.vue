@@ -3,11 +3,10 @@
 definePageMeta({
     ssr: false,
     // middleware: ['logged-in'],
-    middleware: ['coming-soon'],
+    // middleware: ['coming-soon'],
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
-import { shuffleDailyWords } from '~/composables/daily/useDailySessionV2'
 
 type DailyDecode = {
     date: string // "YYYY-MM-DD"
@@ -243,9 +242,10 @@ async function fetchChallenge() {
             headers: { Authorization: `Bearer ${token}` },
             body: {
                 totalQuestions: 5,
-                mode: 'jyutping',
+                mode: 'daily-jyutping',
             }
         })
+
 
         if (daily.session.completed) {
             done.value = true
@@ -259,17 +259,17 @@ async function fetchChallenge() {
             return
         }
 
-        const ids = daily.session?.word_ids
+        const ids = [...new Set(daily.session?.word_ids ?? [])]
 
         if (!ids || ids.length === 0) {
             errorState.value = 'No daily words available.'
             return
         }
 
-        wordIds.value = shuffleDailyWords(ids)
+        wordIds.value = shuffleFisherYates(ids)
         currentIndex.value = 0
 
-        await loadWord(ids[0])
+        await loadWord(wordIds.value[0])
 
     } catch (e: any) {
         errorState.value =
@@ -499,7 +499,39 @@ watch(input, (val) => {
                 {{ errorState }}
             </div>
 
-            <div v-else-if="challenge" class="space-y-5">
+            <div v-else-if="done && finalized" class="bg-white p-4 space-y-2">
+
+                <div class="text-lg font-semibold text-gray-900">
+                    Daily Session Complete
+                </div>
+
+                <div class="text-sm text-gray-700">
+                    Correct: {{ correctCount }} / {{ totalQuestions }}
+                </div>
+
+                <div class="text-sm text-gray-700">
+                    XP Earned: {{ xpEarned }}
+                </div>
+
+                <div class="text-sm text-gray-600">
+                    Come back tomorrow for your new words.
+                </div>
+
+                <div class="mt-8 text-sm opacity-100">
+                    <p class="text-sm text-gray-700 uppercase tracking-wide opacity-100 mb-4">
+                        Next daily unlocks in
+                    </p>
+
+                    <p class="bg-black rounded-lg py-4 px-3 text-center">
+                        <span
+                            class="text-3xl font-semibold bg-gradient-to-r from-[#EAB8E4] via-[#A8CAE0] to-[#D6A3D1] bg-clip-text text-transparent hover:brightness-125">
+                            {{ timeRemaining }}
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div v-else-if="!done && challenge" class="space-y-5">
                 <!-- Word display -->
                 <div class="flex items-start justify-between gap-4">
                     <div>
@@ -627,38 +659,7 @@ watch(input, (val) => {
             </div>
 
 
-            <div v-else-if="done && finalized" class="bg-white p-4 space-y-2">
 
-                <div class="text-lg font-semibold text-gray-900">
-                    Daily Session Complete
-                </div>
-
-                <div class="text-sm text-gray-700">
-                    Correct: {{ correctCount }} / {{ totalQuestions }}
-                </div>
-
-                <div class="text-sm text-gray-700">
-                    XP Earned: {{ xpEarned }}
-                </div>
-
-                <div class="text-sm text-gray-600">
-                    Come back tomorrow for your new words.
-                </div>
-
-                <div class="mt-8 text-sm opacity-100">
-                    <p class="text-sm text-gray-700 uppercase tracking-wide opacity-100 mb-4">
-                        Next daily unlocks in
-                    </p>
-
-                    <p class="bg-black rounded-lg py-4 px-3 text-center">
-                        <span
-                            class="text-3xl font-semibold bg-gradient-to-r from-[#EAB8E4] via-[#A8CAE0] to-[#D6A3D1] bg-clip-text text-transparent hover:brightness-125">
-                            {{ timeRemaining }}
-                        </span>
-                    </p>
-                </div>
-
-            </div>
         </section>
     </main>
 </template>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useAudioVolume } from '~/composables/useAudioVolume'
 import { useAuth } from '~/composables/useAuth'
+import { masteryXp } from '~/utils/xp /helpers'
 
 
 definePageMeta({
@@ -38,17 +39,15 @@ const formattedLevel = computed(() => {
     .replace(/\b\w/g, c => c.toUpperCase())
 })
 
-const MASTERY_XP = 200
-
 const masteryPercent = computed(() => {
   const value = xp.value ?? 0
-  return Math.min((value / MASTERY_XP) * 100, 100)
+  return Math.min((value / masteryXp) * 100, 100)
 })
 
 const xp = ref<number>(0)
 const streak = ref<number>(0)
 
-const isMastered = computed(() => xp.value >= MASTERY_XP)
+const isMastered = computed(() => xp.value >= masteryXp)
 
 onMounted(async () => {
   try {
@@ -134,7 +133,7 @@ watchEffect(() => {
       <div class="pt-4 space-y-3">
 
         <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
-          <span>{{ xp }} XP</span>
+          <span>{{ xp }} / {{ masteryXp }} XP</span>
           <span v-if="isMastered" class="font-semibold text-green-600">
             ✓ Maxed
           </span>

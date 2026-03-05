@@ -5,6 +5,8 @@ definePageMeta({
     ssr: true,
 })
 
+import { masteryXp } from '~/utils/xp /helpers'
+
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -30,13 +32,11 @@ const word = computed(() => data.value)
 const xp = ref<number>(0)
 const streak = ref<number>(0)
 
-const MASTERY_XP = 200
-
 const masteryPercent = computed(() => {
-    return Math.min((xp.value / MASTERY_XP) * 100, 100)
+    return Math.min((xp.value / masteryXp) * 100, 100)
 })
 
-const isMastered = computed(() => xp.value >= MASTERY_XP)
+const isMastered = computed(() => xp.value >= masteryXp)
 
 const formattedTopic = computed(() =>
     topic.value
@@ -130,7 +130,7 @@ watchEffect(() => {
             <div class="pt-6 space-y-3">
 
                 <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
-                    <span>{{ xp }} XP</span>
+                    <span>{{ xp }} / {{ masteryXp }} XP</span>
                     <span v-if="isMastered" class="font-semibold text-green-600">
                         ✓ Maxed
                     </span>
@@ -221,15 +221,11 @@ watchEffect(() => {
 
 /* Main word card */
 .word-card {
-    /* background: rgba(255, 255, 255, 0.75); */
-    /* border: 1px solid rgba(214, 163, 209, 0.35); */
     backdrop-filter: blur(6px);
 }
 
 /* Section cards */
 .section-card {
-    /* background: rgba(255, 255, 255, 0.75); */
-    /* border: 1px solid rgba(234, 184, 228, 0.30); */
     backdrop-filter: blur(6px);
 }
 

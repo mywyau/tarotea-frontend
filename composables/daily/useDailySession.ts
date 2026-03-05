@@ -1,8 +1,5 @@
 import type { DailySessionResponse, DailyWord } from "@/types/daily/DailyItem";
-
-export function shuffleDailyWords<T>(arr: T[]): T[] {
-  return [...arr].sort(() => Math.random() - 0.5);
-}
+import { shuffleFisherYates } from "@/utils/shuffle";
 
 export function useDailySession() {
   const loading = ref(true);
@@ -40,7 +37,7 @@ export function useDailySession() {
 
     questions.value = dailyData.completed
       ? []
-      : shuffleDailyWords(dailyData.words);
+      : shuffleFisherYates(dailyData.words);
 
     loading.value = false;
   }
