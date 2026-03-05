@@ -222,7 +222,7 @@ async function finalizeBatch() {
                 level: slug.value,
                 sessionKey: sessionKey.value,
                 attempts: batchAttempts.value,
-                mode: 'chinese'
+                mode: 'grind-chinese'
             }
         })
 
