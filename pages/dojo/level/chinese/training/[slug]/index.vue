@@ -23,8 +23,6 @@ const slug = computed(() => route.params.slug as string)
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-const BATCH_SIZE = 20
-
 const loading = ref(true)
 const errorState = ref<string | null>(null)
 
@@ -146,22 +144,6 @@ async function fetchWords() {
     }
 }
 
-// ---------- Actions ----------
-
-// function submit() {
-//     if (!current.value) return
-
-//     const correct = normalizedInput.value === normalizedAnswer.value
-
-//     // attempts.value.push({
-//     //     input: input.value.trim(),
-//     //     passed: correct,
-//     //     message: correct ? 'Correct!' : 'Not quite, try again.'
-//     // })
-
-//     input.value = ''
-// }
-
 const copied = ref(false)
 
 async function copyChinese() {
@@ -282,8 +264,6 @@ const normalizedAnswer = computed(() =>
     current.value?.word.replace(/\s+/g, '').trim() ?? ''
 )
 
-onMounted(fetchWords)
-
 watch(
     () => words.value,
     async (ws) => {
@@ -386,10 +366,6 @@ watch(
     { immediate: true }
 )
 
-// onMounted(() => {
-//     sessionKey.value = crypto.randomUUID()
-// })
-
 onMounted(() => {
     sessionKey.value = crypto.randomUUID()
     fetchWords()
@@ -438,15 +414,6 @@ onMounted(() => {
                     </div>
 
                     <div class="flex items-center gap-2">
-
-                        <!-- <button
-                            class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                            type="button" @click="() => {
-                                showHint = !showHint
-                                if (showHint) hintUsedThisQuestion = true
-                            }">
-                            {{ showHint ? 'Hide hint' : 'Show hint' }}
-                        </button> -->
 
                         <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"

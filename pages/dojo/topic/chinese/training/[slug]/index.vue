@@ -2,30 +2,19 @@
 
 definePageMeta({
     ssr: false,
-    // middleware: ['logged-in'],
-    middleware: ['coming-soon'],
+    middleware: ['logged-in'],
+    // middleware: ['coming-soon'],
 })
 
 import type {
-    AttemptLog,
     BatchAttempt,
-    LevelData,
+    TopicData,
     TrainWord
 } from '@/types/jyutping/jyutping-training-types'
 
-import {
-    baseSound,
-    canonicalNoSpace,
-    normalizeJyutping,
-    scoreJyutpingAttempt,
-    splitSyllables,
-    splitUserJyutping,
-    stripToneToken
-} from '@/utils/jyutping/jyutping-utils'
-
-import { levelTitles } from '~/utils/levels/levels'
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
+import { levelTitles } from '~/utils/levels/levels'
 
 
 const route = useRoute()
@@ -33,8 +22,6 @@ const slug = computed(() => route.params.slug as string)
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
-
-const BATCH_SIZE = 5
 
 const loading = ref(true)
 const errorState = ref<string | null>(null)
@@ -48,19 +35,19 @@ const batchAttempts = ref<BatchAttempt[]>([])
 const idx = ref(0)
 
 const input = ref('')
-const attempts = ref<AttemptLog[]>([])
-
-const showHint = ref(false) // faint jyutping
 
 const current = computed(() => words.value[idx.value] ?? null)
-
-const normalizedInput = computed(() => normalizeJyutping(input.value))
-const normalizedAnswer = computed(() => (current.value ? normalizeJyutping(current.value.jyutping) : ''))
 
 const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
 
 const hintUsedThisQuestion = ref(false)
+
+const showHint = ref(false)
+
+const fullJyutping = computed(() =>
+    current.value?.jyutping ?? ''
+)
 
 const live = computed(() => {
     if (!current.value) return { state: 'idle' as const }
@@ -70,53 +57,15 @@ const live = computed(() => {
 
     if (!u) return { state: 'idle' as const }
 
-    const uBase = baseSound(u)
-    const aBase = baseSound(a)
-
-    // ✅ Perfect: exact canonical match including tones/spaces
-    if (canonicalNoSpace(u) === canonicalNoSpace(a)) {
+    if (u === a) {
         return { state: 'perfect' as const }
     }
 
-    // ✅ Pass: base sound matches (tone may differ)
-    if (uBase && uBase === aBase) {
-        return { state: 'pass' as const }
-    }
-
-    // 👀 Partial: they are typing the right “shape” (prefix match)
-    // e.g. user typed "gw" and answerBase starts with "gw"
-    if (uBase && aBase.startsWith(uBase)) {
+    if (a.startsWith(u)) {
         return { state: 'partial' as const }
     }
 
-    // Otherwise: not matching
     return { state: 'miss' as const }
-})
-
-const answerSyllables = computed(() => splitSyllables(current.value?.jyutping ?? ''))
-
-const userSyllables = computed(() => splitUserJyutping(input.value))
-
-const answerBaseNoSpace = computed(() =>
-    baseSound(current.value?.jyutping ?? '')
-)
-
-const userBaseNoSpace = computed(() =>
-    baseSound(input.value)
-)
-
-
-type LetterState = 'idle' | 'correct'
-
-const letterStates = computed<LetterState[]>(() => {
-    const ans = answerBaseNoSpace.value
-    const usr = userBaseNoSpace.value
-
-    return ans.split('').map((letter, i) => {
-        if (!usr[i]) return 'idle'
-        if (usr[i] === letter) return 'correct'
-        return 'idle'
-    })
 })
 
 const chineseChars = computed(() =>
@@ -124,23 +73,17 @@ const chineseChars = computed(() =>
 )
 
 const charStates = computed(() => {
-    const ans = answerSyllables.value
-    const usrBase = userBaseNoSpace.value
+    const answer = normalizedAnswer.value
+    const user = normalizedInput.value
 
-    let cursor = 0
-
-    return ans.map((ansTok) => {
-        const ansBase = stripToneToken(ansTok)
-
-        const segment = usrBase.slice(cursor, cursor + ansBase.length)
-
-        const fullyCorrect = segment === ansBase
-
-        cursor += ansBase.length
-
-        return fullyCorrect ? 'correct' : 'idle'
+    return answer.split('').map((char, i) => {
+        if (!user[i]) return 'idle'
+        if (user[i] === char) return 'correct'
+        return 'idle'
     })
 })
+
+const inputRef = ref<HTMLInputElement | null>(null)
 
 async function fetchWords() {
     loading.value = true
@@ -148,8 +91,8 @@ async function fetchWords() {
 
     try {
         // 1️⃣ Fetch vocab for level
-        const levelData = await $fetch<LevelData>(
-            `/api/vocab-quiz/${slug.value}`
+        const levelData = await $fetch<TopicData>(
+            `/api/topic/${slug.value}`
         )
 
         const allWords = Object.values(levelData.categories).flat()
@@ -191,7 +134,6 @@ async function fetchWords() {
 
         idx.value = 0
         input.value = ''
-        attempts.value = []
 
     } catch (e: any) {
         errorState.value =
@@ -201,84 +143,9 @@ async function fetchWords() {
     }
 }
 
-// ---------- Actions ----------
-
-function submit() {
-    if (!current.value) return
-
-    const result = scoreJyutpingAttempt(input.value, current.value.jyutping)
-
-    attempts.value.push({
-        input: input.value.trim(),
-        passed: result.passed,
-        message: result.message,
-    })
-
-    input.value = ''
-}
-
-const fullJyutping = computed(() =>
-    current.value?.jyutping ?? ''
-)
-
-type RenderState = 'idle' | 'correct'
-
-const jyutpingRenderStates = computed<RenderState[]>(() => {
-    const full = fullJyutping.value
-    const usr = userBaseNoSpace.value
-
-    let letterIndex = 0
-
-    return full.split('').map((char) => {
-        // if not a-z letter, don't compare
-        if (!/[a-z]/i.test(char)) {
-            return 'idle'
-        }
-
-        const userChar = usr[letterIndex]
-
-        if (userChar && userChar === char.toLowerCase()) {
-            letterIndex++
-            return 'correct'
-        }
-
-        return 'idle'
-    })
-})
-
-type SylState = 'idle' | 'correct'
-
-const syllableStates = computed<SylState[]>(() => {
-    const ans = answerSyllables.value
-    const usr = userSyllables.value
-
-    const currentTypingIndex = usr.length - 1
-
-    return ans.map((ansTok, i) => {
-        const usrTok = usr[i]
-        if (!usrTok) return 'idle'
-
-        const ansBase = stripToneToken(ansTok)
-        const usrBase = stripToneToken(usrTok)
-
-        // fully correct syllable
-        if (usrBase === ansBase) return 'correct'
-
-        // only allow prefix match on the currently typing syllable
-        if (
-            i === currentTypingIndex &&
-            ansBase.startsWith(usrBase)
-        ) {
-            return 'correct'
-        }
-
-        return 'idle'
-    })
-})
-
 const copied = ref(false)
 
-async function copyJyutping() {
+async function copyChinese() {
     if (!current.value?.jyutping) return
 
     try {
@@ -307,7 +174,6 @@ function resetTraining(options?: { reshuffle?: boolean }) {
     }
 
     input.value = ''
-    attempts.value = []
     showHint.value = false
     idx.value = 0
 
@@ -319,6 +185,7 @@ function resetTraining(options?: { reshuffle?: boolean }) {
 const sessionResult = ref<{
     xpEarned: number
     correctCount: number
+    totalWords: number
 } | null>(null)
 
 async function finalizeBatch() {
@@ -332,7 +199,8 @@ async function finalizeBatch() {
             body: {
                 level: slug.value,
                 sessionKey: sessionKey.value,
-                attempts: batchAttempts.value
+                attempts: batchAttempts.value,
+                mode: 'grind-chinese-topic]'
             }
         })
 
@@ -340,7 +208,7 @@ async function finalizeBatch() {
     } catch (err) {
         console.error('Finalize failed', err)
     } finally {
-        idx.value = BATCH_SIZE
+        idx.value = words.value.length
     }
 }
 
@@ -362,19 +230,20 @@ function playCurrentAudio() {
 
 function advance() {
     if (isComplete.value) return
-    if (idx.value < BATCH_SIZE - 1) {
+    if (idx.value < words.value.length - 1) {
         idx.value++
         input.value = ''
-        attempts.value = []
+        // attempts.value = []
         hintUsedThisQuestion.value = false   // 🔥 reset here
         showHint.value = false
+        nextTick(() => {
+            inputRef.value?.focus()
+        })
     }
 }
 
-const isComplete = computed(() => idx.value >= BATCH_SIZE)
-
+const isComplete = computed(() => idx.value >= words.value.length)
 const wordProgressMap = ref<Record<string, { xp: number }>>({})
-
 
 function startNewSession() {
     sessionKey.value = crypto.randomUUID()
@@ -383,8 +252,13 @@ function startNewSession() {
     fetchWords()
 }
 
-onMounted(fetchWords)
+const normalizedInput = computed(() =>
+    input.value.replace(/\s+/g, '').trim()
+)
 
+const normalizedAnswer = computed(() =>
+    current.value?.word.replace(/\s+/g, '').trim() ?? ''
+)
 
 watch(
     () => words.value,
@@ -422,7 +296,7 @@ watch(
 
 watch(() => live.value.state, async (state) => {
 
-    if (state !== 'pass' && state !== 'perfect') return
+    if (state !== 'perfect') return
 
     if (advancing) return
     if (!current.value) return
@@ -435,10 +309,10 @@ watch(() => live.value.state, async (state) => {
 
         const hintWasUsed = hintUsedThisQuestion.value
 
-        let delta = 3  // base correct
+        let delta = 10  // base correct
 
         if (hintWasUsed) {
-            delta = 1
+            delta = 3
         }
 
         xpDelta.value = delta
@@ -465,7 +339,7 @@ watch(() => live.value.state, async (state) => {
     // Wait for jingle envelope (~400ms)
     await new Promise(r => setTimeout(r, 600))
 
-    if (batchAttempts.value.length >= BATCH_SIZE) {
+    if (batchAttempts.value.length >= words.value.length) {
         await finalizeBatch()
         advancing = false
         return
@@ -473,8 +347,8 @@ watch(() => live.value.state, async (state) => {
 
     advance()
     advancing = false
-}
-)
+})
+
 watch(
     () => current.value?.wordId,
     (id) => {
@@ -490,6 +364,11 @@ watch(
 
 onMounted(() => {
     sessionKey.value = crypto.randomUUID()
+    fetchWords()
+
+    nextTick(() => {
+        inputRef.value?.focus()
+    })
 })
 
 </script>
@@ -498,19 +377,19 @@ onMounted(() => {
     <main class="mx-auto max-w-xl px-6 py-12">
 
         <div class="mb-6">
-            <NuxtLink :to="`/dojo/topic`" class="text-black text-sm hover:underline">
-                ← Back to Topic Dojo
+            <NuxtLink :to="`/dojo/topic/`" class="text-black text-sm hover:underline">
+                ← Back to Level Dojo
             </NuxtLink>
         </div>
 
         <header class="space-y-4">
 
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Jyutping Dojo - {{ levelTitles[slug] }}
+                Chinese Dojo - {{ levelTitles[slug] }}
             </h1>
 
             <p class="text-sm text-gray-600">
-                Type the jyutping for each word shown
+                Type the Chinese characters for each word
             </p>
         </header>
 
@@ -527,19 +406,10 @@ onMounted(() => {
                 <!-- Progress + controls -->
                 <div v-if="!isComplete" class="flex items-center justify-between">
                     <div class="text-xs text-black">
-                        Word {{ idx + 1 }} / {{ BATCH_SIZE }}
+                        Word {{ idx + 1 }} / {{ words.length }}
                     </div>
 
                     <div class="flex items-center gap-2">
-
-                        <button
-                            class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                            type="button" @click="() => {
-                                showHint = !showHint
-                                if (showHint) hintUsedThisQuestion = true
-                            }">
-                            {{ showHint ? 'Hide hint' : 'Show hint' }}
-                        </button>
 
                         <button
                             class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
@@ -557,7 +427,7 @@ onMounted(() => {
                     <div class="text-4xl font-medium flex gap-1">
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                             'text-green-600 font-semibold': charStates[i] === 'correct',
-                            'text-gray-400': syllableStates[i] === 'idle'
+                            'text-gray-400': charStates[i] === 'idle'
                         }">
                             {{ char }}
                         </span>
@@ -566,22 +436,18 @@ onMounted(() => {
                     <div v-if="current.meaning" class="mt-2 text-lg text-gray-700">
                         {{ current.meaning }}
                     </div>
-
-                    <!-- Faint hint -->
-                    <div v-if="showHint" class="mt-3 flex items-center gap-3">
-                        <div class="text-lg font-mono select-none">
-                            <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
-                                'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
-                                'text-gray-400': jyutpingRenderStates[i] === 'idle'
-                            }">
-                                {{ char }}
-                            </span>
-                        </div>
-
-                        <button type=" button" @click="copyJyutping"
-                            class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
-                            {{ copied ? '✓' : 'copy' }}
+                    <!-- Hint Section -->
+                    <div class="mt-4">
+                        <button type="button" @click="() => {
+                            showHint = !showHint
+                            if (showHint) hintUsedThisQuestion = true
+                        }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
+                            {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
                         </button>
+
+                        <div v-if="showHint" class="mt-2 text-lg font-mono text-gray-500">
+                            {{ fullJyutping }}
+                        </div>
                     </div>
 
                 </div>
@@ -615,14 +481,23 @@ onMounted(() => {
                 </div>
 
                 <!-- Input -->
-                <form v-if="!isComplete" class="space-y-3" @submit.prevent="submit">
+                <div v-if="!isComplete" class="space-y-3">
                     <label class="block text-sm font-medium text-gray-800">
-                        Type here:
+                        Type chinese here:
                     </label>
 
-                    <input :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text" placeholder=""
+
+                    <input ref="inputRef" :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text"
+                        placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
-                </form>
+
+
+
+                    <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
+                        Tip: try typing without spaces, only chinese is accepted, flex those typing skills :)
+                    </div>
+
+                </div>
 
                 <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
 
@@ -631,7 +506,7 @@ onMounted(() => {
                     </h2>
 
                     <p class="text-gray-600 text-base uppercase">
-                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed
+                        {{ sessionResult.correctCount }} / {{ words.length }} words completed
                     </p>
 
                     <p class="text-green-600 text-2xl font-semibold">
@@ -643,11 +518,6 @@ onMounted(() => {
                         Play again
                     </button>
                 </div>
-
-                <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
-                    Tip: try typing without spaces, do not worry about tones.
-                </div>
-
             </div>
         </section>
     </main>

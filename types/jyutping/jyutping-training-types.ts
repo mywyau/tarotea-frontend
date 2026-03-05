@@ -47,3 +47,19 @@ export type LevelData = {
     }[]
   >;
 };
+
+
+export type TopicData = {
+  topic: string;
+  title: string;
+  description: string;
+  categories: Record<
+    string,
+    {
+      id: string;
+      word: string;
+      jyutping: string;
+      meaning: string;
+    }[]
+  >;
+};

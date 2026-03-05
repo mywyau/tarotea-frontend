@@ -155,7 +155,7 @@ const paginatedTopics = computed(() => {
             Start
           </NuxtLink>
 
-          <NuxtLink :to="`/coming-soon`"
+          <NuxtLink :to="`/dojo/topic/chinese/training/${quizTopic.id}`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
             style="background-color:#EAB8E4;">
             Chinese only
