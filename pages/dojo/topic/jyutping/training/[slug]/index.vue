@@ -2,8 +2,8 @@
 
 definePageMeta({
     ssr: false,
-    // middleware: ['logged-in'],
-    middleware: ['coming-soon'],
+    middleware: ['logged-in'],
+    // middleware: ['coming-soon'],
 })
 
 import type {
@@ -35,7 +35,7 @@ const slug = computed(() => route.params.slug as string)
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-const BATCH_SIZE = 5
+const BATCH_SIZE = 20
 
 const loading = ref(true)
 const errorState = ref<string | null>(null)
@@ -106,19 +106,18 @@ const userBaseNoSpace = computed(() =>
     baseSound(input.value)
 )
 
+// type LetterState = 'idle' | 'correct'
 
-type LetterState = 'idle' | 'correct'
+// const letterStates = computed<LetterState[]>(() => {
+//     const ans = answerBaseNoSpace.value
+//     const usr = userBaseNoSpace.value
 
-const letterStates = computed<LetterState[]>(() => {
-    const ans = answerBaseNoSpace.value
-    const usr = userBaseNoSpace.value
-
-    return ans.split('').map((letter, i) => {
-        if (!usr[i]) return 'idle'
-        if (usr[i] === letter) return 'correct'
-        return 'idle'
-    })
-})
+//     return ans.split('').map((letter, i) => {
+//         if (!usr[i]) return 'idle'
+//         if (usr[i] === letter) return 'correct'
+//         return 'idle'
+//     })
+// })
 
 const chineseChars = computed(() =>
     current.value?.word.split('') ?? []
@@ -150,7 +149,7 @@ async function fetchWords() {
     try {
         // 1️⃣ Fetch vocab for level
         const levelData = await $fetch<LevelData>(
-            `/api/vocab-quiz/${slug.value}`
+            `/api/topic/${slug.value}`
         )
 
         const allWords = Object.values(levelData.categories).flat()
@@ -333,7 +332,8 @@ async function finalizeBatch() {
             body: {
                 level: slug.value,
                 sessionKey: sessionKey.value,
-                attempts: batchAttempts.value
+                attempts: batchAttempts.value,
+                mode: 'grind-topic'
             }
         })
 
@@ -341,7 +341,7 @@ async function finalizeBatch() {
     } catch (err) {
         console.error('Finalize failed', err)
     } finally {
-        idx.value = BATCH_SIZE
+        idx.value = words.value.length
     }
 }
 
@@ -363,7 +363,7 @@ function playCurrentAudio() {
 
 function advance() {
     if (isComplete.value) return
-    if (idx.value < BATCH_SIZE - 1) {
+    if (idx.value < words.value.length - 1) {
         idx.value++
         input.value = ''
         attempts.value = []
@@ -372,7 +372,7 @@ function advance() {
     }
 }
 
-const isComplete = computed(() => idx.value >= BATCH_SIZE)
+const isComplete = computed(() => idx.value >= words.value.length)
 
 const wordProgressMap = ref<Record<string, { xp: number }>>({})
 
@@ -466,7 +466,7 @@ watch(() => live.value.state, async (state) => {
     // Wait for jingle envelope (~400ms)
     await new Promise(r => setTimeout(r, 600))
 
-    if (batchAttempts.value.length >= BATCH_SIZE) {
+    if (batchAttempts.value.length >= words.value.length) {
         await finalizeBatch()
         advancing = false
         return
@@ -528,7 +528,7 @@ onMounted(() => {
                 <!-- Progress + controls -->
                 <div v-if="!isComplete" class="flex items-center justify-between">
                     <div class="text-xs text-black">
-                        Word {{ idx + 1 }} / {{ BATCH_SIZE }}
+                        Word {{ idx + 1 }} / {{ words.length }}
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -625,6 +625,10 @@ onMounted(() => {
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
                 </form>
 
+                <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
+                    Tip: try typing without spaces, do not worry about tones.
+                </div>
+
                 <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
 
                     <h2 class="text-2xl font-semibold">
@@ -632,7 +636,7 @@ onMounted(() => {
                     </h2>
 
                     <p class="text-gray-600 text-base uppercase">
-                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed
+                        {{ sessionResult.correctCount }} / {{ words.length }} words completed
                     </p>
 
                     <p class="text-green-600 text-2xl font-semibold">
@@ -643,10 +647,6 @@ onMounted(() => {
                         @click="startNewSession">
                         Play again
                     </button>
-                </div>
-
-                <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
-                    Tip: try typing without spaces, do not worry about tones.
                 </div>
 
             </div>

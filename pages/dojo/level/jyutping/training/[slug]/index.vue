@@ -101,27 +101,27 @@ const answerSyllables = computed(() => splitSyllables(current.value?.jyutping ??
 
 const userSyllables = computed(() => splitUserJyutping(input.value))
 
-const answerBaseNoSpace = computed(() =>
-    baseSound(current.value?.jyutping ?? '')
-)
+// const answerBaseNoSpace = computed(() =>
+//     baseSound(current.value?.jyutping ?? '')
+// )
 
 const userBaseNoSpace = computed(() =>
     baseSound(input.value)
 )
 
 
-type LetterState = 'idle' | 'correct'
+// type LetterState = 'idle' | 'correct'
 
-const letterStates = computed<LetterState[]>(() => {
-    const ans = answerBaseNoSpace.value
-    const usr = userBaseNoSpace.value
+// const letterStates = computed<LetterState[]>(() => {
+//     const ans = answerBaseNoSpace.value
+//     const usr = userBaseNoSpace.value
 
-    return ans.split('').map((letter, i) => {
-        if (!usr[i]) return 'idle'
-        if (usr[i] === letter) return 'correct'
-        return 'idle'
-    })
-})
+//     return ans.split('').map((letter, i) => {
+//         if (!usr[i]) return 'idle'
+//         if (usr[i] === letter) return 'correct'
+//         return 'idle'
+//     })
+// })
 
 const chineseChars = computed(() =>
     current.value?.word.split('') ?? []
@@ -339,7 +339,7 @@ async function finalizeBatch() {
                 level: slug.value,
                 sessionKey: sessionKey.value,
                 attempts: batchAttempts.value,
-                mode: 'grind'
+                mode: 'grind-level'
             }
         })
 
@@ -370,7 +370,7 @@ function playCurrentAudio() {
 function advance() {
     if (isComplete.value) return
 
-    if (idx.value < BATCH_SIZE - 1) {
+    if (idx.value < words.value.length - 1) {
         idx.value++
         input.value = ''
         attempts.value = []
@@ -535,7 +535,7 @@ watch(
                 <!-- Progress + controls -->
                 <div v-if="!isComplete" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div class="text-xs text-black">
-                        Word {{ idx + 1 }} / {{ BATCH_SIZE }}
+                        Word {{ idx + 1 }} / {{ words.length }}
                     </div>
 
                     <div class="flex flex-wrap gap-2">
@@ -653,7 +653,7 @@ watch(
                     </h2>
 
                     <p class="text-gray-600 text-base uppercase">
-                        {{ sessionResult.correctCount }} / {{ BATCH_SIZE }} words completed
+                        {{ sessionResult.correctCount }} / {{ words.length }} words completed
                     </p>
 
                     <p class="text-green-600 text-2xl font-semibold">
