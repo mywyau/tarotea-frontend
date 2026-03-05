@@ -1,15 +1,18 @@
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
+import { masteryXp } from "~/utils/xp/helpers";
 
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
+
+  const aa = masteryXp;
 
   const { rows } = await db.query(
     `
       select
         -- Lifetime stats (word state)
         coalesce(sum(p.xp), 0) as total_xp,
-        count(*) filter (where p.xp >= 200) as words_maxed,
+        count(*) filter (where p.xp >= $2) as words_maxed,
         count(*) as words_seen,
         coalesce(sum(p.correct_count), 0) as total_correct,
         coalesce(sum(p.wrong_count), 0) as total_wrong,
@@ -37,7 +40,7 @@ export default defineEventHandler(async (event) => {
       from user_word_progress p
       where p.user_id = $1
     `,
-    [userId],
+    [userId, masteryXp],
   );
 
   return rows[0];
