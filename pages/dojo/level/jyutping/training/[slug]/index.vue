@@ -28,6 +28,7 @@ import { playCorrectJingle } from '@/utils/sounds'
 import { levelTitles } from '~/utils/levels/levels'
 
 import { nextTick } from 'vue'
+import { masteryXp } from '@/utils/xp/helpers'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -144,6 +145,7 @@ const charStates = computed(() => {
 })
 
 async function fetchWords() {
+
     loading.value = true
     errorState.value = null
 
@@ -378,7 +380,6 @@ const isComplete = computed(() => idx.value >= words.value.length)
 
 const wordProgressMap = ref<Record<string, { xp: number }>>({})
 
-
 function startNewSession() {
     sessionKey.value = crypto.randomUUID()
     batchAttempts.value = []
@@ -515,6 +516,7 @@ watch(
         </header>
 
         <section class="mt-8 rounded-2xl bg-white p-5 shadow-sm">
+
             <div v-if="loading" class="text-sm text-gray-600">
                 Loading training words…
             </div>
@@ -603,7 +605,7 @@ watch(
                         <!-- XP Text + Delta -->
                         <div class="relative flex items-center">
                             <span class="text-sm text-gray-600 whitespace-nowrap">
-                                {{ currentXp ?? 0 }} XP
+                                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
                             </span>
 
                             <transition name="xp-fall">

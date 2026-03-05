@@ -32,7 +32,7 @@ import {
 } from '@/utils/sounds'
 import { brandColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels'
-import { masteryXp } from '~/utils/xp /helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
 // const slug = computed(() => route.params.slug as string)

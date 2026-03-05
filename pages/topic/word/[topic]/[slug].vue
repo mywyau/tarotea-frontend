@@ -5,7 +5,7 @@ definePageMeta({
     ssr: true,
 })
 
-import { masteryXp } from '~/utils/xp /helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()

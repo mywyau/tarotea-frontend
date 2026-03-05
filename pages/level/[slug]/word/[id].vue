@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useAudioVolume } from '~/composables/useAudioVolume'
 import { useAuth } from '~/composables/useAuth'
-import { masteryXp } from '~/utils/xp /helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 
 definePageMeta({

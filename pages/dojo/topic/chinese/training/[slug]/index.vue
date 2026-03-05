@@ -15,6 +15,7 @@ import type {
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
 import { topicJyutpingQuizMeta } from '~/utils/topics/helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 
 const route = useRoute()
@@ -471,7 +472,7 @@ onMounted(() => {
                         <!-- XP Text + Delta -->
                         <div class="relative flex items-center">
                             <span class="text-sm text-gray-600 whitespace-nowrap">
-                                {{ currentXp ?? 0 }} XP
+                                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
                             </span>
 
                             <transition name="xp-fall">

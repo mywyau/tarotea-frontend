@@ -13,7 +13,7 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
-import { masteryXp } from '~/utils/xp /helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 
 type Word = {

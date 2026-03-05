@@ -11,7 +11,7 @@ import { useRoute } from 'vue-router'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel, hasPaidAccess, isFreeLevel } from '~/utils/levels/permissions'
-import { masteryXp } from '~/utils/xp /helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -128,7 +128,7 @@ const gatedCategories = computed(() => {
           !canAccessLevel(isLoggedIn.value, entitlement.value) &&
           globalIndex >= FREE_WORD_LIMIT
 
-          
+
         globalIndex++
 
         return {

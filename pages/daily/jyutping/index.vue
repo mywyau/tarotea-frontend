@@ -2,8 +2,8 @@
 
 definePageMeta({
     ssr: false,
-    // middleware: ['logged-in'],
-    middleware: ['coming-soon'],
+    middleware: ['logged-in'],
+    // middleware: ['coming-soon'],
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
@@ -345,8 +345,8 @@ async function submit() {
         } else {
             done.value = true
             await finalizeDaily()
+            await new Promise(r => setTimeout(r, 1200))
         }
-
         return
     }
 
@@ -359,14 +359,22 @@ async function submit() {
         return
     }
 
-    // ❌ CASE 3: Wrong and no attempts left
+    // ❌ CASE 3: Wrong and no attempts left (word failed)
+
     sessionAnswers.value.push({
         wordId: challenge.value.wordId,
         correct: false
     })
 
-    done.value = true
-    await finalizeDaily()
+    currentIndex.value++
+
+    if (currentIndex.value < wordIds.value.length) {
+        await loadWord(wordIds.value[currentIndex.value])
+    } else {
+        done.value = true
+        await finalizeDaily()
+        await new Promise(r => setTimeout(r, 1200))
+    }
 }
 
 function revealAnswer() {
@@ -388,6 +396,7 @@ type SessionAnswer = {
 }
 
 const sessionAnswers = ref<SessionAnswer[]>([])
+
 const finalizing = ref(false)
 const finalized = ref(false)
 
@@ -473,8 +482,6 @@ watch(input, (val) => {
         input.value = trimmed
     }
 })
-
-
 </script>
 
 <template>
@@ -497,6 +504,20 @@ watch(input, (val) => {
 
             <div v-else-if="errorState" class="text-sm text-red-700">
                 {{ errorState }}
+            </div>
+
+            <div v-else-if="finalizing" class="flex flex-col items-center justify-center text-center py-10">
+
+                <div class="loader mb-6"></div>
+
+                <p class="text-lg font-semibold text-purple-600">
+                    Finalising your score...
+                </p>
+
+                <p class="text-sm text-gray-500 mt-2">
+                    Calculating XP & results
+                </p>
+
             </div>
 
             <div v-else-if="done && finalized" class="bg-white p-4 space-y-2">
@@ -531,7 +552,7 @@ watch(input, (val) => {
                 </div>
             </div>
 
-            <div v-else-if="!done && challenge" class="space-y-5">
+            <div v-else-if="challenge" class="space-y-5">
                 <!-- Word display -->
                 <div class="flex items-start justify-between gap-4">
                     <div>
@@ -663,3 +684,20 @@ watch(input, (val) => {
         </section>
     </main>
 </template>
+
+<style scoped>
+.loader {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 3px solid rgba(168, 85, 247, 0.2);
+    border-top: 3px solid rgb(168, 85, 247);
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+</style>

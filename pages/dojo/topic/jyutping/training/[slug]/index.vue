@@ -25,7 +25,8 @@ import {
 
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
-import { levelTitles } from '~/utils/levels/levels'
+import { topicJyutpingQuizMeta } from '~/utils/topics/helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 
 const route = useRoute()
@@ -61,6 +62,15 @@ const xpDelta = ref<number | null>(null)
 const currentXp = ref<number | null>(null)
 
 const hintUsedThisQuestion = ref(false)
+
+const topicMeta = computed(() =>
+    topicJyutpingQuizMeta.find(t => t.id === slug.value)
+)
+
+const topicTitle = computed(() =>
+    topicMeta.value?.title ?? slug.value
+)
+
 
 const live = computed(() => {
     if (!current.value) return { state: 'idle' as const }
@@ -505,7 +515,7 @@ onMounted(() => {
         <header class="space-y-4">
 
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Jyutping Dojo - {{ levelTitles[slug] }}
+                Chinese Dojo - {{ topicTitle }}
             </h1>
 
             <p class="text-sm text-gray-600">
@@ -608,7 +618,7 @@ onMounted(() => {
                         <!-- XP Text + Delta -->
                         <div class="relative flex items-center">
                             <span class="text-sm text-gray-600 whitespace-nowrap">
-                                {{ currentXp ?? 0 }} XP
+                                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
                             </span>
 
                             <transition name="xp-fall">

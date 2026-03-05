@@ -17,7 +17,7 @@ import {
 } from '@/utils/sounds'
 
 import { buildTopicQuiz } from '~/utils/quiz/buildTopicQuiz'
-import { masteryXp } from '~/utils/xp /helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)

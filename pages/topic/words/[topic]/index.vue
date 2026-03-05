@@ -10,7 +10,7 @@ import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
 import { canAccessTopic } from '~/utils/topics/permissions'
 import { topics } from '~/utils/topics/topics'
-import { masteryXp } from '~/utils/xp /helpers'
+import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
 const slug = route.params.topic as string

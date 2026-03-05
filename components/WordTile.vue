@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { NuxtLink } from '#components';
-import { masteryXp } from '@/utils/xp /helpers';
+import { masteryXp } from '~/utils/xp/helpers';
 
 defineProps<{
   to?: string
