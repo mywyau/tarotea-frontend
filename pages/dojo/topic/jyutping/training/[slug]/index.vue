@@ -615,14 +615,17 @@ onMounted(() => {
                 </div>
 
                 <!-- Input -->
-                <form v-if="!isComplete" class="space-y-3" @submit.prevent="submit">
+                <div v-if="!isComplete" class="space-y-3">
                     <label class="block text-sm font-medium text-gray-800">
                         Type here:
                     </label>
 
                     <input :disabled="isComplete" v-model="input" autocomplete="off" inputmode="text" placeholder=""
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
-                </form>
+                </div>
+
+                <div class="h-24 sm:h-0"></div>
+
 
                 <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
                     Tip: try typing without spaces, do not worry about tones.
