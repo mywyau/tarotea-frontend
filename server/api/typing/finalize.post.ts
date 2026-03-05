@@ -1,24 +1,18 @@
 import { createError, getHeader, readBody } from "h3";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
-
 import type {
-  TypingAttempt,
-  TypingBatchAttempt,
-} from "~/types/typing/typing-types";
+  Attempt,
+  BatchAttempt,
+} from "~/types/jyutping/jyutping-training-types";
 
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
 
-  const allowedModes = ["jyutping", "chinese", "meaning"] as const;
-  type Mode = (typeof allowedModes)[number];
-
-  const mode: Mode = allowedModes.includes(body.mode) ? body.mode : "jyutping"; // safe fallback
-
   const body = (await readBody(event)) as {
     level: string;
     sessionKey: string;
-    attempts: TypingBatchAttempt[];
+    attempts: BatchAttempt[];
     mode: string;
   };
 
@@ -27,7 +21,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // de-dupe by wordId (first occurrence wins)
-  const map = new Map<string, TypingBatchAttempt>();
+  const map = new Map<string, BatchAttempt>();
 
   for (const a of body.attempts) {
     if (!a?.wordId) continue;
@@ -66,13 +60,27 @@ export default defineEventHandler(async (event) => {
       streakMap.set(r.word_id, Number(r.streak ?? 0));
     }
 
-    function deltaFor(a: TypingBatchAttempt) {
+    function deltaFor(a: BatchAttempt, mode: string) {
       if (!a.passed) return 0;
-      if (a.hintUsed) return 1;
-      return 3;
+
+      switch (mode) {
+        case "grind-level":
+          return a.hintUsed ? 1 : 3;
+        case "grind-topic":
+          return a.hintUsed ? 1 : 3;
+
+        case "grind-chinese-level":
+          return a.hintUsed ? 1 : 10; // slightly harder
+
+        case "grind-chinese-topic":
+          return a.hintUsed ? 1 : 10; // slightly harder
+
+        default:
+          return a.hintUsed ? 1 : 3;
+      }
     }
 
-    const payloadAttempts: TypingAttempt[] = attempts.map((a) => ({
+    const payloadAttempts: Attempt[] = attempts.map((a) => ({
       wordId: a.wordId,
       passed: a.passed,
       delta: deltaFor(a),
@@ -98,7 +106,7 @@ export default defineEventHandler(async (event) => {
       `,
       [
         userId,
-        mode,
+        body.mode,
         body.level,
         body.sessionKey,
         JSON.stringify({ answers: payloadAttempts }),

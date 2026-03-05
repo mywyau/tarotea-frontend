@@ -9,13 +9,11 @@ import type {
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
 
-  // const mode = 'grind'
-
   const body = (await readBody(event)) as {
     level: string;
     sessionKey: string;
     attempts: BatchAttempt[];
-    mode: string
+    mode: string;
   };
 
   if (!body || !Array.isArray(body.attempts)) {
@@ -62,10 +60,24 @@ export default defineEventHandler(async (event) => {
       streakMap.set(r.word_id, Number(r.streak ?? 0));
     }
 
-    function deltaFor(a: BatchAttempt) {
+    function deltaFor(a: BatchAttempt, mode: string) {
       if (!a.passed) return 0;
-      if (a.hintUsed) return 1;
-      return 3;
+
+      switch (mode) {
+        case "grind-level":
+          return a.hintUsed ? 1 : 3;
+        case "grind-topic":
+          return a.hintUsed ? 1 : 3;
+
+        case "grind-chinese-level":
+          return a.hintUsed ? 1 : 10; // slightly harder
+
+        case "grind-chinese-topic":
+          return a.hintUsed ? 1 : 10; // slightly harder
+
+        default:
+          return a.hintUsed ? 1 : 3;
+      }
     }
 
     const payloadAttempts: Attempt[] = attempts.map((a) => ({
