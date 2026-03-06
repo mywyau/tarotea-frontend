@@ -131,9 +131,9 @@ export default defineEventHandler(async (event) => {
 
     return {
       session: {
-        correctCount,
-        totalWords: payloadAttempts.length,
         xpEarned: totalDelta,
+        correctCount: correctCount,
+        totalWords: payloadAttempts.length,
       },
     };
   } catch (e) {

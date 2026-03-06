@@ -208,6 +208,7 @@ async function finalizeBatch() {
         })
 
         sessionResult.value = res.session
+        playQuizCompleteFanfareSong()
     } catch (err) {
         console.error('Finalize failed', err)
     } finally {

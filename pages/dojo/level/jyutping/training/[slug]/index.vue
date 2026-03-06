@@ -27,8 +27,8 @@ import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLe
 import { playCorrectJingle } from '@/utils/sounds'
 import { levelTitles } from '~/utils/levels/levels'
 
-import { nextTick } from 'vue'
 import { masteryXp } from '@/utils/xp/helpers'
+import { nextTick } from 'vue'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -99,27 +99,9 @@ const answerSyllables = computed(() => splitSyllables(current.value?.jyutping ??
 
 const userSyllables = computed(() => splitUserJyutping(input.value))
 
-// const answerBaseNoSpace = computed(() =>
-//     baseSound(current.value?.jyutping ?? '')
-// )
-
 const userBaseNoSpace = computed(() =>
     baseSound(input.value)
 )
-
-
-// type LetterState = 'idle' | 'correct'
-
-// const letterStates = computed<LetterState[]>(() => {
-//     const ans = answerBaseNoSpace.value
-//     const usr = userBaseNoSpace.value
-
-//     return ans.split('').map((letter, i) => {
-//         if (!usr[i]) return 'idle'
-//         if (usr[i] === letter) return 'correct'
-//         return 'idle'
-//     })
-// })
 
 const chineseChars = computed(() =>
     current.value?.word.split('') ?? []
@@ -338,6 +320,7 @@ async function finalizeBatch() {
         })
 
         sessionResult.value = res.session
+        playQuizCompleteFanfareSong()
     } catch (err) {
         console.error('Finalize failed', err)
     } finally {

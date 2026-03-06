@@ -214,6 +214,7 @@ async function finalizeBatch() {
         })
 
         sessionResult.value = res.session
+        playQuizCompleteFanfareSong()
     } catch (err) {
         console.error('Finalize failed', err)
     } finally {
@@ -504,18 +505,18 @@ onMounted(() => {
                     <div class="h-24 sm:h-0"></div>
                 </div>
 
-                <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
+                <div v-if="isComplete" class="space-y-8 text-center">
 
                     <h2 class="text-2xl font-semibold">
                         Good job! Keep going!
                     </h2>
 
                     <p class="text-gray-600 text-base uppercase">
-                        {{ sessionResult.correctCount }} / {{ words.length }} words completed
+                        {{ sessionResult?.correctCount ?? words.length }} / {{ words.length }} words completed
                     </p>
 
                     <p class="text-green-600 text-2xl font-semibold">
-                        +{{ sessionResult.xpEarned }} XP
+                        +{{ sessionResult?.xpEarned ?? 0 }} XP
                     </p>
 
                     <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
