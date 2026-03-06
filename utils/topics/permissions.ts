@@ -6,7 +6,7 @@ export const freeTopics = new Set([
   "fruits-vegetables",
   "clothing",
   "dim-sum",
-  "resturant-menu",
+  "restaurant-menu",
 ]);
 
 export const freeTopicsList = [
@@ -15,9 +15,8 @@ export const freeTopicsList = [
   "fruits-vegetables",
   "clothing",
   "dim-sum",
-  "resturant-menu",
+  "restaurant-menu",
 ];
-
 
 export const freeTopicsQuiz = [
   "survival-essentials",
@@ -32,7 +31,6 @@ export const freeTopicsJyutpingDojo = [
   "fruits-vegetables",
   "clothing",
 ];
-
 
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {
   if (!entitlement) {
@@ -62,7 +60,6 @@ export function canAccessTopic(
   userEntitlement: Entitlement | null,
   topic: string,
 ): boolean {
-
   isFreeTopic(topic);
   // Paid levels
   if (!isLoggedIn) return false;
@@ -75,7 +72,6 @@ export function canAccessTopicWord(
   userEntitlement: Entitlement | null,
   topic: string,
 ): boolean {
-
   // Paid levels
   if (!isLoggedIn) return false;
 
@@ -87,7 +83,6 @@ export function canAccessTopicQuiz(
   userEntitlement: Entitlement | null,
   topic: string,
 ): boolean {
-
   if (isFreeTopicQuiz(topic)) return true;
   // Paid levels
   if (!isLoggedIn) return false;

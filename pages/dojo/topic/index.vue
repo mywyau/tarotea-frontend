@@ -6,8 +6,8 @@ definePageMeta({
 })
 
 import type { Topic } from '~/types/topic'
-import { topicJyutpingQuizMeta } from '~/utils/topics/helpers'
 import { canAccessTopic, isFreeTopicsJyutpingDojo } from '~/utils/topics/permissions'
+import { sortedTopics } from '~/utils/topics/topics'
 
 const {
   state,
@@ -48,30 +48,30 @@ function goToPage(page: number) {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-const sortedTopics = computed(() =>
-  [...topicJyutpingQuizMeta].sort((a, b) => {
-    // Coming soon topics go to the end
-    if (a.comingSoon !== b.comingSoon) {
-      return a.comingSoon ? 1 : -1
-    }
+// const sortedTopics = computed(() =>
+//   [...topicJyutpingQuizMeta].sort((a, b) => {
+//     // Coming soon topics go to the end
+//     if (a.comingSoon !== b.comingSoon) {
+//       return a.comingSoon ? 1 : -1
+//     }
 
-    // Optional: push paid topics after free ones
-    if (!!a.requiresPaid !== !!b.requiresPaid) {
-      return a.requiresPaid ? 1 : -1
-    }
+//     // Optional: push paid topics after free ones
+//     if (!!a.requiresPaid !== !!b.requiresPaid) {
+//       return a.requiresPaid ? 1 : -1
+//     }
 
-    return 0
-  })
-)
+//     return 0
+//   })
+// )
 
 const totalPages = computed(() =>
-  Math.ceil(sortedTopics.value.length / ITEMS_PER_PAGE)
+  Math.ceil(sortedTopics.length / ITEMS_PER_PAGE)
 )
 
 const paginatedTopics = computed(() => {
   const start = (currentPage.value - 1) * ITEMS_PER_PAGE
   const end = start + ITEMS_PER_PAGE
-  return sortedTopics.value.slice(start, end)
+  return sortedTopics.slice(start, end)
 })
 
 </script>

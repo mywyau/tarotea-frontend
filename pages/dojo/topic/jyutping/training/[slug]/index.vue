@@ -64,7 +64,7 @@ const currentXp = ref<number | null>(null)
 const hintUsedThisQuestion = ref(false)
 
 const topicMeta = computed(() =>
-    sortedTopicJyutpingQuizMeta.value.find(t => t.id === slug.value)
+    sortedTopicJyutpingQuizMeta.find(t => t.id === slug.value)
 )
 
 const topicTitle = computed(() =>

@@ -57,7 +57,7 @@ const fullJyutping = computed(() =>
 )
 
 const topicMeta = computed(() =>
-    sortedTopicJyutpingQuizMeta.value.find(t => t.id === slug.value)
+    sortedTopicJyutpingQuizMeta.find(t => t.id === slug.value)
 )
 
 const topicTitle = computed(() =>

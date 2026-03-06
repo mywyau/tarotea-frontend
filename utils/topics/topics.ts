@@ -1,19 +1,3 @@
-export const sortedTopics = computed(() =>
-  [...topics].sort((a, b) => {
-    // Coming soon topics go to the end
-    if (a.comingSoon !== b.comingSoon) {
-      return a.comingSoon ? 1 : -1;
-    }
-
-    // Optional: push paid topics after free ones
-    if (!!a.requiresPaid !== !!b.requiresPaid) {
-      return a.requiresPaid ? 1 : -1;
-    }
-
-    return 0;
-  }),
-);
-
 export const freeTopics = [
   "survival-essentials",
   "greetings-polite",
@@ -83,8 +67,8 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
-    id: "resturant-menu",
-    title: "Resturant Menu",
+    id: "restaurant-menu",
+    title: "Restaurant Menu",
     comingSoon: true,
     description: "Study and learn to order your favourite dishes.",
     requiresPaid: false,
@@ -369,3 +353,17 @@ export const topics = [
     quizRequiresPaid: false,
   },
 ];
+
+export const sortedTopics = [...topics].sort((a, b) => {
+  // Coming soon topics go to the end
+  if (a.comingSoon !== b.comingSoon) {
+    return a.comingSoon ? 1 : -1;
+  }
+
+  // Optional: push paid topics after free ones
+  if (!!a.requiresPaid !== !!b.requiresPaid) {
+    return a.requiresPaid ? 1 : -1;
+  }
+
+  return 0;
+});

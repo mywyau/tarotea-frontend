@@ -22,13 +22,13 @@ const ITEMS_PER_PAGE = 9
 const currentPage = ref(1)
 
 const totalPages = computed(() =>
-    Math.ceil(sortedTopics.value.length / ITEMS_PER_PAGE)
+    Math.ceil(sortedTopics.length / ITEMS_PER_PAGE)
 )
 
 const paginatedTopics = computed(() => {
     const start = (currentPage.value - 1) * ITEMS_PER_PAGE
     const end = start + ITEMS_PER_PAGE
-    return sortedTopics.value.slice(start, end)
+    return sortedTopics.slice(start, end)
 })
 
 function goToPage(page: number) {
