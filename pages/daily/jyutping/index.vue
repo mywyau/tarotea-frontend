@@ -211,6 +211,35 @@ function scoreLetters(userRaw: string, answerRaw: string) {
 
 const audio = ref<HTMLAudioElement | null>(null)
 
+const failed = computed(() =>
+    !solved.value && attemptsLeft.value === 0
+)
+
+const revealedLetters = computed(() => {
+    if (!challenge.value) return []
+
+    const answer = baseSound(challenge.value.jyutping).split('')
+
+    if (solved.value || attemptsLeft.value === 0) {
+        return answer
+    }
+
+    const revealed = Array(answer.length).fill(null)
+
+    for (const attempt of attempts.value) {
+        if (!attempt.letters || !attempt.letterStates) continue
+
+        attempt.letters.forEach((letter, i) => {
+            if (attempt.letterStates?.[i] === 'correct') {
+                revealed[i] = letter
+            }
+        })
+    }
+
+    return revealed
+})
+
+
 function playAudio() {
 
     if (!challenge.value?.audioUrl) return
@@ -545,13 +574,13 @@ watch(
                         <div class="flex gap-1 mt-2 font-mono">
                             <div v-for="(letter, i) in answerLetters" :key="i"
                                 class="w-5 h-6 border-b flex items-end justify-center text-sm" :class="[
-                                    revealAnswer
-                                        ? solved
+                                    failed
+                                        ? 'border-red-400 text-red-500'
+                                        : revealedLetters[i]
                                             ? 'border-green-500 text-green-600'
-                                            : 'border-red-400 text-red-500'
-                                        : 'border-gray-400 text-transparent'
+                                            : 'border-gray-400 text-transparent'
                                 ]">
-                                {{ revealAnswer ? letter : '•' }}
+                                {{ failed ? letter : (revealedLetters[i] ?? '•') }}
                             </div>
                         </div>
 
