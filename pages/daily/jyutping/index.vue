@@ -79,6 +79,8 @@ onUnmounted(() => {
     if (tipInterval) clearInterval(tipInterval)
 })
 
+const solved = ref(false)
+
 const totalLetters = computed(() => {
     if (!challenge.value) return 0
     return baseSound(challenge.value.jyutping).length
@@ -105,6 +107,10 @@ const errorMessage = ref('')
 const state = ref<QuizState>('loading')
 
 const MAX_ATTEMPTS = 6
+
+const revealAnswer = computed(() =>
+    solved.value || attemptsLeft.value === 0
+)
 
 const attemptsLeft = computed(() =>
     Math.max(0, MAX_ATTEMPTS - attempts.value.length)
@@ -241,6 +247,7 @@ async function loadWord(id: string) {
     // reset per-word UI state
     input.value = ''
     attempts.value = []
+    solved.value = false
 }
 
 async function nextWord() {
@@ -353,6 +360,7 @@ async function submit() {
 
     if (state.value !== 'playing') return
     if (!challenge.value) return
+    if (solved.value) return
     if (attemptsLeft.value <= 0) return
 
     const result = scoreAttempt(input.value, challenge.value.jyutping)
@@ -377,7 +385,8 @@ async function submit() {
             correct: true
         })
 
-        // return nextWord()
+
+        solved.value = true
         showNext.value = true
     }
 
@@ -535,8 +544,14 @@ watch(
                         <!-- hidden answer letters -->
                         <div class="flex gap-1 mt-2 font-mono">
                             <div v-for="(letter, i) in answerLetters" :key="i"
-                                class="w-5 h-6 border-b flex items-end justify-center text-sm border-gray-400 text-transparent">
-                                •
+                                class="w-5 h-6 border-b flex items-end justify-center text-sm" :class="[
+                                    revealAnswer
+                                        ? solved
+                                            ? 'border-green-500 text-green-600'
+                                            : 'border-red-400 text-red-500'
+                                        : 'border-gray-400 text-transparent'
+                                ]">
+                                {{ revealAnswer ? letter : '•' }}
                             </div>
                         </div>
 
@@ -564,7 +579,7 @@ watch(
                         Your answer:
                     </label>
 
-                    <input ref="inputRef" v-model="input" autocomplete="off" inputmode="text"
+                    <input ref="inputRef" v-model="input" :disabled="solved" autocomplete="off" inputmode="text"
                         class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
 
                     <div class="flex items-center justify-between">
@@ -575,7 +590,7 @@ watch(
 
                         <button
                             class="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:brightness-110 transition disabled:opacity-40"
-                            :disabled="attemptsLeft <= 0 || !input.trim()" type="submit">
+                            :disabled="attemptsLeft <= 0 || !input.trim() || solved" type="submit">
                             Submit
                         </button>
 
