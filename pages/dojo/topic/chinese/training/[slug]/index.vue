@@ -214,6 +214,11 @@ async function finalizeBatch() {
         })
 
         sessionResult.value = res.session
+
+        // mark quiz complete first
+        idx.value = words.value.length
+
+        // then play fanfare
         playQuizCompleteFanfareSong()
     } catch (err) {
         console.error('Finalize failed', err)
@@ -431,7 +436,7 @@ onMounted(() => {
                 </div>
 
                 <!-- Word display -->
-                <div class="rounded-2xl bg-gray-50 p-5">
+                <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5">
 
                     <div class="text-4xl font-medium flex gap-1 leading-none">
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
