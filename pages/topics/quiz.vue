@@ -4,7 +4,7 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 import type { TopicQuiz } from '~/types/topic'
 import { canAccessTopicQuiz } from '~/utils/topics/permissions'
-import { topics } from '~/utils/topics/topics'
+import { sortedTopics } from '~/utils/topics/topics'
 
 const {
     state,
@@ -22,13 +22,13 @@ const ITEMS_PER_PAGE = 9
 const currentPage = ref(1)
 
 const totalPages = computed(() =>
-    Math.ceil(topics.length / ITEMS_PER_PAGE)
+    Math.ceil(sortedTopics.value.length / ITEMS_PER_PAGE)
 )
 
 const paginatedTopics = computed(() => {
     const start = (currentPage.value - 1) * ITEMS_PER_PAGE
     const end = start + ITEMS_PER_PAGE
-    return topics.slice(start, end)
+    return sortedTopics.value.slice(start, end)
 })
 
 function goToPage(page: number) {
@@ -51,7 +51,7 @@ function canEnterTopic(topic: TopicQuiz): boolean {
 }
 
 
-watch(topics, () => {
+watch(sortedTopics, () => {
     currentPage.value = 1
 })
 

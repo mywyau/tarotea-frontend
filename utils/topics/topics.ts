@@ -1,3 +1,19 @@
+export const sortedTopics = computed(() =>
+  [...topics].sort((a, b) => {
+    // Coming soon topics go to the end
+    if (a.comingSoon !== b.comingSoon) {
+      return a.comingSoon ? 1 : -1;
+    }
+
+    // Optional: push paid topics after free ones
+    if (!!a.requiresPaid !== !!b.requiresPaid) {
+      return a.requiresPaid ? 1 : -1;
+    }
+
+    return 0;
+  }),
+);
+
 export const freeTopics = [
   "survival-essentials",
   "greetings-polite",
@@ -72,7 +88,7 @@ export const topics = [
     comingSoon: true,
     description: "Study and learn to order your favourite dishes.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "family-members",
@@ -80,7 +96,7 @@ export const topics = [
     comingSoon: false,
     description: "Talk about family members, and relatives.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "money",

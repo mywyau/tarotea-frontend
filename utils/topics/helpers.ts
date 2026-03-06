@@ -1,3 +1,19 @@
+export const sortedTopicJyutpingQuizMeta = computed(() =>
+  [...topicJyutpingQuizMeta].sort((a, b) => {
+    // Coming soon topics go to the end
+    if (a.comingSoon !== b.comingSoon) {
+      return a.comingSoon ? 1 : -1;
+    }
+
+    // Optional: push paid topics after free ones
+    if (!!a.requiresPaid !== !!b.requiresPaid) {
+      return a.requiresPaid ? 1 : -1;
+    }
+
+    return 0;
+  }),
+);
+
 export const topicJyutpingQuizMeta = [
   {
     id: "survival-essentials",

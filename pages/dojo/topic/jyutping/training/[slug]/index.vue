@@ -25,7 +25,7 @@ import {
 
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
-import { topicJyutpingQuizMeta } from '~/utils/topics/helpers'
+import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
 import { masteryXp } from '~/utils/xp/helpers'
 
 
@@ -64,7 +64,7 @@ const currentXp = ref<number | null>(null)
 const hintUsedThisQuestion = ref(false)
 
 const topicMeta = computed(() =>
-    topicJyutpingQuizMeta.find(t => t.id === slug.value)
+    sortedTopicJyutpingQuizMeta.value.find(t => t.id === slug.value)
 )
 
 const topicTitle = computed(() =>

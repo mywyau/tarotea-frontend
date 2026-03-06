@@ -14,15 +14,15 @@ import type {
 
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
-import { topicJyutpingQuizMeta } from '~/utils/topics/helpers'
 
 import {
     chineseXp,
     chineseXpHintUsed
 } from '@/utils/dojo/xp'
 
-import { masteryXp } from '@/utils/xp/helpers'
 import { totalQuestions, weakestWordRatio } from '@/utils/weakestWords'
+import { masteryXp } from '@/utils/xp/helpers'
+import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -57,7 +57,7 @@ const fullJyutping = computed(() =>
 )
 
 const topicMeta = computed(() =>
-    topicJyutpingQuizMeta.find(t => t.id === slug.value)
+    sortedTopicJyutpingQuizMeta.value.find(t => t.id === slug.value)
 )
 
 const topicTitle = computed(() =>
