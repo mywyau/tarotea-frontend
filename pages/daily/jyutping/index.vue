@@ -406,9 +406,15 @@ watch(
 <template>
     <main class="mx-auto max-w-xl px-6 py-12">
 
-        <header class="space-y-3">
+        <div class="mb-6">
+            <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
+                ← Back to Home
+            </NuxtLink>
+        </div>
+
+        <header v-if="state !== 'complete'" class="space-y-3">
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Daily Phonetic Jyutping Decode
+                Daily Sound Decode
             </h1>
 
             <p class="text-sm text-gray-600">
@@ -416,7 +422,12 @@ watch(
             </p>
         </header>
 
-        <section class="mt-8 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+        <section :class="[
+            'mt-8 p-5',
+            state === 'complete'
+                ? 'bg-transparent border-0 shadow-none'
+                : 'rounded-2xl border border-gray-200 bg-white shadow-sm'
+        ]">
 
             <!-- Loading -->
             <div v-if="state === 'loading'" class="text-sm text-gray-600">
@@ -442,38 +453,66 @@ watch(
             </div>
 
             <!-- Completion -->
-            <div v-else-if="state === 'complete'" class="bg-white p-4 space-y-2">
+            <!-- Completion -->
+            <div v-else-if="state === 'complete'" class="flex flex-col items-center text-center px-4 py-6">
 
-                <div class="text-lg font-semibold text-gray-900">
-                    Daily Session Complete
+                <!-- Title -->
+                <h2 class="text-xl sm:text-2xl font-bold mb-6 tracking-wide">
+                    Daily Exercise Complete!
+                </h2>
+
+                <!-- Score Card -->
+                <div class="w-full max-w-sm rounded-xl p-5 mb-3">
+
+                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">
+                        Score
+                    </p>
+
+                    <div class="flex items-center justify-center text-3xl font-bold">
+
+                        <span class="text-[#7FB9D8]">
+                            {{ correctCount }} / {{ totalQuestions }}
+                        </span>
+
+                    </div>
+
                 </div>
 
-                <div class="text-sm text-gray-700">
-                    Correct: {{ correctCount }} / {{ totalQuestions }}
+                <!-- XP Card -->
+                <div class="w-full max-w-sm rounded-xl p-5 mb-4">
+
+                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">
+                        XP Earned
+                    </p>
+
+                    <p class="text-3xl font-bold text-emerald-500">
+                        +{{ xpEarned }} XP
+                    </p>
+
                 </div>
 
-                <div class="text-sm text-gray-700">
-                    XP Earned: {{ xpEarned }}
-                </div>
+                <!-- Countdown -->
+                <div class="w-full max-w-sm rounded-xl p-5 mb-8">
 
-                <div class="text-sm text-gray-600">
-                    Come back tomorrow for your new words.
-                </div>
-
-                <div class="mt-8 text-sm opacity-100">
-                    <p class="text-sm text-gray-700 uppercase tracking-wide mb-4">
+                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-3">
                         Next daily unlocks in
                     </p>
 
-                    <p class="bg-black rounded-lg py-4 px-3 text-center">
-                        <span
-                            class="text-3xl font-semibold bg-gradient-to-r from-[#EAB8E4] via-[#A8CAE0] to-[#D6A3D1] bg-clip-text text-transparent">
+                    <div class="bg-black rounded-lg py-3">
+
+                        <span class="text-2xl font-semibold
+        bg-gradient-to-r
+        from-[#EAB8E4]
+        via-[#A8CAE0]
+        to-[#D6A3D1]
+        bg-clip-text text-transparent brightness-125">
                             {{ timeRemaining }}
                         </span>
-                    </p>
+
+                    </div>
+
                 </div>
             </div>
-
             <!-- Quiz -->
             <div v-else-if="state === 'playing' && challenge" class="space-y-5">
 

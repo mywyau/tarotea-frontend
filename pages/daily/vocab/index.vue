@@ -265,6 +265,13 @@ watch(currentQuestion, () => {
 <template>
     <div class="max-w-xl mx-auto px-4 py-8">
 
+        <div class="mb-6">
+            <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
+                ← Back to Home
+            </NuxtLink>
+        </div>
+
+
         <h1 v-if="!showCompleteView && !finishing && currentQuestion" class="text-2xl font-semibold text-center mb-4">
             Daily Training
         </h1>
@@ -418,35 +425,54 @@ watch(currentQuestion, () => {
                 <!-- Completion block -->
                 <transition name="complete-fade">
                     <div v-if="showCompleteView"
-                        class="absolute inset-0 overflow-hidden rounded-2xl p-8 text-center text-black">
+                        class="absolute inset-0 overflow-y-auto px-4 py-6 flex flex-col items-center text-center">
 
-                        <h2 class="text-2xl font-bold mb-2 tracking-wide text-black">
+                        <!-- Title -->
+                        <h2 class="text-xl sm:text-2xl font-bold mb-6 tracking-wide">
                             Daily Exercise Complete!
                         </h2>
 
-                        <!-- Accuracy Card -->
-                        <div class="mt-4 p-6">
+                        <!-- Score Card -->
+                        <div class="w-full max-w-sm rounded-xl p-5 mb-2">
 
-                            <p class="text-sm uppercase tracking-wide text-gray-700 mb-3">
+                            <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">
                                 Score
                             </p>
 
-                            <div class="text-4xl font-bold leading-tight">
+                            <div class="flex items-center justify-center gap-2 text-3xl font-bold">
 
-                                <!-- Raw Score -->
                                 <span class="text-[#7FB9D8]">
                                     {{ correctCount }} / {{ totalQuestions }}
                                 </span>
 
-                                <span class="text-gray-400 mx-2">—</span>
+                            </div>
 
-                                <!-- Percentage -->
+                            <!-- <div class="flex items-center justify-center gap-2 text-3xl font-bold">
+
                                 <span :class="[
                                     percentage >= 90
-                                        ? 'text-[#C48CC3]'   // stronger purple
+                                        ? 'text-[#C48CC3]'
                                         : percentage >= 50
-                                            ? 'text-[#DFA0D8]'   // stronger lavender
-                                            : 'text-[#E9A7C6]'   // stronger pink
+                                            ? 'text-[#DFA0D8]'
+                                            : 'text-[#E9A7C6]'
+                                ]">
+                                    {{ percentage }}%
+                                </span>
+
+                            </div> -->
+
+                        </div>
+
+                        <div class="w-full max-w-sm rounded-xl p-5 mb-4">
+
+                            <div class="flex items-center justify-center gap-2 text-3xl font-bold">
+
+                                <span :class="[
+                                    percentage >= 90
+                                        ? 'text-[#C48CC3]'
+                                        : percentage >= 50
+                                            ? 'text-[#DFA0D8]'
+                                            : 'text-[#E9A7C6]'
                                 ]">
                                     {{ percentage }}%
                                 </span>
@@ -456,39 +482,37 @@ watch(currentQuestion, () => {
                         </div>
 
                         <!-- XP Card -->
-                        <div class="mt-4 backdrop-blur-sm rounded-xl p-5">
-                            <p class="text-sm text-gray-700 uppercase tracking-wider opacity-100 mb-2">
+                        <div class="w-full max-w-sm p-5 mb-4">
+
+                            <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">
                                 XP Earned
                             </p>
-                            <p class="text-4xl font-bold text-emerald-500">
-                                +{{ xpToday }} xp
+
+                            <p class="text-3xl font-bold text-emerald-500">
+                                +{{ xpToday }} XP
                             </p>
+
                         </div>
 
                         <!-- Countdown -->
-                        <div class="mt-8 text-sm opacity-100">
-                            <p class="text-sm text-gray-700 uppercase tracking-wide opacity-100 mb-4">
+                        <div class="w-full max-w-sm p-5 mb-10">
+
+                            <p class="text-xs uppercase tracking-wide text-gray-500 mb-3">
                                 Next daily unlocks in
                             </p>
 
-                            <p class="bg-black rounded-lg py-4 px-3">
-                                <span class="text-3xl font-semibold
-                                    bg-gradient-to-r
-                                    from-[#EAB8E4]
-                                    via-[#A8CAE0]
-                                    to-[#D6A3D1]
-                                    bg-clip-text text-transparent hover:brightness-125">
+                            <div class="bg-black rounded-lg py-3">
+
+                                <span class="text-2xl font-semibold
+          bg-gradient-to-r
+          from-[#EAB8E4]
+          via-[#A8CAE0]
+          to-[#D6A3D1]
+          bg-clip-text text-transparent brightness-125">
                                     {{ timeRemaining }}
                                 </span>
-                            </p>
+                            </div>
                         </div>
-
-                        <!-- CTA Button -->
-                        <NuxtLink to="/"
-                            class="mt-8 inline-block opacity-100 text-gray-600 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]">
-                            Return Home →
-                        </NuxtLink>
-
                     </div>
                 </transition>
             </div>

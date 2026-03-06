@@ -115,19 +115,6 @@ const userBaseNoSpace = computed(() =>
     baseSound(input.value)
 )
 
-// type LetterState = 'idle' | 'correct'
-
-// const letterStates = computed<LetterState[]>(() => {
-//     const ans = answerBaseNoSpace.value
-//     const usr = userBaseNoSpace.value
-
-//     return ans.split('').map((letter, i) => {
-//         if (!usr[i]) return 'idle'
-//         if (usr[i] === letter) return 'correct'
-//         return 'idle'
-//     })
-// })
-
 const chineseChars = computed(() =>
     current.value?.word.split('') ?? []
 )
