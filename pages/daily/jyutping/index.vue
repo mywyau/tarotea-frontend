@@ -84,6 +84,8 @@ const totalLetters = computed(() => {
     return baseSound(challenge.value.jyutping).length
 })
 
+const showNext = ref(false)
+
 const challenge = ref<DailyDecode | null>(null)
 
 const wordIds = ref<string[]>([])
@@ -243,6 +245,7 @@ async function loadWord(id: string) {
 
 async function nextWord() {
 
+    showNext.value = false
     currentIndex.value++
 
     if (currentIndex.value < wordIds.value.length) {
@@ -374,7 +377,8 @@ async function submit() {
             correct: true
         })
 
-        return nextWord()
+        // return nextWord()
+        showNext.value = true
     }
 
     // incorrect but attempts left
@@ -386,7 +390,8 @@ async function submit() {
         correct: false
     })
 
-    return nextWord()
+    // return nextWord()
+    showNext.value = true
 }
 
 onMounted(() => {
@@ -452,7 +457,6 @@ watch(
                 </p>
             </div>
 
-            <!-- Completion -->
             <!-- Completion -->
             <div v-else-if="state === 'complete'" class="flex flex-col items-center text-center px-4 py-6">
 
@@ -581,6 +585,11 @@ watch(
                         :class="lastAttempt.passed ? 'text-emerald-700' : 'text-red-700'">
                         {{ lastAttempt.message }}
                     </p>
+
+                    <button v-if="showNext" @click="nextWord"
+                        class="w-full mt-3 rounded-xl bg-black px-4 py-3 text-white hover:brightness-110 transition">
+                        Next
+                    </button>
 
                 </form>
 
