@@ -27,8 +27,18 @@ import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLe
 import { playCorrectJingle } from '@/utils/sounds'
 import { levelTitles } from '~/utils/levels/levels'
 
+import {
+    jyutpingXp,
+    jyutpingXpHintUsed,
+} from '@/utils/dojo/xp'
+
 import { masteryXp } from '@/utils/xp/helpers'
+import { totalQuestions, weakestWordRatio } from '@/utils/weakestWords'
+
 import { nextTick } from 'vue'
+
+type RenderState = 'idle' | 'correct'
+type SylState = 'idle' | 'correct'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -163,7 +173,7 @@ async function fetchWords() {
         const selected = generateWeightedWordsLevel(
             allWords,
             weakestIds,
-            { totalQuestions: 20, weakestRatio: 0.8 }
+            { totalQuestions: totalQuestions, weakestRatio: weakestWordRatio }
         )
 
         // 4️⃣ Map to your TrainWord format
@@ -206,8 +216,6 @@ const fullJyutping = computed(() =>
     current.value?.jyutping ?? ''
 )
 
-type RenderState = 'idle' | 'correct'
-
 const jyutpingRenderStates = computed<RenderState[]>(() => {
     const full = fullJyutping.value
     const usr = userBaseNoSpace.value
@@ -231,7 +239,6 @@ const jyutpingRenderStates = computed<RenderState[]>(() => {
     })
 })
 
-type SylState = 'idle' | 'correct'
 
 const syllableStates = computed<SylState[]>(() => {
     const ans = answerSyllables.value
@@ -424,10 +431,10 @@ watch(() => live.value.state, async (state) => {
 
         const hintWasUsed = hintUsedThisQuestion.value
 
-        let delta = 3  // base correct
+        let delta = jyutpingXp  // base correct
 
         if (hintWasUsed) {
-            delta = 1
+            delta = jyutpingXpHintUsed
         }
 
         xpDelta.value = delta

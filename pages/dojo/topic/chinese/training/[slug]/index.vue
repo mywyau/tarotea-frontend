@@ -15,8 +15,14 @@ import type {
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
 import { topicJyutpingQuizMeta } from '~/utils/topics/helpers'
-import { masteryXp } from '~/utils/xp/helpers'
 
+import {
+    chineseXp,
+    chineseXpHintUsed
+} from '@/utils/dojo/xp'
+
+import { masteryXp } from '@/utils/xp/helpers'
+import { totalQuestions, weakestWordRatio } from '@/utils/weakestWords'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -130,7 +136,7 @@ async function fetchWords() {
         const selected = generateWeightedWordsLevel(
             allWords,
             weakestIds,
-            { totalQuestions: 20, weakestRatio: 0.8 }
+            { totalQuestions: totalQuestions, weakestRatio: weakestWordRatio }
         )
 
         // 4️⃣ Map to your TrainWord format
@@ -154,22 +160,22 @@ async function fetchWords() {
 
 const copied = ref(false)
 
-async function copyChinese() {
-    if (!current.value?.jyutping) return
+// async function copyChinese() {
+//     if (!current.value?.jyutping) return
 
-    try {
-        await navigator.clipboard.writeText(current.value.jyutping)
-        copied.value = true
+//     try {
+//         await navigator.clipboard.writeText(current.value.jyutping)
+//         copied.value = true
 
-        // Reset after 1.2s
-        setTimeout(() => {
-            copied.value = false
-        }, 1200)
+//         // Reset after 1.2s
+//         setTimeout(() => {
+//             copied.value = false
+//         }, 1200)
 
-    } catch (err) {
-        console.error('Clipboard failed:', err)
-    }
-}
+//     } catch (err) {
+//         console.error('Clipboard failed:', err)
+//     }
+// }
 
 let advancing = false
 let advanceTimer: ReturnType<typeof setTimeout> | null = null
@@ -324,10 +330,10 @@ watch(() => live.value.state, async (state) => {
 
         const hintWasUsed = hintUsedThisQuestion.value
 
-        let delta = 10  // base correct
+        let delta = chineseXp  // base correct
 
         if (hintWasUsed) {
-            delta = 3
+            delta = chineseXpHintUsed
         }
 
         xpDelta.value = delta

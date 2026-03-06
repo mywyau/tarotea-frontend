@@ -3,7 +3,6 @@
 definePageMeta({
     ssr: false,
     middleware: ['logged-in'],
-    // middleware: ['coming-soon'],
 })
 
 import type {
@@ -15,7 +14,15 @@ import type {
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
 import { playCorrectJingle } from '@/utils/sounds'
 import { levelTitles } from '~/utils/levels/levels'
-import { masteryXp } from '~/utils/xp/helpers'
+
+import {
+    chineseXp,
+    chineseXpHintUsed
+} from '@/utils/dojo/xp'
+
+import { masteryXp } from '@/utils/xp/helpers'
+import { totalQuestions, weakestWordRatio } from '@/utils/weakestWords'
+
 
 
 const route = useRoute()
@@ -122,7 +129,7 @@ async function fetchWords() {
         const selected = generateWeightedWordsLevel(
             allWords,
             weakestIds,
-            { totalQuestions: 20, weakestRatio: 0.8 }
+            { totalQuestions: totalQuestions, weakestRatio: weakestWordRatio }
         )
 
         // 4️⃣ Map to your TrainWord format
@@ -176,7 +183,6 @@ function resetTraining(options?: { reshuffle?: boolean }) {
     }
 
     input.value = ''
-    // attempts.value = []
     showHint.value = false
     idx.value = 0
 
@@ -237,7 +243,6 @@ function advance() {
     if (idx.value < words.value.length - 1) {
         idx.value++
         input.value = ''
-        // attempts.value = []
         hintUsedThisQuestion.value = false   // 🔥 reset here
         showHint.value = false
         nextTick(() => {
@@ -315,10 +320,10 @@ watch(() => live.value.state, async (state) => {
 
         const hintWasUsed = hintUsedThisQuestion.value
 
-        let delta = 10  // base correct
+        let delta = chineseXp  // base correct
 
         if (hintWasUsed) {
-            delta = 3
+            delta = chineseXpHintUsed
         }
 
         xpDelta.value = delta
