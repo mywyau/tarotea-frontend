@@ -108,10 +108,6 @@ const state = ref<QuizState>('loading')
 
 const MAX_ATTEMPTS = 6
 
-const revealAnswer = computed(() =>
-    solved.value || attemptsLeft.value === 0
-)
-
 const attemptsLeft = computed(() =>
     Math.max(0, MAX_ATTEMPTS - attempts.value.length)
 )
@@ -252,6 +248,7 @@ function playAudio() {
     audio.value.play().catch(() => { })
 }
 
+
 async function loadWord(id: string) {
     const { data, error } = await useFetch(() => `/api/words/${id}`, {
         key: () => `word-${id}`,
@@ -293,8 +290,8 @@ async function nextWord() {
 
     await finalizeDaily()
 
+    playQuizCompleteFanfareSong()  // 🎉 play completion sound
     challenge.value = null
-
     state.value = 'complete'
 }
 
@@ -408,19 +405,19 @@ async function submit() {
 
     // correct answer
     if (result.passed) {
-
+        playCorrectJingle()   // 🔊 play success sound
         sessionAnswers.value.push({
             wordId: challenge.value.wordId,
             correct: true
         })
-
-
         solved.value = true
         showNext.value = true
     }
 
     // incorrect but attempts left
     if (attemptsLeft.value > 0) return
+
+    playIncorrectJingle()   // 🔊 play fail sound
 
     // incorrect and attempts exhausted
     sessionAnswers.value.push({
