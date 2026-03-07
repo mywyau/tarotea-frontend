@@ -69,7 +69,7 @@ export const topics = [
   {
     id: "restaurant-menu",
     title: "Restaurant Menu",
-    comingSoon: true,
+    comingSoon: false,
     description: "Study and learn to order your favourite dishes.",
     requiresPaid: false,
     quizRequiresPaid: true,
@@ -89,16 +89,16 @@ export const topics = [
     description:
       "Discuss prices, paying, change, costs, and money-related situations.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
-    id: "countries-nationalities",
-    title: "Countries & Nationalities",
-    comingSoon: true,
+    id: "countries",
+    title: "Countries",
+    comingSoon: false,
     description:
-      "Talk about where you are from, countries, languages, and cultural background.",
+      "Learn the names of countries commonly mentioned in conversation, travel, and news",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "transport-travel",
