@@ -56,22 +56,6 @@ function goToPage(page: number) {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
-// const sortedTopics = computed(() =>
-//   [...topics].sort((a, b) => {
-//     // Coming soon topics go to the end
-//     if (a.comingSoon !== b.comingSoon) {
-//       return a.comingSoon ? 1 : -1
-//     }
-
-//     // Optional: push paid topics after free ones
-//     if (!!a.requiresPaid !== !!b.requiresPaid) {
-//       return a.requiresPaid ? 1 : -1
-//     }
-
-//     return 0
-//   })
-// )
-
 const totalPages = computed(() =>
   Math.ceil(sortedTopics.length / ITEMS_PER_PAGE)
 )
