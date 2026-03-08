@@ -9,7 +9,7 @@ export const patchNotes: PatchNote[] = [
     date: "March 2026",
     title: "Upcoming",
     items: [
-      "Expandinging content",
+      "Expanding content",
       "Content review to fix dodgy/missing translations, jyutping, chinese characters and audio",
       "Fix UX across site",
     ],
