@@ -73,15 +73,15 @@ onMounted(async () => {
   }
 })
 
-watch(sortedTopics, () => {
-  currentPage.value = 1
-})
+// watch(sortedTopics, () => {
+//   currentPage.value = 1
+// })
 
 </script>
 
 
 <template>
-  <main v-if="authReady" class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-4">
+  <main class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-4">
 
     <NuxtLink :to="`/`" class="inline-block text-sm text-black hover:underline">
       ← Home
@@ -162,9 +162,9 @@ watch(sortedTopics, () => {
 
   </main>
 
-  <div v-else class="py-20 text-center text-gray-500">
+  <!-- <div v-else class="py-20 text-center text-gray-500">
     Loading topics...
-  </div>
+  </div> -->
 </template>
 
 <style scoped>

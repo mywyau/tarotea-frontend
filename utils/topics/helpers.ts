@@ -94,6 +94,14 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
+    id: "emotions",
+    title: "Feelings & Emotions",
+    comingSoon: false,
+    description: "Express emotions, moods, opinions, and personal reactions naturally.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "transport-travel",
     title: "Transport & Travel",
     comingSoon: true,
@@ -135,15 +143,6 @@ export const topicJyutpingQuizMeta = [
     comingSoon: true,
     description:
       "Describe how you feel, talk about common health issues, and seek basic help.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "emotions",
-    title: "Feelings & Emotions",
-    comingSoon: true,
-    description:
-      "Express emotions, moods, opinions, and personal reactions naturally.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
