@@ -97,7 +97,16 @@ export const topicJyutpingQuizMeta = [
     id: "emotions",
     title: "Feelings & Emotions",
     comingSoon: false,
-    description: "Express emotions, moods, opinions, and personal reactions naturally.",
+    description:
+      "Express emotions, moods, opinions, and personal reactions naturally.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "furniture",
+    title: "Furniture & Home",
+    comingSoon: false,
+    description: "Describe your home, rooms, furniture, and everyday household items.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
@@ -107,15 +116,6 @@ export const topicJyutpingQuizMeta = [
     comingSoon: true,
     description:
       "Use transport, ask for directions, talk about travel plans, and get around the city.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "furniture",
-    title: "Home & Furniture",
-    comingSoon: true,
-    description:
-      "Describe your home, rooms, furniture, and everyday household items.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
