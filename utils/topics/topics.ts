@@ -119,6 +119,15 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
+    id: "sports-fitness",
+    title: "Sports & Fitness",
+    comingSoon: false,
+    description:
+      "Talk about exercise, sports, health routines, and physical activities.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "transport-travel",
     title: "Transport & Travel",
     comingSoon: true,
@@ -239,15 +248,6 @@ export const topics = [
     title: "Hobbies & Interests",
     comingSoon: true,
     description: "Discuss hobbies, interests, and things you enjoy doing.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "sports-fitness",
-    title: "Sports & Fitness",
-    comingSoon: true,
-    description:
-      "Talk about exercise, sports, health routines, and physical activities.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
