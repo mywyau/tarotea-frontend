@@ -66,7 +66,7 @@ async function loadProgress() {
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
 
-    const wordIds = Object.values(topic.value.categories)
+    const wordIds = Object.values(levelCdnData.value.categories)
       .flat()
       .map((w: any) => w.id)
 
