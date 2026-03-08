@@ -35,8 +35,7 @@ function toggleTrainingMode() {
       </h1>
 
       <p class="mt-4 text-lg text-gray-700 max-w-xl mx-auto">
-        Structured vocabulary, audio practice, and quizzes designed to help you
-        build real understanding.
+        Structured vocabulary, audio practice, and quizzes designed to help your cantonese studying journey.
       </p>
 
       <NuxtLink to="/topics" class="mt-8 inline-block font-semibold px-8 py-3 rounded-lg
