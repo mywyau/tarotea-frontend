@@ -76,15 +76,6 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: false,
   },
   {
-    id: "money",
-    title: "Money & Payments",
-    comingSoon: true,
-    description:
-      "Discuss prices, paying, change, costs, and money-related situations.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
     id: "countries",
     title: "Countries",
     comingSoon: false,
@@ -119,6 +110,23 @@ export const topicJyutpingQuizMeta = [
       "Talk about exercise, sports, health routines, and physical activities.",
     requiresPaid: false,
     quizRequiresPaid: true,
+  },
+  {
+    id: "weather",
+    title: "Weather & Seasons",
+    comingSoon: false,
+    description: "Talk about the weather, seasons, temperature, and climate.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "money",
+    title: "Money & Payments",
+    comingSoon: true,
+    description:
+      "Discuss prices, paying, change, costs, and money-related situations.",
+    requiresPaid: false,
+    quizRequiresPaid: false,
   },
   {
     id: "transport-travel",
@@ -180,14 +188,6 @@ export const topicJyutpingQuizMeta = [
     comingSoon: true,
     description:
       "Ask for directions, describe locations, and navigate places confidently.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "weather",
-    title: "Weather & Seasons",
-    comingSoon: true,
-    description: "Talk about the weather, seasons, temperature, and climate.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },

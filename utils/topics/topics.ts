@@ -83,15 +83,6 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
-    id: "money",
-    title: "Money & Payments",
-    comingSoon: true,
-    description:
-      "Discuss prices, paying, change, costs, and money-related situations.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
     id: "countries",
     title: "Countries",
     comingSoon: false,
@@ -124,6 +115,23 @@ export const topics = [
     comingSoon: false,
     description:
       "Talk about exercise, sports, health routines, and physical activities.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "weather",
+    title: "Weather & Seasons",
+    comingSoon: false,
+    description: "Talk about the weather, seasons, temperature, and climate.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "money",
+    title: "Money & Payments",
+    comingSoon: true,
+    description:
+      "Discuss prices, paying, change, costs, and money-related situations.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
@@ -190,14 +198,7 @@ export const topics = [
     requiresPaid: false,
     quizRequiresPaid: false,
   },
-  {
-    id: "weather",
-    title: "Weather & Seasons",
-    comingSoon: true,
-    description: "Talk about the weather, seasons, temperature, and climate.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
+
   {
     id: "emergencies",
     title: "Emergencies & Safety",
