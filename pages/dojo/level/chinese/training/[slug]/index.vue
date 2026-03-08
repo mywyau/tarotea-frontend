@@ -461,7 +461,7 @@ onMounted(() => {
                         </button>
 
                         <transition name="fade-word">
-                            <div v-if="showHint" class="mt-2 text-lg font-mono text-gray-500 flex items-center gap-2">
+                            <div v-if="showHint" class="mt-2 text-base font-mono text-gray-500 flex items-center gap-2">
                                 {{ fullJyutping }}
 
                                 <button type="button" @click="copyChinese"

@@ -9,9 +9,17 @@ export const patchNotes: PatchNote[] = [
     date: "March 2026",
     title: "Upcoming",
     items: [
-      "Expanding content",
+      "Expandinging content",
       "Content review to fix dodgy/missing translations, jyutping, chinese characters and audio",
       "Fix UX across site",
+    ],
+  },
+  {
+    date: "8 March 2026",
+    title: "Content blast",
+    items: [
+      "Add content for sports and fitness, furniture and home, feelings and emotions, countries, and family members",
+      "improve mobile view for typing exercises for longer words",
     ],
   },
   {

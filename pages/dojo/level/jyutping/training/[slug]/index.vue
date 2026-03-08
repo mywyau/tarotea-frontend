@@ -32,8 +32,8 @@ import {
     jyutpingXpHintUsed,
 } from '@/utils/dojo/xp'
 
-import { masteryXp } from '@/utils/xp/helpers'
 import { totalQuestions, weakestWordRatio } from '@/utils/weakestWords'
+import { masteryXp } from '@/utils/xp/helpers'
 
 import { nextTick } from 'vue'
 
@@ -563,20 +563,20 @@ watch(
                         </button>
 
                         <transition name="fade-word">
-                            <div v-if="showHint" class="mt-2 text-lg font-mono flex gap-2">
-
-                                <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
-                                    'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
-                                    'text-gray-400': jyutpingRenderStates[i] === 'idle'
-                                }">
-                                    {{ char }}
-                                </span>
+                            <div v-if="showHint" class="mt-2">
+                                <div class="text-base font-mono break-all leading-relaxed">
+                                    <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
+                                        'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
+                                        'text-gray-400': jyutpingRenderStates[i] === 'idle'
+                                    }">
+                                        {{ char }}
+                                    </span>
+                                </div>
 
                                 <button type="button" @click="copyJyutping"
-                                    class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
+                                    class="mt-2 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
                                     {{ copied ? '✓' : 'copy' }}
                                 </button>
-
                             </div>
                         </transition>
                     </div>
