@@ -1,7 +1,7 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
-// import { checkDailyWhisperAttempts } from "../utils/whisper/checkDailyWhisperAttempts";
 import { consumeWhisperAttempt } from "../utils/whisper/consumeWhisperAttempt";
+import { recordWhisperAttempt } from "../utils/whisper/recordWhisperAttempt";
 import { requirePaidUser } from "../utils/whisper/requirePaidUser";
 
 const openai = new OpenAI({
@@ -29,6 +29,13 @@ export default defineEventHandler(async (event) => {
 
   const toneLessJyutping = expectedJyutping.replace(/[1-6]/g, "");
 
+  if (!expectedChinese || !expectedJyutping) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing pronunciation/chinese word metadata",
+    });
+  }
+
   if (!audioFile || !audioFile.data) {
     throw createError({
       statusCode: 400,
@@ -43,7 +50,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await consumeWhisperAttempt(userId);  // atomic counter of daily usage
+  await consumeWhisperAttempt(userId); // atomic counter of daily usage
 
   try {
     const transcription = await openai.audio.transcriptions.create({
@@ -56,6 +63,7 @@ export default defineEventHandler(async (event) => {
       prompt: `Cantonese pronunciation such as ${toneLessJyutping}`,
     });
 
+    await recordWhisperAttempt(userId);
     const transcript = transcription.text;
 
     if (!transcript) {

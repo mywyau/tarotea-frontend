@@ -34,6 +34,7 @@ let audioChunks: Blob[] = []
 const transcript = ref("")
 const feedback = ref("")
 const loading = ref(false)
+const aiState = ref("")
 const score = ref<number | null>(null)
 const recordingUrl = ref<string | null>(null)
 
@@ -77,16 +78,26 @@ async function startRecording() {
 
     loading.value = true
 
-    const res = await $fetch("/api/pronunciation-check", {
-      method: "POST",
-      body: formData
-    })
+    try {
+      const { getAccessToken } = await useAuth();
 
-    transcript.value = res.transcript
-    feedback.value = res.feedback
-    score.value = res.score
+      const token = await getAccessToken();
 
-    loading.value = false
+      const res = await $fetch("/api/pronunciation-check", {
+        method: "POST",
+        body: formData,
+        headers: { Authorization: `Bearer ${token}` },
+      })
+
+      transcript.value = res.transcript
+      feedback.value = res.feedback
+      score.value = res.score
+
+      loading.value = false
+    } catch (e: any) {
+
+      aiState.value = 'error'
+    }
   }
 
   mediaRecorder.value.start()
