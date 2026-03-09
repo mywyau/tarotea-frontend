@@ -296,7 +296,7 @@ onMounted(() => {
 
         <p>
           <strong>Privacy:</strong> Your voice recording is processed securely for
-          pronunciation analysis and is <strong>not stored</strong>. Audio is deleted
+          pronunciation only and is <strong>not stored</strong>. Audio is temporary and is deleted
           immediately after processing.
         </p>
 
