@@ -160,13 +160,19 @@ onMounted(() => {
 
       <div v-if="supported" class="space-y-4">
 
-        <div v-if="word" class="space-y-2">
+        <div v-if="word" class="mt-4 space-y-2">
           <p class="text-4xl font-bold">{{ word.word }}</p>
           <p class="text-gray-500 text-lg">{{ word.jyutping }}</p>
         </div>
 
         <div class="flex justify-center pt-4">
           <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
+        </div>
+
+        <div class="mt-4 mb-4 text-sm text-gray-500 space-y-1">
+          <p>1. Listen to the word</p>
+          <p>2. Record your pronunciation</p>
+          <p>3. Get feedback</p>
         </div>
 
         <div class="flex flex-col items-center gap-3">
@@ -215,21 +221,35 @@ onMounted(() => {
           <p class="text-gray-800 leading-relaxed">
             {{ feedback }}
           </p>
+
+          <div v-if="score !== null" class="rounded-lg p-4 text-center" :class="{
+            'bg-green-50 border border-green-200': score >= 90,
+            'bg-yellow-50 border border-yellow-200': score >= 70 && score < 90,
+            'bg-red-50 border border-red-200': score < 70
+          }">
+            <p class="text-sm text-gray-500">Pronunciation Score</p>
+            <p class="text-3xl font-bold">{{ score }}</p>
+          </div>
         </div>
 
         <button v-if="transcript && !recording" @click="tryAgain" class="px-4 py-2 bg-gray-300 text-black rounded">
           Try Again
         </button>
-
-        <div v-if="score !== null">
-          <h2 class="font-semibold mt-4">Score</h2>
-          <p>{{ score }} / 100</p>
-        </div>
-
       </div>
 
       <div v-else>
         Your browser does not support microphone recording.
+      </div>
+
+      <div class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md p-3 max-w-md mx-auto">
+        <p class="font-medium text-gray-600 mb-1">
+          ⚠️ AI pronunciation feedback
+        </p>
+        <p>
+          This feature uses AI speech recognition to estimate pronunciation.
+          Results may occasionally be inaccurate. If something looks wrong,
+          please try recording again or refresh the page.
+        </p>
       </div>
 
     </div>
