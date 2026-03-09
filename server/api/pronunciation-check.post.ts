@@ -74,8 +74,9 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    console.log("Transcription result:", transcription);
-    console.log("Transcript text:", transcription.text);
+    console.log("[pronunciation-check.post] called");
+    // console.log("Transcription result:", transcription);
+    // console.log("Transcript text:", transcription.text);
 
     if (transcript.includes(expectedChinese)) {
       return {

@@ -6,9 +6,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-
 const id = computed(() => decodeURIComponent(route.params.id as string))
-
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
@@ -95,7 +93,6 @@ async function startRecording() {
 
       loading.value = false
     } catch (e: any) {
-
       aiState.value = 'error'
     }
   }
@@ -169,7 +166,7 @@ onMounted(() => {
         Pronunciation
       </h1>
 
-      <div v-if="supported" class="space-y-4">
+      <div v-if="supported" class="space-y-8">
 
         <div v-if="word" class="mt-4 space-y-2">
           <p class="text-4xl font-bold">{{ word.word }}</p>
@@ -252,14 +249,24 @@ onMounted(() => {
         Your browser does not support microphone recording.
       </div>
 
-      <div class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md p-3 max-w-md mx-auto">
-        <p class="font-medium text-gray-600 mb-1">
+      <div class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md p-3 max-w-md mx-auto space-y-2">
+        <p class="font-medium text-gray-600">
           ⚠️ AI pronunciation feedback
         </p>
+
         <p>
           This feature uses AI speech recognition to estimate pronunciation.
-          Results may occasionally be inaccurate. If something looks wrong,
-          please try recording again or refresh the page.
+          Results may occasionally be inaccurate.
+        </p>
+
+        <p>
+          <strong>Privacy:</strong> Your voice recording is processed securely for
+          pronunciation analysis and is <strong>not stored</strong>. Audio is deleted
+          immediately after processing.
+        </p>
+
+        <p>
+          If something looks wrong, try recording again or refresh the page.
         </p>
       </div>
 
