@@ -303,8 +303,7 @@ watchEffect(() => {
             </span>
 
             <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-              <div class="h-2 bg-blue-300"
-                :style="{ width: usagePercent + '%' }"></div>
+              <div class="h-2 bg-blue-300" :style="{ width: usagePercent + '%' }"></div>
             </div>
 
           </div>
@@ -387,8 +386,12 @@ watchEffect(() => {
         </p>
 
         <p>
-          If something looks wrong, try recording again or refreshing the page. Make sure the environment is free of
-          noise and speech is clear.
+          If something looks wrong, try recording again or refreshing the page. 
+        </p>
+
+        <p>
+          Make sure the environment is free of noise and speech is clear. Some words are more difficult to judge.
+          Talking slower can sometimes help and improve accuracy but accurately spaced, timed and confident speech is generally key. 
         </p>
       </div>
 

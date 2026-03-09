@@ -111,7 +111,7 @@ watchEffect(() => {
         </NuxtLink>
 
         <!-- Word header -->
-        <section class="text-center space-y-3 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">
+        <section class="text-center space-y-4 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">
 
             <h1 class="text-4xl font-semibold text-gray-900">
                 {{ word.word }}
@@ -146,18 +146,20 @@ watchEffect(() => {
                 <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
             </div>
 
-            <NuxtLink :to="`/echo-lab/pronunciation-check/${slug}`"
-                class="inline-flex block text-center rounded-lg px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
-                <span class="bg-gradient-to-r
+            <div class="mt-4">
+                <NuxtLink :to="`/echo-lab/pronunciation-check/${slug}`"
+                    class="inline-flex block text-center rounded-lg px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
+                    <span class="bg-gradient-to-r
                                 from-[#d48fd0]
                                 via-[#b57bc3]
                                 via-[#6faed6]
                                 to-[#d48fd0]
                                 bg-clip-text text-transparent
                                 hover:brightness-125 transition">
-                    AI Echo Lab
-                </span>
-            </NuxtLink>
+                        AI Echo Lab
+                    </span>
+                </NuxtLink>
+            </div>
         </section>
 
         <!-- Usage -->

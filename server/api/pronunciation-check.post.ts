@@ -107,8 +107,6 @@ Speech transcription:
 ${transcript}
 
 The transcription may contain English-like words approximating Cantonese sounds.
-Example: "some" may represent "saam".
-
 Compare the sounds phonetically with the expected Jyutping and score pronunciation from 0–100.
 
 Guidelines:
@@ -124,7 +122,7 @@ Return JSON only:
   "feedback": string
 }
 
-Feedback should be 1–2 short sentences. Keep it light and about if natives can understand their speech.
+Feedback should be 1–2 short sentences. Keep it light and about say if is it would be easy or hard for natives to understand.
 `,
     });
 
