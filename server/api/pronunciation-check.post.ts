@@ -1,56 +1,76 @@
-// import OpenAI from "openai";
-// import { readMultipartFormData } from "h3";
-// import fs from "fs/promises";
+import OpenAI from "openai"
+import { readMultipartFormData, createError } from "h3"
+import fs from "fs/promises"
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+})
 
-// export default defineEventHandler(async (event) => {
-//   const form = await readMultipartFormData(event);
+export default defineEventHandler(async (event) => {
 
-//   const audioFile = form?.find((f) => f.name === "audio");
+  const form = await readMultipartFormData(event)
 
-//   if (!audioFile || !audioFile.data) {
-//     throw createError({
-//       statusCode: 400,
-//       statusMessage: "Missing audio file",
-//     });
-//   }
+  const audioFile = form?.find((f) => f.name === "audio")
 
-//   const tempFile = `/tmp/audio-${Date.now()}.webm`;
+  if (!audioFile || !audioFile.data) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing audio file"
+    })
+  }
 
-//   await fs.writeFile(tempFile, audioFile.data);
+  const tempFile = `/tmp/audio-${Date.now()}.webm`
 
-//   const transcription = await openai.audio.transcriptions.create({
-//     file: await fs.open(tempFile),
-//     model: "whisper-1",
-//   });
+  await fs.writeFile(tempFile, audioFile.data)
 
-//   const transcript = transcription.text;
+  try {
 
-//   const expected = "hoi1 sam1";
+    // 1️⃣ Transcribe speech
+    const transcription = await openai.audio.transcriptions.create({
+      file: await fs.open(tempFile),
+      model: "whisper-1"
+    })
 
-//   const feedbackPrompt = `
-// User is learning Cantonese.
+    const transcript = transcription.text
 
-// Expected pronunciation:
-// ${expected}
+    // Example expected pronunciation
+    const expected = "hoi1 sam1"
 
-// User said:
-// ${transcript}
+    // 2️⃣ Ask AI to evaluate pronunciation
+    const completion = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: `
+A user is learning Cantonese pronunciation.
 
-// Give short pronunciation feedback.
-// Mention tone or vowel issues if obvious.
-// `;
+Expected Jyutping:
+${expected}
 
-//   const completion = await openai.responses.create({
-//     model: "gpt-4.1-mini",
-//     input: feedbackPrompt,
-//   });
+User pronunciation transcription:
+${transcript}
 
-//   return {
-//     transcript,
-//     feedback: completion.output_text,
-//   };
-// });
+Give short feedback about pronunciation accuracy.
+Mention tone or vowel issues if possible.
+`
+    })
+
+    return {
+      transcript,
+      feedback: completion.output_text
+    }
+
+  } catch (err) {
+
+    console.error(err)
+
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to process pronunciation"
+    })
+
+  } finally {
+
+    await fs.unlink(tempFile).catch(() => {})
+
+  }
+
+})
