@@ -73,6 +73,11 @@ async function openBillingPortal() {
     window.location.href = url
 }
 
+const remainingPercent = computed(() => {
+    if (!aiUsage.value) return 0
+    return (aiUsage.value.remaining / aiUsage.value.limit) * 100
+})
+
 watchEffect(() => {
     if (authReady.value && isLoggedIn.value) {
         fetchAIUsage()
@@ -126,12 +131,11 @@ watchEffect(() => {
                             <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2">
 
                                 <div class="font-medium">AI Usage</div>
-                                
+
                                 <span>{{ aiUsage.remaining.toLocaleString() }} requests remaining</span>
 
                                 <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-                                    <div class="h-2 bg-blue-300 striped-bar"
-                                        :style="{ width: (aiUsage.remaining / aiUsage.limit) * 100 + '%' }"></div>
+                                    <div class="h-2 bg-blue-300" :style="{ width: remainingPercent + '%' }"></div>
                                 </div>
                             </div>
                         </div>
@@ -242,25 +246,3 @@ watchEffect(() => {
         </div>
     </main>
 </template>
-
-<style scoped>
-
-.striped-bar {
-    background-image: repeating-linear-gradient(45deg,
-            rgba(255, 255, 255, 0.3) 0px,
-            rgba(255, 255, 255, 0.3) 6px,
-            transparent 6px,
-            transparent 12px);
-    animation: stripeMove 1s linear infinite;
-}
-
-@keyframes stripeMove {
-    from {
-        background-position: 0 0;
-    }
-
-    to {
-        background-position: 20px 0;
-    }
-}
-</style>

@@ -303,7 +303,7 @@ watchEffect(() => {
             </span>
 
             <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-              <div class="h-2 bg-blue-300 striped-bar transition-all duration-500"
+              <div class="h-2 bg-blue-300"
                 :style="{ width: usagePercent + '%' }"></div>
             </div>
 
@@ -395,25 +395,3 @@ watchEffect(() => {
     </div>
   </div>
 </template>
-
-
-<style scoped>
-.striped-bar {
-  background-image: repeating-linear-gradient(45deg,
-      rgba(255, 255, 255, 0.3) 0px,
-      rgba(255, 255, 255, 0.3) 6px,
-      transparent 6px,
-      transparent 12px);
-  animation: stripeMove 1s linear infinite;
-}
-
-@keyframes stripeMove {
-  from {
-    background-position: 0 0;
-  }
-
-  to {
-    background-position: 20px 0;
-  }
-}
-</style>
