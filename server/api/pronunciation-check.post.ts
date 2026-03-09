@@ -1,6 +1,7 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
-import { consumeWhisperAttempt } from "../utils/whisper/consumeWhisperAttempt";
+// import { consumeWhisperAttempt } from "../utils/whisper/consumeWhisperAttemptDaily";
+import { consumeWhisperAttemptMonthly } from "../utils/whisper/consumeWhisperAttemptMonthly";
 import { recordWhisperAttempt } from "../utils/whisper/recordWhisperAttempt";
 import { requirePaidUser } from "../utils/whisper/requirePaidUser";
 
@@ -50,7 +51,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await consumeWhisperAttempt(userId); // atomic counter of daily usage
+  const { attempts, remaining } = await consumeWhisperAttemptMonthly(userId);
 
   try {
     const transcription = await openai.audio.transcriptions.create({
@@ -63,8 +64,9 @@ export default defineEventHandler(async (event) => {
       prompt: `Cantonese pronunciation as jyutping with tones`,
     });
 
-    await recordWhisperAttempt(userId);
     const transcript = transcription.text;
+
+    await recordWhisperAttempt(userId);
 
     if (!transcript) {
       return {
@@ -75,7 +77,9 @@ export default defineEventHandler(async (event) => {
     }
 
     console.log("[pronunciation-check.post] called");
-    console.log("Transcription result:", transcription);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("Transcription result:", transcription);
+    }
     // console.log("Transcript text:", transcription.text);
 
     if (transcript.includes(expectedChinese)) {
@@ -120,7 +124,7 @@ Return JSON only:
   "feedback": string
 }
 
-Feedback should be 1–2 short sentences.
+Feedback should be 1–2 short sentences. Keep it light and about if natives can understand their speech.
 `,
     });
 
@@ -146,6 +150,7 @@ Feedback should be 1–2 short sentences.
       transcript,
       score: result.score,
       feedback: result.feedback,
+      remainingAttempts: remaining,
     };
   } catch (err) {
     console.error(err);

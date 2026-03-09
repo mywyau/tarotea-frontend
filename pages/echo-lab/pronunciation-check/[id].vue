@@ -26,6 +26,7 @@ const word = computed(() => data.value)
 
 const recording = ref(false)
 const mediaRecorder = ref<MediaRecorder | null>(null)
+const remainingAttempts = ref<number | null>(null)
 
 let audioChunks: Blob[] = []
 
@@ -91,6 +92,7 @@ async function startRecording() {
       transcript.value = res.transcript
       feedback.value = res.feedback
       score.value = res.score
+      remainingAttempts.value = res.remainingAttempts
 
       loading.value = false
     } catch (e: any) {
@@ -205,6 +207,10 @@ onMounted(() => {
             Start Recording
           </button> -->
 
+          <div v-if="remainingAttempts !== null" class="text-base text-gray-700">
+            {{ remainingAttempts }} attempts remaining this month
+          </div>
+
           <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
             class="px-4 py-2 bg-black rounded disabled:opacity-50">
             <span class="bg-gradient-to-r
@@ -212,8 +218,7 @@ onMounted(() => {
                   via-[#5aaee6]
                   to-[#3f8fd8]
                   bg-clip-text text-transparent
-                  hover:brightness-125 transition"
-             >
+                  hover:brightness-125 transition">
               Start Recording
             </span>
           </button>
@@ -224,7 +229,8 @@ onMounted(() => {
             </p>
 
             <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-              <div class="bg-red-500 h-2 transition-all duration-200 ease-out" :style="{ width: progress + '%' }"></div>
+              <div class="bg-red-500 h-2 transition-all duration-200 ease-out" :style="{ width: progress + '%' }">
+              </div>
             </div>
           </div>
 
@@ -268,7 +274,8 @@ onMounted(() => {
           </div>
         </div>
 
-        <button v-if="transcript && !recording" @click="tryAgain" class="px-4 py-2 bg-gray-300 text-black rounded hover:brightness-110 transition">
+        <button v-if="transcript && !recording" @click="tryAgain"
+          class="px-4 py-2 bg-gray-300 text-black rounded hover:brightness-110 transition">
           Try Again
         </button>
       </div>
@@ -294,7 +301,8 @@ onMounted(() => {
         </p>
 
         <p>
-          If something looks wrong, try recording again or refreshing the page. Make sure the environment is free of noise
+          If something looks wrong, try recording again or refreshing the page. Make sure the environment is free of
+          noise
           and speech is clear.
         </p>
       </div>
