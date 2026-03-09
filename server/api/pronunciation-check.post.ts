@@ -1,158 +1,161 @@
-// import { createError, readMultipartFormData } from "h3";
-// import OpenAI from "openai";
+import { createError, readMultipartFormData } from "h3";
+import OpenAI from "openai";
 
-// const openai = new OpenAI({
-//   apiKey: process.env.OPENAI_API_KEY,
-// });
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
-// export default defineEventHandler(async (event) => {
-//   const form = await readMultipartFormData(event);
+export default defineEventHandler(async (event) => {
+  const form = await readMultipartFormData(event);
 
-//   const audioFile = form?.find((f) => f.name === "audio");
-//   const expectedJyutpingField = form?.find(
-//     (f) => f.name === "expectedJyutping",
-//   );
-//   const expectedChineseField = form?.find((f) => f.name === "expectedChinese");
+  const MAX_AUDIO_SIZE = 1_000_000; // ~1MB
 
-//   const expectedJyutping = expectedJyutpingField?.data?.toString() ?? "";
-//   const expectedChinese = expectedChineseField?.data?.toString() ?? "";
+  const audioFile = form?.find((f) => f.name === "audio");
 
-//   const toneLessJyutping = expectedJyutping.replace(/[1-6]/g, "");
+  const expectedJyutpingField = form?.find(
+    (f) => f.name === "expectedJyutping",
+  );
+  const expectedChineseField = form?.find((f) => f.name === "expectedChinese");
 
-//   if (!audioFile || !audioFile.data) {
-//     throw createError({
-//       statusCode: 400,
-//       statusMessage: "Missing audio file",
-//     });
-//   }
+  const expectedJyutping = expectedJyutpingField?.data?.toString() ?? "";
+  const expectedChinese = expectedChineseField?.data?.toString() ?? "";
 
-//   try {
-//     // 1️⃣ Transcribe speech
-//     // const transcription = await openai.audio.transcriptions.create({
-//     //   file: new File([audioFile.data], "audio.webm"),
-//     //   model: "whisper-1",
-//     //   language: "yue" // helps Cantonese recognition    -  no iso yue code so rely on luck
-//     // });
+  const toneLessJyutping = expectedJyutping.replace(/[1-6]/g, "");
 
-//     const transcription = await openai.audio.transcriptions.create({
-//       file: new File([audioFile.data], "audio.webm"),
-//       model: "whisper-1",
-//     });
+  if (!audioFile || !audioFile.data) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing audio file",
+    });
+  }
 
-//     const transcript = transcription.text;
+  if (audioFile.data.length > MAX_AUDIO_SIZE) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Audio file too large",
+    });
+  }
 
-//     const normalizedTranscript = transcript
-//       .toLowerCase()
-//       .replace(/[^\w\s]/g, "")
-//       .trim();
+  try {
+    // 1️⃣ Transcribe speech
+    // const transcription = await openai.audio.transcriptions.create({
+    //   file: new File([audioFile.data], "audio.webm"),
+    //   model: "whisper-1",
+    //   language: "yue" // helps Cantonese recognition    -  no iso yue code so rely on luck
+    // });
 
-//     // 2️⃣ Ask AI to evaluate pronunciation
-//     const completion = await openai.responses.create({
-//       model: "gpt-4.1-mini",
-//       input: `
-// You are evaluating a learner's Cantonese pronunciation.
+    const transcription = await openai.audio.transcriptions.create({
+      file: new File([audioFile.data], "recording.webm", {
+        type: "audio/webm",
+      }),
+      language: "zh",
+      model: "whisper-1",
+      temperature: 0,
+    //   prompt: `Cantonese word: ${expectedChinese}`
+    //   prompt: "Cantonese speech using Jyutping pronunciation please do not try to match Korean or English",
+      prompt: `Cantonese pronunciation such as ${toneLessJyutping}`
+    });
 
-// The learner is speaking **Jyutping romanization**.
+    const transcript = transcription.text;
 
-// Expected Chinese word:
-// ${expectedChinese}
+    function normalizeTranscript(text: string) {
+      return text
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}\s]/gu, "")
+        .trim();
+    }
 
-// Correct Jyutping:
-// ${expectedJyutping}
+    const normalizedTranscript = normalizeTranscript(transcript);
 
-// Tone-less Jyutping reference:
-// ${toneLessJyutping}
+    if (!transcript) {
+      return {
+        transcript: "",
+        score: 0,
+        feedback: "No speech detected. Please try speaking clearly.",
+      };
+    }
 
-// Automatic speech transcription:
-// ${normalizedTranscript}
+    console.log("Transcription result:", transcription);
+    console.log("Transcript text:", transcription.text);
 
-// Important context:
+    if (transcript.includes(expectedChinese)) {
+      return {
+        transcript,
+        score: 100,
+        feedback:
+          "Excellent pronunciation. The spoken word matches the expected Cantonese word.",
+      };
+    }
 
-// - The transcription is produced by a speech recognition model and may be inaccurate.
-// - It may contain English-like words approximating Cantonese sounds.
-// - Syllables may be merged or misspelled.
+    // 2️⃣ Ask AI to evaluate pronunciation
+    const completion = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: `
+Evaluate a learner's Cantonese pronunciation.
 
-// Examples of possible distortions:
+Expected Chinese:
+${expectedChinese}
 
-// "mhoissan" → m4 hoi1 sam1  
-// "do they dumb" → zo6 dei6 dang1  
-// "jaw day dung" → zo6 dei6 dung1  
+Expected Jyutping:
+${expectedJyutping}
 
-// Your task:
+Tone-less Jyutping:
+${toneLessJyutping}
 
-// 1. First interpret the transcription phonetically.
-// 2. Convert it into the **closest Jyutping syllables**.
-// 3. Compare those syllables with the expected Jyutping.
+Speech transcription:
+${transcript}
 
-// Evaluation rules:
+The transcription may contain English-like words approximating Cantonese sounds.
+Example: "some" may represent "saam".
 
-// • Compare syllables phonetically, not by spelling.  
-// • Penalize if syllables clearly differ.  
-// • Minor vowel differences should receive small penalties.  
-// • If syllables are merged but still recognizable, be lenient.  
+Compare the sounds phonetically with the expected Jyutping and score pronunciation from 0–100.
 
-// Tone rules:
+Guidelines:
+- Compare sounds, not spelling.
+- Minor vowel differences are acceptable.
+- Mostly correct pronunciation should score 80–95.
+- Only give 100 for extremely clear pronunciation.
 
-// Tone detection from transcription is unreliable.
+Return JSON only:
 
-// If tones cannot be confidently determined:
-// - assume tones may be slightly imperfect but understandable
-// - apply only a small penalty.
+{
+  "score": number,
+  "feedback": string
+}
 
-// Scoring guide:
+Feedback should be 1–2 short sentences.
+`,
+    });
 
-// 100 = extremely clear, native-like pronunciation  
-// 90–95 = very good pronunciation with minor imperfections  
-// 80–89 = understandable with small pronunciation issues  
-// 60–79 = noticeable pronunciation mistakes  
-// 40–59 = difficult to understand but partially correct  
-// 0–39 = incorrect pronunciation  
+    const resultText = completion.output_text;
 
-// Important rule:
+    let result;
 
-// If the transcription appears to represent the correct word,
-// do NOT automatically give 100.
-// Typical good pronunciation should score around 90–95.
+    try {
+      const cleaned = resultText
+        .replace(/```json/g, "")
+        .replace(/```/g, "")
+        .trim();
 
-// Return ONLY valid JSON (no markdown):
+      result = JSON.parse(cleaned);
+    } catch {
+      result = {
+        score: 0,
+        feedback: resultText,
+      };
+    }
 
-// {
-//   "score": number,
-//   "feedback": string
-// }
+    return {
+      transcript,
+      score: result.score,
+      feedback: result.feedback,
+    };
+  } catch (err) {
+    console.error(err);
 
-// Feedback rules:
-
-// • Keep feedback short (1–2 sentences)
-// • Mention which syllables were inaccurate if possible
-// • Encourage the learner if pronunciation is understandable
-// `,
-//     });
-
-//     const resultText = completion.output_text;
-
-//     let result;
-
-//     try {
-//       result = JSON.parse(resultText);
-//     } catch {
-//       result = {
-//         score: 0,
-//         feedback: resultText,
-//       };
-//     }
-
-//     return {
-//       transcript,
-//       score: result.score,
-//       feedback: result.feedback,
-//     };
-//   } catch (err) {
-//     console.error(err);
-
-//     throw createError({
-//       statusCode: 500,
-//       statusMessage: "Failed to process pronunciation",
-//     });
-//   }
-// });
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Failed to process pronunciation",
+    });
+  }
+});

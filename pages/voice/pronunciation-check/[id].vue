@@ -2,7 +2,7 @@
 
 definePageMeta({
   ssr: false,
-  middleware: "coming-soon"
+  // middleware: "coming-soon"
 })
 
 const route = useRoute()
@@ -20,6 +20,10 @@ const { data, error } = await useFetch(
   }
 )
 
+const MAX_RECORDING_SECONDS = 10
+const recordingTime = ref(0)
+let timer: ReturnType<typeof setInterval> | null = null
+
 const word = computed(() => data.value)
 
 const recording = ref(false)
@@ -35,20 +39,18 @@ const recordingUrl = ref<string | null>(null)
 
 const supported = ref(false)
 
-onMounted(() => {
-  supported.value = !!navigator.mediaDevices
-
-  // supported.value = !!(
-  // navigator.mediaDevices &&
-  // navigator.mediaDevices.getUserMedia
-  // )
+const progress = computed(() => {
+  return (recordingTime.value / MAX_RECORDING_SECONDS) * 100
 })
+const streamRef = ref<MediaStream | null>(null)
+
 
 async function startRecording() {
 
   audioChunks = []
 
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+  streamRef.value = stream
 
   mediaRecorder.value = new MediaRecorder(stream)
 
@@ -59,6 +61,12 @@ async function startRecording() {
   mediaRecorder.value.onstop = async () => {
 
     const audioBlob = new Blob(audioChunks, { type: "audio/webm" })
+
+    // ⛔ size limit check
+    if (audioBlob.size > 1_000_000) { // ~1MB
+      alert("Recording is too long. Please keep it under 10 seconds.")
+      return
+    }
 
     recordingUrl.value = URL.createObjectURL(audioBlob)
 
@@ -83,24 +91,62 @@ async function startRecording() {
 
   mediaRecorder.value.start()
   recording.value = true
+
+  recordingTime.value = 0
+
+  timer = setInterval(() => {
+    recordingTime.value++
+
+    //  change number 10 to desired time in seconds
+    if (recordingTime.value >= MAX_RECORDING_SECONDS) {
+      stopRecording()
+    }
+  }, 1000
+  )
 }
 
 function stopRecording() {
   mediaRecorder.value?.stop()
   recording.value = false
+
+  // stop microphone
+  streamRef.value?.getTracks().forEach(track => track.stop())
+  streamRef.value = null
+
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
 }
 
 function resetRecording() {
   transcript.value = ""
   feedback.value = ""
   score.value = null
+
+  if (recordingUrl.value) {
+    URL.revokeObjectURL(recordingUrl.value)
+  }
+
   recordingUrl.value = null
   audioChunks = []
+
+  mediaRecorder.value = null
 }
 
 function tryAgain() {
   resetRecording()
 }
+
+
+onMounted(() => {
+  supported.value = !!navigator.mediaDevices
+
+  // supported.value = !!(
+  // navigator.mediaDevices &&
+  // navigator.mediaDevices.getUserMedia
+  // )
+})
 
 </script>
 
@@ -125,10 +171,20 @@ function tryAgain() {
 
         <div class="flex flex-col items-center gap-3">
 
-          <button v-if="!recording && !transcript" :disabled="loading" @click="startRecording"
+          <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
             class="px-4 py-2 bg-blue-500 text-black rounded disabled:opacity-50">
             Start Recording
           </button>
+
+          <div v-if="recording" class="w-64 space-y-1">
+            <p class="text-red-500 text-sm">
+              Recording... {{ recordingTime }} / {{ MAX_RECORDING_SECONDS }}s
+            </p>
+
+            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+              <div class="bg-red-500 h-2 transition-all duration-200 ease-out" :style="{ width: progress + '%' }"></div>
+            </div>
+          </div>
 
           <button v-if="recording" @click="stopRecording" :disabled="loading"
             class="px-4 py-2 bg-red-500 text-black rounded">
