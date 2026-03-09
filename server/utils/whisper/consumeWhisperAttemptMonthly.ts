@@ -1,7 +1,7 @@
 import { createError } from "h3";
 import { db } from "~/server/db";
 
-const MONTHLY_LIMIT = 6000; // example
+const MONTHLY_LIMIT = 5000; 
 
 export async function consumeWhisperAttemptMonthly(userId: string,): Promise<{ attempts: number; remaining: number }> {
   const { rows } = await db.query(
