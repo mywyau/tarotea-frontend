@@ -44,7 +44,6 @@ const formattedTopic = computed(() =>
         .replace(/\b\w/g, c => c.toUpperCase())
 )
 
-
 onMounted(async () => {
     try {
         const { getAccessToken } = await useAuth()
@@ -147,6 +146,9 @@ watchEffect(() => {
                 <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
             </div>
 
+            <NuxtLink :to="`/voice/pronunciation-check/${slug}`" class="inline-block text-sm text-black hover:underline">
+                AI Prononciation Check
+            </NuxtLink>
         </section>
 
         <!-- Usage -->
