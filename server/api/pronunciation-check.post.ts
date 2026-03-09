@@ -60,7 +60,7 @@ export default defineEventHandler(async (event) => {
       language: "zh",
       model: "whisper-1",
       temperature: 0,
-      prompt: `Cantonese pronunciation such as ${toneLessJyutping}`,
+      prompt: `Cantonese pronunciation as jyutping with tones`,
     });
 
     await recordWhisperAttempt(userId);
@@ -75,7 +75,7 @@ export default defineEventHandler(async (event) => {
     }
 
     console.log("[pronunciation-check.post] called");
-    // console.log("Transcription result:", transcription);
+    console.log("Transcription result:", transcription);
     // console.log("Transcript text:", transcription.text);
 
     if (transcript.includes(expectedChinese)) {
@@ -99,9 +99,6 @@ ${expectedChinese}
 Expected Jyutping:
 ${expectedJyutping}
 
-Tone-less Jyutping:
-${toneLessJyutping}
-
 Speech transcription:
 ${transcript}
 
@@ -112,7 +109,7 @@ Compare the sounds phonetically with the expected Jyutping and score pronunciati
 
 Guidelines:
 - Compare sounds, not spelling.
-- Minor vowel differences are acceptable.
+- Minor differences are acceptable.
 - Mostly correct pronunciation should score 80–95.
 - Only give 100 for extremely clear pronunciation.
 
