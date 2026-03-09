@@ -46,6 +46,7 @@ const streamRef = ref<MediaStream | null>(null)
 
 async function startRecording() {
 
+  aiState.value = ""   // reset error state
   audioChunks = []
 
   const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -94,6 +95,8 @@ async function startRecording() {
       loading.value = false
     } catch (e: any) {
       aiState.value = 'error'
+    } finally {
+      loading.value = false
     }
   }
 
@@ -143,6 +146,7 @@ function resetRecording() {
 }
 
 function tryAgain() {
+  aiState.value = ""
   resetRecording()
 }
 
@@ -165,6 +169,17 @@ onMounted(() => {
       <h1 class="text-2xl font-bold mb-6">
         Pronunciation
       </h1>
+
+      <div v-if="aiState === 'error'" class="text-red-500 text-sm space-y-6">
+        <p>
+          Something went wrong analysing your pronunciation.
+          Please try again.
+        </p>
+
+        <button @click="tryAgain" class="px-4 py-2 bg-gray-300 text-black rounded">
+          Try Again
+        </button>
+      </div>
 
       <div v-if="supported" class="space-y-8">
 
