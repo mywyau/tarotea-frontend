@@ -158,7 +158,7 @@ watchEffect(() => {
             </h2>
 
             <!-- REMOVE BULLETS -->
-            <ul class="space-y-2 text-gray-700">
+            <ul class="list-disc space-y-2 text-gray-700">
                 <li v-for="note in word.usage" :key="note">
                     {{ note }}
                 </li>

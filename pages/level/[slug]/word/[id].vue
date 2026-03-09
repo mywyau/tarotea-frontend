@@ -26,7 +26,6 @@ const { data, error } = await useFetch(
   }
 )
 
-
 const { volume } = useAudioVolume()
 
 const word = computed(() => data.value)

@@ -2,7 +2,7 @@
 
 definePageMeta({
   ssr: false,
-  middleware: "coming-soon"
+  middleware: "ai-whisper-access"
 })
 
 const route = useRoute()
