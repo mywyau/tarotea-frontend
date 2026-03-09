@@ -12,6 +12,12 @@ const {
 const deleting = ref(false)
 const deleteConfirmInput = ref('')
 
+const aiUsage = ref<{
+    attempts: number
+    remaining: number
+    limit: number
+} | null>(null)
+
 async function deleteAccount() {
     if (!isLoggedIn.value) return
     if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
@@ -39,6 +45,20 @@ async function deleteAccount() {
     }
 }
 
+async function fetchAIUsage() {
+    if (!isLoggedIn.value) return
+
+    const auth = await useAuth()
+    const token = await auth.getAccessToken()
+
+    aiUsage.value = await $fetch("/api/ai/usage", {
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+}
+
 async function openBillingPortal() {
     if (!isLoggedIn.value) return
 
@@ -52,6 +72,13 @@ async function openBillingPortal() {
 
     window.location.href = url
 }
+
+watchEffect(() => {
+    if (authReady.value && isLoggedIn.value) {
+        fetchAIUsage()
+    }
+})
+
 </script>
 
 <template>
@@ -96,16 +123,17 @@ async function openBillingPortal() {
                                 </div>
                             </div>
 
-                            <!-- Plan badge -->
-                            <!-- <span
-                class="shrink-0 inline-flex items-center px-3 py-1 text-xs font-semibold"
-                :style="entitlement?.subscription_status === 'active'
-                  ? 'color: rgba(17,24,39,0.9);'
-                  : 'color: rgba(17,24,39,0.85);'
-                "
-              >
-                {{ entitlement?.subscription_status === 'active' ? 'Active' : 'Free' }}
-              </span> -->
+                            <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2">
+
+                                <div class="font-medium">AI Usage</div>
+                                
+                                <span>{{ aiUsage.remaining.toLocaleString() }} requests remaining</span>
+
+                                <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+                                    <div class="h-2 bg-blue-300 striped-bar"
+                                        :style="{ width: (aiUsage.remaining / aiUsage.limit) * 100 + '%' }"></div>
+                                </div>
+                            </div>
                         </div>
 
                         <p v-if="isCanceling && currentPeriodEnd" class="text-sm text-gray-600">
@@ -214,3 +242,25 @@ async function openBillingPortal() {
         </div>
     </main>
 </template>
+
+<style scoped>
+
+.striped-bar {
+    background-image: repeating-linear-gradient(45deg,
+            rgba(255, 255, 255, 0.3) 0px,
+            rgba(255, 255, 255, 0.3) 6px,
+            transparent 6px,
+            transparent 12px);
+    animation: stripeMove 1s linear infinite;
+}
+
+@keyframes stripeMove {
+    from {
+        background-position: 0 0;
+    }
+
+    to {
+        background-position: 20px 0;
+    }
+}
+</style>

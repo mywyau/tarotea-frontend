@@ -10,6 +10,17 @@ const id = computed(() => decodeURIComponent(route.params.id as string))
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+const {
+  authReady,
+  isLoggedIn,
+  user,
+  entitlement,
+  isCanceling,
+  currentPeriodEnd,
+  resolve
+} = useMeStateV2()
+
+
 const { data, error } = await useFetch(
   () => `/api/words/${id.value}`,
   {
@@ -43,6 +54,37 @@ const progress = computed(() => {
   return (recordingTime.value / MAX_RECORDING_SECONDS) * 100
 })
 const streamRef = ref<MediaStream | null>(null)
+
+const safeRemaining = computed(() => aiUsage.value?.remaining ?? 0)
+
+const safeLimit = computed(() => aiUsage.value?.limit ?? 1)
+
+const usagePercent = computed(() => {
+  return (safeRemaining.value / safeLimit.value) * 100
+})
+
+const aiUsage = ref<{
+  attempts: number
+  remaining: number
+  limit: number
+} | null>(null)
+
+
+async function fetchAIUsage() {
+  if (!isLoggedIn.value) return
+
+  const auth = await useAuth()
+  const token = await auth.getAccessToken()
+
+  aiUsage.value = await $fetch<{
+    attempts: number
+    remaining: number
+    limit: number
+  }>("/api/ai/usage", {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` }
+  })
+}
 
 
 async function startRecording() {
@@ -93,6 +135,18 @@ async function startRecording() {
       feedback.value = res.feedback
       score.value = res.score
       remainingAttempts.value = res.remainingAttempts
+
+      if (aiUsage.value) {
+        aiUsage.value.remaining = res.remainingAttempts
+        aiUsage.value.attempts = aiUsage.value.limit - res.remainingAttempts
+      } else {
+        // fallback if usage hasn't loaded yet
+        aiUsage.value = {
+          remaining: res.remainingAttempts,
+          attempts: 0,
+          limit: 5000 // same as backend limit
+        }
+      }
 
       loading.value = false
     } catch (e: any) {
@@ -162,6 +216,12 @@ onMounted(() => {
   // )
 })
 
+watchEffect(() => {
+  if (authReady.value && isLoggedIn.value) {
+    fetchAIUsage()
+  }
+})
+
 </script>
 
 <template>
@@ -202,14 +262,9 @@ onMounted(() => {
 
         <div class="flex flex-col items-center gap-3">
 
-          <!-- <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
-            class="px-4 py-2 bg-blue-500 text-black rounded disabled:opacity-50">
-            Start Recording
-          </button> -->
-
-          <div v-if="remainingAttempts !== null" class="text-base text-gray-700">
+          <!-- <div v-if="remainingAttempts !== null" class="text-base text-gray-700">
             {{ remainingAttempts }} attempts remaining this month
-          </div>
+          </div> -->
 
           <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
             class="px-4 py-2 bg-black rounded disabled:opacity-50">
@@ -222,6 +277,37 @@ onMounted(() => {
               Start Recording
             </span>
           </button>
+
+          <!-- TODO: fix me please -->
+          <!-- <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2">
+
+            <div class="font-medium">AI Usage</div>
+
+            <span>
+              {{ aiUsage?.remaining?.toLocaleString() ?? 0 }} requests remaining
+            </span>
+
+            <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+              <div class="h-2 bg-blue-300 striped-bar transition-all duration-500"
+                :style="{ width: (aiUsage.remaining / aiUsage.limit) * 100 + '%' }"></div>
+            </div>
+
+          </div> -->
+
+          <div class="text-sm text-gray-700 mt-3 space-y-2">
+
+            <div class="font-medium">AI Usage</div>
+
+            <span>
+              {{ safeRemaining.toLocaleString() }} requests remaining
+            </span>
+
+            <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+              <div class="h-2 bg-blue-300 striped-bar transition-all duration-500"
+                :style="{ width: usagePercent + '%' }"></div>
+            </div>
+
+          </div>
 
           <div v-if="recording" class="w-64 space-y-1">
             <p class="text-red-500 text-sm">
@@ -302,11 +388,32 @@ onMounted(() => {
 
         <p>
           If something looks wrong, try recording again or refreshing the page. Make sure the environment is free of
-          noise
-          and speech is clear.
+          noise and speech is clear.
         </p>
       </div>
 
     </div>
   </div>
 </template>
+
+
+<style scoped>
+.striped-bar {
+  background-image: repeating-linear-gradient(45deg,
+      rgba(255, 255, 255, 0.3) 0px,
+      rgba(255, 255, 255, 0.3) 6px,
+      transparent 6px,
+      transparent 12px);
+  animation: stripeMove 1s linear infinite;
+}
+
+@keyframes stripeMove {
+  from {
+    background-position: 0 0;
+  }
+
+  to {
+    background-position: 20px 0;
+  }
+}
+</style>
