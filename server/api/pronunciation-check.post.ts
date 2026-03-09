@@ -6,8 +6,6 @@
 // });
 
 // export default defineEventHandler(async (event) => {
-
-
 //   const form = await readMultipartFormData(event);
 
 //   const audioFile = form?.find((f) => f.name === "audio");
@@ -19,7 +17,7 @@
 //   const expectedJyutping = expectedJyutpingField?.data?.toString() ?? "";
 //   const expectedChinese = expectedChineseField?.data?.toString() ?? "";
 
-//   const toneLessJyutping = expectedJyutping.replace(/[1-6]/g, "")
+//   const toneLessJyutping = expectedJyutping.replace(/[1-6]/g, "");
 
 //   if (!audioFile || !audioFile.data) {
 //     throw createError({
@@ -51,7 +49,7 @@
 //     // 2️⃣ Ask AI to evaluate pronunciation
 //     const completion = await openai.responses.create({
 //       model: "gpt-4.1-mini",
-// input: `
+//       input: `
 // You are evaluating a learner's Cantonese pronunciation.
 
 // The learner is speaking **Jyutping romanization**.
@@ -128,7 +126,7 @@
 // • Keep feedback short (1–2 sentences)
 // • Mention which syllables were inaccurate if possible
 // • Encourage the learner if pronunciation is understandable
-// `
+// `,
 //     });
 
 //     const resultText = completion.output_text;
