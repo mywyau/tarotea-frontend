@@ -167,7 +167,7 @@ onMounted(() => {
   <div class="min-h-[70vh] flex items-center justify-center p-6">
     <div class="max-w-xl w-full text-center space-y-6">
       <h1 class="text-2xl font-bold mb-6">
-        Echo Lab 
+        Echo Lab
       </h1>
 
       <div v-if="aiState === 'error'" class="text-red-500 text-sm space-y-6">
@@ -200,9 +200,22 @@ onMounted(() => {
 
         <div class="flex flex-col items-center gap-3">
 
-          <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
+          <!-- <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
             class="px-4 py-2 bg-blue-500 text-black rounded disabled:opacity-50">
             Start Recording
+          </button> -->
+
+          <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
+            class="px-4 py-2 bg-black rounded disabled:opacity-50">
+            <span class="bg-gradient-to-r
+                  from-[#7ec6f3]
+                  via-[#5aaee6]
+                  to-[#3f8fd8]
+                  bg-clip-text text-transparent
+                  hover:brightness-125 transition"
+             >
+              Start Recording
+            </span>
           </button>
 
           <div v-if="recording" class="w-64 space-y-1">
@@ -216,7 +229,7 @@ onMounted(() => {
           </div>
 
           <button v-if="recording" @click="stopRecording" :disabled="loading"
-            class="px-4 py-2 bg-red-500 text-black rounded">
+            class="px-4 py-2 bg-red-500 text-black rounded hover:brightness-125 transition">
             Stop Recording
           </button>
 
@@ -255,7 +268,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <button v-if="transcript && !recording" @click="tryAgain" class="px-4 py-2 bg-gray-300 text-black rounded">
+        <button v-if="transcript && !recording" @click="tryAgain" class="px-4 py-2 bg-gray-300 text-black rounded hover:brightness-110 transition">
           Try Again
         </button>
       </div>
@@ -281,7 +294,8 @@ onMounted(() => {
         </p>
 
         <p>
-          If something looks wrong, try recording again or refresh the page.
+          If something looks wrong, try recording again or refresh the page. Make sure the environment is free of noise
+          and you speak clearly.
         </p>
       </div>
 

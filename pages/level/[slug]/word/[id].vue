@@ -148,6 +148,19 @@ watchEffect(() => {
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
       </div>
 
+      <NuxtLink :to="`/echo-lab/pronunciation-check/${word.id}`"
+        class="inline-flex block text-center rounded-lg px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
+        <span class="bg-gradient-to-r
+                                from-[#d48fd0]
+                                via-[#b57bc3]
+                                via-[#6faed6]
+                                to-[#d48fd0]
+                                bg-clip-text text-transparent
+                                hover:brightness-125 transition">
+          AI Echo Lab
+        </span>
+      </NuxtLink>
+
     </section>
 
     <!-- Usage -->
