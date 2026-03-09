@@ -146,8 +146,8 @@ watchEffect(() => {
                 <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
             </div>
 
-            <NuxtLink :to="`/voice/pronunciation-check/${slug}`" class="inline-block text-sm text-black hover:underline">
-                AI Prononciation Check
+            <NuxtLink :to="`/echo-lab/pronunciation-check/${slug}`" class="inline-block text-sm text-black hover:underline">
+                AI Echo Lab
             </NuxtLink>
         </section>
 

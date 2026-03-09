@@ -167,7 +167,7 @@ onMounted(() => {
   <div class="min-h-[70vh] flex items-center justify-center p-6">
     <div class="max-w-xl w-full text-center space-y-6">
       <h1 class="text-2xl font-bold mb-6">
-        Pronunciation
+        Echo Lab 
       </h1>
 
       <div v-if="aiState === 'error'" class="text-red-500 text-sm space-y-6">
