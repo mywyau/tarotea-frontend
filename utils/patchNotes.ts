@@ -15,6 +15,13 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
+    date: "9 March 2026",
+    title: "Echo Labs has landed",
+    items: [
+      "Creation of Echo Labs to help users test pronunciation - trial",
+    ],
+  },
+  {
     date: "8 March 2026",
     title: "Content blast",
     items: [
