@@ -294,8 +294,8 @@ onMounted(() => {
         </p>
 
         <p>
-          If something looks wrong, try recording again or refresh the page. Make sure the environment is free of noise
-          and you speak clearly.
+          If something looks wrong, try recording again or refreshing the page. Make sure the environment is free of noise
+          and speech is clear.
         </p>
       </div>
 
