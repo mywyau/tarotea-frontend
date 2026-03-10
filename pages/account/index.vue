@@ -127,17 +127,6 @@ watchEffect(() => {
                                     <span v-else>Free</span>
                                 </div>
                             </div>
-
-                            <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2">
-
-                                <div class="font-medium">AI Usage</div>
-
-                                <span>{{ aiUsage.remaining.toLocaleString() }} requests remaining</span>
-
-                                <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-                                    <div class="h-2 bg-blue-300" :style="{ width: remainingPercent + '%' }"></div>
-                                </div>
-                            </div>
                         </div>
 
                         <p v-if="isCanceling && currentPeriodEnd" class="text-sm text-gray-600">
@@ -152,6 +141,23 @@ watchEffect(() => {
                         <p v-else-if="entitlement?.subscription_status === 'past_due'" class="text-sm text-red-700">
                             Payment issue — update your card to keep access.
                         </p>
+                    </section>
+
+                    <!-- AI Usage card -->
+                    <section class="rounded-lg backdrop-blur p-5 space-y-3" style="background-color:#F6E1E1;">
+                        <div class=" flex items-center justify-between gap-3">
+
+                            <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2">
+
+                                <div class="font-medium">AI Usage</div>
+
+                                <p>{{ aiUsage.remaining.toLocaleString() }} requests remaining</p>
+
+                                <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+                                    <div class="h-2 bg-blue-300" :style="{ width: remainingPercent + '%' }"></div>
+                                </div>
+                            </div>
+                        </div>
                     </section>
 
                     <!-- Primary action -->
