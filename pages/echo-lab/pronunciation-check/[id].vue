@@ -233,7 +233,9 @@ const tips = [
   "Listen to the audio example carefully before recording.",
   "Say the word naturally, but not too fast.",
   "Check your own recording if it's similar to the audio you're fine.",
-  "Make sure the recording captures everything you say. Lightspeed button fingers are both a blessing and a curse",
+  "Upgrade for 5000 requests per month.",
+  "Make sure the recording captures everything you say.",
+  "Free users get 10 requests per month.",
 ]
 
 const tipIndex = ref(0)
