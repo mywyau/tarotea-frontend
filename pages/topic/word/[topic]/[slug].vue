@@ -103,7 +103,7 @@ watchEffect(() => {
 </script>
 
 <template>
-    <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-6 sm:space-y-8">
+    <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
         <!-- Back link -->
         <NuxtLink :to="`/topic/words/${topic}`" class="inline-block text-sm text-black hover:underline">
@@ -146,9 +146,9 @@ watchEffect(() => {
                 <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
             </div>
 
-            <div class="mt-4">
+            <div class="">
                 <NuxtLink :to="`/echo-lab/pronunciation-check/${slug}`"
-                    class="inline-flex block text-center rounded-lg px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
+                    class="inline-flex block text-center rounded px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
                     <span class="bg-gradient-to-r
                                 from-[#d48fd0]
                                 via-[#b57bc3]
@@ -156,7 +156,7 @@ watchEffect(() => {
                                 to-[#d48fd0]
                                 bg-clip-text text-transparent
                                 hover:brightness-125 transition">
-                        AI Echo Lab
+                        Echo Lab
                     </span>
                 </NuxtLink>
             </div>

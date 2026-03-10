@@ -267,7 +267,7 @@ watchEffect(() => {
           </div> -->
 
           <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
-            class="px-4 py-2 bg-black rounded disabled:opacity-50">
+            class="px-4 py-2 bg-black font-semibold rounded disabled:opacity-50">
             <span class="bg-gradient-to-r
                   from-[#7ec6f3]
                   via-[#5aaee6]
@@ -320,7 +320,7 @@ watchEffect(() => {
           </div>
 
           <button v-if="recording" @click="stopRecording" :disabled="loading"
-            class="px-4 py-2 bg-red-500 text-black rounded hover:brightness-125 transition">
+            class="px-4 py-2 bg-red-500 text-black font-semibold rounded hover:brightness-125 transition">
             Stop Recording
           </button>
 

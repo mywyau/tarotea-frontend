@@ -114,7 +114,7 @@ watchEffect(() => {
     </NuxtLink>
 
     <!-- Word header -->
-    <section class="text-center space-y-2 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">
+    <section class="text-center space-y-4 sm:space-y-6 word-card rounded-xl p-6 sm:p-8">
 
       <h1 class="text-4xl font-semibold text-black">
         {{ word.word }}
@@ -129,7 +129,7 @@ watchEffect(() => {
       </div>
 
       <!-- XP block -->
-      <div class="pt-4 space-y-3">
+      <div class="pt-4 space-y-4">
 
         <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
           <span>{{ xp }} / {{ masteryXp }} XP</span>
@@ -144,22 +144,24 @@ watchEffect(() => {
         </div>
       </div>
 
-      <div class="pt-4 sm:pt-4">
+      <div class="">
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
       </div>
 
-      <NuxtLink :to="`/echo-lab/pronunciation-check/${word.id}`"
-        class="inline-flex block text-center rounded-lg px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
-        <span class="bg-gradient-to-r
+      <div class="">
+        <NuxtLink :to="`/echo-lab/pronunciation-check/${word.id}`"
+          class="inline-flex block text-center rounded px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
+          <span class="bg-gradient-to-r
                                 from-[#d48fd0]
                                 via-[#b57bc3]
                                 via-[#6faed6]
                                 to-[#d48fd0]
                                 bg-clip-text text-transparent
                                 hover:brightness-125 transition">
-          AI Echo Lab
-        </span>
-      </NuxtLink>
+            Echo Lab
+          </span>
+        </NuxtLink>
+      </div>
 
     </section>
 

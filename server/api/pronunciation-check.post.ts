@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
       language: "zh",
       model: "whisper-1",
       temperature: 0,
-      prompt: `Cantonese pronunciation as jyutping with tones`,
+      prompt: `Cantonese speech. Possible word: ${expectedChinese}`,
     });
 
     const transcript = transcription.text;
@@ -82,32 +82,31 @@ export default defineEventHandler(async (event) => {
     }
     // console.log("Transcript text:", transcription.text);
 
-    if (transcript.includes(expectedChinese)) {
-      return {
-        transcript,
-        score: 100,
-        feedback:
-          "Excellent pronunciation. The spoken word matches the expected Cantonese word.",
-      };
-    }
+    // if (transcript.includes(expectedChinese)) {
+    //   return {
+    //     transcript,
+    //     score: 100,
+    //     feedback:
+    //       "Excellent pronunciation. What you said matches the chinese word returned.",
+    //   };
+    // }
 
     // 2️⃣ Ask AI to evaluate pronunciation
     const completion = await openai.responses.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-4o-mini",
       input: `
 Evaluate a learner's Cantonese pronunciation.
-
-Expected Chinese:
-${expectedChinese}
 
 Expected Jyutping:
 ${expectedJyutping}
 
-Speech transcription:
+Expected Chinese:
+${expectedChinese}
+
+User Speech transcription:
 ${transcript}
 
-The transcription may contain English-like words approximating Cantonese sounds.
-Compare the sounds phonetically with the expected Jyutping and score pronunciation from 0–100.
+Compare the sounds phonetically with the expected chinese and score pronunciation from 0–100.
 
 Guidelines:
 - Compare sounds, not spelling.
@@ -122,7 +121,7 @@ Return JSON only:
   "feedback": string
 }
 
-Feedback should be 1–2 short sentences. Keep it light and about say if is it would be easy or hard for natives to understand.
+Feedback should be 1–2 short sentences. Keep it light and say if is it would be easy or hard for natives to understand.
 `,
     });
 
