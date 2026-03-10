@@ -32,6 +32,30 @@ const {
 
 const canEnterLevel = canAccessLevelWord(levelNumber, entitlement.value!)
 
+const tips = [
+  "XP is awarded when you complete the quiz.",
+  "Listen to the Cantonese audio and choose the correct English meaning.",
+  "Answer streaks increase the XP you earn.",
+  "New or weaker words appear more often to help reinforce learning.",
+  "Questions are randomized every session.",
+  "Each word has a maximum of 500 XP.",
+  "Streaks are tracked separately for each word.",
+  "Earn at least 5 XP for every correct answer.",  
+  "Wrong answers cost 12 XP and reset your streak for that word.",
+  "Streaks cap at 5 correct answers in a row for a given word.",
+  "Streak XP: 5 → 7 → 9 → 13 → 15."
+]
+
+const tipIndex = ref(0)
+
+function nextTip() {
+  tipIndex.value = (tipIndex.value + 1) % tips.length
+}
+
+onMounted(() => {
+  setInterval(nextTip, 5000)
+})
+
 watchEffect(() => {
   if (slug && levelNumber === null) {
     throw createError({
@@ -78,29 +102,34 @@ watchEffect(() => {
       </h1>
 
       <p class="text-black">
-        Test your listening skills from this level.
+        Practice and test your listening skills from this level.
       </p>
 
-      <ul class="features-list text-base">
-        <li>XP awarded on completion</li>
-        <li>Cantonese audio, English answers</li>
-        <li>Streaks gain you more xp per answer</li>
-        <li>Weakest words appear more often</li>
-        <li>Randomised questions</li>
-      </ul>
-
-      <NuxtLink :to="`/quiz/${slug}/audio/testV3`" class="start-btn">
-        Start quiz
-      </NuxtLink>
-
       <div class="pt-6">
-        <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
-          ← Level {{ levelNumber }} Vocab
+        <NuxtLink :to="`/quiz/${slug}/audio/testV3`" class="start-btn">
+          Start audio quiz
         </NuxtLink>
+
+        <div class="mt-6">
+          <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
+            ← Level {{ levelNumber }} Vocab
+          </NuxtLink>
+        </div>
       </div>
 
-    </section>
+      <div class="mt-2 text-base text-gray-600 max-w-md mx-auto">
+        <Transition name="tip-fade" mode="out-in">
+          <p :key="tipIndex" class="leading-relaxed text-center">
+            {{ tips[tipIndex] }}
+          </p>
+        </Transition>
 
+        <div class="flex justify-center gap-1 mt-3">
+          <span v-for="(_, i) in tips" :key="i" class="w-1.5 h-1.5 rounded-full"
+            :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'" />
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -152,13 +181,13 @@ watchEffect(() => {
   padding: 0.75rem;
   font-weight: 600;
   text-align: center;
-  background: #A8CAE0;
+  background: #ffabe0;
   color: #111827;
   transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .start-btn:hover {
-  background: #8fbfd6;
+  background: #eaaad9;
   transform: translateY(-2px);
 }
 
@@ -181,5 +210,20 @@ watchEffect(() => {
   .quiz-card {
     padding: 1.5rem;
   }
+}
+
+.tip-fade-enter-active,
+.tip-fade-leave-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.tip-fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.tip-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>

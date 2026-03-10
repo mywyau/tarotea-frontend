@@ -271,6 +271,27 @@ async function next() {
   }
 }
 
+const tips = [
+  "New or weaker words appear more often to help you improve.",
+  "Each word can earn up to 500 XP.",
+  "Build streaks to earn more XP per answer.",
+  "Wrong answers reset your streak and cost XP.",
+  "Questions are randomized every time you take the quiz.",
+  "Practice both Cantonese → English and English → Cantonese.",
+  "Mastering a word means reaching its XP cap.",
+  "Focus on accuracy — streaks are where the big XP comes from."
+]
+
+const tipIndex = ref(0)
+
+function nextTip() {
+  tipIndex.value = (tipIndex.value + 1) % tips.length
+}
+
+onMounted(() => {
+  setInterval(nextTip, 6000)
+})
+
 onMounted(async () => {
   try {
     const token = await getAccessToken()
@@ -437,7 +458,7 @@ watch(
 
       <div class="grid grid-cols-2 gap-4">
         <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-xl flex items-center justify-center
-           text-2xl font-semibold text-center p-6
+           text-xl font-semibold text-center p-6
            transition-all duration-200 shadow-sm active:scale-95 hover:brightness-110" :style="{
             backgroundColor:
               !answered
@@ -459,6 +480,25 @@ watch(
         <button v-if="answered" class="w-full rounded bg-black text-white py-2" @click="next">
           Next
         </button>
+      </div>
+
+      <div v-if="current < questions.length" class="mt-10 text-base text-gray-500 p-4 max-w-md mx-auto">
+
+        <div class="flex items-center justify-between gap-3">
+
+          <Transition name="tip-fade" mode="out-in">
+            <p :key="tipIndex" class="text-center flex-1 leading-relaxed">
+              {{ tips[tipIndex] }}
+            </p>
+          </Transition>
+
+        </div>
+
+        <div class="flex justify-center gap-1 mt-3">
+          <span v-for="(_, i) in tips" :key="i" class="w-1.5 h-1.5 rounded-full"
+            :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'" />
+        </div>
+
       </div>
 
     </div>
@@ -528,5 +568,21 @@ watch(
 .fade-streak-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+
+
+.tip-fade-enter-active,
+.tip-fade-leave-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.tip-fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.tip-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>

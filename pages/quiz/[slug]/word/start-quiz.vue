@@ -38,17 +38,18 @@ watchEffect(() => {
 })
 
 const features = [
-  "XP is awarded when you complete the quiz",
-  "Each word has a max xp cap of 500xp, you cannot exceed 500xp per word",
-  "New or your weakest words will tend to appear more often",
-  "You gain at least 5xp for every correct answer",
-  "Streaks gain you more XP per answer",
-  "Questions are randomised",
-  "Cantonese to English and vice versa",
-  "No audio to help with reading recognition and comprehension",
-  "You lose 12xp and your streak for every wrong answer",
-  "Streak cap out at 5 correct in a row",
-  "5xp, 7xp, 9xp, 13xp and finally 15xp is the max cap at 5 streak.",
+  "XP is awarded when you complete a quiz.",
+  "Each word has a maximum of 500 XP.",
+  "Streaks are tracked separately for each word.",
+  "New and weaker words appear more frequently.",
+  "Earn at least 5 XP for every correct answer.",
+  "Answer streaks increase the XP you earn.",
+  "Questions are randomized every session.",
+  "Practice Cantonese → English + English → Cantonese.",
+  "Audio is disabled to focus on reading comprehension.",
+  "Wrong answers cost 12 XP and reset your streak for that word.",
+  "Streaks cap at 5 correct answers in a row for a given word.",
+  "Streak XP: 5 → 7 → 9 → 13 → 15."
 ]
 
 const featureIndex = ref(0)
@@ -58,27 +59,9 @@ function nextFeature() {
     (featureIndex.value + 1) % features.length
 }
 
-function prevFeature() {
-  featureIndex.value =
-    (featureIndex.value - 1 + features.length) % features.length
-}
-
-let interval: ReturnType<typeof setInterval> | null = null
-
-function startAutoScroll() {
-  stopAutoScroll()
-  interval = setInterval(nextFeature, 4000)
-}
-
-function stopAutoScroll() {
-  if (interval) {
-    clearInterval(interval)
-    interval = null
-  }
-}
-
-onMounted(startAutoScroll)
-onBeforeUnmount(stopAutoScroll)
+onMounted(() => {
+  setInterval(nextFeature, 5000)
+})
 
 // --- helpers ---
 
@@ -94,30 +77,11 @@ const canEnterLevel = () => {
   return canAccessLevel(isLoggedIn.value, entitlement.value)
 }
 
-watch(featureIndex, (newVal) => {
-  if (newVal === features.length) {
-    // We reached the cloned slide
-
-    setTimeout(() => {
-      // Disable animation
-      isTransitioning.value = false
-      featureIndex.value = 0
-
-      // Re-enable animation on next frame
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          isTransitioning.value = true
-        })
-      })
-
-    }, 500) // MUST match your transition duration
-  }
-})
-
 </script>
 
 
 <template>
+
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
     <NuxtLink :to="`/quiz/`" class="text-base text-black hover:underline">
@@ -152,44 +116,39 @@ watch(featureIndex, (newVal) => {
       </h1>
 
       <p class="text-black">
-        Test your understanding of the words from this level.
+        Practice and test your understanding of the words from this level.
       </p>
 
-      <div class="relative max-w-sm mx-auto" @mouseenter="stopAutoScroll" @mouseleave="startAutoScroll">
-        <div class="relative h-[120px]">
-
-          <transition name="fade" mode="out-in">
-            <div :key="featureIndex" class="absolute inset-0 rounded-xl p-6 bg-[#F6E1E1] flex items-center">
-              <p class="text-gray-800 text-left">
-                {{ features[featureIndex] }}
-              </p>
-            </div>
-          </transition>
-
-        </div>
-
-        <!-- Controls -->
-        <div class="flex justify-center gap-4 mt-4">
-          <button @click="prevFeature" class="px-3 py-1 rounded-lg bg-[#EAB8E4] hover:brightness-110">
-            ←
-          </button>
-
-          <button @click="nextFeature" class="px-3 py-1 rounded-lg bg-[#A8CAE0] hover:brightness-110">
-            →
-          </button>
-        </div>
-      </div>
-
-      <NuxtLink :to="`/quiz/${slug}/word/testV3`" class="start-btn">
-        Start vocabulary quiz
-      </NuxtLink>
-
       <div class="pt-6">
-        <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
-          ← Level {{ levelNumber }} Vocab
+        <NuxtLink :to="`/quiz/${slug}/word/testV3`" class="start-btn">
+          Start vocabulary quiz
         </NuxtLink>
+
+        <div class="mt-6">
+          <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
+            ← Level {{ levelNumber }} Vocab
+          </NuxtLink>
+        </div>
       </div>
 
+      <div class="text-base text-gray-500 p-4 max-w-md mx-auto">
+
+        <div class="flex items-center justify-between gap-3">
+
+          <Transition name="tip-fade" mode="out-in">
+            <p :key="featureIndex" class="text-center flex-1 leading-relaxed">
+              {{ features[featureIndex] }}
+            </p>
+          </Transition>
+
+        </div>
+
+        <div class="flex justify-center gap-1 mt-3">
+          <span v-for="(_, i) in features" :key="i" class="w-1.5 h-1.5 rounded-full"
+            :class="i === featureIndex ? 'bg-gray-600' : 'bg-gray-300'" />
+        </div>
+
+      </div>
     </section>
 
   </main>
@@ -282,5 +241,21 @@ watch(featureIndex, (newVal) => {
   .quiz-card {
     padding: 1.5rem;
   }
+}
+
+
+.tip-fade-enter-active,
+.tip-fade-leave-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.tip-fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.tip-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 </style>
