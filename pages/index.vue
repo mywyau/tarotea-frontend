@@ -51,7 +51,7 @@ function toggleTrainingMode() {
            bg-clip-text text-transparent
            transition-all duration-300
            hover:brightness-125">
-          Start Learning →
+          Start Learning
         </span>
       </NuxtLink>
     </div>

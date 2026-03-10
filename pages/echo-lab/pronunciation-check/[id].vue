@@ -242,9 +242,19 @@ function nextTip() {
   tipIndex.value = (tipIndex.value + 1) % tips.length
 }
 
-function prevTip() {
-  tipIndex.value =
-    (tipIndex.value - 1 + tips.length) % tips.length
+// function prevTip() {
+//   tipIndex.value =
+//     (tipIndex.value - 1 + tips.length) % tips.length
+// }
+
+const router = useRouter()
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    navigateTo("/")
+  }
 }
 
 
@@ -277,6 +287,13 @@ watchEffect(() => {
 
   <div class="min-h-[70vh] flex items-center justify-center p-6">
     <div class="max-w-xl w-full text-center space-y-6">
+
+      <div class="w-full text-left mb-6">
+        <button @click="goBack" class="inline-flex items-center text-sm text-black hover:underline">
+          ← Back
+        </button>
+      </div>
+
       <h1 class="text-2xl font-bold mb-6">
         Echo Lab
       </h1>
@@ -327,22 +344,6 @@ watchEffect(() => {
             </span>
           </button>
 
-          <!-- TODO: fix me please -->
-          <!-- <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2">
-
-            <div class="font-medium">AI Usage</div>
-
-            <span>
-              {{ aiUsage?.remaining?.toLocaleString() ?? 0 }} requests remaining
-            </span>
-
-            <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-              <div class="h-2 bg-blue-300 striped-bar transition-all duration-500"
-                :style="{ width: (aiUsage.remaining / aiUsage.limit) * 100 + '%' }"></div>
-            </div>
-
-          </div> -->
-
           <div class="text-sm text-gray-700 mt-3 space-y-2">
 
             <div class="font-medium">AI Usage</div>
@@ -379,12 +380,6 @@ watchEffect(() => {
           </p>
 
         </div>
-
-        <!-- the chinese chars are not accurate lets not show for now -->
-        <!-- <div v-if="transcript">
-        <h2 class="font-semibold mt-4">Transcript</h2>
-        <p>{{ transcript }}</p>
-      </div> -->
 
         <div v-if="recordingUrl" class="flex flex-col items-center gap-2">
           <p class="text-sm text-gray-500">Your recording</p>
