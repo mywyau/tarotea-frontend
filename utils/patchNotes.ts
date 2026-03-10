@@ -15,11 +15,18 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
+    date: "10 March 2026",
+    title: "Another general sweep up",
+    items: [
+      "Enable free user allowance of echo labs ",
+      "Add content for housing and rent",
+      "General sweep up e.g. styling, wording, content",
+    ],
+  },
+  {
     date: "9 March 2026",
     title: "Echo Labs has landed",
-    items: [
-      "Creation of Echo Labs to help users test pronunciation - trial",
-    ],
+    items: ["Creation of Echo Labs to help users test pronunciation - trial"],
   },
   {
     date: "8 March 2026",
