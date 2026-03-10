@@ -145,6 +145,15 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
+    id: "transport-travel",
+    title: "Transport & Travel",
+    comingSoon: false,
+    description:
+      "Use transport, ask for directions, talk about travel plans, and get around the city.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "money",
     title: "Money & Payments",
     comingSoon: true,

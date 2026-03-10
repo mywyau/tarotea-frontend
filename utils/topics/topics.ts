@@ -153,6 +153,14 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
+    id: "transport-travel",
+    title: "Transport & Travel",
+    comingSoon: false,
+    description: "Use transport, ask for directions, talk about travel plans, and get around the city.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "money",
     title: "Money & Payments",
     comingSoon: true,
@@ -160,15 +168,6 @@ export const topics = [
       "Discuss prices, paying, change, costs, and money-related situations.",
     requiresPaid: false,
     quizRequiresPaid: true,
-  },
-  {
-    id: "transport-travel",
-    title: "Transport & Travel",
-    comingSoon: true,
-    description:
-      "Use transport, ask for directions, talk about travel plans, and get around the city.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
   },
   {
     id: "food-ordering",
