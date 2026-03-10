@@ -135,6 +135,15 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
+    id: "housing",
+    title: "Housing & Renting",
+    comingSoon: false,
+    description:
+      "Discuss renting, housing issues, utilities, and living arrangements.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "money",
     title: "Money & Payments",
     comingSoon: true,
@@ -231,15 +240,6 @@ export const topics = [
     comingSoon: true,
     description:
       "Make appointments, arrange meetings, and talk about availability.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "housing",
-    title: "Housing & Renting",
-    comingSoon: true,
-    description:
-      "Discuss renting, housing issues, utilities, and living arrangements.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
