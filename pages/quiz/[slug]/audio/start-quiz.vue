@@ -106,7 +106,7 @@ watchEffect(() => {
       </p>
 
       <div class="pt-6">
-        <NuxtLink :to="`/quiz/${slug}/audio/testV3`" class="start-btn">
+        <NuxtLink :to="`/quiz/${slug}/audio/test`" class="start-btn">
           Start audio quiz
         </NuxtLink>
 
@@ -181,7 +181,7 @@ watchEffect(() => {
   padding: 0.75rem;
   font-weight: 600;
   text-align: center;
-  background: #ffabe0;
+  background: #efb8db;
   color: #111827;
   transition: background 0.15s ease, transform 0.15s ease;
 }

@@ -120,7 +120,7 @@ const canEnterLevel = () => {
       </p>
 
       <div class="pt-6">
-        <NuxtLink :to="`/quiz/${slug}/word/testV3`" class="start-btn">
+        <NuxtLink :to="`/quiz/${slug}/word/test`" class="start-btn">
           Start vocabulary quiz
         </NuxtLink>
 

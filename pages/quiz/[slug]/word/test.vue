@@ -481,26 +481,6 @@ watch(
           Next
         </button>
       </div>
-
-      <div v-if="current < questions.length" class="mt-10 text-base text-gray-500 p-4 max-w-md mx-auto">
-
-        <div class="flex items-center justify-between gap-3">
-
-          <Transition name="tip-fade" mode="out-in">
-            <p :key="tipIndex" class="text-center flex-1 leading-relaxed">
-              {{ tips[tipIndex] }}
-            </p>
-          </Transition>
-
-        </div>
-
-        <div class="flex justify-center gap-1 mt-3">
-          <span v-for="(_, i) in tips" :key="i" class="w-1.5 h-1.5 rounded-full"
-            :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'" />
-        </div>
-
-      </div>
-
     </div>
 
     <div v-else class="text-center space-y-6">
