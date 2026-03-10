@@ -3,15 +3,18 @@ import type { Entitlement } from "@/composables/useMeStateV2";
 export const freeTopics = new Set([
   "survival-essentials",
   "greetings-polite",
+  "basic-verbs",
   "fruits-vegetables",
   "clothing",
   "dim-sum",
   "restaurant-menu",
+  
 ]);
 
 export const freeTopicsList = [
   "survival-essentials",
   "greetings-polite",
+  "basic-verbs",
   "fruits-vegetables",
   "clothing",
   "dim-sum",

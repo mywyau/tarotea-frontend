@@ -8,7 +8,7 @@ definePageMeta({
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
-import { canAccessTopic } from '~/utils/topics/permissions'
+import { canAccessTopic, freeTopics } from '~/utils/topics/permissions'
 import { topics } from '~/utils/topics/topics'
 import { masteryXp } from '~/utils/xp/helpers'
 
@@ -25,10 +25,8 @@ const { data: topic, error } = await useFetch(
   }
 )
 
-const FREE_TOPICS = ['survival-essentials', 'greetings-polite', 'fruits-vegetables', 'clothing', '']
-
 const isTopicFree = computed(() => {
-  return FREE_TOPICS.includes(slug)
+  return freeTopics.has(slug)
 })
 
 const TILE_COLORS = [

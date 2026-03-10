@@ -1,6 +1,7 @@
 export const freeTopics = [
   "survival-essentials",
   "greetings-polite",
+  "basic-verbs",
   "fruits-vegetables",
   "clothing",
 ];
@@ -23,6 +24,14 @@ export const topics = [
       "Say hello, goodbye, thank people, apologise, and handle basic polite interactions.",
     requiresPaid: false,
     quizRequiresPaid: false,
+  },
+  {
+    id: "basic-verbs",
+    title: "Basic Verbs",
+    comingSoon: false,
+    description: "Common verbs used in everyday Cantonese conversation.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "fruits-vegetables",

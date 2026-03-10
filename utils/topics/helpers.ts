@@ -18,6 +18,14 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: false,
   },
   {
+    id: "basic-verbs",
+    title: "Basic Verbs",
+    comingSoon: false,
+    description: "Common verbs used in everyday Cantonese conversation.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "fruits-vegetables",
     title: "Fruit & Vegetables",
     comingSoon: false,
@@ -131,7 +139,8 @@ export const topicJyutpingQuizMeta = [
     id: "housing",
     title: "Housing & Renting",
     comingSoon: false,
-    description: "Discuss renting, housing issues, utilities, and living arrangements.",
+    description:
+      "Discuss renting, housing issues, utilities, and living arrangements.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
