@@ -1,6 +1,5 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
-// import { consumeWhisperAttempt } from "../utils/whisper/consumeWhisperAttemptDaily";
 import { consumeWhisperAttemptMonthly } from "../utils/whisper/consumeWhisperAttemptMonthly";
 import { recordWhisperAttempt } from "../utils/whisper/recordWhisperAttempt";
 import { requirePaidUser } from "../utils/whisper/requirePaidUser";
@@ -10,9 +9,11 @@ const openai = new OpenAI({
 });
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
 
+  const userId = await requireUser(event);
   await requirePaidUser(userId); // 🔒 block free users
+
+  console.log("[pronunciation-check.post]")
 
   const form = await readMultipartFormData(event);
 
@@ -61,7 +62,7 @@ export default defineEventHandler(async (event) => {
       language: "zh",
       model: "whisper-1",
       temperature: 0,
-      prompt: `Cantonese speech. Possible word: ${expectedChinese}`,
+      prompt: `Cantonese speech. Possible word: ${expectedChinese}. Return what you hear. Do not accept Mandarin only Cantonese`,
     });
 
     const transcript = transcription.text;
@@ -115,7 +116,7 @@ Return JSON only:
   "feedback": string
 }
 
-Feedback should explain differences in pronunciation if any. Keep it light and simple
+Feedback should explain differences in pronunciation if any. Keep it light and simple.
 `,
     });
 
