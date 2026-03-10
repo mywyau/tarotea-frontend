@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     entitlement.subscription_status === "active" &&
     ["monthly", "yearly"].includes(entitlement.plan);
 
-  const limit = isPaid ? 5000 : 20;
+  const limit = isPaid ? 5000 : 10;
 
   // await requirePaidUser(userId); // 🔒 block free users
 
