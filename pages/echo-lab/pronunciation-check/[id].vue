@@ -206,6 +206,26 @@ function tryAgain() {
   resetRecording()
 }
 
+const tips = [
+  "If something looks wrong, try recording again or refreshing the page.",
+  "Make sure the environment is quiet and speech is clear.",
+  "Speaking slightly slower can improve recognition accuracy.",
+  "Pronounce each syllable clearly and confidently.",
+  "Listen to the audio example carefully before recording.",
+  "Say the word naturally — not too fast.",
+]
+
+const tipIndex = ref(0)
+
+function nextTip() {
+  tipIndex.value = (tipIndex.value + 1) % tips.length
+}
+
+function prevTip() {
+  tipIndex.value =
+    (tipIndex.value - 1 + tips.length) % tips.length
+}
+
 
 onMounted(() => {
   supported.value = !!navigator.mediaDevices
@@ -216,11 +236,19 @@ onMounted(() => {
   // )
 })
 
+onMounted(() => {
+  setInterval(() => {
+    nextTip()
+  }, 6000)
+})
+
 watchEffect(() => {
   if (authReady.value && isLoggedIn.value) {
     fetchAIUsage()
   }
 })
+
+
 
 </script>
 
@@ -384,17 +412,50 @@ watchEffect(() => {
           pronunciation only and is <strong>not stored</strong>. Audio is temporary and is deleted
           immediately after processing.
         </p>
-
-        <p>
-          If something looks wrong, try recording again or refreshing the page. 
-        </p>
-
-        <p>
-          Make sure the environment is free of noise and speech is clear. Some words are more difficult to judge.
-          Talking slower can sometimes help and improve accuracy but accurately spaced, timed and confident speech is generally key. 
-        </p>
       </div>
+
+      <div class="mt-6 text-xs text-gray-500 p-4 max-w-md mx-auto">
+
+        <p class="font-medium text-gray-600 mb-3">
+          Tips
+        </p>
+
+        <div class="flex items-center justify-between gap-3">
+
+          <Transition name="tip-fade" mode="out-in">
+            <p :key="tipIndex" class="text-center flex-1 leading-relaxed">
+              {{ tips[tipIndex] }}
+            </p>
+          </Transition>
+
+        </div>
+
+        <div class="flex justify-center gap-1 mt-3">
+          <span v-for="(tip, i) in tips" :key="i" class="w-1.5 h-1.5 rounded-full"
+            :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'" />
+        </div>
+
+      </div>
+
 
     </div>
   </div>
 </template>
+
+
+<style scoped>
+.tip-fade-enter-active,
+.tip-fade-leave-active {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.tip-fade-enter-from {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.tip-fade-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+</style>

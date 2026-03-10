@@ -97,22 +97,16 @@ export default defineEventHandler(async (event) => {
       input: `
 Evaluate a learner's Cantonese pronunciation.
 
-Expected Jyutping:
-${expectedJyutping}
+Expected word:
+${expectedChinese} (${expectedJyutping})
 
-Expected Chinese:
-${expectedChinese}
-
-User Speech transcription:
+Speech transcription from Whisper:
 ${transcript}
 
-Compare the sounds phonetically with the expected chinese and score pronunciation from 0–100.
-
-Guidelines:
-- Compare sounds, not spelling.
-- Minor differences are acceptable.
-- Mostly correct pronunciation should score 80–95.
-- Only give 100 for extremely clear pronunciation.
+Scoring rules:
+- If the transcription matches the expected word exactly → score between 90 to 100
+- If the word is similar but slightly different → score between 60 to 85
+- If pronunciation sounds very different → score between 0 to 50
 
 Return JSON only:
 
@@ -121,7 +115,7 @@ Return JSON only:
   "feedback": string
 }
 
-Feedback should be 1–2 short sentences. Keep it light and say if is it would be easy or hard for natives to understand.
+Feedback should explain differences in pronunciation if any. Keep it light and simple
 `,
     });
 
