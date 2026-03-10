@@ -12,6 +12,9 @@ const {
 const deleting = ref(false)
 const deleteConfirmInput = ref('')
 
+const animatedRemaining = ref(0)
+const animatedAttempts = ref(0)
+
 const aiUsage = ref<{
     attempts: number
     remaining: number
@@ -51,12 +54,16 @@ async function fetchAIUsage() {
     const auth = await useAuth()
     const token = await auth.getAccessToken()
 
-    aiUsage.value = await $fetch("/api/ai/usage", {
+    const usage = await $fetch("/api/ai/usage", {
         method: "GET",
         headers: {
             Authorization: `Bearer ${token}`
         }
     })
+
+    aiUsage.value = usage
+    animateCount(animatedRemaining, usage.remaining)
+    animateCount(animatedAttempts, usage.attempts)
 }
 
 async function openBillingPortal() {
@@ -82,6 +89,14 @@ watchEffect(() => {
     if (authReady.value && isLoggedIn.value) {
         fetchAIUsage()
     }
+})
+
+const animatedPercent = ref(0)
+
+watch(aiUsage, (val) => {
+    if (!val) return
+    const percent = (val.remaining / val.limit) * 100
+    animateCount(animatedPercent, percent)
 })
 
 </script>
@@ -151,10 +166,11 @@ watchEffect(() => {
 
                                 <div class="font-medium">AI Usage</div>
 
-                                <p>{{ aiUsage.remaining.toLocaleString() }} requests remaining</p>
+                                <!-- <p>{{ aiUsage.remaining.toLocaleString() }} requests remaining</p> -->
+                                <p>{{ animatedRemaining.toLocaleString() }} requests remaining</p>
 
                                 <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-                                    <div class="h-2 bg-blue-300" :style="{ width: remainingPercent + '%' }"></div>
+                                    <div class="h-2 bg-blue-300" :style="{ width: animatedPercent + '%' }"></div>
                                 </div>
                             </div>
                         </div>

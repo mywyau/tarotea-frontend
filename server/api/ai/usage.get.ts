@@ -20,7 +20,7 @@ export default defineEventHandler(async (event) => {
   const attempts = rows[0]?.attempts ?? 0;
 
   return {
-    attempts,
+    attempts: attempts,
     remaining: MONTHLY_LIMIT - attempts,
     limit: MONTHLY_LIMIT,
   };
