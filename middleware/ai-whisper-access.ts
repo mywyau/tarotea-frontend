@@ -16,10 +16,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return resolve();
   }
 
-  // Full paid access
-  if (hasPaidAccess(entitlement.value)) {
-    return;
+  if (isLoggedIn.value) {
+    return
   }
+
+  // Full paid access
+  // if (hasPaidAccess(entitlement.value)) {
+  //   return;
+  // }
 
   return navigateTo("/upgrade");
 });

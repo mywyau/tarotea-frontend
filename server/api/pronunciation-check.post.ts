@@ -1,19 +1,29 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
 import { consumeWhisperAttemptMonthly } from "../utils/whisper/consumeWhisperAttemptMonthly";
-import { recordWhisperAttempt } from "../utils/whisper/recordWhisperAttempt";
-import { requirePaidUser } from "../utils/whisper/requirePaidUser";
+// import { recordWhisperAttempt } from "../utils/whisper/recordWhisperAttempt";
+// import { requirePaidUser } from "../utils/whisper/requirePaidUser";
+import { getUserEntitlement } from "../utils/getEntitlement";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 export default defineEventHandler(async (event) => {
-
   const userId = await requireUser(event);
-  await requirePaidUser(userId); // 🔒 block free users
 
-  console.log("[pronunciation-check.post]")
+  const entitlement = await getUserEntitlement(userId);
+
+  const isPaid =
+    entitlement &&
+    entitlement.subscription_status === "active" &&
+    ["monthly", "yearly"].includes(entitlement.plan);
+
+  const limit = isPaid ? 5000 : 20;
+
+  // await requirePaidUser(userId); // 🔒 block free users
+
+  console.log("[pronunciation-check.post]");
 
   const form = await readMultipartFormData(event);
 
@@ -52,7 +62,10 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const { attempts, remaining } = await consumeWhisperAttemptMonthly(userId);
+  const { attempts, remaining } = await consumeWhisperAttemptMonthly(
+    userId,
+    limit,
+  );
 
   try {
     const transcription = await openai.audio.transcriptions.create({
@@ -67,7 +80,7 @@ export default defineEventHandler(async (event) => {
 
     const transcript = transcription.text;
 
-    await recordWhisperAttempt(userId);
+    // await recordWhisperAttempt(userId);
 
     if (!transcript) {
       return {
@@ -143,6 +156,7 @@ Feedback should explain differences in pronunciation if any. Keep it light and s
       score: result.score,
       feedback: result.feedback,
       remainingAttempts: remaining,
+      limit,
     };
   } catch (err) {
     console.error(err);

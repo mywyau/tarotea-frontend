@@ -1,18 +1,25 @@
-import { createError } from "h3";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
-
-const MONTHLY_LIMIT = 5000;
+import { getUserEntitlement } from "~/server/utils/getEntitlement";
 
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
+
+  const entitlement = await getUserEntitlement(userId);
+
+  const isPaid =
+    entitlement &&
+    entitlement.subscription_status === "active" &&
+    ["monthly", "yearly"].includes(entitlement.plan);
+
+  const limit = isPaid ? 5000 : 20;
 
   const { rows } = await db.query(
     `
     SELECT attempts
     FROM ai_usage_monthly
     WHERE user_id = $1
-    AND month = DATE_TRUNC('month', NOW())::date
+      AND month = DATE_TRUNC('month', NOW())::date
     `,
     [userId]
   );
@@ -20,8 +27,8 @@ export default defineEventHandler(async (event) => {
   const attempts = rows[0]?.attempts ?? 0;
 
   return {
-    attempts: attempts,
-    remaining: MONTHLY_LIMIT - attempts,
-    limit: MONTHLY_LIMIT,
+    attempts,
+    remaining: Math.max(limit - attempts, 0),
+    limit,
   };
 });

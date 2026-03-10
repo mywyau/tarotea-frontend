@@ -127,7 +127,13 @@ async function startRecording() {
 
       const token = await getAccessToken();
 
-      const res = await $fetch("/api/pronunciation-check", {
+      const res = await $fetch<{
+        transcript: string
+        feedback: string
+        score: number
+        remainingAttempts: number
+        limit: number
+      }>("/api/pronunciation-check", {
         method: "POST",
         body: formData,
         headers: { Authorization: `Bearer ${token}` },
@@ -152,12 +158,12 @@ async function startRecording() {
         aiUsage.value = {
           remaining: res.remainingAttempts,
           attempts: 0,
-          limit: 5000
+          limit: res.limit
         }
 
         animateCount(animatedRemaining, res.remainingAttempts)
 
-        const percent = (res.remainingAttempts / 5000) * 100
+        const percent = (res.remainingAttempts / res.limit) * 100
         animateCount(animatedPercent, percent)
       }
 

@@ -1,9 +1,13 @@
 import { createError } from "h3";
 import { db } from "~/server/db";
 
-const MONTHLY_LIMIT = 5000; 
+// const MONTHLY_LIMIT = 5000; 
 
-export async function consumeWhisperAttemptMonthly(userId: string,): Promise<{ attempts: number; remaining: number }> {
+export async function consumeWhisperAttemptMonthly(
+  userId: string,
+  limit: number
+): Promise<{ attempts: number; remaining: number; limit: number }> {
+
   const { rows } = await db.query(
     `
     INSERT INTO ai_usage_monthly (user_id, month, attempts)
@@ -16,18 +20,19 @@ export async function consumeWhisperAttemptMonthly(userId: string,): Promise<{ a
 
     RETURNING attempts
     `,
-    [userId, MONTHLY_LIMIT],
-  );
+    [userId, limit]
+  )
 
   if (rows.length === 0) {
     throw createError({
       statusCode: 429,
       statusMessage: "Monthly AI pronunciation limit reached",
-    });
+    })
   }
 
   return {
     attempts: rows[0].attempts,
-    remaining: MONTHLY_LIMIT - rows[0].attempts,
-  };
+    remaining: limit - rows[0].attempts,
+    limit
+  }
 }
