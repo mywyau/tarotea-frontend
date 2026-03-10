@@ -60,13 +60,13 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
         <!-- Benefits -->
         <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
-          <li>• Full access to content</li>
+          <li>• Full access to all content</li>
           <li>• 5000 Echo Lab requests per month</li>
           <li>• Randomised exercises and tests</li>
           <li>• High quality audio for every word</li>
           <li>• Neatly organised structured content</li>
-          <li>• XP tracking for words</li>
-          <li>• New topics and levels added regularly</li>
+          <li>• XP tracking for all words</li>
+          <li>• Access new topics, words, features added regularly</li>
         </ul>
 
         <!-- Plans -->
