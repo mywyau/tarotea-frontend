@@ -1,7 +1,7 @@
 export function animateCount(
     target: Ref<number>,
     endValue: number,
-    duration = 800
+    duration = 2000
 ) {
     const startValue = 0
     const startTime = performance.now()

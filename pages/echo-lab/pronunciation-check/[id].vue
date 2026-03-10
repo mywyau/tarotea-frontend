@@ -48,20 +48,15 @@ const aiState = ref("")
 const score = ref<number | null>(null)
 const recordingUrl = ref<string | null>(null)
 
+const animatedRemaining = ref(0)
+const animatedPercent = ref(0)
+
 const supported = ref(false)
 
 const progress = computed(() => {
   return (recordingTime.value / MAX_RECORDING_SECONDS) * 100
 })
 const streamRef = ref<MediaStream | null>(null)
-
-const safeRemaining = computed(() => aiUsage.value?.remaining ?? 0)
-
-const safeLimit = computed(() => aiUsage.value?.limit ?? 1)
-
-const usagePercent = computed(() => {
-  return (safeRemaining.value / safeLimit.value) * 100
-})
 
 const aiUsage = ref<{
   attempts: number
@@ -76,7 +71,7 @@ async function fetchAIUsage() {
   const auth = await useAuth()
   const token = await auth.getAccessToken()
 
-  aiUsage.value = await $fetch<{
+  const usage = await $fetch<{
     attempts: number
     remaining: number
     limit: number
@@ -84,6 +79,13 @@ async function fetchAIUsage() {
     method: "GET",
     headers: { Authorization: `Bearer ${token}` }
   })
+
+  aiUsage.value = usage
+
+  animateCount(animatedRemaining, usage.remaining)
+
+  const percent = (usage.remaining / usage.limit) * 100
+  animateCount(animatedPercent, percent)
 }
 
 
@@ -138,14 +140,25 @@ async function startRecording() {
 
       if (aiUsage.value) {
         aiUsage.value.remaining = res.remainingAttempts
+
+        animateCount(animatedRemaining, res.remainingAttempts)
+
+        const percent = (res.remainingAttempts / aiUsage.value.limit) * 100
+        animateCount(animatedPercent, percent)
+
         aiUsage.value.attempts = aiUsage.value.limit - res.remainingAttempts
       } else {
         // fallback if usage hasn't loaded yet
         aiUsage.value = {
           remaining: res.remainingAttempts,
           attempts: 0,
-          limit: 5000 // same as backend limit
+          limit: 5000
         }
+
+        animateCount(animatedRemaining, res.remainingAttempts)
+
+        const percent = (res.remainingAttempts / 5000) * 100
+        animateCount(animatedPercent, percent)
       }
 
       loading.value = false
@@ -327,11 +340,11 @@ watchEffect(() => {
             <div class="font-medium">AI Usage</div>
 
             <span>
-              {{ safeRemaining.toLocaleString() }} requests remaining
+              {{ animatedRemaining.toLocaleString() }} requests remaining
             </span>
 
             <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-              <div class="h-2 bg-blue-300" :style="{ width: usagePercent + '%' }"></div>
+              <div class="h-2 bg-blue-300" :style="{ width: animatedPercent + '%' }"></div>
             </div>
 
           </div>
