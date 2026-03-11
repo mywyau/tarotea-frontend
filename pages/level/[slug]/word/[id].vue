@@ -171,7 +171,7 @@ watchEffect(() => {
         Usage
       </h2>
 
-      <ul class="list-disc pl-5 space-y-2 text-gray-700">
+      <ul class="pl-10 list-disc space-y-2 text-gray-700">
         <li v-for="note in word.usage" :key="note">
           {{ note }}
         </li>

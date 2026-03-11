@@ -9,7 +9,7 @@ import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
 import { canAccessTopic, freeTopics } from '~/utils/topics/permissions'
-import { topics } from '~/utils/topics/topics'
+// import { topics } from '~/utils/topics/topics'
 import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
