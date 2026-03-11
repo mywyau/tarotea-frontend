@@ -23,7 +23,7 @@ export const topicJyutpingQuizMeta = [
     comingSoon: false,
     description: "Common verbs used in everyday Cantonese conversation.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "fruits-vegetables",
