@@ -1,8 +1,6 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
 import { consumeWhisperAttemptMonthly } from "../utils/whisper/consumeWhisperAttemptMonthly";
-// import { recordWhisperAttempt } from "../utils/whisper/recordWhisperAttempt";
-// import { requirePaidUser } from "../utils/whisper/requirePaidUser";
 import { getUserEntitlement } from "../utils/getEntitlement";
 
 const openai = new OpenAI({
@@ -23,8 +21,6 @@ export default defineEventHandler(async (event) => {
 
   // await requirePaidUser(userId); // 🔒 block free users
 
-  console.log("[pronunciation-check.post]");
-
   const form = await readMultipartFormData(event);
 
   const MAX_AUDIO_SIZE = 1_000_000; // ~1MB
@@ -39,7 +35,7 @@ export default defineEventHandler(async (event) => {
   const expectedJyutping = expectedJyutpingField?.data?.toString() ?? "";
   const expectedChinese = expectedChineseField?.data?.toString() ?? "";
 
-  const toneLessJyutping = expectedJyutping.replace(/[1-6]/g, "");
+  console.log(`[pronunciation-check.post] ${expectedChinese}, userid: ${userId}`);
 
   if (!expectedChinese || !expectedJyutping) {
     throw createError({
