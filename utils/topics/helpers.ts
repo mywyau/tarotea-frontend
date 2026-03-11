@@ -175,18 +175,19 @@ export const topicJyutpingQuizMeta = [
     id: "daily-life",
     title: "Daily Life & Routines",
     comingSoon: false,
-    description: "Talk about daily habits, routines, plans, and everyday activities.",
+    description:
+      "Talk about daily habits, routines, plans, and everyday activities.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
   {
-    id: "transport-travel",
-    title: "Transport & Travel",
-    comingSoon: true,
+    id: "materials",
+    title: "Materials",
+    comingSoon: false,
     description:
-      "Use transport, ask for directions, talk about travel plans, and get around the city.",
+      "Talk about what things are made of, including everyday materials, fabrics, building materials, and common material properties.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "food-ordering",

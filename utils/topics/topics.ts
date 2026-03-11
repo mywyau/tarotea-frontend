@@ -174,7 +174,17 @@ export const topics = [
     id: "daily-life",
     title: "Daily Life & Routines",
     comingSoon: false,
-    description: "Talk about daily habits, routines, plans, and everyday activities.",
+    description:
+      "Talk about daily habits, routines, plans, and everyday activities.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "materials",
+    title: "Materials",
+    comingSoon: false,
+    description:
+      "Talk about what things are made of, including everyday materials, fabrics, building materials, and common material properties.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
