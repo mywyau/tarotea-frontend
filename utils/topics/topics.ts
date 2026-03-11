@@ -192,7 +192,17 @@ export const topics = [
     id: "animals",
     title: "Animals",
     comingSoon: false,
-    description: "Learn words for common animals, pets, farm animals, wild animals, and simple animal actions.",
+    description:
+      "Learn words for common animals, pets, farm animals, wild animals, and simple animal actions.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "science",
+    title: "Science",
+    comingSoon: false,
+    description:
+      "Learn common Cantonese words for science, biology, chemistry, physics, and space",
     requiresPaid: false,
     quizRequiresPaid: true,
   },

@@ -154,15 +154,6 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
-    id: "money",
-    title: "Money & Payments",
-    comingSoon: true,
-    description:
-      "Discuss prices, paying, change, costs, and money-related situations.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
     id: "health",
     title: "Health & Wellbeing",
     comingSoon: false,
@@ -197,6 +188,24 @@ export const topicJyutpingQuizMeta = [
       "Learn words for common animals, pets, farm animals, wild animals, and simple animal actions.",
     requiresPaid: false,
     quizRequiresPaid: true,
+  },
+  {
+    id: "science",
+    title: "Science",
+    comingSoon: false,
+    description:
+      "Learn common Cantonese words for science, biology, chemistry, physics, and space",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "money",
+    title: "Money & Payments",
+    comingSoon: true,
+    description:
+      "Discuss prices, paying, change, costs, and money-related situations.",
+    requiresPaid: false,
+    quizRequiresPaid: false,
   },
   {
     id: "food-ordering",
