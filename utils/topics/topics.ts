@@ -156,7 +156,25 @@ export const topics = [
     id: "transport-travel",
     title: "Transport & Travel",
     comingSoon: false,
-    description: "Use transport, ask for directions, talk about travel plans, and get around the city.",
+    description:
+      "Use transport, ask for directions, talk about travel plans, and get around the city.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "health",
+    title: "Health & Wellbeing",
+    comingSoon: false,
+    description:
+      "Describe how you feel, talk about common health issues, and seek basic help.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "daily-life",
+    title: "Daily Life & Routines",
+    comingSoon: false,
+    description: "Talk about daily habits, routines, plans, and everyday activities.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
@@ -184,24 +202,6 @@ export const topics = [
     comingSoon: true,
     description:
       "Shop for items, ask for help, compare options, and use everyday services.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "health",
-    title: "Health & Wellbeing",
-    comingSoon: true,
-    description:
-      "Describe how you feel, talk about common health issues, and seek basic help.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "daily-life",
-    title: "Daily Life & Routines",
-    comingSoon: true,
-    description:
-      "Talk about daily habits, routines, plans, and everyday activities.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
