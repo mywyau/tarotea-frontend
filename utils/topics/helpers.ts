@@ -190,6 +190,15 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
+    id: "animals",
+    title: "Animals",
+    comingSoon: false,
+    description:
+      "Learn words for common animals, pets, farm animals, wild animals, and simple animal actions.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "food-ordering",
     title: "Food & Ordering",
     comingSoon: true,

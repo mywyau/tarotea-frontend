@@ -189,6 +189,14 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
+    id: "animals",
+    title: "Animals",
+    comingSoon: false,
+    description: "Learn words for common animals, pets, farm animals, wild animals, and simple animal actions.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "money",
     title: "Money & Payments",
     comingSoon: true,
