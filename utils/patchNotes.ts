@@ -15,6 +15,13 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
+    date: "11 March 2026",
+    title: "More content",
+    items: [
+      "Enable and add content for health, daily life, transport and ",
+    ],
+  },
+  {
     date: "10 March 2026",
     title: "Another general sweep up",
     items: [
