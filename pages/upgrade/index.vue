@@ -12,7 +12,6 @@ const {
   isLoggedIn,
   user,
   entitlement,
-  // hasPaidAccess,
   isCanceling,
   currentPeriodEnd,
   resolve,
@@ -22,9 +21,9 @@ const isSubscribed = computed(() =>
   authReady.value && hasPaidAccess(entitlement.value!)
 )
 
+// Already paid → manage subscription instead
 function upgrade(plan: 'monthly' | 'yearly') {
   if (isSubscribed.value) {
-    // Already paid → manage subscription instead
     navigateTo('/account')
     return
   }

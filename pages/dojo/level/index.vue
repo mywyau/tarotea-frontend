@@ -16,7 +16,6 @@ const {
   isLoggedOut,
   user,
   entitlement,
-  hasPaidAccess,
   isCanceling,
   currentPeriodEnd,
   resolve,

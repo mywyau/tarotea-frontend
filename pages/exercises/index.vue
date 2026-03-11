@@ -21,7 +21,6 @@ const {
   isLoggedIn,
   user,
   entitlement,
-  hasPaidAccess,
   isCanceling,
   currentPeriodEnd,
   resolve,

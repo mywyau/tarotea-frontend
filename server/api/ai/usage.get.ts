@@ -1,10 +1,10 @@
 import { db } from "~/server/db";
-import { requireUser } from "~/server/utils/requireUser";
 import { getUserEntitlement } from "~/server/utils/getEntitlement";
+import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
+  
   const userId = await requireUser(event);
-
   const entitlement = await getUserEntitlement(userId);
 
   const isPaid =
@@ -21,7 +21,7 @@ export default defineEventHandler(async (event) => {
     WHERE user_id = $1
       AND month = DATE_TRUNC('month', NOW())::date
     `,
-    [userId]
+    [userId],
   );
 
   const attempts = rows[0]?.attempts ?? 0;

@@ -6,7 +6,6 @@ export default defineNuxtRouteMiddleware(() => {
     isLoggedOut,
     user,
     entitlement,
-    hasPaidAccess, // this is dodgy use entitlements instead please :) to determine access
     isCanceling,
     currentPeriodEnd,
     resolve,

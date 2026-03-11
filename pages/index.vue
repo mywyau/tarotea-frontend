@@ -11,7 +11,6 @@ const {
   isLoggedIn,
   user,
   entitlement,
-  hasPaidAccess,  // this is dodgy use entitlements instead please :) to determine access
   isCanceling,
   currentPeriodEnd,
   resolve,

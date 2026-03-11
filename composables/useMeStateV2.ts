@@ -1,28 +1,35 @@
-export type SubscriptionStatus =
-  | "active"
-  | "trialing"
-  | "past_due"
-  | "canceled"
-  | "incomplete";
+// export type SubscriptionStatus =
+//   | "active"
+//   | "trialing"
+//   | "past_due"
+//   | "canceled"
+//   | "incomplete";
 
-export interface Entitlement {
-  plan: "free" | "monthly" | "yearly";
-  subscription_status: SubscriptionStatus;
-  cancel_at_period_end: boolean;
-  current_period_end?: string;
-  canceled_at?: string;
-}
+import type {
+  MeState,
+  Entitlement,
+  SubscriptionStatus,
+  MeUser,
+} from "~/types/auth/entitlements";
 
-export interface MeUser {
-  id: string;
-  email: string;
-  entitlement: Entitlement;
-}
+// export interface Entitlement {
+//   plan: "free" | "monthly" | "yearly";
+//   subscription_status: SubscriptionStatus;
+//   cancel_at_period_end: boolean;
+//   current_period_end?: string;
+//   canceled_at?: string;
+// }
 
-export type MeState =
-  | { status: "loading" }
-  | { status: "logged-out" }
-  | { status: "logged-in"; user: MeUser };
+// export interface MeUser {
+//   id: string;
+//   email: string;
+//   entitlement: Entitlement;
+// }
+
+// export type MeState =
+//   | { status: "loading" }
+//   | { status: "logged-out" }
+//   | { status: "logged-in"; user: MeUser };
 
 export function useMeStateV2() {
   const state = useState<MeState>("meStateV2", () => ({
@@ -77,17 +84,6 @@ export function useMeStateV2() {
       state.value.status === "logged-in" ? state.value.user.entitlement : null,
   );
 
-  const hasPaidAccess = computed(() => {
-    if (!entitlement.value) return false;
-
-    return (
-      entitlement.value.plan !== "free" &&
-      ["active", "trialing", "past_due"].includes(
-        entitlement.value.subscription_status,
-      )
-    );
-  });
-
   const isCanceling = computed(
     () => entitlement.value?.cancel_at_period_end === true,
   );
@@ -106,7 +102,6 @@ export function useMeStateV2() {
     isLoggedOut,
     user,
     entitlement,
-    hasPaidAccess, // this is dodgy use entitlements instead please :) to determine access
     isCanceling,
     currentPeriodEnd,
     resolve,
