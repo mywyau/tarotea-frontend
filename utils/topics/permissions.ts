@@ -24,6 +24,7 @@ export const freeTopicsList = [
 export const freeTopicsQuiz = [
   "survival-essentials",
   "greetings-polite",
+  "basic-verbs",
   "fruits-vegetables",
   "clothing",
 ];
@@ -31,6 +32,7 @@ export const freeTopicsQuiz = [
 export const freeTopicsJyutpingDojo = [
   "survival-essentials",
   "greetings-polite",
+  "basic-verbs",
   "fruits-vegetables",
   "clothing",
 ];
