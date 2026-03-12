@@ -8,6 +8,14 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
+function containsLatinLetters(input: string) {
+  return /[A-Za-z]/.test(input);
+}
+
+function containsCJK(input: string) {
+  return /[\u3400-\u4DBF\u4E00-\u9FFF\uF900-\uFAFF]/.test(input);
+}
+
 function normalizeChinese(input: string) {
   return (input || "").replace(/[，。！？、,.!?\s]/g, "").trim();
 }
@@ -71,6 +79,26 @@ function buildResult(params: {
   const sim = similarity(expected, heard);
   const confidence = confidenceLabel(params.avgLogprob);
   const len = expected.length;
+
+  if (containsLatinLetters(params.transcript) && !heard.includes(expected)) {
+    return {
+      score: 0,
+      matchType: "wrong-language",
+      confidence,
+      feedback:
+        "I heard English or romanized speech. Please say the Cantonese word only.",
+    };
+  }
+
+  if (!containsCJK(heard)) {
+    return {
+      score: 0,
+      matchType: "wrong-language",
+      confidence,
+      feedback:
+        "I didn’t hear a Chinese word clearly. Please say the Cantonese word only.",
+    };
+  }
 
   if (!heard) {
     return {
@@ -234,7 +262,11 @@ export default defineEventHandler(async (event) => {
       temperature: 0,
       response_format: "json",
       include: ["logprobs"],
-      prompt: `Hong Kong Cantonese. Expected phrase: ${expectedChinese}.`,
+      prompt: `Transcribe spoken Hong Kong Cantonese only.
+Do not translate.
+Do not romanize.
+Return only the spoken Chinese characters if heard.
+Expected phrase: ${expectedChinese}.`,
     });
 
     const transcript = transcription.text ?? "";
