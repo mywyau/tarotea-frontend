@@ -262,7 +262,8 @@ export default defineEventHandler(async (event) => {
       temperature: 0,
       response_format: "json",
       include: ["logprobs"],
-      prompt: `Transcribe exactly what was spoken.
+      prompt: `
+      Transcribe spoken Hong Kong Cantonese only.
 Do not translate.
 Do not normalize toward any expected answer.
 If the speaker says an English word, return it in English.`,
