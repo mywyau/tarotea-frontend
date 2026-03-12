@@ -80,13 +80,13 @@ function buildResult(params: {
   const confidence = confidenceLabel(params.avgLogprob);
   const len = expected.length;
 
-  if (containsLatinLetters(params.transcript) && !heard.includes(expected)) {
+  if (containsLatinLetters(params.transcript)) {
     return {
       score: 0,
       matchType: "wrong-language",
       confidence,
       feedback:
-        "I heard English or romanized speech. Please say the Cantonese word only.",
+        "I heard English or Latin letters. Please say the Cantonese word only.",
     };
   }
 
@@ -262,11 +262,15 @@ export default defineEventHandler(async (event) => {
       temperature: 0,
       response_format: "json",
       include: ["logprobs"],
-      prompt: `Transcribe spoken Hong Kong Cantonese only.
+      prompt: `Transcribe exactly what was spoken.
 Do not translate.
-Do not romanize.
-Return only the spoken Chinese characters if heard.
-Expected phrase: ${expectedChinese}.`,
+Do not normalize toward any expected answer.
+If the speaker says an English word, return it in English.`,
+      //       prompt: `Transcribe spoken Hong Kong Cantonese only.
+      // Do not translate.
+      // Do not romanize.
+      // Return only the spoken Chinese characters if heard.
+      // Expected phrase: ${expectedChinese}.`,
     });
 
     const transcript = transcription.text ?? "";
