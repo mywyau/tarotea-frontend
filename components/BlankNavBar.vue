@@ -15,13 +15,6 @@ function closeMenu() {
   menuOpen.value = false
 }
 
-const showUpgrade = computed(() => {
-  return (
-    entitlement.value?.plan === 'free' ||
-    entitlement.value?.subscription_status !== 'active'
-  )
-})
-
 async function handleLogout() {
   await logout()
   await resolve({ force: true })

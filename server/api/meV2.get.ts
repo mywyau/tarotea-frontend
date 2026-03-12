@@ -18,6 +18,9 @@ interface MeResponse {
 }
 
 export default defineEventHandler(async (event): Promise<MeResponse> => {
+
+  setHeader(event, "Cache-Control", "private, no-store");
+  
   const userId = await requireUser(event);
 
   console.log(

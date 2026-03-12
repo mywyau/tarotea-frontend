@@ -5,22 +5,16 @@ const { data: stats } = await useFetch('/api/stats', {
   lazy: true,
 })
 
-const {
-  state,
-  authReady,
-  isLoggedIn,
-  user,
-  entitlement,
-  isCanceling,
-  currentPeriodEnd,
-  resolve,
-} = useMeStateV2();
-
-const showTopicTraining = ref(false)
-
-function toggleTrainingMode() {
-  showTopicTraining.value = !showTopicTraining.value
-}
+// const {
+//   state,
+//   authReady,
+//   isLoggedIn,
+//   user,
+//   entitlement,
+//   isCanceling,
+//   currentPeriodEnd,
+//   resolve,
+// } = useMeStateV2();
 
 </script>
 
