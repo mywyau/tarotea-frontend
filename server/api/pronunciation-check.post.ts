@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
       language: "zh",
       model: "whisper-1",
       temperature: 0,
-      prompt: `Cantonese speech. Possible word: ${expectedChinese}. Do not accept Mandarin only Cantonese`,
+      prompt: `Cantonese speech. Do not accept Mandarin only Cantonese. Possible word jyutping: ${expectedJyutping}.`,
     });
 
     const transcript = transcription.text;

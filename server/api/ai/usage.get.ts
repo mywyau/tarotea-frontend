@@ -1,9 +1,11 @@
+import { setHeader } from "h3";
 import { db } from "~/server/db";
 import { getUserEntitlement } from "~/server/utils/getEntitlement";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
-  
+  setHeader(event, "Cache-Control", "private, no-store");
+
   const userId = await requireUser(event);
   const entitlement = await getUserEntitlement(userId);
 
@@ -13,6 +15,16 @@ export default defineEventHandler(async (event) => {
     ["monthly", "yearly"].includes(entitlement.plan);
 
   const limit = isPaid ? 5000 : 10;
+
+  console.log(
+    JSON.stringify({
+      event: "ai_usage_requested",
+      userId,
+      isPaid,
+      limit,
+      timestamp: new Date().toISOString(),
+    }),
+  );
 
   const { rows } = await db.query(
     `
