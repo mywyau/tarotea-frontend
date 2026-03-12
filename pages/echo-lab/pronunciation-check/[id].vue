@@ -57,6 +57,7 @@ const progress = computed(() => {
   return (recordingTime.value / MAX_RECORDING_SECONDS) * 100
 })
 const streamRef = ref<MediaStream | null>(null)
+const recorderMimeType = ref("")
 
 const aiUsage = ref<{
   attempts: number
@@ -89,120 +90,178 @@ async function fetchAIUsage() {
 }
 
 
-async function startRecording() {
+function getSupportedMimeType() {
+  const candidates = [
+    "audio/webm;codecs=opus",
+    "audio/webm",
+    "audio/mp4",
+  ]
 
-  aiState.value = ""   // reset error state
-  audioChunks = []
-
-  const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-  streamRef.value = stream
-
-  mediaRecorder.value = new MediaRecorder(stream)
-
-  mediaRecorder.value.ondataavailable = (event) => {
-    audioChunks.push(event.data)
+  for (const type of candidates) {
+    if (MediaRecorder.isTypeSupported(type)) {
+      return type
+    }
   }
 
-  mediaRecorder.value.onstop = async () => {
+  return ""
+}
 
-    const audioBlob = new Blob(audioChunks, { type: "audio/webm" })
+async function startRecording() {
+  if (!navigator.mediaDevices || !window.MediaRecorder) {
+    aiState.value = "error"
+    return
+  }
 
-    // ⛔ size limit check
-    if (audioBlob.size > 1_000_000) { // ~1MB
-      alert("Recording is too long. Please keep it under 10 seconds.")
-      return
+  try {
+    aiState.value = ""
+    transcript.value = ""
+    feedback.value = ""
+    score.value = null
+    audioChunks = []
+
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+    streamRef.value = stream
+
+    const supportedMimeType = getSupportedMimeType()
+
+    mediaRecorder.value = supportedMimeType
+      ? new MediaRecorder(stream, { mimeType: supportedMimeType })
+      : new MediaRecorder(stream)
+
+    recorderMimeType.value =
+      mediaRecorder.value.mimeType || supportedMimeType || "audio/webm"
+
+    mediaRecorder.value.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        audioChunks.push(event.data)
+      }
     }
 
-    recordingUrl.value = URL.createObjectURL(audioBlob)
+    mediaRecorder.value.onstop = async () => {
+      try {
+        const audioBlob = new Blob(audioChunks, { type: recorderMimeType.value })
 
-    const formData = new FormData()
-    formData.append("audio", audioBlob)
-    formData.append("expectedJyutping", word.value.jyutping)
-    formData.append("expectedChinese", word.value.word)
+        console.log("[frontend] recording debug", {
+          recorderMimeType: recorderMimeType.value,
+          blobType: audioBlob.type,
+          blobSize: audioBlob.size,
+          chunkCount: audioChunks.length,
+          chunkSizes: audioChunks.map((c) => c.size),
+        })
 
-    loading.value = true
-
-    try {
-      const { getAccessToken } = await useAuth();
-
-      const token = await getAccessToken();
-
-      const res = await $fetch<{
-        transcript: string
-        feedback: string
-        score: number
-        remainingAttempts: number
-        limit: number
-      }>("/api/pronunciation-check", {
-        method: "POST",
-        body: formData,
-        headers: { Authorization: `Bearer ${token}` },
-      })
-
-      transcript.value = res.transcript
-      feedback.value = res.feedback
-      score.value = res.score
-      remainingAttempts.value = res.remainingAttempts
-
-      if (aiUsage.value) {
-        aiUsage.value.remaining = res.remainingAttempts
-
-        animateCount(animatedRemaining, res.remainingAttempts)
-
-        const percent = (res.remainingAttempts / aiUsage.value.limit) * 100
-        animateCount(animatedPercent, percent)
-
-        aiUsage.value.attempts = aiUsage.value.limit - res.remainingAttempts
-      } else {
-        // fallback if usage hasn't loaded yet
-        aiUsage.value = {
-          remaining: res.remainingAttempts,
-          attempts: 0,
-          limit: res.limit
+        if (audioBlob.size < 1000) {
+          console.error("[frontend] audio blob too small")
+          aiState.value = "error"
+          return
         }
 
-        animateCount(animatedRemaining, res.remainingAttempts)
+        if (audioBlob.size > 1_000_000) {
+          alert("Recording is too long. Please keep it under 10 seconds.")
+          return
+        }
 
-        const percent = (res.remainingAttempts / res.limit) * 100
-        animateCount(animatedPercent, percent)
+        if (!word.value?.jyutping || !word.value?.word) {
+          aiState.value = "error"
+          return
+        }
+
+        if (recordingUrl.value) {
+          URL.revokeObjectURL(recordingUrl.value)
+        }
+
+        recordingUrl.value = URL.createObjectURL(audioBlob)
+
+        const extension = recorderMimeType.value.includes("mp4") ? "m4a" : "webm"
+
+        const formData = new FormData()
+        formData.append("audio", audioBlob, `recording.${extension}`)
+        formData.append("expectedJyutping", word.value.jyutping)
+        formData.append("expectedChinese", word.value.word)
+
+        loading.value = true
+
+        const { getAccessToken } = await useAuth()
+        const token = await getAccessToken()
+
+        const res = await $fetch<{
+          transcript: string
+          feedback: string
+          score: number
+          remainingAttempts: number
+          limit: number
+        }>("/api/pronunciation-check", {
+          method: "POST",
+          body: formData,
+          headers: { Authorization: `Bearer ${token}` },
+        })
+
+        transcript.value = res.transcript
+        feedback.value = res.feedback
+        score.value = res.score
+        remainingAttempts.value = res.remainingAttempts
+
+        if (aiUsage.value) {
+          aiUsage.value.remaining = res.remainingAttempts
+          animateCount(animatedRemaining, res.remainingAttempts)
+
+          const percent = (res.remainingAttempts / aiUsage.value.limit) * 100
+          animateCount(animatedPercent, percent)
+
+          aiUsage.value.attempts = aiUsage.value.limit - res.remainingAttempts
+        } else {
+          aiUsage.value = {
+            remaining: res.remainingAttempts,
+            attempts: 0,
+            limit: res.limit
+          }
+
+          animateCount(animatedRemaining, res.remainingAttempts)
+
+          const percent = (res.remainingAttempts / res.limit) * 100
+          animateCount(animatedPercent, percent)
+        }
+      } catch (e) {
+        console.error("[frontend] pronunciation upload failed", e)
+        aiState.value = "error"
+      } finally {
+        loading.value = false
+        streamRef.value?.getTracks().forEach((track) => track.stop())
+        streamRef.value = null
+        mediaRecorder.value = null
       }
-
-      loading.value = false
-    } catch (e: any) {
-      aiState.value = 'error'
-    } finally {
-      loading.value = false
     }
+
+    mediaRecorder.value.start()
+    recording.value = true
+    recordingTime.value = 0
+
+    timer = setInterval(() => {
+      recordingTime.value++
+
+      if (recordingTime.value >= MAX_RECORDING_SECONDS) {
+        stopRecording()
+      }
+    }, 1000)
+  } catch (e) {
+    console.error("[frontend] failed to start recording", e)
+    aiState.value = "error"
+    recording.value = false
+    streamRef.value?.getTracks().forEach((track) => track.stop())
+    streamRef.value = null
   }
-
-  mediaRecorder.value.start()
-  recording.value = true
-
-  recordingTime.value = 0
-
-  timer = setInterval(() => {
-    recordingTime.value++
-
-    //  change number 10 to desired time in seconds
-    if (recordingTime.value >= MAX_RECORDING_SECONDS) {
-      stopRecording()
-    }
-  }, 1000
-  )
 }
 
 function stopRecording() {
-  mediaRecorder.value?.stop()
-  recording.value = false
+  if (!mediaRecorder.value || mediaRecorder.value.state === "inactive") return
 
-  // stop microphone
-  streamRef.value?.getTracks().forEach(track => track.stop())
-  streamRef.value = null
+  recording.value = false
 
   if (timer) {
     clearInterval(timer)
     timer = null
   }
+
+  mediaRecorder.value.stop()
 }
 
 function resetRecording() {
@@ -261,19 +320,31 @@ function goBack() {
 
 
 onMounted(() => {
-  supported.value = !!navigator.mediaDevices
-
-  // supported.value = !!(
-  // navigator.mediaDevices &&
-  // navigator.mediaDevices.getUserMedia
-  // )
+  supported.value = !!(
+    navigator.mediaDevices &&
+    window.MediaRecorder
+  )
 })
 
+
+let tipTimer: ReturnType<typeof setInterval> | null = null
+
 onMounted(() => {
-  setInterval(() => {
+  tipTimer = setInterval(() => {
     nextTip()
   }, 6000)
 })
+
+onUnmounted(() => {
+  if (tipTimer) clearInterval(tipTimer)
+
+  if (recordingUrl.value) {
+    URL.revokeObjectURL(recordingUrl.value)
+  }
+
+  streamRef.value?.getTracks().forEach((track) => track.stop())
+})
+
 
 watchEffect(() => {
   if (authReady.value && isLoggedIn.value) {
