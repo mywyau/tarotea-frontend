@@ -83,21 +83,6 @@ watchEffect(() => {
         ogDescription: `Cantonese vocabulary for "${word.value.meaning}" in ${topicLabel}.`,
         ogType: 'article',
     })
-
-    // useHead({
-    //     script: [
-    //         {
-    //             type: 'application/ld+json',
-    //             children: JSON.stringify({
-    //                 "@context": "https://schema.org",
-    //                 "@type": "DefinedTerm",
-    //                 name: word.value.word,
-    //                 description: word.value.meaning,
-    //                 inDefinedTermSet: `Cantonese ${topicLabel} Vocabulary`,
-    //             })
-    //         }
-    //     ]
-    // })
 })
 
 </script>
@@ -201,8 +186,27 @@ watchEffect(() => {
                                 {{ example.sentence }}
                             </span>
 
-                            <AudioButton v-if="word.audio?.examples?.[index]"
-                                :src="`${cdnBase}/audio/${word.audio.examples[index]}`" size="sm" />
+
+
+                            <div class="flex items-center justify-center gap-3">
+
+                                <NuxtLink :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/${index}`"
+                                    class="text-xs px-2 py-1 rounded-md bg-black shadow-sm hover:brightness-125 transition">
+                                    <span class="bg-gradient-to-r
+                      from-[#d48fd0]
+                      via-[#b57bc3]
+                      via-[#6faed6]
+                      to-[#d48fd0]
+                      bg-clip-text text-transparent">
+                                        ▶︎
+                                    </span>
+                                </NuxtLink>
+
+                                <AudioButton v-if="word.audio?.examples?.[index]" :src="`${cdnBase}/audio/${word.audio.examples[index]}`" size="sm" />
+                            </div>
+
+
+                            <!-- <AudioButton v-if="word.audio?.examples?.[index]" :src="`${cdnBase}/audio/${word.audio.examples[index]}`" size="sm" /> -->
                         </div>
 
                         <div class="text-sm text-gray-500">

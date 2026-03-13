@@ -1,4 +1,4 @@
-import type { Entitlement } from "@/composables/useMeStateV2";
+import type { Entitlement } from "~/types/auth/entitlements";
 
 export const freeTopics = new Set([
   "survival-essentials",
@@ -8,7 +8,6 @@ export const freeTopics = new Set([
   "clothing",
   "dim-sum",
   "restaurant-menu",
-  
 ]);
 
 export const freeTopicsList = [

@@ -189,7 +189,7 @@ watchEffect(() => {
 
               <div class="flex items-center justify-center gap-3">
 
-                <NuxtLink :to="`/echo-lab/pronunciation-check/${level}/sentences/${word.id}/${index}`"
+                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/${index}`"
                   class="text-xs px-2 py-1 rounded-md bg-black shadow-sm hover:brightness-125 transition">
                   <span class="bg-gradient-to-r
                       from-[#d48fd0]
@@ -201,7 +201,7 @@ watchEffect(() => {
                   </span>
                 </NuxtLink>
 
-                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="sm" />
+                <AudioButton v-if="word.audio?.examples?.[index]" :src="`${cdnBase}/audio/${word.audio.examples[index]}`" size="sm" />
               </div>
 
             </div>

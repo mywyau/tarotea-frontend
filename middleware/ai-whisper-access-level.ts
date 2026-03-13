@@ -5,10 +5,6 @@ import {
   isFreeLevel,
 } from "~/utils/levels/permissions";
 
-// http://localhost:3000/level/level-ten/word/si4gwo3ging2cin1-times-change
-
-// http://localhost:3000/echo-lab/pronunciation-check/level-ten/sentences/si4gwo3ging2cin1-times-change/0
-
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return; // middleware runs on client only
 
