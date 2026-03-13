@@ -130,21 +130,6 @@ watchEffect(() => {
             <div class="pt-5 sm:pt-6">
                 <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
             </div>
-
-            <div class="">
-                <NuxtLink :to="`/echo-lab/pronunciation-check/${slug}`"
-                    class="inline-flex block text-center rounded px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
-                    <span class="bg-gradient-to-r
-                                from-[#d48fd0]
-                                via-[#b57bc3]
-                                via-[#6faed6]
-                                to-[#d48fd0]
-                                bg-clip-text text-transparent
-                                hover:brightness-125 transition">
-                        Echo Lab
-                    </span>
-                </NuxtLink>
-            </div>
         </section>
 
         <!-- Usage -->
