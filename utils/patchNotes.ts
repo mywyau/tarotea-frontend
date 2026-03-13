@@ -11,15 +11,20 @@ export const patchNotes: PatchNote[] = [
     items: [
       "Expanding content",
       "Content review to fix dodgy/missing translations, jyutping, chinese characters and audio",
-      "Fix UX across site",
+      "Fix and improve UX across site",
+    ],
+  },
+  {
+    date: "13 March 2026",
+    title: "Improve Echo Labs",
+    items: [
+      "Improve echo labs to be phrase based instead of word based"
     ],
   },
   {
     date: "11 March 2026",
     title: "More content",
-    items: [
-      "Enable and add content for health, daily life, transport and ",
-    ],
+    items: ["Enable and add content for health, daily life, transport and various other topics"],
   },
   {
     date: "10 March 2026",
