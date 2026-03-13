@@ -73,20 +73,27 @@ function buildResult(params: {
   expectedJyutping: string;
   transcript: string;
   avgLogprob: number | null;
+  targetMode?: string;
+  targetWord?: string;
 }) {
   const expected = normalizeChinese(params.expectedChinese);
   const heard = normalizeChinese(params.transcript);
   const sim = similarity(expected, heard);
   const confidence = confidenceLabel(params.avgLogprob);
   const len = expected.length;
+  const isPhrase = params.targetMode === "phrase";
+  const unit = isPhrase ? "phrase" : "word";
+
+  const normalizedTargetWord = normalizeChinese(params.targetWord || "");
+  const containsTargetWord =
+    !normalizedTargetWord || heard.includes(normalizedTargetWord);
 
   if (containsLatinLetters(params.transcript)) {
     return {
       score: 0,
       matchType: "wrong-language",
       confidence,
-      feedback:
-        "I heard English or Latin letters. Please say the Cantonese word only.",
+      feedback: `I heard English or Latin letters. Please say the Cantonese ${unit} only.`,
     };
   }
 
@@ -95,8 +102,7 @@ function buildResult(params: {
       score: 0,
       matchType: "wrong-language",
       confidence,
-      feedback:
-        "I didn’t hear a Chinese word clearly. Please say the Cantonese word only.",
+      feedback: `I didn’t hear a Chinese ${unit} clearly. Please say the Cantonese ${unit} only.`,
     };
   }
 
@@ -105,11 +111,21 @@ function buildResult(params: {
       score: 0,
       matchType: "unclear",
       confidence,
-      feedback:
-        "I couldn’t hear a clear attempt. Try again in a quiet place and say only the target word.",
+      feedback: `I couldn’t hear a clear attempt. Try again in a quiet place and say only the target ${unit}.`,
     };
   }
 
+  // In phrase mode, require the core target word to appear if you have it
+  if (isPhrase && normalizedTargetWord && !containsTargetWord) {
+    return {
+      score: 15,
+      matchType: "wrong",
+      confidence,
+      feedback: `I heard “${params.transcript}”, but I couldn’t clearly hear the target word “${params.targetWord}” inside the phrase. Try again: ${params.expectedJyutping}.`,
+    };
+  }
+
+  // Exact match after normalization
   if (heard === expected) {
     const score =
       confidence === "high" ? 92 : confidence === "medium" ? 84 : 76;
@@ -118,21 +134,62 @@ function buildResult(params: {
       score,
       matchType: "exact",
       confidence,
-      feedback: `Nice — I heard exactly “${params.expectedChinese}”. That means your pronunciation was understandable. Keep aiming for ${params.expectedJyutping}.`,
+      feedback: `Nice — I heard exactly “${params.expectedChinese}”. That means your ${unit} was understood. Keep aiming for ${params.expectedJyutping}.`,
     };
   }
 
-  // If the expected word appears inside the transcript, be more generous.
+  // Phrase mode: treat very high similarity as near-exact
+  if (isPhrase && sim >= 0.85) {
+    const score =
+      confidence === "high" ? 88 : confidence === "medium" ? 80 : 72;
+
+    return {
+      score,
+      matchType: "near-exact",
+      confidence,
+      feedback: `Very close. I heard “${params.transcript}”, which is a natural variant of “${params.expectedChinese}”. Good job — try to match the full phrase even more closely: ${params.expectedJyutping}.`,
+    };
+  }
+
+  // If expected appears inside heard, or vice versa
   if (heard.includes(expected) || expected.includes(heard)) {
     return {
       score: confidence === "high" ? 82 : 74,
       matchType: "close",
       confidence,
-      feedback: `Very close. I heard “${params.transcript}”. The target was “${params.expectedChinese}”. Try saying only the target word clearly: ${params.expectedJyutping}.`,
+      feedback: `Close. I heard “${params.transcript}”. The target was “${params.expectedChinese}”. Try saying the full ${unit} clearly: ${params.expectedJyutping}.`,
     };
   }
 
-  // More forgiving thresholds for short words
+  // Phrase-friendly scoring
+  if (isPhrase) {
+    if (sim >= 0.7) {
+      return {
+        score: confidence === "high" ? 72 : 64,
+        matchType: "close",
+        confidence,
+        feedback: `Close. I heard “${params.transcript}” instead of “${params.expectedChinese}”. Try saying the whole phrase a bit more clearly and naturally: ${params.expectedJyutping}.`,
+      };
+    }
+
+    if (sim >= 0.5) {
+      return {
+        score: 45,
+        matchType: "partial",
+        confidence,
+        feedback: `Partly understood. I heard “${params.transcript}”. Try again and focus on the full phrase: ${params.expectedJyutping}.`,
+      };
+    }
+
+    return {
+      score: 15,
+      matchType: "wrong",
+      confidence,
+      feedback: `I heard “${params.transcript}”, which sounds quite different from “${params.expectedChinese}”. Listen once more and repeat slowly: ${params.expectedJyutping}.`,
+    };
+  }
+
+  // Word scoring
   if (len <= 2) {
     if (sim >= 0.5) {
       return {
@@ -178,7 +235,6 @@ function buildResult(params: {
     };
   }
 
-  // Default rules for longer words
   if (sim >= 0.7) {
     return {
       score: confidence === "high" ? 68 : 60,
@@ -221,6 +277,13 @@ export default defineEventHandler(async (event) => {
   const MAX_AUDIO_SIZE = 1_000_000;
 
   const audioFile = form?.find((f) => f.name === "audio");
+
+  const targetModeField = form?.find((f) => f.name === "targetMode");
+  const targetWordField = form?.find((f) => f.name === "targetWord");
+
+  const targetMode = targetModeField?.data?.toString() ?? "word";
+  const targetWord = targetWordField?.data?.toString() ?? "";
+
   const expectedJyutpingField = form?.find(
     (f) => f.name === "expectedJyutping",
   );
@@ -263,10 +326,11 @@ export default defineEventHandler(async (event) => {
       response_format: "json",
       include: ["logprobs"],
       prompt: `
-      Transcribe spoken Hong Kong Cantonese only.
-Do not translate.
 Do not normalize toward any expected answer.
-If the speaker says an English word, return it in English.`,
+Transcribe exactly what was spoken.
+If the speech is Mandarin, return pinyin with tone numbers.
+If the speech is Cantonese, return Chinese characters only.
+If the speech is English, return English.`,
       //       prompt: `Transcribe spoken Hong Kong Cantonese only.
       // Do not translate.
       // Do not romanize.
@@ -294,6 +358,7 @@ If the speaker says an English word, return it in English.`,
       expectedJyutping,
       transcript,
       avgLogprob,
+      targetMode,
     });
 
     return {

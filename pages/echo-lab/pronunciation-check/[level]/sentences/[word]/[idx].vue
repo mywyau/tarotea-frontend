@@ -1,61 +1,71 @@
 <script setup lang="ts">
-
 definePageMeta({
   ssr: false,
-  middleware: "ai-whisper-access-level"
+  middleware: "ai-whisper-access-level",
 })
 
 const route = useRoute()
-const id = computed(() => decodeURIComponent(route.params.id as string))
+const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-const {
-  authReady,
-  isLoggedIn,
-  user,
-  entitlement,
-  isCanceling,
-  currentPeriodEnd,
-  resolve
-} = useMeStateV2()
+const wordSlug = computed(() => decodeURIComponent(route.params.word as string))
 
+const idx = computed(() => {
+  const raw = route.params.idx as string | undefined
+  const parsed = Number.parseInt(raw ?? "", 10)
+  return Number.isNaN(parsed) ? 0 : parsed
+})
+
+const { authReady, isLoggedIn } = useMeStateV2()
 
 const { data, error } = await useFetch(
-  () => `/api/words/${id.value}`,
+  () => `/api/words/${wordSlug.value}`,
   {
-    key: () => `word-${id.value}`,
-    server: true
+    key: () => `word-${wordSlug.value}`,
+    server: true,
   }
 )
 
-const MAX_RECORDING_SECONDS = 10
-const recordingTime = ref(0)
-let timer: ReturnType<typeof setInterval> | null = null
-
 const word = computed(() => data.value)
 
-const recording = ref(false)
-const mediaRecorder = ref<MediaRecorder | null>(null)
-const remainingAttempts = ref<number | null>(null)
+const selectedExample = computed(() => {
+  return word.value?.examples?.[idx.value] ?? null
+})
 
-let audioChunks: Blob[] = []
+const practiceTarget = computed(() => {
+  const example = selectedExample.value
 
-const transcript = ref("")
-const feedback = ref("")
-const loading = ref(false)
-const aiState = ref("")
-const score = ref<number | null>(null)
-const recordingUrl = ref<string | null>(null)
+  if (!example?.sentence || !example?.jyutping || !example?.meaning) {
+    return null
+  }
 
-const animatedRemaining = ref(0)
-const animatedPercent = ref(0)
+  return {
+    chinese: example.sentence,
+    jyutping: example.jyutping,
+    meaning: example.meaning,
+    mode: "phrase" as const,
+  }
+})
+
+const phraseAudioSrc = computed(() => {
+  const filename = word.value?.audio?.examples?.[idx.value]
+  return filename ? `${cdnBase}/audio/${filename}` : null
+})
+
+const MAX_RECORDING_SECONDS = 10
+const MAX_AUDIO_BYTES = 1_000_000
 
 const supported = ref(false)
-
-const progress = computed(() => {
-  return (recordingTime.value / MAX_RECORDING_SECONDS) * 100
-})
+const recording = ref(false)
+const loading = ref(false)
+const aiState = ref<"" | "error">("")
+const recordingTime = ref(0)
+const transcript = ref("")
+const feedback = ref("")
+const score = ref<number | null>(null)
+const recordingUrl = ref<string | null>(null)
+const mediaRecorder = ref<MediaRecorder | null>(null)
 const streamRef = ref<MediaStream | null>(null)
 const recorderMimeType = ref("")
 
@@ -65,49 +75,40 @@ const aiUsage = ref<{
   limit: number
 } | null>(null)
 
-const practiceTarget = computed(() => {
+const animatedRemaining = ref(0)
+const animatedPercent = ref(0)
 
-  const example = word.value?.examples?.[0]
-
-  if (example?.sentence && example?.jyutping) {
-
-    return {
-      chinese: example.sentence,
-      jyutping: example.jyutping,
-      mode: "phrase"
-    }
-  }
-
-  return {
-    chinese: word.value?.word ?? "",
-    jyutping: word.value?.jyutping ?? "",
-    mode: "word"
-  }
+const progress = computed(() => {
+  return (recordingTime.value / MAX_RECORDING_SECONDS) * 100
 })
+
+let timer: ReturnType<typeof setInterval> | null = null
+let tipTimer: ReturnType<typeof setInterval> | null = null
+let audioChunks: Blob[] = []
 
 async function fetchAIUsage() {
   if (!isLoggedIn.value) return
 
-  const auth = await useAuth()
-  const token = await auth.getAccessToken()
+  try {
+    const auth = await useAuth()
+    const token = await auth.getAccessToken()
 
-  const usage = await $fetch<{
-    attempts: number
-    remaining: number
-    limit: number
-  }>("/api/ai/usage", {
-    method: "GET",
-    headers: { Authorization: `Bearer ${token}` }
-  })
+    const usage = await $fetch<{
+      attempts: number
+      remaining: number
+      limit: number
+    }>("/api/ai/usage", {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    })
 
-  aiUsage.value = usage
-
-  animateCount(animatedRemaining, usage.remaining)
-
-  const percent = (usage.remaining / usage.limit) * 100
-  animateCount(animatedPercent, percent)
+    aiUsage.value = usage
+    animateCount(animatedRemaining, usage.remaining)
+    animateCount(animatedPercent, (usage.remaining / usage.limit) * 100)
+  } catch (e) {
+    console.error("[frontend] failed to fetch AI usage", e)
+  }
 }
-
 
 function getSupportedMimeType() {
   const candidates = [
@@ -125,17 +126,56 @@ function getSupportedMimeType() {
   return ""
 }
 
+function stopTracks() {
+  streamRef.value?.getTracks().forEach((track) => track.stop())
+  streamRef.value = null
+}
+
+function clearRecordingTimer() {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+}
+
+function resetFeedback() {
+  transcript.value = ""
+  feedback.value = ""
+  score.value = null
+  aiState.value = ""
+}
+
+function resetRecording() {
+  resetFeedback()
+
+  if (recordingUrl.value) {
+    URL.revokeObjectURL(recordingUrl.value)
+    recordingUrl.value = null
+  }
+
+  audioChunks = []
+  mediaRecorder.value = null
+  recording.value = false
+  loading.value = false
+  recordingTime.value = 0
+  clearRecordingTimer()
+  stopTracks()
+}
+
 async function startRecording() {
   if (!navigator.mediaDevices || !window.MediaRecorder) {
     aiState.value = "error"
     return
   }
 
+  if (!practiceTarget.value) {
+    aiState.value = "error"
+    return
+  }
+
   try {
     aiState.value = ""
-    transcript.value = ""
-    feedback.value = ""
-    score.value = null
+    resetFeedback()
     audioChunks = []
 
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -160,26 +200,14 @@ async function startRecording() {
       try {
         const audioBlob = new Blob(audioChunks, { type: recorderMimeType.value })
 
-        console.log("[frontend] recording debug", {
-          recorderMimeType: recorderMimeType.value,
-          blobType: audioBlob.type,
-          blobSize: audioBlob.size,
-          chunkCount: audioChunks.length,
-          chunkSizes: audioChunks.map((c) => c.size),
-        })
-
         if (audioBlob.size < 1000) {
           console.error("[frontend] audio blob too small")
           aiState.value = "error"
           return
         }
 
-        if (audioBlob.size > 1_000_000) {
+        if (audioBlob.size > MAX_AUDIO_BYTES) {
           alert("Recording is too long. Please keep it under 10 seconds.")
-          return
-        }
-
-        if (!practiceTarget.value.chinese || !practiceTarget.value.jyutping) {
           aiState.value = "error"
           return
         }
@@ -194,9 +222,9 @@ async function startRecording() {
 
         const formData = new FormData()
         formData.append("audio", audioBlob, `recording.${extension}`)
-        formData.append("expectedJyutping", practiceTarget.value.jyutping)
-        formData.append("expectedChinese", practiceTarget.value.chinese)
-        formData.append("targetMode", practiceTarget.value.mode)
+        formData.append("expectedJyutping", practiceTarget.value!.jyutping)
+        formData.append("expectedChinese", practiceTarget.value!.chinese)
+        formData.append("targetMode", "phrase")
 
         loading.value = true
 
@@ -218,36 +246,32 @@ async function startRecording() {
         transcript.value = res.transcript
         feedback.value = res.feedback
         score.value = res.score
-        remainingAttempts.value = res.remainingAttempts
 
         if (aiUsage.value) {
           aiUsage.value.remaining = res.remainingAttempts
-          animateCount(animatedRemaining, res.remainingAttempts)
-
-          const percent = (res.remainingAttempts / aiUsage.value.limit) * 100
-          animateCount(animatedPercent, percent)
-
           aiUsage.value.attempts = aiUsage.value.limit - res.remainingAttempts
+          animateCount(animatedRemaining, res.remainingAttempts)
+          animateCount(
+            animatedPercent,
+            (res.remainingAttempts / aiUsage.value.limit) * 100
+          )
         } else {
           aiUsage.value = {
             remaining: res.remainingAttempts,
-            attempts: 0,
-            limit: res.limit
+            attempts: res.limit - res.remainingAttempts,
+            limit: res.limit,
           }
 
           animateCount(animatedRemaining, res.remainingAttempts)
-
-          const percent = (res.remainingAttempts / res.limit) * 100
-          animateCount(animatedPercent, percent)
+          animateCount(animatedPercent, (res.remainingAttempts / res.limit) * 100)
         }
       } catch (e) {
         console.error("[frontend] pronunciation upload failed", e)
         aiState.value = "error"
       } finally {
         loading.value = false
-        streamRef.value?.getTracks().forEach((track) => track.stop())
-        streamRef.value = null
         mediaRecorder.value = null
+        stopTracks()
       }
     }
 
@@ -266,8 +290,7 @@ async function startRecording() {
     console.error("[frontend] failed to start recording", e)
     aiState.value = "error"
     recording.value = false
-    streamRef.value?.getTracks().forEach((track) => track.stop())
-    streamRef.value = null
+    stopTracks()
   }
 }
 
@@ -275,56 +298,17 @@ function stopRecording() {
   if (!mediaRecorder.value || mediaRecorder.value.state === "inactive") return
 
   recording.value = false
-
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
-
+  clearRecordingTimer()
   mediaRecorder.value.stop()
 }
 
-function resetRecording() {
-  transcript.value = ""
-  feedback.value = ""
-  score.value = null
-
-  if (recordingUrl.value) {
-    URL.revokeObjectURL(recordingUrl.value)
-  }
-
-  recordingUrl.value = null
-  audioChunks = []
-
-  mediaRecorder.value = null
-}
-
 function tryAgain() {
-  aiState.value = ""
   resetRecording()
 }
-
-const tips = [
-  "If something looks wrong, try recording again or refreshing the page.",
-  "Make sure the environment is quiet and speech is clear.",
-  "Speaking slightly slower can improve recognition accuracy.",
-  "Pronounce each syllable clearly and confidently.",
-  "Listen to the audio example carefully before recording.",
-  "Say the word naturally, but not too fast.",
-  "Check the quality of your own recording.",
-  "Practice more out loud before submitting, this will help your tokens go further.",
-  "Make sure the recording captures the entire phrase.",
-  "Free users get 10 requests per month.",
-  "Upgrade for 5000 requests per month.",
-]
-
-const tipIndex = ref(0)
 
 function nextTip() {
   tipIndex.value = (tipIndex.value + 1) % tips.length
 }
-
-const router = useRouter()
 
 function goBack() {
   if (window.history.length > 1) {
@@ -334,18 +318,31 @@ function goBack() {
   }
 }
 
+const tips = [
+  "If something looks wrong, try recording again or refreshing the page.",
+  "Make sure the environment is quiet and speech is clear.",
+  "Speaking slightly slower can improve recognition accuracy.",
+  "Pronounce each syllable clearly and confidently.",
+  "Listen to the full phrase carefully before recording.",
+  "Say the phrase naturally, but not too fast.",
+  "Check the quality of your own recording.",
+  "Practice out loud before submitting to use your tokens more efficiently.",
+  "Make sure the recording captures the entire phrase.",
+  "Free users get 10 requests per month.",
+  "Upgrade for 5000 requests per month.",
+]
+
+const tipIndex = ref(0)
+
+watch([authReady, isLoggedIn], ([ready, loggedIn]) => {
+  if (ready && loggedIn) {
+    fetchAIUsage()
+  }
+}, { immediate: true })
 
 onMounted(() => {
-  supported.value = !!(
-    navigator.mediaDevices &&
-    window.MediaRecorder
-  )
-})
+  supported.value = !!(navigator.mediaDevices && window.MediaRecorder)
 
-
-let tipTimer: ReturnType<typeof setInterval> | null = null
-
-onMounted(() => {
   tipTimer = setInterval(() => {
     nextTip()
   }, 6000)
@@ -353,39 +350,26 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (tipTimer) clearInterval(tipTimer)
-
-  if (recordingUrl.value) {
-    URL.revokeObjectURL(recordingUrl.value)
-  }
-
-  streamRef.value?.getTracks().forEach((track) => track.stop())
+  resetRecording()
 })
-
-
-watchEffect(() => {
-  if (authReady.value && isLoggedIn.value) {
-    fetchAIUsage()
-  }
-})
-
-
-
 </script>
 
 <template>
-
   <div class="min-h-[70vh] flex items-center justify-center p-6">
     <div class="max-w-xl w-full text-center space-y-6">
-
       <div class="w-full text-left mb-6">
-        <button @click="goBack" class="inline-flex items-center text-sm text-black hover:underline">
+        <button
+          @click="goBack"
+          class="inline-flex items-center text-sm text-black hover:underline"
+        >
           ← Back
         </button>
       </div>
 
-      <h1 class="text-2xl font-bold mb-6">
-        Echo Lab
-      </h1>
+      <h1 class="text-2xl font-bold mb-2">Echo Lab</h1>
+      <p class="text-sm text-gray-500">
+        Practice the phrase by listening, recording, and reviewing feedback.
+      </p>
 
       <div v-if="aiState === 'error'" class="text-red-500 text-sm space-y-6">
         <p>
@@ -393,25 +377,23 @@ watchEffect(() => {
           Please try again.
         </p>
 
-        <button @click="tryAgain" class="px-4 py-2 bg-gray-300 text-black rounded">
+        <button
+          @click="tryAgain"
+          class="px-4 py-2 bg-gray-300 text-black rounded"
+        >
           Try Again
         </button>
       </div>
 
       <div v-if="supported" class="space-y-8">
-
-        <div v-if="word" class="mt-4 space-y-2">
-          <p class="text-4xl font-bold">{{ word.word }}</p>
-          <p class="text-gray-500 text-lg">{{ word.jyutping }}</p>
-          <p class="text-gray-500 text-lg">{{ word.examples[0].sentence }}</p>
+        <div v-if="practiceTarget" class="mt-4 space-y-2">
+          <p class="text-3xl font-bold">{{ practiceTarget.chinese }}</p>
+          <!-- <p class="text-gray-500 text-sm">{{ practiceTarget.jyutping }}</p> -->
+          <p class="text-gray-500 text-sm">{{ practiceTarget.meaning }}</p>
         </div>
 
-        <div class="flex justify-center pt-4">
-          <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
-        </div>
-
-        <div class="flex justify-center pt-4">
-          <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.examples[0]}`" size="lg" />
+        <div v-if="phraseAudioSrc" class="flex justify-center pt-2">
+          <AudioButton :src="phraseAudioSrc" size="lg" />
         </div>
 
         <div class="mt-4 mb-4 text-sm text-gray-500 space-y-1">
@@ -421,21 +403,20 @@ watchEffect(() => {
         </div>
 
         <div class="flex flex-col items-center gap-3">
-
-          <button v-if="!recording && !transcript" :disabled="loading || recording" @click="startRecording"
-            class="px-4 py-2 bg-black font-semibold rounded disabled:opacity-50">
-            <span class="bg-gradient-to-r
-                  from-[#7ec6f3]
-                  via-[#5aaee6]
-                  to-[#3f8fd8]
-                  bg-clip-text text-transparent
-                  hover:brightness-125 transition">
+          <button
+            v-if="!recording && !transcript"
+            :disabled="loading || recording || !practiceTarget"
+            @click="startRecording"
+            class="px-4 py-2 bg-black font-semibold rounded disabled:opacity-50"
+          >
+            <span
+              class="bg-gradient-to-r from-[#7ec6f3] via-[#5aaee6] to-[#3f8fd8] bg-clip-text text-transparent hover:brightness-125 transition"
+            >
               Start Recording
             </span>
           </button>
 
-          <div class="text-sm text-gray-700 mt-3 space-y-2">
-
+          <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2 w-full max-w-xs">
             <div class="font-medium">AI Usage</div>
 
             <span>
@@ -443,9 +424,11 @@ watchEffect(() => {
             </span>
 
             <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-              <div class="h-2 bg-blue-300" :style="{ width: animatedPercent + '%' }"></div>
+              <div
+                class="h-2 bg-blue-300"
+                :style="{ width: animatedPercent + '%' }"
+              />
             </div>
-
           </div>
 
           <div v-if="recording" class="w-64 space-y-1">
@@ -454,47 +437,62 @@ watchEffect(() => {
             </p>
 
             <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-              <div class="bg-red-500 h-2 transition-all duration-200 ease-out" :style="{ width: progress + '%' }">
-              </div>
+              <div
+                class="bg-red-500 h-2 transition-all duration-200 ease-out"
+                :style="{ width: progress + '%' }"
+              />
             </div>
           </div>
 
-          <button v-if="recording" @click="stopRecording" :disabled="loading"
-            class="px-4 py-2 bg-red-500 text-black font-semibold rounded hover:brightness-125 transition">
+          <button
+            v-if="recording"
+            @click="stopRecording"
+            :disabled="loading"
+            class="px-4 py-2 bg-red-500 text-black font-semibold rounded hover:brightness-125 transition"
+          >
             Stop Recording
           </button>
 
           <p v-if="loading" class="text-gray-500 text-sm flex items-center gap-2">
-            <span class="animate-spin h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full"></span>
+            <span class="animate-spin h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full" />
             Processing pronunciation...
           </p>
-
         </div>
 
         <div v-if="recordingUrl" class="flex flex-col items-center gap-2">
           <p class="text-sm text-gray-500">Your recording</p>
-          <audio :src="recordingUrl" controls class="w-64"></audio>
+          <audio :src="recordingUrl" controls class="w-64" />
         </div>
 
-        <div v-if="feedback"
-          class="mx-auto max-w-md text-left bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
+        <div
+          v-if="feedback"
+          class="mx-auto max-w-md text-left bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2"
+        >
           <h2 class="font-semibold text-gray-700">Feedback</h2>
+
           <p class="text-gray-800 leading-relaxed">
             {{ feedback }}
           </p>
 
-          <div v-if="score !== null" class="rounded-lg p-4 text-center" :class="{
-            'bg-green-50 border border-green-200': score >= 90,
-            'bg-yellow-50 border border-yellow-200': score >= 70 && score < 90,
-            'bg-red-50 border border-red-200': score < 70
-          }">
+          <div
+            v-if="score !== null"
+            class="rounded-lg p-4 text-center"
+            :class="{
+              'bg-green-50 border border-green-200': score >= 90,
+              'bg-yellow-50 border border-yellow-200': score >= 70 && score < 90,
+              'bg-red-50 border border-red-200': score < 70
+            }"
+          >
             <p class="text-sm text-gray-500">Pronunciation Score</p>
             <p class="text-3xl font-bold">{{ score }}</p>
           </div>
         </div>
 
-        <button v-if="transcript && !recording" @click="tryAgain"
-          class="px-4 py-2 bg-gray-300 text-black rounded hover:brightness-110 transition">
+        <button
+          v-if="transcript && !recording"
+          @click="tryAgain"
+          class="px-4 py-2 bg-gray-300 text-black rounded hover:brightness-110 transition"
+        >
           Try Again
         </button>
       </div>
@@ -521,33 +519,30 @@ watchEffect(() => {
       </div>
 
       <div class="mt-6 text-xs text-gray-500 p-4 max-w-md mx-auto">
-
         <p class="font-medium text-gray-600 mb-3">
           Tips
         </p>
 
         <div class="flex items-center justify-between gap-3">
-
           <Transition name="tip-fade" mode="out-in">
             <p :key="tipIndex" class="text-center flex-1 leading-relaxed">
               {{ tips[tipIndex] }}
             </p>
           </Transition>
-
         </div>
 
         <div class="flex justify-center gap-1 mt-3">
-          <span v-for="(tip, i) in tips" :key="i" class="w-1.5 h-1.5 rounded-full"
-            :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'" />
+          <span
+            v-for="(tip, i) in tips"
+            :key="i"
+            class="w-1.5 h-1.5 rounded-full"
+            :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'"
+          />
         </div>
-
       </div>
-
-
     </div>
   </div>
 </template>
-
 
 <style scoped>
 .tip-fade-enter-active,

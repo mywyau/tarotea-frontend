@@ -1,3 +1,5 @@
+import type { Entitlement } from "~/types/auth/entitlements";
+
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {
   if (!entitlement) {
     return false;
