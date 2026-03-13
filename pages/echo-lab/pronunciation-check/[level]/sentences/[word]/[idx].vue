@@ -224,7 +224,7 @@ async function startRecording() {
         formData.append("audio", audioBlob, `recording.${extension}`)
         formData.append("expectedJyutping", practiceTarget.value!.jyutping)
         formData.append("expectedChinese", practiceTarget.value!.chinese)
-        formData.append("targetMode", "phrase")
+        // formData.append("targetWord", wordSlug.value)
 
         loading.value = true
 
@@ -388,7 +388,7 @@ onUnmounted(() => {
       <div v-if="supported" class="space-y-8">
         <div v-if="practiceTarget" class="mt-4 space-y-2">
           <p class="text-3xl font-bold">{{ practiceTarget.chinese }}</p>
-          <!-- <p class="text-gray-500 text-sm">{{ practiceTarget.jyutping }}</p> -->
+          <p class="text-gray-500 text-sm">{{ practiceTarget.jyutping }}</p>
           <p class="text-gray-500 text-sm">{{ practiceTarget.meaning }}</p>
         </div>
 

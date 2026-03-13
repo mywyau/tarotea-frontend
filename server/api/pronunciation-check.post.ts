@@ -73,18 +73,16 @@ function buildResult(params: {
   expectedJyutping: string;
   transcript: string;
   avgLogprob: number | null;
-  targetMode?: string;
-  targetWord?: string;
+  // targetWord?: string;
 }) {
   const expected = normalizeChinese(params.expectedChinese);
   const heard = normalizeChinese(params.transcript);
   const sim = similarity(expected, heard);
   const confidence = confidenceLabel(params.avgLogprob);
-  const len = expected.length;
-  const isPhrase = params.targetMode === "phrase";
-  const unit = isPhrase ? "phrase" : "word";
+  const unit = "phrase";
 
   const normalizedTargetWord = normalizeChinese(params.targetWord || "");
+
   const containsTargetWord =
     !normalizedTargetWord || heard.includes(normalizedTargetWord);
 
@@ -97,15 +95,6 @@ function buildResult(params: {
     };
   }
 
-  if (!containsCJK(heard)) {
-    return {
-      score: 0,
-      matchType: "wrong-language",
-      confidence,
-      feedback: `I didn’t hear a Chinese ${unit} clearly. Please say the Cantonese ${unit} only.`,
-    };
-  }
-
   if (!heard) {
     return {
       score: 0,
@@ -115,17 +104,24 @@ function buildResult(params: {
     };
   }
 
-  // In phrase mode, require the core target word to appear if you have it
-  if (isPhrase && normalizedTargetWord && !containsTargetWord) {
+  if (!containsCJK(heard)) {
     return {
-      score: 15,
-      matchType: "wrong",
+      score: 0,
+      matchType: "wrong-language",
       confidence,
-      feedback: `I heard “${params.transcript}”, but I couldn’t clearly hear the target word “${params.targetWord}” inside the phrase. Try again: ${params.expectedJyutping}.`,
+      feedback: `I didn’t hear a Chinese ${unit} clearly. Please say the Cantonese ${unit} only.`,
     };
   }
 
-  // Exact match after normalization
+  // if (normalizedTargetWord && !containsTargetWord) {
+  //   return {
+  //     score: 15,
+  //     matchType: "wrong",
+  //     confidence,
+  //     feedback: `I heard “${params.transcript}”, but I couldn’t clearly hear the target word “${params.targetWord}” inside the phrase. Try again: ${params.expectedJyutping}.`,
+  //   };
+  // }
+
   if (heard === expected) {
     const score =
       confidence === "high" ? 92 : confidence === "medium" ? 84 : 76;
@@ -138,8 +134,7 @@ function buildResult(params: {
     };
   }
 
-  // Phrase mode: treat very high similarity as near-exact
-  if (isPhrase && sim >= 0.85) {
+  if (sim >= 0.85) {
     const score =
       confidence === "high" ? 88 : confidence === "medium" ? 80 : 72;
 
@@ -151,7 +146,6 @@ function buildResult(params: {
     };
   }
 
-  // If expected appears inside heard, or vice versa
   if (heard.includes(expected) || expected.includes(heard)) {
     return {
       score: confidence === "high" ? 82 : 74,
@@ -161,95 +155,21 @@ function buildResult(params: {
     };
   }
 
-  // Phrase-friendly scoring
-  if (isPhrase) {
-    if (sim >= 0.7) {
-      return {
-        score: confidence === "high" ? 72 : 64,
-        matchType: "close",
-        confidence,
-        feedback: `Close. I heard “${params.transcript}” instead of “${params.expectedChinese}”. Try saying the whole phrase a bit more clearly and naturally: ${params.expectedJyutping}.`,
-      };
-    }
-
-    if (sim >= 0.5) {
-      return {
-        score: 45,
-        matchType: "partial",
-        confidence,
-        feedback: `Partly understood. I heard “${params.transcript}”. Try again and focus on the full phrase: ${params.expectedJyutping}.`,
-      };
-    }
-
-    return {
-      score: 15,
-      matchType: "wrong",
-      confidence,
-      feedback: `I heard “${params.transcript}”, which sounds quite different from “${params.expectedChinese}”. Listen once more and repeat slowly: ${params.expectedJyutping}.`,
-    };
-  }
-
-  // Word scoring
-  if (len <= 2) {
-    if (sim >= 0.5) {
-      return {
-        score: confidence === "high" ? 72 : 64,
-        matchType: "close",
-        confidence,
-        feedback: `Close. I heard “${params.transcript}” instead of “${params.expectedChinese}”. Try again and focus on the exact word: ${params.expectedJyutping}.`,
-      };
-    }
-
-    return {
-      score: 20,
-      matchType: "wrong",
-      confidence,
-      feedback: `I heard “${params.transcript}”, which sounds different from “${params.expectedChinese}”. Listen once more and repeat slowly: ${params.expectedJyutping}.`,
-    };
-  }
-
-  if (len === 3) {
-    if (sim >= 0.66) {
-      return {
-        score: confidence === "high" ? 72 : 64,
-        matchType: "close",
-        confidence,
-        feedback: `Close. I heard “${params.transcript}” instead of “${params.expectedChinese}”. Try saying each syllable more clearly: ${params.expectedJyutping}.`,
-      };
-    }
-
-    if (sim >= 0.33) {
-      return {
-        score: 45,
-        matchType: "partial",
-        confidence,
-        feedback: `Partly understood. I heard “${params.transcript}”. Try again and focus on the target pronunciation: ${params.expectedJyutping}.`,
-      };
-    }
-
-    return {
-      score: 20,
-      matchType: "wrong",
-      confidence,
-      feedback: `I heard “${params.transcript}”, which sounds quite different from “${params.expectedChinese}”. Listen once more and repeat slowly: ${params.expectedJyutping}.`,
-    };
-  }
-
   if (sim >= 0.7) {
     return {
-      score: confidence === "high" ? 68 : 60,
+      score: confidence === "high" ? 72 : 64,
       matchType: "close",
       confidence,
-      feedback: `Close. I heard “${params.transcript}” instead of “${params.expectedChinese}”. Try slowing down and saying each syllable more clearly: ${params.expectedJyutping}.`,
+      feedback: `Close. I heard “${params.transcript}” instead of “${params.expectedChinese}”. Try saying the whole phrase a bit more clearly and naturally: ${params.expectedJyutping}.`,
     };
   }
 
-  if (sim >= 0.4) {
+  if (sim >= 0.5) {
     return {
-      score: 40,
+      score: 45,
       matchType: "partial",
       confidence,
-      feedback: `Partly understood, but not clearly enough. I heard “${params.transcript}”. Try again and focus on the target pronunciation: ${params.expectedJyutping}.`,
+      feedback: `Partly understood. I heard “${params.transcript}”. Try again and focus on the full phrase: ${params.expectedJyutping}.`,
     };
   }
 
@@ -278,11 +198,7 @@ export default defineEventHandler(async (event) => {
 
   const audioFile = form?.find((f) => f.name === "audio");
 
-  const targetModeField = form?.find((f) => f.name === "targetMode");
   const targetWordField = form?.find((f) => f.name === "targetWord");
-
-  const targetMode = targetModeField?.data?.toString() ?? "word";
-  const targetWord = targetWordField?.data?.toString() ?? "";
 
   const expectedJyutpingField = form?.find(
     (f) => f.name === "expectedJyutping",
@@ -291,6 +207,7 @@ export default defineEventHandler(async (event) => {
 
   const expectedJyutping = expectedJyutpingField?.data?.toString() ?? "";
   const expectedChinese = expectedChineseField?.data?.toString() ?? "";
+  // const targetWord = targetWordField?.data?.toString() ?? "";
 
   if (!expectedChinese || !expectedJyutping) {
     throw createError({
@@ -358,7 +275,7 @@ If the speech is English, return English.`,
       expectedJyutping,
       transcript,
       avgLogprob,
-      targetMode,
+      // targetWord,
     });
 
     return {
