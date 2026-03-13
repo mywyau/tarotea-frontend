@@ -113,15 +113,6 @@ function buildResult(params: {
     };
   }
 
-  // if (normalizedTargetWord && !containsTargetWord) {
-  //   return {
-  //     score: 15,
-  //     matchType: "wrong",
-  //     confidence,
-  //     feedback: `I heard “${params.transcript}”, but I couldn’t clearly hear the target word “${params.targetWord}” inside the phrase. Try again: ${params.expectedJyutping}.`,
-  //   };
-  // }
-
   if (heard === expected) {
     const score =
       confidence === "high" ? 92 : confidence === "medium" ? 84 : 76;
@@ -198,8 +189,6 @@ export default defineEventHandler(async (event) => {
 
   const audioFile = form?.find((f) => f.name === "audio");
 
-  const targetWordField = form?.find((f) => f.name === "targetWord");
-
   const expectedJyutpingField = form?.find(
     (f) => f.name === "expectedJyutping",
   );
@@ -248,11 +237,6 @@ Transcribe exactly what was spoken.
 If the speech is Mandarin, return pinyin with tone numbers.
 If the speech is Cantonese, return Chinese characters only.
 If the speech is English, return English.`,
-      //       prompt: `Transcribe spoken Hong Kong Cantonese only.
-      // Do not translate.
-      // Do not romanize.
-      // Return only the spoken Chinese characters if heard.
-      // Expected phrase: ${expectedChinese}.`,
     });
 
     const transcript = transcription.text ?? "";
@@ -275,7 +259,6 @@ If the speech is English, return English.`,
       expectedJyutping,
       transcript,
       avgLogprob,
-      // targetWord,
     });
 
     return {
