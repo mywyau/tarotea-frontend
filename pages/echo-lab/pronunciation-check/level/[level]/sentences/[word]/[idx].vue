@@ -321,7 +321,7 @@ function goBack() {
 const tips = [
   "If something looks wrong, try recording again or refreshing the page.",
   "Make sure the environment is quiet and speech is clear.",
-  "Speaking slightly slower can improve recognition accuracy.",
+  "Speaking slightly slower may improve recognition accuracy.",
   "Pronounce each syllable clearly and confidently.",
   "Listen to the full phrase carefully before recording.",
   "Say the phrase naturally, but not too fast.",
