@@ -304,7 +304,6 @@ function resetTraining(options?: { reshuffle?: boolean }) {
 }
 
 const sessionResult = ref<{
-
     correctCount: number,
     totalWords: number,
     xpEarned: number
@@ -588,7 +587,7 @@ watch(
                         <div class="w-28 mr-2">
                             <div class="h-[3px] bg-gray-200 rounded">
                                 <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
-                                    :style="{ width: Math.min((currentXp ?? 0) / 200 * 100, 100) + '%' }" />
+                                    :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                             </div>
                         </div>
 

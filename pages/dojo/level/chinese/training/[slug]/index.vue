@@ -20,8 +20,8 @@ import {
     chineseXpHintUsed
 } from '@/utils/dojo/xp'
 
-import { masteryXp } from '@/utils/xp/helpers'
 import { totalQuestions, weakestWordRatio } from '@/utils/weakestWords'
+import { masteryXp } from '@/utils/xp/helpers'
 
 
 
@@ -192,9 +192,9 @@ function resetTraining(options?: { reshuffle?: boolean }) {
 }
 
 const sessionResult = ref<{
-    xpEarned: number
     correctCount: number
     totalWords: number
+    xpEarned: number
 } | null>(null)
 
 async function finalizeBatch() {
@@ -481,7 +481,7 @@ onMounted(() => {
                         <div class="w-28 mr-2">
                             <div class="h-[3px] bg-gray-200 rounded">
                                 <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
-                                    :style="{ width: Math.min((currentXp ?? 0) / 200 * 100, 100) + '%' }" />
+                                    :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                             </div>
                         </div>
 
@@ -518,26 +518,27 @@ onMounted(() => {
                     </div>
 
                     <div class="h-24 sm:h-0"></div>
+                </div>
 
-                    <div v-if="isComplete && sessionResult" class="space-y-8 text-center">
 
-                        <h2 class="text-2xl font-semibold">
-                            Good job! Keep going!
-                        </h2>
+                <div v-if="sessionResult" class="space-y-8 text-center">
 
-                        <p class="text-gray-600 text-base uppercase">
-                            {{ sessionResult.correctCount }} / {{ words.length }} words completed
-                        </p>
+                    <h2 class="text-2xl font-semibold">
+                        Good job! Keep going!
+                    </h2>
 
-                        <p class="text-green-600 text-2xl font-semibold">
-                            +{{ sessionResult.xpEarned }} / {{ masteryXp }} XP
-                        </p>
+                    <p class="text-gray-600 text-base uppercase">
+                        {{ sessionResult.correctCount }} words completed
+                    </p>
 
-                        <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
-                            @click="startNewSession">
-                            Play again
-                        </button>
-                    </div>
+                    <p class="text-green-600 text-2xl font-semibold">
+                        +{{ sessionResult.xpEarned }}
+                    </p>
+
+                    <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
+                        @click="startNewSession">
+                        Play again
+                    </button>
                 </div>
             </div>
         </section>
