@@ -75,6 +75,8 @@ export default defineEventHandler(async (event) => {
         case "grind-chinese-topic":
           return a.hintUsed ? 3 : 10; // slightly harder
 
+        case "grind-chinese-sentences-level":
+          return a.hintUsed ? 5 : 15; // slightly harder
         default:
           return a.hintUsed ? 1 : 3;
       }

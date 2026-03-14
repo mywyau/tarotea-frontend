@@ -10,7 +10,7 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
 
   try {
-    return await $fetch(`${cdnBase}/sentences/${id}.json`);
+    return await $fetch(`${cdnBase}/sentences/${id}-sentences.json`);
   } catch {
     throw createError({
       statusCode: 404,

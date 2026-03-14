@@ -108,6 +108,12 @@ const canEnterLevel = (level: any) => {
             style="background-color:#A8CAE0;">
             Chinese only
           </NuxtLink>
+
+          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}`"
+            class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
+            style="background-color:#A8CAE0;">
+            Sentences Chinese Only
+          </NuxtLink>
         </div>
 
         <!-- Locked -->

@@ -142,7 +142,6 @@ async function fetchWords() {
 
         idx.value = 0
         input.value = ''
-        // attempts.value = []
 
     } catch (e: any) {
         errorState.value =
