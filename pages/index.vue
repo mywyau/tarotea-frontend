@@ -103,7 +103,7 @@ const { data: stats } = await useFetch('/api/stats', {
           <NuxtLink to="/daily/jyutping" class="rounded-xl p-6 flex items-end
       shadow-sm hover:shadow-md transition hover:brightness-105" style="background-color:#F6E1E1;">
             <div>
-              <div class="font-semibold text-gray-900">Phonetic Jyutping Daily</div>
+              <div class="font-semibold text-gray-900">Jyutping Daily</div>
               <div class="text-xs text-gray-800 mt-1">
                 Practice your typing and phonetic understanding
               </div>
