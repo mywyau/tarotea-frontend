@@ -54,7 +54,7 @@ type SessionAnswer = {
 const tips = [
     'No need to be perfect first try.',
     'Correct answers do not need tones.',
-    'Focus on the sound shape.',
+    'Focus on the shape of the sound.',
     'Break the word into syllables.',
     'Try saying it out loud before typing.'
 ]

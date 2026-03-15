@@ -1,6 +1,10 @@
 import { createError, getHeader, readBody } from "h3";
 import { db } from "~/server/db";
 import { requireUser } from "~/server/utils/requireUser";
+import {
+  dailyJyutpingFailXp,
+  dailyJyutpingSuccessXp,
+} from "~/utils/xp/helpers";
 
 type SessionAnswer = {
   wordId: string;
@@ -107,16 +111,16 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    function deltaFor(correct: boolean, streakBefore: number) {
-      if (!correct) return 0;
-      return 10;
+    function deltaFor(correct: boolean) {
+      if (!correct) return dailyJyutpingFailXp;
+      return dailyJyutpingSuccessXp;
     }
 
     const payloadAnswers = filtered.map((a) => {
       return {
         wordId: a.wordId,
         correct: a.correct,
-        delta: deltaFor(a.correct, 0),
+        delta: deltaFor(a.correct),
       };
     });
 
