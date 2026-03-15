@@ -1,0 +1,22 @@
+export default defineEventHandler(async (event) => {
+  const id = getRouterParam(event, "id");
+
+  if (!id) {
+    throw createError({ statusCode: 400, statusMessage: "Missing id" });
+  }
+
+  const {
+    public: { cdnBase },
+  } = useRuntimeConfig();
+
+  console.log(`${cdnBase}/topic-sentences/${id}-sentences.json`);
+
+  try {
+    return await $fetch(`${cdnBase}/topic-sentences/${id}-sentences.json`);
+  } catch {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "sentence set not found",
+    });
+  }
+});
