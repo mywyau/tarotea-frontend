@@ -9,7 +9,7 @@ import { chineseSentenceXp, chineseSentenceXpHintUsed } from '@/utils/dojo/xp'
 import { playCorrectJingle } from '@/utils/sounds'
 import { totalQuestions, weakestWordRatio } from '@/utils/weakestWords'
 import { masteryXp } from '@/utils/xp/helpers'
-import { levelTitles } from '~/utils/levels/levels'
+import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
 
 type TrainSentence = {
   sentenceId: string
@@ -33,6 +33,10 @@ type SentenceBatchAttempt = {
   passed: boolean
   hintUsed: boolean
 }
+
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
+
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -141,6 +145,14 @@ function pickWeightedSentences(
 
   return shuffleArray(selected)
 }
+
+const topicMeta = computed(() =>
+  sortedTopicJyutpingQuizMeta.find(t => t.id === slug.value)
+)
+
+const topicTitle = computed(() =>
+  topicMeta.value?.title ?? slug.value
+)
 
 async function fetchSentences() {
   loading.value = true
@@ -353,7 +365,7 @@ onMounted(() => {
 
     <header class="space-y-4">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-        Sentence Dojo - {{ levelTitles[slug] }}
+        Sentence Dojo - {{ topicTitle }}
       </h1>
 
       <p class="text-sm text-gray-600">
@@ -362,6 +374,7 @@ onMounted(() => {
     </header>
 
     <section class="mt-8 rounded-2xl bg-white p-5 shadow-sm">
+
       <div v-if="loading" class="text-sm text-gray-600">
         Loading training sentences…
       </div>
@@ -371,15 +384,22 @@ onMounted(() => {
       </div>
 
       <div v-else class="space-y-5">
+
         <div v-if="!isComplete" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
           <div class="text-xs text-black">
             Sentence {{ idx + 1 }} / {{ sentences.length }}
           </div>
 
-          <button class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-            type="button" @click="resetTraining">
-            Reset
-          </button>
+          <div class="flex items-center gap-2">
+            <button
+              class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+              type="button" @click="resetTraining">
+              Reset
+            </button>
+
+            <AudioButton :key="current?.sentenceId" :src="`${cdnBase}/audio/${current?.sentenceId}.mp3`" />
+          </div>
         </div>
 
         <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5 space-y-5">
@@ -388,7 +408,8 @@ onMounted(() => {
               Sentence
             </div>
 
-            <div class="text-2xl font-medium text-gray-900 leading-relaxed">
+            <div class="text-2xl font-medium text-gray-900 leading-relaxed no-copy" @copy.prevent @cut.prevent
+              @contextmenu.prevent @dragstart.prevent @selectstart.prevent>
               {{ current?.sentence }}
             </div>
 
@@ -407,7 +428,7 @@ onMounted(() => {
 
             <transition name="fade-word">
               <div v-if="showHint" class="mt-2">
-                <div class="text-base font-mono break-all leading-relaxed text-gray-500">
+                <div class="text-sm font-mono break-all leading-relaxed text-gray-500">
                   {{ current?.jyutping }}
                 </div>
 
@@ -517,5 +538,13 @@ onMounted(() => {
 .fade-word-enter-from,
 .fade-word-leave-to {
   opacity: 0;
+}
+
+.no-copy {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
 }
 </style>

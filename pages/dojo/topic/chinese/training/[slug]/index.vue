@@ -158,25 +158,6 @@ async function fetchWords() {
     }
 }
 
-const copied = ref(false)
-
-// async function copyChinese() {
-//     if (!current.value?.jyutping) return
-
-//     try {
-//         await navigator.clipboard.writeText(current.value.jyutping)
-//         copied.value = true
-
-//         // Reset after 1.2s
-//         setTimeout(() => {
-//             copied.value = false
-//         }, 1200)
-
-//     } catch (err) {
-//         console.error('Clipboard failed:', err)
-//     }
-// }
-
 let advancing = false
 let advanceTimer: ReturnType<typeof setTimeout> | null = null
 
