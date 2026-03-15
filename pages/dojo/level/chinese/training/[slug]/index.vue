@@ -511,7 +511,7 @@ onMounted(() => {
                             class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition" />
 
                         <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
-                            Tip: try typing without spaces, only chinese is accepted, flex those typing skills :)
+                            Tip: try typing without spaces, only chinese is accepted
                         </div>
 
                     </div>

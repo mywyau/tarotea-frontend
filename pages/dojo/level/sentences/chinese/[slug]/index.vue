@@ -2,7 +2,7 @@
 
 definePageMeta({
   ssr: false,
-  middleware: ['coming-soon'],
+  // middleware: ['coming-soon'],
 })
 
 import { chineseSentenceXp, chineseSentenceXpHintUsed } from '@/utils/dojo/xp'
@@ -29,7 +29,7 @@ type SentenceLevelResponse = {
 
 type SentenceBatchAttempt = {
   sentenceId: string
-  wordId: string
+  sourceWordId: string
   passed: boolean
   hintUsed: boolean
 }
@@ -226,7 +226,7 @@ async function finalizeBatch() {
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
 
-    const res = await $fetch('/api/jyutping/finalize', {
+    const res = await $fetch('/api/sentences/jyutping/finalize', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: {
@@ -324,7 +324,7 @@ watch(
 
       batchAttempts.value.push({
         sentenceId: current.value.sentenceId,
-        wordId: current.value.sourceWordId,
+        sourceWordId: current.value.sourceWordId,
         passed: true,
         hintUsed: hintWasUsed,
       })
@@ -430,26 +430,13 @@ onMounted(() => {
                   class="mt-2 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
                   copy
                 </button>
-
-                <!-- <div class="mt-4 text-xs uppercase tracking-wide text-gray-500">
-                  Answer preview
-                </div>
-
-                <div class="mt-2 text-2xl font-medium leading-relaxed break-all">
-                  <span v-for="(char, i) in answerChars" :key="i" class="transition-all duration-200" :class="{
-                    'text-green-600 font-semibold': answerCharStates[i] === 'correct',
-                    'text-gray-400': answerCharStates[i] === 'idle'
-                  }">
-                    {{ char }}
-                  </span>
-                </div> -->
               </div>
             </transition>
           </div>
 
           <div class="space-y-2 mt-2">
             <div class="text-sm text-gray-500">
-              Source word: <span class="font-medium text-gray-700">{{ current?.sourceWord }}</span>
+              Target word: <span class="font-medium text-gray-700">{{ current?.sourceWord }}</span>
             </div>
 
             <div class="flex items-center max-w-xs">
