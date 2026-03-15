@@ -28,7 +28,7 @@ const { data: stats } = await useFetch('/api/stats', {
       </h1>
 
       <p class="mt-4 text-lg text-gray-700 max-w-xl mx-auto">
-        Structured vocabulary, audio practice, and quizzes designed to help you on your cantonese studying journey.
+        Structured vocabulary, audio, and exercises and tests designed to help you on your cantonese studying journey.
       </p>
 
       <NuxtLink to="/topics" class="mt-8 inline-block font-semibold px-8 py-3 rounded-lg
