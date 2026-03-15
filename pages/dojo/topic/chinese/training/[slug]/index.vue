@@ -425,7 +425,17 @@ onMounted(() => {
                 <!-- Word display -->
                 <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5">
 
-                    <div class="text-4xl font-medium flex gap-1 leading-none">
+                    <!-- <div class="text-4xl font-medium flex gap-1 leading-none">
+                        <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
+                            'text-green-600 font-semibold': charStates[i] === 'correct',
+                            'text-gray-400': charStates[i] === 'idle'
+                        }">
+                            {{ char }}
+                        </span>
+                    </div> -->
+
+                    <div class="text-4xl font-medium flex gap-1 leading-none no-copy" @copy.prevent @cut.prevent
+                        @contextmenu.prevent @dragstart.prevent @selectstart.prevent>
                         <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                             'text-green-600 font-semibold': charStates[i] === 'correct',
                             'text-gray-400': charStates[i] === 'idle'
@@ -555,5 +565,13 @@ onMounted(() => {
 .fade-streak-leave-to {
     opacity: 0;
     transform: translateY(-4px);
+}
+
+.no-copy {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
 }
 </style>

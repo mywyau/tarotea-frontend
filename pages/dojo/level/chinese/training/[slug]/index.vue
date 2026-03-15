@@ -153,7 +153,7 @@ async function fetchWords() {
 
 const copied = ref(false)
 
-async function copyChinese() {
+async function copyJyutping() {
     if (!current.value?.jyutping) return
 
     try {
@@ -434,8 +434,21 @@ onMounted(() => {
                 <!-- Word display -->
                 <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5">
 
-                    <transition name="fade-word" mode="out-in">
+                    <!-- <transition name="fade-word" mode="out-in">
                         <div :key="current?.wordId" class="text-4xl sm:text-4xl text-center font-medium flex gap-1">
+                            <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
+                                'text-green-600 font-semibold': charStates[i] === 'correct',
+                                'text-gray-400': charStates[i] === 'idle'
+                            }">
+                                {{ char }}
+                            </span>
+                        </div>
+                    </transition> -->
+
+                    <transition name="fade-word" mode="out-in">
+                        <div :key="current?.wordId"
+                            class="text-4xl sm:text-4xl text-center font-medium flex gap-1 no-copy" @copy.prevent
+                            @cut.prevent @contextmenu.prevent @dragstart.prevent @selectstart.prevent>
                             <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                                 'text-green-600 font-semibold': charStates[i] === 'correct',
                                 'text-gray-400': charStates[i] === 'idle'
@@ -463,7 +476,7 @@ onMounted(() => {
                             <div v-if="showHint" class="mt-2 text-base font-mono text-gray-500 flex items-center gap-2">
                                 {{ fullJyutping }}
 
-                                <button type="button" @click="copyChinese"
+                                <button type="button" @click="copyJyutping"
                                     class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
                                     {{ copied ? '✓' : 'copy' }}
                                 </button>
@@ -588,5 +601,13 @@ onMounted(() => {
 .fade-word-enter-from,
 .fade-word-leave-to {
     opacity: 0;
+}
+
+.no-copy {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-touch-callout: none;
 }
 </style>
