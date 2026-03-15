@@ -68,7 +68,7 @@ const paginatedTopics = computed(() => {
         Topic Dojo
       </h1>
       <p class="text-gray-600 text-sm sm:text-base">
-        Strenghten your phonetic proficiency with our exercises
+        Strenghten your phonetic and typing proficiency with our exercises
       </p>
     </header>
 
@@ -129,7 +129,7 @@ const paginatedTopics = computed(() => {
           <NuxtLink :to="`/dojo/topic/jyutping/training/${quizTopic.id}`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
             style="background-color:#EAB8E4;">
-            Start
+            Jyutping only
           </NuxtLink>
 
           <NuxtLink :to="`/dojo/topic/chinese/training/${quizTopic.id}`"

@@ -54,7 +54,7 @@ const canEnterLevel = (level: any) => {
         Level Dojo
       </h1>
       <p class="text-gray-600 text-sm sm:text-base">
-        Strenghten your phonetic proficiency with our exercises
+        Strenghten your phonetic and typing proficiency with our exercises
       </p>
     </header>
 
@@ -100,7 +100,7 @@ const canEnterLevel = (level: any) => {
           <NuxtLink :to="`/dojo/level/jyutping/training/${quizLevel.id}`"
             class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
             style="background-color:#A8CAE0;">
-            Jyutping
+            Jyutping only
           </NuxtLink>
 
           <NuxtLink :to="`/dojo/level/chinese/training/${quizLevel.id}`"
