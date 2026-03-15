@@ -21,6 +21,21 @@ const TOPICS = [
   "survival-essentials",
   "time-dates",
   "dim-sum",
+  "restaurant-menu",
+  "family-members",
+  "countries",
+  "emotions",
+  "furniture",
+  "sports-fitness",
+  "weather",
+  "technology",
+  "housing",
+  "transport-travel",
+  "health",
+  "daily-life",
+  "materials",
+  "animals",
+  "science",
 ];
 
 async function seed() {

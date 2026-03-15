@@ -162,7 +162,7 @@ function scoreAttempt(userRaw: string, answerRaw: string) {
         return {
             passed: false,
             perfect: false,
-            message: 'The spelling was wrong. Try again.'
+            message: 'Try again.'
         }
     }
 
@@ -170,14 +170,14 @@ function scoreAttempt(userRaw: string, answerRaw: string) {
         return {
             passed: true,
             perfect: true,
-            message: 'Perfect! Sound and tone correct.'
+            message: 'Perfect!.'
         }
     }
 
     return {
         passed: true,
         perfect: false,
-        message: 'Good! The sound is correct.'
+        message: 'Well done!'
     }
 }
 

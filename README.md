@@ -93,3 +93,16 @@ npm run dev
 ```
 npm run preview
 ```
+
+### Seed topic words
+```
+npx tsx scripts/seed-topics.ts
+```
+
+### Seed level words
+```
+npx tsx scripts/seed-levels.ts
+```
+
+
+
