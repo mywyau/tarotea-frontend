@@ -94,21 +94,6 @@ const live = computed(() => {
   return { state: 'miss' as const }
 })
 
-const answerChars = computed(() =>
-  normalizedAnswer.value.split('')
-)
-
-const answerCharStates = computed(() => {
-  const answer = normalizedAnswer.value
-  const user = normalizedInput.value
-
-  return answer.split('').map((char, i) => {
-    if (!user[i]) return 'idle'
-    if (user[i] === char) return 'correct'
-    return 'idle'
-  })
-})
-
 function shuffleArray<T>(items: T[]) {
   const arr = [...items]
 
@@ -487,7 +472,7 @@ onMounted(() => {
           </p>
 
           <p class="text-green-600 text-2xl font-semibold">
-            +{{ sessionResult.xpEarned }}
+            +{{ sessionResult.xpEarned }} XP
           </p>
 
           <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"

@@ -5,6 +5,12 @@ import type {
   Attempt,
   BatchAttempt,
 } from "~/types/jyutping/jyutping-training-types";
+import {
+  chineseOnlyHintXp,
+  chineseOnlyXp,
+  jyutpingOnlyHintXp,
+  jyutpingOnlyXp,
+} from "~/utils/xp/helpers";
 
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
@@ -65,18 +71,13 @@ export default defineEventHandler(async (event) => {
 
       switch (mode) {
         case "grind-level":
-          return a.hintUsed ? 1 : 3;
+          return a.hintUsed ? jyutpingOnlyHintXp : jyutpingOnlyXp;
         case "grind-topic":
-          return a.hintUsed ? 1 : 3;
-
+          return a.hintUsed ? jyutpingOnlyHintXp : jyutpingOnlyXp;
         case "grind-chinese-level":
-          return a.hintUsed ? 3 : 10; // slightly harder
-
+          return a.hintUsed ? chineseOnlyHintXp : chineseOnlyXp; // slightly harder
         case "grind-chinese-topic":
-          return a.hintUsed ? 3 : 10; // slightly harder
-
-        case "grind-chinese-sentences-level":
-          return a.hintUsed ? 5 : 15; // slightly harder
+          return a.hintUsed ? chineseOnlyHintXp : chineseOnlyXp; // slightly harder
         default:
           return a.hintUsed ? 1 : 3;
       }
