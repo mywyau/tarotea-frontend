@@ -26,7 +26,6 @@ async function fetchWordsByIdsBatch(
 ): Promise<DailyWord[]> {
   if (wordIds.length === 0) return [];
 
-  // ✅ You implement this endpoint (recommended)
   return await $fetch<DailyWord[]>("/api/daily/words", {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -116,13 +115,7 @@ export function useDailySession() {
       loading.value = false;
       return;
     }
-
-    // Preferred: batch fetch
-    // const words = await fetchWordsByIdsBatch(token, wordIds);
-
-    // Fallback: one-by-one fetch (uncomment if you don't have batch endpoint yet)
-    // const words = await fetchWordsByIdsIndividually(token, wordIds);
-
+    
     // Choose one:
     const words = await fetchWordsByIdsBatch(token, wordIds).catch(async () => {
       // graceful fallback if batch endpoint isn't ready
