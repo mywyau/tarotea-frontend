@@ -46,7 +46,7 @@ function similarity(a: string, b: string): number {
   if (!a && !b) return 1;
   if (!a || !b) return 0;
   const distance = levenshtein(a, b);
-  return 1 - distance / Math.max(a.length, b.length);
+  return clamp(1 - distance / Math.max(a.length, b.length), 0, 1);
 }
 
 function averageLogprob(
@@ -248,6 +248,11 @@ function buildResult(params: {
     isExact: heard === expected,
   });
 
+  const isContainedButMeaningful =
+    heard.length >= 2 &&
+    expected.length >= 2 &&
+    (heard.includes(expected) || expected.includes(heard));
+
   if (heard === expected) {
     return {
       score,
@@ -266,21 +271,12 @@ function buildResult(params: {
     };
   }
 
-  if (heard.includes(expected) || expected.includes(heard)) {
+  if (isContainedButMeaningful || sim >= 0.7) {
     return {
       score,
       matchType: "close",
       confidence,
       feedback: `Close. I heard “${params.transcript}”. The target was “${params.expectedChinese}”. Try saying the full ${unit} clearly: ${params.expectedJyutping}.`,
-    };
-  }
-
-  if (sim >= 0.7) {
-    return {
-      score,
-      matchType: "close",
-      confidence,
-      feedback: `Close. I heard “${params.transcript}” instead of “${params.expectedChinese}”. Try saying the whole phrase a bit more clearly and naturally: ${params.expectedJyutping}.`,
     };
   }
 

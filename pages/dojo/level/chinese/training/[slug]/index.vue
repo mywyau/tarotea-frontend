@@ -544,7 +544,7 @@ onMounted(() => {
                     </p>
 
                     <p class="text-green-600 text-2xl font-semibold">
-                        +{{ sessionResult.xpEarned }}
+                        +{{ sessionResult.xpEarned }} XP
                     </p>
 
                     <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
