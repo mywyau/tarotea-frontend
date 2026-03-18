@@ -1,7 +1,4 @@
-import {
-  canAccessTopicWord,
-  freeTopics
-} from "~/utils/topics/permissions";
+import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return; // middleware runs on client only
@@ -11,9 +8,13 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (!topicSlug || !wordIdSlug) return;
 
-  const { isLoggedIn, entitlement, resolve } = useMeStateV2();
+  const { isLoggedIn, isLoggedOut, entitlement, resolve } = useMeStateV2();
 
   await resolve();
+
+  if (isLoggedOut) {
+    return navigateTo("/please-sign-in");
+  }
 
   // ✅ Fully free topics
   if (freeTopics.has(topicSlug)) {

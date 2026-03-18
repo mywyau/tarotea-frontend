@@ -21,9 +21,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const levelNumber: number = levelIdToNumbers(levelSlug);
 
-  const { authReady, isLoggedIn, entitlement, resolve } = useMeStateV2();
+  const { authReady, isLoggedIn, isLoggedOut, entitlement, resolve } =
+    useMeStateV2();
 
   await resolve();
+
+  if (isLoggedOut) {
+    return navigateTo("/please-sign-in");
+  }
 
   // Free levels
   if (isFreeLevel(levelNumber)) return;
