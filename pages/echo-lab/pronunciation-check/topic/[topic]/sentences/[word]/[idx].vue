@@ -461,7 +461,7 @@ onUnmounted(() => {
         </div>
 
 
-        <div class="flex flex-col items-center gap-3">
+        <div class="flex flex-col items-center gap-8">
           <button v-if="!recording && !recordingUrl" :disabled="loading || !practiceTarget" @click="startRecording"
             class="px-4 py-2 bg-black font-semibold rounded disabled:opacity-50">
             <span
@@ -470,7 +470,8 @@ onUnmounted(() => {
             </span>
           </button>
 
-          <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2 w-full max-w-xs">
+          <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-6 w-full max-w-xs">
+
             <div class="font-medium">AI Usage</div>
 
             <span>
@@ -482,7 +483,7 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div v-if="recording" class="w-64 space-y-1">
+          <div v-if="recording" class="w-64 space-y-4">
             <p class="text-red-500 text-sm">
               Recording... {{ recordingTime }} / {{ MAX_RECORDING_SECONDS }}s
             </p>
@@ -492,7 +493,13 @@ onUnmounted(() => {
             </div>
           </div>
 
+          <div v-if="recordingUrl" class="flex flex-col items-center gap-2">
+            <p class="text-sm text-gray-500">Your recording</p>
+            <audio :src="recordingUrl" controls class="w-64" />
+          </div>
+
           <div v-if="recording" class="flex items-center gap-3">
+
             <button @click="stopRecording" :disabled="loading"
               class="px-4 py-2 bg-red-500 text-black font-semibold rounded hover:brightness-125 transition">
               Stop Recording
@@ -520,11 +527,6 @@ onUnmounted(() => {
             <span class="animate-spin h-4 w-4 border-2 border-gray-400 border-t-transparent rounded-full" />
             Processing pronunciation...
           </p>
-        </div>
-
-        <div v-if="recordingUrl" class="flex flex-col items-center gap-2">
-          <p class="text-sm text-gray-500">Your recording</p>
-          <audio :src="recordingUrl" controls class="w-64" />
         </div>
 
         <div v-if="feedback"

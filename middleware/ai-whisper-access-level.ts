@@ -26,7 +26,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   await resolve();
 
-  if (isLoggedOut) {
+  if (isLoggedOut.value) {
     return navigateTo("/please-sign-in");
   }
 
