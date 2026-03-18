@@ -354,6 +354,12 @@ async function submitRecording() {
     feedback.value = res.feedback
     score.value = res.score
 
+    if (score.value > 65) {
+      playCorrectJingle(0.7)
+    } else {
+      playIncorrectJingle(0.4)
+    }
+
     if (aiUsage.value) {
       aiUsage.value.remaining = res.remainingAttempts
       aiUsage.value.attempts = aiUsage.value.limit - res.remainingAttempts
