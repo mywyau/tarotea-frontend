@@ -131,7 +131,7 @@ onMounted(async () => {
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/audio/v3/${topic.id}` : undefined"
                         class="topic-btn topic-btn-purple"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Audio
+                        Audio Only
                     </NuxtLink>
 
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}` : undefined"
@@ -143,7 +143,7 @@ onMounted(async () => {
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/audio/${topic.id}` : undefined"
                         class="topic-btn topic-btn-blush"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Audio Only Sentences
+                        Audio Only Sentences 
                     </NuxtLink>
 
                 </div>
@@ -191,11 +191,16 @@ onMounted(async () => {
 
 /* Buttons */
 .topic-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     text-align: center;
+    min-height: 52px;
     padding: 0.6rem 0.75rem;
     font-size: 0.85rem;
     border-radius: 14px;
     font-weight: 600;
+    line-height: 1.2;
     transition: all 0.15s ease;
 }
 
