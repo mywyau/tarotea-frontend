@@ -506,6 +506,7 @@ watch(
         </transition>
 
         <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+
           <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
             :class="tile.className">
             <p class="stat-label">
@@ -639,7 +640,7 @@ watch(
 }
 
 .stat-value {
-  font-size: 1.9rem;
+  font-size: 1.2rem;
   font-weight: 700;
   margin-top: 0.75rem;
   color: #111827;
