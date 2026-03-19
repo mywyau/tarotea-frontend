@@ -70,7 +70,7 @@ watchEffect(() => {
 <template>
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
-    <NuxtLink :to="`/quiz/`" class="text-base text-black hover:underline">
+    <NuxtLink :to="`/quiz/`" class="text-sm text-black hover:underline">
       ← All quizzes
     </NuxtLink>
 

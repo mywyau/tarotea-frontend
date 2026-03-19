@@ -52,7 +52,7 @@ const canEnterTopic = () => {
 <template>
   <main class="max-w-xl mx-auto px-4 py-16 space-y-10">
 
-    <NuxtLink :to="`/quiz/`" class="block text-gray-500 hover:underline">
+    <NuxtLink :to="`/quiz/`" class="text-sm text-gray-500 hover:underline">
       ← All quizzes
     </NuxtLink>
 
