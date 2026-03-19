@@ -34,7 +34,6 @@ import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels'
 import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
-// const slug = computed(() => route.params.slug as string)
 const slug = route.params.slug as string
 
 if (!isLevelId(slug)) {
@@ -139,6 +138,23 @@ const correctWords = computed(() => {
     .filter(Boolean)
 })
 
+const hasQuestions = computed(() => questions.value.length > 0)
+
+const quizFinished = computed(() => {
+  return hasQuestions.value && current.value >= questions.value.length
+})
+
+const showQuiz = computed(() => {
+  return hasQuestions.value && current.value < questions.value.length
+})
+
+const showCalculating = computed(() => {
+  return quizFinished.value && finishing.value
+})
+
+const showResults = computed(() => {
+  return quizFinished.value && !finishing.value
+})
 
 function generateTileColors() {
   tileColors.value = shuffleFisherYates(brandColours).slice(0, 4)
@@ -199,19 +215,22 @@ async function finalizeQuiz() {
   try {
     const token = await getAccessToken()
 
-    const res = await $fetch<{
-      quiz: {
-        correctCount: number
-        totalQuestions: number
-        xpEarned: number
-      }
-    }>('/api/quiz/grind/finalize', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: {
-        answers: answerLog.value
-      }
-    })
+    const [res] = await Promise.all([
+      $fetch<{
+        quiz: {
+          correctCount: number
+          totalQuestions: number
+          xpEarned: number
+        }
+      }>('/api/quiz/grind/finalize', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}` },
+        body: {
+          answers: answerLog.value
+        }
+      }),
+      sleep(MIN_CALCULATING_MS)
+    ])
 
     totalXpEarned.value = res.quiz.xpEarned
 
@@ -299,6 +318,12 @@ const completionTiles = computed(() => [
   }
 ])
 
+const MIN_CALCULATING_MS = 1800
+
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 watch(
   () => questions.value,
   async (qs) => {
@@ -358,10 +383,20 @@ watch(
   { immediate: true }
 )
 
+// watch(
+//   () => current.value >= questions.value.length,
+//   (isComplete) => {
+//     if (!isComplete || completionAnimated.value) return
+
+//     completionAnimated.value = true
+//     runCompletionAnimations()
+//   }
+// )
+
 watch(
-  () => current.value >= questions.value.length,
-  (isComplete) => {
-    if (!isComplete || completionAnimated.value) return
+  () => showResults.value,
+  (visible) => {
+    if (!visible || completionAnimated.value) return
 
     completionAnimated.value = true
     runCompletionAnimations()
@@ -407,83 +442,7 @@ watch(
 
       </div>
 
-      <div v-if="current < questions.length" class="space-y-6">
-
-        <div v-if="question.type === 'audio'" class="text-center">
-          <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
-        </div>
-
-        <div class="min-h-[50px] space-y-3">
-
-          <!-- XP Row -->
-          <div class="flex items-center justify-center gap-3">
-
-            <!-- XP Bar -->
-            <div class="w-32 h-1 bg-gray-200 rounded">
-              <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
-            </div>
-
-            <!-- XP Text + Delta Anchor -->
-            <div class="relative flex items-center">
-
-              <span class="text-sm text-gray-500 whitespace-nowrap">
-                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
-              </span>
-
-              <transition name="xp-fall">
-                <span v-if="xpDelta !== null" class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                  :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-                  {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
-                </span>
-              </transition>
-
-            </div>
-
-          </div>
-
-          <!-- Streak -->
-          <div class="h-5 flex items-center justify-center">
-            <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
-              {{ currentStreak }} streak
-            </span>
-          </div>
-
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <button v-for="(option, i) in question.options" :key="i" class="answer-tile aspect-square rounded-xl flex items-center justify-center
-         text-2xl font-semibold text-center p-6 select-none
-         transition-all duration-200 ease-out
-         shadow-sm active:scale-95" :style="{
-          backgroundColor:
-            !answered
-              ? tileColors[i]
-              : i === question.correctIndex
-                ? '#BBF7D0'
-                : i === selectedIndex
-                  ? '#FECACA'
-                  : tileColors[i]
-        }" :class="[
-    !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
-    // !answered && 'hover:ring-2 hover:ring-white/70',
-    answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-    answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-  ]" @click="answer(i)">
-            {{ option }}
-          </button>
-        </div>
-
-        <div class="h-10">
-          <button v-if="answered" class="w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
-            @click="next" style="background-color:#F4C2D7;">
-            Next
-          </button>
-        </div>
-
-      </div>
-
-      <div v-else class="space-y-6">
+      <!-- <div v-else class="space-y-6">
 
         <transition name="card-fade" appear>
           <div class="stat-card hero-card" :class="resultHeroClass">
@@ -517,57 +476,216 @@ watch(
               <template v-if="tile.label === 'XP Earned' && finishing">
                 ...
               </template>
-              <template v-else>
+<template v-else>
                 {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
               </template>
-            </p>
-          </div>
-        </transition-group>
+</p>
+</div>
+</transition-group>
 
-        <div v-if="finishing" class="text-sm text-gray-500">
-          Saving results...
+<div v-if="finishing" class="text-sm text-gray-500">
+  Saving results...
+</div>
+
+<div v-if="correctWords.length" class="stat-card text-left result-3">
+  <h3 class="text-sm font-semibold text-gray-900 mb-3">
+    Correct
+  </h3>
+
+  <div class="flex flex-wrap gap-2">
+    <span v-for="word in correctWords" :key="word!.id"
+      class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
+      {{ word!.word }}
+    </span>
+  </div>
+</div>
+
+<div v-if="missedWords.length" class="stat-card text-left result-1">
+  <h3 class="text-sm font-semibold text-gray-900 mb-3">
+    Incorrect
+  </h3>
+
+  <div class="flex flex-wrap gap-2">
+    <span v-for="word in missedWords" :key="word!.id"
+      class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
+      {{ word!.word }}
+    </span>
+  </div>
+</div>
+
+<div class="pt-2 space-y-3">
+  <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`"
+    class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+    style="background-color:#A8CAE0;">
+    Play Again
+  </NuxtLink>
+
+  <NuxtLink :to="`/level/${slug}`"
+    class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
+    style="background-color:rgba(244,205,39,0.35);">
+    Back to Level {{ levelNumber }}
+  </NuxtLink>
+</div>
+</div> -->
+
+      <div v-if="showQuiz" class="space-y-6">
+
+        <div v-if="question.type === 'audio'" class="text-center">
+          <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
         </div>
 
-        <div v-if="correctWords.length" class="stat-card text-left result-3">
-          <h3 class="text-sm font-semibold text-gray-900 mb-3">
-            Correct
-          </h3>
+        <div class="min-h-[50px] space-y-3">
+          <div class="flex items-center justify-center gap-3">
+            <div class="w-32 h-1 bg-gray-200 rounded">
+              <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
+            </div>
 
-          <div class="flex flex-wrap gap-2">
-            <span v-for="word in correctWords" :key="word!.id"
-              class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
-              {{ word!.word }}
+            <div class="relative flex items-center">
+              <span class="text-sm text-gray-500 whitespace-nowrap">
+                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
+              </span>
+
+              <transition name="xp-fall">
+                <span v-if="xpDelta !== null" class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                  :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                  {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                </span>
+              </transition>
+            </div>
+          </div>
+
+          <div class="h-5 flex items-center justify-center">
+            <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
+              {{ currentStreak }} streak
             </span>
           </div>
         </div>
 
-        <div v-if="missedWords.length" class="stat-card text-left result-1">
-          <h3 class="text-sm font-semibold text-gray-900 mb-3">
-            Incorrect
-          </h3>
-
-          <div class="flex flex-wrap gap-2">
-            <span v-for="word in missedWords" :key="word!.id"
-              class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
-              {{ word!.word }}
-            </span>
-          </div>
+        <div class="grid grid-cols-2 gap-4">
+          <button v-for="(option, i) in question.options" :key="i" class="answer-tile aspect-square rounded-xl flex items-center justify-center
+             text-2xl font-semibold text-center p-6 select-none
+             transition-all duration-200 ease-out
+             shadow-sm active:scale-95" :style="{
+              backgroundColor:
+                !answered
+                  ? tileColors[i]
+                  : i === question.correctIndex
+                    ? '#BBF7D0'
+                    : i === selectedIndex
+                      ? '#FECACA'
+                      : tileColors[i]
+            }" :class="[
+        !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
+        answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+        answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+      ]" @click="answer(i)">
+            {{ option }}
+          </button>
         </div>
 
-        <div class="pt-2 space-y-3">
-          <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`"
-            class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-            style="background-color:#A8CAE0;">
-            Play Again
-          </NuxtLink>
-
-          <NuxtLink :to="`/level/${slug}`"
-            class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-            style="background-color:rgba(244,205,39,0.35);">
-            Back to Level {{ levelNumber }}
-          </NuxtLink>
+        <div class="h-10">
+          <button v-if="answered" class="w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
+            @click="next" style="background-color:#F4C2D7;">
+            Next
+          </button>
         </div>
+
       </div>
+
+      <transition name="fade-scale" mode="out-in">
+        <div v-if="showCalculating" key="calculating" class="stat-card hero-card result-2 space-y-4">
+          <div class="spinner mx-auto" />
+
+          <p class="stat-label">
+            Calculating
+          </p>
+
+          <h2 class="hero-title">
+            Marking your quiz...
+          </h2>
+
+          <p class="hero-subtext">
+            Updating your XP and preparing your results
+          </p>
+        </div>
+
+        <div v-else-if="showResults" key="results" class="space-y-6">
+
+          <transition name="card-fade" appear>
+            <div class="stat-card hero-card" :class="resultHeroClass">
+              <p class="stat-label">
+                Quiz Complete
+              </p>
+
+              <h2 class="hero-title">
+                {{ resultMeta.title }}
+              </h2>
+
+              <p class="hero-score">
+                {{ animatedAccuracy }}%
+              </p>
+
+              <p class="hero-subtext">
+                {{ score }} / {{ questions.length }} correct
+              </p>
+            </div>
+          </transition>
+
+          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+              :class="tile.className">
+              <p class="stat-label">
+                {{ tile.label }}
+              </p>
+
+              <p class="stat-value">
+                {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
+              </p>
+            </div>
+          </transition-group>
+
+          <div v-if="correctWords.length" class="stat-card text-left result-3">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">
+              Correct
+            </h3>
+
+            <div class="flex flex-wrap gap-2">
+              <span v-for="word in correctWords" :key="word!.id"
+                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
+                {{ word!.word }}
+              </span>
+            </div>
+          </div>
+
+          <div v-if="missedWords.length" class="stat-card text-left result-1">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">
+              Incorrect
+            </h3>
+
+            <div class="flex flex-wrap gap-2">
+              <span v-for="word in missedWords" :key="word!.id"
+                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
+                {{ word!.word }}
+              </span>
+            </div>
+          </div>
+
+          <div class="pt-2 space-y-3">
+            <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`"
+              class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+              style="background-color:#A8CAE0;">
+              Play Again
+            </NuxtLink>
+
+            <NuxtLink :to="`/level/${slug}`"
+              class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
+              style="background-color:rgba(244,205,39,0.35);">
+              Back to Level {{ levelNumber }}
+            </NuxtLink>
+          </div>
+        </div>
+      </transition>
     </section>
 
   </main>
@@ -686,5 +804,31 @@ watch(
   margin-top: 0.65rem;
   font-size: 0.95rem;
   color: rgba(17, 24, 39, 0.68);
+}
+
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+.spinner {
+  width: 52px;
+  height: 52px;
+  border-radius: 9999px;
+  border: 4px solid rgba(17, 24, 39, 0.12);
+  border-top-color: rgba(17, 24, 39, 0.75);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>
