@@ -86,6 +86,20 @@ const tileColors = ref<string[]>([])
 
 const totalXpEarned = ref<number>(0)
 
+const animatedAccuracy = ref(0)
+const animatedCorrect = ref(0)
+const animatedIncorrect = ref(0)
+const animatedXpEarned = ref(0)
+
+const completionAnimated = ref(false)
+
+const resultHeroClass = computed(() => {
+  if (accuracy.value === 100) return 'result-3'
+  if (accuracy.value >= 70) return 'result-0'
+  if (accuracy.value >= 50) return 'result-2'
+  return 'result-1'
+})
+
 const accuracy = computed(() => {
   if (!questions.value.length) return 0
   return Math.round((score.value / questions.value.length) * 100)
@@ -96,36 +110,19 @@ const incorrectCount = computed(() => {
 })
 
 const resultMeta = computed(() => {
-
   if (accuracy.value === 100) {
-    return {
-      title: 'Perfect',
-      ring: 'ring-green-300',
-      bg: 'bg-green-50'
-    }
+    return { title: 'Perfect' }
   }
 
   if (accuracy.value >= 70) {
-    return {
-      title: 'Great job',
-      ring: 'ring-green-300',
-      bg: 'bg-green-50'
-    }
+    return { title: 'Great job' }
   }
 
   if (accuracy.value >= 50) {
-    return {
-      title: 'Nice try',
-      ring: 'ring-blue-300',
-      bg: 'bg-blue-50'
-    }
+    return { title: 'Nice try' }
   }
 
-  return {
-    title: 'Keep practicing',
-    ring: 'ring-rose-300',
-    bg: 'bg-rose-50'
-  }
+  return { title: 'Keep practicing' }
 })
 
 const missedWords = computed(() => {
@@ -250,6 +247,20 @@ async function next() {
   }
 }
 
+function resetCompletionAnimations() {
+  animatedAccuracy.value = 0
+  animatedCorrect.value = 0
+  animatedIncorrect.value = 0
+  animatedXpEarned.value = 0
+  completionAnimated.value = false
+}
+
+function runCompletionAnimations() {
+  animateCount(animatedAccuracy, accuracy.value, 2300)
+  animateCount(animatedCorrect, score.value, 3000)
+  animateCount(animatedIncorrect, incorrectCount.value, 3500)
+}
+
 const percentage = computed(() => {
   if (questions.value.length === 0) return 0
   return (score.value / questions.value.length) * 100
@@ -268,27 +279,31 @@ const completionTiles = computed(() => [
   {
     label: 'Correct',
     value: score.value,
+    // value: animatedCorrect.value,
     suffix: '',
     className: 'result-0'
   },
   {
     label: 'Incorrect',
     value: incorrectCount.value,
+    // value: animatedIncorrect.value,
     suffix: '',
     className: 'result-1'
   },
   {
     label: 'XP Earned',
-    value: totalXpEarned.value,
+    value: animatedXpEarned.value,
     suffix: 'XP',
     className: 'result-2',
-    prefix: totalXpEarned.value > 0 ? '+' : ''
+    prefix: animatedXpEarned.value > 0 ? '+' : ''
   }
 ])
 
 watch(
   () => questions.value,
   async (qs) => {
+    resetCompletionAnimations()
+
     if (!qs.length) return
 
     const token = await getAccessToken()
@@ -341,6 +356,26 @@ watch(
     generateTileColors()
   },
   { immediate: true }
+)
+
+watch(
+  () => current.value >= questions.value.length,
+  (isComplete) => {
+    if (!isComplete || completionAnimated.value) return
+
+    completionAnimated.value = true
+    runCompletionAnimations()
+  }
+)
+
+watch(
+  () => finishing.value,
+  (isFinishing, wasFinishing) => {
+    if (isFinishing) return
+    if (!completionAnimated.value) return
+
+    animateCount(animatedXpEarned, totalXpEarned.value, 1000)
+  }
 )
 </script>
 
@@ -448,18 +483,25 @@ watch(
 
       <div v-else class="space-y-6">
 
-        <div class="rounded-3xl p-6 shadow-sm ring-2" :class="[resultMeta.bg, resultMeta.ring]">
+        <transition name="card-fade" appear>
+          <div class="stat-card hero-card" :class="resultHeroClass">
+            <p class="stat-label">
+              Quiz Complete
+            </p>
 
-          <h2 class="text-3xl font-bold text-gray-900">
-            {{ resultMeta.title }}
-          </h2>
+            <h2 class="hero-title">
+              {{ resultMeta.title }}
+            </h2>
 
-          <div class="mt-6">
-            <p class="text-5xl font-bold text-gray-900">
-              {{ accuracy }}%
+            <p class="hero-score">
+              {{ animatedAccuracy }}%
+            </p>
+
+            <p class="hero-subtext">
+              {{ score }} / {{ questions.length }} correct
             </p>
           </div>
-        </div>
+        </transition>
 
         <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
           <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
@@ -489,8 +531,7 @@ watch(
           </h3>
 
           <div class="flex flex-wrap gap-2">
-            <span v-for="word in correctWords" :key="word!.id"
-              class="rounded-lg text-green-700 px-3 py-1 text-base">
+            <span v-for="word in correctWords" :key="word!.id" class="rounded-lg text-green-700 px-3 py-1 text-base">
               {{ word!.word }}
             </span>
           </div>
@@ -502,8 +543,7 @@ watch(
           </h3>
 
           <div class="flex flex-wrap gap-2">
-            <span v-for="word in missedWords" :key="word!.id"
-              class="rounded-lg bg-white/70 text-rose-700 px-3 py-1 text-base">
+            <span v-for="word in missedWords" :key="word!.id" class="rounded-lg text-rose-700 px-3 py-1 text-base">
               {{ word!.word }}
             </span>
           </div>
@@ -618,4 +658,28 @@ watch(
   background: rgba(168, 224, 182, 0.45);
 }
 
+.hero-card {
+  padding: 2rem 1.5rem;
+}
+
+.hero-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+  color: #111827;
+}
+
+.hero-score {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 600;
+  margin-top: 0.9rem;
+  color: #111827;
+}
+
+.hero-subtext {
+  margin-top: 0.65rem;
+  font-size: 0.95rem;
+  color: rgba(17, 24, 39, 0.68);
+}
 </style>
