@@ -134,11 +134,17 @@ onMounted(async () => {
                         Audio
                     </NuxtLink>
 
-                    <!-- <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}` : undefined"
-                        class="topic-btn topic-btn-yellow col-span-2"
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}` : undefined"
+                        class="topic-btn topic-btn-yellow"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Sentences
-                    </NuxtLink> -->
+                    </NuxtLink>
+
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/audio/${topic.id}` : undefined"
+                        class="topic-btn topic-btn-blush"
+                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
+                        Audio Only Sentences
+                    </NuxtLink>
 
                 </div>
 
@@ -220,6 +226,17 @@ onMounted(async () => {
 .topic-btn-yellow:hover {
     background: rgba(244, 205, 39, 0.65);
 }
+
+
+.topic-btn-blush {
+    background: rgb(249, 166, 166);
+    color: #1f2937;
+}
+
+.topic-btn-blush:hover {
+    background: rgb(204, 136, 136);
+}
+
 
 /* Pagination */
 
