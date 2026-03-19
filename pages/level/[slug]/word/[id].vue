@@ -48,6 +48,8 @@ const streak = ref<number>(0)
 
 const isMastered = computed(() => xp.value >= masteryXp)
 
+const playbackRate = ref(1)
+
 onMounted(async () => {
   try {
     const { getAccessToken } = await useAuth()
@@ -130,23 +132,9 @@ watchEffect(() => {
       </div>
 
       <div class="">
-        <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
+        <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
+          size="lg" />
       </div>
-
-      <!-- <div class="">
-        <NuxtLink :to="`/echo-lab/pronunciation-check/${word.id}`"
-          class="inline-flex block text-center rounded px-4 py-2 font-semibold text-gray-900 bg-black text-white backdrop-blur transition shadow-sm hover:brightness-125 transition">
-          <span class="bg-gradient-to-r
-                                from-[#d48fd0]
-                                via-[#b57bc3]
-                                via-[#6faed6]
-                                to-[#d48fd0]
-                                bg-clip-text text-transparent
-                                hover:brightness-125 transition">
-            Echo Lab
-          </span>
-        </NuxtLink>
-      </div> -->
 
     </section>
 
@@ -163,13 +151,29 @@ watchEffect(() => {
       </ul>
     </section>
 
-    <!-- Volume -->
-    <div class="flex items-center justify-center gap-3 text-sm text-gray-600">
-      <span>Volume</span>
-      <input type="range" min="0" max="1" step="0.01" v-model="volume" class="w-32 accent-black" />
-      <span class="w-8 tabular-nums">
-        {{ Math.round(volume * 100) }}%
-      </span>
+    <!-- Volume and text speed -->
+    <!-- Volume and speed -->
+    <div class="mx-auto grid w-fit grid-cols-[auto_auto] items-center gap-x-4 gap-y-3 text-sm text-gray-600">
+      <span class="text-left">Volume</span>
+
+      <div class="flex items-center gap-3">
+        <input type="range" min="0" max="1" step="0.01" v-model="volume" class="w-32 accent-black" />
+        <span class="w-8 tabular-nums">
+          {{ Math.round(volume * 100) }}%
+        </span>
+      </div>
+
+      <span class="text-left">Speed</span>
+
+      <div class="flex items-center">
+        <select v-model.number="playbackRate" class="rounded border px-2 py-1">
+          <option :value="1.4">1.4x</option>
+          <option :value="1.2">1.2x</option>
+          <option :value="1">1.0x</option>
+          <option :value="0.80">0.80x</option>
+          <option :value="0.6">0.6x</option>
+        </select>
+      </div>
     </div>
 
     <!-- Examples -->
@@ -201,7 +205,8 @@ watchEffect(() => {
                   </span>
                 </NuxtLink>
 
-                <AudioButton v-if="word.audio?.examples?.[index]" :src="`${cdnBase}/audio/${word.audio.examples[index]}`" size="sm" />
+                <AudioButton v-if="word.audio?.examples?.[index]"
+                  :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm" />
               </div>
 
             </div>
