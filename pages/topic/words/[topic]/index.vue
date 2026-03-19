@@ -150,7 +150,6 @@ const gatedCategories = computed(() => {
       <p class="topic-subheading mt-2">{{ topic.description }}</p>
     </header>
 
-
     <section v-for="category in gatedCategories" :key="category.key" class="space-y-8">
 
       <h2 class="category-heading">

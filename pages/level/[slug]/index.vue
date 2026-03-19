@@ -10,7 +10,7 @@ import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
-import { canAccessLevel, hasPaidAccess, isFreeLevel } from '~/utils/levels/permissions'
+import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
 import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
@@ -93,16 +93,6 @@ const isMastered = (id: string) =>
 
 const FREE_WORD_LIMIT = 10
 
-// const canAccessLevel = computed(() => {
-//   if (!authReady.value) return false
-//   if (!isLoggedIn.value) return false
-//   return entitlement.value ? hasPaidAccess(entitlement.value) : false
-// })
-
-// const canAccessLevel = computed(() => {
-//   return entitlement.value ? hasPaidAccess(entitlement.value) : false
-// })
-
 function getColorFromId(id: string) {
   let hash = 0
 
@@ -146,20 +136,22 @@ onMounted(loadProgress)
 </script>
 
 <template>
-  <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-6">
+  <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-10">
 
     <NuxtLink :to="`/levels`" class="inline-block text-sm text-black hover:underline">
       ← Levels
     </NuxtLink>
 
-    <header class="header-card rounded-xl p-6 sm:p-7 space-y-2">
-      <h1 class="text-3xl font-semibold text-gray-900">{{ levelCdnData.title }}</h1>
-      <p class="text-gray-700">{{ levelCdnData.description }}</p>
+    <header class="rounded-lg header-card">
+      <h1 class="level-heading">{{ levelCdnData.title }}</h1>
+      <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
-    <section v-for="category in gatedCategories" :key="category.key" class="category-card rounded-xl p-5 sm:p-6">
+    <section v-for="category in gatedCategories" :key="category.key" class="category-card rounded-xl">
+
       <div class="flex items-baseline justify-between gap-4">
-        <h2 class="text-xl font-semibold capitalize text-gray-900">
+
+        <h2 class="category-heading">
           {{ category.title }}
         </h2>
       </div>
@@ -184,6 +176,27 @@ onMounted(loadProgress)
   --blush: #F6E1E1;
 
   padding-bottom: 2rem;
+}
+
+.level-heading {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
+}
+
+.level-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.category-heading {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
 }
 
 .header-card {
