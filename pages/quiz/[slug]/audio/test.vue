@@ -5,20 +5,6 @@ definePageMeta({
   ssr: false
 })
 
-type Word = {
-  id: string
-  word: string
-  jyutping: string
-  meaning: string
-}
-
-type LevelData = {
-  level: number
-  title: string
-  description: string
-  categories: Record<string, Word[]>
-}
-
 type QuizAnswer = { wordId: string; correct: boolean }
 
 import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz'
@@ -29,6 +15,8 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
+
+import type { LevelData, Word } from '~/types/level/quiz/types'
 import { brandColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels'
 import { masteryXp } from '~/utils/xp/helpers'
@@ -382,16 +370,6 @@ watch(
   },
   { immediate: true }
 )
-
-// watch(
-//   () => current.value >= questions.value.length,
-//   (isComplete) => {
-//     if (!isComplete || completionAnimated.value) return
-
-//     completionAnimated.value = true
-//     runCompletionAnimations()
-//   }
-// )
 
 watch(
   () => showResults.value,

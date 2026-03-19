@@ -6,13 +6,8 @@ import { canAccessLevelQuiz, isComingSoon, isFreeLevel } from '~/utils/levels/pe
 
 
 const {
-  state,
   authReady,
-  isLoggedIn,
-  user,
   entitlement,
-  isCanceling,
-  currentPeriodEnd,
   resolve,
 } = useMeStateV2()
 
