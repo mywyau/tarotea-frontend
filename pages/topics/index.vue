@@ -80,7 +80,7 @@ onMounted(async () => {
 
 
 <template>
-  <main class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-4">
+  <main class="topics-page max-w-5xl mx-auto py-12 px-4 space-y-10">
 
     <NuxtLink :to="`/`" class="inline-block text-sm text-black hover:underline">
       ← Home
