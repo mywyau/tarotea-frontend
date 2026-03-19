@@ -28,7 +28,7 @@ const { data: stats } = await useFetch('/api/stats', {
       </h1>
 
       <p class="mt-4 text-lg text-gray-700 max-w-xl mx-auto">
-        Structured vocabulary, audio, and exercises and tests designed to help you on your cantonese studying journey.
+        Structured content and material to help you on your cantonese studying journey.
       </p>
 
       <NuxtLink to="/topics" class="mt-8 inline-block font-semibold px-8 py-3 rounded-lg
@@ -146,8 +146,7 @@ const { data: stats } = await useFetch('/api/stats', {
 
           <NuxtLink to="/dojo"
             class="rounded-xl p-6 flex items-end shadow-sm hover:shadow-md transition hover:brightness-110"
-            style="background-color:rgba(244,205,39,0.35);"
-            >
+            style="background-color:rgba(244,205,39,0.35);">
             <div>
               <div class="text-sm font-semibold text-gray-900">Jyutping Dojo</div>
             </div>
