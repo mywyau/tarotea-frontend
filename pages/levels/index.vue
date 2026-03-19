@@ -37,7 +37,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-8">
+  <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-10">
 
     <NuxtLink :to="`/`" class="inline-block text-sm text-black hover:underline">
       ← Home
@@ -127,17 +127,17 @@ onMounted(async () => {
 }
 
 .level-heading {
-    font-size: 1rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgba(17, 24, 39, 0.65);
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
 }
 
 .level-subheading {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgba(17, 24, 39, 0.65);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
 }
 
 /* Header card */
