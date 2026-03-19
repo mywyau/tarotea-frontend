@@ -9,7 +9,6 @@ import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
 import { canAccessTopic, freeTopics } from '~/utils/topics/permissions'
-// import { topics } from '~/utils/topics/topics'
 import { masteryXp } from '~/utils/xp/helpers'
 
 const route = useRoute()
@@ -140,20 +139,21 @@ const gatedCategories = computed(() => {
 </script>
 
 <template>
-  <main v-if="authReady" class="max-w-4xl mx-auto px-4 py-12 space-y-6">
+  <main v-if="authReady" class="max-w-4xl mx-auto px-4 py-12 space-y-10">
 
     <NuxtLink :to="`/topics`" class="inline-block text-sm text-black hover:underline">
       ← Topics
     </NuxtLink>
 
-    <header class="space-y-2">
-      <h1 class="text-3xl font-semibold">{{ topic.title }}</h1>
-      <p class="text-gray-600">{{ topic.description }}</p>
+    <header class="rounded-lg header-card">
+      <h1 class="topic-heading">{{ topic.title }}</h1>
+      <p class="topic-subheading mt-2">{{ topic.description }}</p>
     </header>
 
-    <section v-for="category in gatedCategories" :key="category.key" class="space-y-4">
 
-      <h2 class="text-xl font-medium capitalize">
+    <section v-for="category in gatedCategories" :key="category.key" class="space-y-8">
+
+      <h2 class="category-heading">
         {{ category.title }}
       </h2>
 
@@ -172,3 +172,28 @@ const gatedCategories = computed(() => {
     </section>
   </main>
 </template>
+
+<style scoped>
+
+.topic-heading {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
+}
+
+.topic-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.category-heading {
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
+}
+
+</style>
