@@ -1,4 +1,5 @@
 <script setup lang="ts">
+
 definePageMeta({
   middleware: ['level-quiz-access'],
   ssr: false
@@ -28,8 +29,6 @@ const finishing = ref(false)
 const totalXpEarned = ref<number>(0)
 
 const animatedAccuracy = ref(0)
-const animatedCorrect = ref(0)
-const animatedIncorrect = ref(0)
 const animatedXpEarned = ref(0)
 const completionAnimated = ref(false)
 
@@ -230,16 +229,12 @@ const completionTiles = computed(() => [
 
 function resetCompletionAnimations() {
   animatedAccuracy.value = 0
-  animatedCorrect.value = 0
-  animatedIncorrect.value = 0
   animatedXpEarned.value = 0
   completionAnimated.value = false
 }
 
 function runCompletionAnimations() {
   animateCount(animatedAccuracy, accuracy.value, 2300)
-  animateCount(animatedCorrect, score.value, 3000)
-  animateCount(animatedIncorrect, incorrectCount.value, 3500)
 }
 
 async function finalizeQuiz() {
@@ -420,25 +415,6 @@ watch(
   { immediate: true }
 )
 
-watch(
-  () => showResults.value,
-  (visible) => {
-    if (!visible || completionAnimated.value) return
-
-    completionAnimated.value = true
-    runCompletionAnimations()
-  }
-)
-
-// watch(
-//   () => finishing.value,
-//   (isFinishing) => {
-//     if (isFinishing) return
-//     if (!completionAnimated.value) return
-
-//     animateCount(animatedXpEarned, totalXpEarned.value, 1000)
-//   }
-// )
 </script>
 
 <template>
@@ -647,17 +623,6 @@ watch(
 .xp-fall-leave-to {
   opacity: 0;
   transform: translateY(35px) scale(0.95);
-}
-
-.fade-streak-enter-active,
-.fade-streak-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-streak-enter-from,
-.fade-streak-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
 }
 
 .card-fade-enter-active {
