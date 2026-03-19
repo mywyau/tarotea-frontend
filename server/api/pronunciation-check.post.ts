@@ -220,7 +220,7 @@ function buildResult(params: {
       score: 0,
       matchType: "wrong-language",
       confidence,
-      feedback: `I heard English or Latin letters: '${params.transcript}' in your attempt. Please say the Cantonese ${unit} only.`,
+      feedback: `I think I heard English or Latin letters: '${params.transcript}' in your attempt. or nothing at all. Please try again and say the Cantonese ${unit} only.`,
     };
   }
 
@@ -258,7 +258,7 @@ function buildResult(params: {
       score,
       matchType: "exact",
       confidence,
-      feedback: `Nice — I heard exactly “${params.expectedChinese}”. That means your ${unit} was understood. Keep aiming for ${params.expectedJyutping}.`,
+      feedback: `Nice, I heard exactly “${params.expectedChinese}”. That means your ${unit} was perfectly understood. Keep aiming for something similar to this.`,
     };
   }
 
@@ -267,7 +267,7 @@ function buildResult(params: {
       score,
       matchType: "near-exact",
       confidence,
-      feedback: `Very close. I heard “${params.transcript}”, which is close to “${params.expectedChinese}”. Good job — try to match the full phrase even more closely: ${params.expectedJyutping}.`,
+      feedback: `Very close. I heard “${params.transcript}”, which is close to “${params.expectedChinese}”. Good job, try to match the full phrase even more closely.`,
     };
   }
 
@@ -276,7 +276,7 @@ function buildResult(params: {
       score,
       matchType: "close",
       confidence,
-      feedback: `Close. I heard “${params.transcript}”. The target was “${params.expectedChinese}”. Try saying the full ${unit} clearly: ${params.expectedJyutping}.`,
+      feedback: `Not Bad. I heard “${params.transcript}”. The target was “${params.expectedChinese}”. Try saying the full ${unit} more clearly.`,
     };
   }
 
@@ -285,7 +285,7 @@ function buildResult(params: {
       score,
       matchType: "partial",
       confidence,
-      feedback: `Partly understood. I heard “${params.transcript}”. Try again and focus on the full phrase: ${params.expectedJyutping}.`,
+      feedback: `Partly understood. I heard “${params.transcript}”. Might just of been unlucky. Focus on the full phrase, do some trial runs or try again.`,
     };
   }
 
