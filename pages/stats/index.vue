@@ -142,7 +142,7 @@ onMounted(async () => {
         </div>
 
         <div v-else>
-            <h1 class="text-3xl font-semibold">
+            <h1 class="your-stat-heading">
                 Your Stats
             </h1>
 
@@ -200,6 +200,13 @@ main {
 /* Label */
 .stat-label {
     font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
+}
+
+.your-stat-heading {
+    font-size: 1rem;
     text-transform: uppercase;
     letter-spacing: 0.06em;
     color: rgba(17, 24, 39, 0.65);

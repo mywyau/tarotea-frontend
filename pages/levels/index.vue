@@ -37,15 +37,15 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-4">
+  <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-8">
 
     <NuxtLink :to="`/`" class="inline-block text-sm text-black hover:underline">
       ← Home
     </NuxtLink>
 
     <header class="rounded-lg header-card">
-      <h1 class="text-2xl font-semibold text-gray-900">Levels</h1>
-      <p class="text-gray-700 text-sm mt-2">
+      <h1 class="level-heading">Levels</h1>
+      <p class="level-subheading mt-2">
         Explore Cantonese words and sentence patterns organised by level.
       </p>
     </header>
@@ -124,6 +124,20 @@ onMounted(async () => {
 
   border-radius: 16px;
   padding-bottom: 2rem;
+}
+
+.level-heading {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
+}
+
+.level-subheading {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
 }
 
 /* Header card */
