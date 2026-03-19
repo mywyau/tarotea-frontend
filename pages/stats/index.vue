@@ -156,8 +156,7 @@ onMounted(async () => {
                     </p>
 
                     <p class="stat-value">
-                        {{ stat.prefix }}{{ (animatedStats[index] ?? stat.value).toLocaleString() }} {{ stat.suffix
-                        }}
+                        {{ stat.prefix }}{{ (animatedStats[index] ?? stat.value).toLocaleString() }} {{ stat.suffix }}
                     </p>
                 </div>
 
