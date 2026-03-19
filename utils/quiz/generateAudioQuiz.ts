@@ -10,7 +10,7 @@ export type AudioQuizQuestion = {
 
 export function generateAudioQuiz(
   words: Word[],
-  count = 20,
+  count = 5,
 ): AudioQuizQuestion[] {
   const selected = shuffleFisherYates(words).slice(0, count);
 

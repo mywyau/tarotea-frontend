@@ -14,6 +14,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Invalid payload" });
   }
 
+  const WRONG_PENALTY = -12
+
   // de-dupe answers
   const map = new Map<string, boolean>();
   for (const a of body.answers) {
@@ -53,7 +55,7 @@ export default defineEventHandler(async (event) => {
     const STREAK_CAP = 5;
 
     function deltaFor(correct: boolean, streakBefore: number) {
-      if (!correct) return 0;
+      if (!correct) return WRONG_PENALTY;
       const effective = Math.min(streakBefore, STREAK_CAP);
       return 5 + effective * 2;
     }
