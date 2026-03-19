@@ -452,22 +452,24 @@ watch(
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <button v-for="(option, i) in question.options" :key="i" class="aspect-square rounded-xl flex items-center justify-center
-           text-2xl font-semibold text-center p-6
-           transition-all duration-300 ease-out
-           shadow-sm active:scale-95 hover:bri" :style="{
-            backgroundColor:
-              !answered
-                ? tileColors[i]
-                : i === question.correctIndex
-                  ? '#BBF7D0'   // soft green success
-                  : i === selectedIndex
-                    ? '#FECACA' // soft red fail
-                    : tileColors[i]
-          }" :class="[
-            answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-            answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-          ]" @click="answer(i)">
+          <button v-for="(option, i) in question.options" :key="i" class="answer-tile aspect-square rounded-xl flex items-center justify-center
+         text-2xl font-semibold text-center p-6 select-none
+         transition-all duration-200 ease-out
+         shadow-sm active:scale-95" :style="{
+          backgroundColor:
+            !answered
+              ? tileColors[i]
+              : i === question.correctIndex
+                ? '#BBF7D0'
+                : i === selectedIndex
+                  ? '#FECACA'
+                  : tileColors[i]
+        }" :class="[
+    !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
+    // !answered && 'hover:ring-2 hover:ring-white/70',
+    answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+    answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+  ]" @click="answer(i)">
             {{ option }}
           </button>
         </div>
@@ -531,7 +533,8 @@ watch(
           </h3>
 
           <div class="flex flex-wrap gap-2">
-            <span v-for="word in correctWords" :key="word!.id" class="rounded-lg text-green-700 px-3 py-1 text-base">
+            <span v-for="word in correctWords" :key="word!.id"
+              class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
               {{ word!.word }}
             </span>
           </div>
@@ -543,7 +546,8 @@ watch(
           </h3>
 
           <div class="flex flex-wrap gap-2">
-            <span v-for="word in missedWords" :key="word!.id" class="rounded-lg text-rose-700 px-3 py-1 text-base">
+            <span v-for="word in missedWords" :key="word!.id"
+              class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
               {{ word!.word }}
             </span>
           </div>
