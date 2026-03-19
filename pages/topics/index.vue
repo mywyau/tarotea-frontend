@@ -86,9 +86,16 @@ onMounted(async () => {
       ← Home
     </NuxtLink>
 
-    <header class="rounded-lg header-card">
+    <!-- <header class="rounded-lg header-card">
       <h1 class="text-2xl font-semibold text-gray-900">Topics</h1>
       <p class="text-gray-700 text-sm mt-2 ">
+        Vocabulary and sentences grouped by subject matter.
+      </p>
+    </header> -->
+
+    <header class="rounded-lg header-card">
+      <h1 class="topic-heading">Topics</h1>
+      <p class="topic-subheading mt-2">
         Vocabulary and sentences grouped by subject matter.
       </p>
     </header>
@@ -177,6 +184,21 @@ onMounted(async () => {
   --blush: #F6E1E1;
   border-radius: 16px;
 }
+
+.topic-heading {
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
+}
+
+.topic-subheading {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
+}
+
 
 /* Header card */
 .header-card {
