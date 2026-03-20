@@ -9,7 +9,6 @@ definePageMeta({
     middleware: "logged-in"
 })
 
-
 import { useCountdownToUtcMidnight } from '@/composables/daily/useCountdownToUtcMidnight'
 import { useDailySession } from '@/composables/daily/useDailySessionV2'
 import { useXpAnimation } from '@/composables/daily/useXpAnimation'
@@ -24,6 +23,7 @@ import {
     playCorrectJingle,
     playIncorrectJingle
 } from '@/utils/sounds'
+import { brandColours } from '~/utils/branding/helpers'
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -37,19 +37,10 @@ const finishing = ref(false)                    // "Finalising score" loading st
 type DailyAnswer = { wordId: string; correct: boolean }
 const answerLog = ref<DailyAnswer[]>([])
 
-const BRAND_COLORS = [
-    '#EAB8E4',
-    '#A8CAE0',
-    '#F4C2D7',
-    '#F2CACA',
-    '#D6A3D1',
-    'rgba(244,205,39,0.35)',
-]
-
 const tileColors = ref<string[]>([])
 
 function generateTileColors() {
-    tileColors.value = shuffleFisherYates([...BRAND_COLORS]).slice(0, 4)
+    tileColors.value = shuffleFisherYates([...brandColours]).slice(0, 4)
 }
 
 // Use the SAME rule as your daily delta in update.v2:
@@ -61,6 +52,7 @@ function generateTileColors() {
 // The server finalize should match this (deltaFor(correct) => 5 or 0).
 
 const STREAK_CAP = 5
+
 function dailyDeltaFor(correct: boolean, streakBefore: number) {
     if (!correct) return 0
     return 5 + Math.min(streakBefore, STREAK_CAP) * 2
@@ -166,7 +158,7 @@ async function selectAnswer(answer: string) {
 
                 dailyCompleted.value = true
 
-                await sleep(1800)
+                await sleep(1300)
                 showCompleteView.value = true
                 playQuizCompleteFanfareSong()
             } catch (err) {
