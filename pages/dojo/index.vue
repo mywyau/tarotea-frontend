@@ -7,7 +7,7 @@ definePageMeta({
 </script>
 
 <template>
-  <main class="max-w-3xl mx-auto py-20 px-6 space-y-12">
+  <main class="max-w-3xl mx-auto py-20 px-6 space-y-10">
 
     <!-- Back -->
     <NuxtLink to="/" class="inline-block text-sm text-black hover:underline">
@@ -16,11 +16,11 @@ definePageMeta({
 
     <!-- Header -->
     <div class="text-center space-y-4">
-      <h1 class="text-3xl sm:text-4xl font-semibold text-black">
+      <h1 class="text-3xl sm:text-4xl font-semibold text-black dojo-heading">
         Jyutping Dojo
       </h1>
 
-      <p class="text-gray-700 max-w-lg mx-auto">
+      <p class="text-gray-700 max-w-lg mx-auto dojo-subheading">
         Strengthen your Cantonese phonetic skills with some training.
       </p>
     </div>
@@ -61,5 +61,19 @@ definePageMeta({
 <style scoped>
 main {
   min-height: 60vh;
+}
+
+.dojo-heading {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
+}
+
+.dojo-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
 }
 </style>

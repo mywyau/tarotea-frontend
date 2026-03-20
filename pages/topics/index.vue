@@ -46,8 +46,40 @@ function topicLink(topic: Topic) {
   }
 }
 
-const ITEMS_PER_PAGE = 12
+const ITEMS_PER_PAGE = 9
 const currentPage = ref(1)
+
+const MAX_VISIBLE_PAGES = 3
+
+const visiblePages = computed(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= MAX_VISIBLE_PAGES) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+
+  let start = current
+  let end = current + MAX_VISIBLE_PAGES - 1
+
+  if (end > total) {
+    end = total
+    start = total - MAX_VISIBLE_PAGES + 1
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+})
+
+const showFirstButton = computed(() => {
+  return visiblePages.value.length > 0 && visiblePages.value[0] > 1
+})
+
+const showLastButton = computed(() => {
+  return (
+    visiblePages.value.length > 0 &&
+    visiblePages.value[visiblePages.value.length - 1] < totalPages.value
+  )
+})
 
 function goToPage(page: number) {
   if (page < 1 || page > totalPages.value) return
@@ -93,21 +125,6 @@ onMounted(async () => {
       </p>
     </header>
 
-    <div v-if="totalPages > 1" class="pagination-wrapper flex justify-center items-center gap-3 pt-8">
-      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
-        ←
-      </button>
-
-      <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="pagination-page"
-        :class="{ 'is-active': page === currentPage }">
-        {{ page }}
-      </button>
-
-      <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
-        →
-      </button>
-    </div>
-
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
 
       <li v-for="topic in paginatedTopics" :key="topic.id" class="topic-card rounded-lg p-4 space-y-3 transition"
@@ -144,26 +161,38 @@ onMounted(async () => {
       </li>
     </ul>
 
-    <div v-if="totalPages > 1" class="pagination-wrapper flex justify-center items-center gap-3 pt-8">
-      <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
-        ←
-      </button>
+    <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
 
-      <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="pagination-page"
-        :class="{ 'is-active': page === currentPage }">
-        {{ page }}
-      </button>
+      <div class="flex justify-center items-center gap-1.5 sm:gap-3">
+        <button @click="goToPage(1)" :disabled="currentPage === 1" class="pagination-jump" v-if="showFirstButton">
+          «
+        </button>
 
-      <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
-        →
-      </button>
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
+          ←
+        </button>
+
+        <button v-for="page in visiblePages" :key="page" @click="goToPage(page)" class="pagination-page"
+          :class="{ 'is-active': page === currentPage }">
+          {{ page }}
+        </button>
+
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
+          →
+        </button>
+
+        <button @click="goToPage(totalPages)" :disabled="currentPage === totalPages" class="pagination-jump"
+          v-if="showLastButton">
+          »
+        </button>
+      </div>
+
+      <p class="text-xs text-gray-500">
+        Page {{ currentPage }} of {{ totalPages }}
+      </p>
     </div>
 
   </main>
-
-  <!-- <div v-else class="py-20 text-center text-gray-500">
-    Loading topics...
-  </div> -->
 </template>
 
 <style scoped>
@@ -178,18 +207,25 @@ onMounted(async () => {
   border-radius: 16px;
 }
 
+.pagination-dots {
+  min-width: 20px;
+  text-align: center;
+  font-weight: 600;
+  color: #6b7280;
+}
+
 .topic-heading {
-    font-size: 1.3rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgba(0, 0, 0);
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
 }
 
 .topic-subheading {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: rgba(17, 24, 39, 0.65);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
 }
 
 /* Header card */
@@ -236,70 +272,89 @@ onMounted(async () => {
 
 /* Pink + Yellow TaroTea pagination */
 
-.pagination-wrapper {
-  padding: 12px 16px;
-  border-radius: 16px;
-}
-
-/* Page numbers */
+/* Mobile first */
 .pagination-page {
-  min-width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 10px;
   font-weight: 600;
-  font-size: 0.9rem;
-
+  font-size: 0.8rem;
   background-color: #F6E1E1;
-  /* blush */
   color: #3A2A2A;
-
   transition: all 0.18s ease;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 }
 
-.pagination-page:hover {
+.pagination-page:hover:not(.is-active) {
   background-color: #EAB8E4;
-  /* pink */
   transform: translateY(-1px);
 }
 
-/* Active page */
 .pagination-page.is-active {
   background-color: #D6A3D1;
-  /* stronger pink/purple */
   color: #000;
   box-shadow: 0 6px 16px rgba(214, 163, 209, 0.35);
   transform: translateY(-1px);
 }
 
-/* Arrows */
 .pagination-arrow {
-  width: 38px;
-  height: 38px;
-  border-radius: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   font-weight: 600;
-
   background-color: rgba(244, 205, 39, 0.35);
-  /* soft yellow */
   color: #3A2A2A;
-
   transition: all 0.18s ease;
 }
 
-.pagination-arrow:hover:not(:disabled) {
-  background-color: rgba(244, 205, 39, 0.55);
+/* Tablet and up */
+@media (min-width: 640px) {
+  .pagination-wrapper {
+    padding: 12px 16px;
+  }
+
+  .pagination-page {
+    min-width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+  }
+
+  .pagination-arrow {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+}
+
+.pagination-jump {
+  min-width: 48px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  background-color: rgba(168, 202, 224, 0.45);
+  color: #3A2A2A;
+  transition: all 0.18s ease;
+}
+
+.pagination-jump:hover:not(:disabled) {
+  background-color: rgba(168, 202, 224, 0.65);
   transform: translateY(-1px);
 }
 
-.pagination-arrow:disabled {
+.pagination-jump:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
-</style>
 
-<!-- 
---brown: #8B5E3C;           /* brown sugar */
---brown-soft: #C69C6D;      /* milk tea */
---cream: #F5E6D3;           /* milk foam */
---caramel: #B87333;         /* caramel accent */ 
--->
+@media (min-width: 640px) {
+  .pagination-jump {
+    min-width: 58px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+  }
+}
+</style>
