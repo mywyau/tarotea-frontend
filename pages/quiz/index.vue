@@ -87,7 +87,7 @@ const canEnterLevel = (level: any) => {
           </NuxtLink>
 
           <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/audio`" class="level-btn level-btn-blush">
-            Sentence Audio Quiz
+            Sentence Audio Only
           </NuxtLink>
         </div>
 

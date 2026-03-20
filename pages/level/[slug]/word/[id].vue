@@ -193,7 +193,7 @@ watchEffect(() => {
 
               <div class="flex items-center justify-center gap-3">
 
-                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/${index}`"
+                <!-- <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/${index}`"
                   class="text-xs px-2 py-1 rounded-md bg-black shadow-sm hover:brightness-125 transition">
                   <span class="bg-gradient-to-r
                       from-[#d48fd0]
@@ -201,6 +201,13 @@ watchEffect(() => {
                       via-[#6faed6]
                       to-[#d48fd0]
                       bg-clip-text text-transparent">
+                    ▶︎
+                  </span>
+                </NuxtLink> -->
+
+                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/${index}`"
+                  class="topic-btn-blush text-xs px-2 py-1 rounded-md shadow-sm transition">
+                  <span class="text-black">
                     ▶︎
                   </span>
                 </NuxtLink>
@@ -230,7 +237,6 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-
 .word-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;
@@ -263,5 +269,14 @@ watchEffect(() => {
   background: linear-gradient(90deg,
       #D6A3D1,
       #EAB8E4);
+}
+
+.topic-btn-blush {
+  background: rgb(249, 166, 166);
+  transition: background-color 0.2s ease;
+}
+
+.topic-btn-blush:hover {
+  background: rgb(204, 136, 136);
 }
 </style>

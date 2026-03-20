@@ -20,7 +20,7 @@ const { data: stats } = await useFetch('/api/stats', {
         Structured material and tools to help you on your studying journey.
       </p>
 
-      <NuxtLink to="/topics" class="mt-8 inline-block font-semibold px-8 py-3 rounded-lg
+      <!-- <NuxtLink to="/topics" class="mt-8 inline-block font-semibold px-8 py-3 rounded-lg
          bg-black
          shadow-md hover:shadow-lg
          hover:-translate-y-0.5
@@ -35,6 +35,11 @@ const { data: stats } = await useFetch('/api/stats', {
            hover:brightness-125">
           Start Learning
         </span>
+      </NuxtLink> -->
+
+      <NuxtLink to="/topics"
+        class="topic-btn-blush mt-8 inline-block font-semibold px-8 py-3 rounded-lg text-black transition-colors">
+        Start Learning
       </NuxtLink>
     </div>
 
@@ -213,3 +218,13 @@ const { data: stats } = await useFetch('/api/stats', {
     </div>
   </main>
 </template>
+
+<style scoped>
+.topic-btn-blush {
+  background: rgb(249, 166, 166);
+}
+
+.topic-btn-blush:hover {
+  background: rgb(204, 136, 136);
+}
+</style>

@@ -458,7 +458,7 @@ watch(
             </h1>
 
             <p class="text-sm text-gray-600">
-                Guess the correct phonetic. If your sound is right, you pass.
+                Guess the jyutping.
             </p>
         </header>
 
@@ -466,7 +466,7 @@ watch(
             'mt-8 p-5',
             state === 'complete'
                 ? 'bg-transparent border-0 shadow-none'
-                : 'rounded-2xl border border-gray-200 bg-white shadow-sm'
+                : 'rounded-xl border border-gray-200 bg-white shadow-sm'
         ]">
 
             <!-- Loading -->
