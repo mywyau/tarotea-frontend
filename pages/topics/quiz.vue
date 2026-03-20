@@ -15,6 +15,38 @@ const {
 const ITEMS_PER_PAGE = 8
 const currentPage = ref(1)
 
+const MAX_VISIBLE_PAGES = 4
+
+const visiblePages = computed(() => {
+    const total = totalPages.value
+    const current = currentPage.value
+
+    if (total <= MAX_VISIBLE_PAGES) {
+        return Array.from({ length: total }, (_, i) => i + 1)
+    }
+
+    let start = current
+    let end = current + MAX_VISIBLE_PAGES - 1
+
+    if (end > total) {
+        end = total
+        start = total - MAX_VISIBLE_PAGES + 1
+    }
+
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+})
+
+const showFirstButton = computed(() => {
+    return visiblePages.value.length > 0 && visiblePages.value[0] > 1
+})
+
+const showLastButton = computed(() => {
+    return (
+        visiblePages.value.length > 0 &&
+        visiblePages.value[visiblePages.value.length - 1] < totalPages.value
+    )
+})
+
 const totalPages = computed(() =>
     Math.ceil(sortedTopics.length / ITEMS_PER_PAGE)
 )
@@ -136,19 +168,36 @@ onMounted(async () => {
 
         </ul>
 
-        <div v-if="totalPages > 1" class="flex justify-center items-center gap-3 pt-8">
-            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
-                ←
-            </button>
+        <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
+            <div class="pagination-row flex items-center justify-center gap-1.5 sm:gap-3 max-w-full overflow-x-auto">
+                <button v-if="showFirstButton" @click="goToPage(1)" :disabled="currentPage === 1"
+                    class="pagination-jump">
+                    «
+                </button>
 
-            <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="pagination-page"
-                :class="{ 'is-active': page === currentPage }">
-                {{ page }}
-            </button>
+                <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
+                    ←
+                </button>
 
-            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
-                →
-            </button>
+                <button v-for="page in visiblePages" :key="page" @click="goToPage(page)" class="pagination-page"
+                    :class="{ 'is-active': page === currentPage }">
+                    {{ page }}
+                </button>
+
+                <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
+                    class="pagination-arrow">
+                    →
+                </button>
+
+                <button v-if="showLastButton" @click="goToPage(totalPages)" :disabled="currentPage === totalPages"
+                    class="pagination-jump">
+                    »
+                </button>
+            </div>
+
+            <p class="text-xs text-gray-500">
+                Page {{ currentPage }} of {{ totalPages }}
+            </p>
         </div>
     </main>
 </template>
@@ -251,54 +300,118 @@ onMounted(async () => {
     background: rgb(204, 136, 136);
 }
 
+.pagination-wrapper {
+    padding: 12px 8px;
+    border-radius: 16px;
+}
 
-/* Pagination */
+.pagination-row {
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
 
+.pagination-row::-webkit-scrollbar {
+    display: none;
+}
+
+.pagination-page,
+.pagination-arrow,
+.pagination-jump {
+    flex: 0 0 auto;
+}
+
+/* Mobile first */
 .pagination-page {
-    min-width: 40px;
-    height: 40px;
-    border-radius: 14px;
+    min-width: 32px;
+    height: 32px;
+    border-radius: 10px;
     font-weight: 600;
-    font-size: 0.9rem;
-
+    font-size: 0.8rem;
     background-color: #F6E1E1;
-    /* blush */
     color: #1f2937;
-
     transition: all 0.18s ease;
     box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
 }
 
-.pagination-page:hover {
+.pagination-page:hover:not(.is-active) {
     background-color: #EAB8E4;
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .pagination-page.is-active {
     background-color: #D6A3D1;
+    color: #000;
     box-shadow: 0 8px 20px rgba(214, 163, 209, 0.35);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .pagination-arrow {
-    width: 40px;
-    height: 40px;
-    border-radius: 14px;
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
     font-weight: 600;
-
     background-color: rgba(244, 205, 39, 0.45);
     color: #1f2937;
-
     transition: all 0.18s ease;
 }
 
 .pagination-arrow:hover:not(:disabled) {
     background-color: rgba(244, 205, 39, 0.65);
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .pagination-arrow:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.pagination-jump {
+    min-width: 40px;
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    background-color: rgba(168, 202, 224, 0.45);
+    color: #1f2937;
+    transition: all 0.18s ease;
+}
+
+.pagination-jump:hover:not(:disabled) {
+    background-color: rgba(168, 202, 224, 0.65);
+    transform: translateY(-1px);
+}
+
+.pagination-jump:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Tablet and up */
+@media (min-width: 640px) {
+    .pagination-wrapper {
+        padding: 12px 16px;
+    }
+
+    .pagination-page {
+        min-width: 38px;
+        height: 38px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+    }
+
+    .pagination-arrow {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+    }
+
+    .pagination-jump {
+        min-width: 48px;
+        height: 38px;
+        border-radius: 12px;
+        font-size: 0.85rem;
+    }
 }
 </style>
