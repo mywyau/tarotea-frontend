@@ -7,19 +7,19 @@ definePageMeta({
 
 type QuizAnswer = { wordId: string; correct: boolean }
 
-import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz'
-import { computed, ref } from 'vue'
+import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz';
+import { computed, ref } from 'vue';
 
 import {
   playQuizCompleteFailSong,
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
-} from '@/utils/sounds'
+} from '@/utils/sounds';
 
-import type { LevelData, Word } from '~/types/level/quiz/types'
-import { brandColours } from '~/utils/branding/helpers'
-import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels'
-import { masteryXp } from '~/utils/xp/helpers'
+import type { LevelData, Word } from '~/types/level/quiz/types';
+import { brandColours } from '~/utils/branding/helpers';
+import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels';
+import { masteryXp } from '~/utils/xp/helpers';
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -372,18 +372,10 @@ watch(
 
     completionAnimated.value = true
     runCompletionAnimations()
-  }
-)
-
-watch(
-  () => finishing.value,
-  (isFinishing, wasFinishing) => {
-    if (isFinishing) return
-    if (!completionAnimated.value) return
-
     animateCount(animatedXpEarned, totalXpEarned.value, 1000)
   }
 )
+
 </script>
 
 <template>
@@ -462,10 +454,10 @@ watch(
                       ? '#FECACA'
                       : tileColors[i]
             }" :class="[
-        !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
-        answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-        answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-      ]" @click="answer(i)">
+              !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
+              answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+              answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+            ]" @click="answer(i)">
             {{ option }}
           </button>
         </div>
