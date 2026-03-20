@@ -89,7 +89,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <main class="topics-page max-w-3xl mx-auto py-10 px-4 space-y-8">
+    <main class="topics-page max-w-4xl mx-auto py-10 px-4 space-y-8">
 
         <div class="mb-6">
             <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
@@ -98,7 +98,7 @@ onMounted(async () => {
         </div>
 
         <!-- Intro -->
-        <header class="text-center space-y-3 max-w-2xl mx-auto">
+        <header class="text-center space-y-3 max-w-4xl mx-auto">
             <h1 class="font-semibold topics-heading">
                 Topic Quiz
             </h1>
@@ -227,7 +227,7 @@ onMounted(async () => {
 
 /* Card */
 .topic-card {
-    border-radius: 24px;
+    border-radius: 20px;
     padding: 1.5rem;
     background: rgba(255, 255, 255, 0.75);
     backdrop-filter: blur(8px);
@@ -256,7 +256,7 @@ onMounted(async () => {
     min-height: 52px;
     padding: 0.6rem 0.75rem;
     font-size: 0.85rem;
-    border-radius: 14px;
+    border-radius: 8px;
     font-weight: 600;
     line-height: 1.2;
     transition: all 0.15s ease;

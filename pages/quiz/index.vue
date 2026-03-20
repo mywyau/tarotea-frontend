@@ -82,11 +82,11 @@ const canEnterLevel = (level: any) => {
             Audio
           </NuxtLink>
 
-          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences`" class="level-btn level-btn-purple">
+          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences`" class="level-btn level-btn-yellow">
             Sentences
           </NuxtLink>
 
-          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/audio`" class="level-btn level-btn-purple">
+          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/audio`" class="level-btn level-btn-blush">
             Sentence Audio Quiz
           </NuxtLink>
         </div>
@@ -154,7 +154,7 @@ const canEnterLevel = (level: any) => {
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-height: 56px;
+  min-height: 52px;
   padding: 0.6rem 0.75rem;
   font-size: 0.85rem;
   border-radius: 8px;
@@ -179,5 +179,23 @@ const canEnterLevel = (level: any) => {
 
 .level-btn-purple:hover {
   background: rgba(214, 163, 209, 0.65);
+}
+
+.level-btn-yellow {
+    background: rgba(244, 205, 39, 0.45);
+    color: #1f2937;
+}
+
+.level-btn-yellow:hover {
+    background: rgba(244, 205, 39, 0.65);
+}
+
+.level-btn-blush {
+    background: rgb(249, 166, 166);
+    color: #1f2937;
+}
+
+.level-btn-blush:hover {
+    background: rgb(204, 136, 136);
 }
 </style>
