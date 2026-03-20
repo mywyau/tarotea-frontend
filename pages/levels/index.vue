@@ -11,13 +11,7 @@ import { onMounted } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 
 const {
-  state,
   authReady,
-  isLoggedIn,
-  user,
-  entitlement,
-  isCanceling,
-  currentPeriodEnd,
   resolve,
 } = useMeStateV2()
 

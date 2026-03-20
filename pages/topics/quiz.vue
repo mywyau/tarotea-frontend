@@ -7,17 +7,12 @@ import { canAccessTopicQuiz } from '~/utils/topics/permissions'
 import { sortedTopics } from '~/utils/topics/topics'
 
 const {
-    state,
-    authReady,
     isLoggedIn,
-    user,
     entitlement,
-    isCanceling,
-    currentPeriodEnd,
     resolve,
 } = useMeStateV2()
 
-const ITEMS_PER_PAGE = 9
+const ITEMS_PER_PAGE = 8
 const currentPage = ref(1)
 
 const totalPages = computed(() =>
@@ -62,7 +57,7 @@ onMounted(async () => {
 </script>
 
 <template>
-    <main class="topics-page max-w-6xl mx-auto py-10 px-4 space-y-8">
+    <main class="topics-page max-w-3xl mx-auto py-10 px-4 space-y-8">
 
         <div class="mb-6">
             <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
@@ -72,31 +67,16 @@ onMounted(async () => {
 
         <!-- Intro -->
         <header class="text-center space-y-3 max-w-2xl mx-auto">
-            <h1 class="text-3xl font-semibold text-gray-900">
+            <h1 class="font-semibold topics-heading">
                 Topic Quiz
             </h1>
-            <p class="text-gray-600 text-sm sm:text-base">
+            <p class="text-sm sm:text-base topics-subheading">
                 Practice Cantonese by topic. Your weakest words appear more often as you improve.
             </p>
         </header>
 
-        <div v-if="totalPages > 1" class="flex justify-center items-center gap-3 pt-8">
-            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
-                ←
-            </button>
-
-            <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="pagination-page"
-                :class="{ 'is-active': page === currentPage }">
-                {{ page }}
-            </button>
-
-            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
-                →
-            </button>
-        </div>
-
         <!-- Grid -->
-        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
 
             <li v-for="topic in paginatedTopics" :key="topic.id" class="topic-card" :class="[
                 topic.comingSoon || (topic.quizRequiresPaid && !canEnterTopic(topic))
@@ -143,7 +123,7 @@ onMounted(async () => {
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/audio/${topic.id}` : undefined"
                         class="topic-btn topic-btn-blush"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Audio Only Sentences 
+                        Audio Only Sentences
                     </NuxtLink>
 
                 </div>
@@ -155,6 +135,21 @@ onMounted(async () => {
             </li>
 
         </ul>
+
+        <div v-if="totalPages > 1" class="flex justify-center items-center gap-3 pt-8">
+            <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
+                ←
+            </button>
+
+            <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="pagination-page"
+                :class="{ 'is-active': page === currentPage }">
+                {{ page }}
+            </button>
+
+            <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
+                →
+            </button>
+        </div>
     </main>
 </template>
 
@@ -165,6 +160,20 @@ onMounted(async () => {
     --blue: #A8CAE0;
     --yellow: #F4CD27;
     --blush: #F6E1E1;
+}
+
+.topics-heading {
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(0, 0, 0);
+}
+
+.topics-subheading {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
 }
 
 /* Card */

@@ -30,7 +30,7 @@ const canEnterLevel = (level: any) => {
 </script>
 
 <template>
-  <main class="levels-page max-w-5xl mx-auto py-10 px-4 space-y-8">
+  <main class="levels-page max-w-4xl mx-auto py-10 px-2 space-y-10">
 
     <div class="mb-6">
       <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
@@ -40,10 +40,10 @@ const canEnterLevel = (level: any) => {
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="text-3xl font-semibold text-gray-900">
+      <h1 class="font-semibold level-heading">
         Level Quiz
       </h1>
-      <p class="text-gray-600 text-sm sm:text-base">
+      <p class="text-gray-600 text-sm sm:text-base level-subheading">
         Progress through structured and progressively trickier Cantonese content. 
       </p>
     </header>
@@ -102,6 +102,20 @@ const canEnterLevel = (level: any) => {
   --blue: #A8CAE0;
   --yellow: #F4CD27;
   --blush: #F6E1E1;
+}
+
+.level-heading {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
+}
+
+.level-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
 }
 
 /* Card */
