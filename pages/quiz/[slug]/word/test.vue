@@ -425,7 +425,7 @@ watch(
     </NuxtLink>
 
     <section class="text-center space-y-4">
-      <h1 class="text-2xl font-semibold text-center">
+      <h1 class="text-2xl font-semibold text-center level-heading">
         {{ levelTitles[slug] ?? 'Unknown level' }}
       </h1>
 
@@ -602,6 +602,21 @@ watch(
 </template>
 
 <style scoped>
+
+.level-heading {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
+}
+
+.level-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
+}
+
 .xp-fall-enter-active {
   transition: transform 0.6s ease, opacity 0.6s ease;
 }

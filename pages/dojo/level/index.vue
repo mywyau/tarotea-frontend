@@ -9,16 +9,9 @@ definePageMeta({
 })
 
 const {
-  state,
-  authReady,
-  isLoading,
   isLoggedIn,
   isLoggedOut,
-  user,
   entitlement,
-  isCanceling,
-  currentPeriodEnd,
-  resolve,
 } = useMeStateV2()
 
 const isComingSoon = (level: any) => level.comingSoon === true
@@ -82,7 +75,7 @@ const canEnterLevel = (level: any) => {
 
         <!-- Title -->
         <div class="space-y-2">
-          <h2 class="text-lg font-semibold text-gray-900">
+          <h2 class="text-lg font-semibold text-gray-900 ">
             {{ quizLevel.title }}
           </h2>
 
@@ -97,21 +90,15 @@ const canEnterLevel = (level: any) => {
 
         <!-- Buttons -->
         <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/dojo/level/jyutping/training/${quizLevel.id}`"
-            class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
-            style="background-color:#A8CAE0;">
+          <NuxtLink :to="`/dojo/level/jyutping/training/${quizLevel.id}`" class="level-btn level-btn-purple">
             Jyutping only
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/level/chinese/training/${quizLevel.id}`"
-            class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
-            style="background-color:#A8CAE0;">
+          <NuxtLink :to="`/dojo/level/chinese/training/${quizLevel.id}`" class="level-btn level-btn-blue">
             Chinese only
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}`"
-            class="rounded-lg text-black text-sm px-2 py-2 font-medium text-center hover:brightness-110"
-            style="background-color:#A8CAE0;">
+          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}`" class="level-btn level-btn-blush col-span-2">
             Sentences Chinese Only
           </NuxtLink>
         </div>
@@ -150,6 +137,8 @@ const canEnterLevel = (level: any) => {
   justify-content: space-between;
 }
 
+
+
 .level-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
@@ -159,19 +148,44 @@ const canEnterLevel = (level: any) => {
   opacity: 0.6;
 }
 
-/* Buttons */
 .level-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  min-height: 56px;
   padding: 0.6rem 0.75rem;
   font-size: 0.85rem;
   border-radius: 8px;
   font-weight: 600;
+  line-height: 1.2;
   transition: all 0.15s ease;
 }
 
-/* Colour variations */
-.level-btn-yellow {
-  background: var(--yellow);
+.level-btn-blue {
+  background: rgba(168, 202, 224, 0.45);
   color: #1f2937;
+}
+
+.level-btn-blue:hover {
+  background: rgba(168, 202, 224, 0.65);
+}
+
+.level-btn-purple {
+  background: rgba(214, 163, 209, 0.45);
+  color: #1f2937;
+}
+
+.level-btn-purple:hover {
+  background: rgba(214, 163, 209, 0.65);
+}
+
+.level-btn-blush {
+  background: rgb(249, 166, 166);
+  color: #1f2937;
+}
+
+.level-btn-blush:hover {
+  background: rgb(204, 136, 136);
 }
 </style>

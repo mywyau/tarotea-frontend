@@ -230,6 +230,7 @@ watchEffect(() => {
 </template>
 
 <style scoped>
+
 .word-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;

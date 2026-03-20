@@ -213,7 +213,8 @@ watch(
 </script>
 
 <template>
-  <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
+  <main class="max-w-xl mx-auto px-4 py-16 space-y-10">
+
     <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline">
       ← Back to topic quizzes
     </NuxtLink>
@@ -237,13 +238,13 @@ watch(
 
       <div v-if="showQuiz" class="space-y-6">
 
-        <div class="max-w-xl mx-auto w-full space-y-4">
+        <div class="max-w-xl mx-auto w-full space-y-8">
 
           <div class="min-h-[90px] flex items-center justify-center">
             <div class="w-full text-center">
               <div class="inline-block text-left space-y-2 transition-all duration-300"
                 :class="answered ? 'blur-0 opacity-100' : 'blur-md opacity-70 select-none'">
-                <p class="text-3xl text-gray-700 leading-relaxed">
+                <p class="text-2xl text-gray-900 leading-relaxed">
                   <span class="font-semibold">{{ question.prompt }}</span>
                 </p>
 

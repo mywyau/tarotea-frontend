@@ -237,7 +237,7 @@ watch(
 
         <div class="space-y-3">
           <div class="flex flex-col items-center justify-center min-h-[120px]">
-            <p class="text-3xl leading-relaxed font-semibold text-center">
+            <p class="text-2xl text-gray-900 leading-relaxed font-semibold text-center">
               {{ question.prompt }}
             </p>
 

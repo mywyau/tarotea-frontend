@@ -214,11 +214,11 @@ watch(
 <template>
     <main class="max-w-2xl mx-auto px-4 py-16 space-y-8">
         <NuxtLink v-if="current < questions.length" :to="`/quiz`" class="text-black text-sm hover:underline">
-            ← Back to level quizzes
+            ← Back
         </NuxtLink>
 
         <section class="text-center space-y-4">
-            <h1 class="text-2xl font-semibold">
+            <h1 class="text-2xl font-semibold level-heading">
                 {{ data?.title ?? 'Sentence Quiz' }}
             </h1>
 
@@ -326,6 +326,21 @@ watch(
 </template>
 
 <style scoped>
+
+.level-heading {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
+}
+
+.level-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
+}
+
 .card-fade-enter-active {
     transition: opacity 0.4s ease, transform 0.4s ease;
 }

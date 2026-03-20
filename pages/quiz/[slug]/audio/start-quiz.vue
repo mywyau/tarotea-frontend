@@ -71,7 +71,7 @@ watchEffect(() => {
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
     <NuxtLink :to="`/quiz/`" class="text-sm text-black hover:underline">
-      ← All quizzes
+      ← Back
     </NuxtLink>
 
     <!-- 🔒 Locked -->
@@ -97,11 +97,11 @@ watchEffect(() => {
     <!-- ✅ Quiz intro -->
     <section v-else class="quiz-card text-center space-y-6">
 
-      <h1 class="text-3xl font-semibold text-black">
+      <h1 class="text-3xl font-semibold text-black level-heading">
         Level {{ levelNumber }}
       </h1>
 
-      <p class="text-black">
+      <p class="text-black level-subheading">
         Practice and test your listening skills from this level.
       </p>
 
@@ -134,6 +134,21 @@ watchEffect(() => {
 </template>
 
 <style scoped>
+
+.level-heading {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
+}
+
+.level-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
+}
+
 .quiz-intro-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;

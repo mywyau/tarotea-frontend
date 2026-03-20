@@ -108,6 +108,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+
 /* Palette variables */
 .levels-page {
   --pink: #EAB8E4;
