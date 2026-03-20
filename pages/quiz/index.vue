@@ -23,7 +23,7 @@ const canEnterLevel = (level: any) => {
   if (isComingSoon(level)) return false
 
   if (isFreeLevel(level.number)) return true
-  
+
   return canAccessLevelQuiz(level, entitlement.value!)
 }
 
@@ -44,7 +44,7 @@ const canEnterLevel = (level: any) => {
         Level Quiz
       </h1>
       <p class="text-gray-600 text-sm sm:text-base level-subheading">
-        Progress through structured and progressively trickier Cantonese content. 
+        Progress through structured and progressively trickier Cantonese content.
       </p>
     </header>
 
@@ -75,11 +75,19 @@ const canEnterLevel = (level: any) => {
         <!-- Buttons -->
         <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
           <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`" class="level-btn level-btn-blue">
-            Word Quiz
+            Vocabulary
           </NuxtLink>
 
           <NuxtLink :to="`/quiz/${quizLevel.id}/audio/start-quiz`" class="level-btn level-btn-purple">
-            Audio Quiz
+            Audio
+          </NuxtLink>
+
+          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences`" class="level-btn level-btn-purple">
+            Sentences
+          </NuxtLink>
+
+          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/audio`" class="level-btn level-btn-purple">
+            Sentence Audio Quiz
           </NuxtLink>
         </div>
 
