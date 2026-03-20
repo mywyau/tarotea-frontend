@@ -3,7 +3,7 @@ export type SentenceQuizQuestion = {
   sentenceId: string
   prompt: string
   jyutping: string
-  correctMeaning: string
+  correctSentence: string
   options: string[]
   correctIndex: number
   sourceWord: string
@@ -24,25 +24,25 @@ type TopicSentenceItem = {
 }
 
 export function buildSentenceQuiz(items: TopicSentenceItem[]): SentenceQuizQuestion[] {
-  const allMeanings = items.map(i => i.meaning)
+  const allSentences = items.map(i => i.sentence)
 
   return shuffleFisherYates(items).map((item) => {
     const wrongOptions = shuffleFisherYates(
-      allMeanings.filter(m => m !== item.meaning)
+      allSentences.filter(s => s !== item.sentence)
     ).slice(0, 3)
 
     const options = shuffleFisherYates([
-      item.meaning,
+      item.sentence,
       ...wrongOptions
     ])
 
     return {
       sentenceId: item.sentenceId,
-      prompt: item.sentence,
+      prompt: item.meaning, // English prompt
       jyutping: item.jyutping,
-      correctMeaning: item.meaning,
-      options,
-      correctIndex: options.findIndex(o => o === item.meaning),
+      correctSentence: item.sentence,
+      options, // Chinese answers
+      correctIndex: options.findIndex(o => o === item.sentence),
       sourceWord: item.sourceWord,
       sourceWordMeaning: item.sourceWordMeaning
     }

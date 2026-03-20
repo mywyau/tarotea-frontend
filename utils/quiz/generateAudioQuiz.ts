@@ -1,4 +1,4 @@
-import type { Word } from "./levelOneWords";
+import type { Word } from "~/types/level/quiz/types";
 
 export type AudioQuizQuestion = {
   wordId: string;
@@ -6,6 +6,9 @@ export type AudioQuizQuestion = {
   audioKey: string;
   options: string[];
   correctIndex: number;
+  meaning: string;
+  jyutping: string;
+  correctWord: string;
 };
 
 export function generateAudioQuiz(
@@ -15,22 +18,24 @@ export function generateAudioQuiz(
   const selected = shuffleFisherYates(words).slice(0, count);
 
   return selected.map((word) => {
-    const distractors = shuffleFisherYates(words.filter((w) => w.id !== word.id)).slice(
-      0,
-      3,
-    );
+    const distractors = shuffleFisherYates(
+      words.filter((w) => w.id !== word.id)
+    ).slice(0, 3);
 
     const options = shuffleFisherYates([
-      word.meaning,
-      ...distractors.map((w) => w.meaning),
+      word.word,
+      ...distractors.map((w) => w.word),
     ]);
 
     return {
-      wordId: word.id, // ← THIS IS THE FIX
+      wordId: word.id,
       type: "audio",
       audioKey: `${word.id}.mp3`,
       options,
-      correctIndex: options.indexOf(word.meaning),
+      correctIndex: options.indexOf(word.word),
+      meaning: word.meaning,
+      jyutping: word.jyutping,
+      correctWord: word.word,
     };
   });
 }

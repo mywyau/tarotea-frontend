@@ -95,7 +95,7 @@ const wordProgressMap = ref<
 
 const STREAK_CAP = 5
 const WRONG_PENALTY = -12
-const MIN_CALCULATING_MS = 1800
+const MIN_CALCULATING_MS = 1500
 
 function deltaFor(correct: boolean, streakBefore: number) {
   if (!correct) return WRONG_PENALTY
