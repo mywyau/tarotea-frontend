@@ -44,7 +44,7 @@ onMounted(async () => {
       </p>
     </header>
 
-    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
 
       <li v-for="(level, index) in levelSelectMetaData" :key="level.id"
         class="rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :style="{

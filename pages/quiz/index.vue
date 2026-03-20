@@ -49,7 +49,7 @@ const canEnterLevel = (level: any) => {
     </header>
 
     <!-- Grid -->
-    <ul class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
       <li v-for="quizLevel in levelSelectMetaData" :key="quizLevel.id" class="level-card" :class="[
         quizLevel.comingSoon
@@ -150,7 +150,11 @@ const canEnterLevel = (level: any) => {
 
 /* Buttons */
 .level-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  min-height: 56px;
   padding: 0.6rem 0.75rem;
   font-size: 0.85rem;
   border-radius: 8px;
