@@ -74,8 +74,6 @@ const tileColors = ref<string[]>([])
 const totalXpEarned = ref<number>(0)
 
 const animatedAccuracy = ref(0)
-const animatedCorrect = ref(0)
-const animatedIncorrect = ref(0)
 const animatedXpEarned = ref(0)
 
 const completionAnimated = ref(false)
@@ -256,16 +254,12 @@ async function next() {
 
 function resetCompletionAnimations() {
   animatedAccuracy.value = 0
-  animatedCorrect.value = 0
-  animatedIncorrect.value = 0
   animatedXpEarned.value = 0
   completionAnimated.value = false
 }
 
 function runCompletionAnimations() {
   animateCount(animatedAccuracy, accuracy.value, 2300)
-  animateCount(animatedCorrect, score.value, 3000)
-  animateCount(animatedIncorrect, incorrectCount.value, 3500)
 }
 
 const percentage = computed(() => {

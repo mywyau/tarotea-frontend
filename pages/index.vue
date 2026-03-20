@@ -28,7 +28,7 @@ const { data: stats } = await useFetch('/api/stats', {
       </h1>
 
       <p class="mt-4 text-lg text-gray-700 max-w-xl mx-auto">
-        Structured content and material to help you on your cantonese studying journey.
+        Structured material and tools to help you on your studying journey.
       </p>
 
       <NuxtLink to="/topics" class="mt-8 inline-block font-semibold px-8 py-3 rounded-lg
