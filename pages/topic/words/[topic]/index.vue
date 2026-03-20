@@ -150,11 +150,13 @@ const gatedCategories = computed(() => {
       <p class="topic-subheading mt-2">{{ topic.description }}</p>
     </header>
 
-    <section v-for="category in gatedCategories" :key="category.key" class="space-y-8">
+    <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
 
-      <h2 class="category-heading">
-        {{ category.title }}
-      </h2>
+      <div class="flex items-baseline justify-between gap-4">
+        <h2 class="category-heading">
+          {{ category.title }}
+        </h2>
+      </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 
@@ -173,7 +175,6 @@ const gatedCategories = computed(() => {
 </template>
 
 <style scoped>
-
 .topic-heading {
   font-size: 1.3rem;
   text-transform: uppercase;
@@ -192,7 +193,6 @@ const gatedCategories = computed(() => {
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-    color: rgba(17, 24, 39, 0.65);
+  color: rgba(0, 0, 0);
 }
-
 </style>

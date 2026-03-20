@@ -147,10 +147,9 @@ onMounted(loadProgress)
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
-    <section v-for="category in gatedCategories" :key="category.key" class="category-card rounded-xl">
+    <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
 
       <div class="flex items-baseline justify-between gap-4">
-
         <h2 class="category-heading">
           {{ category.title }}
         </h2>
@@ -196,7 +195,7 @@ onMounted(loadProgress)
   font-size: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(17, 24, 39, 0.65);
+  color: rgba(0, 0, 0);
 }
 
 .header-card {
