@@ -271,7 +271,20 @@ async function nextWord() {
 
     await finalizeDaily()
 
-    playQuizCompleteFanfareSong()  // 🎉 play completion sound
+    // playQuizCompleteFanfareSong()  // 🎉 play completion sound
+
+    if (totalQuestions.value > 0) {
+        const percent = (correctCount.value / totalQuestions.value) * 100
+
+        if (percent >= 90) {
+            playQuizCompleteFanfareSong()
+        } else if (percent >= 50) {
+            playQuizCompleteOkaySong()
+        } else {
+            playQuizCompleteFailSong()
+        }
+    }
+
     challenge.value = null
     state.value = 'complete'
 }
@@ -313,6 +326,8 @@ async function finalizeDaily() {
 
 async function fetchChallenge() {
     state.value = 'loading'
+
+    resetCompletionAnimations()
 
     try {
         await loadEligibility()
@@ -412,11 +427,103 @@ async function submit() {
     showNext.value = true
 }
 
+const animatedAccuracy = ref(0)
+const animatedXpEarned = ref(0)
+const completionAnimated = ref(false)
+
+const incorrectCount = computed(() =>
+    Math.max(0, totalQuestions.value - correctCount.value)
+)
+
+const accuracy = computed(() => {
+    if (!totalQuestions.value) return 0
+    return Math.round((correctCount.value / totalQuestions.value) * 100)
+})
+
+const resultHeroClass = computed(() => {
+    if (accuracy.value === 100) return 'result-3'
+    if (accuracy.value >= 70) return 'result-0'
+    if (accuracy.value >= 50) return 'result-2'
+    return 'result-1'
+})
+
+const resultMeta = computed(() => {
+    if (accuracy.value === 100) {
+        return { title: 'Perfect' }
+    }
+
+    if (accuracy.value >= 70) {
+        return { title: 'Great job' }
+    }
+
+    if (accuracy.value >= 50) {
+        return { title: 'Nice try' }
+    }
+
+    return { title: 'Keep practicing' }
+})
+
+const completionTiles = computed(() => [
+    {
+        label: 'Correct',
+        value: correctCount.value,
+        suffix: '',
+        className: 'result-0'
+    },
+    {
+        label: 'Incorrect',
+        value: incorrectCount.value,
+        suffix: '',
+        className: 'result-1'
+    },
+    {
+        label: 'XP Earned',
+        value: animatedXpEarned.value,
+        suffix: 'XP',
+        className: 'result-2',
+        prefix: animatedXpEarned.value > 0 ? '+' : ''
+    }
+])
+
+function animateCount(target: { value: number }, end: number, duration = 1200) {
+    const start = target.value
+    const startTime = performance.now()
+
+    function tick(now: number) {
+        const progress = Math.min((now - startTime) / duration, 1)
+        target.value = Math.round(start + (end - start) * progress)
+
+        if (progress < 1) {
+            requestAnimationFrame(tick)
+        }
+    }
+
+    requestAnimationFrame(tick)
+}
+
+function resetCompletionAnimations() {
+    animatedAccuracy.value = 0
+    animatedXpEarned.value = 0
+    completionAnimated.value = false
+}
+
 watch(
     () => challenge.value?.audioUrl,
     (src) => {
         if (!src) return
         setTimeout(() => playAudio(), 300)
+    }
+)
+
+watch(
+    () => state.value,
+    (value) => {
+        if (value !== 'complete') return
+        if (completionAnimated.value) return
+
+        completionAnimated.value = true
+        animateCount(animatedAccuracy, accuracy.value, 2200)
+        animateCount(animatedXpEarned, xpEarned.value, 1000)
     }
 )
 
@@ -472,15 +579,15 @@ watch(
             </div>
 
             <!-- Completion -->
-            <div v-else-if="state === 'complete'" class="flex flex-col items-center text-center px-4 py-6">
+            <!-- <div v-else-if="state === 'complete'" class="flex flex-col items-center text-center px-4 py-6"> -->
 
-                <!-- Title -->
-                <h2 class="text-xl sm:text-2xl font-bold mb-6 tracking-wide">
+            <!-- Title -->
+            <!-- <h2 class="text-xl sm:text-2xl font-bold mb-6 tracking-wide">
                     Daily Exercise Complete!
-                </h2>
+                </h2> -->
 
-                <!-- Score Card -->
-                <div class="w-full max-w-sm rounded-xl p-5 mb-3">
+            <!-- Score Card -->
+            <!-- <div class="w-full max-w-sm rounded-xl p-5 mb-3">
 
                     <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">
                         Score
@@ -494,10 +601,10 @@ watch(
 
                     </div>
 
-                </div>
+                </div> -->
 
-                <!-- XP Card -->
-                <div class="w-full max-w-sm rounded-xl p-5 mb-4">
+            <!-- XP Card -->
+            <!-- <div class="w-full max-w-sm rounded-xl p-5 mb-4">
 
                     <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">
                         XP Earned
@@ -507,10 +614,10 @@ watch(
                         +{{ xpEarned }} XP
                     </p>
 
-                </div>
+                </div> -->
 
-                <!-- Countdown -->
-                <div class="w-full max-w-sm rounded-xl p-5 mb-8">
+            <!-- Countdown -->
+            <!-- <div class="w-full max-w-sm rounded-xl p-5 mb-8">
 
                     <p class="text-xs uppercase tracking-wide text-gray-500 mb-3">
                         Next daily unlocks in
@@ -529,6 +636,68 @@ watch(
 
                     </div>
 
+                </div> -->
+            <!-- </div> -->
+
+            <div v-else-if="state === 'complete'" class="space-y-6">
+                <transition name="card-fade" appear>
+                    <div class="stat-card hero-card" :class="resultHeroClass">
+                        <p class="stat-label">
+                            Daily Exercise Complete
+                        </p>
+
+                        <h2 class="hero-title">
+                            {{ resultMeta.title }}
+                        </h2>
+
+                        <p class="hero-score">
+                            {{ animatedAccuracy }}%
+                        </p>
+
+                        <p class="hero-subtext">
+                            {{ correctCount }} / {{ totalQuestions }} correct
+                        </p>
+                    </div>
+                </transition>
+
+                <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                    <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+                        :class="tile.className">
+                        <p class="stat-label">
+                            {{ tile.label }}
+                        </p>
+
+                        <p class="stat-value">
+                            {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
+                        </p>
+                    </div>
+                </transition-group>
+
+                <!-- <div class="stat-card result-2"> -->
+                <div class="text-center">
+                    <p class="stat-label">
+                        Next daily unlocks in
+                    </p>
+
+                    <div class="countdown-pill mt-4">
+                        <span class="countdown-text brightness-125">
+                            {{ timeRemaining }}
+                        </span>
+                    </div>
+                </div>
+
+                <div class="pt-2 space-y-3">
+                    <NuxtLink to="/"
+                        class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+                        style="background-color:#A8CAE0;">
+                        Back to home
+                    </NuxtLink>
+
+                    <NuxtLink to="/topics/quiz"
+                        class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
+                        style="background-color:rgba(244,205,39,0.35);">
+                        Explore more practice
+                    </NuxtLink>
                 </div>
             </div>
 
@@ -707,5 +876,101 @@ watch(
     to {
         transform: rotate(360deg);
     }
+}
+
+.card-fade-enter-active {
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.card-fade-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.stat-card {
+    border-radius: 22px;
+    padding: 1.5rem;
+    text-align: center;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 0.75rem;
+    color: #111827;
+}
+
+.result-0 {
+    background: rgba(168, 202, 224, 0.45);
+}
+
+.result-1 {
+    background: rgba(246, 225, 225, 0.75);
+}
+
+.result-2 {
+    background: rgba(244, 205, 39, 0.35);
+}
+
+.result-3 {
+    background: rgba(168, 224, 182, 0.45);
+}
+
+.hero-card {
+    padding: 2rem 1.5rem;
+}
+
+.hero-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 0.35rem;
+    color: #111827;
+}
+
+.hero-score {
+    font-size: 3rem;
+    line-height: 1;
+    font-weight: 600;
+    margin-top: 0.9rem;
+    color: #111827;
+}
+
+.hero-subtext {
+    margin-top: 0.65rem;
+    font-size: 0.95rem;
+    color: rgba(17, 24, 39, 0.68);
+}
+
+.countdown-pill {
+    background: #111827;
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+}
+
+.countdown-text {
+    font-size: 1.75rem;
+    font-weight: 600;
+    background: linear-gradient(90deg,
+            #EAB8E4 0%,
+            #A8CAE0 50%,
+            #D6A3D1 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
 </style>
