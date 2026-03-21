@@ -1,5 +1,5 @@
 export type EligibilityResponse = {
-    wordsSeen: number
+    words_seen: number
 }
 
 export type DailyDecode = {

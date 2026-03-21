@@ -2,7 +2,7 @@
 
 definePageMeta({
     ssr: false,
-    middleware: ['coming-soon'],
+    // middleware: ['coming-soon'],
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
@@ -92,7 +92,7 @@ async function loadEligibility() {
         }
     })
 
-    seenWords.value = res.wordsSeen ?? 0
+    seenWords.value = res.words_seen ?? 0
 }
 
 function normalizeJyutping(raw: string): string {
@@ -103,6 +103,7 @@ function normalizeJyutping(raw: string): string {
         .replace(/\s+/g, ' ')
         .replace(/-/g, ' ')
 }
+
 
 function baseSound(jp: string): string {
     return normalizeJyutping(jp)
