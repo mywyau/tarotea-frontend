@@ -1,60 +1,12 @@
 <script setup lang="ts">
 
-
 definePageMeta({
     ssr: false,
     middleware: ['coming-soon'],
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
-
-type EligibilityResponse = {
-    wordsSeen: number
-}
-
-type DailyDecode = {
-    date: string // "YYYY-MM-DD"
-    wordId: string
-    word: string
-    jyutping: string // canonical answer, e.g. "gwai6" or "mou5 so2 wai6"
-    meaning?: string
-    audioUrl?: string // optional if you host audio assets
-}
-
-type AttemptLog = {
-    input: string
-    passed: boolean
-    perfect: boolean
-    message: string
-    letters?: string[]
-    letterStates?: ('correct' | 'wrong')[]
-}
-
-type DailyStartResponse = {
-    session: {
-        completed: boolean
-        word_ids: string[]
-        answered_count: number
-        correct_count: number
-        xp_earned: number
-        total_questions: number
-    }
-    dailyLocked?: boolean
-}
-
-type QuizState =
-    | 'locked'
-    | 'loading'
-    | 'playing'
-    | 'finalizing'
-    | 'complete'
-    | 'error'
-
-
-type SessionAnswer = {
-    wordId: string
-    correct: boolean
-}
+import type { AttemptLog, SessionAnswer, DailyStartResponse, QuizState, EligibilityResponse, DailyDecode } from '~/types/daily/jyutping/types'
 
 const tips = [
     'No need to be perfect first try.',
@@ -277,6 +229,7 @@ function playAudio() {
 
 
 async function loadWord(id: string) {
+
     const { data, error } = await useFetch(() => `/api/words/${id}`, {
         key: () => `word-${id}`,
         server: false, // since ssr:false, keep it client-side
