@@ -135,7 +135,7 @@ async function loadEligibility() {
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
 
-    const res = await $fetch<EligibilityResponse>('/api/me/stats', {
+    const res = await $fetch<EligibilityResponse>('/api/user/stats', {
         headers: {
             Authorization: `Bearer ${token}`
         }
@@ -581,8 +581,8 @@ watch(
 
             <!-- Locked -->
             <div v-else-if="state === 'locked'" class="py-8 text-center space-y-4">
-                <div class="inline-block rounded-xl px-4 py-2 text-sm font-medium text-black"
-                    style="background: rgb(249, 166, 166);">
+
+                <div class="inline-block rounded-xl px-4 py-2 text-sm font-medium text-black">
                     Quiz locked
                 </div>
 

@@ -1,8 +1,8 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
+import { consumeWhisperAttemptMonthly } from "../db/whisper/consumeWhisperAttemptMonthly";
 import { getUserEntitlement } from "../utils/getEntitlement";
 import { requireUser } from "../utils/requireUser";
-import { consumeWhisperAttemptMonthly } from "../utils/whisper/consumeWhisperAttemptMonthly";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -98,110 +98,6 @@ function computePronunciationScore(params: {
 
   return Math.round(clamp(score, 0, 100));
 }
-
-// function buildResult(params: {
-//   expectedChinese: string;
-//   expectedJyutping: string;
-//   transcript: string;
-//   avgLogprob: number | null;
-//   // targetWord?: string;
-// }) {
-//   const expected = normalizeChinese(params.expectedChinese);
-//   const heard = normalizeChinese(params.transcript);
-//   const sim = similarity(expected, heard);
-//   const confidence = confidenceLabel(params.avgLogprob);
-//   const unit = "phrase";
-
-//   // const normalizedTargetWord = normalizeChinese(params.targetWord || "");
-
-//   // const containsTargetWord =
-//   //   !normalizedTargetWord || heard.includes(normalizedTargetWord);
-
-//   if (containsLatinLetters(params.transcript)) {
-//     return {
-//       score: 0,
-//       matchType: "wrong-language",
-//       confidence,
-//       feedback: `I heard English or Latin letters. Please say the Cantonese ${unit} only.`,
-//     };
-//   }
-
-//   if (!heard) {
-//     return {
-//       score: 0,
-//       matchType: "unclear",
-//       confidence,
-//       feedback: `I couldn’t hear a clear attempt. Try again in a quiet place and say only the target ${unit}.`,
-//     };
-//   }
-
-//   if (!containsCJK(heard)) {
-//     return {
-//       score: 0,
-//       matchType: "wrong-language",
-//       confidence,
-//       feedback: `I didn’t hear a Chinese ${unit} clearly. Please say the Cantonese ${unit} only.`,
-//     };
-//   }
-
-//   if (heard === expected) {
-//     // const score =
-//     //   confidence === "high" ? 92 : confidence === "medium" ? 84 : 76;
-
-//     return {
-//       score,
-//       matchType: "exact",
-//       confidence,
-//       feedback: `Nice — I heard exactly “${params.expectedChinese}”. That means your ${unit} was understood. Keep aiming for ${params.expectedJyutping}.`,
-//     };
-//   }
-
-//   if (sim >= 0.85) {
-//     // const score =
-//     //   confidence === "high" ? 88 : confidence === "medium" ? 80 : 72;
-
-//     return {
-//       score,
-//       matchType: "near-exact",
-//       confidence,
-//       feedback: `Very close. I heard “${params.transcript}”, which is a natural variant of “${params.expectedChinese}”. Good job — try to match the full phrase even more closely: ${params.expectedJyutping}.`,
-//     };
-//   }
-
-//   if (heard.includes(expected) || expected.includes(heard)) {
-//     return {
-//       score: confidence === "high" ? 82 : 74,
-//       matchType: "close",
-//       confidence,
-//       feedback: `Close. I heard “${params.transcript}”. The target was “${params.expectedChinese}”. Try saying the full ${unit} clearly: ${params.expectedJyutping}.`,
-//     };
-//   }
-
-//   if (sim >= 0.7) {
-//     return {
-//       score: confidence === "high" ? 72 : 64,
-//       matchType: "close",
-//       confidence,
-//       feedback: `Close. I heard “${params.transcript}” instead of “${params.expectedChinese}”. Try saying the whole phrase a bit more clearly and naturally: ${params.expectedJyutping}.`,
-//     };
-//   }
-
-//   if (sim >= 0.5) {
-//     return {
-//       score: 45,
-//       matchType: "partial",
-//       confidence,
-//       feedback: `Partly understood. I heard “${params.transcript}”. Try again and focus on the full phrase: ${params.expectedJyutping}.`,
-//     };
-//   }
-
-//   return {
-//     score: 15,
-//     matchType: "wrong",
-//     confidence,
-//     feedback: `I heard “${params.transcript}”, which sounds quite different from “${params.expectedChinese}”. Listen once more and repeat slowly: ${params.expectedJyutping}.`,
-//   };
-// }
 
 function buildResult(params: {
   expectedChinese: string;

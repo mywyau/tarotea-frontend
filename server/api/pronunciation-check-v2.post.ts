@@ -3,8 +3,8 @@ import OpenAI from "openai";
 import { getCurrentAllowanceWindow } from "../utils/getCurrentAllowanceWindow";
 import { getUserEntitlement } from "../utils/getEntitlement";
 import { requireUser } from "../utils/requireUser";
-import { consumeWhisperAttemptMonthly } from "../utils/whisper/consumeWhisperAttemptMonthly";
-import { consumeWhisperAttemptSubscriptionMonthV2 } from "../utils/whisper/consumeWhisperAttemptSubscriptionMonthV2";
+import { consumeWhisperAttemptMonthly } from "../db/whisper/consumeWhisperAttemptMonthly";
+import { consumeWhisperAttemptSubscriptionMonthV2 } from "../db/whisper/consumeWhisperAttemptSubscriptionMonthV2";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
