@@ -33,7 +33,7 @@ const canEnterLevel = (level: any) => {
 </script>
 
 <template>
-  <main class="levels-page max-w-5xl mx-auto py-10 px-4 space-y-8">
+  <main class="levels-page max-w-4xl mx-auto py-10 px-4 space-y-8">
 
     <div class="mb-6">
       <NuxtLink :to="`/dojo`" class="text-black text-sm hover:underline">
@@ -52,7 +52,7 @@ const canEnterLevel = (level: any) => {
     </header>
 
     <!-- Grid -->
-    <ul class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
       <li v-for="quizLevel in jyutPingQuizSelectMetaData" :key="quizLevel.id" class="
           rounded-2xl
