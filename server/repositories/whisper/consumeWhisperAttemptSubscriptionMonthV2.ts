@@ -1,5 +1,5 @@
 import { createError } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 interface SubscriptionMonthUsageRow {
   attempts: number;

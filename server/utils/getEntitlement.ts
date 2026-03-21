@@ -1,7 +1,9 @@
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import type { Entitlement } from "~/types/auth/entitlements";
 
-export async function getUserEntitlement(userId: string): Promise<Entitlement | null> {
+export async function getUserEntitlement(
+  userId: string,
+): Promise<Entitlement | null> {
   const { rows } = await db.query(
     `
     SELECT
@@ -15,7 +17,7 @@ export async function getUserEntitlement(userId: string): Promise<Entitlement | 
     WHERE user_id = $1
     LIMIT 1
     `,
-    [userId]
+    [userId],
   );
 
   return rows[0] ?? null;

@@ -1,8 +1,6 @@
 import { createError, getHeader, readRawBody } from "h3";
 import Stripe from "stripe";
-import { db } from "~/server/db";
-
-const requestId = crypto.randomUUID();
+import { db } from "~/server/repositories/db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
@@ -18,59 +16,141 @@ type SubscriptionStatus =
 interface Entitlement {
   plan: "free" | "monthly" | "yearly";
   subscription_status: SubscriptionStatus;
+  current_period_start?: string;
   cancel_at_period_end: boolean;
   current_period_end?: string;
   canceled_at?: string;
 }
 
+// function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
+//   const item = sub.items?.data?.[0];
+
+//   // 👇 Stripe-safe interpretation
+//   const cancelAtPeriodEnd =
+//     sub.cancel_at_period_end ||
+//     (sub.cancel_at && sub.cancel_at * 1000 > Date.now());
+
+//   return {
+//     plan: (sub.metadata.plan as "monthly" | "yearly") ?? "free",
+//     subscription_status: sub.status as SubscriptionStatus,
+//     cancel_at_period_end: Boolean(cancelAtPeriodEnd),
+
+//     ...(item?.current_period_end && {
+//       current_period_end: new Date(
+//         item.current_period_end * 1000,
+//       ).toISOString(),
+//     }),
+
+//     ...(sub.canceled_at && {
+//       canceled_at: new Date(sub.canceled_at * 1000).toISOString(),
+//     }),
+//   };
+// }
+
+// function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
+//   const item = sub.items?.data?.[0];
+
+//   const cancelAtPeriodEnd =
+//     sub.cancel_at_period_end ||
+//     (sub.cancel_at && sub.cancel_at * 1000 > Date.now());
+
+//   const rawPlan = sub.metadata.plan;
+//   const plan = rawPlan === "monthly" || rawPlan === "yearly" ? rawPlan : "free";
+
+//   return {
+//     // plan: (sub.metadata.plan as "monthly" | "yearly") ?? "free",
+//     plan: plan,
+//     subscription_status: sub.status as SubscriptionStatus,
+//     cancel_at_period_end: Boolean(cancelAtPeriodEnd),
+
+//     ...(item?.current_period_start && {
+//       current_period_start: new Date(
+//         item.current_period_start * 1000,
+//       ).toISOString(),
+//     }),
+
+//     ...(item?.current_period_end && {
+//       current_period_end: new Date(
+//         item.current_period_end * 1000,
+//       ).toISOString(),
+//     }),
+
+//     ...(sub.canceled_at && {
+//       canceled_at: new Date(sub.canceled_at * 1000).toISOString(),
+//     }),
+//   };
+// }
+
+function toSubscriptionStatus(status: string): SubscriptionStatus {
+  switch (status) {
+    case "active":
+    case "trialing":
+    case "past_due":
+    case "canceled":
+    case "incomplete_expired":
+      return status;
+    default:
+      throw new Error(`Unhandled subscription status: ${status}`);
+  }
+}
+
 function entitlementFromSubscription(sub: Stripe.Subscription): Entitlement {
   const item = sub.items?.data?.[0];
+  const rawPlan = sub.metadata.plan;
 
-  // 👇 Stripe-safe interpretation
+  if (rawPlan !== "monthly" && rawPlan !== "yearly") {
+    throw new Error(
+      `Missing or invalid subscription plan metadata for ${sub.id}`,
+    );
+  }
+
   const cancelAtPeriodEnd =
     sub.cancel_at_period_end ||
     (sub.cancel_at && sub.cancel_at * 1000 > Date.now());
 
   return {
-    plan: (sub.metadata.plan as "monthly" | "yearly") ?? "free",
-    subscription_status: sub.status as SubscriptionStatus,
+    plan: rawPlan,
+    subscription_status: toSubscriptionStatus(sub.status),
     cancel_at_period_end: Boolean(cancelAtPeriodEnd),
-
+    ...(item?.current_period_start && {
+      current_period_start: new Date(
+        item.current_period_start * 1000,
+      ).toISOString(),
+    }),
     ...(item?.current_period_end && {
       current_period_end: new Date(
         item.current_period_end * 1000,
       ).toISOString(),
     }),
-
     ...(sub.canceled_at && {
       canceled_at: new Date(sub.canceled_at * 1000).toISOString(),
     }),
   };
 }
 
-function getSubscriptionIdFromInvoiceLines(
-  invoice: Stripe.Invoice,
-): string | null {
-  const line = invoice.lines?.data?.[0] as any;
+// function getSubscriptionIdFromInvoiceLines(
+//   invoice: Stripe.Invoice,
+// ): string | null {
+//   const line = invoice.lines?.data?.[0] as any;
 
-  return typeof line?.parent?.subscription_item_details?.subscription ===
-    "string"
-    ? line.parent.subscription_item_details.subscription
-    : null;
-}
+//   return typeof line?.parent?.subscription_item_details?.subscription ===
+//     "string"
+//     ? line.parent.subscription_item_details.subscription
+//     : null;
+// }
 
-function getSubscriptionIdFromInvoice(invoice: Stripe.Invoice): string | null {
-  const parent = invoice.parent as any;
+// function getSubscriptionIdFromInvoice(invoice: Stripe.Invoice): string | null {
+//   const parent = invoice.parent as any;
 
-  if (
-    parent?.type === "subscription_details" &&
-    typeof parent?.subscription_details?.subscription === "string"
-  ) {
-    return parent.subscription_details.subscription;
-  }
+//   if (
+//     parent?.type === "subscription_details" &&
+//     typeof parent?.subscription_details?.subscription === "string"
+//   ) {
+//     return parent.subscription_details.subscription;
+//   }
 
-  return null;
-}
+//   return null;
+// }
 
 function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
   const parent = invoice.parent as any;
@@ -94,6 +174,8 @@ function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
 }
 
 export default defineEventHandler(async (event) => {
+  const requestId = crypto.randomUUID();
+
   const sig = getHeader(event, "stripe-signature");
   const body = await readRawBody(event);
 
@@ -150,19 +232,21 @@ export default defineEventHandler(async (event) => {
 
       await db.query(
         `
-      update entitlements
-        set
-          plan = $1,
-          subscription_status = $2,
-          cancel_at_period_end = $3,
-          current_period_end = $4,
-          canceled_at = $5
-      where user_id = $6
-    `,
+    UPDATE entitlements
+    SET
+      plan = $1,
+      subscription_status = $2,
+      cancel_at_period_end = $3,
+      current_period_start = $4,
+      current_period_end = $5,
+      canceled_at = $6
+    WHERE user_id = $7
+  `,
         [
           e.plan,
           e.subscription_status,
           e.cancel_at_period_end,
+          e.current_period_start,
           e.current_period_end,
           e.canceled_at,
           userId,
@@ -177,6 +261,13 @@ export default defineEventHandler(async (event) => {
       return { received: true };
     }
     case "invoice.payment_failed": {
+      //NOTE: for now intentionally no-op; subscription.updated handles downgrade state
+
+      console.warn("[STRIPE] invoice.payment_failed received", {
+        requestId,
+        invoiceId: (stripeEvent.data.object as Stripe.Invoice).id,
+      });
+
       const invoice = stripeEvent.data.object as Stripe.Invoice;
       const subId =
         typeof invoice.subscription === "string" ? invoice.subscription : null;
@@ -220,19 +311,21 @@ export default defineEventHandler(async (event) => {
         case "trialing": {
           await db.query(
             `
-              UPDATE entitlements
-              SET
-                plan = $1,
-                subscription_status = $2,
-                cancel_at_period_end = $3,
-                current_period_end = $4,
-                canceled_at = $5
-              WHERE user_id = $6
-            `,
+    UPDATE entitlements
+    SET
+      plan = $1,
+      subscription_status = $2,
+      cancel_at_period_end = $3,
+      current_period_start = $4,
+      current_period_end = $5,
+      canceled_at = $6
+    WHERE user_id = $7
+  `,
             [
               e.plan,
               e.subscription_status,
               e.cancel_at_period_end,
+              e.current_period_start,
               e.current_period_end,
               e.canceled_at,
               userId,
@@ -246,15 +339,16 @@ export default defineEventHandler(async (event) => {
         case "incomplete_expired": {
           await db.query(
             `
-              UPDATE entitlements
-              SET
-                plan = 'free',
-                subscription_status = $1,
-                cancel_at_period_end = false,
-                current_period_end = null,
-                canceled_at = $2
-              WHERE user_id = $3
-            `,
+    UPDATE entitlements
+    SET
+      plan = 'free',
+      subscription_status = $1,
+      cancel_at_period_end = false,
+      current_period_start = null,
+      current_period_end = null,
+      canceled_at = $2
+    WHERE user_id = $3
+  `,
             [
               e.subscription_status,
               e.canceled_at ?? new Date().toISOString(),
@@ -279,15 +373,16 @@ export default defineEventHandler(async (event) => {
 
       await db.query(
         `
-          update entitlements
-          set
-            plan = 'free',
-            subscription_status = 'canceled',
-            cancel_at_period_end = false,
-            current_period_end = null,
-            canceled_at = now()
-          where user_id = $1
-        `,
+    update entitlements
+    set
+      plan = 'free',
+      subscription_status = 'canceled',
+      cancel_at_period_end = false,
+      current_period_start = null,
+      current_period_end = null,
+      canceled_at = now()
+    where user_id = $1
+  `,
         [userId],
       );
 

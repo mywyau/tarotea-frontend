@@ -1,5 +1,5 @@
 import { createError } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 export async function consumeWhisperAttempt(userId: string) {
   const { rows } = await db.query(
@@ -14,7 +14,7 @@ export async function consumeWhisperAttempt(userId: string) {
 
     RETURNING attempts
     `,
-    [userId]
+    [userId],
   );
 
   if (rows.length === 0) {

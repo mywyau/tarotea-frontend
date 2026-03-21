@@ -1,5 +1,5 @@
 import { createError } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 export async function checkDailyWhisperAttempts(userId: string) {
   const { rows } = await db.query(
@@ -9,7 +9,7 @@ export async function checkDailyWhisperAttempts(userId: string) {
     WHERE user_id = $1
     AND created_at >= DATE_TRUNC('day', NOW())
     `,
-    [userId]
+    [userId],
   );
 
   const attemptsToday = rows[0]?.count ?? 0;

@@ -6,7 +6,7 @@ definePageMeta({
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
-import type { AttemptLog, SessionAnswer, DailyStartResponse, QuizState, EligibilityResponse, DailyDecode } from '~/types/daily/jyutping/types'
+import type { AttemptLog, DailyDecode, DailyStartResponse, EligibilityResponse, QuizState, SessionAnswer } from '~/types/daily/jyutping/types'
 
 const tips = [
     'No need to be perfect first try.',

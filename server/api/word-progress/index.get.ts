@@ -1,5 +1,5 @@
 import { createError, getQuery } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
 
   const wordIds = wordIdsParam
     .split(",")
-    .map(id => id.trim())
+    .map((id) => id.trim())
     .filter(Boolean);
 
   if (!wordIds.length) {

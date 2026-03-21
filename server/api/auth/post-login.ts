@@ -1,26 +1,25 @@
 // server/api/auth/post-login.post.ts
 
-import { readBody, createError } from 'h3'
-import { db } from '~/server/db' // adjust to your DB client
+import { readBody, createError } from "h3";
+import { db } from "~/server/repositories/db"; // adjust to your DB client
 
 type PostLoginBody = {
-  sub: string
-  email: string
-}
+  sub: string;
+  email: string;
+};
 
 export default defineEventHandler(async (event) => {
-  
-  const body = await readBody<PostLoginBody>(event)
+  const body = await readBody<PostLoginBody>(event);
 
   if (!body?.sub || !body?.email) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Missing user identity'
-    })
+      statusMessage: "Missing user identity",
+    });
   }
 
-  const userId = body.sub
-  const email = body.email
+  const userId = body.sub;
+  const email = body.email;
 
   // 1️⃣ Create user if not exists
   await db.query(
@@ -29,8 +28,8 @@ export default defineEventHandler(async (event) => {
     VALUES ($1, $2, NOW())
     ON CONFLICT (id) DO NOTHING
     `,
-    [userId, email]
-  )
+    [userId, email],
+  );
 
   // 2️⃣ Create entitlement if not exists
   await db.query(
@@ -39,8 +38,8 @@ export default defineEventHandler(async (event) => {
     VALUES ($1, 'free', 'no_subscription')
     ON CONFLICT (user_id) DO NOTHING
     `,
-    [userId]
-  )
+    [userId],
+  );
 
   // 3️⃣ Fetch combined user state
   const { rows } = await db.query(
@@ -54,8 +53,8 @@ export default defineEventHandler(async (event) => {
     JOIN entitlements e ON e.user_id = u.id
     WHERE u.id = $1
     `,
-    [userId]
-  )
+    [userId],
+  );
 
-  return rows[0]
-})
+  return rows[0];
+});

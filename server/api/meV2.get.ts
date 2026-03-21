@@ -1,5 +1,5 @@
 import { requireUser } from "@/server/utils/requireUser";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled";
 
@@ -18,9 +18,8 @@ interface MeResponse {
 }
 
 export default defineEventHandler(async (event): Promise<MeResponse> => {
-
   setHeader(event, "Cache-Control", "private, no-store");
-  
+
   const userId = await requireUser(event);
 
   console.log(

@@ -1,4 +1,4 @@
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { redis } from "~/server/redis";
 
 export default defineEventHandler(async () => {

@@ -1,8 +1,7 @@
-import { createError } from "h3"
-import { db } from "~/server/db"
+import { createError } from "h3";
+import { db } from "~/server/repositories/db";
 
 export async function requirePaidUser(userId: string) {
-
   const { rows } = await db.query(
     `
     SELECT plan, subscription_status, current_period_end
@@ -10,34 +9,34 @@ export async function requirePaidUser(userId: string) {
     WHERE user_id = $1
     LIMIT 1
     `,
-    [userId]
-  )
+    [userId],
+  );
 
-  const entitlement = rows[0]
+  const entitlement = rows[0];
 
   if (!entitlement) {
     throw createError({
       statusCode: 403,
       statusMessage: "Subscription required",
-    })
+    });
   }
 
-  const now = new Date()
+  const now = new Date();
   const periodEnd = entitlement.current_period_end
     ? new Date(entitlement.current_period_end)
-    : null
+    : null;
 
   const isActive =
     entitlement.subscription_status === "active" &&
     ["monthly", "yearly"].includes(entitlement.plan) &&
-    (!periodEnd || periodEnd > now)
+    (!periodEnd || periodEnd > now);
 
   if (!isActive) {
     throw createError({
       statusCode: 403,
       statusMessage: "Pro subscription required",
-    })
+    });
   }
 
-  return entitlement
+  return entitlement;
 }

@@ -6,14 +6,8 @@ import { useUpgrade } from '@/composables/useUpgrade';
 import { hasPaidAccess } from '~/utils/levels/permissions';
 
 const {
-  state,
-  authReady,
   isLoggedIn,
-  user,
   entitlement,
-  isCanceling,
-  currentPeriodEnd,
-  resolve,
 } = useMeStateV2();
 
 function upgrade(billing: 'monthly' | 'yearly') {

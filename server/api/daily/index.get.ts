@@ -5,7 +5,7 @@ import type {
   DailySessionRow,
 } from "@/types/daily/DailyItem";
 
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(

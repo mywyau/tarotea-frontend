@@ -1,6 +1,6 @@
 import { verifyAuth0Token } from "@/server/utils/auth0";
 import { H3Event, getHeader } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 export type SessionUser = {
   id: string; // auth0 sub

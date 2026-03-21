@@ -1,5 +1,5 @@
 import { readBody } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
     where user_id = $1
       and session_date = current_date
     `,
-    [userId, xpEarned, correctCount, totalQuestions]
+    [userId, xpEarned, correctCount, totalQuestions],
   );
 
   return { success: true };

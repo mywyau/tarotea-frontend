@@ -1,4 +1,4 @@
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 type Payload = {
   answers: Array<{ wordId: string; correct: boolean; delta: number }>;

@@ -1,5 +1,5 @@
 import { createError, getHeader, readBody } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 type Answer = { wordId: string; correct: boolean };
