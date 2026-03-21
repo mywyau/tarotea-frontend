@@ -170,7 +170,7 @@ watchEffect(() => {
           <option :value="1.4">1.4x</option>
           <option :value="1.2">1.2x</option>
           <option :value="1">1.0x</option>
-          <option :value="0.80">0.80x</option>
+          <option :value="0.80">0.8x</option>
           <option :value="0.6">0.6x</option>
         </select>
       </div>
