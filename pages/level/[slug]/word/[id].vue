@@ -205,7 +205,14 @@ watchEffect(() => {
                   </span>
                 </NuxtLink> -->
 
-                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/${index}`"
+                <!-- <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/${index}`"
+                  class="topic-btn-blush text-xs px-2 py-1 rounded-md shadow-sm transition">
+                  <span class="text-black">
+                    ▶︎
+                  </span>
+                </NuxtLink> -->
+
+                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
                   class="topic-btn-blush text-xs px-2 py-1 rounded-md shadow-sm transition">
                   <span class="text-black">
                     ▶︎
