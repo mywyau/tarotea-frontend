@@ -70,7 +70,6 @@ let tipInterval: number | undefined
 
 const { timeRemaining } = useCountdownToUtcMidnight()
 
-
 onMounted(() => {
     fetchChallenge()
 
