@@ -213,7 +213,7 @@ watch(
 </script>
 
 <template>
-  <main class="max-w-xl mx-auto px-4 py-16 space-y-10">
+  <main class="max-w-2xl mx-auto px-4 py-16 space-y-10">
 
     <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline">
       ← Back to topic quizzes
@@ -238,7 +238,7 @@ watch(
 
       <div v-if="showQuiz" class="space-y-6">
 
-        <div class="max-w-xl mx-auto w-full space-y-8">
+        <div class="max-w-2xl mx-auto w-full space-y-8">
 
           <div class="min-h-[90px] flex items-center justify-center">
             <div class="w-full text-center">
@@ -261,7 +261,7 @@ watch(
           </div>
 
           <div class="grid grid-cols-1 gap-4 w-full">
-            <button v-for="(option, i) in question.options" :key="i" class="rounded-xl flex items-center justify-center text-sm font-medium text-center p-5 select-none
+            <button v-for="(option, i) in question.options" :key="i" class="rounded-xl flex items-center justify-center text-lg font-medium text-center p-5 select-none
           transition-all duration-200 ease-out shadow-sm active:scale-95" :style="{
             backgroundColor:
               !answered
