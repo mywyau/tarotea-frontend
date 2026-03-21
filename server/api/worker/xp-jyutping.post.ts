@@ -1,4 +1,4 @@
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 type Payload = {
   answers: Array<{ wordId: string; correct: boolean; delta: number }>;
@@ -21,7 +21,7 @@ export default defineEventHandler(async () => {
       order by id
       limit 200
       for update skip locked
-      `
+      `,
     );
 
     if (!batchRes.rowCount) {
@@ -37,9 +37,7 @@ export default defineEventHandler(async () => {
       const userId = row.user_id as string;
 
       const payload: Payload =
-        typeof row.payload === "string"
-          ? JSON.parse(row.payload)
-          : row.payload;
+        typeof row.payload === "string" ? JSON.parse(row.payload) : row.payload;
 
       const answers = payload?.answers ?? [];
 
@@ -112,7 +110,7 @@ export default defineEventHandler(async () => {
           end,
           updated_at = now()
         `,
-        [userId, wordIds, deltas, corrects, MASTERY_CAP]
+        [userId, wordIds, deltas, corrects, MASTERY_CAP],
       );
 
       applied += wordIds.length;
@@ -125,7 +123,7 @@ export default defineEventHandler(async () => {
       set processed = true, processed_at = now()
       where id = any($1::bigint[])
       `,
-      [processedIds]
+      [processedIds],
     );
 
     await client.query("COMMIT");

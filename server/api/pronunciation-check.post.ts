@@ -1,6 +1,6 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
-import { consumeWhisperAttemptMonthly } from "../db/whisper/consumeWhisperAttemptMonthly";
+import { consumeWhisperAttemptMonthly } from "../repositories/whisper/consumeWhisperAttemptMonthly";
 import { getUserEntitlement } from "../utils/getEntitlement";
 import { requireUser } from "../utils/requireUser";
 

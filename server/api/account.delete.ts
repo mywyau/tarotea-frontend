@@ -4,7 +4,7 @@ import Stripe from "stripe";
 import { getUserFromSession } from "@/server/utils/auth";
 import { deleteAuth0User } from "@/server/utils/auth0";
 import { deleteUserData } from "@/server/utils/deleteUserData";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 export default defineEventHandler(async (event) => {
   // 1️⃣ Authenticate

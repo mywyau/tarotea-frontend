@@ -1,5 +1,5 @@
 import { setHeader } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { getUserEntitlement } from "~/server/utils/getEntitlement";
 import { requireUser } from "~/server/utils/requireUser";
 

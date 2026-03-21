@@ -13,11 +13,6 @@ const cdnBase = runtimeConfig.public.cdnBase
 const {
   authReady,
   isLoggedIn,
-  user,
-  entitlement,
-  isCanceling,
-  currentPeriodEnd,
-  resolve
 } = useMeStateV2()
 
 

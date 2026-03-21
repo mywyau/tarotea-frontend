@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { jyutPingQuizSelectMetaData } from '~/utils/levels/helpers'
-import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
-
 
 definePageMeta({
   ssr: false,
   middleware: ['logged-in'],
 })
+
+import { jyutPingQuizSelectMetaData } from '~/utils/levels/helpers'
+import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
 
 const {
   isLoggedIn,

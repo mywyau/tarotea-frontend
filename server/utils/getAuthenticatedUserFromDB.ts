@@ -1,5 +1,5 @@
 // import jwt from "jsonwebtoken"
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export async function getAuthenticatedUserFromDB(event: any) {

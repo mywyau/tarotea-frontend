@@ -1,6 +1,6 @@
 import { createError, getHeader, readBody } from "h3";
 import Stripe from "stripe";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

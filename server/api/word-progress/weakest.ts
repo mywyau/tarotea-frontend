@@ -1,27 +1,23 @@
-import { getQuery, createError } from "h3"
-import { db } from "~/server/db"
-import { requireUser } from "~/server/utils/requireUser"
+import { getQuery, createError } from "h3";
+import { db } from "~/server/repositories/db";
+import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
-  
-  const userId = await requireUser(event)
+  const userId = await requireUser(event);
 
-  const query = getQuery(event)
-  const levelSlug = query.level
-  const topicSlug = query.topic
+  const query = getQuery(event);
+  const levelSlug = query.level;
+  const topicSlug = query.topic;
 
   // ✅ Validate filter
-  if (
-    (!levelSlug && !topicSlug) ||
-    (levelSlug && topicSlug)
-  ) {
+  if ((!levelSlug && !topicSlug) || (levelSlug && topicSlug)) {
     throw createError({
       statusCode: 400,
       statusMessage: "Provide either level or topic",
-    })
+    });
   }
 
-  let rows
+  let rows;
 
   // ===============================
   // 🎯 LEVEL FILTER
@@ -43,10 +39,10 @@ export default defineEventHandler(async (event) => {
       where l.slug = $2
       order by coalesce(p.xp, 0) asc
       `,
-      [userId, levelSlug]
-    )
+      [userId, levelSlug],
+    );
 
-    rows = result.rows
+    rows = result.rows;
   }
 
   // ===============================
@@ -69,11 +65,11 @@ export default defineEventHandler(async (event) => {
       where t.slug = $2
       order by coalesce(p.xp, 0) asc
       `,
-      [userId, topicSlug]
-    )
+      [userId, topicSlug],
+    );
 
-    rows = result.rows
+    rows = result.rows;
   }
 
-  return rows ?? []
-})
+  return rows ?? [];
+});

@@ -1,5 +1,5 @@
 import { createError, readBody } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { redis } from "~/server/redis";
 import { requireUser } from "~/server/utils/requireUser";
 
@@ -126,7 +126,7 @@ export default defineEventHandler(async (event) => {
 
     /// lock based firing
 
-    const lockTimer = 10 // lock redis to only run every 10s can change to 60s
+    const lockTimer = 10; // lock redis to only run every 10s can change to 60s
 
     const lock = await redis.set(
       "xp_worker_lock",

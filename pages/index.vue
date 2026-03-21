@@ -119,7 +119,7 @@ const { data: stats } = await useFetch('/api/stats', {
         shadow-sm hover:shadow-md transition hover:brightness-110
         lg:col-span-4 lg:row-span-2" style="background-color:#EAB8E4;">
             <div class="text-lg font-semibold text-black">
-              Explore Topics
+              Topics
             </div>
             <div class="text-sm text-gray-800 mt-2">
               Browse structured vocabulary

@@ -1,10 +1,10 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
-import { consumeWhisperAttemptMonthly } from "../db/whisper/consumeWhisperAttemptMonthly";
-import { consumeWhisperAttemptSubscriptionMonthV2 } from "../db/whisper/consumeWhisperAttemptSubscriptionMonthV2";
-import { getCurrentAllowanceWindow } from "../utils/whisper/getCurrentAllowanceWindow";
+import { consumeWhisperAttemptMonthly } from "../repositories/whisper/consumeWhisperAttemptMonthly";
+import { consumeWhisperAttemptSubscriptionMonthV2 } from "../repositories/whisper/consumeWhisperAttemptSubscriptionMonthV2";
 import { getUserEntitlement } from "../utils/getEntitlement";
 import { requireUser } from "../utils/requireUser";
+import { getCurrentAllowanceWindow } from "../utils/whisper/getCurrentAllowanceWindow";
 import {
   averageLogprob,
   buildResult,
@@ -26,9 +26,9 @@ export default defineEventHandler(async (event) => {
     ["monthly", "yearly"].includes(entitlement.plan);
 
   const limit = isPaid ? 5000 : 10;
+  const MAX_AUDIO_SIZE = 1_000_000;
 
   const form = await readMultipartFormData(event);
-  const MAX_AUDIO_SIZE = 1_000_000;
 
   const audioFile = form?.find((f) => f.name === "audio");
 

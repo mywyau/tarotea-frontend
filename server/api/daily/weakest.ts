@@ -1,9 +1,9 @@
-import { createError } from "h3"
-import { db } from "~/server/db"
-import { requireUser } from "~/server/utils/requireUser"
+import { createError } from "h3";
+import { db } from "~/server/repositories/db";
+import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event)
+  const userId = await requireUser(event);
 
   const result = await db.query(
     `
@@ -22,8 +22,8 @@ export default defineEventHandler(async (event) => {
       coalesce(p.last_seen_at, '1970-01-01') asc
     limit 10
     `,
-    [userId]
-  )
+    [userId],
+  );
 
-  return result.rows
-})
+  return result.rows;
+});

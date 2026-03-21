@@ -1,7 +1,7 @@
-import { db } from '~/server/db'
+import { db } from "~/server/repositories/db";
 
 export async function deleteUserData(userId: string) {
-  await db.query('BEGIN')
+  await db.query("BEGIN");
 
   try {
     /**
@@ -19,14 +19,11 @@ export async function deleteUserData(userId: string) {
      * We intentionally do NOT manually delete from those tables
      * to avoid duplication and future maintenance bugs.
      */
-    await db.query(
-      `DELETE FROM users WHERE id = $1`,
-      [userId]
-    )
+    await db.query(`DELETE FROM users WHERE id = $1`, [userId]);
 
-    await db.query('COMMIT')
+    await db.query("COMMIT");
   } catch (err) {
-    await db.query('ROLLBACK')
-    throw err
+    await db.query("ROLLBACK");
+    throw err;
   }
 }

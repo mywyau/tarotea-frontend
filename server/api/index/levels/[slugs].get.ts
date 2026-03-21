@@ -1,6 +1,6 @@
 // import levelData from "@/server/api/index/levels/[id]";
 import { createError, getHeader, getRouterParam } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { isLevelId, levelIdToNumberMap } from "~/utils/levels/levels";
 import { isFreeLevel } from "~/utils/levels/permissions";
 

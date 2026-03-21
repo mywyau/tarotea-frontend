@@ -1,4 +1,4 @@
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 import { masteryXp } from "~/utils/xp/helpers";
 

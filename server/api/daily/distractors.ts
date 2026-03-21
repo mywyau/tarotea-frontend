@@ -1,5 +1,5 @@
 import { readBody } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 
 export default defineEventHandler(async (event) => {
   const { wordId, limit = 3 } = await readBody(event);
@@ -16,10 +16,10 @@ export default defineEventHandler(async (event) => {
     order by random()
     limit $2
     `,
-    [wordId, limit]
+    [wordId, limit],
   );
 
   return {
-    distractors: result.rows
+    distractors: result.rows,
   };
 });

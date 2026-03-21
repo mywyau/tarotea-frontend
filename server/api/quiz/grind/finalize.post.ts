@@ -1,5 +1,5 @@
 import { createError, getHeader, readBody } from "h3";
-import { db } from "~/server/db";
+import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 type Answer = { wordId: string; correct: boolean };
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Invalid payload" });
   }
 
-  const WRONG_PENALTY = -12
+  const WRONG_PENALTY = -12;
 
   // de-dupe answers
   const map = new Map<string, boolean>();
