@@ -3,7 +3,7 @@
 
 definePageMeta({
     ssr: false,
-    middleware: ['logged-in'],
+    middleware: ['coming-soon'],
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
@@ -69,7 +69,6 @@ const currentTipIndex = ref(0)
 let tipInterval: number | undefined
 
 const { timeRemaining } = useCountdownToUtcMidnight()
-
 
 onMounted(() => {
     fetchChallenge()
@@ -595,7 +594,7 @@ watch(
                     {{ wordsRemaining }} more to unlock.
                 </p>
 
-                <NuxtLink to="/topics" class="inline-block rounded-xl px-4 py-3 font-medium text-black"
+                <NuxtLink to="/topics/quiz" class="inline-block rounded-xl px-4 py-3 font-medium text-black"
                     style="background: rgb(249, 166, 166);">
                     Explore words
                 </NuxtLink>
