@@ -215,7 +215,7 @@ watchEffect(() => {
 
                                 <NuxtLink
                                     :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/v2/${index}`"
-                                    class="topic-btn-blush text-xs px-2 py-1 rounded-md shadow-sm transition">
+                                    class="topic-btn-blue text-xs px-2 py-1 rounded-md shadow-sm transition">
                                     <span class="text-black">
                                         ▶︎
                                     </span>
@@ -277,12 +277,12 @@ watchEffect(() => {
             #EAB8E4);
 }
 
-.topic-btn-blush {
-    background: rgb(249, 166, 166);
-    transition: background-color 0.2s ease;
+.topic-btn-blue {
+  background: rgb(115, 159, 255);
+  transition: background-color 0.2s ease;
 }
 
-.topic-btn-blush:hover {
-    background: rgb(204, 136, 136);
+.topic-btn-blue:hover {
+  background: rgb(159, 189, 255);
 }
 </style>
