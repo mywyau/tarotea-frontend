@@ -1,13 +1,23 @@
 import { createError } from "h3";
 import { db } from "~/server/db";
 
+interface SubscriptionMonthUsageRow {
+  attempts: number;
+}
+
+interface ConsumeWhisperAttemptResult {
+  attempts: number;
+  remaining: number;
+  limit: number;
+}
+
 export async function consumeWhisperAttemptSubscriptionMonthV2(
   userId: string,
   limit: number,
   windowStart: Date,
-  windowEnd: Date
-): Promise<{ attempts: number; remaining: number; limit: number }> {
-  const { rows } = await db.query(
+  windowEnd: Date,
+): Promise<ConsumeWhisperAttemptResult> {
+  const result = await db.query<SubscriptionMonthUsageRow>(
     `
     INSERT INTO ai_usage_subscription_month (
       user_id,
@@ -28,10 +38,12 @@ export async function consumeWhisperAttemptSubscriptionMonthV2(
 
     RETURNING attempts
     `,
-    [userId, windowStart.toISOString(), windowEnd.toISOString(), limit]
+    [userId, windowStart.toISOString(), windowEnd.toISOString(), limit],
   );
 
-  if (rows.length === 0) {
+  const [row] = result.rows;
+
+  if (!row) {
     throw createError({
       statusCode: 429,
       statusMessage: "Monthly pronunciation limit reached",
@@ -39,8 +51,8 @@ export async function consumeWhisperAttemptSubscriptionMonthV2(
   }
 
   return {
-    attempts: rows[0].attempts,
-    remaining: limit - rows[0].attempts,
+    attempts: row.attempts,
+    remaining: limit - row.attempts,
     limit,
   };
 }
