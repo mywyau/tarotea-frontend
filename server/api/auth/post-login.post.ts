@@ -45,14 +45,14 @@ export default defineEventHandler(async (event) => {
     // 3️⃣ Fetch combined user + entitlement state
     const { rows } = await db.query(
       `
-      select
-        u.id,
-        u.email,
-        e.plan,
-        e.subscription_status
-      from users u
-      join entitlements e on e.user_id = u.id
-      where u.id = $1
+        select
+          u.id,
+          u.email,
+          e.plan,
+          e.subscription_status
+        from users u
+        join entitlements e on e.user_id = u.id
+        where u.id = $1
       `,
       [userId]
     )

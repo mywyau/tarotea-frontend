@@ -5,8 +5,6 @@ import { masteryXp } from "~/utils/xp/helpers";
 export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
 
-  const aa = masteryXp;
-
   const { rows } = await db.query(
     `
       select

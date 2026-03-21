@@ -38,8 +38,9 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
         u.email,
         e.plan,
         e.subscription_status,
-        e.cancel_at_period_end,
+        e.current_period_start,
         e.current_period_end,
+        e.cancel_at_period_end,
         e.canceled_at
       from users u
       left join entitlements e on e.user_id = u.id

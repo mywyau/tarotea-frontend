@@ -8,8 +8,9 @@ export type SubscriptionStatus =
 export interface Entitlement {
   plan: "free" | "monthly" | "yearly";
   subscription_status: SubscriptionStatus;
-  cancel_at_period_end: boolean;
+  current_period_start?: string;
   current_period_end?: string;
+  cancel_at_period_end: boolean;
   canceled_at?: string;
 }
 

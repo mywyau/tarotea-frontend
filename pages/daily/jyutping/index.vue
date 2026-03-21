@@ -1,12 +1,16 @@
 <script setup lang="ts">
-import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
 
 
 definePageMeta({
     ssr: false,
     middleware: ['logged-in'],
-    // middleware: ['coming-soon'],
 })
+
+import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
+
+type EligibilityResponse = {
+    wordsSeen: number
+}
 
 type DailyDecode = {
     date: string // "YYYY-MM-DD"
@@ -39,6 +43,7 @@ type DailyStartResponse = {
 }
 
 type QuizState =
+    | 'locked'
     | 'loading'
     | 'playing'
     | 'finalizing'
@@ -53,7 +58,7 @@ type SessionAnswer = {
 
 const tips = [
     'No need to be perfect first try.',
-    'Correct answers do not need tones.',
+    'Tones are not marked.',
     'Focus on the shape of the sound.',
     'Break the word into syllables.',
     'Try saying it out loud before typing.'
@@ -104,6 +109,16 @@ const totalQuestions = ref(0)
 
 const errorMessage = ref('')
 
+const MIN_WORDS_REQUIRED = 20
+
+const seenWords = ref(0)
+
+const canPlayQuiz = computed(() => seenWords.value >= MIN_WORDS_REQUIRED)
+
+const wordsRemaining = computed(() =>
+    Math.max(0, MIN_WORDS_REQUIRED - seenWords.value)
+)
+
 const state = ref<QuizState>('loading')
 
 const MAX_ATTEMPTS = 6
@@ -115,6 +130,19 @@ const attemptsLeft = computed(() =>
 const lastAttempt = computed(
     () => attempts.value[attempts.value.length - 1] || null
 )
+
+async function loadEligibility() {
+    const { getAccessToken } = await useAuth()
+    const token = await getAccessToken()
+
+    const res = await $fetch<EligibilityResponse>('/api/me/stats', {
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
+    })
+
+    seenWords.value = res.wordsSeen ?? 0
+}
 
 function normalizeJyutping(raw: string): string {
     return raw
@@ -331,10 +359,15 @@ async function finalizeDaily() {
 }
 
 async function fetchChallenge() {
-
     state.value = 'loading'
 
     try {
+        await loadEligibility()
+
+        if (!canPlayQuiz.value) {
+            state.value = 'locked'
+            return
+        }
 
         const { getAccessToken } = await useAuth()
         const token = await getAccessToken()
@@ -352,7 +385,6 @@ async function fetchChallenge() {
         )
 
         if (daily.session.completed) {
-
             xpEarned.value = daily.session.xp_earned
             correctCount.value = daily.session.correct_count
             totalQuestions.value = daily.session.total_questions
@@ -370,9 +402,7 @@ async function fetchChallenge() {
         await loadWord(wordIds.value[0])
 
         state.value = 'playing'
-
     } catch (e: any) {
-
         errorMessage.value =
             e?.data?.message ??
             e?.message ??
@@ -428,10 +458,6 @@ async function submit() {
     // return nextWord()
     showNext.value = true
 }
-
-onMounted(() => {
-    fetchChallenge()
-})
 
 watch(
     () => challenge.value?.audioUrl,
@@ -552,6 +578,30 @@ watch(
 
                 </div>
             </div>
+
+            <!-- Locked -->
+            <div v-else-if="state === 'locked'" class="py-8 text-center space-y-4">
+                <div class="inline-block rounded-xl px-4 py-2 text-sm font-medium text-black"
+                    style="background: rgb(249, 166, 166);">
+                    Quiz locked
+                </div>
+
+                <p class="text-sm text-gray-700">
+                    You need to see at least {{ MIN_WORDS_REQUIRED }} words before playing this quiz.
+                </p>
+
+                <p class="text-sm text-gray-500">
+                    You have seen {{ seenWords }} word<span v-if="seenWords !== 1">s</span>.
+                    {{ wordsRemaining }} more to unlock.
+                </p>
+
+                <NuxtLink to="/topics" class="inline-block rounded-xl px-4 py-3 font-medium text-black"
+                    style="background: rgb(249, 166, 166);">
+                    Explore words
+                </NuxtLink>
+            </div>
+
+
             <!-- Quiz -->
             <div v-else-if="state === 'playing' && challenge" class="space-y-5">
 
