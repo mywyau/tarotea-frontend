@@ -552,11 +552,11 @@ watch(
             'mt-8 p-5',
             state === 'complete'
                 ? 'bg-transparent border-0 shadow-none'
-                : 'rounded-xl border border-gray-200 bg-white shadow-sm'
+                : 'rounded-xl'
         ]">
 
             <!-- Loading -->
-            <div v-if="state === 'loading'" class="text-sm text-gray-600">
+            <div v-if="state === 'loading'" class="text-sm text-gray-600 text-center">
                 Loading today’s words…
             </div>
 
