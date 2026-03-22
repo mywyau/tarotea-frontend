@@ -260,7 +260,7 @@ watch(
           </div>
 
           <div class="grid grid-cols-1 gap-4 w-full">
-            <button v-for="(option, i) in question.options" :key="i" class="rounded-xl flex items-center justify-center text-sm font-medium text-center p-5 select-none
+            <button v-for="(option, i) in question.options" :key="i" class="rounded-xl flex items-center justify-center text-lg font-medium text-center p-5 select-none
           transition-all duration-200 ease-out shadow-sm active:scale-95" :style="{
             backgroundColor:
               !answered
