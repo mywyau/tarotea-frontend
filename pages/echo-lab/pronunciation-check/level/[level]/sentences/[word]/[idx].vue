@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  // middleware: "ai-whisper-access-level",
+  middleware: "coming-soon",
 })
 
 const route = useRoute()
@@ -52,9 +52,6 @@ const phraseAudioSrc = computed(() => {
   const filename = word.value?.audio?.examples?.[idx.value]
   return filename ? `${cdnBase}/audio/${filename}` : null
 })
-
-const MAX_RECORDING_SECONDS = 10
-const MAX_AUDIO_BYTES = 1_000_000
 
 const supported = ref(false)
 const recording = ref(false)

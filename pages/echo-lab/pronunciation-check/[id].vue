@@ -24,7 +24,6 @@ const { data, error } = await useFetch(
   }
 )
 
-const MAX_RECORDING_SECONDS = 10
 const recordingTime = ref(0)
 let timer: ReturnType<typeof setInterval> | null = null
 
