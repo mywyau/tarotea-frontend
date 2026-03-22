@@ -104,10 +104,6 @@ onMounted(async () => {
   }
 })
 
-// watch(sortedTopics, () => {
-//   currentPage.value = 1
-// })
-
 </script>
 
 

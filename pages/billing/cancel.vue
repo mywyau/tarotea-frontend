@@ -46,7 +46,7 @@ const isSubscribed = computed(() =>
               style="background-color:#A8CAE0;" :class="isSubscribed
                 ? 'opacity-60 cursor-not-allowed'
                 : 'hover:brightness-110 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('monthly')">
-              Monthly plan · £5.99
+              Monthly plan · £3.99
             </button>
 
             <!-- Yearly (KEEP BLACK) -->

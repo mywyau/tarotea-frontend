@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, watchEffect } from 'vue'
 import { patchNotes } from '@/utils/patchNotes'
+import { computed, watchEffect } from 'vue'
 
 definePageMeta({
   title: 'What’s new · TaroTea'
@@ -10,6 +10,7 @@ const route = useRoute()
 const router = useRouter()
 
 const NOTES_PER_PAGE = 5
+const MAX_VISIBLE_PAGES = 3
 
 const totalPages = computed(() => {
   return Math.max(1, Math.ceil(patchNotes.length / NOTES_PER_PAGE))
@@ -29,8 +30,34 @@ const paginatedNotes = computed(() => {
   return patchNotes.slice(start, end)
 })
 
-const pageNumbers = computed(() => {
-  return Array.from({ length: totalPages.value }, (_, i) => i + 1)
+const visiblePages = computed(() => {
+  const total = totalPages.value
+  const current = currentPage.value
+
+  if (total <= MAX_VISIBLE_PAGES) {
+    return Array.from({ length: total }, (_, i) => i + 1)
+  }
+
+  let start = current
+  let end = current + MAX_VISIBLE_PAGES - 1
+
+  if (end > total) {
+    end = total
+    start = total - MAX_VISIBLE_PAGES + 1
+  }
+
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i)
+})
+
+const showFirstButton = computed(() => {
+  return visiblePages.value.length > 0 && visiblePages.value[0] > 1
+})
+
+const showLastButton = computed(() => {
+  return (
+    visiblePages.value.length > 0 &&
+    visiblePages.value[visiblePages.value.length - 1] < totalPages.value
+  )
 })
 
 async function goToPage(page: number) {
@@ -42,6 +69,10 @@ async function goToPage(page: number) {
       page: safePage === 1 ? undefined : String(safePage)
     }
   })
+
+  if (import.meta.client) {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 }
 
 watchEffect(() => {
@@ -71,69 +102,148 @@ watchEffect(() => {
       </p>
     </header>
 
-    <section
-      v-for="note in paginatedNotes"
-      :key="`${note.date}-${note.title ?? ''}`"
-      class="space-y-4"
-    >
+    <section v-for="note in paginatedNotes" :key="`${note.date}-${note.title ?? ''}`" class="space-y-4">
       <div class="flex items-center gap-3">
         <h2 class="text-lg font-semibold">
           {{ note.date }}
         </h2>
 
-        <span
-          v-if="note.title"
-          class="text-sm text-gray-500"
-        >
+        <span v-if="note.title" class="text-sm text-gray-500">
           — {{ note.title }}
         </span>
       </div>
 
       <ul class="list-disc list-inside space-y-2 text-gray-700">
-        <li
-          v-for="item in note.items"
-          :key="item"
-        >
+        <li v-for="item in note.items" :key="item">
           {{ item }}
         </li>
       </ul>
     </section>
 
-    <nav
-      v-if="totalPages > 1"
-      class="flex flex-col items-center gap-4 pt-4"
-      aria-label="Patch notes pagination"
-    >
-      <div class="flex items-center gap-2 flex-wrap justify-center">
-        <button
-          class="px-4 py-2 rounded-lg text-sm transition disabled:opacity-40 disabled:cursor-not-allowed hover:text-gray-800"
-          :disabled="currentPage === 1"
-          @click="goToPage(currentPage - 1)"
-        >
-          Previous
+    <nav v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8"
+      aria-label="Patch notes pagination">
+      <div class="flex justify-center items-center gap-1.5 sm:gap-3">
+        <button v-if="showFirstButton" @click="goToPage(1)" :disabled="currentPage === 1" class="pagination-jump">
+          «
         </button>
 
-        <button
-          v-for="page in pageNumbers"
-          :key="page"
-          class="min-w-10 h-10 px-3 rounded-lg text-sm font-medium transition"
-          :class="page === currentPage
-            ? 'bg-black text-white'
-            : 'text-black hover:bg-gray-50'"
-          @click="goToPage(page)"
-        >
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
+          ←
+        </button>
+
+        <button v-for="page in visiblePages" :key="page" @click="goToPage(page)" class="pagination-page"
+          :class="{ 'is-active': page === currentPage }">
           {{ page }}
         </button>
 
-        <button
-          class="px-4 py-2 rounded-lg text-sm transition disabled:opacity-40 disabled:cursor-not-allowed hover:text-gray-800"
-          :disabled="currentPage === totalPages"
-          @click="goToPage(currentPage + 1)"
-        >
-          Next
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
+          →
+        </button>
+
+        <button v-if="showLastButton" @click="goToPage(totalPages)" :disabled="currentPage === totalPages"
+          class="pagination-jump">
+          »
         </button>
       </div>
+
+      <p class="text-xs text-gray-500">
+        Page {{ currentPage }} of {{ totalPages }}
+      </p>
     </nav>
 
   </main>
 </template>
+
+<style scoped>
+.pagination-page {
+  min-width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  background-color: #F6E1E1;
+  color: #3A2A2A;
+  transition: all 0.18s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.pagination-page:hover:not(.is-active) {
+  background-color: #EAB8E4;
+  transform: translateY(-1px);
+}
+
+.pagination-page.is-active {
+  background-color: #D6A3D1;
+  color: #000;
+  box-shadow: 0 6px 16px rgba(214, 163, 209, 0.35);
+  transform: translateY(-1px);
+}
+
+.pagination-arrow {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  font-weight: 600;
+  background-color: rgba(244, 205, 39, 0.35);
+  color: #3A2A2A;
+  transition: all 0.18s ease;
+}
+
+.pagination-arrow:hover:not(:disabled) {
+  background-color: rgba(244, 205, 39, 0.55);
+  transform: translateY(-1px);
+}
+
+.pagination-arrow:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-jump {
+  min-width: 48px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.75rem;
+  background-color: rgba(168, 202, 224, 0.45);
+  color: #3A2A2A;
+  transition: all 0.18s ease;
+}
+
+.pagination-jump:hover:not(:disabled) {
+  background-color: rgba(168, 202, 224, 0.65);
+  transform: translateY(-1px);
+}
+
+.pagination-jump:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+@media (min-width: 640px) {
+  .pagination-wrapper {
+    padding: 12px 16px;
+  }
+
+  .pagination-page {
+    min-width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+  }
+
+  .pagination-arrow {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+  }
+
+  .pagination-jump {
+    min-width: 58px;
+    height: 38px;
+    border-radius: 12px;
+    font-size: 0.85rem;
+  }
+}
+</style>
