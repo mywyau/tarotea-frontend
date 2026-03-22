@@ -9,31 +9,16 @@ export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
   const entitlement = await getUserEntitlement(userId);
 
-  const isActivePaid =
+  const isPaid =
     entitlement &&
     entitlement.subscription_status === "active" &&
     ["monthly", "yearly"].includes(entitlement.plan);
 
+  const limit = isPaid ? 5000 : 10;
+
   let attempts = 0;
-  let limit = 10;
 
-  if (!isActivePaid) {
-    // Free tier: still calendar month if that is your rule
-    const { rows } = await db.query(
-      `
-      SELECT attempts
-      FROM ai_usage_monthly
-      WHERE user_id = $1
-        AND month = DATE_TRUNC('month', NOW())::date
-      `,
-      [userId],
-    );
-
-    attempts = rows[0]?.attempts ?? 0;
-    limit = 10;
-  } else if (entitlement.plan === "monthly") {
-    limit = 5000;
-
+  if (isPaid) {
     const windowStart = entitlement.current_period_start;
     const windowEnd = entitlement.current_period_end;
 
@@ -49,21 +34,15 @@ export default defineEventHandler(async (event) => {
     );
 
     attempts = rows[0]?.attempts ?? 0;
-  } else if (entitlement.plan === "yearly") {
-    limit = 5000; // or whatever yearly limit really is
-
-    const windowStart = entitlement.current_period_start;
-    const windowEnd = entitlement.current_period_end;
-
+  } else {
     const { rows } = await db.query(
       `
       SELECT attempts
-      FROM ai_usage_subscription_year
+      FROM ai_usage_monthly
       WHERE user_id = $1
-        AND window_start = $2
-        AND window_end = $3
+        AND month = DATE_TRUNC('month', NOW())::date
       `,
-      [userId, windowStart, windowEnd],
+      [userId],
     );
 
     attempts = rows[0]?.attempts ?? 0;
