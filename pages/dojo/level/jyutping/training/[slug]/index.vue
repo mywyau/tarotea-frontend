@@ -160,12 +160,12 @@ const resultMeta = computed(() => {
 })
 
 const completionTiles = computed(() => [
-    {
-        label: 'Words Completed',
-        value: animatedCompletedWords.value,
-        suffix: '',
-        className: 'result-0'
-    },
+    // {
+    //     label: 'Words Completed',
+    //     value: animatedCompletedWords.value,
+    //     suffix: '',
+    //     className: 'result-0'
+    // },
     {
         label: 'Hint-Free',
         value: hintFreeCount.value,
@@ -812,17 +812,17 @@ watch(
                                 {{ resultMeta.title }}
                             </h2>
 
-                            <p class="hero-score">
+                            <!-- <p class="hero-score">
                                 +{{ animatedXpEarned }}
                                 <span class="text-xl font-semibold">XP</span>
-                            </p>
+                            </p> -->
 
                             <p class="hero-subtext">
                                 {{ completedWordsCount }} / {{ totalWordsCount }} words completed
                             </p>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                             <div v-for="tile in completionTiles" :key="tile.label"
                                 class="stat-card hover:brightness-110" :class="tile.className">
                                 <p class="stat-label">
