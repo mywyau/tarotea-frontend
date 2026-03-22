@@ -603,6 +603,7 @@ onMounted(() => {
                     </div>
 
                     <div class="rounded-2xl bg-gray-50 p-5">
+                        
                         <transition name="fade-word" mode="out-in">
                             <div :key="current?.wordId"
                                 class="text-4xl sm:text-4xl text-center font-medium flex gap-1 no-copy" @copy.prevent
