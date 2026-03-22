@@ -418,7 +418,7 @@ watch(currentQuestion, () => {
 
                 </div>
 
-                <div v-if="!showCompleteView && !finishing && currentQuestion" class="p-8 rounded-2xl transition-all">
+                <div v-if="!showCompleteView && !finishing && currentQuestion" class="py-8 rounded-2xl transition-all">
 
                     <p class="text-3xl font-medium text-center mb-2">
                         {{ currentQuestion.word }}
@@ -465,7 +465,7 @@ watch(currentQuestion, () => {
                     <div class="grid gap-4">
 
                         <button v-for="(option, i) in options" :key="option.id" @click="selectAnswer(option.meaning)"
-                            class="rounded-lg px-6 py-4 text-left
+                            class="rounded-lg px-6 py-4 text-center
            transition-all duration-300 ease-out
            shadow-sm active:scale-95 hover:brightness-110" :style="{
             backgroundColor:
