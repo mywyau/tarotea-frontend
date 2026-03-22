@@ -24,7 +24,13 @@ import {
 } from '@/utils/jyutping/jyutping-utils'
 
 import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
-import { playCorrectJingle } from '@/utils/sounds'
+
+import {
+    playCorrectJingle,
+    playQuizCompleteFanfareSong,
+    playQuizCompleteOkaySong
+} from '@/utils/sounds'
+
 import { levelTitles } from '~/utils/levels/levels'
 
 import {
@@ -73,6 +79,113 @@ const currentXp = ref<number | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
 
 const hintUsedThisQuestion = ref(false)
+
+const finishing = ref(false)
+const MIN_CALCULATING_MS = 1400
+
+const animatedCompletedWords = ref(0)
+const animatedXpEarned = ref(0)
+const completionAnimated = ref(false)
+const completionSoundPlayed = ref(false)
+
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function animateCount(target: { value: number }, end: number, duration = 1000) {
+    const start = target.value
+    const diff = end - start
+    const startTime = performance.now()
+
+    const tick = (now: number) => {
+        const progress = Math.min((now - startTime) / duration, 1)
+        target.value = Math.round(start + diff * progress)
+
+        if (progress < 1) {
+            requestAnimationFrame(tick)
+        }
+    }
+
+    requestAnimationFrame(tick)
+}
+
+function resetCompletionAnimations() {
+    animatedCompletedWords.value = 0
+    animatedXpEarned.value = 0
+    completionAnimated.value = false
+    completionSoundPlayed.value = false
+}
+
+const completedWordsCount = computed(() => sessionResult.value?.correctCount ?? 0)
+const totalWordsCount = computed(() => sessionResult.value?.totalWords ?? words.value.length)
+
+const hintsUsedCount = computed(() =>
+    batchAttempts.value.filter(a => a.hintUsed).length
+)
+
+const hintFreeCount = computed(() =>
+    Math.max(0, completedWordsCount.value - hintsUsedCount.value)
+)
+
+const hintUsageRatio = computed(() => {
+    if (!completedWordsCount.value) return 0
+    return hintsUsedCount.value / completedWordsCount.value
+})
+
+const showTraining = computed(() => !finishing.value && !sessionResult.value)
+const showCalculating = computed(() => finishing.value)
+const showResults = computed(() => !finishing.value && !!sessionResult.value)
+
+const resultHeroClass = computed(() => {
+    if (hintsUsedCount.value === 0) return 'result-3'
+    if (hintUsageRatio.value <= 0.25) return 'result-0'
+    if (hintUsageRatio.value <= 0.6) return 'result-2'
+    return 'result-1'
+})
+
+const resultMeta = computed(() => {
+    if (hintsUsedCount.value === 0) {
+        return { title: 'Excellent work' }
+    }
+
+    if (hintUsageRatio.value <= 0.25) {
+        return { title: 'Great job' }
+    }
+
+    if (hintUsageRatio.value <= 0.6) {
+        return { title: 'Nice progress' }
+    }
+
+    return { title: 'Keep practicing' }
+})
+
+const completionTiles = computed(() => [
+    {
+        label: 'Words Completed',
+        value: animatedCompletedWords.value,
+        suffix: '',
+        className: 'result-0'
+    },
+    {
+        label: 'Hint-Free',
+        value: hintFreeCount.value,
+        suffix: '',
+        className: 'result-3'
+    },
+    {
+        label: 'Hints Used',
+        value: hintsUsedCount.value,
+        suffix: '',
+        className: 'result-1'
+    },
+    {
+        label: 'XP Earned',
+        value: animatedXpEarned.value,
+        suffix: 'XP',
+        className: 'result-2',
+        prefix: animatedXpEarned.value > 0 ? '+' : ''
+    }
+])
 
 const live = computed(() => {
     if (!current.value) return { state: 'idle' as const }
@@ -137,19 +250,18 @@ const charStates = computed(() => {
 })
 
 async function fetchWords() {
-
     loading.value = true
     errorState.value = null
+    finishing.value = false
+    resetCompletionAnimations()
 
     try {
-        // 1️⃣ Fetch vocab for level
         const levelData = await $fetch<LevelData>(
             `/api/vocab-quiz/${slug.value}`
         )
 
         const allWords = Object.values(levelData.categories).flat()
 
-        // 2️⃣ Fetch weakest IDs for this user + level
         const { getAccessToken } = await useAuth()
         const token = await getAccessToken()
 
@@ -169,14 +281,12 @@ async function fetchWords() {
             weakestIds = []
         }
 
-        // 3️⃣ Generate weighted words
         const selected = generateWeightedWordsLevel(
             allWords,
             weakestIds,
             { totalQuestions: totalQuestions, weakestRatio: weakestWordRatio }
         )
 
-        // 4️⃣ Map to your TrainWord format
         words.value = selected.map(w => ({
             wordId: w.id,
             word: w.word,
@@ -187,6 +297,12 @@ async function fetchWords() {
         idx.value = 0
         input.value = ''
         attempts.value = []
+
+        batchAttempts.value = []
+        sessionResult.value = null
+        showHint.value = false
+        hintUsedThisQuestion.value = false
+        xpDelta.value = null
 
     } catch (e: any) {
         errorState.value =
@@ -290,17 +406,24 @@ async function copyJyutping() {
 let advancing = false
 
 function resetTraining(options?: { reshuffle?: boolean }) {
-    // cancel pending auto-advance
     advancing = false
 
     input.value = ''
     attempts.value = []
     showHint.value = false
+    hintUsedThisQuestion.value = false
     idx.value = 0
+    batchAttempts.value = []
+    sessionResult.value = null
+    finishing.value = false
+    resetCompletionAnimations()
 
     if (options?.reshuffle) {
         words.value = shuffleFisherYates(words.value)
     }
+
+    const firstId = words.value[0]?.wordId
+    currentXp.value = firstId ? (wordProgressMap.value[firstId]?.xp ?? 0) : 0
 }
 
 const sessionResult = ref<{
@@ -310,27 +433,39 @@ const sessionResult = ref<{
 } | null>(null)
 
 async function finalizeBatch() {
+    finishing.value = true
+
     try {
         const { getAccessToken } = await useAuth()
         const token = await getAccessToken()
 
-        const res = await $fetch('/api/jyutping/finalize', {
-            method: 'POST',
-            headers: { Authorization: `Bearer ${token}` },
-            body: {
-                level: slug.value,
-                sessionKey: sessionKey.value,
-                attempts: batchAttempts.value,
-                mode: 'grind-level'
-            }
-        })
+        const [res] = await Promise.all([
+            $fetch<{
+                session: {
+                    correctCount: number
+                    totalWords: number
+                    xpEarned: number
+                }
+            }>('/api/jyutping/finalize', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${token}` },
+                body: {
+                    level: slug.value,
+                    sessionKey: sessionKey.value,
+                    attempts: batchAttempts.value,
+                    mode: 'grind-level'
+                }
+            }),
+            sleep(MIN_CALCULATING_MS)
+        ])
 
         sessionResult.value = res.session
-        playQuizCompleteFanfareSong()
+        idx.value = words.value.length
     } catch (err) {
         console.error('Finalize failed', err)
+        errorState.value = 'Failed to save your session.'
     } finally {
-        idx.value = words.value.length
+        finishing.value = false
     }
 }
 
@@ -373,6 +508,8 @@ function startNewSession() {
     sessionKey.value = crypto.randomUUID()
     batchAttempts.value = []
     sessionResult.value = null
+    finishing.value = false
+    resetCompletionAnimations()
     fetchWords()
 }
 
@@ -439,7 +576,7 @@ watch(() => live.value.state, async (state) => {
         xpDelta.value = delta
 
         // Optimistic UI update
-        currentXp.value = Math.min((currentXp.value ?? 0) + delta, 500)
+        currentXp.value = Math.min((currentXp.value ?? 0) + delta, masteryXp)
 
 
         batchAttempts.value.push({
@@ -470,6 +607,7 @@ watch(() => live.value.state, async (state) => {
     advancing = false
 }
 )
+
 watch(
     () => current.value?.wordId,
     (id) => {
@@ -481,6 +619,29 @@ watch(
         }, 300)
     },
     { immediate: true }
+)
+
+watch(
+    () => showResults.value,
+    (visible) => {
+        if (!visible || !sessionResult.value) return
+
+        if (!completionAnimated.value) {
+            completionAnimated.value = true
+            animateCount(animatedCompletedWords, completedWordsCount.value, 900)
+            animateCount(animatedXpEarned, sessionResult.value.xpEarned, 1000)
+        }
+
+        if (!completionSoundPlayed.value) {
+            completionSoundPlayed.value = true
+
+            if (hintsUsedCount.value === 0) {
+                playQuizCompleteFanfareSong()
+            } else {
+                playQuizCompleteOkaySong()
+            }
+        }
+    }
 )
 </script>
 
@@ -504,7 +665,12 @@ watch(
             </p>
         </header>
 
-        <section class="mt-8 rounded-2xl bg-white p-5 shadow-sm">
+        <section :class="[
+            'mt-8',
+            showCalculating || showResults
+                ? 'bg-transparent shadow-none px-0 py-2'
+                : 'rounded-2xl bg-white p-5 shadow-sm'
+        ]">
 
             <div v-if="loading" class="text-sm text-gray-600">
                 Loading training words…
@@ -515,136 +681,175 @@ watch(
             </div>
 
             <div v-else class="space-y-5">
-                <!-- Progress + controls -->
-                <div v-if="!isComplete" class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                    <div class="text-xs text-black">
-                        Word {{ idx + 1 }} / {{ words.length }}
-                    </div>
-
-                    <div class="flex flex-wrap gap-2">
-
-                        <button
-                            class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                            type="button" @click="resetTraining({ reshuffle: true })">
-                            Reset
-                        </button>
-
-                        <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
-                    </div>
-                </div>
-
-                <!-- Word display -->
-                <div v-if="!isComplete" class="rounded-2xl bg-gray-50 p-5">
-
-                    <transition name="fade-word" mode="out-in">
-                        <div :key="current?.wordId" class="text-4xl text-center font-medium flex gap-1 leading-none">
-                            <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
-                                'text-green-600 font-semibold': charStates[i] === 'correct',
-                                'text-gray-400': charStates[i] === 'idle'
-                            }">
-                                {{ char }}
-                            </span>
+                <div v-if="showTraining" class="space-y-5">
+                    <!-- Progress + controls -->
+                    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                        <div class="text-xs text-black">
+                            Word {{ idx + 1 }} / {{ words.length }}
                         </div>
-                    </transition>
 
-                    <div v-if="current.meaning" class="mt-2 text-lg text-gray-700">
-                        {{ current.meaning }}
+                        <div class="flex flex-wrap gap-2">
+                            <button
+                                class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+                                type="button" @click="resetTraining({ reshuffle: true })">
+                                Reset
+                            </button>
+
+                            <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
+                        </div>
                     </div>
 
-                    <!-- Hint Section -->
-                    <div class="mt-4 mb-6 min-h-[36px]">
-
-                        <button type="button" @click="() => {
-                            showHint = !showHint
-                            if (showHint) hintUsedThisQuestion = true
-                        }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
-                            {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
-                        </button>
-
-                        <transition name="fade-word">
-                            <div v-if="showHint" class="mt-2">
-                                <div class="text-base font-mono break-all leading-relaxed">
-                                    <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
-                                        'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
-                                        'text-gray-400': jyutpingRenderStates[i] === 'idle'
+                    <!-- Word display -->
+                    <div class="rounded-2xl bg-gray-50 p-5">
+                        <transition name="fade-word" mode="out-in">
+                            <div :key="current?.wordId"
+                                class="text-4xl text-center font-medium flex gap-1 leading-none">
+                                <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200"
+                                    :class="{
+                                        'text-green-600 font-semibold': charStates[i] === 'correct',
+                                        'text-gray-400': charStates[i] === 'idle'
                                     }">
-                                        {{ char }}
-                                    </span>
-                                </div>
-
-                                <button type="button" @click="copyJyutping"
-                                    class="mt-2 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
-                                    {{ copied ? '✓' : 'copy' }}
-                                </button>
+                                    {{ char }}
+                                </span>
                             </div>
                         </transition>
-                    </div>
 
-                    <!-- XP Row -->
-                    <div v-if="!isComplete" class="flex items-center max-w-xs mt-2">
+                        <div v-if="current?.meaning" class="mt-2 text-lg text-gray-700">
+                            {{ current.meaning }}
+                        </div>
 
-                        <!-- XP Bar -->
-                        <div class="w-28 mr-2">
-                            <div class="h-[3px] bg-gray-200 rounded">
-                                <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
-                                    :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
+                        <div class="mt-4 mb-6 min-h-[36px]">
+                            <button type="button" @click="() => {
+                                showHint = !showHint
+                                if (showHint) hintUsedThisQuestion = true
+                            }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
+                                {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
+                            </button>
+
+                            <transition name="fade-word">
+                                <div v-if="showHint" class="mt-2">
+                                    <div class="text-base font-mono break-all leading-relaxed">
+                                        <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
+                                            'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
+                                            'text-gray-400': jyutpingRenderStates[i] === 'idle'
+                                        }">
+                                            {{ char }}
+                                        </span>
+                                    </div>
+
+                                    <button type="button" @click="copyJyutping"
+                                        class="mt-2 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
+                                        {{ copied ? '✓' : 'copy' }}
+                                    </button>
+                                </div>
+                            </transition>
+                        </div>
+
+                        <div class="flex items-center max-w-xs mt-2">
+                            <div class="w-28 mr-2">
+                                <div class="h-[3px] bg-gray-200 rounded">
+                                    <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
+                                        :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
+                                </div>
+                            </div>
+
+                            <div class="relative flex items-center">
+                                <span class="text-sm text-gray-600 whitespace-nowrap">
+                                    {{ currentXp ?? 0 }} / {{ masteryXp }} XP
+                                </span>
+
+                                <transition name="xp-fall">
+                                    <span v-if="xpDelta !== null"
+                                        class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                                        :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                                        {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                                    </span>
+                                </transition>
                             </div>
                         </div>
 
-                        <!-- XP Text + Delta -->
-                        <div class="relative flex items-center">
-                            <span class="text-sm text-gray-600 whitespace-nowrap">
-                                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
-                            </span>
+                        <div class="space-y-3">
+                            <label class="hidden sm:block text-sm font-medium text-gray-800">
+                                Type here:
+                            </label>
 
-                            <transition name="xp-fall">
-                                <span v-if="xpDelta !== null"
-                                    class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                                    :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-                                    {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
-                                </span>
-                            </transition>
+                            <input ref="inputRef" v-model="input" autofocus autocomplete="off" inputmode="text"
+                                class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition" />
+                        </div>
+
+                        <div class="h-24 sm:h-0"></div>
+
+                        <div class="pt-2 text-xs text-gray-500">
+                            Tip: try typing without spaces, do not worry about tones.
                         </div>
                     </div>
-
-                    <!-- Input -->
-                    <div v-if="!isComplete" class="space-y-3">
-                        <label class=" hidden sm:block text-sm font-medium text-gray-800">
-                            Type here:
-                        </label>
-
-                        <input ref="inputRef" v-model="input" autofocus autocomplete="off" inputmode="text"
-                            class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition" />
-
-                    </div>
-
-                    <div class="h-24 sm:h-0"></div>
-
-                    <div v-if="!isComplete" class="pt-2 text-xs text-gray-500">
-                        Tip: try typing without spaces, do not worry about tones.
-                    </div>
-
                 </div>
 
-                <div v-else-if="sessionResult" class="space-y-8 text-center">
+                <transition name="fade-scale" mode="out-in">
+                    <div v-if="showCalculating" key="calculating" class="stat-card hero-card result-2 space-y-4">
+                        <div class="spinner mx-auto" />
 
-                    <h2 class="text-2xl font-semibold">
-                        Good job! Keep going!
-                    </h2>
+                        <p class="stat-label">
+                            Calculating
+                        </p>
 
-                    <p class="text-gray-600 text-base uppercase">
-                        {{ sessionResult.correctCount }} / {{ words.length }} words completed
-                    </p>
+                        <h2 class="hero-title">
+                            Saving your session...
+                        </h2>
 
-                    <p class="text-green-600 text-2xl font-semibold">
-                        +{{ sessionResult.xpEarned }} XP
-                    </p>
+                        <p class="hero-subtext">
+                            Updating your XP and preparing your results
+                        </p>
+                    </div>
 
-                    <button class="rounded-lg bg-black text-white px-6 py-3 hover:bg-gray-800 transition"
-                        @click="startNewSession">
-                        Play again
-                    </button>
-                </div>
+                    <div v-else-if="showResults" key="results" class="space-y-6">
+                        <div class="stat-card hero-card" :class="resultHeroClass">
+                            <p class="stat-label">
+                                Session Complete
+                            </p>
+
+                            <h2 class="hero-title">
+                                {{ resultMeta.title }}
+                            </h2>
+
+                            <p class="hero-score">
+                                +{{ animatedXpEarned }}
+                                <span class="text-xl font-semibold">XP</span>
+                            </p>
+
+                            <p class="hero-subtext">
+                                {{ completedWordsCount }} / {{ totalWordsCount }} words completed
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                            <div v-for="tile in completionTiles" :key="tile.label"
+                                class="stat-card hover:brightness-110" :class="tile.className">
+                                <p class="stat-label">
+                                    {{ tile.label }}
+                                </p>
+
+                                <p class="stat-value">
+                                    {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="pt-2 space-y-3">
+                            <button
+                                class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+                                style="background-color:#A8CAE0;" @click="startNewSession">
+                                Play again
+                            </button>
+
+                            <NuxtLink to="/dojo/level/"
+                                class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
+                                style="background-color:rgba(244,205,39,0.35);">
+                                Back to Level Dojo
+                            </NuxtLink>
+                        </div>
+                    </div>
+                </transition>
             </div>
         </section>
     </main>
@@ -694,5 +899,109 @@ watch(
 .fade-word-enter-from,
 .fade-word-leave-to {
     opacity: 0;
+}
+
+.card-fade-enter-active {
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.card-fade-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.stat-card {
+    border-radius: 22px;
+    padding: 1.5rem;
+    text-align: center;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.stat-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 0.75rem;
+    color: #111827;
+}
+
+.result-0 {
+    background: rgba(168, 202, 224, 0.45);
+}
+
+.result-1 {
+    background: rgba(246, 225, 225, 0.75);
+}
+
+.result-2 {
+    background: rgba(244, 205, 39, 0.35);
+}
+
+.result-3 {
+    background: rgba(168, 224, 182, 0.45);
+}
+
+.hero-card {
+    padding: 2rem 1.5rem;
+}
+
+.hero-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 0.35rem;
+    color: #111827;
+}
+
+.hero-score {
+    font-size: 3rem;
+    line-height: 1;
+    font-weight: 600;
+    margin-top: 0.9rem;
+    color: #111827;
+}
+
+.hero-subtext {
+    margin-top: 0.65rem;
+    font-size: 0.95rem;
+    color: rgba(17, 24, 39, 0.68);
+}
+
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+}
+
+.spinner {
+    width: 52px;
+    height: 52px;
+    border-radius: 9999px;
+    border: 4px solid rgba(17, 24, 39, 0.12);
+    border-top-color: rgba(17, 24, 39, 0.75);
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
 }
 </style>
