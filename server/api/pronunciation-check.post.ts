@@ -10,6 +10,7 @@ import {
   normalizeChinese,
   similarity,
 } from "../utils/whisper/helpers";
+import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -25,7 +26,7 @@ export default defineEventHandler(async (event) => {
     entitlement.subscription_status === "active" &&
     ["monthly", "yearly"].includes(entitlement.plan);
 
-  const limit = isPaid ? 5000 : 10;
+  const limit = isPaid ? whisperRequestLimit : whisperRequestLimitFree;
 
   const form = await readMultipartFormData(event);
   const MAX_AUDIO_SIZE = 1_000_000;

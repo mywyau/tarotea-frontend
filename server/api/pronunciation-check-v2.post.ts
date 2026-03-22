@@ -1,5 +1,6 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
+import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
 import { consumeWhisperAttemptMonthly } from "../repositories/whisper/consumeWhisperAttemptMonthly";
 import { consumeWhisperAttemptSubscriptionMonthV2 } from "../repositories/whisper/consumeWhisperAttemptSubscriptionMonthV2";
 import { getUserEntitlement } from "../utils/getEntitlement";
@@ -25,7 +26,7 @@ export default defineEventHandler(async (event) => {
     entitlement.subscription_status === "active" &&
     ["monthly", "yearly"].includes(entitlement.plan);
 
-  const limit = isPaid ? 5000 : 10;
+  const limit = isPaid ? whisperRequestLimit : whisperRequestLimitFree;
   const MAX_AUDIO_SIZE = 1_000_000;
 
   const form = await readMultipartFormData(event);

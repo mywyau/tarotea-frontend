@@ -2,6 +2,7 @@ import { setHeader } from "h3";
 import { db } from "~/server/repositories/db";
 import { getUserEntitlement } from "~/server/utils/getEntitlement";
 import { requireUser } from "~/server/utils/requireUser";
+import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
 
 export default defineEventHandler(async (event) => {
   setHeader(event, "Cache-Control", "private, no-store");
@@ -14,7 +15,7 @@ export default defineEventHandler(async (event) => {
     entitlement.subscription_status === "active" &&
     ["monthly", "yearly"].includes(entitlement.plan);
 
-  const limit = isPaid ? 5000 : 10;
+  const limit = isPaid ? whisperRequestLimit : whisperRequestLimitFree;
 
   let attempts = 0;
 

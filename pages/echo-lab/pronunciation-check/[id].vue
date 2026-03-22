@@ -310,7 +310,7 @@ const tips = [
   "Practice out loud before submitting, this will help your tokens go further.",
   "Make sure the recording captures the entire phrase.",
   "Free users get 10 requests per month.",
-  "Upgrade for 5000 requests per month.",
+  "Upgrade for 3000 requests per month.",
 ]
 
 const tipIndex = ref(0)
