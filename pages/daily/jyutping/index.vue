@@ -538,9 +538,10 @@ watch(
             </NuxtLink>
         </div>
 
-        <header v-if="state !== 'complete'" class="space-y-3">
+        <header v-if="state !== 'complete' && state != 'loading'" class="space-y-3">
+
             <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-                Daily Sound Decode
+                Daily Jyutping Challenge
             </h1>
 
             <p class="text-sm text-gray-600">
@@ -556,7 +557,7 @@ watch(
         ]">
 
             <!-- Loading -->
-            <div v-if="state === 'loading'" class="text-sm text-gray-600 text-center">
+            <div v-if="state === 'loading'" class="text-gray-600 text-center">
                 Loading today’s words…
             </div>
 
@@ -577,67 +578,6 @@ watch(
                     Calculating XP & results
                 </p>
             </div>
-
-            <!-- Completion -->
-            <!-- <div v-else-if="state === 'complete'" class="flex flex-col items-center text-center px-4 py-6"> -->
-
-            <!-- Title -->
-            <!-- <h2 class="text-xl sm:text-2xl font-bold mb-6 tracking-wide">
-                    Daily Exercise Complete!
-                </h2> -->
-
-            <!-- Score Card -->
-            <!-- <div class="w-full max-w-sm rounded-xl p-5 mb-3">
-
-                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">
-                        Score
-                    </p>
-
-                    <div class="flex items-center justify-center text-3xl font-bold">
-
-                        <span class="text-[#7FB9D8]">
-                            {{ correctCount }} / {{ totalQuestions }}
-                        </span>
-
-                    </div>
-
-                </div> -->
-
-            <!-- XP Card -->
-            <!-- <div class="w-full max-w-sm rounded-xl p-5 mb-4">
-
-                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">
-                        XP Earned
-                    </p>
-
-                    <p class="text-3xl font-bold text-emerald-500">
-                        +{{ xpEarned }} XP
-                    </p>
-
-                </div> -->
-
-            <!-- Countdown -->
-            <!-- <div class="w-full max-w-sm rounded-xl p-5 mb-8">
-
-                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-3">
-                        Next daily unlocks in
-                    </p>
-
-                    <div class="bg-black rounded-lg py-3">
-
-                        <span class="text-2xl font-semibold
-        bg-gradient-to-r
-        from-[#EAB8E4]
-        via-[#A8CAE0]
-        to-[#D6A3D1]
-        bg-clip-text text-transparent brightness-125">
-                            {{ timeRemaining }}
-                        </span>
-
-                    </div>
-
-                </div> -->
-            <!-- </div> -->
 
             <div v-else-if="state === 'complete'" class="space-y-6">
                 <transition name="card-fade" appear>
