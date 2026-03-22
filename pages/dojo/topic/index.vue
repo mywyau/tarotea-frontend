@@ -287,18 +287,18 @@ const paginatedTopics = computed(() => {
   background-color: #F6E1E1;
   color: #1f2937;
   transition: all 0.18s ease;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
-}
-
-.pagination-page:hover:not(.is-active) {
-  background-color: #EAB8E4;
-  transform: translateY(-1px);
+  box-shadow: none;
 }
 
 .pagination-page.is-active {
   background-color: #D6A3D1;
   color: #000;
-  box-shadow: 0 8px 20px rgba(214, 163, 209, 0.35);
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+
+.pagination-page:hover:not(.is-active) {
+  background-color: #EAB8E4;
   transform: translateY(-1px);
 }
 
