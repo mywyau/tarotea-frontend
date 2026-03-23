@@ -820,11 +820,6 @@ onMounted(() => {
                                 {{ resultMeta.title }}
                             </h2>
 
-                            <!-- <p class="hero-score">
-                                +{{ animatedXpEarned }}
-                                <span class="text-xl font-semibold">XP</span>
-                            </p> -->
-
                             <p class="hero-subtext">
                                 {{ completedWordsCount }} / {{ totalWordsCount }} words completed
                             </p>
