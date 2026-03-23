@@ -254,7 +254,10 @@ async function finalizeQuiz() {
       }>('/api/quiz/grind/finalize', {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
-        body: { answers: answerLog.value }
+        body: {
+          quizType: 'grind-level',
+          answers: answerLog.value
+        }
       }),
       sleep(MIN_CALCULATING_MS)
     ])
@@ -602,7 +605,6 @@ watch(
 </template>
 
 <style scoped>
-
 .level-heading {
   font-size: 1.3rem;
   text-transform: uppercase;

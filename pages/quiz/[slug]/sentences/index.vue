@@ -15,7 +15,8 @@ import { computed, ref, watch } from 'vue'
 
 import { brandColours } from '~/utils/branding/helpers'
 
-import { buildSentenceQuiz } from '~/utils/quiz/buildSentenceQuiz'
+import { buildSentenceQuiz, type SentenceQuizQuestion } from '~/utils/quiz/buildSentenceQuiz'
+import { masteryXp } from '~/utils/xp/helpers'
 
 type LevelSentenceItem = {
     sentenceId: string
@@ -41,6 +42,8 @@ type LevelSentenceData = {
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
+const { getAccessToken } = await useAuth()
+
 const { data } = await useFetch<LevelSentenceData>(
     () => `/api/sentences/${slug.value}`,
     {
@@ -51,9 +54,9 @@ const { data } = await useFetch<LevelSentenceData>(
 
 const sentenceItems = computed(() => data.value?.items ?? [])
 
-const questions = computed(() =>
-    sentenceItems.value.length
-        ? buildSentenceQuiz(sentenceItems.value).slice(0, 20)
+const questions = computed<SentenceQuizQuestion[]>(() =>
+    uniqueSentenceItems.value.length
+        ? buildSentenceQuiz(uniqueSentenceItems.value).slice(0, 20)
         : []
 )
 
@@ -64,10 +67,31 @@ const selectedIndex = ref<number | null>(null)
 const showJyutping = ref(false)
 const completionSoundPlayed = ref(false)
 
+const xpDelta = ref<number | null>(null)
+const currentXp = ref<number | null>(null)
+const currentStreak = ref<number | null>(null)
+
+const wordProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
+
+const STREAK_CAP = 5
+const WRONG_PENALTY = -12
+
+function deltaFor(correct: boolean, streakBefore: number) {
+    if (!correct) return WRONG_PENALTY
+    return 5 + Math.min(streakBefore, STREAK_CAP) * 2.5
+}
+
 const question = computed(() => questions.value[current.value])
 
 const animatedAccuracy = ref(0)
 const completionAnimated = ref(false)
+
+type QuizAnswer = { wordId: string; correct: boolean }
+const answerLog = ref<QuizAnswer[]>([])
+const finishing = ref(false)
+const totalXpEarned = ref(0)
+
+const animatedXpEarned = ref(0)
 
 const accuracy = computed(() => {
     if (!questions.value.length) return 0
@@ -90,6 +114,55 @@ const hasQuestions = computed(() => questions.value.length > 0)
 const quizFinished = computed(() => {
     return hasQuestions.value && current.value >= questions.value.length
 })
+
+const showCalculating = computed(() => {
+    return quizFinished.value && finishing.value
+})
+
+const showResults = computed(() => {
+    return quizFinished.value && !finishing.value
+})
+
+const MIN_CALCULATING_MS = 1800
+
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+async function finalizeQuiz() {
+    if (finishing.value) return
+    finishing.value = true
+
+    try {
+        const token = await getAccessToken()
+
+        const [res] = await Promise.all([
+            $fetch<{
+                quiz: {
+                    correctCount: number
+                    totalQuestions: number
+                    xpEarned: number
+                }
+            }>('/api/quiz/grind/finalize', {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`
+                },
+                body: {
+                    mode: 'level-sentences',
+                    answers: answerLog.value
+                }
+            }),
+            sleep(MIN_CALCULATING_MS)
+        ])
+
+        totalXpEarned.value = res.quiz.xpEarned
+    } catch (err) {
+        console.error('Sentence quiz finalize failed', err)
+    } finally {
+        finishing.value = false
+    }
+}
 
 const showQuiz = computed(() => {
     return hasQuestions.value && current.value < questions.value.length
@@ -117,11 +190,13 @@ function generateTileColors() {
 
 function resetCompletionAnimations() {
     animatedAccuracy.value = 0
+    animatedXpEarned.value = 0
     completionAnimated.value = false
 }
 
 function runCompletionAnimations() {
     animateCount(animatedAccuracy, accuracy.value, 2300)
+    animateCount(animatedXpEarned, totalXpEarned.value, 1000)
 }
 
 async function answer(index: number) {
@@ -133,12 +208,37 @@ async function answer(index: number) {
 
     const correct = index === question.value.correctIndex
 
+    answerLog.value.push({
+        wordId: question.value.wordId,
+        correct
+    })
+
     if (correct) {
         score.value++
         playCorrectJingle()
     } else {
         playIncorrectJingle()
     }
+
+    const wordId = question.value.wordId
+    const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
+
+    const delta = deltaFor(correct, prev.streak)
+    const newStreak = correct ? prev.streak + 1 : 0
+    const newXp = Math.max(0, prev.xp + delta)
+
+    wordProgressMap.value[wordId] = {
+        xp: newXp,
+        streak: newStreak
+    }
+
+    xpDelta.value = delta
+    currentXp.value = newXp
+    currentStreak.value = newStreak
+
+    setTimeout(() => {
+        xpDelta.value = null
+    }, 1000)
 }
 
 async function next() {
@@ -146,12 +246,37 @@ async function next() {
     selectedIndex.value = null
     showJyutping.value = false
     current.value++
+
+    if (current.value >= questions.value.length) {
+        if (answerLog.value.length > 0) {
+            await finalizeQuiz()
+        }
+        return
+    }
+
+    const nextWordId = questions.value[current.value]?.wordId
+    if (nextWordId) {
+        currentXp.value = wordProgressMap.value[nextWordId]?.xp ?? 0
+        currentStreak.value = wordProgressMap.value[nextWordId]?.streak ?? 0
+    }
+
+    xpDelta.value = null
 }
 
 const percentage = computed(() => {
     const total = questions.value.length
     if (!total) return 0
     return (score.value / total) * 100
+})
+
+const uniqueSentenceItems = computed<LevelSentenceItem[]>(() => {
+    const seen = new Set<string>()
+
+    return shuffleFisherYates([...sentenceItems.value]).filter((item) => {
+        if (seen.has(item.sourceWordId)) return false
+        seen.add(item.sourceWordId)
+        return true
+    })
 })
 
 watch(
@@ -170,30 +295,28 @@ watch(
 )
 
 watch(
-    () => quizFinished.value,
-    (done) => {
-        if (!done || completionSoundPlayed.value) return
+    () => showResults.value,
+    (visible) => {
+        if (!visible) return
 
-        completionSoundPlayed.value = true
+        if (!completionAnimated.value) {
+            completionAnimated.value = true
+            runCompletionAnimations()
+        }
 
-        setTimeout(() => {
-            if (percentage.value >= 90) {
-                playQuizCompleteFanfareSong()
-            } else if (percentage.value >= 50) {
-                playQuizCompleteOkaySong()
-            } else {
-                playQuizCompleteFailSong()
-            }
-        }, 250)
-    }
-)
+        if (!completionSoundPlayed.value) {
+            completionSoundPlayed.value = true
 
-watch(
-    () => quizFinished.value,
-    (done) => {
-        if (!done || completionAnimated.value) return
-        completionAnimated.value = true
-        runCompletionAnimations()
+            setTimeout(() => {
+                if (percentage.value >= 90) {
+                    playQuizCompleteFanfareSong()
+                } else if (percentage.value >= 50) {
+                    playQuizCompleteOkaySong()
+                } else {
+                    playQuizCompleteFailSong()
+                }
+            }, 250)
+        }
     }
 )
 
@@ -206,9 +329,55 @@ watch(
         selectedIndex.value = null
         showJyutping.value = false
         completionSoundPlayed.value = false
+        answerLog.value = []
+        finishing.value = false
+        totalXpEarned.value = 0
+        wordProgressMap.value = {}
+        currentXp.value = 0
+        currentStreak.value = 0
+        xpDelta.value = null
         resetCompletionAnimations()
     }
 )
+
+watch(
+    () => questions.value,
+    async (qs) => {
+        if (!qs.length) {
+            wordProgressMap.value = {}
+            currentXp.value = 0
+            currentStreak.value = 0
+            return
+        }
+
+        try {
+            const token = await getAccessToken()
+            const wordIds = qs.map(q => q.wordId)
+
+            const progressMap = await $fetch<
+                Record<string, { xp: number; streak: number }>
+            >('/api/word-progress', {
+                query: { wordIds: wordIds.join(',') },
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            wordProgressMap.value = progressMap
+
+            const firstWordId = qs[0]?.wordId
+            currentXp.value = progressMap[firstWordId]?.xp ?? 0
+            currentStreak.value = progressMap[firstWordId]?.streak ?? 0
+        } catch (err) {
+            console.error('Failed to load sentence quiz word progress', err)
+            wordProgressMap.value = {}
+            currentXp.value = 0
+            currentStreak.value = 0
+        }
+    },
+    { immediate: true }
+)
+
 </script>
 
 <template>
@@ -235,29 +404,98 @@ watch(
 
             <div v-if="showQuiz" class="space-y-6">
 
-                <div class="space-y-8">
+                <div class="space-y-6">
+
                     <div class="flex flex-col items-center justify-center min-h-[80px]">
                         <p class="text-2xl text-black leading-relaxed font-semibold text-center">
                             {{ question.prompt }}
                         </p>
                     </div>
 
+                    <div class="text-center space-y-4">
+                        <div class="relative">
+                            <div class="space-y-1 transition-all duration-300"
+                                :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
+                                <p class="text-xs uppercase tracking-wide text-gray-500">
+                                    Target word
+                                </p>
+
+                                <p class="text-base font-semibold text-black">
+                                    {{ question.sourceWord }}
+                                </p>
+
+                                <p class="text-sm text-gray-600">
+                                    {{ question.sourceWordJyutping }}
+                                </p>
+                            </div>
+
+                            <!-- <div v-if="!answered"
+                                class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span
+                                    class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
+                                    Reveals after answer
+                                </span>
+                            </div> -->
+                        </div>
+
+                        <div class="relative">
+                            <div class="min-h-[50px] space-y-3 transition-all duration-300"
+                                :class="!answered && 'blur-md opacity-70 select-none'">
+                                <div class="flex items-center justify-center gap-3">
+                                    <div class="w-32 h-1 bg-gray-200 rounded">
+                                        <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                                            :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
+                                    </div>
+
+                                    <div class="relative flex items-center">
+                                        <span class="text-sm text-gray-500 whitespace-nowrap">
+                                            {{ currentXp ?? 0 }} / {{ masteryXp }} XP
+                                        </span>
+
+                                        <transition name="xp-fall">
+                                            <span v-if="xpDelta !== null"
+                                                class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                                                :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                                                {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                                            </span>
+                                        </transition>
+                                    </div>
+                                </div>
+
+                                <div class="h-5 flex items-center justify-center">
+                                    <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
+                                        {{ currentStreak }} streak
+                                    </span>
+                                </div>
+                            </div>
+
+                            <!-- <div v-if="!answered"
+                                class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                                <span
+                                    class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
+                                    XP reveals after answer
+                                </span>
+                            </div> -->
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 gap-4">
-                        <button v-for="(option, i) in question.options" :key="i" class="rounded-xl flex items-center justify-center text-base font-medium text-center p-5 select-none
-              transition-all duration-200 ease-out shadow-sm active:scale-95" :style="{
-                backgroundColor:
-                    !answered
-                        ? tileColors[i]
-                        : i === question.correctIndex
-                            ? '#BBF7D0'
-                            : i === selectedIndex
-                                ? '#FECACA'
-                                : tileColors[i]
-            }" :class="[
-                !answered && 'hover:-translate-y-1 hover:shadow-lg hover:bg-gray-50 hover:brightness-110',
-                answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-                answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-            ]" @click="answer(i)">
+                        <button v-for="(option, i) in question.options" :key="i"
+                            class="rounded-xl flex items-center justify-center text-lg font-medium text-center p-5 select-none transition-all duration-200 ease-out shadow-sm active:scale-95"
+                            :style="{
+                                backgroundColor:
+                                    !answered
+                                        ? tileColors[i]
+                                        : i === question.correctIndex
+                                            ? '#BBF7D0'
+                                            : i === selectedIndex
+                                                ? '#FECACA'
+                                                : tileColors[i]
+                            }" :class="[
+                                !answered && 'hover:-translate-y-1 hover:shadow-lg hover:bg-gray-50 hover:brightness-110',
+                                answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+                                answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+                            ]" @click="answer(i)">
                             {{ option }}
                         </button>
                     </div>
@@ -273,7 +511,23 @@ watch(
             </div>
 
             <transition name="fade-scale" mode="out-in">
-                <div v-if="quizFinished" key="results" class="space-y-6">
+                <div v-if="showCalculating" key="calculating" class="stat-card hero-card result-2 space-y-4">
+                    <div class="spinner mx-auto" />
+
+                    <p class="stat-label">
+                        Calculating
+                    </p>
+
+                    <h2 class="hero-title">
+                        Updating your XP...
+                    </h2>
+
+                    <p class="hero-subtext">
+                        Saving your sentence quiz progress
+                    </p>
+                </div>
+
+                <div v-else-if="showResults" key="results" class="space-y-6">
                     <transition name="card-fade" appear>
                         <div class="stat-card hero-card" :class="resultHeroClass">
                             <p class="stat-label">
@@ -294,7 +548,7 @@ watch(
                         </div>
                     </transition>
 
-                    <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                         <div class="stat-card hover:brightness-110 result-0">
                             <p class="stat-label">Correct</p>
                             <p class="stat-value">{{ score }}</p>
@@ -303,6 +557,11 @@ watch(
                         <div class="stat-card hover:brightness-110 result-1">
                             <p class="stat-label">Incorrect</p>
                             <p class="stat-value">{{ incorrectCount }}</p>
+                        </div>
+
+                        <div class="stat-card hover:brightness-110 result-2">
+                            <p class="stat-label">XP Earned</p>
+                            <p class="stat-value">+{{ animatedXpEarned }} XP</p>
                         </div>
                     </transition-group>
 
@@ -326,19 +585,18 @@ watch(
 </template>
 
 <style scoped>
-
 .level-heading {
-  font-size: 1.3rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(0, 0, 0);
+    font-size: 1.3rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(0, 0, 0);
 }
 
 .level-subheading {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(17, 24, 39, 0.65);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(17, 24, 39, 0.65);
 }
 
 .card-fade-enter-active {
@@ -428,5 +686,43 @@ watch(
 .fade-scale-leave-to {
     opacity: 0;
     transform: translateY(8px) scale(0.98);
+}
+
+.spinner {
+    width: 52px;
+    height: 52px;
+    border-radius: 9999px;
+    border: 4px solid rgba(17, 24, 39, 0.12);
+    border-top-color: rgba(17, 24, 39, 0.75);
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.xp-fall-enter-active {
+    transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+.xp-fall-leave-active {
+    transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.xp-fall-enter-from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.9);
+}
+
+.xp-fall-enter-to {
+    opacity: 1;
+    transform: translateY(0px) scale(1);
+}
+
+.xp-fall-leave-to {
+    opacity: 0;
+    transform: translateY(35px) scale(0.95);
 }
 </style>

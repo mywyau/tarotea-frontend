@@ -212,6 +212,7 @@ async function finalizeQuiz() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: {
+          quizType: 'grind-level-audio',
           answers: answerLog.value
         }
       }),

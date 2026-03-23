@@ -304,6 +304,7 @@ async function finalizeTopicQuiz() {
         },
         body: {
           topic: topicSlug.value,
+          quizType: 'grind-topic',
           answers: answerLog.value
         }
       }),
