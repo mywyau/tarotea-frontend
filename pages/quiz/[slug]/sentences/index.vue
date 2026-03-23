@@ -78,7 +78,7 @@ const WRONG_PENALTY = -12
 
 function deltaFor(correct: boolean, streakBefore: number) {
     if (!correct) return WRONG_PENALTY
-    return 5 + Math.min(streakBefore, STREAK_CAP) * 2.5
+    return 10 + Math.min(streakBefore, STREAK_CAP) * 3
 }
 
 const question = computed(() => questions.value[current.value])
@@ -414,7 +414,7 @@ watch(
 
                     <div class="text-center space-y-4">
                         <div class="relative">
-                            <div class="space-y-1 transition-all duration-300"
+                            <div class="space-y-1"
                                 :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
                                 <p class="text-xs uppercase tracking-wide text-gray-500">
                                     Target word

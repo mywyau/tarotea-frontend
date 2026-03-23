@@ -68,7 +68,7 @@ export default defineEventHandler(async (event) => {
       case "topic-sentences":
       case "level-sentences-audio":
       case "topic-sentences-audio":
-        return 10 + effective * 2.5;
+        return 10 + effective * 3;
       case "grind-level":
       case "grind-topic":
       case "grind-level-audio":
