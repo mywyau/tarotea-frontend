@@ -1,4 +1,4 @@
-// /server/api/sentences/[id]/weakest.get.ts
+// /server/api/sentences/[id]/rotate.get.ts
 import { createError, getRouterParam } from "h3";
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";

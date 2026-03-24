@@ -560,7 +560,7 @@ watch(
                     </p>
                 </div>
 
-                <div v-else-if="showResults" key="results" class="space-y-6">
+                <div v-else-if="true" key="results" class="space-y-6">
                     <transition name="card-fade" appear>
                         <div class="stat-card hero-card" :class="resultHeroClass">
                             <p class="stat-label">
@@ -601,13 +601,13 @@ watch(
                     </transition-group>
 
                     <div class="pt-2 space-y-3">
-                        <NuxtLink :to="`/levels/quiz`"
+                        <NuxtLink :to="`/quiz`"
                             class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
                             style="background-color:#A8CAE0;">
                             Play Again
                         </NuxtLink>
 
-                        <NuxtLink :to="`/level/words/${slug}`"
+                        <NuxtLink :to="`/level/${slug}`"
                             class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
                             style="background-color:rgba(244,205,39,0.35);">
                             Back to level

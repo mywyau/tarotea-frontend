@@ -1,6 +1,6 @@
 import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
-import { redis } from "~/server/redis";
+import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {

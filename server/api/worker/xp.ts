@@ -1,5 +1,5 @@
 import { db } from "~/server/repositories/db";
-import { redis } from "~/server/redis";
+import { redis } from "~/server/repositories/redis";
 
 export default defineEventHandler(async () => {
   console.log("XP worker triggered at:", new Date().toISOString());
