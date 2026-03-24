@@ -146,13 +146,13 @@ onMounted(async () => {
                         Audio Only
                     </NuxtLink>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}` : undefined"
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}/v2` : undefined"
                         class="topic-btn topic-btn-yellow"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Sentences
                     </NuxtLink>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/audio/${topic.id}` : undefined"
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/audio/${topic.id}/v2` : undefined"
                         class="topic-btn topic-btn-blush"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Audio Only Sentences
