@@ -8,7 +8,6 @@ definePageMeta({
 type QuizAnswer = { wordId: string; correct: boolean }
 
 import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz';
-import { computed, ref } from 'vue';
 
 import {
   playQuizCompleteFailSong,
@@ -20,6 +19,8 @@ import type { LevelData, Word } from '~/types/level/quiz/types';
 import { brandColours } from '~/utils/branding/helpers';
 import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels';
 import { masteryXp } from '~/utils/xp/helpers';
+
+import { computed, onMounted, ref, watch } from 'vue';
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -50,9 +51,52 @@ const wordsForLevel = computed<Word[]>(() => {
   return Object.values(data.value.categories).flat()
 })
 
+const weightedWords = computed(() => {
+  const words = wordsForLevel.value
+
+  if (!words.length) {
+    return []
+  }
+
+  const totalQuestions = 20
+
+  if (!weakestIds.value.length) {
+    return shuffleFisherYates(words).slice(0, totalQuestions)
+  }
+
+  const weakestPool = shuffleFisherYates(
+    words.filter(w => weakestIds.value.includes(w.id))
+  )
+
+  const nonWeakestPool = shuffleFisherYates(
+    words.filter(w => !weakestIds.value.includes(w.id))
+  )
+
+  const weakestTarget = Math.floor(totalQuestions * 0.7)
+
+  const selected: Word[] = []
+
+  selected.push(...weakestPool.slice(0, weakestTarget))
+  selected.push(
+    ...nonWeakestPool.slice(0, totalQuestions - selected.length)
+  )
+
+  if (selected.length < totalQuestions) {
+    const remaining = shuffleFisherYates(
+      words.filter(w => !selected.some(s => s.id === w.id))
+    )
+
+    selected.push(
+      ...remaining.slice(0, totalQuestions - selected.length)
+    )
+  }
+
+  return shuffleFisherYates(selected)
+})
+
 const questions = computed(() =>
-  wordsForLevel.value.length
-    ? generateAudioQuiz(wordsForLevel.value)
+  weightedWords.value.length
+    ? generateAudioQuiz(weightedWords.value)
     : []
 )
 
@@ -77,6 +121,7 @@ const animatedAccuracy = ref(0)
 const animatedXpEarned = ref(0)
 
 const completionAnimated = ref(false)
+const weakestIds = ref<string[]>([])
 
 const resultHeroClass = computed(() => {
   if (accuracy.value === 100) return 'result-3'
@@ -212,7 +257,7 @@ async function finalizeQuiz() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: {
-          quizType: 'grind-level-audio',
+          mode: 'grind-level-audio',
           answers: answerLog.value
         }
       }),
@@ -307,6 +352,26 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+onMounted(async () => {
+  try {
+    const token = await getAccessToken()
+
+    const weakest = await $fetch<{ id: string }[]>(
+      '/api/word-progress/weakest',
+      {
+        query: { level: slug },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+
+    weakestIds.value = weakest.map(w => w.id)
+  } catch {
+    weakestIds.value = []
+  }
+})
+
 watch(
   () => questions.value,
   async (qs) => {
@@ -316,7 +381,7 @@ watch(
 
     const token = await getAccessToken()
 
-    const wordIds = qs.map(q => q.wordId)
+    const wordIds = [...new Set(qs.map(q => q.wordId))]
 
     const progressMap = await $fetch<
       Record<string, { xp: number; streak: number }>
@@ -572,7 +637,6 @@ watch(
 
 
 <style scoped>
-
 .level-heading {
   font-size: 1.3rem;
   text-transform: uppercase;
