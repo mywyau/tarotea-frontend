@@ -2,7 +2,8 @@ import { createError, getHeader, readBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
-type Answer = { wordId: string; correct: boolean };
+type Answer = { wordId: string; sentenceId?: string; correct: boolean };
+
 type QuizMode =
   | "grind-level"
   | "grind-level-audio"
@@ -40,7 +41,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Invalid payload" });
   }
 
-  const rawMode = body.mode ?? body.quizType ?? "grind";
+  const rawMode = body.mode ?? body.quizType ?? "grind-level";
 
   if (!ALLOWED_MODES.includes(rawMode as QuizMode)) {
     throw createError({
@@ -165,6 +166,42 @@ export default defineEventHandler(async (event) => {
       ],
     );
 
+    const sentenceAnswers = body.answers.filter(
+      (a) => typeof a.sentenceId === "string" && a.sentenceId.length > 0,
+    );
+
+    for (const a of sentenceAnswers) {
+      await client.query(
+        `
+    insert into user_sentence_progress (
+      user_id,
+      word_id,
+      sentence_id,
+      seen_count,
+      correct_count,
+      wrong_count,
+      last_seen_at,
+      created_at,
+      updated_at
+    )
+    values (
+      $1, $2, $3, 1,
+      case when $4 then 1 else 0 end,
+      case when $4 then 0 else 1 end,
+      now(), now(), now()
+    )
+    on conflict (user_id, sentence_id)
+    do update set
+      seen_count = user_sentence_progress.seen_count + 1,
+      correct_count = user_sentence_progress.correct_count + case when $4 then 1 else 0 end,
+      wrong_count = user_sentence_progress.wrong_count + case when $4 then 0 else 1 end,
+      last_seen_at = now(),
+      updated_at = now()
+    `,
+        [userId, a.wordId, a.sentenceId, a.correct],
+      );
+    }
+
     await client.query("COMMIT");
 
     const host =
@@ -186,6 +223,11 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (e) {
+    console.error("FINALIZE FAILED", {
+      mode,
+      body,
+      error: e,
+    });
     await client.query("ROLLBACK");
     throw e;
   } finally {

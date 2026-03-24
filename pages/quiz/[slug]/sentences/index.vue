@@ -44,19 +44,50 @@ const slug = computed(() => route.params.slug as string)
 
 const { getAccessToken } = await useAuth()
 
-const { data } = await useFetch<LevelSentenceData>(
-    () => `/api/sentences/${slug.value}`,
+// const token = await getAccessToken()
+
+// const { data } = await useFetch<LevelSentenceData>(
+//     () => `/api/sentences/${slug.value}/rotate`,
+//     {
+//         key: () => `level-sentences-${slug.value}`,
+//         server: true,
+//         headers: {
+//             Authorization: `Bearer ${token}`
+//         }
+//     }
+// )
+
+const { data, error, refresh } = await useAsyncData(
+    () => `level-sentences-${slug.value}`,
+    async () => {
+        const token = await getAccessToken()
+
+        return $fetch<LevelSentenceData>(
+            `/api/sentences/${slug.value}/rotate`,
+            {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            }
+        )
+    },
     {
-        key: () => `level-sentences-${slug.value}`,
-        server: true
+        watch: [slug],
+        server: false
     }
 )
 
 const sentenceItems = computed(() => data.value?.items ?? [])
 
+// const questions = computed<SentenceQuizQuestion[]>(() =>
+//     uniqueSentenceItems.value.length
+//         ? buildSentenceQuiz(uniqueSentenceItems.value).slice(0, 20)
+//         : []
+// )
+
 const questions = computed<SentenceQuizQuestion[]>(() =>
-    uniqueSentenceItems.value.length
-        ? buildSentenceQuiz(uniqueSentenceItems.value).slice(0, 20)
+    sentenceItems.value.length
+        ? buildSentenceQuiz(sentenceItems.value).slice(0, 20)
         : []
 )
 
@@ -86,7 +117,8 @@ const question = computed(() => questions.value[current.value])
 const animatedAccuracy = ref(0)
 const completionAnimated = ref(false)
 
-type QuizAnswer = { wordId: string; correct: boolean }
+type QuizAnswer = { wordId: string; sentenceId: string; correct: boolean }
+
 const answerLog = ref<QuizAnswer[]>([])
 const finishing = ref(false)
 const totalXpEarned = ref(0)
@@ -210,6 +242,7 @@ async function answer(index: number) {
 
     answerLog.value.push({
         wordId: question.value.wordId,
+        sentenceId: question.value.sentenceId,
         correct
     })
 
@@ -269,15 +302,15 @@ const percentage = computed(() => {
     return (score.value / total) * 100
 })
 
-const uniqueSentenceItems = computed<LevelSentenceItem[]>(() => {
-    const seen = new Set<string>()
+// const uniqueSentenceItems = computed<LevelSentenceItem[]>(() => {
+//     const seen = new Set<string>()
 
-    return shuffleFisherYates([...sentenceItems.value]).filter((item) => {
-        if (seen.has(item.sourceWordId)) return false
-        seen.add(item.sourceWordId)
-        return true
-    })
-})
+//     return shuffleFisherYates([...sentenceItems.value]).filter((item) => {
+//         if (seen.has(item.sourceWordId)) return false
+//         seen.add(item.sourceWordId)
+//         return true
+//     })
+// })
 
 watch(
     () => question.value?.sentenceId,
@@ -561,7 +594,9 @@ watch(
 
                         <div class="stat-card hover:brightness-110 result-2">
                             <p class="stat-label">XP Earned</p>
-                            <p class="stat-value">+{{ animatedXpEarned }} XP</p>
+                            <p class="stat-value">
+                                {{ animatedXpEarned > 0 ? '+' : '' }}{{ animatedXpEarned }} XP
+                            </p>
                         </div>
                     </transition-group>
 
