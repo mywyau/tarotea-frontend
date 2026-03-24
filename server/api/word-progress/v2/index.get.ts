@@ -1,4 +1,4 @@
-// server/api/word-progress/index.get.ts
+// server/api/word-progress/v2/index.get.ts
 
 import { createError, getQuery } from "h3";
 import { db } from "~/server/repositories/db";

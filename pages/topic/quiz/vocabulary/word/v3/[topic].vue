@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   middleware: ['topic-access-quiz'],
-  ssr: true,
+  ssr: false,
 })
 
 import type { TopicData } from '@/types/topic'
