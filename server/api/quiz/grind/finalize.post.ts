@@ -167,7 +167,7 @@ export default defineEventHandler(async (event) => {
     const proto = getHeader(event, "x-forwarded-proto") ?? "https";
 
     if (host) {
-      fetch(`${proto}://${host}/api/worker/xp-quiz`, {
+      fetch(`${proto}://${host}/api/worker/xp-quiz-v2`, {
         method: "POST",
       }).catch(() => {});
     }

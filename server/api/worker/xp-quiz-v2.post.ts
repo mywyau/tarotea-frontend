@@ -91,50 +91,82 @@ export default defineEventHandler(async () => {
 
       const upsertRes = await client.query<UpdatedWordProgressRow>(
         `
-        insert into user_word_progress
-          (
-            user_id,
-            word_id,
-            xp,
-            streak,
-            correct_count,
-            wrong_count,
-            last_seen_at,
-            last_correct_at,
-            updated_at
-          )
-        select
-          $1::text,
-          u.word_id,
-          least($5::int, greatest(0, u.delta)),
-          case when u.correct then 1 else 0 end,
-          case when u.correct then 1 else 0 end,
-          case when u.correct then 0 else 1 end,
-          now(),
-          case when u.correct then now() else null end,
-          now()
-        from unnest($2::text[], $3::int[], $4::boolean[])
-          as u(word_id, delta, correct)
-        on conflict (user_id, word_id)
-        do update set
-          xp = least(
-            $5::int,
-            greatest(0, user_word_progress.xp + excluded.xp)
-          ),
-          streak = case
-            when excluded.correct_count = 1 then user_word_progress.streak + 1
-            else 0
-          end,
-          correct_count = user_word_progress.correct_count + excluded.correct_count,
-          wrong_count = user_word_progress.wrong_count + excluded.wrong_count,
-          last_seen_at = now(),
-          last_correct_at = case
-            when excluded.correct_count = 1 then now()
-            else user_word_progress.last_correct_at
-          end,
-          updated_at = now()
-        returning word_id, xp, streak
-        `,
+  with input_rows as (
+    select *
+    from unnest($2::text[], $3::int[], $4::boolean[])
+      as u(word_id, delta, correct)
+  )
+  insert into user_word_progress
+    (
+      user_id,
+      word_id,
+      xp,
+      streak,
+      correct_count,
+      wrong_count,
+      last_seen_at,
+      last_correct_at,
+      updated_at
+    )
+  select
+    $1::text,
+    i.word_id,
+    least($5::int, greatest(0, i.delta)),
+    case when i.correct then 1 else 0 end,
+    case when i.correct then 1 else 0 end,
+    case when i.correct then 0 else 1 end,
+    now(),
+    case when i.correct then now() else null end,
+    now()
+  from input_rows i
+  on conflict (user_id, word_id)
+  do update set
+    xp = least(
+      $5::int,
+      greatest(0, user_word_progress.xp + (
+        select i.delta
+        from input_rows i
+        where i.word_id = user_word_progress.word_id
+      ))
+    ),
+    streak = case
+      when (
+        select i.correct
+        from input_rows i
+        where i.word_id = user_word_progress.word_id
+      )
+      then user_word_progress.streak + 1
+      else 0
+    end,
+    correct_count = user_word_progress.correct_count + case
+      when (
+        select i.correct
+        from input_rows i
+        where i.word_id = user_word_progress.word_id
+      )
+      then 1 else 0
+    end,
+    wrong_count = user_word_progress.wrong_count + case
+      when (
+        select i.correct
+        from input_rows i
+        where i.word_id = user_word_progress.word_id
+      )
+      then 0 else 1
+    end,
+    last_seen_at = now(),
+    last_correct_at = case
+      when (
+        select i.correct
+        from input_rows i
+        where i.word_id = user_word_progress.word_id
+      )
+      then now()
+      else user_word_progress.last_correct_at
+    end,
+    updated_at = now()
+  returning word_id, xp, streak
+  `,
         [userId, wordIds, deltas, corrects, MASTERY_CAP],
       );
 
