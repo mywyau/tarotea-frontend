@@ -2,7 +2,7 @@
 
 definePageMeta({
     ssr: false,
-    // middleware: ['coming-soon'],
+    middleware: ['logged-in'],
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
@@ -727,8 +727,9 @@ watch(
                         </div>
 
                         <button
-                            class="submit-btn-blush rounded-xl px-4 py-2 text-sm font-medium text-black hover:brightness-110 transition disabled:opacity-40"
-                            :disabled="attemptsLeft <= 0 || !input.trim() || solved" type="submit">
+                            class="rounded-xl px-4 py-2 text-sm font-medium text-black hover:brightness-110 transition disabled:opacity-40"
+                            style="background-color:#A8CAE0;" :disabled="attemptsLeft <= 0 || !input.trim() || solved"
+                            type="submit">
                             Submit
                         </button>
 
@@ -740,9 +741,8 @@ watch(
                     </p>
 
                     <button v-if="showNext" @click="nextWord"
-                        class="w-full mt-3 rounded-xl px-4 py-3 text-black hover:brightness-110 transition"
-                        style="background-color:#A8CAE0;"
-                        >
+                        class="w-full mt-3 rounded-xl px-4 py-3 text-black font-medium hover:brightness-110 transition"
+                        style="background-color:#A8CAE0;">
                         Next
                     </button>
 
