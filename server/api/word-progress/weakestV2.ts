@@ -1,4 +1,4 @@
-// server/api/word-progress/weakest.ts
+// server/api/word-progress/weakestV2.ts
 
 import { getQuery, createError } from "h3";
 import { db } from "~/server/repositories/db";

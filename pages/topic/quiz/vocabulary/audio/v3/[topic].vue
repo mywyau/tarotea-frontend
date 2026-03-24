@@ -170,9 +170,8 @@ async function finalizeAudioQuiz() {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: {
-          mode: 'topic-audio',
           source: slug.value,
-          quizType: 'grind-topic-audio',
+          mode: 'grind-topic-audio',
           answers: answerLog.value
         }
       }),

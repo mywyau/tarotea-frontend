@@ -357,7 +357,8 @@ onMounted(async () => {
     const token = await getAccessToken()
 
     const weakest = await $fetch<{ id: string }[]>(
-      '/api/word-progress/weakest',
+      // '/api/word-progress/weakest',
+      '/api/word-progress/weakestV2',
       {
         query: { level: slug },
         headers: {
