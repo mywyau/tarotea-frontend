@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['topic-access-quiz'],
+  // middleware: ['topic-access-quiz'],
+  middleware: ['coming-soon'],
   ssr: false,
 })
 
