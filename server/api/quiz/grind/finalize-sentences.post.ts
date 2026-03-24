@@ -6,10 +6,6 @@ import { requireUser } from "~/server/utils/requireUser";
 type Answer = { wordId: string; sentenceId?: string; correct: boolean };
 
 type QuizMode =
-  | "grind-level"
-  | "grind-level-audio"
-  | "grind-topic"
-  | "grind-topic-audio"
   | "level-sentences"
   | "topic-sentences"
   | "level-sentences-audio"
@@ -36,10 +32,6 @@ type PayloadAnswer = {
 };
 
 const ALLOWED_MODES: QuizMode[] = [
-  "grind-level",
-  "grind-level-audio",
-  "grind-topic",
-  "grind-topic-audio",
   "level-sentences",
   "topic-sentences",
   "level-sentences-audio",
@@ -64,12 +56,8 @@ function deltaFor(
     case "level-sentences-audio":
     case "topic-sentences-audio":
       return 10 + effective * 3;
-    case "grind-level":
-    case "grind-topic":
-    case "grind-level-audio":
-    case "grind-topic-audio":
     default:
-      return 5 + effective * 2;
+      return 10 + effective * 3;
   }
 }
 
