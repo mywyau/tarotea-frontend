@@ -22,7 +22,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   const levelNumber:number = levelIdToNumbers(slug);
 
-  if(isLoggedOut) {
+  if(isLoggedOut.value) {
     return navigateTo("/please-sign-in");
   }
 
