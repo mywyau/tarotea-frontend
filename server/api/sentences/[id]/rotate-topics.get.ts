@@ -1,4 +1,5 @@
 import { createError, getRouterParam } from "h3";
+import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
@@ -77,6 +78,15 @@ async function loadSentenceProgressMap(
     } else {
       cachedById = (result ?? {}) as Record<string, unknown>;
     }
+
+    try {
+      await redis.expire(redisKey, SENTENCE_PROGRESS_CACHE_TTL_SECONDS);
+    } catch (error) {
+      console.error(
+        "[sentences/topics/rotate] Redis EXPIRE after HMGET failed",
+        error,
+      );
+    }
   } catch (error) {
     console.error("[sentences/topics/rotate] Redis HMGET failed", error);
     cachedById = {};
@@ -153,6 +163,15 @@ async function loadSentenceProgressMap(
   try {
     if (Object.keys(redisWrites).length > 0) {
       await redis.hset(redisKey, redisWrites);
+
+      try {
+        await redis.expire(redisKey, SENTENCE_PROGRESS_CACHE_TTL_SECONDS);
+      } catch (error) {
+        console.error(
+          "[sentences/topics/rotate] Redis EXPIRE after HSET failed",
+          error,
+        );
+      }
     }
   } catch (error) {
     console.error("[sentences/topics/rotate] Redis HSET failed", error);

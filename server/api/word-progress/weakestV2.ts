@@ -1,6 +1,7 @@
 // server/api/word-progress/weakestV2.ts
 
-import { getQuery, createError } from "h3";
+import { createError, getQuery } from "h3";
+import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
@@ -44,7 +45,10 @@ async function loadCandidateWordIds(
         }
       }
     } catch (error) {
-      console.error("[word-progress/weakest] level scope Redis GET failed", error);
+      console.error(
+        "[word-progress/weakest] level scope Redis GET failed",
+        error,
+      );
     }
 
     const { rows } = await db.query(
@@ -67,7 +71,10 @@ async function loadCandidateWordIds(
       // optional TTL:
       // await redis.expire(cacheKey, 60 * 60);
     } catch (error) {
-      console.error("[word-progress/weakest] level scope Redis SET failed", error);
+      console.error(
+        "[word-progress/weakest] level scope Redis SET failed",
+        error,
+      );
     }
 
     return ids;
@@ -85,7 +92,10 @@ async function loadCandidateWordIds(
         }
       }
     } catch (error) {
-      console.error("[word-progress/weakest] topic scope Redis GET failed", error);
+      console.error(
+        "[word-progress/weakest] topic scope Redis GET failed",
+        error,
+      );
     }
 
     const { rows } = await db.query(
@@ -108,7 +118,10 @@ async function loadCandidateWordIds(
       // optional TTL:
       // await redis.expire(cacheKey, 60 * 60);
     } catch (error) {
-      console.error("[word-progress/weakest] topic scope Redis SET failed", error);
+      console.error(
+        "[word-progress/weakest] topic scope Redis SET failed",
+        error,
+      );
     }
 
     return ids;
@@ -121,10 +134,8 @@ export default defineEventHandler(async (event) => {
   const userId = await requireUser(event);
 
   const query = getQuery(event);
-  const levelSlug =
-    typeof query.level === "string" ? query.level : undefined;
-  const topicSlug =
-    typeof query.topic === "string" ? query.topic : undefined;
+  const levelSlug = typeof query.level === "string" ? query.level : undefined;
+  const topicSlug = typeof query.topic === "string" ? query.topic : undefined;
 
   if ((!levelSlug && !topicSlug) || (levelSlug && topicSlug)) {
     throw createError({
@@ -153,6 +164,15 @@ export default defineEventHandler(async (event) => {
       );
     } else {
       cachedById = (result ?? {}) as Record<string, unknown>;
+    }
+
+    try {
+      await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
+    } catch (error) {
+      console.error(
+        "[word-progress/weakest] Redis EXPIRE after HMGET failed",
+        error,
+      );
     }
   } catch (error) {
     console.error("[word-progress/weakest] Redis HMGET failed", error);
@@ -224,6 +244,15 @@ export default defineEventHandler(async (event) => {
     try {
       if (Object.keys(redisWrites).length > 0) {
         await redis.hset(redisKey, redisWrites);
+
+        try {
+          await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
+        } catch (error) {
+          console.error(
+            "[word-progress/weakest] Redis EXPIRE after HSET failed",
+            error,
+          );
+        }
       }
     } catch (error) {
       console.error("[word-progress/weakest] Redis HSET failed", error);
