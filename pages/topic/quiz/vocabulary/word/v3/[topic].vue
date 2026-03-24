@@ -103,7 +103,7 @@ const weightedWords = computed(() => {
     words.filter(w => !weakestIds.value.includes(w.id))
   )
 
-  const weakestTarget = Math.floor(totalQuestions * 0.7)
+  const weakestTarget = Math.floor(totalQuestions * weakestWordRatio)
 
   const selected: typeof words = []
 
