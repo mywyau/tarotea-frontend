@@ -1,3 +1,5 @@
+// server/api/vocab-quiz/[id].ts
+
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
 

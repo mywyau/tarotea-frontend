@@ -361,7 +361,7 @@ watch(
 
     const token = await getAccessToken()
 
-    const wordIds = qs.map(q => q.wordId)
+    const wordIds = [...new Set(qs.map(q => q.wordId))]
 
     const progressMap = await $fetch<
       Record<string, { xp: number; streak: number }>

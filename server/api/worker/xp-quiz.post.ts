@@ -1,7 +1,16 @@
+// server/api/worker/xp-quiz.post.ts
+
 import { db } from "~/server/repositories/db";
+import { redis } from "~/server/repositories/redis";
 
 type Payload = {
   answers: Array<{ wordId: string; correct: boolean; delta: number }>;
+};
+
+type UpdatedWordProgressRow = {
+  word_id: string;
+  xp: number;
+  streak: number;
 };
 
 export default defineEventHandler(async () => {
@@ -11,6 +20,9 @@ export default defineEventHandler(async () => {
 
   const client = await db.connect();
   await client.query("BEGIN");
+
+  // Collect Redis writes grouped by user, then apply after COMMIT
+  const redisWritesByUser = new Map<string, Record<string, string>>();
 
   try {
     const batchRes = await client.query(
@@ -36,31 +48,39 @@ export default defineEventHandler(async () => {
       const eventId = Number(row.id);
       const userId = row.user_id as string;
 
-      // ✅ normalize jsonb (could be object or string)
       const payload: Payload =
         typeof row.payload === "string" ? JSON.parse(row.payload) : row.payload;
 
       const answers = payload?.answers ?? [];
+
       if (answers.length === 0) {
         processedIds.push(eventId);
         continue;
       }
 
-      // ✅ dedupe by wordId to avoid “cannot affect row a second time”
+      // Dedupe by wordId inside this event
       const byWord = new Map<string, { delta: number; correct: boolean }>();
+
       for (const a of answers) {
         if (!a?.wordId) continue;
+
         const prev = byWord.get(a.wordId);
-        if (!prev)
-          byWord.set(a.wordId, { delta: a.delta ?? 0, correct: !!a.correct });
-        else
+
+        if (!prev) {
+          byWord.set(a.wordId, {
+            delta: a.delta ?? 0,
+            correct: !!a.correct,
+          });
+        } else {
           byWord.set(a.wordId, {
             delta: prev.delta + (a.delta ?? 0),
             correct: prev.correct || !!a.correct,
           });
+        }
       }
 
       const wordIds = [...byWord.keys()];
+
       if (wordIds.length === 0) {
         processedIds.push(eventId);
         continue;
@@ -69,45 +89,68 @@ export default defineEventHandler(async () => {
       const deltas = wordIds.map((id) => byWord.get(id)!.delta);
       const corrects = wordIds.map((id) => byWord.get(id)!.correct);
 
-      await client.query(
+      const upsertRes = await client.query<UpdatedWordProgressRow>(
         `
-            insert into user_word_progress
-              (user_id, word_id, xp, streak, correct_count, wrong_count, last_seen_at, last_correct_at, updated_at)
-            select
-              $1::text,
-              u.word_id,
-              greatest(0, u.delta),
-              case when u.correct then 1 else 0 end, -- initial streak for new word
-              case when u.correct then 1 else 0 end,
-              case when u.correct then 0 else 1 end,
-              now(),
-              case when u.correct then now() else null end,
-              now()
-            from unnest($2::text[], $3::int[], $4::boolean[])
-              as u(word_id, delta, correct)
-            on conflict (user_id, word_id)
-            do update set
-              xp = least(
-                      $5::int,
-                      greatest(0, user_word_progress.xp + excluded.xp)
-                    ),
-              streak = case
-                when excluded.correct_count = 1 then user_word_progress.streak + 1
-                else 0
-              end,
-              correct_count = user_word_progress.correct_count + excluded.correct_count,
-              wrong_count = user_word_progress.wrong_count + excluded.wrong_count,
-              last_seen_at = now(),
-              last_correct_at = case
-                when excluded.correct_count = 1 then now()
-                else user_word_progress.last_correct_at
-              end,
-              updated_at = now()
+        insert into user_word_progress
+          (
+            user_id,
+            word_id,
+            xp,
+            streak,
+            correct_count,
+            wrong_count,
+            last_seen_at,
+            last_correct_at,
+            updated_at
+          )
+        select
+          $1::text,
+          u.word_id,
+          least($5::int, greatest(0, u.delta)),
+          case when u.correct then 1 else 0 end,
+          case when u.correct then 1 else 0 end,
+          case when u.correct then 0 else 1 end,
+          now(),
+          case when u.correct then now() else null end,
+          now()
+        from unnest($2::text[], $3::int[], $4::boolean[])
+          as u(word_id, delta, correct)
+        on conflict (user_id, word_id)
+        do update set
+          xp = least(
+            $5::int,
+            greatest(0, user_word_progress.xp + excluded.xp)
+          ),
+          streak = case
+            when excluded.correct_count = 1 then user_word_progress.streak + 1
+            else 0
+          end,
+          correct_count = user_word_progress.correct_count + excluded.correct_count,
+          wrong_count = user_word_progress.wrong_count + excluded.wrong_count,
+          last_seen_at = now(),
+          last_correct_at = case
+            when excluded.correct_count = 1 then now()
+            else user_word_progress.last_correct_at
+          end,
+          updated_at = now()
+        returning word_id, xp, streak
         `,
         [userId, wordIds, deltas, corrects, MASTERY_CAP],
       );
 
-      applied += wordIds.length; // count unique words applied
+      // Stage Redis refresh data for this user
+      const existingWrites = redisWritesByUser.get(userId) ?? {};
+
+      for (const updated of upsertRes.rows) {
+        existingWrites[updated.word_id] = JSON.stringify({
+          xp: Number(updated.xp ?? 0),
+          streak: Number(updated.streak ?? 0),
+        });
+      }
+
+      redisWritesByUser.set(userId, existingWrites);
+
+      applied += wordIds.length;
       processedIds.push(eventId);
     }
 
@@ -121,6 +164,21 @@ export default defineEventHandler(async () => {
     );
 
     await client.query("COMMIT");
+
+    // Best-effort Redis refresh after commit
+    for (const [userId, redisWrites] of redisWritesByUser.entries()) {
+      try {
+        if (Object.keys(redisWrites).length > 0) {
+          await redis.hset(`word_progress:${userId}`, redisWrites);
+        }
+      } catch (error) {
+        console.error("[xp-quiz worker] Redis HSET failed", {
+          userId,
+          error,
+        });
+      }
+    }
+
     return {
       processedQuizEvents: processedIds.length,
       appliedAnswers: applied,

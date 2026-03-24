@@ -1,0 +1,236 @@
+// server/api/word-progress/weakest.ts
+
+import { getQuery, createError } from "h3";
+import { db } from "~/server/repositories/db";
+import { redis } from "~/server/repositories/redis";
+import { requireUser } from "~/server/utils/requireUser";
+
+type WordProgress = {
+  xp: number;
+  streak: number;
+};
+
+function parseCachedWordProgress(raw: unknown): WordProgress | null {
+  if (!raw || typeof raw !== "string") return null;
+
+  try {
+    const parsed = JSON.parse(raw) as {
+      xp?: unknown;
+      streak?: unknown;
+    };
+
+    return {
+      xp: Number(parsed.xp ?? 0),
+      streak: Number(parsed.streak ?? 0),
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function loadCandidateWordIds(
+  levelSlug?: string,
+  topicSlug?: string,
+): Promise<string[]> {
+  if (levelSlug) {
+    const cacheKey = `scope_words:level:${levelSlug}`;
+
+    try {
+      const cached = await redis.get<string>(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((id) => typeof id === "string");
+        }
+      }
+    } catch (error) {
+      console.error("[word-progress/weakest] level scope Redis GET failed", error);
+    }
+
+    const { rows } = await db.query(
+      `
+      select w.id
+      from words w
+      join word_levels wl
+        on wl.word_id = w.id
+      join levels l
+        on l.id = wl.level_id
+      where l.slug = $1
+      `,
+      [levelSlug],
+    );
+
+    const ids = rows.map((row) => row.id as string);
+
+    try {
+      await redis.set(cacheKey, JSON.stringify(ids));
+      // optional TTL:
+      // await redis.expire(cacheKey, 60 * 60);
+    } catch (error) {
+      console.error("[word-progress/weakest] level scope Redis SET failed", error);
+    }
+
+    return ids;
+  }
+
+  if (topicSlug) {
+    const cacheKey = `scope_words:topic:${topicSlug}`;
+
+    try {
+      const cached = await redis.get<string>(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          return parsed.filter((id) => typeof id === "string");
+        }
+      }
+    } catch (error) {
+      console.error("[word-progress/weakest] topic scope Redis GET failed", error);
+    }
+
+    const { rows } = await db.query(
+      `
+      select w.id
+      from words w
+      join word_topics wt
+        on wt.word_id = w.id
+      join topics t
+        on t.id = wt.topic_id
+      where t.slug = $1
+      `,
+      [topicSlug],
+    );
+
+    const ids = rows.map((row) => row.id as string);
+
+    try {
+      await redis.set(cacheKey, JSON.stringify(ids));
+      // optional TTL:
+      // await redis.expire(cacheKey, 60 * 60);
+    } catch (error) {
+      console.error("[word-progress/weakest] topic scope Redis SET failed", error);
+    }
+
+    return ids;
+  }
+
+  return [];
+}
+
+export default defineEventHandler(async (event) => {
+  const userId = await requireUser(event);
+
+  const query = getQuery(event);
+  const levelSlug =
+    typeof query.level === "string" ? query.level : undefined;
+  const topicSlug =
+    typeof query.topic === "string" ? query.topic : undefined;
+
+  if ((!levelSlug && !topicSlug) || (levelSlug && topicSlug)) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Provide either level or topic",
+    });
+  }
+
+  const candidateWordIds = await loadCandidateWordIds(levelSlug, topicSlug);
+
+  if (!candidateWordIds.length) {
+    return [];
+  }
+
+  const redisKey = `word_progress:${userId}`;
+  const weakest: Array<{ id: string; xp: number }> = [];
+
+  let cachedById: Record<string, unknown> = {};
+
+  try {
+    const result = await redis.hmget(redisKey, ...candidateWordIds);
+
+    if (Array.isArray(result)) {
+      cachedById = Object.fromEntries(
+        candidateWordIds.map((id, i) => [id, result[i] ?? null]),
+      );
+    } else {
+      cachedById = (result ?? {}) as Record<string, unknown>;
+    }
+  } catch (error) {
+    console.error("[word-progress/weakest] Redis HMGET failed", error);
+    cachedById = {};
+  }
+
+  const missingIds: string[] = [];
+
+  for (const wordId of candidateWordIds) {
+    const cached = parseCachedWordProgress(cachedById[wordId]);
+
+    if (cached) {
+      weakest.push({
+        id: wordId,
+        xp: cached.xp,
+      });
+    } else {
+      missingIds.push(wordId);
+    }
+  }
+
+  if (missingIds.length > 0) {
+    const { rows } = await db.query(
+      `
+      select word_id, xp, streak
+      from user_word_progress
+      where user_id = $1
+        and word_id = any($2::text[])
+      `,
+      [userId, missingIds],
+    );
+
+    const foundIds = new Set<string>();
+    const redisWrites: Record<string, string> = {};
+
+    for (const row of rows) {
+      const progress: WordProgress = {
+        xp: Number(row.xp ?? 0),
+        streak: Number(row.streak ?? 0),
+      };
+
+      foundIds.add(row.word_id);
+
+      weakest.push({
+        id: row.word_id,
+        xp: progress.xp,
+      });
+
+      redisWrites[row.word_id] = JSON.stringify(progress);
+    }
+
+    // Cache zero/default progress too
+    for (const wordId of missingIds) {
+      if (foundIds.has(wordId)) continue;
+
+      const zeroProgress: WordProgress = {
+        xp: 0,
+        streak: 0,
+      };
+
+      weakest.push({
+        id: wordId,
+        xp: 0,
+      });
+
+      redisWrites[wordId] = JSON.stringify(zeroProgress);
+    }
+
+    try {
+      if (Object.keys(redisWrites).length > 0) {
+        await redis.hset(redisKey, redisWrites);
+      }
+    } catch (error) {
+      console.error("[word-progress/weakest] Redis HSET failed", error);
+    }
+  }
+
+  weakest.sort((a, b) => a.xp - b.xp);
+
+  return weakest;
+});

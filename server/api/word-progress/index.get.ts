@@ -1,3 +1,5 @@
+// server/api/word-progress/index.get.ts
+
 import { createError, getQuery } from "h3";
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
