@@ -44,11 +44,13 @@ const slug = computed(() => route.params.slug as string)
 
 const { getAccessToken } = await useAuth()
 
+const auth = await useAuth()
+const tokenPromise = auth.getAccessToken()
 
 const { data, error, refresh } = await useAsyncData(
     () => `level-sentences-${slug.value}`,
     async () => {
-        const token = await getAccessToken()
+        const token = await tokenPromise
 
         return $fetch<LevelSentenceData>(
             `/api/sentences/${slug.value}/rotateV2`,
@@ -148,7 +150,7 @@ async function finalizeQuiz() {
     finishing.value = true
 
     try {
-        const token = await getAccessToken()
+        const token = await auth.getAccessToken()
 
         const [res] = await Promise.all([
             $fetch<{
@@ -357,7 +359,7 @@ watch(
         }
 
         try {
-            const token = await getAccessToken()
+            const token = await tokenPromise
             const wordIds = qs.map(q => q.wordId)
 
             const progressMap = await $fetch<

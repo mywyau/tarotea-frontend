@@ -28,6 +28,7 @@ function getClient() {
 }
 
 export async function useAuth() {
+  
   if (process.server) {
     return {
       client: null,
