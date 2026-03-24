@@ -530,7 +530,7 @@ onMounted(() => {
       </h1>
 
       <p class="text-sm text-gray-600">
-        Read the meaning and type the full Chinese sentence.
+        Read the chinese and type the full sentence in Chinese.
       </p>
     </header>
 
