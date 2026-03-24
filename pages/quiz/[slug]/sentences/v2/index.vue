@@ -44,18 +44,6 @@ const slug = computed(() => route.params.slug as string)
 
 const { getAccessToken } = await useAuth()
 
-// const token = await getAccessToken()
-
-// const { data } = await useFetch<LevelSentenceData>(
-//     () => `/api/sentences/${slug.value}/rotate`,
-//     {
-//         key: () => `level-sentences-${slug.value}`,
-//         server: true,
-//         headers: {
-//             Authorization: `Bearer ${token}`
-//         }
-//     }
-// )
 
 const { data, error, refresh } = await useAsyncData(
     () => `level-sentences-${slug.value}`,
@@ -63,7 +51,7 @@ const { data, error, refresh } = await useAsyncData(
         const token = await getAccessToken()
 
         return $fetch<LevelSentenceData>(
-            `/api/sentences/${slug.value}/rotate`,
+            `/api/sentences/${slug.value}/rotateV2`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
