@@ -727,7 +727,7 @@ watch(
                         </div>
 
                         <button
-                            class="rounded-xl bg-black px-4 py-2 text-sm font-medium text-white hover:brightness-110 transition disabled:opacity-40"
+                            class="submit-btn-blush rounded-xl px-4 py-2 text-sm font-medium text-black hover:brightness-110 transition disabled:opacity-40"
                             :disabled="attemptsLeft <= 0 || !input.trim() || solved" type="submit">
                             Submit
                         </button>
@@ -740,7 +740,9 @@ watch(
                     </p>
 
                     <button v-if="showNext" @click="nextWord"
-                        class="w-full mt-3 rounded-xl bg-black px-4 py-3 text-white hover:brightness-110 transition">
+                        class="w-full mt-3 rounded-xl px-4 py-3 text-black hover:brightness-110 transition"
+                        style="background-color:#A8CAE0;"
+                        >
                         Next
                     </button>
 
@@ -912,5 +914,9 @@ watch(
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+}
+
+.submit-btn-blush {
+    background: rgb(249, 166, 166);
 }
 </style>
