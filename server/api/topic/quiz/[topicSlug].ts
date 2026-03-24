@@ -44,8 +44,8 @@ type TopicQuizResponse = {
 const TOTAL_QUESTIONS = 20;
 
 // Tune these to match the feel you want
-const WEAKEST_QUESTION_RATIO = 0.6; // 60% of quiz comes from weakest pool
-const WEAKEST_POOL_RATIO = 0.5;     // weakest pool = bottom 50% of topic words by XP
+const WEAKEST_QUESTION_RATIO = 0.7; // 60% of quiz comes from weakest pool
+const WEAKEST_POOL_RATIO = 0.8;     // weakest pool = bottom 80% of topic words by XP
 
 function shuffleFisherYates<T>(input: T[]): T[] {
   const arr = [...input];
