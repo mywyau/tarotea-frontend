@@ -488,7 +488,8 @@ watch(currentQuestion, () => {
                     <transition name="next-fade">
                         <button v-if="showResult && readyForNext && currentIndex < questions.length - 1"
                             @click="nextQuestion"
-                            class="mt-6 w-full bg-black text-white p-3 rounded-lg transition-transform duration-150 hover:scale-[1.02] active:scale-[0.98]">
+                            class="mt-6 w-full next-btn-blush font-medium text-black p-3 rounded-lg transition-transform duration-150 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
+                            >
                             Next
                         </button>
                     </transition>
@@ -901,5 +902,9 @@ watch(currentQuestion, () => {
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
+}
+
+.next-btn-blush {
+  background: rgb(249, 166, 166);
 }
 </style>
