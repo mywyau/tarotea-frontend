@@ -35,10 +35,6 @@ type CachedSentenceProgress = {
   lastSeenAt?: string | null;
 };
 
-function getSentenceProgressRedisKey(userId: string) {
-  return `sentence_progress:${userId}`;
-}
-
 function parseCachedProgress(raw: unknown): SentenceProgress | null {
   if (!raw || typeof raw !== "string") return null;
 
@@ -57,27 +53,6 @@ function parseCachedProgress(raw: unknown): SentenceProgress | null {
   }
 }
 
-function normalizeHmgetResult(
-  result: unknown,
-  sentenceIds: string[],
-): Record<string, unknown> {
-  if (Array.isArray(result)) {
-    const mapped: Record<string, unknown> = {};
-
-    for (let i = 0; i < sentenceIds.length; i++) {
-      mapped[sentenceIds[i]] = result[i] ?? null;
-    }
-
-    return mapped;
-  }
-
-  if (result && typeof result === "object") {
-    return result as Record<string, unknown>;
-  }
-
-  return {};
-}
-
 async function loadSentenceProgressMap(
   userId: string,
   sentenceIds: string[],
@@ -88,27 +63,45 @@ async function loadSentenceProgressMap(
     return progressMap;
   }
 
-  const redisKey = getSentenceProgressRedisKey(userId);
+  const redisKey = `sentence_progress:${userId}`;
 
   let cachedById: Record<string, unknown> = {};
 
   try {
-    const hmgetResult = await redis.hmget(redisKey, ...sentenceIds);
-    cachedById = normalizeHmgetResult(hmgetResult, sentenceIds);
+    const result = await redis.hmget(redisKey, ...sentenceIds);
+
+    if (Array.isArray(result)) {
+      cachedById = Object.fromEntries(
+        sentenceIds.map((id, i) => [id, result[i] ?? null]),
+      );
+    } else {
+      cachedById = (result ?? {}) as Record<string, unknown>;
+    }
   } catch (error) {
-    console.error("[sentences/weakest] Redis HMGET failed", error);
+    console.error("[sentences/rotate] Redis HMGET failed", error);
     cachedById = {};
   }
 
   const missingIds: string[] = [];
 
   for (const sentenceId of sentenceIds) {
-    const cached = parseCachedProgress(cachedById[sentenceId]);
+    const raw = cachedById[sentenceId];
 
-    if (cached) {
-      progressMap.set(sentenceId, cached);
-    } else {
+    if (typeof raw !== "string") {
       missingIds.push(sentenceId);
+      continue;
+    }
+
+    const parsed = parseCachedProgress(raw);
+
+    if (!parsed) {
+      missingIds.push(sentenceId);
+      continue;
+    }
+
+    // Only add actually-seen items to progressMap
+    if (parsed.seenCount > 0 || parsed.lastSeenAt !== null) {
+      progressMap.set(sentenceId, parsed);
     }
   }
 
@@ -135,19 +128,19 @@ async function loadSentenceProgressMap(
       lastSeenAt: row.last_seen_at ?? null,
     };
 
-    progressMap.set(row.sentence_id, progress);
     foundIds.add(row.sentence_id);
+
+    if (progress.seenCount > 0 || progress.lastSeenAt !== null) {
+      progressMap.set(row.sentence_id, progress);
+    }
 
     redisWrites[row.sentence_id] = JSON.stringify({
       seenCount: progress.seenCount,
-      lastSeenAt:
-        progress.lastSeenAt instanceof Date
-          ? progress.lastSeenAt.toISOString()
-          : progress.lastSeenAt,
+      lastSeenAt: progress.lastSeenAt,
     });
   }
 
-  // Cache unseen sentences too so we do not keep querying Postgres
+  // Cache unseen items too so we stop re-querying Postgres
   for (const sentenceId of missingIds) {
     if (foundIds.has(sentenceId)) continue;
 
@@ -160,11 +153,9 @@ async function loadSentenceProgressMap(
   try {
     if (Object.keys(redisWrites).length > 0) {
       await redis.hset(redisKey, redisWrites);
-      // Optional:
-      // await redis.expire(redisKey, 60 * 60 * 24);
     }
   } catch (error) {
-    console.error("[sentences/weakest] Redis HSET failed", error);
+    console.error("[sentences/rotate] Redis HSET failed", error);
   }
 
   return progressMap;
@@ -174,7 +165,6 @@ function pickBestVariantForWord(
   variants: LevelSentenceItem[],
   progressMap: Map<string, SentenceProgress>,
 ): LevelSentenceItem {
-  // Shuffle first so ties do not always pick the same sentence
   const randomized = shuffleFisherYates([...variants]);
 
   const unseen = randomized.filter(
@@ -185,9 +175,6 @@ function pickBestVariantForWord(
     return unseen[0];
   }
 
-  // If all have been seen, prefer:
-  // 1. lowest seenCount
-  // 2. oldest lastSeenAt
   const sortedSeen = randomized.sort((a, b) => {
     const aProgress = progressMap.get(a.sentenceId);
     const bProgress = progressMap.get(b.sentenceId);
@@ -250,7 +237,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const sentenceIds = [...new Set(data.items.map((item) => item.sentenceId))];
-
   const progressMap = await loadSentenceProgressMap(userId, sentenceIds);
 
   const byWord = new Map<string, LevelSentenceItem[]>();

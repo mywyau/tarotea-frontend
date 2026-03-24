@@ -1,3 +1,5 @@
+// server/api/quiz/grind/finalize.post.ts
+
 import { createError, getHeader, readBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";

@@ -67,12 +67,6 @@ const { data, error, refresh } = await useAsyncData(
 
 const sentenceItems = computed(() => data.value?.items ?? [])
 
-// const questions = computed<SentenceQuizQuestion[]>(() =>
-//     uniqueSentenceItems.value.length
-//         ? buildSentenceQuiz(uniqueSentenceItems.value).slice(0, 20)
-//         : []
-// )
-
 const questions = computed<SentenceQuizQuestion[]>(() =>
     sentenceItems.value.length
         ? buildSentenceQuiz(sentenceItems.value).slice(0, 20)
@@ -163,7 +157,7 @@ async function finalizeQuiz() {
                     totalQuestions: number
                     xpEarned: number
                 }
-            }>('/api/quiz/grind/finalize', {
+            }>('/api/quiz/grind/finalize-sentences', {
                 method: 'POST',
                 headers: {
                     Authorization: `Bearer ${token}`
@@ -290,15 +284,6 @@ const percentage = computed(() => {
     return (score.value / total) * 100
 })
 
-// const uniqueSentenceItems = computed<LevelSentenceItem[]>(() => {
-//     const seen = new Set<string>()
-
-//     return shuffleFisherYates([...sentenceItems.value]).filter((item) => {
-//         if (seen.has(item.sourceWordId)) return false
-//         seen.add(item.sourceWordId)
-//         return true
-//     })
-// })
 
 watch(
     () => question.value?.sentenceId,
