@@ -42,8 +42,6 @@ type LevelSentenceData = {
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const { getAccessToken } = await useAuth()
-
 const auth = await useAuth()
 const tokenPromise = auth.getAccessToken()
 
