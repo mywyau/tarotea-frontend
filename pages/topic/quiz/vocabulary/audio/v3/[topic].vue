@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['topic-access-quiz'],
-  ssr: true,
+  // middleware: ['topic-access-quiz'],
+  middleware: ['coming-soon'],
+  ssr: false,
 })
 
 type TopicWord = {

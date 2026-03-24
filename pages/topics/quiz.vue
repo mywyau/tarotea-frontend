@@ -140,7 +140,7 @@ onMounted(async () => {
                         Vocab
                     </NuxtLink>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/audio/v3/${topic.id}` : undefined"
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/audio/v4/${topic.id}` : undefined"
                         class="topic-btn topic-btn-purple"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Audio Only
