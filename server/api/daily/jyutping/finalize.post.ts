@@ -21,7 +21,8 @@ function utcDayString(d = new Date()): string {
 export default defineEventHandler(async (event) => {
   console.log("[finalize][dailyJyutping] quiz");
 
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
   const body = (await readBody(event)) as { answers: SessionAnswer[] };
 
   if (!body || !Array.isArray(body.answers)) {

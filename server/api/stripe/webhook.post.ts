@@ -174,6 +174,7 @@ function extractSubscriptionId(invoice: Stripe.Invoice): string | null {
 }
 
 export default defineEventHandler(async (event) => {
+  
   const requestId = crypto.randomUUID();
 
   const sig = getHeader(event, "stripe-signature");

@@ -4,20 +4,21 @@ import { consumeWhisperAttemptMonthly } from "../repositories/whisper/consumeWhi
 import { getUserEntitlement } from "../utils/getEntitlement";
 import { requireUser } from "../utils/requireUser";
 
+import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
 import {
   averageLogprob,
   buildResult,
   normalizeChinese,
   similarity,
 } from "../utils/whisper/helpers";
-import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const entitlement = await getUserEntitlement(userId);
 

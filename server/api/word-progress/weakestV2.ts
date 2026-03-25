@@ -131,7 +131,8 @@ async function loadCandidateWordIds(
 }
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const query = getQuery(event);
   const levelSlug = typeof query.level === "string" ? query.level : undefined;

@@ -45,7 +45,7 @@ const TOTAL_QUESTIONS = 20;
 
 // Tune these to match the feel you want
 const WEAKEST_QUESTION_RATIO = 0.7; // 60% of quiz comes from weakest pool
-const WEAKEST_POOL_RATIO = 0.8;     // weakest pool = bottom 80% of topic words by XP
+const WEAKEST_POOL_RATIO = 0.8; // weakest pool = bottom 80% of topic words by XP
 
 function shuffleFisherYates<T>(input: T[]): T[] {
   const arr = [...input];
@@ -270,9 +270,7 @@ function selectWeightedWords(
   const selected: TopicWord[] = [];
 
   selected.push(...weakestPool.slice(0, weakestTarget));
-  selected.push(
-    ...nonWeakestPool.slice(0, totalQuestions - selected.length),
-  );
+  selected.push(...nonWeakestPool.slice(0, totalQuestions - selected.length));
 
   if (selected.length < totalQuestions) {
     const selectedIds = new Set(selected.map((w) => w.id));
@@ -334,19 +332,14 @@ function buildTopicQuiz(
 ): QuizQuestion[] {
   return shuffleFisherYates(selectedWords).map((word) => {
     const direction =
-      Math.random() > 0.5
-        ? "word-to-meaning"
-        : "meaning-to-word";
+      Math.random() > 0.5 ? "word-to-meaning" : "meaning-to-word";
 
     const correctLabel = buildLabel(word, direction);
     const prompt = buildPrompt(word, direction);
 
     const distractors = pickDistractorLabels(word, allWords, direction, 3);
 
-    const options = shuffleFisherYates([
-      correctLabel,
-      ...distractors,
-    ]);
+    const options = shuffleFisherYates([correctLabel, ...distractors]);
 
     return {
       wordId: word.id,
@@ -358,7 +351,8 @@ function buildTopicQuiz(
 }
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const topicSlug = getRouterParam(event, "topicSlug");
 

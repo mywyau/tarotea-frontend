@@ -5,7 +5,8 @@ import { requireUser } from "~/server/utils/requireUser";
 type Answer = { wordId: string; correct: boolean };
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
   const body = (await readBody(event)) as { answers: Answer[]; mode?: string };
 
   if (!body || !Array.isArray(body.answers)) {

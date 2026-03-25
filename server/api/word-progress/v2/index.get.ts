@@ -29,7 +29,8 @@ function parseCachedWordProgress(raw: unknown): WordProgress | null {
 }
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const query = getQuery(event);
   const wordIdsParam = query.wordIds;
@@ -41,12 +42,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const wordIds = [...new Set(
-    wordIdsParam
-      .split(",")
-      .map((id) => id.trim())
-      .filter(Boolean)
-  )];
+  const wordIds = [
+    ...new Set(
+      wordIdsParam
+        .split(",")
+        .map((id) => id.trim())
+        .filter(Boolean),
+    ),
+  ];
 
   if (!wordIds.length) {
     return {};

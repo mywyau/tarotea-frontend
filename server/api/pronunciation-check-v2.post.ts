@@ -18,9 +18,9 @@ const openai = new OpenAI({
 });
 
 export default defineEventHandler(async (event) => {
-
   const auth = await requireUser(event);
-  const userId = auth.sub
+  const userId = auth.sub;
+
   const entitlement = await getUserEntitlement(userId);
 
   const isPaid =

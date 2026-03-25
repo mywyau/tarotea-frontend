@@ -3,7 +3,8 @@ import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export async function getAuthenticatedUserFromDB(event: any) {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const { rows } = await db.query(
     `

@@ -14,7 +14,8 @@ type SentenceBatchAttempt = {
 };
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const body = (await readBody(event)) as {
     level: string;

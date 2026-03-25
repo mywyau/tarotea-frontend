@@ -9,7 +9,8 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 export default defineEventHandler(async (event) => {
   // 🔐 Authenticated user
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub
 
   // 👤 Fetch user email
   const { rows } = await db.query(`select email from users where id = $1`, [

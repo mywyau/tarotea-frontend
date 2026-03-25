@@ -105,10 +105,7 @@ function pickProgressMap(
   wordIds: string[],
 ): Record<string, WordProgress> {
   return Object.fromEntries(
-    wordIds.map((id) => [
-      id,
-      progressMap[id] ?? { xp: 0, streak: 0 },
-    ]),
+    wordIds.map((id) => [id, progressMap[id] ?? { xp: 0, streak: 0 }]),
   );
 }
 
@@ -148,11 +145,7 @@ function normalizeAudioKey(raw: string): string {
 }
 
 function resolveAudioKey(word: TopicWord): string | null {
-  const candidates = [
-    word.audioKey,
-    word.audio,
-    word.audioFile,
-  ];
+  const candidates = [word.audioKey, word.audio, word.audioFile];
 
   for (const candidate of candidates) {
     if (typeof candidate === "string" && candidate.trim()) {
@@ -343,9 +336,7 @@ function selectWeightedWords(
   const selected: TopicWord[] = [];
 
   selected.push(...weakestPool.slice(0, weakestTarget));
-  selected.push(
-    ...nonWeakestPool.slice(0, totalQuestions - selected.length),
-  );
+  selected.push(...nonWeakestPool.slice(0, totalQuestions - selected.length));
 
   if (selected.length < totalQuestions) {
     const selectedIds = new Set(selected.map((w) => w.id));
@@ -401,10 +392,7 @@ function buildTopicAudioQuiz(
 
     const distractors = pickDistractorOptions(word, allWords, 3);
 
-    const options = shuffleFisherYates([
-      word.word,
-      ...distractors,
-    ]);
+    const options = shuffleFisherYates([word.word, ...distractors]);
 
     return {
       type: "audio" as const,
@@ -417,7 +405,8 @@ function buildTopicAudioQuiz(
 }
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const topicSlug = getRouterParam(event, "topicSlug");
 

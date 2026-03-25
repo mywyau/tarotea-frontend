@@ -1,11 +1,12 @@
 // server/api/word-progress/weakest.ts
 
-import { getQuery, createError } from "h3";
+import { createError, getQuery } from "h3";
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const query = getQuery(event);
   const levelSlug = query.level;

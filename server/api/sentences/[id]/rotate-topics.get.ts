@@ -220,7 +220,8 @@ function pickBestVariantForWord(
 }
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
   const topic = getRouterParam(event, "id");
 
   if (!topic) {

@@ -10,7 +10,9 @@ function utcDayString(d = new Date()): string {
 }
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const body = (await readBody(event).catch(() => ({}))) as {
     totalQuestions?: number;

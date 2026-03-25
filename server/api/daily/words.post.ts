@@ -1,4 +1,4 @@
-import { readBody, createError } from "h3";
+import { createError, readBody } from "h3";
 import { requireUser } from "~/server/utils/requireUser";
 
 type DailyWord = {
@@ -9,7 +9,9 @@ type DailyWord = {
 };
 
 export default defineEventHandler(async (event) => {
-  await requireUser(event);
+  
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const body = await readBody<{ wordIds: string[] }>(event);
 
@@ -41,7 +43,7 @@ export default defineEventHandler(async (event) => {
       } catch {
         return null;
       }
-    })
+    }),
   );
 
   // drop missing

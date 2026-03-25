@@ -1,9 +1,9 @@
-import { createError } from "h3";
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
   const result = await db.query(
     `

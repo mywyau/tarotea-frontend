@@ -10,7 +10,8 @@ import { requireUser } from "~/server/utils/requireUser";
 
 export default defineEventHandler(
   async (event): Promise<DailySessionResponse> => {
-    const userId = await requireUser(event);
+    const auth = await requireUser(event);
+    const userId = auth.sub;
 
     const DAILY_MIN_WORDS_REQUIRED = 20;
     const dailyNumberOfQuesions = 20;
