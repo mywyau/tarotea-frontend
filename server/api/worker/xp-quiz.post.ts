@@ -16,7 +16,7 @@ type UpdatedWordProgressRow = {
 export default defineEventHandler(async () => {
   console.log("[xp-quiz worker] invoked");
 
-  const MASTERY_CAP = 500;
+  const MASTERY_CAP = 1000;
 
   const client = await db.connect();
   await client.query("BEGIN");
