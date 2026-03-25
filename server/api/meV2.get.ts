@@ -1,5 +1,6 @@
 import { requireUser } from "@/server/utils/requireUser";
 import { db } from "~/server/repositories/db";
+import { createError, setHeader } from "h3";
 
 type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled";
 
@@ -20,7 +21,8 @@ interface MeResponse {
 export default defineEventHandler(async (event): Promise<MeResponse> => {
   setHeader(event, "Cache-Control", "private, no-store");
 
-  const userId = await requireUser(event);
+  const authUser = await requireUser(event);
+  const userId = authUser.sub;
 
   console.log(
     JSON.stringify({
@@ -77,16 +79,6 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
         subscription_status: "canceled",
         cancel_at_period_end: false,
       };
-
-  // ✅ 3️⃣ Log resolved entitlement (safe summary only)
-  // console.log(
-  //   JSON.stringify({
-  //     event: "entitlement_resolved",
-  //     userId,
-  //     plan: entitlement.plan,
-  //     subscription_status: entitlement.subscription_status,
-  //   }),
-  // );
 
   return {
     id: row.id,

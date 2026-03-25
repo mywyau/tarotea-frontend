@@ -5,9 +5,11 @@ import { requireUser } from "~/server/utils/requireUser";
 import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
 
 export default defineEventHandler(async (event) => {
+
   setHeader(event, "Cache-Control", "private, no-store");
 
-  const userId = await requireUser(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub
   const entitlement = await getUserEntitlement(userId);
 
   const isPaid =

@@ -1,39 +1,41 @@
-// server/api/auth/post-login.post.ts
-
 import { readBody, createError } from "h3";
 import { db } from "~/server/repositories/db";
+import { requireUser } from "~/server/utils/requireUser";
 
 type PostLoginBody = {
-  sub: string;
-  email: string;
+  email?: string;
 };
 
 export default defineEventHandler(async (event) => {
+  const authUser = await requireUser(event);
   const body = await readBody<PostLoginBody>(event);
 
-  if (!body?.sub || !body?.email) {
+  const userId = authUser.sub;
+  const email = authUser.email ?? body?.email;
+
+  if (!userId || !email) {
     throw createError({
       statusCode: 400,
       statusMessage: "Missing user identity",
     });
   }
 
-  const userId = body.sub;
-  const email = body.email;
+  const client = await db.connect();
 
   try {
-    // 1️⃣ Create user if they don't exist
-    await db.query(
+    await client.query("BEGIN");
+
+    await client.query(
       `
       insert into users (id, email)
       values ($1, $2)
-      on conflict (id) do nothing
+      on conflict (id)
+      do update set email = excluded.email
       `,
       [userId, email],
     );
 
-    // 2️⃣ Create default entitlement if missing // e.g. user logins first time ever
-    await db.query(
+    await client.query(
       `
       insert into entitlements (user_id, plan, subscription_status)
       values ($1, 'free', 'no_subscription')
@@ -42,17 +44,16 @@ export default defineEventHandler(async (event) => {
       [userId],
     );
 
-    // 3️⃣ Fetch combined user + entitlement state
-    const { rows } = await db.query(
+    const { rows } = await client.query(
       `
-        select
-          u.id,
-          u.email,
-          e.plan,
-          e.subscription_status
-        from users u
-        join entitlements e on e.user_id = u.id
-        where u.id = $1
+      select
+        u.id,
+        u.email,
+        e.plan,
+        e.subscription_status
+      from users u
+      join entitlements e on e.user_id = u.id
+      where u.id = $1
       `,
       [userId],
     );
@@ -61,13 +62,17 @@ export default defineEventHandler(async (event) => {
       throw new Error("User creation failed");
     }
 
+    await client.query("COMMIT");
     return rows[0];
   } catch (err) {
+    await client.query("ROLLBACK");
     console.error("[post-login]", err);
 
     throw createError({
       statusCode: 500,
       statusMessage: "Failed to process login",
     });
+  } finally {
+    client.release();
   }
 });

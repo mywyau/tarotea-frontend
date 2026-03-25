@@ -1,9 +1,9 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false })
 
-import { onMounted } from 'vue'
 import { useAuth } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
+import { onMounted, ref } from 'vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,49 +12,50 @@ const me = useMeStateV2()
 
 const error = route.query.error as string | undefined
 const description = route.query.error_description as string | undefined
+const callbackError = ref<string | null>(null)
 
 onMounted(async () => {
-  // ❌ Auth0 denied access (private beta, etc.)
   if (error) {
     console.warn('Auth0 login error:', error, description)
     return
   }
 
-  const { client } = await useAuth()
+  const auth = await useAuth()
+  const client = auth.client
 
   if (!client) {
     console.error('Auth0 client not initialised')
+    callbackError.value = 'Auth0 client not initialised'
     return
   }
 
   try {
-    // Complete Auth0 login
     await client.handleRedirectCallback()
 
-    // Optional: ensure user exists in DB
+    const token = await auth.getAccessToken()
     const user = await client.getUser()
-    if (user?.sub && user?.email) {
-      await $fetch('/api/auth/post-login', {
-        method: 'POST',
-        body: {
-          sub: user.sub,
-          email: user.email
-        }
-      })
-    }
 
-    // await refresh()
+    await $fetch('/api/auth/post-login', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: {
+        email: user?.email,
+      },
+    })
+
     await me.resolve({ force: true })
     await router.replace('/')
   } catch (e) {
     console.error('Login callback failed:', e)
+    callbackError.value = e instanceof Error ? e.message : 'Login callback failed'
   }
+  
 })
 </script>
-
 <template>
   <main class="max-w-xl mx-auto py-16 px-4 text-center space-y-4">
-    <!-- ❌ LOGIN ERROR -->
     <template v-if="error">
       <h1 class="text-2xl font-semibold">
         Sign-in unavailable
@@ -69,7 +70,20 @@ onMounted(async () => {
       </NuxtLink>
     </template>
 
-    <!-- ⏳ LOGIN SUCCESS -->
+    <template v-else-if="callbackError">
+      <h1 class="text-2xl font-semibold">
+        Sign-in failed
+      </h1>
+
+      <p class="text-gray-600">
+        {{ callbackError }}
+      </p>
+
+      <NuxtLink to="/" class="inline-block mt-4 text-blue-600 hover:underline">
+        Return to home
+      </NuxtLink>
+    </template>
+
     <template v-else>
       <p class="text-gray-500">
         Signing you in…
