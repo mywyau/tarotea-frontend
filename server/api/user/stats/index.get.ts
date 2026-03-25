@@ -3,7 +3,9 @@ import { requireUser } from "~/server/utils/requireUser";
 import { masteryXp } from "~/utils/xp/helpers";
 
 export default defineEventHandler(async (event) => {
-  const userId = await requireUser(event);
+
+  const auth = await requireUser(event);
+  const userId = auth.sub
 
   const { rows } = await db.query(
     `

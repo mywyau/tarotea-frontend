@@ -1,6 +1,7 @@
 import { db } from "~/server/repositories/db";
 
 export default defineEventHandler(async () => {
+  
   const { rows: userRows } = await db.query(
     `SELECT COUNT(*)::int AS count FROM users`,
   );
