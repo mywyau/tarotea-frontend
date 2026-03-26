@@ -1,6 +1,6 @@
-import { createError, defineEventHandler } from "h3";
-import { Receiver } from "@upstash/qstash";
 import { useRuntimeConfig } from "#imports";
+import { Receiver } from "@upstash/qstash";
+import { createError, defineEventHandler } from "h3";
 import { db } from "~/server/repositories/db";
 
 type WorkerJob = {
@@ -150,12 +150,13 @@ async function verifyQStashRequest(
   event: Parameters<typeof defineEventHandler>[0],
   rawBody: string,
 ): Promise<void> {
-
   const config = useRuntimeConfig(event);
 
-  const currentSigningKey = config.qstashCurrentSigningKey as string | undefined;
+  const currentSigningKey = config.qstashCurrentSigningKey as
+    | string
+    | undefined;
   const nextSigningKey = config.qstashNextSigningKey as string | undefined;
-  const appBaseUrl = config.siteUrl as string | undefined;
+  const appBaseUrl = config.public.siteUrl as string | undefined;
 
   if (!currentSigningKey || !nextSigningKey) {
     throw createError({
@@ -203,6 +204,14 @@ async function verifyQStashRequest(
 
 export default defineEventHandler(async (event) => {
   // Important: use the raw request body for signature verification.
+
+  console.log("XP worker reached", {
+    host: event.req.headers.get("host"),
+    proto: event.req.headers.get("x-forwarded-proto"),
+    signaturePresent: !!event.req.headers.get("Upstash-Signature"),
+    messageId: event.req.headers.get("Upstash-Message-Id"),
+  });
+
   const rawBody = await event.req.text();
 
   await verifyQStashRequest(event, rawBody);
