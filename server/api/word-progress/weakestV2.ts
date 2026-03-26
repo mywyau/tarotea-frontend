@@ -11,22 +11,85 @@ type WordProgress = {
   streak: number;
 };
 
-function parseCachedWordProgress(raw: unknown): WordProgress | null {
-  if (!raw || typeof raw !== "string") return null;
+function parseCachedWordIds(raw: unknown): string[] | null {
+  if (!raw) return null;
 
-  try {
-    const parsed = JSON.parse(raw) as {
-      xp?: unknown;
-      streak?: unknown;
-    };
+  if (Array.isArray(raw)) {
+    return raw.filter(
+      (id): id is string => typeof id === "string" && id.length > 0,
+    );
+  }
 
-    return {
-      xp: Number(parsed.xp ?? 0),
-      streak: Number(parsed.streak ?? 0),
-    };
-  } catch {
+  if (typeof raw !== "string") {
     return null;
   }
+
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+
+  // New format: JSON array string
+  if (trimmed.startsWith("[")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      return Array.isArray(parsed)
+        ? parsed.filter(
+            (id): id is string => typeof id === "string" && id.length > 0,
+          )
+        : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // Legacy format: CSV string
+  return trimmed
+    .split(",")
+    .map((id) => id.trim())
+    .filter(Boolean);
+}
+
+// function parseCachedWordProgress(raw: unknown): WordProgress | null {
+//   if (!raw || typeof raw !== "string") return null;
+
+//   try {
+//     const parsed = JSON.parse(raw) as {
+//       xp?: unknown;
+//       streak?: unknown;
+//     };
+
+//     return {
+//       xp: Number(parsed.xp ?? 0),
+//       streak: Number(parsed.streak ?? 0),
+//     };
+//   } catch {
+//     return null;
+//   }
+// }
+
+function parseCachedWordProgress(raw: unknown): WordProgress | null {
+  if (!raw) return null;
+
+  let parsed: unknown = raw;
+
+  if (typeof raw === "string") {
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      return null;
+    }
+  }
+
+  if (!parsed || typeof parsed !== "object") {
+    return null;
+  }
+
+  const xp = Number((parsed as { xp?: unknown }).xp ?? 0);
+  const streak = Number((parsed as { streak?: unknown }).streak ?? 0);
+
+  return {
+    xp: Number.isFinite(xp) ? xp : 0,
+    streak: Number.isFinite(streak) ? streak : 0,
+  };
 }
 
 async function loadCandidateWordIds(
@@ -36,24 +99,38 @@ async function loadCandidateWordIds(
   if (levelSlug) {
     const cacheKey = `scope_words:level:${levelSlug}`;
 
+    // try {
+    //   const cached = await redis.get<string>(cacheKey);
+    //   if (cached) {
+    //     const parsed = JSON.parse(cached);
+    //     if (Array.isArray(parsed)) {
+    //       return parsed.filter((id) => typeof id === "string");
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error(
+    //     "[word-progress/weakestV2] level scope Redis GET failed",
+    //     error,
+    //   );
+    // }
+
     try {
-      const cached = await redis.get<string>(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((id) => typeof id === "string");
-        }
+      const cached = await redis.get(cacheKey);
+      const parsed = parseCachedWordIds(cached);
+
+      if (parsed?.length) {
+        return parsed;
       }
     } catch (error) {
       console.error(
-        "[word-progress/weakest] level scope Redis GET failed",
+        "[word-progress/weakestV2] level scope Redis GET failed",
         error,
       );
     }
 
     const { rows } = await db.query(
       `
-      select w.id
+      select distinct w.id
       from words w
       join word_levels wl
         on wl.word_id = w.id
@@ -72,7 +149,7 @@ async function loadCandidateWordIds(
       // await redis.expire(cacheKey, 60 * 60);
     } catch (error) {
       console.error(
-        "[word-progress/weakest] level scope Redis SET failed",
+        "[word-progress/weakestV2] level scope Redis SET failed",
         error,
       );
     }
@@ -83,24 +160,38 @@ async function loadCandidateWordIds(
   if (topicSlug) {
     const cacheKey = `scope_words:topic:${topicSlug}`;
 
+    // try {
+    //   const cached = await redis.get<string>(cacheKey);
+    //   if (cached) {
+    //     const parsed = JSON.parse(cached);
+    //     if (Array.isArray(parsed)) {
+    //       return parsed.filter((id) => typeof id === "string");
+    //     }
+    //   }
+    // } catch (error) {
+    //   console.error(
+    //     "[word-progress/weakestV2] topic scope Redis GET failed",
+    //     error,
+    //   );
+    // }
+
     try {
-      const cached = await redis.get<string>(cacheKey);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((id) => typeof id === "string");
-        }
+      const cached = await redis.get(cacheKey);
+      const parsed = parseCachedWordIds(cached);
+
+      if (parsed?.length) {
+        return parsed;
       }
     } catch (error) {
       console.error(
-        "[word-progress/weakest] topic scope Redis GET failed",
+        "[word-progress/weakestV2] topic scope Redis GET failed",
         error,
       );
     }
 
     const { rows } = await db.query(
       `
-      select w.id
+      select distinct w.id
       from words w
       join word_topics wt
         on wt.word_id = w.id
@@ -119,7 +210,7 @@ async function loadCandidateWordIds(
       // await redis.expire(cacheKey, 60 * 60);
     } catch (error) {
       console.error(
-        "[word-progress/weakest] topic scope Redis SET failed",
+        "[word-progress/weakestV2] topic scope Redis SET failed",
         error,
       );
     }
@@ -171,12 +262,12 @@ export default defineEventHandler(async (event) => {
       await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
     } catch (error) {
       console.error(
-        "[word-progress/weakest] Redis EXPIRE after HMGET failed",
+        "[word-progress/weakestV2] Redis EXPIRE after HMGET failed",
         error,
       );
     }
   } catch (error) {
-    console.error("[word-progress/weakest] Redis HMGET failed", error);
+    console.error("[word-progress/weakestV2] Redis HMGET failed", error);
     cachedById = {};
   }
 
@@ -250,13 +341,13 @@ export default defineEventHandler(async (event) => {
           await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
         } catch (error) {
           console.error(
-            "[word-progress/weakest] Redis EXPIRE after HSET failed",
+            "[word-progress/weakestV2] Redis EXPIRE after HSET failed",
             error,
           );
         }
       }
     } catch (error) {
-      console.error("[word-progress/weakest] Redis HSET failed", error);
+      console.error("[word-progress/weakestV2] Redis HSET failed", error);
     }
   }
 

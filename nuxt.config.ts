@@ -31,6 +31,10 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    qstashUrl: process.env.QSTASH_URL,
+    qstashCurrentSigningKey: process.env.QSTASH_CURRENT_SIGNING_KEY,
+    qstashNextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
+    qstashToken: process.env.QSTASH_TOKEN,
     public: {
       appVersion: process.env.VERCEL_GIT_COMMIT_SHA || Date.now().toString(),
       cdnBase: process.env.NUXT_PUBLIC_CDN_BASE,
