@@ -234,6 +234,15 @@ watchEffect(() => {
           </div>
         </li>
       </ul>
+
+      <div class="text-center mt-10">
+        <p class="text-center mt-10 text-sm"> Spot an error? Report to:
+          <a href="mailto:errors@tarotea.co.uk" class="font-medium text-gray-600">
+            errors@tarotea.co.uk
+          </a>
+        </p>
+      </div>
+
     </section>
 
   </main>
@@ -286,5 +295,4 @@ watchEffect(() => {
 .level-btn-blue:hover {
   background: rgb(159, 189, 255);
 }
-
 </style>
