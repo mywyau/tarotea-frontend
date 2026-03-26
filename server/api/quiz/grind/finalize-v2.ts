@@ -207,6 +207,7 @@ async function enqueueFinalizeJob(
   event: Parameters<typeof defineEventHandler>[0],
   job: { attemptId: string; userId: string },
 ): Promise<void> {
+  
   const config = useRuntimeConfig(event);
 
   const qstashUrl = config.qstashUrl as string | undefined;

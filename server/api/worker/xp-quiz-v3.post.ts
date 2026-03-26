@@ -1,6 +1,11 @@
 import { useRuntimeConfig } from "#imports";
 import { Receiver } from "@upstash/qstash";
-import { createError, defineEventHandler } from "h3";
+import {
+  createError,
+  defineEventHandler,
+  getHeader,
+  readRawBody,
+} from "h3";
 import { db } from "~/server/repositories/db";
 
 type WorkerJob = {
@@ -137,9 +142,6 @@ function aggregateAnswers(answers: PayloadAnswer[]): AggregatedWordUpdate[] {
     }
 
     existing.delta += answer.delta;
-
-    // Defensive rule:
-    // if duplicates somehow slip in, any wrong answer resets streak.
     existing.correct = existing.correct && answer.correct;
   }
 
@@ -152,9 +154,7 @@ async function verifyQStashRequest(
 ): Promise<void> {
   const config = useRuntimeConfig(event);
 
-  const currentSigningKey = config.qstashCurrentSigningKey as
-    | string
-    | undefined;
+  const currentSigningKey = config.qstashCurrentSigningKey as string | undefined;
   const nextSigningKey = config.qstashNextSigningKey as string | undefined;
   const appBaseUrl = config.public.siteUrl as string | undefined;
 
@@ -168,11 +168,11 @@ async function verifyQStashRequest(
   if (!appBaseUrl) {
     throw createError({
       statusCode: 500,
-      statusMessage: "Missing appBaseUrl",
+      statusMessage: "Missing public.siteUrl",
     });
   }
 
-  const signature = event.req.headers.get("Upstash-Signature");
+  const signature = getHeader(event, "Upstash-Signature");
 
   if (!signature) {
     throw createError({
@@ -187,6 +187,11 @@ async function verifyQStashRequest(
   });
 
   const workerUrl = `${appBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v3`;
+
+  console.log("Verifying QStash request", {
+    workerUrl,
+    signaturePresent: !!signature,
+  });
 
   const isValid = await receiver.verify({
     signature,
@@ -203,22 +208,27 @@ async function verifyQStashRequest(
 }
 
 export default defineEventHandler(async (event) => {
-  // Important: use the raw request body for signature verification.
-
   console.log("XP worker reached", {
-    host: event.req.headers.get("host"),
-    proto: event.req.headers.get("x-forwarded-proto"),
-    signaturePresent: !!event.req.headers.get("Upstash-Signature"),
-    messageId: event.req.headers.get("Upstash-Message-Id"),
+    host: getHeader(event, "host"),
+    proto: getHeader(event, "x-forwarded-proto"),
+    signaturePresent: !!getHeader(event, "Upstash-Signature"),
+    messageId: getHeader(event, "Upstash-Message-Id"),
   });
 
-  const rawBody = await event.req.text();
+  const rawBody = await readRawBody(event, false);
+
+  if (!rawBody) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing request body",
+    });
+  }
 
   await verifyQStashRequest(event, rawBody);
 
   const job = parseWorkerJob(rawBody);
-  const qstashMessageId = event.req.headers.get("Upstash-Message-Id");
-  const qstashRetried = event.req.headers.get("Upstash-Retried");
+  const qstashMessageId = getHeader(event, "Upstash-Message-Id");
+  const qstashRetried = getHeader(event, "Upstash-Retried");
 
   const client = await db.connect();
 
