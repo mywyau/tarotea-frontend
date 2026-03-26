@@ -162,14 +162,33 @@ function resolveAudioKey(word: TopicWord): string | null {
   return null;
 }
 
+function parseCachedTopicData(raw: unknown): TopicData | null {
+  if (!raw) return null;
+
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as TopicData;
+    } catch {
+      return null;
+    }
+  }
+
+  if (typeof raw === "object") {
+    return raw as TopicData;
+  }
+
+  return null;
+}
+
 async function loadTopicData(topicSlug: string): Promise<TopicData> {
   const cacheKey = `topic_data:${topicSlug}`;
 
   try {
-    const cached = await redis.get<string>(cacheKey);
+    const cached = await redis.get(cacheKey);
+    const parsed = parseCachedTopicData(cached);
 
-    if (cached) {
-      return JSON.parse(cached) as TopicData;
+    if (parsed) {
+      return parsed;
     }
   } catch (error) {
     console.error("[topic/audio-quiz] topic cache GET failed", error);
@@ -190,8 +209,6 @@ async function loadTopicData(topicSlug: string): Promise<TopicData> {
 
   try {
     await redis.set(cacheKey, JSON.stringify(data));
-    // optional TTL:
-    // await redis.expire(cacheKey, 60 * 60);
   } catch (error) {
     console.error("[topic/audio-quiz] topic cache SET failed", error);
   }

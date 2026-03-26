@@ -48,6 +48,24 @@ function parseCachedWordIds(raw: unknown): string[] | null {
     .filter(Boolean);
 }
 
+function parseCachedTopicData<T>(raw: unknown): T | null {
+  if (!raw) return null;
+
+  if (typeof raw === "string") {
+    try {
+      return JSON.parse(raw) as T;
+    } catch {
+      return null;
+    }
+  }
+
+  if (typeof raw === "object") {
+    return raw as T;
+  }
+
+  return null;
+}
+
 // function parseCachedWordProgress(raw: unknown): WordProgress | null {
 //   if (!raw || typeof raw !== "string") return null;
 
@@ -177,11 +195,12 @@ async function loadCandidateWordIds(
 
     try {
       const cached = await redis.get(cacheKey);
-      const parsed = parseCachedWordIds(cached);
+      const parsed = parseCachedTopicData(cached);
 
-      if (parsed?.length) {
+      if (parsed) {
         return parsed;
       }
+      
     } catch (error) {
       console.error(
         "[word-progress/weakestV2] topic scope Redis GET failed",

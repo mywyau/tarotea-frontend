@@ -20,7 +20,9 @@ import { masteryXp } from '~/utils/xp/helpers'
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)
 
+
 const { getAccessToken } = await useAuth()
+
 const { stop } = useGlobalAudio()
 
 type QuizAnswer = { wordId: string; correct: boolean }
@@ -65,6 +67,8 @@ type FinalizeResponse = {
   queued?: boolean
   deduped?: boolean
 }
+
+const me = useMeStateV2()
 
 const quizData = ref<TopicQuizPayload | null>(null)
 const quizLoading = ref(false)
@@ -169,7 +173,13 @@ async function loadQuiz() {
   resetQuizState()
 
   try {
-    const token = await getAccessToken()
+  
+    const token = await getAccessToken();
+
+    console.log('topic quiz token debug', {
+      type: typeof token,
+      token,
+    })
 
     const res = await $fetch<TopicQuizPayload>(
       `/api/topic/quiz/${topicSlug.value}`,
@@ -199,8 +209,9 @@ async function loadQuiz() {
 }
 
 watch(
-  () => topicSlug.value,
-  () => {
+  () => [topicSlug.value, me.isLoggedIn.value],
+  ([, isLoggedIn]) => {
+    if (!isLoggedIn) return
     loadQuiz()
   },
   { immediate: true }
@@ -618,7 +629,78 @@ watch(
         </div>
 
         <div v-else-if="showResults" key="results" class="space-y-6">
-          <!-- existing results block unchanged -->
+          <transition name="card-fade" appear>
+            <div class="stat-card hero-card" :class="resultHeroClass">
+              <p class="stat-label">
+                Quiz Complete
+              </p>
+
+              <h2 class="hero-title">
+                {{ resultMeta.title }}
+              </h2>
+
+              <p class="hero-score">
+                {{ animatedAccuracy }}%
+              </p>
+
+              <p class="hero-subtext">
+                {{ score }} / {{ questions.length }} correct
+              </p>
+            </div>
+          </transition>
+
+          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+              :class="tile.className">
+              <p class="stat-label">
+                {{ tile.label }}
+              </p>
+
+              <p class="stat-value">
+                {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
+              </p>
+            </div>
+          </transition-group>
+
+          <div v-if="correctWords.length" class="stat-card text-left result-3">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">
+              Correct
+            </h3>
+
+            <div class="flex flex-wrap gap-2">
+              <span v-for="word in correctWords" :key="word!.id"
+                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
+                {{ word!.word }}
+              </span>
+            </div>
+          </div>
+
+          <div v-if="missedWords.length" class="stat-card text-left result-1">
+            <h3 class="text-sm font-semibold text-gray-900 mb-3">
+              Incorrect
+            </h3>
+
+            <div class="flex flex-wrap gap-2">
+              <span v-for="word in missedWords" :key="word!.id"
+                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
+                {{ word!.word }}
+              </span>
+            </div>
+          </div>
+
+          <div class="pt-2 space-y-3">
+            <NuxtLink :to="`/topics/quiz`"
+              class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+              style="background-color:#A8CAE0;">
+              Play Again
+            </NuxtLink>
+
+            <NuxtLink :to="`/topic/words/${topicSlug}`"
+              class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
+              style="background-color:rgba(244,205,39,0.35);">
+              Back to Topic
+            </NuxtLink>
+          </div>
         </div>
       </transition>
     </section>
