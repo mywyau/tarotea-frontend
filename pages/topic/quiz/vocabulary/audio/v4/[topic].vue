@@ -515,17 +515,18 @@ watch(
                             ? '#FECACA'
                             : tileColors[i]
         }" :class="[
-        !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
-        answered && i === question?.correctIndex && 'ring-2 ring-emerald-400',
-        answered && i === selectedIndex && i !== question?.correctIndex && 'animate-shake ring-2 ring-rose-400'
-    ]" @click="answer(i)">
+            !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
+            answered && i === question?.correctIndex && 'ring-2 ring-emerald-400',
+            answered && i === selectedIndex && i !== question?.correctIndex && 'animate-shake ring-2 ring-rose-400'
+        ]" @click="answer(i)">
                         {{ option }}
                     </button>
                 </div>
 
                 <div class="h-10">
-                    <button v-if="answered" class="w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
-                        style="background-color:#F4C2D7;" @click="next">
+                    <button v-if="answered"
+                        class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
+                        @click="next">
                         Next
                     </button>
                 </div>
@@ -753,5 +754,9 @@ watch(
     to {
         transform: rotate(360deg);
     }
+}
+
+.next-btn-blue {
+    background: rgb(126, 147, 255);
 }
 </style>

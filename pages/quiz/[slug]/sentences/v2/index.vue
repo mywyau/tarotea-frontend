@@ -508,7 +508,7 @@ watch(
 
                     <div class="h-10 mt-6">
                         <button v-if="answered"
-                            class="w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
+                            class="next-btn-blue w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
                             style="background-color:#F4C2D7;" @click="next">
                             Next
                         </button>
@@ -732,5 +732,9 @@ watch(
 .xp-fall-leave-to {
     opacity: 0;
     transform: translateY(35px) scale(0.95);
+}
+
+.next-btn-blue {
+  background: rgb(126, 147, 255);
 }
 </style>

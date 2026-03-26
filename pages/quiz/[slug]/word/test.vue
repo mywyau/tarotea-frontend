@@ -485,7 +485,7 @@ watch(
 
         <div class="grid grid-cols-2 gap-4">
           <button v-for="(option, i) in question.options" :key="i" class="answer-tile aspect-square rounded-xl flex items-center justify-center
-              text-xl font-semibold text-center p-6 select-none
+              text-xl sm:text-lg md:text-xl lg:text-2xl font-semibold text-center p-6 select-none
               transition-all duration-200 ease-out shadow-sm active:scale-95" :style="{
                 backgroundColor:
                   !answered
@@ -505,8 +505,8 @@ watch(
         </div>
 
         <div class="h-10">
-          <button v-if="answered" class="w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
-            style="background-color:#F4C2D7;" @click="next">
+          <button v-if="answered" class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
+            @click="next">
             Next
           </button>
         </div>
@@ -748,5 +748,9 @@ watch(
   to {
     transform: rotate(360deg);
   }
+}
+
+.next-btn-blue {
+  background: rgb(126, 147, 255);
 }
 </style>

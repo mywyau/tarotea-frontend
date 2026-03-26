@@ -533,7 +533,7 @@ watch(
         </div>
 
         <div class="h-10">
-          <button v-if="answered" class="w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
+          <button v-if="answered" class="next-btn-blue w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
             @click="next" style="background-color:#F4C2D7;">
             Next
           </button>
@@ -793,5 +793,9 @@ watch(
   to {
     transform: rotate(360deg);
   }
+}
+
+.next-btn-blue {
+  background: rgb(126, 147, 255);
 }
 </style>
