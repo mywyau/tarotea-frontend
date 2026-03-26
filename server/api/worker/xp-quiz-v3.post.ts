@@ -150,11 +150,12 @@ async function verifyQStashRequest(
   event: Parameters<typeof defineEventHandler>[0],
   rawBody: string,
 ): Promise<void> {
+
   const config = useRuntimeConfig(event);
 
   const currentSigningKey = config.qstashCurrentSigningKey as string | undefined;
   const nextSigningKey = config.qstashNextSigningKey as string | undefined;
-  const appBaseUrl = config.appBaseUrl as string | undefined;
+  const appBaseUrl = config.siteUrl as string | undefined;
 
   if (!currentSigningKey || !nextSigningKey) {
     throw createError({
