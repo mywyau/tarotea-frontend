@@ -42,7 +42,7 @@ const { data, error } = await useFetch<LevelData>(
   () => `/api/vocab-quiz/${slug}`,
   {
     key: () => `audio-quiz-${slug}`,
-    server: true
+    server: false
   }
 )
 
@@ -487,15 +487,20 @@ watch(
 )
 
 watch(
-  () => current.value,
-  (newCurrent) => {
-    if (
-      newCurrent >= questions.value.length &&
-      !completionSoundPlayed.value
-    ) {
+  () => showResults.value,
+  (visible) => {
+    if (!visible) return
+
+    if (!completionAnimated.value) {
+      completionAnimated.value = true
+      runCompletionAnimations()
+      animateCount(animatedXpEarned, totalXpEarned.value, 1000)
+    }
+
+    if (!completionSoundPlayed.value) {
       completionSoundPlayed.value = true
 
-      stop() // 🔑 stop last word audio
+      stop()
 
       setTimeout(() => {
         if (percentage.value >= 70) {
@@ -516,17 +521,6 @@ watch(
     generateTileColors()
   },
   { immediate: true }
-)
-
-watch(
-  () => showResults.value,
-  (visible) => {
-    if (!visible || completionAnimated.value) return
-
-    completionAnimated.value = true
-    runCompletionAnimations()
-    animateCount(animatedXpEarned, totalXpEarned.value, 1000)
-  }
 )
 
 </script>
