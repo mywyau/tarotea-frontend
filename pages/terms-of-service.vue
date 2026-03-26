@@ -129,7 +129,9 @@ definePageMeta({
       <p class="text-gray-700">
         If you have any questions about these Terms, please contact:
         <br />
-        <span class="font-medium">contact@tarotea.co.uk</span>
+        <a href="mailto:contact@tarotea.co.uk" class="font-medium">
+          contact@tarotea.co.uk
+        </a>
       </p>
     </section>
 
