@@ -98,7 +98,9 @@ definePageMeta({
       <p class="text-gray-700">
         For billing or refund questions, please contact:
         <br />
-        <span class="font-medium">billing@tarotea.com</span>
+        <a href="mailto:billing@tarotea.co.uk" class="font-medium">
+          billing@tarotea.co.uk
+        </a>
       </p>
     </section>
 

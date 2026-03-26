@@ -33,7 +33,9 @@ definePageMeta({
       <p class="text-gray-700">
         If you have any questions about this notice or your data, you can contact us at:
         <br />
-        <span class="font-medium">contact@tarotea.co.uk</span>
+        <a href="mailto:contact@tarotea.co.uk" class="font-medium">
+          contact@tarotea.co.uk
+        </a>
       </p>
     </section>
 
@@ -154,7 +156,9 @@ definePageMeta({
       <p class="text-gray-700">
         If you have any questions about this Privacy Notice, please contact:
         <br />
-        <span class="font-medium">contact@tarotea.co.uk</span>
+        <a href="mailto:contact@tarotea.co.uk" class="font-medium">
+          contact@tarotea.co.uk
+        </a>
       </p>
     </section>
 
