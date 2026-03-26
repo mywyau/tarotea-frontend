@@ -215,7 +215,7 @@ export default defineEventHandler(async (event) => {
     messageId: getHeader(event, "Upstash-Message-Id"),
   });
 
-  const rawBody = await readRawBody(event, false);
+  const rawBody = await readRawBody(event, "utf8")
 
   if (!rawBody) {
     throw createError({
