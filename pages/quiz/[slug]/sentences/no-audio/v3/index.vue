@@ -236,10 +236,7 @@ async function finalizeQuiz() {
 
     finishing.value = true
 
-    console.log(activeSessionKey.value)
-
-    // a27964e0-84a2-44f1-864a-f968b3f64f1a
-    // a27964e0-84a2-44f1-864a-f968b3f64f1a  
+    // console.log(activeSessionKey.value)
 
     try {
         const [res] = await Promise.all([

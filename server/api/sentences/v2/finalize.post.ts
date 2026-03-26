@@ -24,7 +24,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  console.log(body?.sessionKey);
+  // console.log(body?.sessionKey);
 
   // Idempotent fast-path if worker already processed this session
   const existingEventRes = await db.query(
@@ -54,7 +54,7 @@ export default defineEventHandler(async (event) => {
   const redisKey = `quiz:sentences:${userId}:${body.sessionKey}`;
   const rawSession = await redis.get<QuizSession | string>(redisKey);
 
-  console.log(rawSession);
+  // console.log(rawSession);
 
   if (!rawSession) {
     throw createError({
@@ -129,7 +129,7 @@ export default defineEventHandler(async (event) => {
   });
 
   await qstash.publishJSON({
-    url: `${config.public.siteUrl}/api/worker/xp-quiz-sentences`,
+    url: `${config.public.siteUrl}/api/sentences/v2/xp-quiz-sentences`,
     body: {
       userId,
       sessionKey: body.sessionKey,
