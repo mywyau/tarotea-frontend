@@ -103,6 +103,62 @@ const questions = computed(() =>
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+
+type FinalizeResponse = {
+  quiz: {
+    mode: string
+    correctCount: number
+    totalQuestions: number
+    xpEarned: number
+  }
+  attemptId: string
+  queued?: boolean
+  deduped?: boolean
+}
+
+const finalizeAttemptId = ref<string | null>(null)
+const finalizeCompleted = ref(false)
+const finalizeError = ref<string | null>(null)
+
+function createAttemptId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+
+  return `audio-quiz-${slug}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+function ensureFinalizeAttemptId() {
+  if (!finalizeAttemptId.value) {
+    finalizeAttemptId.value = createAttemptId()
+  }
+
+  return finalizeAttemptId.value
+}
+
+function resetFinalizeState() {
+  finalizeAttemptId.value = null
+  finalizeCompleted.value = false
+  finalizeError.value = null
+  totalXpEarned.value = 0
+  finishing.value = false
+  completionAnimated.value = false
+  animatedAccuracy.value = 0
+  animatedXpEarned.value = 0
+  completionSoundPlayed.value = false
+}
+
+function resetQuizRunState() {
+  answerLog.value = []
+  current.value = 0
+  score.value = 0
+  answered.value = false
+  selectedIndex.value = null
+  xpDelta.value = null
+  currentXp.value = null
+  currentStreak.value = null
+}
+
 const current = ref(0)
 const score = ref(0)
 const answered = ref(false)
@@ -183,8 +239,12 @@ const showCalculating = computed(() => {
   return quizFinished.value && finishing.value
 })
 
+const showFinalizeError = computed(() => {
+  return quizFinished.value && !finishing.value && !finalizeCompleted.value && !!finalizeError.value
+})
+
 const showResults = computed(() => {
-  return quizFinished.value && !finishing.value
+  return quizFinished.value && !finishing.value && finalizeCompleted.value
 })
 
 function generateTileColors() {
@@ -240,34 +300,56 @@ async function answer(index: number) {
 const wordProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
 
 async function finalizeQuiz() {
-  if (finishing.value) return
+  if (finishing.value || finalizeCompleted.value) return
+  if (!answerLog.value.length) return
+
   finishing.value = true
+  finalizeError.value = null
+
+  const attemptId = ensureFinalizeAttemptId()
+  const startedAt = Date.now()
 
   try {
     const token = await getAccessToken()
 
-    const [res] = await Promise.all([
-      $fetch<{
-        quiz: {
-          correctCount: number
-          totalQuestions: number
-          xpEarned: number
-        }
-      }>('/api/quiz/grind/finalize', {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: {
-          mode: 'grind-level-audio',
-          answers: answerLog.value
-        }
-      }),
-      sleep(MIN_CALCULATING_MS)
-    ])
+    const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v2', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: {
+        attemptId,
+        mode: 'grind-level-audio',
+        answers: answerLog.value
+      }
+    })
+
+    const elapsed = Date.now() - startedAt
+    const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
+
+    if (remaining > 0) {
+      await sleep(remaining)
+    }
 
     totalXpEarned.value = res.quiz.xpEarned
+    finalizeCompleted.value = true
 
+    console.info('Audio quiz finalized', {
+      attemptId: res.attemptId,
+      queued: res.queued,
+      deduped: res.deduped
+    })
   } catch (err) {
-    console.error('Audio finalize failed', err)
+    const elapsed = Date.now() - startedAt
+    const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
+
+    if (remaining > 0) {
+      await sleep(remaining)
+    }
+
+    finalizeError.value = 'We could not save your quiz result. Please try again.'
+    console.error('Audio finalize failed', {
+      attemptId,
+      err
+    })
   } finally {
     finishing.value = false
   }
@@ -376,7 +458,8 @@ onMounted(async () => {
 watch(
   () => questions.value,
   async (qs) => {
-    resetCompletionAnimations()
+    resetQuizRunState()
+    resetFinalizeState()
 
     if (!qs.length) return
 
@@ -387,12 +470,12 @@ watch(
     const progressMap = await $fetch<
       Record<string, { xp: number; streak: number }>
     >(
-      // '/api/word-progress',
       '/api/word-progress/v2',
       {
         query: { wordIds: wordIds.join(',') },
         headers: { Authorization: `Bearer ${token}` }
-      })
+      }
+    )
 
     wordProgressMap.value = progressMap
 
@@ -533,8 +616,9 @@ watch(
         </div>
 
         <div class="h-10">
-          <button v-if="answered" class="next-btn-blue w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
-            @click="next" style="background-color:#F4C2D7;">
+          <button v-if="answered"
+            class="next-btn-blue w-full rounded-xl font-medium text-black py-2 hover:brightness-110" @click="next"
+            style="background-color:#F4C2D7;">
             Next
           </button>
         </div>
@@ -556,6 +640,25 @@ watch(
           <p class="hero-subtext">
             Updating your XP and preparing your results
           </p>
+        </div>
+
+        <div v-else-if="showFinalizeError" key="finalize-error" class="stat-card hero-card result-1 space-y-4">
+          <p class="stat-label">
+            Save Failed
+          </p>
+
+          <h2 class="hero-title">
+            Could not finish quiz
+          </h2>
+
+          <p class="hero-subtext">
+            {{ finalizeError }}
+          </p>
+
+          <button class="next-btn-blue w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
+            @click="finalizeQuiz" style="background-color:#F4C2D7;">
+            Retry Saving Results
+          </button>
         </div>
 
         <div v-else-if="showResults" key="results" class="space-y-6">
