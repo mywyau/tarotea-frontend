@@ -300,12 +300,7 @@ export default defineEventHandler(async (event) => {
     now(),
     now()
   from unnest($2::text[], $3::int[], $4::boolean[]) as data(word_id, delta, correct)
-  where not exists (
-    select 1
-    from user_word_progress uwp
-    where uwp.user_id = $1
-      and uwp.word_id = data.word_id
-  )
+  on conflict (user_id, word_id) do nothing
   `,
       [job.userId, wordIds, deltas, correctFlags],
     );
