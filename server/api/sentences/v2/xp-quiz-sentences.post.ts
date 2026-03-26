@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
   const isValid = await receiver.verify({
     signature,
     body: rawBody,
-    url: `${config.public.siteUrl}/api/worker/xp-quiz-sentences`,
+    url: `${config.public.siteUrl}/api/sentences/v2/xp-quiz-sentences`,
   });
 
   if (!isValid) {
