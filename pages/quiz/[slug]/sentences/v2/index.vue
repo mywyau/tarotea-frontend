@@ -735,6 +735,6 @@ watch(
 }
 
 .next-btn-blue {
-  background: rgb(126, 147, 255);
+    background: rgb(126, 147, 255);
 }
 </style>

@@ -1,4 +1,7 @@
 // ~/utils/quiz/buildSentenceQuiz.ts
+
+import { shuffleFisherYates } from "~/utils/shuffle"
+
 export type SentenceQuizQuestion = {
   sentenceId: string;
   wordId: string;
