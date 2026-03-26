@@ -1,11 +1,6 @@
 import { useRuntimeConfig } from "#imports";
 import { Receiver } from "@upstash/qstash";
-import {
-  createError,
-  defineEventHandler,
-  getHeader,
-  readRawBody,
-} from "h3";
+import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
 import { db } from "~/server/repositories/db";
 
 type WorkerJob = {
@@ -154,7 +149,9 @@ async function verifyQStashRequest(
 ): Promise<void> {
   const config = useRuntimeConfig(event);
 
-  const currentSigningKey = config.qstashCurrentSigningKey as string | undefined;
+  const currentSigningKey = config.qstashCurrentSigningKey as
+    | string
+    | undefined;
   const nextSigningKey = config.qstashNextSigningKey as string | undefined;
   const appBaseUrl = config.public.siteUrl as string | undefined;
 
@@ -215,7 +212,7 @@ export default defineEventHandler(async (event) => {
     messageId: getHeader(event, "Upstash-Message-Id"),
   });
 
-  const rawBody = await readRawBody(event, "utf8")
+  const rawBody = await readRawBody(event, "utf8");
 
   if (!rawBody) {
     throw createError({
@@ -276,26 +273,40 @@ export default defineEventHandler(async (event) => {
 
     await client.query(
       `
-      insert into user_word_progress
-        (user_id, word_id, xp, streak, created_at, updated_at)
-      select
-        $1::text as user_id,
-        data.word_id,
-        data.delta,
-        case when data.correct then 1 else 0 end as streak,
-        now(),
-        now()
-      from unnest($2::text[], $3::int[], $4::boolean[]) as data(word_id, delta, correct)
-      on conflict (user_id, word_id)
-      do update
-      set
-        xp = coalesce(user_word_progress.xp, 0) + excluded.xp,
-        streak = case
-          when excluded.streak = 0 then 0
-          else coalesce(user_word_progress.streak, 0) + 1
-        end,
-        updated_at = now()
-      `,
+  update user_word_progress as uwp
+  set
+    xp = greatest(0, coalesce(uwp.xp, 0) + data.delta),
+    streak = case
+      when data.correct then coalesce(uwp.streak, 0) + 1
+      else 0
+    end,
+    updated_at = now()
+  from unnest($2::text[], $3::int[], $4::boolean[]) as data(word_id, delta, correct)
+  where uwp.user_id = $1
+    and uwp.word_id = data.word_id
+  `,
+      [job.userId, wordIds, deltas, correctFlags],
+    );
+
+    await client.query(
+      `
+  insert into user_word_progress
+    (user_id, word_id, xp, streak, created_at, updated_at)
+  select
+    $1::text as user_id,
+    data.word_id,
+    greatest(0, data.delta) as xp,
+    case when data.correct then 1 else 0 end as streak,
+    now(),
+    now()
+  from unnest($2::text[], $3::int[], $4::boolean[]) as data(word_id, delta, correct)
+  where not exists (
+    select 1
+    from user_word_progress uwp
+    where uwp.user_id = $1
+      and uwp.word_id = data.word_id
+  )
+  `,
       [job.userId, wordIds, deltas, correctFlags],
     );
 
