@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
-    middleware: ['level-quiz-access'],
+    // middleware: ['level-quiz-access'],
+    middleware: ['coming-soon'],
     ssr: false,
 })
 
