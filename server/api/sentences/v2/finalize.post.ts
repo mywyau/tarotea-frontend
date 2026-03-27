@@ -12,6 +12,48 @@ import type {
 } from "~/server/services/sentence-quiz/finalize/type";
 import { requireUser } from "~/server/utils/requireUser";
 
+type ExistingEventRow = {
+  id: number | string;
+  mode: string;
+  total_delta: number | string | null;
+  correct_count: number | string | null;
+  total_questions: number | string | null;
+  processed: boolean | null;
+  payload: {
+    answers?: Array<{ wordId: string; correct: boolean; delta: number }>;
+    sentenceAggregates?: Array<{
+      wordId: string;
+      sentenceId: string;
+      seenInc: number;
+      correctInc: number;
+      wrongInc: number;
+    }>;
+  } | null;
+};
+
+async function publishSentenceWorker(args: {
+  userId: string;
+  sessionKey: string;
+}) {
+  const config = useRuntimeConfig();
+  const qstash = new Client({
+    token: config.qstashToken,
+  });
+
+  await qstash.publishJSON({
+    url: `${config.public.siteUrl}/api/sentences/v2/xp-quiz-sentences`,
+    body: {
+      userId: args.userId,
+      sessionKey: args.sessionKey,
+    },
+    retries: 3,
+    flowControl: {
+      key: "xp-quiz-sentences",
+      parallelism: 10,
+    },
+  });
+}
+
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
@@ -24,22 +66,45 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  // console.log(body?.sessionKey);
+  const sessionKey = body.sessionKey;
 
-  // Idempotent fast-path if worker already processed this session
-  const existingEventRes = await db.query(
+  const existingEventRes = await db.query<ExistingEventRow>(
     `
-    select mode, total_delta, correct_count, total_questions
+    select
+      id,
+      mode,
+      total_delta,
+      correct_count,
+      total_questions,
+      processed,
+      payload
     from xp_quiz_events
     where user_id = $1
       and session_key = $2
     limit 1
     `,
-    [userId, body.sessionKey],
+    [userId, sessionKey],
   );
 
   if (existingEventRes.rows.length > 0) {
     const existing = existingEventRes.rows[0];
+
+    if (existing.processed) {
+      return {
+        quiz: {
+          mode: existing.mode,
+          correctCount: Number(existing.correct_count ?? 0),
+          totalQuestions: Number(existing.total_questions ?? 0),
+          xpEarned: Number(existing.total_delta ?? 0),
+        },
+        deduped: true,
+      };
+    }
+
+    await publishSentenceWorker({
+      userId,
+      sessionKey,
+    });
 
     return {
       quiz: {
@@ -48,13 +113,13 @@ export default defineEventHandler(async (event) => {
         totalQuestions: Number(existing.total_questions ?? 0),
         xpEarned: Number(existing.total_delta ?? 0),
       },
+      queued: true,
+      deduped: true,
     };
   }
 
-  const redisKey = `quiz:sentences:${userId}:${body.sessionKey}`;
+  const redisKey = `quiz:sentences:${userId}:${sessionKey}`;
   const rawSession = await redis.get<QuizSession | string>(redisKey);
-
-  // console.log(rawSession);
 
   if (!rawSession) {
     throw createError({
@@ -123,25 +188,95 @@ export default defineEventHandler(async (event) => {
   const correctCount = payloadAnswers.filter((a) => a.correct).length;
   const totalDelta = payloadAnswers.reduce((acc, a) => acc + a.delta, 0);
 
-  const config = useRuntimeConfig();
-  const qstash = new Client({
-    token: config.qstashToken,
-  });
-
-  await qstash.publishJSON({
-    url: `${config.public.siteUrl}/api/sentences/v2/xp-quiz-sentences`,
-    body: {
-      userId,
-      sessionKey: body.sessionKey,
+  const insertRes = await db.query<{ id: number | string }>(
+    `
+    insert into xp_quiz_events (
+      user_id,
       mode,
-      payloadAnswers,
-      sentenceAggregates,
-    },
-    retries: 3,
-    flowControl: {
-      key: "xp-quiz-sentences",
-      parallelism: 10,
-    },
+      session_key,
+      payload,
+      total_delta,
+      correct_count,
+      total_questions,
+      processed
+    )
+    values (
+      $1,
+      $2,
+      $3,
+      $4::jsonb,
+      $5,
+      $6,
+      $7,
+      false
+    )
+    on conflict (user_id, session_key) do nothing
+    returning id
+    `,
+    [
+      userId,
+      mode,
+      sessionKey,
+      JSON.stringify({
+        answers: payloadAnswers,
+        sentenceAggregates,
+      }),
+      totalDelta,
+      correctCount,
+      payloadAnswers.length,
+    ],
+  );
+
+  if (insertRes.rows.length === 0) {
+    const racedEventRes = await db.query<ExistingEventRow>(
+      `
+      select
+        id,
+        mode,
+        total_delta,
+        correct_count,
+        total_questions,
+        processed,
+        payload
+      from xp_quiz_events
+      where user_id = $1
+        and session_key = $2
+      limit 1
+      `,
+      [userId, sessionKey],
+    );
+
+    if (racedEventRes.rows.length === 0) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: "Could not load queued quiz event",
+      });
+    }
+
+    const existing = racedEventRes.rows[0];
+
+    if (!existing.processed) {
+      await publishSentenceWorker({
+        userId,
+        sessionKey,
+      });
+    }
+
+    return {
+      quiz: {
+        mode: existing.mode,
+        correctCount: Number(existing.correct_count ?? 0),
+        totalQuestions: Number(existing.total_questions ?? 0),
+        xpEarned: Number(existing.total_delta ?? 0),
+      },
+      queued: !existing.processed,
+      deduped: true,
+    };
+  }
+
+  await publishSentenceWorker({
+    userId,
+    sessionKey,
   });
 
   return {
@@ -151,5 +286,6 @@ export default defineEventHandler(async (event) => {
       totalQuestions: payloadAnswers.length,
       xpEarned: totalDelta,
     },
+    queued: true,
   };
 });
