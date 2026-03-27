@@ -146,7 +146,7 @@ onMounted(async () => {
                         Audio Only
                     </NuxtLink>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}/v2` : undefined"
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/${topic.id}/v3` : undefined"
                         class="topic-btn topic-btn-yellow"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Sentences
