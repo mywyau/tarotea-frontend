@@ -609,3 +609,143 @@ watch(
     </section>
   </main>
 </template>
+
+<style scoped>
+.level-heading {
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(0, 0, 0);
+}
+
+.card-fade-enter-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.card-fade-enter-from {
+  opacity: 0;
+  transform: translateY(10px);
+}
+
+.stat-card {
+  border-radius: 22px;
+  padding: 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 0.75rem;
+  color: #111827;
+}
+
+.result-0 {
+  background: rgba(168, 202, 224, 0.45);
+}
+
+.result-1 {
+  background: rgba(246, 225, 225, 0.75);
+}
+
+.result-2 {
+  background: rgba(244, 205, 39, 0.35);
+}
+
+.result-3 {
+  background: rgba(168, 224, 182, 0.45);
+}
+
+.hero-card {
+  padding: 2rem 1.5rem;
+}
+
+.hero-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+  color: #111827;
+}
+
+.hero-score {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 600;
+  margin-top: 0.9rem;
+  color: #111827;
+}
+
+.hero-subtext {
+  margin-top: 0.65rem;
+  font-size: 0.95rem;
+  color: rgba(17, 24, 39, 0.68);
+}
+
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+
+.spinner {
+  width: 52px;
+  height: 52px;
+  border-radius: 9999px;
+  border: 4px solid rgba(17, 24, 39, 0.12);
+  border-top-color: rgba(17, 24, 39, 0.75);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.xp-fall-enter-active {
+  transition: transform 0.6s ease, opacity 0.6s ease;
+}
+
+.xp-fall-leave-active {
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.xp-fall-enter-from {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.9);
+}
+
+.xp-fall-enter-to {
+  opacity: 1;
+  transform: translateY(0px) scale(1);
+}
+
+.xp-fall-leave-to {
+  opacity: 0;
+  transform: translateY(35px) scale(0.95);
+}
+
+.next-btn-blue {
+  background: rgb(126, 147, 255);
+}
+</style>
