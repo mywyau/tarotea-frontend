@@ -42,8 +42,6 @@ export default defineEventHandler(async (event) => {
 
   let data: LevelSentenceData;
 
-  console.log(`${cdnBase}/sentences/${slug}-sentences.json`,)
-
   try {
     data = await $fetch<LevelSentenceData>(
       `${cdnBase}/sentences/${slug}-sentences.json`,
