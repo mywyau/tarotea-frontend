@@ -49,8 +49,9 @@ const tokenPromise = auth.getAccessToken()
 const { data, error, refresh } = await useAsyncData(
     () => `level-sentences-${slug.value}`,
     async () => {
-        const token = await tokenPromise
 
+        const token = await tokenPromise
+        
         return $fetch<LevelSentenceData>(
             `/api/sentences/${slug.value}/rotateV2`,
             {

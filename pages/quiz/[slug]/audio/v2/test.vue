@@ -1,48 +1,123 @@
 <script setup lang="ts">
-
 definePageMeta({
-  // middleware: ['level-quiz-access'],
-  middleware: ['coming-soon'],
+  middleware: ['level-quiz-access'],
   ssr: false
 })
 
-type QuizAnswer = { wordId: string; correct: boolean }
-
-import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz';
+import { computed, onMounted, ref, watch } from 'vue'
+import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz'
 
 import {
   playQuizCompleteFailSong,
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
-} from '@/utils/sounds';
+} from '@/utils/sounds'
 
-import type { LevelData, Word } from '~/types/level/quiz/types';
-import { brandColours } from '~/utils/branding/helpers';
-import { isLevelId, levelIdToNumbers, levelTitles } from '~/utils/levels/levels';
-import { masteryXp } from '~/utils/xp/helpers';
+import type { LevelData, Word } from '~/types/level/quiz/types'
+import { brandColours } from '~/utils/branding/helpers'
+import { isLevelId, levelTitles } from '~/utils/levels/levels'
+import { masteryXp } from '~/utils/xp/helpers'
 
-import { computed, onMounted, ref, watch } from 'vue';
+type QuizAnswer = { wordId: string; correct: boolean }
+
+type FinalizeResponse = {
+  quiz: {
+    mode: string
+    correctCount: number
+    totalQuestions: number
+    xpEarned: number
+  }
+  attemptId: string
+  queued?: boolean
+  deduped?: boolean
+}
 
 const route = useRoute()
-const slug = route.params.slug as string
+const slug = computed(() => route.params.slug as string)
 
-if (!isLevelId(slug)) {
+if (!isLevelId(slug.value)) {
   throw createError({ statusCode: 404 })
 }
 
-const levelNumber: number = levelIdToNumbers(slug)
+const { getAccessToken } = await useAuth()
+const { stop } = useGlobalAudio()
+
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
+
+const finalizeAttemptId = ref<string | null>(null)
+const finalizeCompleted = ref(false)
+const finalizeError = ref<string | null>(null)
+const completionSoundPlayed = ref(false)
+
+function createAttemptId() {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+
+  return `audio-quiz-${slug.value}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+}
+
+function ensureFinalizeAttemptId() {
+  if (!finalizeAttemptId.value) {
+    finalizeAttemptId.value = createAttemptId()
+  }
+
+  return finalizeAttemptId.value
+}
 
 const answerLog = ref<QuizAnswer[]>([])
 const finishing = ref(false)
+const totalXpEarned = ref<number>(0)
 
-const { getAccessToken } = await useAuth()
+const animatedAccuracy = ref(0)
+const animatedXpEarned = ref(0)
+const completionAnimated = ref(false)
 
-const { stop } = useGlobalAudio()
+const tileColors = ref<string[]>([])
+const weakestIds = ref<string[]>([])
+
+const current = ref(0)
+const score = ref(0)
+const answered = ref(false)
+const selectedIndex = ref<number | null>(null)
+const xpDelta = ref<number | null>(null)
+const currentXp = ref<number | null>(null)
+const currentStreak = ref<number | null>(null)
+
+const wordProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
+
+function resetCompletionAnimations() {
+  animatedAccuracy.value = 0
+  animatedXpEarned.value = 0
+  completionAnimated.value = false
+}
+
+function resetFinalizeState() {
+  finalizeAttemptId.value = null
+  finalizeCompleted.value = false
+  finalizeError.value = null
+  totalXpEarned.value = 0
+  finishing.value = false
+  completionSoundPlayed.value = false
+  resetCompletionAnimations()
+}
+
+function resetQuizRunState() {
+  answerLog.value = []
+  current.value = 0
+  score.value = 0
+  answered.value = false
+  selectedIndex.value = null
+  xpDelta.value = null
+  currentXp.value = null
+  currentStreak.value = null
+}
 
 const { data, error } = await useFetch<LevelData>(
-  () => `/api/vocab-quiz/${slug}`,
+  () => `/api/vocab-quiz/${slug.value}`,
   {
-    key: () => `audio-quiz-${slug}`,
+    key: () => `audio-quiz-${slug.value}`,
     server: false
   }
 )
@@ -51,6 +126,10 @@ const wordsForLevel = computed<Word[]>(() => {
   if (!data.value) return []
   return Object.values(data.value.categories).flat()
 })
+
+function generateTileColors() {
+  tileColors.value = shuffleFisherYates(brandColours).slice(0, 4)
+}
 
 const weightedWords = computed(() => {
   const words = wordsForLevel.value
@@ -101,91 +180,20 @@ const questions = computed(() =>
     : []
 )
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
-
-
-type FinalizeResponse = {
-  quiz: {
-    mode: string
-    correctCount: number
-    totalQuestions: number
-    xpEarned: number
-  }
-  attemptId: string
-  queued?: boolean
-  deduped?: boolean
-}
-
-const finalizeAttemptId = ref<string | null>(null)
-const finalizeCompleted = ref(false)
-const finalizeError = ref<string | null>(null)
-
-function createAttemptId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID()
-  }
-
-  return `audio-quiz-${slug}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-}
-
-function ensureFinalizeAttemptId() {
-  if (!finalizeAttemptId.value) {
-    finalizeAttemptId.value = createAttemptId()
-  }
-
-  return finalizeAttemptId.value
-}
-
-function resetFinalizeState() {
-  finalizeAttemptId.value = null
-  finalizeCompleted.value = false
-  finalizeError.value = null
-  totalXpEarned.value = 0
-  finishing.value = false
-  completionAnimated.value = false
-  animatedAccuracy.value = 0
-  animatedXpEarned.value = 0
-  completionSoundPlayed.value = false
-}
-
-function resetQuizRunState() {
-  answerLog.value = []
-  current.value = 0
-  score.value = 0
-  answered.value = false
-  selectedIndex.value = null
-  xpDelta.value = null
-  currentXp.value = null
-  currentStreak.value = null
-}
-
-const current = ref(0)
-const score = ref(0)
-const answered = ref(false)
-const selectedIndex = ref<number | null>(null)
-
-const currentXp = ref<number | null>(null)
-const currentStreak = ref<number | null>(null)
-
 const question = computed(() => questions.value[current.value])
 
-const tileColors = ref<string[]>([])
+const STREAK_CAP = 5
+const WRONG_PENALTY = -12
+const MIN_CALCULATING_MS = 1800
 
-const totalXpEarned = ref<number>(0)
+function deltaFor(correct: boolean, streakBefore: number) {
+  if (!correct) return WRONG_PENALTY
+  return 5 + Math.min(streakBefore, STREAK_CAP) * 2
+}
 
-const animatedAccuracy = ref(0)
-const animatedXpEarned = ref(0)
-
-const completionAnimated = ref(false)
-const weakestIds = ref<string[]>([])
-
-const resultHeroClass = computed(() => {
-  if (accuracy.value === 100) return 'result-3'
-  if (accuracy.value >= 70) return 'result-0'
-  if (accuracy.value >= 50) return 'result-2'
-  return 'result-1'
-})
+function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
 
 const accuracy = computed(() => {
   if (!questions.value.length) return 0
@@ -194,6 +202,26 @@ const accuracy = computed(() => {
 
 const incorrectCount = computed(() => {
   return Math.max(0, questions.value.length - score.value)
+})
+
+const percentage = computed(() => {
+  const total = questions.value.length
+  if (!total) return 0
+  return (score.value / total) * 100
+})
+
+const progressPercent = computed(() => {
+  const total = questions.value.length
+  if (!total) return 0
+  const position = Math.min(current.value + 1, total)
+  return Math.round((position / total) * 100)
+})
+
+const resultHeroClass = computed(() => {
+  if (accuracy.value === 100) return 'result-3'
+  if (accuracy.value >= 70) return 'result-0'
+  if (accuracy.value >= 50) return 'result-2'
+  return 'result-1'
 })
 
 const resultMeta = computed(() => {
@@ -212,16 +240,16 @@ const resultMeta = computed(() => {
   return { title: 'Keep practicing' }
 })
 
-const missedWords = computed(() => {
+const correctWords = computed(() => {
   return answerLog.value
-    .filter(a => !a.correct)
+    .filter(a => a.correct)
     .map(a => wordsForLevel.value.find(w => w.id === a.wordId))
     .filter(Boolean)
 })
 
-const correctWords = computed(() => {
+const missedWords = computed(() => {
   return answerLog.value
-    .filter(a => a.correct)
+    .filter(a => !a.correct)
     .map(a => wordsForLevel.value.find(w => w.id === a.wordId))
     .filter(Boolean)
 })
@@ -248,57 +276,31 @@ const showResults = computed(() => {
   return quizFinished.value && !finishing.value && finalizeCompleted.value
 })
 
-function generateTileColors() {
-  tileColors.value = shuffleFisherYates(brandColours).slice(0, 4)
-}
-
-const WRONG_PENALTY = -12
-const STREAK_CAP = 5
-function deltaFor(correct: boolean, streakBefore: number) {
-  if (!correct) return WRONG_PENALTY
-  return 5 + Math.min(streakBefore, STREAK_CAP) * 2
-}
-
-const xpDelta = ref<number | null>(null)
-
-async function answer(index: number) {
-  if (answered.value) return
-  if (!question.value) return
-
-  selectedIndex.value = index
-  answered.value = true
-
-  const correct = index === question.value.correctIndex
-
-  if (correct) {
-    score.value++
-    playCorrectJingle()
-  } else {
-    playIncorrectJingle()
+const completionTiles = computed(() => [
+  {
+    label: 'Correct',
+    value: score.value,
+    suffix: '',
+    className: 'result-0'
+  },
+  {
+    label: 'Incorrect',
+    value: incorrectCount.value,
+    suffix: '',
+    className: 'result-1'
+  },
+  {
+    label: 'XP Earned',
+    value: animatedXpEarned.value,
+    suffix: 'XP',
+    className: 'result-2',
+    prefix: animatedXpEarned.value > 0 ? '+' : ''
   }
+])
 
-  // store locally for finalize
-  const wordId = question.value.wordId
-  answerLog.value.push({ wordId, correct })
-
-  // optimistic xp/streak update (same as word quiz)
-  const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
-  const delta = deltaFor(correct, prev.streak)
-  const newStreak = correct ? prev.streak + 1 : 0
-  const newXp = Math.max(0, prev.xp + delta)
-
-  wordProgressMap.value[wordId] = { xp: newXp, streak: newStreak }
-
-  xpDelta.value = delta
-  currentXp.value = newXp
-  currentStreak.value = newStreak
-
-  setTimeout(() => {
-    xpDelta.value = null
-  }, 1000)
+function runCompletionAnimations() {
+  animateCount(animatedAccuracy, accuracy.value, 2300)
 }
-
-const wordProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
 
 async function finalizeQuiz() {
   if (finishing.value || finalizeCompleted.value) return
@@ -315,7 +317,9 @@ async function finalizeQuiz() {
 
     const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v2', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
       body: {
         attemptId,
         mode: 'grind-level-audio',
@@ -356,16 +360,56 @@ async function finalizeQuiz() {
   }
 }
 
+async function answer(index: number) {
+  if (answered.value) return
+  if (!question.value) return
+
+  selectedIndex.value = index
+  answered.value = true
+
+  const correct = index === question.value.correctIndex
+
+  answerLog.value.push({
+    wordId: question.value.wordId,
+    correct
+  })
+
+  if (correct) {
+    score.value++
+    playCorrectJingle()
+  } else {
+    playIncorrectJingle()
+  }
+
+  const wordId = question.value.wordId
+  const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
+
+  const delta = deltaFor(correct, prev.streak)
+  const newStreak = correct ? prev.streak + 1 : 0
+  const newXp = Math.max(0, prev.xp + delta)
+
+  wordProgressMap.value[wordId] = {
+    xp: newXp,
+    streak: newStreak
+  }
+
+  xpDelta.value = delta
+  currentXp.value = newXp
+  currentStreak.value = newStreak
+
+  setTimeout(() => {
+    xpDelta.value = null
+  }, 1000)
+}
+
 async function next() {
   stop()
 
   answered.value = false
   selectedIndex.value = null
 
-  // move to next question
   current.value++
 
-  // if finished, finalize once
   if (current.value >= questions.value.length) {
     if (answerLog.value.length > 0) {
       await finalizeQuiz()
@@ -373,66 +417,11 @@ async function next() {
     return
   }
 
-  // load xp/streak for the NEW current question
   const nextWordId = questions.value[current.value]?.wordId
   if (nextWordId) {
-    currentXp.value = wordProgressMap.value[nextWordId]?.xp ?? 0
     currentStreak.value = wordProgressMap.value[nextWordId]?.streak ?? 0
+    currentXp.value = wordProgressMap.value[nextWordId]?.xp ?? 0
   }
-}
-
-function resetCompletionAnimations() {
-  animatedAccuracy.value = 0
-  animatedXpEarned.value = 0
-  completionAnimated.value = false
-}
-
-function runCompletionAnimations() {
-  animateCount(animatedAccuracy, accuracy.value, 2300)
-}
-
-const percentage = computed(() => {
-  if (questions.value.length === 0) return 0
-  return (score.value / questions.value.length) * 100
-})
-
-const completionSoundPlayed = ref(false)
-
-const progressPercent = computed(() => {
-  const total = questions.value.length
-  if (!total) return 0
-  const position = Math.min(current.value + 1, total)
-  return Math.round((position / total) * 100)
-})
-
-const completionTiles = computed(() => [
-  {
-    label: 'Correct',
-    value: score.value,
-    // value: animatedCorrect.value,
-    suffix: '',
-    className: 'result-0'
-  },
-  {
-    label: 'Incorrect',
-    value: incorrectCount.value,
-    // value: animatedIncorrect.value,
-    suffix: '',
-    className: 'result-1'
-  },
-  {
-    label: 'XP Earned',
-    value: animatedXpEarned.value,
-    suffix: 'XP',
-    className: 'result-2',
-    prefix: animatedXpEarned.value > 0 ? '+' : ''
-  }
-])
-
-const MIN_CALCULATING_MS = 1800
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 onMounted(async () => {
@@ -440,10 +429,9 @@ onMounted(async () => {
     const token = await getAccessToken()
 
     const weakest = await $fetch<{ id: string }[]>(
-      // '/api/word-progress/weakest',
       '/api/word-progress/weakestV2',
       {
-        query: { level: slug },
+        query: { level: slug.value },
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -470,13 +458,10 @@ watch(
 
     const progressMap = await $fetch<
       Record<string, { xp: number; streak: number }>
-    >(
-      '/api/word-progress/v2',
-      {
-        query: { wordIds: wordIds.join(',') },
-        headers: { Authorization: `Bearer ${token}` }
-      }
-    )
+    >('/api/word-progress/v2', {
+      query: { wordIds: wordIds.join(',') },
+      headers: { Authorization: `Bearer ${token}` }
+    })
 
     wordProgressMap.value = progressMap
 
@@ -500,18 +485,19 @@ watch(
 
     if (!completionSoundPlayed.value) {
       completionSoundPlayed.value = true
-
       stop()
 
       setTimeout(() => {
-        if (percentage.value >= 70) {
+        const p = percentage.value
+
+        if (p >= 70) {
           playQuizCompleteFanfareSong()
-        } else if (percentage.value >= 50) {
+        } else if (p >= 50) {
           playQuizCompleteOkaySong()
         } else {
           playQuizCompleteFailSong()
         }
-      }, 400)
+      }, 250)
     }
   }
 )
@@ -523,48 +509,52 @@ watch(
   },
   { immediate: true }
 )
-
 </script>
 
 <template>
-
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
-
-    <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/audio/start-quiz`"
-      class="text-sm text-black hover:underline">
+    <NuxtLink
+      v-if="current < questions.length"
+      :to="`/quiz/${slug}/audio/start-quiz`"
+      class="text-sm text-black hover:underline"
+    >
       ← Restart Quiz
     </NuxtLink>
 
     <section class="text-center space-y-4">
-
       <h1 class="text-2xl font-semibold text-center level-heading">
         {{ levelTitles[slug] ?? 'Unknown level' }}
       </h1>
 
       <div class="flex items-center gap-3 mb-6">
-
         <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
-          <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
-            :style="{ width: progressPercent + '%' }" />
+          <div
+            class="bg-purple-300 h-3 rounded-full transition-all duration-300"
+            :style="{ width: progressPercent + '%' }"
+          />
         </div>
 
         <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
           {{ current + 1 }} / {{ questions.length }}
         </span>
-
       </div>
 
       <div v-if="showQuiz" class="space-y-6">
-
-        <div v-if="question.type === 'audio'" class="text-center">
-          <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
+        <div v-if="question?.type === 'audio'" class="text-center">
+          <AudioButton
+            :key="question.audioKey"
+            :src="`${cdnBase}/audio/${question.audioKey}`"
+            autoplay
+          />
         </div>
 
         <div class="min-h-[50px] space-y-3">
           <div class="flex items-center justify-center gap-3">
             <div class="w-32 h-1 bg-gray-200 rounded">
-              <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
+              <div
+                class="h-1 bg-green-500 rounded transition-all duration-500"
+                :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }"
+              />
             </div>
 
             <div class="relative flex items-center">
@@ -573,8 +563,11 @@ watch(
               </span>
 
               <transition name="xp-fall">
-                <span v-if="xpDelta !== null" class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                  :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                <span
+                  v-if="xpDelta !== null"
+                  class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                  :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'"
+                >
                   {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                 </span>
               </transition>
@@ -589,10 +582,13 @@ watch(
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <button v-for="(option, i) in question.options" :key="i" class="answer-tile aspect-square rounded-xl flex items-center justify-center
-             text-2xl font-semibold text-center p-6 select-none
-             transition-all duration-200 ease-out
-             shadow-sm active:scale-95" :style="{
+          <button
+            v-for="(option, i) in question.options"
+            :key="i"
+            class="answer-tile aspect-square rounded-xl flex items-center justify-center
+              text-xl sm:text-lg md:text-xl lg:text-2xl font-semibold text-center p-6 select-none
+              transition-all duration-200 ease-out shadow-sm active:scale-95"
+            :style="{
               backgroundColor:
                 !answered
                   ? tileColors[i]
@@ -601,23 +597,27 @@ watch(
                     : i === selectedIndex
                       ? '#FECACA'
                       : tileColors[i]
-            }" :class="[
+            }"
+            :class="[
               !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
               answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
               answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-            ]" @click="answer(i)">
+            ]"
+            @click="answer(i)"
+          >
             {{ option }}
           </button>
         </div>
 
         <div class="h-10">
-          <button v-if="answered"
-            class="next-btn-blue w-full rounded-xl font-medium text-black py-2 hover:brightness-110" @click="next"
-            style="background-color:#F4C2D7;">
+          <button
+            v-if="answered"
+            class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
+            @click="next"
+          >
             Next
           </button>
         </div>
-
       </div>
 
       <transition name="fade-scale" mode="out-in">
@@ -650,14 +650,15 @@ watch(
             {{ finalizeError }}
           </p>
 
-          <button class="next-btn-blue w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
-            @click="finalizeQuiz" style="background-color:#F4C2D7;">
+          <button
+            class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
+            @click="finalizeQuiz"
+          >
             Retry Saving Results
           </button>
         </div>
 
         <div v-else-if="showResults" key="results" class="space-y-6">
-
           <transition name="card-fade" appear>
             <div class="stat-card hero-card" :class="resultHeroClass">
               <p class="stat-label">
@@ -679,8 +680,12 @@ watch(
           </transition>
 
           <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-            <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
-              :class="tile.className">
+            <div
+              v-for="tile in completionTiles"
+              :key="tile.label"
+              class="stat-card hover:brightness-110"
+              :class="tile.className"
+            >
               <p class="stat-label">
                 {{ tile.label }}
               </p>
@@ -697,8 +702,11 @@ watch(
             </h3>
 
             <div class="flex flex-wrap gap-2">
-              <span v-for="word in correctWords" :key="word!.id"
-                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
+              <span
+                v-for="word in correctWords"
+                :key="word!.id"
+                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125"
+              >
                 {{ word!.word }}
               </span>
             </div>
@@ -710,33 +718,38 @@ watch(
             </h3>
 
             <div class="flex flex-wrap gap-2">
-              <span v-for="word in missedWords" :key="word!.id"
-                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
+              <span
+                v-for="word in missedWords"
+                :key="word!.id"
+                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125"
+              >
                 {{ word!.word }}
               </span>
             </div>
           </div>
 
           <div class="pt-2 space-y-3">
-            <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`"
+            <NuxtLink
+              :to="`/quiz/${slug}/audio/start-quiz`"
               class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-              style="background-color:#A8CAE0;">
+              style="background-color:#A8CAE0;"
+            >
               Play Again
             </NuxtLink>
 
-            <NuxtLink :to="`/level/${slug}`"
+            <NuxtLink
+              :to="`/level/${slug}`"
               class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-              style="background-color:rgba(244,205,39,0.35);">
-              Back to Level {{ levelNumber }}
+              style="background-color:rgba(244,205,39,0.35);"
+            >
+              Back to {{ levelTitles[slug] }}
             </NuxtLink>
           </div>
         </div>
       </transition>
     </section>
-
   </main>
 </template>
-
 
 <style scoped>
 .level-heading {
@@ -753,13 +766,12 @@ watch(
   color: rgba(17, 24, 39, 0.65);
 }
 
-
 .xp-fall-enter-active {
   transition: transform 0.6s ease, opacity 0.6s ease;
 }
 
 .xp-fall-leave-active {
-  transition: transform 0.4s ease, opacity 0.4s ease
+  transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .xp-fall-enter-from {
@@ -775,17 +787,6 @@ watch(
 .xp-fall-leave-to {
   opacity: 0;
   transform: translateY(35px) scale(0.95);
-}
-
-.fade-streak-enter-active,
-.fade-streak-leave-active {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-streak-enter-from,
-.fade-streak-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
 }
 
 .card-fade-enter-active {
@@ -825,7 +826,6 @@ watch(
   color: #111827;
 }
 
-/* completion page colours */
 .result-0 {
   background: rgba(168, 202, 224, 0.45);
 }
