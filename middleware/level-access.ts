@@ -5,9 +5,13 @@ export default defineNuxtRouteMiddleware((to) => {
   const slug = to.params.slug as string | undefined;
   if (!slug) return;
 
-  const { authReady } = useMeStateV2();
+  const { authReady, isLoggedOut } = useMeStateV2();
 
   if (!authReady.value) return;
+
+  if (isLoggedOut.value) {
+    return navigateTo("please-sign-in")
+  }
 
   // ✅ Type guard
   if (!isLevelId(slug)) {
