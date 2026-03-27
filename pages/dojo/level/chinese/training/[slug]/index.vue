@@ -26,7 +26,6 @@ import { totalQuestions, weakestWordRatio } from '@/utils/weakestWords'
 import { masteryXp } from '@/utils/xp/helpers'
 
 
-
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
@@ -301,12 +300,6 @@ const resultMeta = computed(() => {
 })
 
 const completionTiles = computed(() => [
-    //   {
-    //     label: 'Words Completed',
-    //     value: animatedCompletedWords.value,
-    //     suffix: '',
-    //     className: 'result-0'
-    //   },
     {
         label: 'Hint-Free',
         value: hintFreeCount.value,

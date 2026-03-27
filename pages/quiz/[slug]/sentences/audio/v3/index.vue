@@ -581,7 +581,7 @@ watch(
             <div class="h-10 mt-6">
               <button
                 v-if="answered"
-                class="next-btn-blue w-full rounded-xl font-medium text-black py-2 hover:brightness-110"
+                class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
                 @click="next"
               >
                 Next
