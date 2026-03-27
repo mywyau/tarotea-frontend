@@ -48,7 +48,7 @@ async function publishSentenceWorker(args: {
     },
     retries: 3,
     flowControl: {
-      key: "xp-quiz-sentences",
+      key: "xp-quiz-sentences-topics",
       parallelism: 10,
     },
   });
@@ -118,7 +118,7 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const redisKey = `quiz:sentences:${userId}:${sessionKey}`;
+  const redisKey = `quiz:topic-sentences:${userId}:${sessionKey}`;
   const rawSession = await redis.get<QuizSession | string>(redisKey);
 
   if (!rawSession) {
@@ -143,6 +143,13 @@ export default defineEventHandler(async (event) => {
   }
 
   const mode = session.mode;
+
+  if (session.scope !== "topic" || session.mode !== "topic-sentences") {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Invalid topic sentence quiz session",
+    });
+  }
 
   const allowedPairs = new Set(
     session.allowedPairs.map((pair) => `${pair.wordId}:${pair.sentenceId}`),

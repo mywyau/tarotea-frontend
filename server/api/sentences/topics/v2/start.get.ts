@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
   const userId = auth.sub;
   const query = getQuery(event);
 
-  const scope = String(query.scope ?? "Topic");
+  const scope = String(query.scope ?? "topic");
   const slug = String(query.slug ?? "");
 
   if (!slug) {
@@ -41,8 +41,6 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
 
   let data: TopicSentenceData;
-
-  // console.log(`${cdnBase}/topic-sentences/${slug}-sentences.json`,)
 
   try {
     data = await $fetch<TopicSentenceData>(
@@ -77,7 +75,7 @@ export default defineEventHandler(async (event) => {
       sessionKey: emptySessionKey,
       quiz: {
         mode: "topic-sentences" as const,
-        Topic: String(data.topic),
+        topic: String(data.topic),
         title: data.title,
         totalQuestions: 0,
         questions: [],
@@ -136,7 +134,7 @@ export default defineEventHandler(async (event) => {
     sessionKey,
     quiz: {
       mode: "topic-sentences" as const,
-      Topic: String(data.topic),
+      topic: String(data.topic),
       title: data.title,
       totalQuestions: questions.length,
       questions,

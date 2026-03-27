@@ -44,7 +44,9 @@ type SentenceProgressRow = {
   last_seen_at: string | null;
 };
 
-function parseStoredPayload(payload: ExistingEventRow["payload"]): StoredEventPayload {
+function parseStoredPayload(
+  payload: ExistingEventRow["payload"],
+): StoredEventPayload {
   if (!payload) {
     throw createError({
       statusCode: 500,
@@ -182,6 +184,13 @@ export default defineEventHandler(async (event) => {
 
     const quizEvent = eventRes.rows[0];
 
+    if (quizEvent.mode !== "topic-sentences") {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid topic sentence quiz event, not topic-sentences",
+      });
+    }
+
     quizMode = quizEvent.mode;
     correctCount = Number(quizEvent.correct_count ?? 0);
     totalQuestions = Number(quizEvent.total_questions ?? 0);
@@ -218,7 +227,13 @@ export default defineEventHandler(async (event) => {
             `,
             [userId, uniqueWordIds],
           )
-        : { rows: [] as Array<{ word_id: string; xp: number | string | null; streak: number | string | null }> };
+        : {
+            rows: [] as Array<{
+              word_id: string;
+              xp: number | string | null;
+              streak: number | string | null;
+            }>,
+          };
 
       const existingMap = new Map<string, { xp: number; streak: number }>(
         existingWordRowsRes.rows.map((row) => [
@@ -230,7 +245,10 @@ export default defineEventHandler(async (event) => {
         ]),
       );
 
-      const rolledUpWordProgress = rollupAnswersByWord(payloadAnswers, existingMap);
+      const rolledUpWordProgress = rollupAnswersByWord(
+        payloadAnswers,
+        existingMap,
+      );
 
       if (rolledUpWordProgress.length > 0) {
         await client.query(
@@ -376,7 +394,9 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  await redis.del(`quiz:topic-sentences:${userId}:${sessionKey}`).catch(() => {});
+  await redis
+    .del(`quiz:topic-sentences:${userId}:${sessionKey}`)
+    .catch(() => {});
 
   return {
     quiz: {
