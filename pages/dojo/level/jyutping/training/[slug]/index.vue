@@ -256,9 +256,7 @@ async function fetchWords() {
     resetCompletionAnimations()
 
     try {
-        const levelData = await $fetch<LevelData>(
-            `/api/vocab-quiz/${slug.value}`
-        )
+        const levelData = await $fetch<LevelData>(`/api/vocab-quiz/${slug.value}`)
 
         const allWords = Object.values(levelData.categories).flat()
 
@@ -811,7 +809,7 @@ watch(
                             <h2 class="hero-title">
                                 {{ resultMeta.title }}
                             </h2>
-                            
+
                             <p class="hero-subtext">
                                 {{ completedWordsCount }} / {{ totalWordsCount }} words completed
                             </p>
