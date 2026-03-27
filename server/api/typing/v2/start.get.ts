@@ -3,6 +3,7 @@ import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
 import { generateWeightedWordsLevel } from "~/utils/quiz/generateWeightedWordsLevel";
+import { shuffleFisherYates } from "~/utils/shuffle";
 import { levelTitles } from "~/utils/levels/levels";
 import { totalQuestions, weakestWordRatio } from "~/utils/weakestWords";
 

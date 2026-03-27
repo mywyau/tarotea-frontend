@@ -1,3 +1,5 @@
+import { shuffleFisherYates } from "~/utils/shuffle";
+
 export interface WeightedWord {
   id: string
 }

@@ -95,7 +95,7 @@ const {
 } = await useAsyncData(
   () => `jyutping-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>('/api/jyutping/v2/start', {
+    authedFetch<DojoStartResponse>('/api/typing/v2/start', {
       query: {
         scope: 'level',
         slug: slug.value,
