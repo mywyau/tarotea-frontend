@@ -69,7 +69,7 @@ export default defineEventHandler(async (event) => {
     });
 
     await qstash.publishJSON({
-      url: `${config.public.siteUrl}/api/jyutping/v2/xp-jyutping`,
+      url: `${config.public.siteUrl}/api/typing/v2/xp-jyutping`,
       body: {
         userId,
         sessionKey,

@@ -307,7 +307,7 @@ async function finalizeBatch() {
 
   try {
     const [res] = await Promise.all([
-      authedFetch<DojoFinalizeResponse>('/api/jyutping/v2/finalize', {
+      authedFetch<DojoFinalizeResponse>('/api/typing/v2/finalize', {
         method: 'POST',
         body: {
           sessionKey: activeSessionKey.value,
