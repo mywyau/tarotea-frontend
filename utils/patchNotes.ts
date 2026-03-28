@@ -15,16 +15,25 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
+    date: "28 March 2026",
+    title: "Rearchitecture and general improvements",
+    items: [
+      "Clean up more various styling and improve app stability and performance",
+      "Recreate level one content to improve audio quality and add more examples",
+      "Still continuously reviewing content and checking for errors.",
+    ],
+  },
+  {
     date: "13 March 2026",
     title: "Improve Echo Labs",
-    items: [
-      "Improve echo labs to be phrase based instead of word based"
-    ],
+    items: ["Improve echo labs to be phrase based instead of word based"],
   },
   {
     date: "11 March 2026",
     title: "More content",
-    items: ["Enable and add content for health, daily life, transport and various other topics"],
+    items: [
+      "Enable and add content for health, daily life, transport and various other topics",
+    ],
   },
   {
     date: "10 March 2026",
