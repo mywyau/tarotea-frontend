@@ -86,18 +86,14 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
-
   let topicData: TopicData;
 
   try {
-    topicData = await $fetch<TopicData>(`${cdnBase}/vocab-quiz/${slug}.json`);
+    topicData = await $fetch<TopicData>(`/api/topic/${slug}`);
   } catch {
     throw createError({
       statusCode: 404,
-      statusMessage: "Vocab quiz set not found",
+      statusMessage: "Topic set not found",
     });
   }
 
@@ -167,6 +163,7 @@ export default defineEventHandler(async (event) => {
   });
 
   const progress: Record<string, { xp: number }> = {};
+
   for (const word of selected) {
     progress[word.id] = {
       xp: xpMap.get(word.id) ?? 0,
