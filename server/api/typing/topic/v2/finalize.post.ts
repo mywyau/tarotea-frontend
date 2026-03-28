@@ -93,8 +93,8 @@ export default defineEventHandler(async (event) => {
       retries: 3,
       flowControl: {
         key: "xp-typing-topic-v2",
-        parallelism: 10,
-        rate: 600,
+        parallelism: 20,
+        rate: 800,
         period: "1m",
       },
     });

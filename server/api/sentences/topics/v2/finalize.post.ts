@@ -49,7 +49,7 @@ async function publishSentenceWorker(args: {
     retries: 3,
     flowControl: {
       key: "xp-quiz-sentences-topics",
-      parallelism: 10,
+      parallelism: 20,
     },
   });
 }
