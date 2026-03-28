@@ -1,6 +1,5 @@
 import { createError, defineEventHandler } from "h3";
 import { db } from "~/server/repositories/db";
-import { requireUser } from "~/server/utils/requireUser";
 import {
   DAILY_DISTRACTOR_COUNT,
   DAILY_MODE,
@@ -11,6 +10,7 @@ import {
   getUtcDayKey,
   shuffle,
 } from "~/server/utils/dailyQuiz";
+import { requireUser } from "~/server/utils/requireUser";
 
 type DailySessionRow = {
   session_date: string;
@@ -263,16 +263,17 @@ export default defineEventHandler(async (event) => {
     })
     .filter((question): question is DailyQuestion => !!question);
 
-  const sessionKey = buildDailySessionKey(mode, session.session_date, userId);
+  const attemptId = buildDailySessionKey(mode, session.session_date, userId);
 
   const eventResult = await db.query<QuizEventRow>(
     `
-    select processed
-    from xp_quiz_events
-    where session_key = $1
-    limit 1
-    `,
-    [sessionKey],
+  select processed
+  from xp_quiz_events
+  where user_id = $1
+    and attempt_id = $2
+  limit 1
+  `,
+    [userId, attemptId],
   );
 
   const processed = !!eventResult.rows[0]?.processed;

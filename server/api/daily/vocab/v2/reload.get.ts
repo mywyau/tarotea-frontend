@@ -1,11 +1,11 @@
 import { createError, defineEventHandler, getQuery } from "h3";
 import { db } from "~/server/repositories/db";
-import { requireUser } from "~/server/utils/requireUser";
 import {
   DAILY_MODE,
   buildDailySessionKey,
   getUtcDayKey,
 } from "~/server/utils/dailyQuiz";
+import { requireUser } from "~/server/utils/requireUser";
 
 type DailySessionRow = {
   completed: boolean;
@@ -73,16 +73,17 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const sessionKey = buildDailySessionKey(mode, sess.session_date, userId);
+  const attemptId = buildDailySessionKey(mode, sess.session_date, userId);
 
   const eventRes = await db.query<EventRow>(
     `
-    select processed, processed_at::text
-    from xp_quiz_events
-    where session_key = $1
-    limit 1
-    `,
-    [sessionKey],
+  select processed, processed_at::text
+  from xp_quiz_events
+  where user_id = $1
+    and attempt_id = $2
+  limit 1
+  `,
+    [userId, attemptId],
   );
 
   const processed = !!eventRes.rows[0]?.processed;
@@ -97,7 +98,7 @@ export default defineEventHandler(async (event) => {
       totalQuestions: sess.total_questions ?? 0,
     },
     quizEvent: {
-      sessionKey,
+      sessionKey: attemptId,
       processed,
       processedAt: eventRes.rows[0]?.processed_at ?? null,
     },

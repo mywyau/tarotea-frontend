@@ -1,7 +1,11 @@
 import { Client as QStashClient } from "@upstash/qstash";
 
-export async function queueXpQuizWorker() {
-  
+type QueueXpQuizWorkerInput = {
+  attemptId: string;
+  userId: string;
+};
+
+export async function queueXpQuizWorker(input: QueueXpQuizWorkerInput) {
   const runtimeConfig = useRuntimeConfig();
 
   const qstash = new QStashClient({
@@ -9,8 +13,11 @@ export async function queueXpQuizWorker() {
   });
 
   await qstash.publishJSON({
-    url: `${runtimeConfig.public.siteUrl}/api/worker/xp-quiz`,
-    body: {},
+    url: `${runtimeConfig.public.siteUrl}/api/worker/xp-quiz-v3`,
+    body: {
+      attemptId: input.attemptId,
+      userId: input.userId,
+    },
     retries: 3,
   });
 }

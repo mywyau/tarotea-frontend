@@ -1,11 +1,11 @@
 import { createError, defineEventHandler, readBody } from "h3";
 import { db } from "~/server/repositories/db";
 import {
-    DAILY_MODE,
-    buildDailySessionKey,
-    dailyDeltaFor,
-    dedupeAnswers,
-    getUtcDayKey,
+  DAILY_MODE,
+  buildDailySessionKey,
+  dailyDeltaFor,
+  dedupeAnswers,
+  getUtcDayKey,
 } from "~/server/utils/dailyQuiz";
 import { queueXpQuizWorker } from "~/server/utils/queueXpQuizWorker";
 import { requireUser } from "~/server/utils/requireUser";
@@ -60,7 +60,9 @@ export default defineEventHandler(async (event) => {
   const client = await db.connect();
 
   let sessionKey = "";
+  let attemptId = "";
   let shouldQueueWorker = false;
+
   let responsePayload: {
     daily: {
       answeredCount: number;
@@ -69,7 +71,7 @@ export default defineEventHandler(async (event) => {
       totalQuestions: number;
     };
     status: "processing" | "completed";
-    quizEvent: { sessionKey: string };
+    quizEvent: { sessionKey: string; attemptId: string };
   };
 
   try {
@@ -103,20 +105,25 @@ export default defineEventHandler(async (event) => {
 
     const sess = sessRes.rows[0];
     sessionKey = buildDailySessionKey(mode, sess.session_date, userId);
+    attemptId = sessionKey;
 
     if (sess.completed) {
       const existingEventRes = await client.query<EventRow>(
         `
         select processed
         from xp_quiz_events
-        where session_key = $1
+        where user_id = $1
+          and attempt_id = $2
         limit 1
         `,
-        [sessionKey],
+        [userId, attemptId],
       );
 
-      const processed = !!existingEventRes.rows[0]?.processed;
-      shouldQueueWorker = !processed;
+      const existingEvent = existingEventRes.rows[0];
+      const processed = !!existingEvent?.processed;
+      const eventExists = !!existingEvent;
+
+      shouldQueueWorker = eventExists && !processed;
 
       responsePayload = {
         daily: {
@@ -126,7 +133,7 @@ export default defineEventHandler(async (event) => {
           totalQuestions: sess.total_questions ?? 0,
         },
         status: processed ? "completed" : "processing",
-        quizEvent: { sessionKey },
+        quizEvent: { sessionKey, attemptId },
       };
 
       await client.query("COMMIT");
@@ -176,18 +183,28 @@ export default defineEventHandler(async (event) => {
         0,
       );
 
-      const insertEventRes = await client.query(
+      await client.query(
         `
         insert into xp_quiz_events
-          (user_id, mode, session_key, payload, total_delta, correct_count, total_questions)
+          (
+            user_id,
+            mode,
+            session_key,
+            attempt_id,
+            payload,
+            total_delta,
+            correct_count,
+            total_questions
+          )
         values
-          ($1, $2, $3, $4::jsonb, $5, $6, $7)
+          ($1, $2, $3, $4, $5::jsonb, $6, $7, $8)
         on conflict (session_key) do nothing
         `,
         [
           userId,
           mode,
           sessionKey,
+          attemptId,
           JSON.stringify({ answers: payloadAnswers }),
           totalDelta,
           correctCount,
@@ -230,7 +247,7 @@ export default defineEventHandler(async (event) => {
           totalQuestions: sess.total_questions,
         },
         status: "processing",
-        quizEvent: { sessionKey },
+        quizEvent: { sessionKey, attemptId },
       };
 
       await client.query("COMMIT");
@@ -244,11 +261,14 @@ export default defineEventHandler(async (event) => {
 
   if (shouldQueueWorker) {
     try {
-      await queueXpQuizWorker();
+      await queueXpQuizWorker({
+        attemptId,
+        userId,
+      });
     } catch (error) {
       console.error("[daily-submit] failed to queue xp worker", error);
     }
   }
 
-  return responsePayload!;
+  return responsePayload;
 });

@@ -655,7 +655,7 @@ onMounted(async () => {
                 </div>
               </transition-group>
 
-              <div
+              <!-- <div
                 v-if="isBackgroundSyncing"
                 class="stat-card text-center"
                 style="background-color: rgba(168, 202, 224, 0.25);"
@@ -667,7 +667,7 @@ onMounted(async () => {
                 <p class="text-sm text-gray-700 mt-2">
                   Your score is saved. XP and streak updates are still being processed.
                 </p>
-              </div>
+              </div> -->
 
               <div class="text-center">
                 <p class="stat-label">
