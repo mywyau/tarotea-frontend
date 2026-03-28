@@ -144,7 +144,7 @@ export default defineEventHandler(async (event) => {
   const isValid = await receiver.verify({
     signature,
     body: rawBody,
-    url: `${config.public.siteUrl}/api/typing/sentence/v2/xp-chinese`,
+    url: `${config.public.siteUrl}/api/typing/sentences/v2/xp-chinese`,
   });
 
   if (!isValid) {
