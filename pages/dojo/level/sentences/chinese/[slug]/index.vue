@@ -2,7 +2,8 @@
 
 definePageMeta({
   ssr: false,
-  // middleware: ['coming-soon'],
+  middleware: ['coming-soon'],
+  // middleware: ['logged-in'],
 })
 
 import { chineseSentenceXp, chineseSentenceXpHintUsed } from '@/utils/dojo/xp'

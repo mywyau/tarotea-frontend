@@ -2,7 +2,8 @@
 
 definePageMeta({
   ssr: false,
-  // middleware: ['coming-soon'],
+  middleware: ['coming-soon'],
+  // middleware: ['logged-in'],
 })
 
 import { chineseSentenceXp, chineseSentenceXpHintUsed } from '@/utils/dojo/xp'
@@ -742,7 +743,7 @@ onMounted(() => {
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-              
+
               <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
                 :class="tile.className">
                 <p class="stat-label">
