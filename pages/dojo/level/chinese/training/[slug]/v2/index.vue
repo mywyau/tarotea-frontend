@@ -83,7 +83,7 @@ const {
 } = await useAsyncData(
   () => `chinese-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>('/api/typing/v2/start', {
+    authedFetch<DojoStartResponse>('/api/typing/levels/v2/start', {
       query: {
         scope: 'level',
         slug: slug.value,
@@ -307,7 +307,7 @@ async function finalizeBatch() {
 
   try {
     const [res] = await Promise.all([
-      authedFetch<DojoFinalizeResponse>('/api/typing/v2/finalize', {
+      authedFetch<DojoFinalizeResponse>('/api/typing/levels/v2/finalize', {
         method: 'POST',
         body: {
           sessionKey: activeSessionKey.value,
