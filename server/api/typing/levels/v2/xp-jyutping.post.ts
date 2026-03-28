@@ -134,7 +134,7 @@ export default defineEventHandler(async (event) => {
   const isValid = await receiver.verify({
     signature,
     body: rawBody,
-    url: `${config.public.siteUrl}/api/typing/v2/xp-jyutping`,
+    url: `${config.public.siteUrl}/api/typing/level/v2/xp-jyutping`,
   });
 
   if (!isValid) {
