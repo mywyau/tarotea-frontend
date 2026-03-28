@@ -78,7 +78,7 @@ const {
 } = await useAsyncData(
   () => `topic-chinese-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>('/api/typing/v2/start', {
+    authedFetch<DojoStartResponse>('/api/typing/topic/v2/start', {
       query: {
         scope: 'topic',
         slug: slug.value,
@@ -342,7 +342,7 @@ async function finalizeBatch() {
 
   try {
     const [res] = await Promise.all([
-      authedFetch<DojoFinalizeResponse>('/api/typing/v2/finalize', {
+      authedFetch<DojoFinalizeResponse>('/api/typing/topic/v2/finalize', {
         method: 'POST',
         body: {
           sessionKey: activeSessionKey.value,
@@ -580,12 +580,7 @@ watch(
 
           <div class="rounded-2xl bg-gray-50 p-5">
             <div
-              class="text-4xl font-medium flex gap-1 leading-none no-copy"
-              @copy.prevent
-              @cut.prevent
-              @contextmenu.prevent
-              @dragstart.prevent
-              @selectstart.prevent
+              class="text-4xl font-medium flex gap-1 leading-none"
             >
               <span
                 v-for="(char, i) in chineseChars"
