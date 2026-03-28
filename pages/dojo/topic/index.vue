@@ -132,14 +132,14 @@ const paginatedTopics = computed(() => {
           class="grid grid-cols-2 gap-3 pt-4"
         >
           <NuxtLink
-            :to="`/dojo/topic/jyutping/training/${quizTopic.id}`"
+            :to="`/dojo/topic/jyutping/training/${quizTopic.id}/v2`"
             class="topic-btn topic-btn-purple"
           >
             Jyutping only
           </NuxtLink>
 
           <NuxtLink
-            :to="`/dojo/topic/chinese/training/${quizTopic.id}`"
+            :to="`/dojo/topic/chinese/training/${quizTopic.id}/v2`"
             class="topic-btn topic-btn-blue"
           >
             Chinese only
