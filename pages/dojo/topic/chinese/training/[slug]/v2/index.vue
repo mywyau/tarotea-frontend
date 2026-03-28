@@ -580,7 +580,12 @@ watch(
 
           <div class="rounded-2xl bg-gray-50 p-5">
             <div
-              class="text-4xl font-medium flex gap-1 leading-none"
+              class="text-4xl font-medium flex gap-1 leading-none no-copy"
+              @copy.prevent
+              @cut.prevent
+              @contextmenu.prevent
+              @dragstart.prevent
+              @selectstart.prevent
             >
               <span
                 v-for="(char, i) in chineseChars"
