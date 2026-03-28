@@ -3,7 +3,12 @@ import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
-import { jyutpingXp, jyutpingXpHintUsed } from "~/utils/dojo/xp";
+import {
+  chineseXp,
+  chineseXpHintUsed,
+  jyutpingXp,
+  jyutpingXpHintUsed,
+} from "~/utils/dojo/xp";
 
 type BatchAttempt = {
   wordId: string;
@@ -16,9 +21,11 @@ type FinalizeBody = {
   attempts: BatchAttempt[];
 };
 
+type DojoMode = "dojo-level-jyutping" | "dojo-level-chinese";
+
 type QuizSession = {
   version: 1;
-  mode: "dojo-level-jyutping";
+  mode: DojoMode;
   scope: "level";
   slug: string;
   createdAt: string;
@@ -34,9 +41,19 @@ type ExistingEventRow = {
   processed: boolean | null;
 };
 
-function deltaFor(attempt: BatchAttempt) {
+function isDojoMode(mode: string): mode is DojoMode {
+  return mode === "dojo-level-jyutping" || mode === "dojo-level-chinese";
+}
+
+function deltaFor(attempt: BatchAttempt, mode: DojoMode) {
   if (!attempt.passed) return 0;
-  return attempt.hintUsed ? jyutpingXpHintUsed : jyutpingXp;
+
+  switch (mode) {
+    case "dojo-level-jyutping":
+      return attempt.hintUsed ? jyutpingXpHintUsed : jyutpingXp;
+    case "dojo-level-chinese":
+      return attempt.hintUsed ? chineseXpHintUsed : chineseXp;
+  }
 }
 
 export default defineEventHandler(async (event) => {
@@ -60,10 +77,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const sessionKey = body.sessionKey;
-
   const config = useRuntimeConfig();
 
-  async function publishJyutpingWorker() {
+  async function publishTypingWorker() {
     const qstash = new Client({
       token: config.qstashToken,
     });
@@ -76,7 +92,7 @@ export default defineEventHandler(async (event) => {
       },
       retries: 3,
       flowControl: {
-        key: "xp-jyutping-v2",
+        key: "xp-typing-v2",
         parallelism: 10,
       },
     });
@@ -102,10 +118,10 @@ export default defineEventHandler(async (event) => {
   if (existingEventRes.rows.length > 0) {
     const existing = existingEventRes.rows[0];
 
-    if (existing.mode !== "dojo-level-jyutping") {
+    if (!isDojoMode(existing.mode)) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid dojo jyutping event",
+        statusMessage: "Invalid dojo typing event",
       });
     }
 
@@ -120,7 +136,7 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    await publishJyutpingWorker();
+    await publishTypingWorker();
 
     return {
       session: {
@@ -133,7 +149,7 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const redisKey = `dojo:jyutping:level:${userId}:${sessionKey}`;
+  const redisKey = `dojo:typing:level:${userId}:${sessionKey}`;
   const rawSession = await redis.get<QuizSession | string>(redisKey);
 
   if (!rawSession) {
@@ -157,7 +173,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  if (session.scope !== "level" || session.mode !== "dojo-level-jyutping") {
+  if (session.scope !== "level" || !isDojoMode(session.mode)) {
     throw createError({
       statusCode: 400,
       statusMessage: "Invalid dojo session",
@@ -198,7 +214,7 @@ export default defineEventHandler(async (event) => {
   const payloadAnswers = attempts.map((attempt) => ({
     wordId: attempt.wordId,
     correct: !!attempt.passed,
-    delta: deltaFor(attempt),
+    delta: deltaFor(attempt, session.mode),
   }));
 
   const correctCount = payloadAnswers.filter((a) => a.correct).length;
@@ -273,15 +289,15 @@ export default defineEventHandler(async (event) => {
 
     const existing = racedEventRes.rows[0];
 
-    if (existing.mode !== "dojo-level-jyutping") {
+    if (!isDojoMode(existing.mode)) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid dojo jyutping event",
+        statusMessage: "Invalid dojo typing event",
       });
     }
 
     if (!existing.processed) {
-      await publishJyutpingWorker();
+      await publishTypingWorker();
     }
 
     return {
@@ -295,7 +311,7 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  await publishJyutpingWorker();
+  await publishTypingWorker();
 
   return {
     session: {

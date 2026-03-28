@@ -19,14 +19,48 @@ type LevelData = {
   categories: Record<string, VocabWord[]>;
 };
 
+type DojoVariant = "jyutping" | "chinese";
+type DojoMode = "dojo-level-jyutping" | "dojo-level-chinese";
+
 type QuizSession = {
   version: 1;
-  mode: "dojo-level-jyutping";
+  mode: DojoMode;
   scope: "level";
   slug: string;
   createdAt: string;
   allowedWordIds: string[];
 };
+
+function resolveVariant(rawVariant: string): DojoVariant {
+  if (rawVariant === "jyutping" || rawVariant === "chinese") {
+    return rawVariant;
+  }
+
+  throw createError({
+    statusCode: 400,
+    statusMessage: "Unsupported variant",
+  });
+}
+
+function resolveMode(variant: DojoVariant): DojoMode {
+  switch (variant) {
+    case "jyutping":
+      return "dojo-level-jyutping";
+    case "chinese":
+      return "dojo-level-chinese";
+  }
+}
+
+function resolveTitle(variant: DojoVariant, slug: string) {
+  const levelTitle = levelTitles[slug] ?? slug;
+
+  switch (variant) {
+    case "jyutping":
+      return `Jyutping Dojo - ${levelTitle}`;
+    case "chinese":
+      return `Chinese Dojo - ${levelTitle}`;
+  }
+}
 
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
@@ -35,6 +69,8 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const scope = String(query.scope ?? "level");
   const slug = String(query.slug ?? "");
+  const variant = resolveVariant(String(query.variant ?? "jyutping"));
+  const mode = resolveMode(variant);
 
   if (!slug) {
     throw createError({
@@ -72,7 +108,7 @@ export default defineEventHandler(async (event) => {
 
     const session: QuizSession = {
       version: 1,
-      mode: "dojo-level-jyutping",
+      mode,
       scope: "level",
       slug,
       createdAt: new Date().toISOString(),
@@ -80,7 +116,7 @@ export default defineEventHandler(async (event) => {
     };
 
     await redis.set(
-      `dojo:jyutping:level:${userId}:${sessionKey}`,
+      `dojo:typing:level:${userId}:${sessionKey}`,
       JSON.stringify(session),
       { ex: QUIZ_SESSION_TTL_SECONDS },
     );
@@ -88,9 +124,9 @@ export default defineEventHandler(async (event) => {
     return {
       sessionKey,
       session: {
-        mode: "dojo-level-jyutping" as const,
+        mode,
         level: slug,
-        title: `Jyutping Dojo - ${levelTitles[slug] ?? slug}`,
+        title: resolveTitle(variant, slug),
         totalWords: 0,
         words: [],
       },
@@ -141,7 +177,7 @@ export default defineEventHandler(async (event) => {
 
   const session: QuizSession = {
     version: 1,
-    mode: "dojo-level-jyutping",
+    mode,
     scope: "level",
     slug,
     createdAt: new Date().toISOString(),
@@ -149,7 +185,7 @@ export default defineEventHandler(async (event) => {
   };
 
   await redis.set(
-    `dojo:jyutping:level:${userId}:${sessionKey}`,
+    `dojo:typing:level:${userId}:${sessionKey}`,
     JSON.stringify(session),
     { ex: QUIZ_SESSION_TTL_SECONDS },
   );
@@ -157,9 +193,9 @@ export default defineEventHandler(async (event) => {
   return {
     sessionKey,
     session: {
-      mode: "dojo-level-jyutping" as const,
+      mode,
       level: slug,
-      title: `Jyutping Dojo - ${levelTitles[slug] ?? slug}`,
+      title: resolveTitle(variant, slug),
       totalWords: selected.length,
       words: selected.map((w) => ({
         wordId: w.id,

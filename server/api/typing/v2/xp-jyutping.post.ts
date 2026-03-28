@@ -9,6 +9,8 @@ type WorkerBody = {
   sessionKey: string;
 };
 
+type DojoMode = "dojo-level-jyutping" | "dojo-level-chinese";
+
 type PayloadAnswer = {
   wordId: string;
   correct: boolean;
@@ -29,7 +31,13 @@ type ExistingEventRow = {
   payload: StoredEventPayload | string | null;
 };
 
-function parseStoredPayload(payload: ExistingEventRow["payload"]): StoredEventPayload {
+function isDojoMode(mode: string): mode is DojoMode {
+  return mode === "dojo-level-jyutping" || mode === "dojo-level-chinese";
+}
+
+function parseStoredPayload(
+  payload: ExistingEventRow["payload"]
+): StoredEventPayload {
   if (!payload) {
     throw createError({
       statusCode: 500,
@@ -49,7 +57,7 @@ function parseStoredPayload(payload: ExistingEventRow["payload"]): StoredEventPa
 
 function rollupAnswersByWord(
   answers: PayloadAnswer[],
-  existingMap: Map<string, { xp: number; streak: number }>,
+  existingMap: Map<string, { xp: number; streak: number }>
 ) {
   const grouped = new Map<string, PayloadAnswer[]>();
 
@@ -174,7 +182,7 @@ export default defineEventHandler(async (event) => {
       limit 1
       for update
       `,
-      [userId, sessionKey],
+      [userId, sessionKey]
     );
 
     if (eventRes.rows.length === 0) {
@@ -186,10 +194,10 @@ export default defineEventHandler(async (event) => {
 
     const quizEvent = eventRes.rows[0];
 
-    if (quizEvent.mode !== "dojo-level-jyutping") {
+    if (!isDojoMode(quizEvent.mode)) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid dojo jyutping event",
+        statusMessage: "Invalid dojo typing event",
       });
     }
 
@@ -227,7 +235,7 @@ export default defineEventHandler(async (event) => {
             where user_id = $1
               and word_id = any($2::text[])
             `,
-            [userId, uniqueWordIds],
+            [userId, uniqueWordIds]
           )
         : {
             rows: [] as Array<{
@@ -244,12 +252,12 @@ export default defineEventHandler(async (event) => {
             xp: Number(row.xp ?? 0),
             streak: Number(row.streak ?? 0),
           },
-        ]),
+        ])
       );
 
       const rolledUpWordProgress = rollupAnswersByWord(
         payloadAnswers,
-        existingMap,
+        existingMap
       );
 
       if (rolledUpWordProgress.length > 0) {
@@ -305,7 +313,7 @@ export default defineEventHandler(async (event) => {
             rolledUpWordProgress.map((r) => r.streak),
             rolledUpWordProgress.map((r) => r.correctInc),
             rolledUpWordProgress.map((r) => r.wrongInc),
-          ],
+          ]
         );
       }
 
@@ -316,7 +324,7 @@ export default defineEventHandler(async (event) => {
             processed_at = now()
         where id = $1
         `,
-        [quizEvent.id],
+        [quizEvent.id]
       );
 
       await client.query("COMMIT");
@@ -329,7 +337,7 @@ export default defineEventHandler(async (event) => {
   }
 
   await redis
-    .del(`dojo:jyutping:level:${userId}:${sessionKey}`)
+    .del(`dojo:typing:level:${userId}:${sessionKey}`)
     .catch(() => {});
 
   return {
