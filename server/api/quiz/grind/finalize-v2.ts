@@ -203,46 +203,6 @@ function buildPayloadAnswers(
   });
 }
 
-// async function enqueueFinalizeJob(
-//   event: Parameters<typeof defineEventHandler>[0],
-//   job: { attemptId: string; userId: string },
-// ): Promise<void> {
-
-//   const config = useRuntimeConfig(event);
-
-//   const qstashUrl = config.qstashUrl as string | undefined;
-//   const qstashToken = config.qstashToken as string | undefined;
-//   const appBaseUrl = config.public.siteUrl as string | undefined;
-
-//   if (!qstashToken) {
-//     throw new Error("Missing qstashToken runtime config");
-//   }
-
-//   if (!appBaseUrl) {
-//     throw new Error("Missing appBaseUrl runtime config");
-//   }
-
-//   const normalizedBaseUrl = appBaseUrl.replace(/\/+$/, "");
-//   const workerUrl = `${normalizedBaseUrl}/api/worker/xp-quiz-v3`;
-//   const publishUrl = `https://qstash-us-east-1.upstash.io/v2/publish/${workerUrl}`;
-
-//   const res = await fetch(publishUrl, {
-//     method: "POST",
-//     headers: {
-//       Authorization: `Bearer ${qstashToken}`,
-//       "Content-Type": "application/json",
-//       "Upstash-Deduplication-Id": job.attemptId,
-//       "Upstash-Retries": "3",
-//     },
-//     body: JSON.stringify(job),
-//   });
-
-//   if (!res.ok) {
-//     const text = await res.text().catch(() => "");
-//     throw new Error(`QStash publish failed (${res.status}): ${text}`);
-//   }
-// }
-
 import { Client } from "@upstash/qstash";
 
 async function enqueueFinalizeJob(
@@ -275,8 +235,8 @@ async function enqueueFinalizeJob(
     deduplicationId: job.attemptId,
     flowControl: {
       key: "quiz-xp-word-progress",
-      parallelism: 5,
-      rate: 30,
+      parallelism: 20,
+      rate: 1200,
       period: "1m",
     },
   });

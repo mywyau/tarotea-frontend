@@ -20,9 +20,7 @@ type FinalizeBody = {
   attempts: SentenceBatchAttempt[];
 };
 
-type DojoMode =
-  | "dojo-level-sentences-chinese"
-  | "dojo-topic-sentences-chinese";
+type DojoMode = "dojo-level-sentences-chinese" | "dojo-topic-sentences-chinese";
 
 type QuizSession = {
   version: 1;
@@ -106,6 +104,8 @@ export default defineEventHandler(async (event) => {
       flowControl: {
         key: "xp-chinese-sentence-dojo",
         parallelism: 10,
+        rate: 600,
+        period: "1m",
       },
     });
   }
