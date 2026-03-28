@@ -10,7 +10,7 @@ import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtc
 import type { AttemptLog, DailyDecode, DailyStartResponse, EligibilityResponse, QuizState, SessionAnswer } from '~/types/daily/jyutping/types'
 
 const tips = [
-    'No need to be perfect first try.',
+    'No need to be perfect first try. Feel out the word',
     'Tones are not marked.',
     'Focus on the shape of the sound.',
     'Break the word into syllables.',
@@ -694,7 +694,7 @@ watch(
                             </div>
                         </div>
 
-                        <div class="text-xs text-gray-500 mt-2">
+                        <div class="text-xs text-gray-800 mt-2">
                             {{ totalLetters }} letters
                         </div>
                     </div>
@@ -705,7 +705,7 @@ watch(
                         Play audio
                     </button>
 
-                    <div class="text-xs text-gray-500">
+                    <div class="text-xs text-gray-800">
                         Word {{ currentIndex + 1 }} / {{ wordIds.length }}
                     </div>
 
@@ -759,7 +759,7 @@ watch(
                     <ul class="space-y-2">
 
                         <li v-for="(a, idx) in attempts" :key="idx"
-                            class="rounded-xl border border-gray-100 bg-gray-50 px-3 py-2">
+                            class="rounded-xl px-3 py-2">
 
                             <div class="flex items-center justify-between">
 

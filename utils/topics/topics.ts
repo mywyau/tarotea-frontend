@@ -218,15 +218,6 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
-    id: "food-ordering",
-    title: "Food & Ordering",
-    comingSoon: true,
-    description:
-      "Talk about food, order at restaurants, express preferences, and ask for recommendations.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
     id: "shopping",
     title: "Shopping & Services",
     comingSoon: true,
@@ -363,14 +354,6 @@ export const topics = [
     title: "News & Current Events",
     comingSoon: true,
     description: "Discuss news topics and everyday current events casually.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "food-cooking",
-    title: "Cooking & Recipes",
-    comingSoon: true,
-    description: "Describe cooking methods, ingredients, and food preparation.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
