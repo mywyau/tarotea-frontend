@@ -571,7 +571,7 @@ onMounted(async () => {
             <button
               v-if="showResult && readyForNext && currentIndex < questions.length - 1"
               @click="nextQuestion"
-              class="mt-6 w-full next-btn-blush font-medium text-black p-3 rounded-lg transition-transform duration-150 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
+              class="mt-6 w-full next-btn-blue font-medium text-black p-3 rounded-lg transition-transform duration-150 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
             >
               Next
             </button>
@@ -942,7 +942,7 @@ onMounted(async () => {
   color: transparent;
 }
 
-.next-btn-blush {
-  background: rgb(249, 166, 166);
+.next-btn-blue {
+  background: rgb(126, 147, 255);
 }
 </style>
