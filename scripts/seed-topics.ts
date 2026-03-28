@@ -17,6 +17,7 @@ const TOPICS = [
   "clothing",
   "fruits-vegetables",
   "greetings-polite",
+  "basic-verbs",
   "measure-quantities",
   "survival-essentials",
   "time-dates",

@@ -70,11 +70,13 @@ async function getOrCreateDailySession(
 
   const eligible = await db.query<{ word_id: string }>(
     `
-    select word_id
-    from user_word_progress
-    where user_id = $1
-    order by random()
-    limit $2
+      select uwp.word_id
+      from user_word_progress uwp
+      join words w
+        on w.id = uwp.word_id
+      where uwp.user_id = $1
+      order by random()
+      limit $2
     `,
     [userId, DAILY_QUESTION_COUNT],
   );
@@ -294,7 +296,7 @@ export default defineEventHandler(async (event) => {
       answeredCount: session.answered_count ?? 0,
       correctCount: session.correct_count ?? 0,
       xpEarned: session.xp_earned ?? 0,
-      totalQuestions: session.total_questions ?? questions.length,
+      totalQuestions: questions.length
     },
     questions,
   };
