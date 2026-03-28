@@ -98,7 +98,7 @@ const canEnterLevel = (level: any) => {
             Chinese only
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}`" class="level-btn level-btn-blush col-span-2">
+          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}/v2`" class="level-btn level-btn-blush col-span-2">
             Sentences Chinese Only
           </NuxtLink>
         </div>
