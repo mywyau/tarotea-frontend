@@ -9,7 +9,7 @@ interface Options {
   weakestRatio?: number
 }
 
-export function generateWeightedWordsLevel<T extends WeightedWord>(
+export function generateWeightedWords<T extends WeightedWord>(
   words: T[],
   weakestIds: string[],
   options?: Options
@@ -19,7 +19,6 @@ export function generateWeightedWordsLevel<T extends WeightedWord>(
 
   if (!words.length) return []
 
-  // No weakest words → simple random
   if (!weakestIds.length) {
     return shuffleFisherYates(words).slice(0, totalQuestions)
   }
@@ -44,7 +43,6 @@ export function generateWeightedWordsLevel<T extends WeightedWord>(
     ...nonWeakestPool.slice(0, totalQuestions - selected.length)
   )
 
-  // Fill remaining if needed
   if (selected.length < totalQuestions) {
     const remaining = shuffleFisherYates(
       words.filter(w => !selected.some(s => s.id === w.id))

@@ -23,7 +23,7 @@ import {
     stripToneToken
 } from '@/utils/jyutping/jyutping-utils'
 
-import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
+import { generateWeightedWordsLevel } from '~/utils/quiz/generateWeightedWords'
 import {
     playCorrectJingle
 } from '@/utils/sounds'

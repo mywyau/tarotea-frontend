@@ -12,7 +12,7 @@ import type {
     TrainWord
 } from '@/types/jyutping/jyutping-training-types'
 
-import { generateWeightedWordsLevel } from '@/utils/quiz/generateWeightedWordsLevel'
+import { generateWeightedWordsLevel } from '~/utils/quiz/generateWeightedWords'
 import {
     playCorrectJingle
 } from '@/utils/sounds'

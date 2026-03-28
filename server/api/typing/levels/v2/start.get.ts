@@ -3,7 +3,7 @@ import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
 import { levelTitles } from "~/utils/levels/levels";
-import { generateWeightedWordsLevel } from "~/utils/quiz/generateWeightedWordsLevel";
+import { generateWeightedWords } from "~/utils/quiz/generateWeightedWords";
 import { totalQuestions, weakestWordRatio } from "~/utils/weakestWords";
 
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
@@ -161,7 +161,7 @@ export default defineEventHandler(async (event) => {
     .sort((a, b) => a.xp - b.xp)
     .map((w) => w.id);
 
-  const selected = generateWeightedWordsLevel(allWords, weakestIds, {
+  const selected = generateWeightedWords(allWords, weakestIds, {
     totalQuestions,
     weakestRatio: weakestWordRatio,
   });

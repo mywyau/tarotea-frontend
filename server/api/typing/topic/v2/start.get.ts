@@ -2,8 +2,8 @@ import { createError, getQuery } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
-import { topicTitles } from "~/utils/topics/topics";
-import { generateWeightedWordsTopic } from "~/utils/quiz/generateWeightedWordsTopic";
+import { generateWeightedWords } from "~/utils/quiz/generateWeightedWords";
+import { topics } from "~/utils/topics/topics";
 import { totalQuestions, weakestWordRatio } from "~/utils/weakestWords";
 
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
@@ -52,7 +52,7 @@ function resolveMode(variant: DojoVariant): DojoMode {
 }
 
 function resolveTitle(variant: DojoVariant, slug: string) {
-  const topicTitle = topicTitles[slug] ?? slug;
+  const topicTitle = topics.find((topic) => topic.id === slug)?.title ?? slug;
 
   switch (variant) {
     case "jyutping":
@@ -157,7 +157,7 @@ export default defineEventHandler(async (event) => {
     .sort((a, b) => a.xp - b.xp)
     .map((w) => w.id);
 
-  const selected = generateWeightedWordsTopic(allWords, weakestIds, {
+  const selected = generateWeightedWords(allWords, weakestIds, {
     totalQuestions,
     weakestRatio: weakestWordRatio,
   });
