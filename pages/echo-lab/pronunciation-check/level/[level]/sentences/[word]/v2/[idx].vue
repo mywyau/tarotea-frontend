@@ -369,7 +369,7 @@ const tips = [
   "Speaking slightly slower may improve recognition accuracy.",
   "Pronounce each syllable clearly and confidently.",
   "Listen to the full phrase carefully before recording.",
-  "Say the phrase naturally, but not too fast.",
+  "Say the phrase naturally, but not too quickly.",
   "Check the quality of your own recording.",
   "Practice out loud before submitting to use your tokens more efficiently.",
   "Make sure the recording captures the entire phrase.",

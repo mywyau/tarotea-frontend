@@ -138,30 +138,6 @@ function clearRecordingTimer() {
   }
 }
 
-// function resetFeedback() {
-//   transcript.value = ""
-//   feedback.value = ""
-//   score.value = null
-//   aiState.value = ""
-// }
-
-// function resetRecording() {
-//   resetFeedback()
-
-//   if (recordingUrl.value) {
-//     URL.revokeObjectURL(recordingUrl.value)
-//     recordingUrl.value = null
-//   }
-
-//   audioChunks = []
-//   mediaRecorder.value = null
-//   recording.value = false
-//   loading.value = false
-//   recordingTime.value = 0
-//   clearRecordingTimer()
-//   stopTracks()
-// }
-
 async function startRecording() {
   if (!navigator.mediaDevices || !window.MediaRecorder) {
     aiState.value = "error"
@@ -390,7 +366,7 @@ const tips = [
   "Speaking slightly slower may improve recognition accuracy.",
   "Pronounce each syllable clearly and confidently.",
   "Listen to the full phrase carefully before recording.",
-  "Say the phrase naturally, but not too fast.",
+  "Say the phrase naturally, but not too quickly.",
   "Check the quality of your own recording.",
   "Practice out loud before submitting to use your tokens more efficiently.",
   "Make sure the recording captures the entire phrase.",
