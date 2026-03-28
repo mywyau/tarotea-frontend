@@ -53,14 +53,14 @@ function upgrade(plan: 'monthly' | 'yearly') {
         </p>
 
         <!-- Benefits -->
-        <ul class="text-left text-gray-700 space-y-2 max-w-sm mx-auto">
-          <li>• Learn faster with full access to all content</li>
-          <li>• Practice and check your pronuciation with 3000 Echo Lab requests per month</li>
-          <li>• Check your recall and understanding with randomised exercises and tests</li>
-          <li>• High quality audio for every word</li>
-          <li>• Neatly organised and structured content</li>
-          <li>• Practice less familiar and weakest words</li>
-          <li>• Access new topics, words and features added regularly</li>
+        <ul class="list-disc pl-5 text-left text-gray-700 space-y-2 max-w-sm mx-auto leading-relaxed">
+          <li>Learn faster with full access to all content</li>
+          <li>Practice and check your pronunciation with 3000 Echo Lab requests per month</li>
+          <li>Check your recall and understanding with randomised exercises and tests</li>
+          <li>High quality audio for every word</li>
+          <li>Neatly organised and structured content</li>
+          <li>Practice less familiar and weakest words</li>
+          <li>Access new topics, words and features added regularly</li>
         </ul>
 
         <!-- Plans -->
