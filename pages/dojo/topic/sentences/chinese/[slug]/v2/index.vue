@@ -573,12 +573,12 @@ watch(
               </div>
 
               <div
-                class="text-2xl font-medium text-gray-900 leading-relaxed no-copy"
-                @copy.prevent
-                @cut.prevent
-                @contextmenu.prevent
-                @dragstart.prevent
-                @selectstart.prevent
+                class="text-2xl font-medium text-gray-900 leading-relaxed "
+                
+                
+                
+                
+                
               >
                 {{ current?.sentence }}
               </div>

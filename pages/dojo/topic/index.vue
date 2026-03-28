@@ -146,7 +146,7 @@ const paginatedTopics = computed(() => {
           </NuxtLink>
 
           <NuxtLink
-            :to="`/dojo/topic/sentences/chinese/${quizTopic.id}`"
+            :to="`/dojo/topic/sentences/chinese/${quizTopic.id}/v2`"
             class="topic-btn topic-btn-blush col-span-2"
           >
             Sentences Chinese Only
