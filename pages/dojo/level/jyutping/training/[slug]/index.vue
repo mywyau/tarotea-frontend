@@ -23,7 +23,7 @@ import {
     stripToneToken
 } from '@/utils/jyutping/jyutping-utils'
 
-import { generateWeightedWordsLevel } from '~/utils/quiz/generateWeightedWords'
+import { generateWeightedWords } from '~/utils/quiz/generateWeightedWords'
 
 import {
     playCorrectJingle,
@@ -279,7 +279,7 @@ async function fetchWords() {
             weakestIds = []
         }
 
-        const selected = generateWeightedWordsLevel(
+        const selected = generateWeightedWords(
             allWords,
             weakestIds,
             { totalQuestions: totalQuestions, weakestRatio: weakestWordRatio }

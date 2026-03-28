@@ -12,7 +12,7 @@ import type {
     TrainWord
 } from '@/types/jyutping/jyutping-training-types'
 
-import { generateWeightedWordsLevel } from '~/utils/quiz/generateWeightedWords'
+import { generateWeightedWords } from '~/utils/quiz/generateWeightedWords'
 import {
     playCorrectJingle
 } from '@/utils/sounds'
@@ -170,7 +170,7 @@ async function fetchWords() {
             weakestIds = []
         }
 
-        const selected = generateWeightedWordsLevel(
+        const selected = generateWeightedWords(
             allWords,
             weakestIds,
             { totalQuestions: totalQuestions, weakestRatio: weakestWordRatio }
