@@ -21,12 +21,12 @@ type FinalizeBody = {
   attempts: BatchAttempt[];
 };
 
-type DojoMode = "dojo-level-jyutping" | "dojo-level-chinese";
+type DojoMode = "dojo-topic-jyutping" | "dojo-topic-chinese";
 
 type QuizSession = {
   version: 1;
   mode: DojoMode;
-  scope: "level";
+  scope: "topic";
   slug: string;
   createdAt: string;
   allowedWordIds: string[];
@@ -42,16 +42,16 @@ type ExistingEventRow = {
 };
 
 function isDojoMode(mode: string): mode is DojoMode {
-  return mode === "dojo-level-jyutping" || mode === "dojo-level-chinese";
+  return mode === "dojo-topic-jyutping" || mode === "dojo-topic-chinese";
 }
 
 function deltaFor(attempt: BatchAttempt, mode: DojoMode) {
   if (!attempt.passed) return 0;
 
   switch (mode) {
-    case "dojo-level-jyutping":
+    case "dojo-topic-jyutping":
       return attempt.hintUsed ? jyutpingXpHintUsed : jyutpingXp;
-    case "dojo-level-chinese":
+    case "dojo-topic-chinese":
       return attempt.hintUsed ? chineseXpHintUsed : chineseXp;
   }
 }
@@ -85,7 +85,7 @@ export default defineEventHandler(async (event) => {
     });
 
     await qstash.publishJSON({
-      url: `${config.public.siteUrl}/api/typing/levels/v2/xp-jyutping`,
+      url: `${config.public.siteUrl}/api/typing/topic/v2/xp-jyutping`,
       body: {
         userId,
         sessionKey,
@@ -149,7 +149,7 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const redisKey = `dojo:typing:level:${userId}:${sessionKey}`;
+  const redisKey = `dojo:typing:topic:${userId}:${sessionKey}`;
   const rawSession = await redis.get<QuizSession | string>(redisKey);
 
   if (!rawSession) {
@@ -173,7 +173,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  if (session.scope !== "level" || !isDojoMode(session.mode)) {
+  if (session.scope !== "topic" || !isDojoMode(session.mode)) {
     throw createError({
       statusCode: 400,
       statusMessage: "Invalid dojo session",
@@ -226,7 +226,7 @@ export default defineEventHandler(async (event) => {
     insert into xp_jyutping_events (
       user_id,
       mode,
-      level,
+      topic,
       session_key,
       payload,
       total_delta,

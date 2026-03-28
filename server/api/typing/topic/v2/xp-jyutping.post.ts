@@ -9,7 +9,7 @@ type WorkerBody = {
   sessionKey: string;
 };
 
-type DojoMode = "dojo-level-jyutping" | "dojo-level-chinese";
+type DojoMode = "dojo-topic-jyutping" | "dojo-topic-chinese";
 
 type PayloadAnswer = {
   wordId: string;
@@ -32,7 +32,7 @@ type ExistingEventRow = {
 };
 
 function isDojoMode(mode: string): mode is DojoMode {
-  return mode === "dojo-level-jyutping" || mode === "dojo-level-chinese";
+  return mode === "dojo-topic-jyutping" || mode === "dojo-topic-chinese";
 }
 
 function parseStoredPayload(
@@ -134,7 +134,7 @@ export default defineEventHandler(async (event) => {
   const isValid = await receiver.verify({
     signature,
     body: rawBody,
-    url: `${config.public.siteUrl}/api/typing/levels/v2/xp-jyutping`,
+    url: `${config.public.siteUrl}/api/typing/topic/v2/xp-jyutping`,
   });
 
   if (!isValid) {
@@ -337,7 +337,7 @@ export default defineEventHandler(async (event) => {
   }
 
   await redis
-    .del(`dojo:typing:level:${userId}:${sessionKey}`)
+    .del(`dojo:typing:topic:${userId}:${sessionKey}`)
     .catch(() => {});
 
   return {
