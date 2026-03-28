@@ -2,7 +2,8 @@
 
 definePageMeta({
     ssr: false,
-    middleware: ['logged-in'],
+    middleware: ['coming-soon'],
+    // middleware: ['logged-in'],
 })
 
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
