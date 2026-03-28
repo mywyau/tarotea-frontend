@@ -197,7 +197,7 @@ export default defineEventHandler(async (event) => {
     if (!isDojoMode(quizEvent.mode)) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid dojo typing event",
+        statusMessage: "Invalid topic dojo event",
       });
     }
 

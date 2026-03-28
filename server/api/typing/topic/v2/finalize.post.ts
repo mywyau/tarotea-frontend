@@ -92,7 +92,7 @@ export default defineEventHandler(async (event) => {
       },
       retries: 3,
       flowControl: {
-        key: "xp-typing-v2",
+        key: "xp-typing-topic-v2",
         parallelism: 10,
       },
     });
@@ -226,7 +226,7 @@ export default defineEventHandler(async (event) => {
     insert into xp_jyutping_events (
       user_id,
       mode,
-      topic,
+      level,
       session_key,
       payload,
       total_delta,
