@@ -655,14 +655,6 @@ watch(
           </div>
         </transition-group>
 
-        <div
-          v-if="syncPending"
-          class="rounded-xl px-4 py-3 text-sm text-gray-700"
-          style="background-color: rgba(168, 202, 224, 0.25);"
-        >
-          Your result is saved. Progress stats may update shortly.
-        </div>
-
         <div class="text-center">
           <p class="stat-label">
             Next daily unlocks in
