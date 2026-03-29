@@ -1,5 +1,3 @@
-
-
 export const freeTopics = [
   "survival-essentials",
   "greetings-polite",
@@ -61,15 +59,6 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
-    id: "time-dates",
-    title: "Time & Dates",
-    comingSoon: false,
-    description:
-      "Talk about time, days, dates, schedules, and when things happen.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
     id: "dim-sum", // new topic
     title: "Dim Sum",
     comingSoon: false,
@@ -82,6 +71,15 @@ export const topics = [
     title: "Restaurant Menu",
     comingSoon: false,
     description: "Study and learn to order your favourite dishes.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "time-dates",
+    title: "Time & Dates",
+    comingSoon: false,
+    description:
+      "Talk about time, days, dates, schedules, and when things happen.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
