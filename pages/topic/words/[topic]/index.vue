@@ -8,6 +8,7 @@ definePageMeta({
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
+import { FREE_WORD_LIMIT } from '~/config/topics-config'
 import { canAccessTopic, freeTopics } from '~/utils/topics/permissions'
 import { masteryXp } from '~/utils/xp/helpers'
 
@@ -93,8 +94,6 @@ const getStreak = (id: string) =>
 
 const isMastered = (id: string) =>
   (progressMap.value?.[id]?.xp ?? 0) >= masteryXp
-
-const FREE_WORD_LIMIT = 10
 
 const hasPaidAccess = computed(() => {
   return canAccessTopic(isLoggedIn.value, entitlement.value, topic.id)

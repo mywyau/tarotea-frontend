@@ -8,6 +8,7 @@ definePageMeta({
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
+import { FREE_LEVEL_WORD_LIMIT } from '~/config/levels-config'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
@@ -91,7 +92,7 @@ const getXp = (id: string) =>
 const isMastered = (id: string) =>
   (progressMap.value?.[id]?.xp ?? 0) >= masteryXp
 
-const FREE_WORD_LIMIT = 10
+// const FREE_WORD_LIMIT = 10
 
 function getColorFromId(id: string) {
   let hash = 0
@@ -116,7 +117,7 @@ const gatedCategories = computed(() => {
         const shouldLock =
           !isFreeLevel(levelNumber) &&
           !canAccessLevel(isLoggedIn.value, entitlement.value) &&
-          globalIndex >= FREE_WORD_LIMIT
+          globalIndex >= FREE_LEVEL_WORD_LIMIT
 
 
         globalIndex++

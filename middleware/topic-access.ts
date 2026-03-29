@@ -1,7 +1,4 @@
-import {
-  canAccessTopic,
-  freeTopics,
-} from "~/utils/topics/permissions";
+import { canAccessTopic, freeTopics } from "~/utils/topics/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return; // middleware runs on client only
@@ -9,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const topic = to.params.topic as string;
   if (!topic) return;
 
-  const { authReady, isLoggedIn, resolve, entitlement } = useMeStateV2();
+  const { isLoggedIn, resolve, entitlement } = useMeStateV2();
 
   await resolve();
 

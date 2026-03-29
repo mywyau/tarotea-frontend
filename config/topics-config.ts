@@ -1,0 +1,1 @@
+export const FREE_WORD_LIMIT = 15

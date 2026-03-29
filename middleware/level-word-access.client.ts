@@ -1,4 +1,5 @@
 import { isLevelId, levelIdToNumbers } from "@/utils/levels/levels";
+import { FREE_LEVEL_WORD_LIMIT } from "~/config/levels-config";
 import {
   canAccessLevelWord,
   isComingSoon,
@@ -6,7 +7,6 @@ import {
 } from "~/utils/levels/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
-
   if (process.server) return; // middleware runs on client only
 
   const slug = to.params.slug as string;
@@ -14,7 +14,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (!slug || !id) return;
 
-  const { authReady, isLoggedIn, entitlement, resolve } = useMeStateV2();
+  const { entitlement, resolve } = useMeStateV2();
 
   await resolve();
 
@@ -40,7 +40,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Free preview (first 10 words)
   const levels = await $fetch(`/api/index/levels/${slug}`);
   const allWords = Object.values(levels.categories).flat();
-  const freePreviewIds = allWords.slice(0, 10).map((w: any) => w.id);
+  const freePreviewIds = allWords
+    .slice(0, FREE_LEVEL_WORD_LIMIT)
+    .map((w: any) => w.id);
 
   if (freePreviewIds.includes(id)) return;
 

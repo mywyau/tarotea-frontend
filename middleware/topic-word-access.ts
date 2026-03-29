@@ -1,10 +1,5 @@
-import {
-  canAccessTopic,
-  canAccessTopicWord,
-  freeTopics,
-} from "~/utils/topics/permissions";
-
-// http://localhost:3000/topic/word/dim-sum/haa1coeng4fan2-shrimp-rice-noodle-roll
+import { FREE_WORD_LIMIT } from "~/config/topics-config";
+import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return; // middleware runs on client only
@@ -33,7 +28,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const topic = await $fetch(`/api/index/topics/${topicSlug}`);
 
   const allWords = Object.values(topic.categories).flat();
-  const freePreviewIds = allWords.slice(0, 10).map((w: any) => w.id);
+  const freePreviewIds = allWords
+    .slice(0, FREE_WORD_LIMIT)
+    .map((w: any) => w.id);
 
   if (freePreviewIds.includes(wordIdSlug)) {
     return; // allow preview
