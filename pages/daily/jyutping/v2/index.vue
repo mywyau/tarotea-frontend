@@ -786,8 +786,7 @@ watch(
             </div>
 
             <button
-              class="rounded-xl px-4 py-2 text-sm font-medium text-black hover:brightness-110 transition disabled:opacity-40"
-              style="background-color:#A8CAE0;"
+              class="next-btn-blue rounded-lg px-4 py-2 text-sm font-medium text-black hover:brightness-110 transition disabled:opacity-40"
               :disabled="attemptsLeft <= 0 || !input.trim() || solved || showNext"
               type="submit"
             >
@@ -806,8 +805,7 @@ watch(
           <button
             v-if="showNext"
             @click="nextWord"
-            class="w-full mt-3 rounded-xl px-4 py-3 text-black font-medium hover:brightness-110 transition"
-            style="background-color:#A8CAE0;"
+            class="next-btn-blue w-full mt-3 rounded-lg px-4 py-3 text-black font-medium hover:brightness-110 transition"
             type="button"
           >
             Next
@@ -970,5 +968,9 @@ watch(
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.next-btn-blue {
+  background: rgb(126, 147, 255);
 }
 </style>
