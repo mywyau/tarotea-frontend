@@ -223,7 +223,7 @@ export default defineEventHandler(async (event) => {
   let queueEnqueued = false;
 
   try {
-    const workerUrl = getWorkerUrl(event, "/api/worker/xp-jyutping");
+    const workerUrl = getWorkerUrl(event, "/api/daily/jyutping/v2/xp-worker");
     const queue = getQstashClient().queue({ queueName: XP_JYUTPING_QUEUE });
 
     const enqueueResult = await queue.enqueueJSON({

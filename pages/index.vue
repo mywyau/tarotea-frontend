@@ -94,7 +94,7 @@ const { data: stats } = await useFetch('/api/stats', {
             </div>
           </NuxtLink>
 
-          <NuxtLink to="/daily/jyutping" class="rounded-xl p-6 flex items-end
+          <NuxtLink to="/daily/jyutping/v2" class="rounded-xl p-6 flex items-end
       shadow-sm hover:shadow-md transition hover:brightness-105" style="background-color:#F6E1E1;">
             <div>
               <div class="font-semibold text-gray-900">Jyutping Daily</div>

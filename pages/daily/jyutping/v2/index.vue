@@ -330,7 +330,7 @@ async function getAuthHeaders() {
 }
 
 async function loadEligibility() {
-  const res = await $fetch<EligibilityResponse>('/api/user/stats', {
+  const res = await $fetch<EligibilityResponse>('/api/daily/jyutping/v2/stats', {
     headers: await getAuthHeaders()
   })
 
@@ -338,7 +338,7 @@ async function loadEligibility() {
 }
 
 async function loadWord(id: string) {
-  const data = await $fetch<any>(`/api/words/${id}`)
+  const data = await $fetch<any>(`/api/daily/jyutping/v2/words/${id}`)
 
   challenge.value = {
     date: new Date().toISOString().slice(0, 10),
@@ -368,7 +368,7 @@ function applyCompletedSession(session: DailyStartResponse['session']) {
 }
 
 async function fetchDailySession() {
-  return await $fetch<DailyStartResponse>('/api/daily/start', {
+  return await $fetch<DailyStartResponse>('/api/daily/jyutping/v2/start', {
     method: 'POST',
     headers: await getAuthHeaders(),
     body: {
@@ -457,7 +457,7 @@ async function finalizeDaily() {
       queued?: boolean
       alreadyCompleted?: boolean
     }
-  }>('/api/daily/jyutping/finalize', {
+  }>('/api/daily/jyutping/v2/finalize', {
     method: 'POST',
     headers: await getAuthHeaders(),
     body: {
