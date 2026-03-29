@@ -26,6 +26,8 @@ export const freeTopicsQuiz = [
   "basic-verbs",
   "fruits-vegetables",
   "clothing",
+  "dim-sum",
+  "restaurant-menu",
 ];
 
 export const freeTopicsJyutpingDojo = [
@@ -34,6 +36,8 @@ export const freeTopicsJyutpingDojo = [
   "basic-verbs",
   "fruits-vegetables",
   "clothing",
+  "dim-sum",
+  "restaurant-menu",
 ];
 
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {

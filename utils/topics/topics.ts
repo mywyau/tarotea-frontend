@@ -1,11 +1,3 @@
-export const freeTopics = [
-  "survival-essentials",
-  "greetings-polite",
-  "basic-verbs",
-  "fruits-vegetables",
-  "clothing",
-];
-
 export const topics = [
   {
     id: "survival-essentials",
@@ -50,15 +42,6 @@ export const topics = [
     quizRequiresPaid: false,
   },
   {
-    id: "measure-quantities",
-    title: "Measurements & Quantities",
-    comingSoon: false,
-    description:
-      "Describe amounts, sizes, prices, and quantities used in daily life and shopping.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
     id: "dim-sum", // new topic
     title: "Dim Sum",
     comingSoon: false,
@@ -71,6 +54,15 @@ export const topics = [
     title: "Restaurant Menu",
     comingSoon: false,
     description: "Study and learn to order your favourite dishes.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "measure-quantities",
+    title: "Measurements & Quantities",
+    comingSoon: false,
+    description:
+      "Describe amounts, sizes, prices, and quantities used in daily life and shopping.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
