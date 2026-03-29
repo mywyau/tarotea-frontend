@@ -22,6 +22,7 @@ export const patchNotes: PatchNote[] = [
       "Recreate level one content to improve audio quality and add more examples",
       "Reviewing content and fixing content mistakes.",
       "Increase number of free words to 15",
+      "Add dim sum and resturant to free quiz and typing practice",
     ],
   },
   {
