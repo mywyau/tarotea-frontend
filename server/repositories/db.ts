@@ -1,14 +1,14 @@
+import { attachDatabasePool } from "@vercel/functions";
 import pg from "pg";
-import { attachDatabasePool } from '@vercel/functions'
 
 const { Pool } = pg;
 
 export const db = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false },
-  max: 2,
+  max: 3,
   idleTimeoutMillis: 5000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 5000,
 });
 
-attachDatabasePool(db)
+attachDatabasePool(db);
