@@ -2,11 +2,7 @@
 import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
-import {
-  XP_JYUTPING_QUEUE,
-  getQstashClient,
-  getWorkerUrl,
-} from "~/server/utils/qstash/dailyJyutping";
+import { queueDailyJyutpingWorker } from "~/server/utils/qstash/dailyJyutping";
 import {
   dailyJyutpingFailXp,
   dailyJyutpingSuccessXp,
@@ -33,6 +29,7 @@ function dedupeAnswers(answers: SessionAnswer[]): SessionAnswer[] {
 
   for (const answer of answers) {
     if (!answer?.wordId) continue;
+
     if (!map.has(answer.wordId)) {
       map.set(answer.wordId, !!answer.correct);
     }
@@ -77,7 +74,6 @@ export default defineEventHandler(async (event) => {
   const sessionKey = `daily:${mode}:${sessionDate}:${userId}`;
 
   const client = await db.connect();
-  await client.query("BEGIN");
 
   let eventId: number | string | null = null;
   let totalQuestions = 0;
@@ -86,6 +82,8 @@ export default defineEventHandler(async (event) => {
   let xpEarned = 0;
 
   try {
+    await client.query("BEGIN");
+
     const sessionRes = await client.query(
       `
         select
@@ -126,6 +124,7 @@ export default defineEventHandler(async (event) => {
         },
         quizEvent: {
           sessionKey,
+          eventId: null,
           queued: false,
           alreadyCompleted: true,
         },
@@ -133,7 +132,9 @@ export default defineEventHandler(async (event) => {
     }
 
     const allowedWordIds = new Set<string>(session.word_ids ?? []);
-    const filtered = answers.filter((answer) => allowedWordIds.has(answer.wordId));
+    const filtered = answers.filter((answer) =>
+      allowedWordIds.has(answer.wordId),
+    );
 
     if (filtered.length === 0) {
       throw createError({
@@ -219,35 +220,25 @@ export default defineEventHandler(async (event) => {
     client.release();
   }
 
-  let queueMessageId: string | null = null;
-  let queueEnqueued = false;
+  let queued = false;
 
-  try {
-    const workerUrl = getWorkerUrl(event, "/api/daily/jyutping/v2/xp-worker");
-    const queue = getQstashClient().queue({ queueName: XP_JYUTPING_QUEUE });
-
-    const enqueueResult = await queue.enqueueJSON({
-      url: workerUrl,
-      body: {
+  if (eventId != null) {
+    try {
+      await queueDailyJyutpingWorker({
         eventId,
-        sessionKey,
         userId,
-      },
-    });
+        sessionKey,
+      });
 
-    queueMessageId =
-      enqueueResult && "messageId" in enqueueResult
-        ? enqueueResult.messageId
-        : null;
-
-    queueEnqueued = true;
-  } catch (error) {
-    console.error("[daily-jyutping] enqueue failed", {
-      sessionKey,
-      eventId,
-      userId,
-      error,
-    });
+      queued = true;
+    } catch (error) {
+      console.error("[daily-jyutping] publish failed", {
+        eventId,
+        userId,
+        sessionKey,
+        error,
+      });
+    }
   }
 
   return {
@@ -260,8 +251,7 @@ export default defineEventHandler(async (event) => {
     quizEvent: {
       sessionKey,
       eventId,
-      queued: queueEnqueued,
-      queueMessageId,
+      queued,
     },
   };
 });
