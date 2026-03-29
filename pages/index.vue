@@ -37,10 +37,10 @@ const { data: stats } = await useFetch('/api/stats', {
         </span>
       </NuxtLink> -->
 
-      <NuxtLink to="/topics"
+      <!-- <NuxtLink to="/topics"
         class="topic-btn-blush mt-8 inline-block font-semibold px-8 py-3 rounded-lg text-black transition-colors">
         Start Learning
-      </NuxtLink>
+      </NuxtLink> -->
     </div>
 
     <!-- Stats -->

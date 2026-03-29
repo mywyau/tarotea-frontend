@@ -440,11 +440,11 @@ onMounted(async () => {
         class="shadow p-10 rounded-lg text-center"
         style="background-color:#A8CAE0;"
       >
-        <h2 class="text-xl font-semibold mb-4">
+        <h2 class="text-xl text-black font-semibold mb-4">
           Daily Training Locked
         </h2>
 
-        <p class="text-gray-700 mb-4">
+        <p class="text-black mb-4">
           You need to have quizzed yourself on at least {{ requiredWords }} words
           to unlock Daily Training.
         </p>
@@ -456,13 +456,13 @@ onMounted(async () => {
           />
         </div>
 
-        <p class="text-sm text-gray-700 mb-6">
+        <p class="text-sm text-gray-800 font-semibold mb-6">
           {{ currentWordCount }} / {{ requiredWords }} words tested
         </p>
 
         <NuxtLink
           to="/topics/quiz"
-          class="mt-2 inline-block text-gray-800 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98]"
+          class="mt-2 inline-block text-gray-800 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98] hover:underline"
         >
           Test yourself on more words first →
         </NuxtLink>
