@@ -437,8 +437,7 @@ onMounted(async () => {
     <div v-else>
       <div
         v-if="dailyLocked"
-        class="shadow p-10 rounded-lg text-center"
-        style="background-color:#A8CAE0;"
+        class="p-10 rounded-lg text-center"
       >
         <h2 class="text-xl text-black font-semibold mb-4">
           Daily Training Locked
