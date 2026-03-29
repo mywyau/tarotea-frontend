@@ -1,4 +1,4 @@
-import type { Entitlement } from "@/composables/useMeStateV2";
+import type { Entitlement } from "~/types/auth/entitlements";
 
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {
   if (!entitlement) {
