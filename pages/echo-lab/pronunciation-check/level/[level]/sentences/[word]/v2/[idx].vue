@@ -53,7 +53,7 @@ const phraseAudioSrc = computed(() => {
   return filename ? `${cdnBase}/audio/${filename}` : null
 })
 
-const MAX_RECORDING_SECONDS = 10
+const MAX_RECORDING_SECONDS = 15
 const MAX_AUDIO_BYTES = 1_000_000
 
 const supported = ref(false)
