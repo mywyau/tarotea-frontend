@@ -18,9 +18,10 @@ export const patchNotes: PatchNote[] = [
     date: "28 March 2026",
     title: "Rearchitecture and general improvements",
     items: [
-      "Clean up more various styling and improve app stability and performance",
+      "Clean up various styling and improve app stability and performance",
       "Recreate level one content to improve audio quality and add more examples",
-      "Still continuously reviewing content and checking for errors.",
+      "Reviewing content and fixing content mistakes.",
+      "Increase number of free words to 15",
     ],
   },
   {
