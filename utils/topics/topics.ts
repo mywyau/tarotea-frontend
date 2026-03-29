@@ -217,6 +217,14 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
+    id: "hobbies-interests",
+    title: "Hobbies & Interests",
+    comingSoon: false,
+    description: "Discuss hobbies, interests, and things you enjoy doing.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "money",
     title: "Money & Payments",
     comingSoon: true,
@@ -286,14 +294,6 @@ export const topics = [
     comingSoon: true,
     description:
       "Talk about studying, classes, learning, and educational experiences.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "hobbies",
-    title: "Hobbies & Interests",
-    comingSoon: true,
-    description: "Discuss hobbies, interests, and things you enjoy doing.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
