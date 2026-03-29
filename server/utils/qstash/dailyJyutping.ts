@@ -76,7 +76,7 @@ export async function queueDailyJyutpingWorker(
   });
 
   await qstash.publishJSON({
-    url: `${runtimeConfig.public.siteUrl}/api/worker/xp-jyutping-v2`,
+    url: `${runtimeConfig.public.siteUrl}/api/daily/jyutping/v2/xp-worker`,
     body: {
       eventId: input.eventId,
       userId: input.userId,
