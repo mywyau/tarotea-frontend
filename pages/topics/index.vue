@@ -46,7 +46,7 @@ function topicLink(topic: Topic) {
   }
 }
 
-const ITEMS_PER_PAGE = 9
+const ITEMS_PER_PAGE = 12
 const currentPage = ref(1)
 
 const MAX_VISIBLE_PAGES = 3
