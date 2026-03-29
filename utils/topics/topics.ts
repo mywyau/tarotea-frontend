@@ -61,7 +61,17 @@ export const topics = [
     id: "colours",
     title: "Colours",
     comingSoon: false,
-    description: "Learn common colours and simple words for describing shades, brightness and colour style.",
+    description:
+      "Learn common colours and simple words for describing shades, brightness and colour style.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "math",
+    title: "Math",
+    comingSoon: false,
+    description:
+      "Learn common Cantonese words for school math, numbers, shapes, and measurement.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },

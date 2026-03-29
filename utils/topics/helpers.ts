@@ -67,6 +67,15 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
+    id: "math",
+    title: "Math",
+    comingSoon: false,
+    description:
+      "Learn common Cantonese words for school math, numbers, shapes, and measurement.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "measure-quantities",
     title: "Measurements & Quantities",
     comingSoon: false,
