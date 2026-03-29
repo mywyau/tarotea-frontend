@@ -58,6 +58,14 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
+    id: "colours",
+    title: "Colours",
+    comingSoon: false,
+    description: "Learn common colours and simple words for describing shades, brightness and colour style.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "measure-quantities",
     title: "Measurements & Quantities",
     comingSoon: false,
