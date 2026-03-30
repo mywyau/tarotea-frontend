@@ -35,7 +35,7 @@ const tips = [
   'Try saying it out loud before typing.'
 ]
 
-const MIN_WORDS_REQUIRED = 20
+const MIN_WORDS_REQUIRED = 100
 const MAX_ATTEMPTS = 6
 const DAILY_MODE = 'daily-jyutping'
 const TOTAL_QUESTIONS = 5
@@ -330,6 +330,7 @@ async function getAuthHeaders() {
 }
 
 async function loadEligibility() {
+
   const res = await $fetch<EligibilityResponse>('/api/daily/jyutping/v2/stats', {
     headers: await getAuthHeaders()
   })
@@ -568,10 +569,8 @@ watch(
 
 <template>
   <main class="mx-auto max-w-xl px-6 py-12">
+
     <div class="mb-6">
-      <!-- <NuxtLink to="/" class="text-black text-sm hover:underline"> -->
-        <!-- ← Back to Home -->
-      <!-- </NuxtLink> -->
       <BackLink />
     </div>
 
@@ -678,11 +677,11 @@ watch(
         </div>
 
         <p class="text-sm text-gray-700">
-          You need to see at least {{ MIN_WORDS_REQUIRED }} words before playing this quiz.
+          You need to have quizzed yourself on at least {{ MIN_WORDS_REQUIRED }} words before playing this quiz.
         </p>
 
         <p class="text-sm text-gray-500">
-          You have seen {{ seenWords }} word<span v-if="seenWords !== 1">s</span>.
+          You have quizzed yourself on {{ seenWords }} word<span v-if="seenWords !== 1">s</span>.
           {{ wordsRemaining }} more to unlock.
         </p>
 
