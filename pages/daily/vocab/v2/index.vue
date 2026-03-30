@@ -454,7 +454,7 @@ onMounted(async () => {
 
         <NuxtLink to="/topics/quiz"
           class="mt-2 inline-block text-gray-800 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98] hover:underline">
-          Test yourself on more words first →
+          Test yourself on more words →
         </NuxtLink>
       </div>
 

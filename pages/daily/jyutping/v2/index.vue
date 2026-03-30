@@ -671,8 +671,8 @@ watch(
         </div>
       </div>
 
-      <div v-else-if="state === 'locked'" class="py-8 text-center space-y-4">
-        <div class="inline-block rounded-xl px-4 py-2 text-sm font-medium text-black">
+      <div v-else-if="state === 'locked'" class="py-8 text-center space-y-6">
+        <div class="inline-block rounded-xl px-4 py-2 text-2xl font-medium text-black">
           Quiz locked
         </div>
 
@@ -685,7 +685,7 @@ watch(
           {{ wordsRemaining }} more to unlock.
         </p>
 
-        <NuxtLink to="/topics/quiz" class="inline-block rounded-xl px-4 py-3 font-medium text-black"
+        <NuxtLink to="/topics/quiz" class="inline-block rounded-lg px-4 py-3 font-medium text-black"
           style="background: rgb(249, 166, 166);">
           Explore words
         </NuxtLink>
