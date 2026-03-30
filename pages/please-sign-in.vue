@@ -19,8 +19,7 @@ definePageMeta({
       <h1 class="text-3xl font-semibold">Please sign in 🚧</h1>
 
       <p class="text-gray-600 text-sm max-w-md mx-auto">
-        Sign in to continue your Cantonese journey and unlock
-        daily exercises, quizzes, xp tracking and more.
+        Sign in to view this content and continue your journey.
       </p>
     </div>
 
