@@ -225,11 +225,11 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
-    id: "money",
-    title: "Money & Payments",
-    comingSoon: true,
+    id: "buildings-local-services",
+    title: "Buildings & Local Services",
+    comingSoon: false,
     description:
-      "Discuss prices, paying, change, costs, and money-related situations.",
+      "Learn common places, buildings, shops, and local services you find in a town or city.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
@@ -260,7 +260,6 @@ export const topics = [
     requiresPaid: false,
     quizRequiresPaid: false,
   },
-
   {
     id: "emergencies",
     title: "Emergencies & Safety",
@@ -324,32 +323,6 @@ export const topics = [
     quizRequiresPaid: false,
   },
   {
-    id: "complaints",
-    title: "Complaints & Problems",
-    comingSoon: true,
-    description: "Raise issues, complain politely, and explain problems.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "celebrations",
-    title: "Celebrations & Festivals",
-    comingSoon: true,
-    description:
-      "Talk about festivals, holidays, celebrations, and special occasions.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "culture",
-    title: "Culture & Customs",
-    comingSoon: true,
-    description:
-      "Understand cultural habits, customs, and social expectations.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
     id: "dating",
     title: "Dating & Relationships",
     comingSoon: true,
@@ -362,15 +335,6 @@ export const topics = [
     title: "News & Current Events",
     comingSoon: true,
     description: "Discuss news topics and everyday current events casually.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "travel-abroad",
-    title: "Travel Abroad",
-    comingSoon: true,
-    description:
-      "Handle airports, hotels, overseas travel, and travel-related conversations.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
