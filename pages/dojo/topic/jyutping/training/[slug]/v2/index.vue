@@ -4,8 +4,7 @@ definePageMeta({
   middleware: ['logged-in'],
 })
 
-import { nextTick } from 'vue'
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, nextTick, ref, watch, type Ref } from 'vue'
 
 import {
   baseSound,
@@ -22,9 +21,9 @@ import {
   playQuizCompleteOkaySong,
 } from '@/utils/sounds'
 
-import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
 import { jyutpingXp, jyutpingXpHintUsed } from '@/utils/dojo/xp'
 import { masteryXp } from '@/utils/xp/helpers'
+import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
 
 type TrainWord = {
   wordId: string
@@ -482,7 +481,7 @@ function playCurrentAudio() {
 
   wordAudio.value.src = src
   wordAudio.value.currentTime = 0
-  wordAudio.value.play().catch(() => {})
+  wordAudio.value.play().catch(() => { })
 }
 
 watch(
@@ -601,11 +600,13 @@ watch(
 
 <template>
   <main class="mx-auto max-w-xl px-6 pt-12 pb-28 sm:pb-12">
-    <div class="mb-6">
+    <!-- <div class="mb-6">
       <NuxtLink :to="`/dojo/topic`" class="text-black text-sm hover:underline">
         ← Back to Topic Dojo
       </NuxtLink>
-    </div>
+    </div> -->
+
+    <BackLink />
 
     <header class="space-y-4">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
@@ -617,14 +618,12 @@ watch(
       </p>
     </header>
 
-    <section
-      :class="[
-        'mt-8',
-        showCalculating || showResults || showFinalizeError
-          ? 'bg-transparent shadow-none px-0 py-2'
-          : 'rounded-2xl bg-white p-5 shadow-sm'
-      ]"
-    >
+    <section :class="[
+      'mt-8',
+      showCalculating || showResults || showFinalizeError
+        ? 'bg-transparent shadow-none px-0 py-2'
+        : 'rounded-2xl bg-white p-5 shadow-sm'
+    ]">
       <div v-if="pending" class="text-sm text-gray-600">
         Loading training words…
       </div>
@@ -634,11 +633,8 @@ watch(
           Failed to load dojo session.
         </p>
 
-        <button
-          class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-          type="button"
-          @click="restartSession"
-        >
+        <button class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+          type="button" @click="restartSession">
           Retry
         </button>
       </div>
@@ -653,9 +649,7 @@ watch(
             <div class="flex flex-wrap gap-2">
               <button
                 class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                type="button"
-                @click="restartSession"
-              >
+                type="button" @click="restartSession">
                 New session
               </button>
 
@@ -665,19 +659,11 @@ watch(
 
           <div class="rounded-2xl bg-gray-50 p-5">
             <transition name="fade-word" mode="out-in">
-              <div
-                :key="current?.wordId"
-                class="text-4xl text-center font-medium flex gap-1 leading-none"
-              >
-                <span
-                  v-for="(char, i) in chineseChars"
-                  :key="i"
-                  class="transition-all duration-200"
-                  :class="{
-                    'text-green-600 font-semibold': charStates[i] === 'correct',
-                    'text-gray-400': charStates[i] === 'idle'
-                  }"
-                >
+              <div :key="current?.wordId" class="text-4xl text-center font-medium flex gap-1 leading-none">
+                <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
+                  'text-green-600 font-semibold': charStates[i] === 'correct',
+                  'text-gray-400': charStates[i] === 'idle'
+                }">
                   {{ char }}
                 </span>
               </div>
@@ -688,37 +674,26 @@ watch(
             </div>
 
             <div class="mt-4 mb-6 min-h-[36px]">
-              <button
-                type="button"
-                @click="() => {
-                  showHint = !showHint
-                  if (showHint) hintUsedThisQuestion = true
-                }"
-                class="text-xs text-gray-500 hover:text-gray-700 transition underline"
-              >
+              <button type="button" @click="() => {
+                showHint = !showHint
+                if (showHint) hintUsedThisQuestion = true
+              }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
                 {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
               </button>
 
               <transition name="fade-word">
                 <div v-if="showHint" class="mt-2">
                   <div class="text-base font-mono break-all leading-relaxed">
-                    <span
-                      v-for="(char, i) in fullJyutping.split('')"
-                      :key="i"
-                      :class="{
-                        'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
-                        'text-gray-400': jyutpingRenderStates[i] === 'idle'
-                      }"
-                    >
+                    <span v-for="(char, i) in fullJyutping.split('')" :key="i" :class="{
+                      'text-green-600 font-semibold': jyutpingRenderStates[i] === 'correct',
+                      'text-gray-400': jyutpingRenderStates[i] === 'idle'
+                    }">
                       {{ char }}
                     </span>
                   </div>
 
-                  <button
-                    type="button"
-                    @click="copyJyutping"
-                    class="mt-2 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition"
-                  >
+                  <button type="button" @click="copyJyutping"
+                    class="mt-2 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
                     {{ copied ? '✓' : 'copy' }}
                   </button>
                 </div>
@@ -728,10 +703,8 @@ watch(
             <div class="flex items-center max-w-xs mt-2">
               <div class="w-28 mr-2">
                 <div class="h-[3px] bg-gray-200 rounded">
-                  <div
-                    class="h-[3px] bg-green-500 rounded transition-all duration-500"
-                    :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }"
-                  />
+                  <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
+                    :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                 </div>
               </div>
 
@@ -741,11 +714,9 @@ watch(
                 </span>
 
                 <transition name="xp-fall">
-                  <span
-                    v-if="xpDelta !== null"
+                  <span v-if="xpDelta !== null"
                     class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                    :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'"
-                  >
+                    :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
                     {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                   </span>
                 </transition>
@@ -757,14 +728,8 @@ watch(
                 Type here:
               </label>
 
-              <input
-                ref="inputRef"
-                v-model="input"
-                autofocus
-                autocomplete="off"
-                inputmode="text"
-                class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition"
-              />
+              <input ref="inputRef" v-model="input" autofocus autocomplete="off" inputmode="text"
+                class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition" />
             </div>
 
             <div class="h-24 sm:h-0"></div>
@@ -807,9 +772,7 @@ watch(
 
             <button
               class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-              style="background-color:#A8CAE0;"
-              @click="finalizeBatch"
-            >
+              style="background-color:#A8CAE0;" @click="finalizeBatch">
               Retry Saving Session
             </button>
           </div>
@@ -830,12 +793,8 @@ watch(
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-              <div
-                v-for="tile in completionTiles"
-                :key="tile.label"
-                class="stat-card hover:brightness-110"
-                :class="tile.className"
-              >
+              <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+                :class="tile.className">
                 <p class="stat-label">
                   {{ tile.label }}
                 </p>
@@ -849,17 +808,13 @@ watch(
             <div class="pt-2 space-y-3">
               <button
                 class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:#A8CAE0;"
-                @click="restartSession"
-              >
+                style="background-color:#A8CAE0;" @click="restartSession">
                 Play again
               </button>
 
-              <NuxtLink
-                to="/dojo/topic"
+              <NuxtLink to="/dojo/topic"
                 class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:rgba(244,205,39,0.35);"
-              >
+                style="background-color:rgba(244,205,39,0.35);">
                 Back to Topic Dojo
               </NuxtLink>
             </div>

@@ -4,19 +4,19 @@ definePageMeta({
   middleware: "logged-in",
 })
 
-import { computed, onMounted, ref, watch } from "vue"
 import { useCountdownToUtcMidnight } from "@/composables/daily/useCountdownToUtcMidnight"
 import { useXpAnimation } from "@/composables/daily/useXpAnimation"
 import {
   playCorrectJingle,
   playIncorrectJingle,
+  playQuizCompleteFailSong,
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong,
-  playQuizCompleteFailSong,
 } from "@/utils/sounds"
+import { computed, onMounted, ref, watch } from "vue"
+import type { DailyWord } from "~/types/daily/DailyItem"
 import { brandColours } from "~/utils/branding/helpers"
 import { shuffleFisherYates } from "~/utils/shuffle"
-import type { DailyWord } from "~/types/daily/DailyItem"
 
 type DailyAnswer = {
   wordId: string
@@ -418,15 +418,13 @@ onMounted(async () => {
 <template>
   <div class="max-w-xl mx-auto px-4 py-8">
     <div class="mb-6">
-      <NuxtLink to="/" class="text-black text-sm hover:underline">
-        ← Back to Home
-      </NuxtLink>
+      <!-- <NuxtLink to="/" class="text-black text-sm hover:underline"> -->
+        <!-- ← Back to Home -->
+      <!-- </NuxtLink> -->
+      <BackLink />
     </div>
 
-    <h1
-      v-if="!showCompleteView && !submitting && currentQuestion"
-      class="text-2xl font-semibold text-center mb-4"
-    >
+    <h1 v-if="!showCompleteView && !submitting && currentQuestion" class="text-2xl font-semibold text-center mb-4">
       Daily Training
     </h1>
 
@@ -435,10 +433,7 @@ onMounted(async () => {
     </div>
 
     <div v-else>
-      <div
-        v-if="dailyLocked"
-        class="p-10 rounded-lg text-center"
-      >
+      <div v-if="dailyLocked" class="p-10 rounded-lg text-center">
         <h2 class="text-xl text-black font-semibold mb-4">
           Daily Training Locked
         </h2>
@@ -449,39 +444,29 @@ onMounted(async () => {
         </p>
 
         <div class="w-full bg-gray-200 h-3 rounded-full mb-4">
-          <div
-            class="bg-purple-500 h-3 rounded-full transition-[width] duration-500 ease-out"
-            :style="{ width: `${(currentWordCount / requiredWords) * 100}%` }"
-          />
+          <div class="bg-purple-500 h-3 rounded-full transition-[width] duration-500 ease-out"
+            :style="{ width: `${(currentWordCount / requiredWords) * 100}%` }" />
         </div>
 
         <p class="text-sm text-gray-800 font-semibold mb-6">
           {{ currentWordCount }} / {{ requiredWords }} words tested
         </p>
 
-        <NuxtLink
-          to="/topics/quiz"
-          class="mt-2 inline-block text-gray-800 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98] hover:underline"
-        >
+        <NuxtLink to="/topics/quiz"
+          class="mt-2 inline-block text-gray-800 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98] hover:underline">
           Test yourself on more words first →
         </NuxtLink>
       </div>
 
       <div v-else class="relative min-h-[700px]">
-        <div
-          v-if="!showCompleteView && !submitting && currentQuestion"
-          class="flex items-center gap-3 mb-6"
-        >
+        <div v-if="!showCompleteView && !submitting && currentQuestion" class="flex items-center gap-3 mb-6">
           <div class="flex-1 bg-gray-200 rounded-lg h-3 relative overflow-hidden">
-            <div
-              :class="[
-                'h-3 rounded-lg transition-[width] duration-500 ease-out relative',
-                progressPercent > 80
-                  ? 'bg-purple-400 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
-                  : 'bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]'
-              ]"
-              :style="{ width: `${progressPercent}%` }"
-            />
+            <div :class="[
+              'h-3 rounded-lg transition-[width] duration-500 ease-out relative',
+              progressPercent > 80
+                ? 'bg-purple-400 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
+                : 'bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]'
+            ]" :style="{ width: `${progressPercent}%` }" />
           </div>
 
           <span class="text-sm text-gray-500 whitespace-nowrap">
@@ -489,37 +474,28 @@ onMounted(async () => {
           </span>
         </div>
 
-        <div
-          v-if="!showCompleteView && !submitting && currentQuestion"
-          class="py-8 rounded-2xl transition-all"
-        >
+        <div v-if="!showCompleteView && !submitting && currentQuestion" class="py-8 rounded-2xl transition-all">
           <p class="text-3xl font-medium text-center mb-2">
             {{ currentQuestion.word }}
           </p>
 
           <div class="flex flex-col items-center gap-2 mb-6">
             <div class="w-40 h-2 bg-gray-200 rounded">
-              <div
-                :class="[
-                  'h-2 bg-green-500 rounded transition-[width] duration-500 ease-out',
-                  mergingXp ? 'ring-2 ring-green-300' : ''
-                ]"
-                :style="{ width: `${Math.min((currentXp / 1000) * 100, 100)}%` }"
-              />
+              <div :class="[
+                'h-2 bg-green-500 rounded transition-[width] duration-500 ease-out',
+                mergingXp ? 'ring-2 ring-green-300' : ''
+              ]" :style="{ width: `${Math.min((currentXp / 1000) * 100, 100)}%` }" />
             </div>
 
             <div class="relative text-sm text-gray-500">
               {{ currentXp }} XP
 
               <transition name="xp-fall">
-                <span
-                  v-if="xpDelta !== null"
-                  :class="[
-                    'absolute left-full ml-2 font-semibold transition-all duration-200',
-                    xpDelta > 0 ? 'text-green-600' : 'text-red-600',
-                    mergingXp ? 'opacity-0 scale-75 -translate-y-2' : ''
-                  ]"
-                >
+                <span v-if="xpDelta !== null" :class="[
+                  'absolute left-full ml-2 font-semibold transition-all duration-200',
+                  xpDelta > 0 ? 'text-green-600' : 'text-red-600',
+                  mergingXp ? 'opacity-0 scale-75 -translate-y-2' : ''
+                ]">
                   {{ xpDelta > 0 ? `+${xpDelta}` : xpDelta }}
                 </span>
               </transition>
@@ -532,19 +508,12 @@ onMounted(async () => {
             </div>
 
             <div class="text-center">
-              <AudioButton
-                :key="currentQuestion.id"
-                :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`"
-                autoplay
-              />
+              <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay />
             </div>
           </div>
 
           <div class="grid gap-4">
-            <button
-              v-for="(option, i) in questionOptions"
-              :key="option.id"
-              :disabled="showResult || submitting"
+            <button v-for="(option, i) in questionOptions" :key="option.id" :disabled="showResult || submitting"
               @click="selectAnswer(option.meaning)"
               class="rounded-lg px-6 py-4 text-center transition-all duration-300 ease-out shadow-sm active:scale-95 hover:brightness-110 disabled:opacity-80 disabled:cursor-not-allowed"
               :style="{
@@ -556,22 +525,17 @@ onMounted(async () => {
                       : selected === option.meaning
                         ? '#FECACA'
                         : tileColors[i]
-              }"
-              :class="[
+              }" :class="[
                 showResult && option.meaning === currentQuestion.meaning && 'ring-2 ring-emerald-400',
                 showResult && selected === option.meaning && option.meaning !== currentQuestion.meaning && 'animate-shake ring-2 ring-rose-400'
-              ]"
-            >
+              ]">
               {{ option.meaning }}
             </button>
           </div>
 
           <transition name="next-fade">
-            <button
-              v-if="showResult && readyForNext && currentIndex < questions.length - 1"
-              @click="nextQuestion"
-              class="mt-6 w-full next-btn-blue font-medium text-black p-3 rounded-lg transition-transform duration-150 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]"
-            >
+            <button v-if="showResult && readyForNext && currentIndex < questions.length - 1" @click="nextQuestion"
+              class="mt-6 w-full next-btn-blue font-medium text-black p-3 rounded-lg transition-transform duration-150 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]">
               Next
             </button>
           </transition>
@@ -581,20 +545,14 @@ onMounted(async () => {
               {{ submitError }}
             </p>
 
-            <button
-              class="mt-3 px-5 py-3 rounded-lg bg-black text-white hover:opacity-90"
-              @click="submitAnswers"
-            >
+            <button class="mt-3 px-5 py-3 rounded-lg bg-black text-white hover:opacity-90" @click="submitAnswers">
               Retry finalise
             </button>
           </div>
         </div>
 
         <transition name="finalise-fade">
-          <div
-            v-if="submitting"
-            class="absolute inset-0 flex flex-col items-center justify-center text-center"
-          >
+          <div v-if="submitting" class="absolute inset-0 flex flex-col items-center justify-center text-center">
             <div class="loader mb-6"></div>
 
             <p class="text-lg font-semibold text-purple-600">
@@ -608,10 +566,7 @@ onMounted(async () => {
         </transition>
 
         <transition name="complete-fade">
-          <div
-            v-if="showCompleteView"
-            class="absolute inset-0 overflow-y-auto px-4 py-6"
-          >
+          <div v-if="showCompleteView" class="absolute inset-0 overflow-y-auto px-4 py-6">
             <div class="space-y-6">
               <transition name="card-fade" appear>
                 <div class="stat-card hero-card" :class="resultHeroClass">
@@ -633,17 +588,9 @@ onMounted(async () => {
                 </div>
               </transition>
 
-              <transition-group
-                name="card-fade"
-                tag="div"
-                class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"
-              >
-                <div
-                  v-for="tile in completionTiles"
-                  :key="tile.label"
-                  class="stat-card hover:brightness-110"
-                  :class="tile.className"
-                >
+              <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+                  :class="tile.className">
                   <p class="stat-label">
                     {{ tile.label }}
                   </p>
@@ -681,19 +628,15 @@ onMounted(async () => {
               </div>
 
               <div class="pt-2 space-y-3">
-                <NuxtLink
-                  to="/"
+                <NuxtLink to="/"
                   class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                  style="background-color:#A8CAE0;"
-                >
+                  style="background-color:#A8CAE0;">
                   Back to home
                 </NuxtLink>
 
-                <NuxtLink
-                  to="/topics/quiz"
+                <NuxtLink to="/topics/quiz"
                   class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                  style="background-color:rgba(244,205,39,0.35);"
-                >
+                  style="background-color:rgba(244,205,39,0.35);">
                   Explore more practice
                 </NuxtLink>
               </div>
@@ -701,10 +644,8 @@ onMounted(async () => {
           </div>
         </transition>
 
-        <div
-          v-if="!loading && !dailyLocked && !showCompleteView && !submitting && !currentQuestion"
-          class="text-center py-10 text-gray-500"
-        >
+        <div v-if="!loading && !dailyLocked && !showCompleteView && !submitting && !currentQuestion"
+          class="text-center py-10 text-gray-500">
           No daily questions available right now.
         </div>
       </div>
@@ -793,12 +734,10 @@ onMounted(async () => {
 }
 
 .shimmer-layer {
-  background: linear-gradient(
-    110deg,
-    transparent 25%,
-    rgba(255, 255, 255, 0.5) 50%,
-    transparent 75%
-  );
+  background: linear-gradient(110deg,
+      transparent 25%,
+      rgba(255, 255, 255, 0.5) 50%,
+      transparent 75%);
   background-size: 200% 100%;
   animation: shimmer 2.5s infinite linear;
   mix-blend-mode: overlay;
@@ -930,12 +869,10 @@ onMounted(async () => {
 .countdown-text {
   font-size: 1.75rem;
   font-weight: 600;
-  background: linear-gradient(
-    90deg,
-    #EAB8E4 0%,
-    #A8CAE0 50%,
-    #D6A3D1 100%
-  );
+  background: linear-gradient(90deg,
+      #EAB8E4 0%,
+      #A8CAE0 50%,
+      #D6A3D1 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

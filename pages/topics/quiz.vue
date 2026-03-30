@@ -92,9 +92,10 @@ onMounted(async () => {
     <main class="topics-page max-w-4xl mx-auto py-10 px-4 space-y-8">
 
         <div class="mb-6">
-            <NuxtLink :to="`/`" class="text-black text-sm hover:underline">
-                ← Home
-            </NuxtLink>
+            <!-- <NuxtLink :to="`/`" class="text-black text-sm hover:underline"> -->
+                <!-- ← Home -->
+            <!-- </NuxtLink> -->
+            <BackLink />
         </div>
 
         <!-- Intro -->

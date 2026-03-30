@@ -519,11 +519,13 @@ onMounted(() => {
 
 <template>
   <main class="mx-auto max-w-2xl px-6 py-12">
-    <div class="mb-6">
+    <!-- <div class="mb-6">
       <NuxtLink to="/dojo/level/" class="text-black text-sm hover:underline">
         ← Back to Level Dojo
       </NuxtLink>
-    </div>
+    </div> -->
+
+    <BackLink />
 
     <header class="space-y-4">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">

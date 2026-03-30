@@ -33,6 +33,8 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
     <div class="max-w-md mx-auto">
 
+      <BackLink />
+
       <!-- Card -->
       <div class="p-10 text-center space-y-6">
 

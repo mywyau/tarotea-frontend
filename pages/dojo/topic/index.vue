@@ -55,11 +55,13 @@ const paginatedTopics = computed(() => {
 
 <template>
   <main class="topics-page max-w-4xl mx-auto py-10 px-2 space-y-10">
-    <div class="mb-6">
+    <!-- <div class="mb-6">
       <NuxtLink :to="`/dojo`" class="text-black text-sm hover:underline">
         ← Dojo
       </NuxtLink>
-    </div>
+    </div> -->
+
+    <BackLink />
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
       <h1 class="font-semibold topics-heading">
@@ -72,29 +74,16 @@ const paginatedTopics = computed(() => {
 
     <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
       <div class="pagination-row flex items-center justify-center gap-1.5 sm:gap-3 max-w-full overflow-x-auto">
-        <button
-          @click="goToPage(currentPage - 1)"
-          :disabled="currentPage === 1"
-          class="pagination-arrow"
-        >
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
           ←
         </button>
 
-        <button
-          v-for="page in totalPages"
-          :key="page"
-          @click="goToPage(page)"
-          class="pagination-page"
-          :class="{ 'is-active': page === currentPage }"
-        >
+        <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="pagination-page"
+          :class="{ 'is-active': page === currentPage }">
           {{ page }}
         </button>
 
-        <button
-          @click="goToPage(currentPage + 1)"
-          :disabled="currentPage === totalPages"
-          class="pagination-arrow"
-        >
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
           →
         </button>
       </div>
@@ -105,14 +94,9 @@ const paginatedTopics = computed(() => {
     </div>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <li
-        v-for="quizTopic in paginatedTopics"
-        :key="quizTopic.id"
-        class="topic-card"
-        :class="[
-          (!canEnterTopic(quizTopic) || quizTopic.comingSoon) ? 'topic-locked' : ''
-        ]"
-      >
+      <li v-for="quizTopic in paginatedTopics" :key="quizTopic.id" class="topic-card" :class="[
+        (!canEnterTopic(quizTopic) || quizTopic.comingSoon) ? 'topic-locked' : ''
+      ]">
         <div class="space-y-2">
           <h2 class="text-lg font-semibold text-gray-900">
             {{ quizTopic.title }}
@@ -127,28 +111,17 @@ const paginatedTopics = computed(() => {
           </p>
         </div>
 
-        <div
-          v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon"
-          class="grid grid-cols-2 gap-3 pt-4"
-        >
-          <NuxtLink
-            :to="`/dojo/topic/jyutping/training/${quizTopic.id}/v2`"
-            class="topic-btn topic-btn-purple"
-          >
+        <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
+          <NuxtLink :to="`/dojo/topic/jyutping/training/${quizTopic.id}/v2`" class="topic-btn topic-btn-purple">
             Jyutping only
           </NuxtLink>
 
-          <NuxtLink
-            :to="`/dojo/topic/chinese/training/${quizTopic.id}/v2`"
-            class="topic-btn topic-btn-blue"
-          >
+          <NuxtLink :to="`/dojo/topic/chinese/training/${quizTopic.id}/v2`" class="topic-btn topic-btn-blue">
             Chinese only
           </NuxtLink>
 
-          <NuxtLink
-            :to="`/dojo/topic/sentences/chinese/${quizTopic.id}/v2`"
-            class="topic-btn topic-btn-blush col-span-2"
-          >
+          <NuxtLink :to="`/dojo/topic/sentences/chinese/${quizTopic.id}/v2`"
+            class="topic-btn topic-btn-blush col-span-2">
             Sentences Chinese Only
           </NuxtLink>
         </div>
@@ -162,7 +135,6 @@ const paginatedTopics = computed(() => {
 </template>
 
 <style scoped>
-
 .topics-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;

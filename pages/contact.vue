@@ -7,6 +7,8 @@ definePageMeta({
 <template>
   <main class="contact-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
+    <BackLink />
+
     <!-- Header -->
     <header class="text-center space-y-3">
       <h1 class="text-3xl font-semibold text-gray-900">

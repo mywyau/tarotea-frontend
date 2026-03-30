@@ -399,10 +399,14 @@ onUnmounted(() => {
 <template>
   <div class="min-h-[70vh] flex items-center justify-center p-6">
     <div class="max-w-xl w-full text-center space-y-6">
-      <div class="w-full text-left mb-6">
+      <!-- <div class="w-full text-left mb-6">
         <button @click="goBack" class="inline-flex items-center text-sm text-black hover:underline">
           ← Back
         </button>
+      </div> -->
+
+      <div class="w-full text-left mb-6">
+        <BackLink />
       </div>
 
       <h1 class="text-2xl font-bold mb-2">Echo Lab</h1>

@@ -3,20 +3,20 @@ definePageMeta({
   title: 'Coming soon · TaroTea'
 })
 
-const goBack = () => {
-  if (window.history.length > 1) {
-    window.history.back()
-  } else {
-    navigateTo('/levels')
-  }
-}
+// const goBack = () => {
+//   if (window.history.length > 1) {
+//     window.history.back()
+//   } else {
+//     navigateTo('/levels')
+//   }
+// }
 
 </script>
 
 <template>
   <main class="max-w-xl mx-auto px-4 py-20 space-y-8 text-center">
 
-    <div class="text-left">
+    <!-- <div class="text-left">
       <button
         type="button"
         @click="goBack"
@@ -24,6 +24,10 @@ const goBack = () => {
       >
         ← Back
       </button>
+    </div> -->
+
+    <div class="text-left">
+      <BackLink />
     </div>
 
     <h1 class="text-3xl text-black font-semibold">

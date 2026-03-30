@@ -133,6 +133,9 @@ onMounted(async () => {
 
 <template>
   <main class="max-w-4xl mx-auto px-4 py-16 space-y-12">
+
+    <BackLink />
+
     <div v-if="loading" class="text-center text-gray-400">
       Loading stats...
     </div>
@@ -146,17 +149,10 @@ onMounted(async () => {
         Your Stats
       </h1>
 
-      <transition-group
-        name="card-fade"
-        tag="div"
-        class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6"
-      >
-        <div
-          v-for="(stat, index) in stats"
-          :key="stat.label"
-          class="stat-card hover:brightness-110"
-          :class="`stat-${index}`"
-        >
+      <transition-group name="card-fade" tag="div"
+        class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+        <div v-for="(stat, index) in stats" :key="stat.label" class="stat-card hover:brightness-110"
+          :class="`stat-${index}`">
           <p class="stat-label">
             {{ stat.label }}
           </p>

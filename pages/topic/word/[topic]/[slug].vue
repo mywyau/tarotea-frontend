@@ -94,9 +94,11 @@ watchEffect(() => {
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
         <!-- Back link -->
-        <NuxtLink :to="`/topic/words/${topic}`" class="inline-block text-sm text-black hover:underline">
-            ← {{ formattedTopic }} Vocabulary
-        </NuxtLink>
+        <!-- <NuxtLink :to="`/topic/words/${topic}`" class="inline-block text-sm text-black hover:underline"> -->
+            <!-- ← {{ formattedTopic }} Vocabulary -->
+        <!-- </NuxtLink> -->
+
+        <BackLink />
 
         <!-- Word header -->
         <section class="text-center space-y-4 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">

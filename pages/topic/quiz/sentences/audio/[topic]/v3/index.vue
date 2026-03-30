@@ -435,9 +435,11 @@ watch(
 
 <template>
   <main class="max-w-2xl mx-auto px-4 py-16 space-y-8">
-    <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline">
+    <!-- <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline">
       ← Back to topic quizzes
-    </NuxtLink>
+    </NuxtLink> -->
+
+    <BackLink />
 
     <section class="text-center space-y-4">
       <h1 class="text-2xl font-semibold level-heading">
@@ -453,10 +455,8 @@ watch(
           Failed to load topic sentence audio quiz
         </p>
 
-        <button
-          class="next-btn-blue rounded-xl font-medium text-black px-6 py-2 hover:brightness-110"
-          @click="refresh()"
-        >
+        <button class="next-btn-blue rounded-xl font-medium text-black px-6 py-2 hover:brightness-110"
+          @click="refresh()">
           Retry
         </button>
       </div>
@@ -464,10 +464,8 @@ watch(
       <template v-else>
         <div class="flex items-center gap-3 mb-6">
           <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
-            <div
-              class="bg-purple-300 h-3 rounded-full transition-all duration-300"
-              :style="{ width: progressPercent + '%' }"
-            />
+            <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
+              :style="{ width: progressPercent + '%' }" />
           </div>
 
           <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
@@ -478,10 +476,8 @@ watch(
         <div v-if="showQuiz" class="space-y-6">
           <div class="space-y-6">
             <div class="flex flex-col items-center justify-center min-h-[80px]">
-              <div
-                class="space-y-2 transition-all duration-300"
-                :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'"
-              >
+              <div class="space-y-2 transition-all duration-300"
+                :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
                 <p class="text-2xl text-black leading-relaxed font-semibold text-center">
                   {{ question.prompt }}
                 </p>
@@ -493,20 +489,14 @@ watch(
             </div>
 
             <div class="flex items-center justify-center min-h-[72px]">
-              <AudioButton
-                v-if="question"
-                :key="question.audioKey"
-                :src="`${cdnBase}/audio/${question.audioKey}`"
-                autoplay
-              />
+              <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`"
+                autoplay />
             </div>
 
             <div class="text-center space-y-4">
               <div class="relative">
-                <div
-                  class="space-y-1"
-                  :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'"
-                >
+                <div class="space-y-1"
+                  :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
                   <p class="text-xs uppercase tracking-wide text-gray-500">
                     Target word
                   </p>
@@ -522,16 +512,12 @@ watch(
               </div>
 
               <div class="relative">
-                <div
-                  class="min-h-[50px] space-y-3 transition-all duration-300"
-                  :class="!answered && 'blur-md opacity-70 select-none'"
-                >
+                <div class="min-h-[50px] space-y-3 transition-all duration-300"
+                  :class="!answered && 'blur-md opacity-70 select-none'">
                   <div class="flex items-center justify-center gap-3">
                     <div class="w-32 h-1 bg-gray-200 rounded">
-                      <div
-                        class="h-1 bg-green-500 rounded transition-all duration-500"
-                        :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }"
-                      />
+                      <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                        :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                     </div>
 
                     <div class="relative flex items-center">
@@ -540,11 +526,9 @@ watch(
                       </span>
 
                       <transition name="xp-fall">
-                        <span
-                          v-if="xpDelta !== null"
+                        <span v-if="xpDelta !== null"
                           class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                          :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'"
-                        >
+                          :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
                           {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                         </span>
                       </transition>
@@ -561,9 +545,7 @@ watch(
             </div>
 
             <div class="grid grid-cols-1 gap-4 w-full">
-              <button
-                v-for="(option, i) in question.options"
-                :key="i"
+              <button v-for="(option, i) in question.options" :key="i"
                 class="rounded-xl flex items-center justify-center text-lg font-medium text-center p-5 select-none transition-all duration-200 ease-out shadow-sm active:scale-95"
                 :style="{
                   backgroundColor:
@@ -574,24 +556,19 @@ watch(
                         : i === selectedIndex
                           ? '#FECACA'
                           : tileColors[i]
-                }"
-                :class="[
+                }" :class="[
                   !answered && 'hover:-translate-y-1 hover:shadow-lg hover:bg-gray-50 hover:brightness-110',
                   answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
                   answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-                ]"
-                @click="answer(i)"
-              >
+                ]" @click="answer(i)">
                 {{ option }}
               </button>
             </div>
 
             <div class="h-10 mt-6">
-              <button
-                v-if="answered"
+              <button v-if="answered"
                 class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
-                @click="next"
-              >
+                @click="next">
                 Next
               </button>
             </div>
@@ -656,19 +633,15 @@ watch(
             </transition-group>
 
             <div class="pt-2 space-y-3">
-              <NuxtLink
-                :to="`/topics/quiz`"
+              <NuxtLink :to="`/topics/quiz`"
                 class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:#A8CAE0;"
-              >
+                style="background-color:#A8CAE0;">
                 Play Again
               </NuxtLink>
 
-              <NuxtLink
-                :to="`/topic/words/${slug}`"
+              <NuxtLink :to="`/topic/words/${slug}`"
                 class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:rgba(244,205,39,0.35);"
-              >
+                style="background-color:rgba(244,205,39,0.35);">
                 Back to Topic
               </NuxtLink>
             </div>

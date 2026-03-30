@@ -10,6 +10,10 @@ definePageMeta({
 <template>
   <main class="max-w-xl mx-auto px-6 py-20 text-center space-y-10">
 
+    <div class="text-left">
+      <BackLink />
+    </div>
+
     <!-- Title -->
     <div class="space-y-4">
       <h1 class="text-3xl font-semibold">Please sign in 🚧</h1>

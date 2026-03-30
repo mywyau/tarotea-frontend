@@ -173,7 +173,7 @@ async function loadQuiz() {
   resetQuizState()
 
   try {
-  
+
     const token = await getAccessToken();
 
     console.log('topic quiz token debug', {
@@ -492,9 +492,11 @@ watch(
 
 <template>
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
-    <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline">
-      ← Back to topic quizzes
-    </NuxtLink>
+    <!-- <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline"> -->
+      <!-- ← Back to topic quizzes -->
+    <!-- </NuxtLink> -->
+
+    <BackLink />
 
     <section class="text-center space-y-4">
       <h1 class="text-2xl font-semibold capitalize">

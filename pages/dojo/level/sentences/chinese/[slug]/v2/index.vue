@@ -5,17 +5,16 @@ definePageMeta({
   middleware: ['logged-in'],
 })
 
-import { nextTick } from 'vue'
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, nextTick, ref, watch, type Ref } from 'vue'
 
 import { chineseSentenceXp, chineseSentenceXpHintUsed } from '@/utils/dojo/xp'
-import { masteryXp } from '@/utils/xp/helpers'
-import { levelTitles } from '~/utils/levels/levels'
 import {
   playCorrectJingle,
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong,
 } from '@/utils/sounds'
+import { masteryXp } from '@/utils/xp/helpers'
+import { levelTitles } from '~/utils/levels/levels'
 
 type TrainSentence = {
   sentenceId: string
@@ -490,11 +489,13 @@ watch(
 
 <template>
   <main class="mx-auto max-w-2xl px-6 py-12">
-    <div class="mb-6">
+    <!-- <div class="mb-6">
       <NuxtLink to="/dojo/level/" class="text-black text-sm hover:underline">
         ← Back to Level Dojo
       </NuxtLink>
-    </div>
+    </div> -->
+
+    <BackLink />
 
     <header class="space-y-4">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
@@ -506,14 +507,12 @@ watch(
       </p>
     </header>
 
-    <section
-      :class="[
-        'mt-8',
-        showCalculating || showResults || showFinalizeError
-          ? 'bg-transparent shadow-none p-0'
-          : 'rounded-2xl bg-white p-5 shadow-sm'
-      ]"
-    >
+    <section :class="[
+      'mt-8',
+      showCalculating || showResults || showFinalizeError
+        ? 'bg-transparent shadow-none p-0'
+        : 'rounded-2xl bg-white p-5 shadow-sm'
+    ]">
       <div v-if="pending" class="text-sm text-gray-600">
         Loading training sentences…
       </div>
@@ -523,11 +522,8 @@ watch(
           Failed to load sentence dojo session.
         </p>
 
-        <button
-          class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-          type="button"
-          @click="restartSession"
-        >
+        <button class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+          type="button" @click="restartSession">
           Retry
         </button>
       </div>
@@ -541,9 +537,7 @@ watch(
 
             <button
               class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-              type="button"
-              @click="restartSession"
-            >
+              type="button" @click="restartSession">
               New session
             </button>
           </div>
@@ -564,14 +558,10 @@ watch(
             </div>
 
             <div class="mt-4 min-h-[36px]">
-              <button
-                type="button"
-                @click="() => {
-                  showHint = !showHint
-                  if (showHint) hintUsedThisQuestion = true
-                }"
-                class="text-xs text-gray-500 hover:text-gray-700 transition underline"
-              >
+              <button type="button" @click="() => {
+                showHint = !showHint
+                if (showHint) hintUsedThisQuestion = true
+              }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
                 {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
               </button>
 
@@ -581,11 +571,8 @@ watch(
                     {{ current?.jyutping }}
                   </div>
 
-                  <button
-                    type="button"
-                    @click="copyJyutping"
-                    class="mt-2 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition"
-                  >
+                  <button type="button" @click="copyJyutping"
+                    class="mt-2 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
                     {{ copied ? '✓' : 'copy' }}
                   </button>
                 </div>
@@ -601,10 +588,8 @@ watch(
               <div class="flex items-center max-w-xs">
                 <div class="w-28 mr-2">
                   <div class="h-[3px] bg-gray-200 rounded">
-                    <div
-                      class="h-[3px] bg-green-500 rounded transition-all duration-500"
-                      :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }"
-                    />
+                    <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
+                      :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                   </div>
                 </div>
 
@@ -614,11 +599,9 @@ watch(
                   </span>
 
                   <transition name="xp-fall">
-                    <span
-                      v-if="xpDelta !== null"
+                    <span v-if="xpDelta !== null"
                       class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                      :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'"
-                    >
+                      :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
                       {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                     </span>
                   </transition>
@@ -631,13 +614,8 @@ watch(
                 Type the Chinese sentence:
               </label>
 
-              <textarea
-                ref="inputRef"
-                v-model="input"
-                rows="3"
-                autocomplete="off"
-                class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition resize-none"
-              />
+              <textarea ref="inputRef" v-model="input" rows="3" autocomplete="off"
+                class="w-full rounded-2xl border-2 border-gray-300 px-4 py-4 text-xl font-mono tracking-wide outline-none focus:border-black transition resize-none" />
 
               <div class="pt-2 text-xs text-gray-500">
                 Spaces and punctuation are ignored for matching.
@@ -678,9 +656,7 @@ watch(
 
             <button
               class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-              style="background-color:#A8CAE0;"
-              @click="finalizeBatch"
-            >
+              style="background-color:#A8CAE0;" @click="finalizeBatch">
               Retry Saving Session
             </button>
           </div>
@@ -701,12 +677,8 @@ watch(
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-              <div
-                v-for="tile in completionTiles"
-                :key="tile.label"
-                class="stat-card hover:brightness-110"
-                :class="tile.className"
-              >
+              <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+                :class="tile.className">
                 <p class="stat-label">
                   {{ tile.label }}
                 </p>
@@ -720,17 +692,13 @@ watch(
             <div class="pt-2 space-y-3">
               <button
                 class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:#A8CAE0;"
-                @click="restartSession"
-              >
+                style="background-color:#A8CAE0;" @click="restartSession">
                 Play again
               </button>
 
-              <NuxtLink
-                to="/dojo/level/"
+              <NuxtLink to="/dojo/level/"
                 class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:rgba(244,205,39,0.35);"
-              >
+                style="background-color:rgba(244,205,39,0.35);">
                 Back to Level Dojo
               </NuxtLink>
             </div>

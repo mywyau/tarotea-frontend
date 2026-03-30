@@ -3,6 +3,8 @@ import { useAudioVolume } from '~/composables/useAudioVolume'
 import { useAuth } from '~/composables/useAuth'
 import { masteryXp } from '~/utils/xp/helpers'
 
+import BackLink from '~/components/BackLink.vue'
+
 
 definePageMeta({
   middleware: ['level-word-access-client'],
@@ -50,6 +52,9 @@ const isMastered = computed(() => xp.value >= masteryXp)
 
 const playbackRate = ref(1)
 
+const goBack = useGoBack()
+
+
 onMounted(async () => {
   try {
     const { getAccessToken } = await useAuth()
@@ -96,9 +101,11 @@ watchEffect(() => {
   <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
     <!-- Back link -->
-    <NuxtLink :to="`/level/${level}`" class="inline-block text-sm text-black hover:underline">
+    <!-- <NuxtLink :to="`/level/${level}`" class="inline-block text-sm text-black hover:underline">
       ← {{ formattedLevel }} Vocab
-    </NuxtLink>
+    </NuxtLink> -->
+
+    <BackLink />
 
     <!-- Word header -->
     <section class="text-center space-y-4 sm:space-y-6 word-card rounded-xl p-6 sm:p-8">

@@ -103,9 +103,13 @@ watch(aiUsage, (val) => {
 
 <template>
     <main class="min-h-[calc(100vh-56px)]">
+
         <!-- Soft page background -->
         <div class="px-4 py-14 sm:py-16">
             <div class="max-w-xl mx-auto space-y-8">
+
+                <BackLink />
+                
                 <!-- Header -->
                 <header class="space-y-2">
                     <h1 class="text-3xl font-semibold text-gray-900">Account</h1>

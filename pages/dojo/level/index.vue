@@ -35,11 +35,13 @@ const canEnterLevel = (level: any) => {
 <template>
   <main class="levels-page max-w-4xl mx-auto py-10 px-4 space-y-8">
 
-    <div class="mb-6">
+    <!-- <div class="mb-6">
       <NuxtLink :to="`/dojo`" class="text-black text-sm hover:underline">
         ← Dojo
       </NuxtLink>
-    </div>
+    </div> -->
+
+    <BackLink />
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
@@ -98,7 +100,8 @@ const canEnterLevel = (level: any) => {
             Chinese only
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}/v2`" class="level-btn level-btn-blush col-span-2">
+          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}/v2`"
+            class="level-btn level-btn-blush col-span-2">
             Sentences Chinese Only
           </NuxtLink>
         </div>

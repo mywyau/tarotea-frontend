@@ -442,7 +442,7 @@ function playAudio() {
   }
 
   audio.value.currentTime = 0
-  audio.value.play().catch(() => {})
+  audio.value.play().catch(() => { })
 }
 
 async function finalizeDaily() {
@@ -569,9 +569,10 @@ watch(
 <template>
   <main class="mx-auto max-w-xl px-6 py-12">
     <div class="mb-6">
-      <NuxtLink to="/" class="text-black text-sm hover:underline">
-        ← Back to Home
-      </NuxtLink>
+      <!-- <NuxtLink to="/" class="text-black text-sm hover:underline"> -->
+        <!-- ← Back to Home -->
+      <!-- </NuxtLink> -->
+      <BackLink />
     </div>
 
     <header v-if="state !== 'complete' && state !== 'loading'" class="space-y-3">
@@ -598,10 +599,7 @@ watch(
         {{ errorMessage }}
       </div>
 
-      <div
-        v-else-if="state === 'finalizing'"
-        class="flex flex-col items-center justify-center text-center py-10"
-      >
+      <div v-else-if="state === 'finalizing'" class="flex flex-col items-center justify-center text-center py-10">
         <div class="loader mb-6"></div>
 
         <p class="text-lg font-semibold text-purple-600">
@@ -634,17 +632,9 @@ watch(
           </div>
         </transition>
 
-        <transition-group
-          name="card-fade"
-          tag="div"
-          class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6"
-        >
-          <div
-            v-for="tile in completionTiles"
-            :key="tile.label"
-            class="stat-card hover:brightness-110"
-            :class="tile.className"
-          >
+        <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+            :class="tile.className">
             <p class="stat-label">
               {{ tile.label }}
             </p>
@@ -668,19 +658,15 @@ watch(
         </div>
 
         <div class="pt-2 space-y-3">
-          <NuxtLink
-            to="/"
+          <NuxtLink to="/"
             class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-            style="background-color:#A8CAE0;"
-          >
+            style="background-color:#A8CAE0;">
             Back to home
           </NuxtLink>
 
-          <NuxtLink
-            to="/topics/quiz"
+          <NuxtLink to="/topics/quiz"
             class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-            style="background-color:rgba(244,205,39,0.35);"
-          >
+            style="background-color:rgba(244,205,39,0.35);">
             Explore more practice
           </NuxtLink>
         </div>
@@ -700,11 +686,8 @@ watch(
           {{ wordsRemaining }} more to unlock.
         </p>
 
-        <NuxtLink
-          to="/topics/quiz"
-          class="inline-block rounded-xl px-4 py-3 font-medium text-black"
-          style="background: rgb(249, 166, 166);"
-        >
+        <NuxtLink to="/topics/quiz" class="inline-block rounded-xl px-4 py-3 font-medium text-black"
+          style="background: rgb(249, 166, 166);">
           Explore words
         </NuxtLink>
       </div>
@@ -721,18 +704,14 @@ watch(
             </div>
 
             <div class="flex gap-1 mt-2 font-mono">
-              <div
-                v-for="(letter, i) in answerLetters"
-                :key="i"
-                class="w-5 h-6 border-b flex items-end justify-center text-sm"
-                :class="[
+              <div v-for="(letter, i) in answerLetters" :key="i"
+                class="w-5 h-6 border-b flex items-end justify-center text-sm" :class="[
                   failed
                     ? 'border-red-400 text-red-500'
                     : revealedLetters[i]
                       ? 'border-green-500 text-green-600'
                       : 'border-gray-400 text-transparent'
-                ]"
-              >
+                ]">
                 {{ failed ? letter : (revealedLetters[i] ?? '•') }}
               </div>
             </div>
@@ -743,12 +722,9 @@ watch(
           </div>
 
           <div class="flex flex-col items-end gap-2">
-            <button
-              v-if="challenge.audioUrl"
+            <button v-if="challenge.audioUrl"
               class="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-              @click="playAudio"
-              type="button"
-            >
+              @click="playAudio" type="button">
               Play audio
             </button>
 
@@ -763,14 +739,8 @@ watch(
             Your answer:
           </label>
 
-          <input
-            ref="inputRef"
-            v-model="input"
-            :disabled="solved || showNext"
-            autocomplete="off"
-            inputmode="text"
-            class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400"
-          />
+          <input ref="inputRef" v-model="input" :disabled="solved || showNext" autocomplete="off" inputmode="text"
+            class="w-full rounded-xl border border-gray-200 px-4 py-3 text-base outline-none focus:border-gray-400" />
 
           <div class="flex items-center justify-between">
             <div class="text-xs text-gray-600">
@@ -779,27 +749,18 @@ watch(
 
             <button
               class="next-btn-blue rounded-lg px-4 py-2 text-sm font-medium text-black hover:brightness-110 transition disabled:opacity-40"
-              :disabled="attemptsLeft <= 0 || !input.trim() || solved || showNext"
-              type="submit"
-            >
+              :disabled="attemptsLeft <= 0 || !input.trim() || solved || showNext" type="submit">
               Submit
             </button>
           </div>
 
-          <p
-            v-if="lastAttempt"
-            class="text-sm"
-            :class="lastAttempt.passed ? 'text-emerald-700' : 'text-red-700'"
-          >
+          <p v-if="lastAttempt" class="text-sm" :class="lastAttempt.passed ? 'text-emerald-700' : 'text-red-700'">
             {{ lastAttempt.message }}
           </p>
 
-          <button
-            v-if="showNext"
-            @click="nextWord"
+          <button v-if="showNext" @click="nextWord"
             class="next-btn-blue w-full mt-3 rounded-lg px-4 py-3 text-black font-medium hover:brightness-110 transition"
-            type="button"
-          >
+            type="button">
             Next
           </button>
         </form>
@@ -810,21 +771,13 @@ watch(
           </div>
 
           <ul class="space-y-2">
-            <li
-              v-for="(a, idx) in attempts"
-              :key="idx"
-              class="rounded-xl px-3 py-2"
-            >
+            <li v-for="(a, idx) in attempts" :key="idx" class="rounded-xl px-3 py-2">
               <div class="flex items-center justify-between">
                 <div class="flex gap-1 font-mono">
-                  <div
-                    v-for="(letter, i) in a.letters"
-                    :key="i"
-                    class="w-5 h-6 border-b flex items-end justify-center text-sm"
-                    :class="a.letterStates?.[i] === 'correct'
+                  <div v-for="(letter, i) in a.letters" :key="i"
+                    class="w-5 h-6 border-b flex items-end justify-center text-sm" :class="a.letterStates?.[i] === 'correct'
                       ? 'border-green-500 text-green-600'
-                      : 'border-red-300 text-red-500'"
-                  >
+                      : 'border-red-300 text-red-500'">
                     {{ letter }}
                   </div>
                 </div>
@@ -954,9 +907,9 @@ watch(
   font-size: 1.75rem;
   font-weight: 600;
   background: linear-gradient(90deg,
-    #EAB8E4 0%,
-    #A8CAE0 50%,
-    #D6A3D1 100%);
+      #EAB8E4 0%,
+      #A8CAE0 50%,
+      #D6A3D1 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
