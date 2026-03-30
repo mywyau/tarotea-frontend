@@ -232,6 +232,22 @@ function resetQuestionUi() {
   mergingXp.value = false
 }
 
+const wordsRemaining = computed(() =>
+  Math.max(0, requiredWords.value - currentWordCount.value)
+)
+
+const unlockProgressPercent = computed(() => {
+  if (!requiredWords.value) return 0
+  return Math.min(Math.round((currentWordCount.value / requiredWords.value) * 100), 100)
+})
+
+const unlockProgressLabel = computed(() => {
+  if (unlockProgressPercent.value >= 100) return "Ready to unlock"
+  if (unlockProgressPercent.value >= 75) return "Nearly there"
+  if (unlockProgressPercent.value >= 40) return "Making progress"
+  return "Just getting started"
+})
+
 async function pollForCompletionInBackground() {
   try {
     const token = await getAccessToken()
@@ -419,7 +435,7 @@ onMounted(async () => {
   <div class="max-w-xl mx-auto px-4 py-8">
     <div class="mb-6">
       <!-- <NuxtLink to="/" class="text-black text-sm hover:underline"> -->
-        <!-- ← Back to Home -->
+      <!-- ← Back to Home -->
       <!-- </NuxtLink> -->
       <BackLink />
     </div>
@@ -433,29 +449,42 @@ onMounted(async () => {
     </div>
 
     <div v-else>
-      <div v-if="dailyLocked" class="p-10 rounded-lg text-center">
-        <h2 class="text-xl text-black font-semibold mb-4">
+      <div v-if="dailyLocked" class="py-8 text-center space-y-6">
+        <div class="inline-block rounded-xl px-4 py-2 text-2xl font-medium text-black">
           Daily Training Locked
-        </h2>
-
-        <p class="text-black mb-4">
-          You need to have quizzed yourself on at least {{ requiredWords }} words
-          to unlock Daily Training.
-        </p>
-
-        <div class="w-full bg-gray-200 h-3 rounded-full mb-4">
-          <div class="bg-purple-500 h-3 rounded-full transition-[width] duration-500 ease-out"
-            :style="{ width: `${(currentWordCount / requiredWords) * 100}%` }" />
         </div>
 
-        <p class="text-sm text-gray-800 font-semibold mb-6">
-          {{ currentWordCount }} / {{ requiredWords }} words tested
+        <p class="text-sm text-gray-600">
+          Quiz more words to unlock this daily challenge.
         </p>
 
-        <NuxtLink to="/topics/quiz"
-          class="mt-2 inline-block text-gray-800 font-semibold px-6 py-3 transition-transform duration-150 hover:scale-[1.05] active:scale-[0.98] hover:underline">
-          Test yourself on more words →
-        </NuxtLink>
+        <div class="max-w-md mx-auto text-left space-y-3">
+
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-semibold text-gray-800">
+              {{ unlockProgressLabel }}
+            </span>
+
+            <span class="text-sm font-semibold text-purple-700">
+              {{ unlockProgressPercent }}%
+            </span>
+          </div>
+
+          <div class="w-full h-3 rounded-full bg-gray-200 overflow-hidden">
+            <div class="h-3 rounded-full bg-purple-500 transition-[width] duration-500 ease-out"
+              :style="{ width: `${unlockProgressPercent}%` }" />
+          </div>
+
+          <p class="text-xs text-gray-500">
+            {{ wordsRemaining }} more word<span v-if="wordsRemaining !== 1">s</span> to unlock.
+          </p>
+        </div>
+
+        <div class="pt-2">
+          <NuxtLink to="/topics/quiz" class="inline-block rounded-lg px-4 py-3 font-medium text-black hover:underline">
+            Explore words
+          </NuxtLink>
+        </div>
       </div>
 
       <div v-else class="relative min-h-[700px]">

@@ -4,9 +4,6 @@ definePageMeta({
   middleware: ['logged-in'],
 })
 
-import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
-import { shuffleFisherYates } from '~/utils/shuffle'
-import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
 import {
   playCorrectJingle,
   playIncorrectJingle,
@@ -14,6 +11,9 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong,
 } from '@/utils/sounds'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
+import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
+import { shuffleFisherYates } from '~/utils/shuffle'
 
 import type {
   AttemptLog,
@@ -321,6 +321,18 @@ function playCompletionSound() {
     playQuizCompleteFailSong()
   }
 }
+
+const unlockProgressPercent = computed(() => {
+  if (!MIN_WORDS_REQUIRED) return 0
+  return Math.min(Math.round((seenWords.value / MIN_WORDS_REQUIRED) * 100), 100)
+})
+
+const unlockProgressLabel = computed(() => {
+  if (unlockProgressPercent.value >= 100) return 'Ready to unlock'
+  if (unlockProgressPercent.value >= 75) return 'Nearly there'
+  if (unlockProgressPercent.value >= 40) return 'Making progress'
+  return 'Just getting started'
+})
 
 async function getAuthHeaders() {
   const token = await getAccessToken()
@@ -676,19 +688,38 @@ watch(
           Quiz locked
         </div>
 
-        <p class="text-sm text-gray-700">
-          You need to have quizzed yourself on at least {{ MIN_WORDS_REQUIRED }} words before playing this quiz.
+        <p class="text-sm text-gray-600">
+          Quiz more words to unlock this daily challenge.
         </p>
 
-        <p class="text-sm text-gray-500">
-          You have quizzed yourself on {{ seenWords }} word<span v-if="seenWords !== 1">s</span>.
-          {{ wordsRemaining }} more to unlock.
-        </p>
+        <div class="max-w-md mx-auto text-left space-y-4">
 
-        <NuxtLink to="/topics/quiz" class="inline-block rounded-lg px-4 py-3 font-medium text-black"
-          style="background: rgb(249, 166, 166);">
-          Explore words
-        </NuxtLink>
+          <div class="flex items-center justify-between">
+
+            <span class="text-sm font-semibold text-gray-800">
+              {{ unlockProgressLabel }}
+            </span>
+
+            <span class="text-sm font-semibold text-purple-700">
+              {{ unlockProgressPercent }}%
+            </span>
+          </div>
+
+          <div class="w-full h-3 rounded-full bg-gray-200 overflow-hidden">
+            <div class="h-3 rounded-full bg-purple-500 transition-[width] duration-500 ease-out"
+              :style="{ width: `${unlockProgressPercent}%` }" />
+          </div>
+
+          <p class="text-xs text-gray-500">
+            {{ wordsRemaining }} more word<span v-if="wordsRemaining !== 1">s</span> to unlock.
+          </p>
+        </div>
+
+        <div class="mt-10">
+          <NuxtLink to="/topics/quiz" class="rounded-lg px-4 py-3 font-medium text-black hover:underline">
+            Explore words
+          </NuxtLink>
+        </div>
       </div>
 
       <div v-else-if="state === 'playing' && challenge" class="space-y-5">
