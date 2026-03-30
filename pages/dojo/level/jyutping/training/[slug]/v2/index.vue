@@ -599,7 +599,9 @@ watch(
       </NuxtLink>
     </div> -->
 
-    <BackLink />
+    <div class="mb-6">
+      <BackLink />
+    </div>
 
     <header class="space-y-4">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">

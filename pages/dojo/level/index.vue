@@ -41,7 +41,9 @@ const canEnterLevel = (level: any) => {
       </NuxtLink>
     </div> -->
 
-    <BackLink />
+    <div class="mb-6">
+      <BackLink />
+    </div>
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">

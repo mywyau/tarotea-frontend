@@ -574,10 +574,9 @@ onMounted(() => {
 
 <template>
   <main class="mx-auto max-w-2xl px-6 py-12">
+
     <div class="mb-6">
-      <NuxtLink to="/dojo/topic/" class="text-black text-sm hover:underline">
-        ← Back to Topic Dojo
-      </NuxtLink>
+      <BackLink />
     </div>
 
     <header class="space-y-4">

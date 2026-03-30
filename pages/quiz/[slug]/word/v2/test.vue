@@ -507,10 +507,12 @@ watch(
 
 <template>
     <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
-        <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/word/start-quiz`"
+        <!-- <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/word/start-quiz`"
             class="text-sm text-black hover:underline">
             ← Restart Quiz
-        </NuxtLink>
+        </NuxtLink> -->
+
+        <BackLink />
 
         <section class="text-center space-y-4">
             <h1 class="text-2xl font-semibold text-center level-heading">
