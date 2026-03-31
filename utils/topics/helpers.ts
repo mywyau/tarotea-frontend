@@ -295,6 +295,24 @@ export const topicJyutpingQuizMeta = [
     requiresPaid: false,
     quizRequiresPaid: true,
   },
+  {
+    id: "politics",
+    title: "Politics",
+    comingSoon: true,
+    description:
+      "Get down and serious with governenance, political terminology and views.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "onomatopoeia",
+    title: "Onomatopoeia",
+    comingSoon: true,
+    description:
+      "Get expressive with onomatopoeic expressions used for sounds, movement, feelings, and vivid everyday descriptions.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
 ];
 
 export const sortedTopicJyutpingQuizMeta = [...topicJyutpingQuizMeta].sort(
