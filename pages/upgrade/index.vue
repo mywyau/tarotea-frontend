@@ -62,7 +62,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
           <li>Practice and check your pronunciation with 3000 Echo Lab requests per month</li>
           <li>High quality audio for every word</li>
           <li>Neatly organised and structured content</li>
-          <li>Increase expose to unseen and less frequently visited words via our xp system</li>
+          <li>Increase exposure to unseen and less frequently visited words via our xp system</li>
           <li>Access new topics, words and features added regularly</li>
         </ul>
 
