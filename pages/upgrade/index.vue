@@ -63,7 +63,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
           <li>High quality audio for every word</li>
           <li>Neatly organised and structured content</li>
           <li>Increase exposure to unseen and less frequently visited words via our xp system</li>
-          <li>Access new topics, words and features</li>
+          <li>Access new topics, words and features added regularly</li>
         </ul>
 
         <!-- Plans -->
