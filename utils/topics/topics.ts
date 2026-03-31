@@ -278,6 +278,15 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
+    id: "plants-gardening",
+    title: "Plants and Gardening",
+    comingSoon: false,
+    description:
+      "Learn common Cantonese words for plants, flowers, trees, leaves, and other nature-related vocabulary.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "directions",
     title: "Directions & Locations",
     comingSoon: true,
