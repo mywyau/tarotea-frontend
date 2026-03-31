@@ -234,6 +234,15 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
+    id: "business",
+    title: "Business",
+    comingSoon: false,
+    description:
+      "Learn common words for business, companies, office work, meetings, sales, and professional communication.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "shopping",
     title: "Shopping & Services",
     comingSoon: true,
