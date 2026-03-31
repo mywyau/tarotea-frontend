@@ -269,13 +269,22 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
+    id: "news-media",
+    title: "News & Media",
+    comingSoon: false,
+    description:
+      "Learn common words used in news, media, and online content, including reporting, journalism, and digital platforms.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
     id: "directions",
     title: "Directions & Locations",
     comingSoon: true,
     description:
       "Ask for directions, describe locations, and navigate places confidently.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "emergencies",
@@ -284,7 +293,7 @@ export const topicJyutpingQuizMeta = [
     description:
       "Handle urgent situations, ask for help, and explain problems clearly.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "phone-internet",
@@ -293,7 +302,7 @@ export const topicJyutpingQuizMeta = [
     description:
       "Use phone-related language, internet services, and digital communication.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "appointments",
@@ -302,7 +311,7 @@ export const topicJyutpingQuizMeta = [
     description:
       "Make appointments, arrange meetings, and talk about availability.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "school-education",
@@ -311,7 +320,7 @@ export const topicJyutpingQuizMeta = [
     description:
       "Talk about studying, classes, learning, and educational experiences.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "entertainment",
@@ -320,7 +329,7 @@ export const topicJyutpingQuizMeta = [
     description:
       "Discuss movies, TV shows, music, and entertainment preferences.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "social-media",
@@ -329,7 +338,7 @@ export const topicJyutpingQuizMeta = [
     description:
       "Talk about social platforms, posting, messaging, and online habits.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "opinions",
@@ -337,7 +346,7 @@ export const topicJyutpingQuizMeta = [
     comingSoon: true,
     description: "Express likes, dislikes, opinions, and personal preferences.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "dating",
@@ -345,15 +354,7 @@ export const topicJyutpingQuizMeta = [
     comingSoon: true,
     description: "Talk about dating, relationships, and social connections.",
     requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "news",
-    title: "News & Current Events",
-    comingSoon: true,
-    description: "Discuss news topics and everyday current events casually.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "slang",
@@ -361,7 +362,7 @@ export const topicJyutpingQuizMeta = [
     comingSoon: true,
     description: "Learn slang used in everyday life and in real situations.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
 ];
 

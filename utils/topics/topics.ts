@@ -263,7 +263,17 @@ export const topics = [
     id: "landforms-natural-disasters",
     title: "Landforms & Natural Disasters",
     comingSoon: false,
-    description: "Learn words for mountains, valleys, rivers, volcanoes, earthquakes, floods, and other natural features and disasters.",
+    description:
+      "Learn words for mountains, valleys, rivers, volcanoes, earthquakes, floods, and other natural features and disasters.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "news-media",
+    title: "News & Media",
+    comingSoon: true,
+    description:
+      "Learn common words used in news, media, and online content, including reporting, journalism, and digital platforms.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
@@ -274,7 +284,7 @@ export const topics = [
     description:
       "Ask for directions, describe locations, and navigate places confidently.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "emergencies",
@@ -283,7 +293,7 @@ export const topics = [
     description:
       "Handle urgent situations, ask for help, and explain problems clearly.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "phone-internet",
@@ -292,7 +302,7 @@ export const topics = [
     description:
       "Use phone-related language, internet services, and digital communication.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "appointments",
@@ -301,7 +311,7 @@ export const topics = [
     description:
       "Make appointments, arrange meetings, and talk about availability.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "school-education",
@@ -310,7 +320,7 @@ export const topics = [
     description:
       "Talk about studying, classes, learning, and educational experiences.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "entertainment",
@@ -319,7 +329,7 @@ export const topics = [
     description:
       "Discuss movies, TV shows, music, and entertainment preferences.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "social-media",
@@ -328,7 +338,7 @@ export const topics = [
     description:
       "Talk about social platforms, posting, messaging, and online habits.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "opinions",
@@ -336,7 +346,7 @@ export const topics = [
     comingSoon: true,
     description: "Express likes, dislikes, opinions, and personal preferences.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "dating",
@@ -344,15 +354,7 @@ export const topics = [
     comingSoon: true,
     description: "Talk about dating, relationships, and social connections.",
     requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "news",
-    title: "News & Current Events",
-    comingSoon: true,
-    description: "Discuss news topics and everyday current events casually.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "slang",
@@ -360,7 +362,7 @@ export const topics = [
     comingSoon: true,
     description: "Learn slang used in everyday life and in real situations.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
 ];
 
