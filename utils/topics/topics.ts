@@ -271,7 +271,7 @@ export const topics = [
   {
     id: "news-media",
     title: "News & Media",
-    comingSoon: true,
+    comingSoon: false,
     description:
       "Learn common words used in news, media, and online content, including reporting, journalism, and digital platforms.",
     requiresPaid: false,
