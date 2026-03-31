@@ -249,16 +249,16 @@ export const topicJyutpingQuizMeta = [
     description:
       "Talk about jobs, roles, and what people do for work.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
-    id: "shopping",
-    title: "Shopping & Services",
-    comingSoon: true,
+    id: "gemstones-jewellery",
+    title: "Gemstones & Jewellery",
+    comingSoon: false,
     description:
-      "Shop for items, ask for help, compare options, and use everyday services.",
+      "Study jewellery, gemstones, precious materials, and accessories used in shopping and everyday conversation.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "directions",

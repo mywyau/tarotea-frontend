@@ -246,10 +246,18 @@ export const topics = [
     id: "jobs-professions",
     title: "Jobs & Professions",
     comingSoon: false,
-    description:
-      "Talk about jobs, roles, and what people do for work.",
+    description: "Talk about jobs, roles, and what people do for work.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "gemstones-jewellery",
+    title: "Gemstones & Jewellery",
+    comingSoon: false,
+    description:
+      "Study jewellery, gemstones, precious materials, and accessories used in shopping and everyday conversation.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "shopping",
