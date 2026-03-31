@@ -586,7 +586,7 @@ watch(
       <BackLink />
     </div>
 
-    <header v-if="state !== 'complete' && state !== 'loading'" class="space-y-3">
+    <header v-if="state !== 'complete' && state !== 'loading' && state !== 'locked'" class="space-y-3">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
         Daily Jyutping Challenge
       </h1>
@@ -685,7 +685,7 @@ watch(
 
       <div v-else-if="state === 'locked'" class="py-8 text-center space-y-6">
         <div class="inline-block rounded-xl px-4 py-2 text-2xl font-medium text-black">
-          Quiz locked
+          Daily Jyutping Challenge locked
         </div>
 
         <p class="text-sm text-gray-600">
