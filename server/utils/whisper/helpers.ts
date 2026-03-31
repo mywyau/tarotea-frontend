@@ -103,7 +103,7 @@ export function buildResult(params: {
       score: 0,
       matchType: "wrong-language",
       confidence,
-      feedback: `I think I heard English or Latin letters: '${params.transcript}' in your attempt. or nothing at all. Please try again and say the Cantonese ${unit} only.`,
+      feedback: `I'm not sure if I heard anything or I heard English or Latin letters. Please try again and say the Cantonese ${unit} only.`,
     };
   }
 
