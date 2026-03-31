@@ -243,20 +243,20 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
+    id: "jobs-professions",
+    title: "Jobs & Professions",
+    comingSoon: false,
+    description:
+      "Talk about jobs, roles, and what people do for work.",
+    requiresPaid: false,
+    quizRequiresPaid: false,
+  },
+  {
     id: "shopping",
     title: "Shopping & Services",
     comingSoon: true,
     description:
       "Shop for items, ask for help, compare options, and use everyday services.",
-    requiresPaid: false,
-    quizRequiresPaid: false,
-  },
-  {
-    id: "professions",
-    title: "Work & Professions",
-    comingSoon: true,
-    description:
-      "Talk about jobs, workplaces, roles, and what people do for work.",
     requiresPaid: false,
     quizRequiresPaid: false,
   },
