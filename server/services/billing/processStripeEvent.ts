@@ -1,5 +1,7 @@
 import type Stripe from "stripe";
 import { db } from "~/server/repositories/db";
+import { getBillingSubscriptionByStripeSubscriptionId } from "~/server/services/billing/getBillingSubscriptionByStripeSubscriptionId";
+import { syncEntitlementFromBillingSubscription } from "~/server/services/billing/syncEntitlementFromBillingSubscription";
 import { upsertBillingSubscription } from "~/server/services/billing/upsertBillingSubscription";
 
 type ProcessStripeEventResult =
@@ -112,7 +114,19 @@ export async function processStripeEvent(
 
     if (isSubscriptionEventType(eventType)) {
       const subscription = stripeEvent.data.object as Stripe.Subscription;
+
       await upsertBillingSubscription(subscription);
+
+      const billingSubscription =
+        await getBillingSubscriptionByStripeSubscriptionId(subscription.id);
+
+      if (!billingSubscription) {
+        throw new Error(
+          `Billing subscription not found after upsert: ${subscription.id}`,
+        );
+      }
+
+      await syncEntitlementFromBillingSubscription(billingSubscription);
     }
 
     await markStripeEventProcessed(eventId);
