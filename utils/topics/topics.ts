@@ -260,13 +260,12 @@ export const topics = [
     quizRequiresPaid: true,
   },
   {
-    id: "shopping",
-    title: "Shopping & Services",
-    comingSoon: true,
-    description:
-      "Shop for items, ask for help, compare options, and use everyday services.",
+    id: "landforms-natural-disasters",
+    title: "Landforms & Natural Disasters",
+    comingSoon: false,
+    description: "Learn words for mountains, valleys, rivers, volcanoes, earthquakes, floods, and other natural features and disasters.",
     requiresPaid: false,
-    quizRequiresPaid: false,
+    quizRequiresPaid: true,
   },
   {
     id: "directions",

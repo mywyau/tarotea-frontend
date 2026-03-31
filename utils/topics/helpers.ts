@@ -246,8 +246,7 @@ export const topicJyutpingQuizMeta = [
     id: "jobs-professions",
     title: "Jobs & Professions",
     comingSoon: false,
-    description:
-      "Talk about jobs, roles, and what people do for work.",
+    description: "Talk about jobs, roles, and what people do for work.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
@@ -257,6 +256,15 @@ export const topicJyutpingQuizMeta = [
     comingSoon: false,
     description:
       "Study jewellery, gemstones, precious materials, and accessories used in shopping and everyday conversation.",
+    requiresPaid: false,
+    quizRequiresPaid: true,
+  },
+  {
+    id: "landforms-natural-disasters",
+    title: "Landforms & Natural Disasters",
+    comingSoon: false,
+    description:
+      "Learn words for mountains, valleys, rivers, volcanoes, earthquakes, floods, and other natural features and disasters.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
