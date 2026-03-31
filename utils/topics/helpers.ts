@@ -287,89 +287,11 @@ export const topicJyutpingQuizMeta = [
     quizRequiresPaid: true,
   },
   {
-    id: "directions",
-    title: "Directions & Locations",
+    id: "music",
+    title: "Music and Instruments",
     comingSoon: true,
     description:
-      "Ask for directions, describe locations, and navigate places confidently.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "emergencies",
-    title: "Emergencies & Safety",
-    comingSoon: true,
-    description:
-      "Handle urgent situations, ask for help, and explain problems clearly.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "phone-internet",
-    title: "Phone & Internet",
-    comingSoon: true,
-    description:
-      "Use phone-related language, internet services, and digital communication.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "appointments",
-    title: "Appointments & Scheduling",
-    comingSoon: true,
-    description:
-      "Make appointments, arrange meetings, and talk about availability.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "school-education",
-    title: "School & Education",
-    comingSoon: true,
-    description:
-      "Talk about studying, classes, learning, and educational experiences.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "entertainment",
-    title: "Movies, TV & Entertainment",
-    comingSoon: true,
-    description:
-      "Discuss movies, TV shows, music, and entertainment preferences.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "social-media",
-    title: "Social Media & Online Life",
-    comingSoon: true,
-    description:
-      "Talk about social platforms, posting, messaging, and online habits.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "opinions",
-    title: "Opinions & Preferences",
-    comingSoon: true,
-    description: "Express likes, dislikes, opinions, and personal preferences.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "dating",
-    title: "Dating & Relationships",
-    comingSoon: true,
-    description: "Talk about dating, relationships, and social connections.",
-    requiresPaid: false,
-    quizRequiresPaid: true,
-  },
-  {
-    id: "slang",
-    title: "Slang",
-    comingSoon: true,
-    description: "Learn slang used in everyday life and in real situations.",
+      "Study you favourite music genres, instruments and all things music.",
     requiresPaid: false,
     quizRequiresPaid: true,
   },
