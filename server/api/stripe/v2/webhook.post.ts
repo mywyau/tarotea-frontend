@@ -1,7 +1,6 @@
-// server/api/stripe/webhook-v2.post.ts
-
 import { createError, getHeader, readRawBody } from "h3";
 import Stripe from "stripe";
+import { enqueueStripeEventJob } from "~/server/services/billing/stripeEnqueueHelper";
 import { insertStripeEvent } from "~/server/services/billing/stripeEventRepository";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -9,7 +8,6 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-
 
 export default defineEventHandler(async (event) => {
   const requestId = crypto.randomUUID();
@@ -69,17 +67,27 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    console.log("[STRIPE_V2] Event stored", {
+    await enqueueStripeEventJob(event, {
+      eventId: stripeEvent.id,
+      stripeSubscriptionId: result.stripeSubscriptionId,
+      stripeCustomerId: result.stripeCustomerId,
+    });
+
+    console.log("[STRIPE_V2] Event stored and queued", {
       requestId,
       eventId: stripeEvent.id,
       eventType: stripeEvent.type,
+      stripeSubscriptionId: result.stripeSubscriptionId,
+      stripeCustomerId: result.stripeCustomerId,
+      userId: result.userId,
     });
 
     return {
       received: true,
+      queued: true,
     };
   } catch (error) {
-    console.error("[STRIPE_V2] Failed to persist Stripe event", {
+    console.error("[STRIPE_V2] Failed to persist or queue Stripe event", {
       requestId,
       eventId: stripeEvent.id,
       eventType: stripeEvent.type,
@@ -88,7 +96,7 @@ export default defineEventHandler(async (event) => {
 
     throw createError({
       statusCode: 500,
-      statusMessage: "Failed to persist Stripe event",
+      statusMessage: "Failed to persist or queue Stripe event",
     });
   }
 });
