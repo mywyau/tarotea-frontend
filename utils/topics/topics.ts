@@ -289,7 +289,7 @@ export const topics = [
   {
     id: "music",
     title: "Music and Instruments",
-    comingSoon: true,
+    comingSoon: false,
     description:
       "Study you favourite music genres, instruments and all things music.",
     requiresPaid: false,

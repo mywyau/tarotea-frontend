@@ -9,11 +9,6 @@ definePageMeta({
 <template>
   <main class="max-w-3xl mx-auto py-20 px-6 space-y-10">
 
-    <!-- Back -->
-    <!-- <NuxtLink to="/" class="inline-block text-sm text-black hover:underline"> -->
-      <!-- ← Home -->
-    <!-- </NuxtLink> -->
-
     <BackLink />
 
     <!-- Header -->
