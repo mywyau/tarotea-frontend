@@ -44,7 +44,7 @@ export async function enqueueStripeEventJob(
     flowControl: {
       key: flowKey,
       parallelism: 1,
-      rate: 300,
+      rate: 120,
       period: "1m",
     },
   });
