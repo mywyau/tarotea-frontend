@@ -176,11 +176,6 @@ async function loadQuiz() {
 
     const token = await getAccessToken();
 
-    console.log('topic quiz token debug', {
-      type: typeof token,
-      token,
-    })
-
     const res = await $fetch<TopicQuizPayload>(
       `/api/topic/quiz/${topicSlug.value}`,
       {
