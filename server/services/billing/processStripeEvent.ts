@@ -1,6 +1,7 @@
 import type Stripe from "stripe";
 import { db } from "~/server/repositories/db";
 import { getBillingSubscriptionByStripeSubscriptionId } from "~/server/services/billing/getBillingSubscriptionByStripeSubscriptionId";
+import { stripe } from "~/server/services/billing/stripeClient";
 import { syncEntitlementFromBillingSubscription } from "~/server/services/billing/syncEntitlementFromBillingSubscription";
 import { upsertBillingSubscription } from "~/server/services/billing/upsertBillingSubscription";
 
@@ -108,6 +109,73 @@ function isSubscriptionEventType(eventType: string): boolean {
   }
 }
 
+function isInvoiceEventType(eventType: string): boolean {
+  switch (eventType) {
+    case "invoice.paid":
+    case "invoice.payment_failed":
+      return true;
+    default:
+      return false;
+  }
+}
+
+function extractSubscriptionIdFromInvoice(invoice: Stripe.Invoice): string | null {
+  
+  if (typeof invoice.subscription === "string") {
+    return invoice.subscription;
+  }
+
+  const parent = invoice.parent as
+    | {
+        type?: string;
+        subscription_details?: { subscription?: string };
+      }
+    | undefined;
+
+  if (
+    parent?.type === "subscription_details" &&
+    typeof parent.subscription_details?.subscription === "string"
+  ) {
+    return parent.subscription_details.subscription;
+  }
+
+  const firstLine = invoice.lines?.data?.[0] as
+    | {
+        parent?: {
+          subscription_item_details?: {
+            subscription?: string;
+          };
+        };
+      }
+    | undefined;
+
+  if (
+    typeof firstLine?.parent?.subscription_item_details?.subscription ===
+    "string"
+  ) {
+    return firstLine.parent.subscription_item_details.subscription;
+  }
+
+  return null;
+}
+
+async function reconcileSubscriptionById(stripeSubscriptionId: string) {
+  const subscription = await stripe.subscriptions.retrieve(stripeSubscriptionId);
+
+  await upsertBillingSubscription(subscription);
+
+  const billingSubscription =
+    await getBillingSubscriptionByStripeSubscriptionId(stripeSubscriptionId);
+
+  if (!billingSubscription) {
+    throw new Error(
+      `Billing subscription not found after upsert: ${stripeSubscriptionId}`,
+    );
+  }
+
+  await syncEntitlementFromBillingSubscription(billingSubscription);
+}
+
 export async function processStripeEvent(
   eventId: string,
 ): Promise<ProcessStripeEventResult> {
@@ -171,19 +239,20 @@ export async function processStripeEvent(
 
     if (isSubscriptionEventType(eventType)) {
       const subscription = stripeEvent.data.object as Stripe.Subscription;
+      await reconcileSubscriptionById(subscription.id);
+    }
 
-      await upsertBillingSubscription(subscription);
+    if (isInvoiceEventType(eventType)) {
+      const invoice = stripeEvent.data.object as Stripe.Invoice;
+      const stripeSubscriptionId = extractSubscriptionIdFromInvoice(invoice);
 
-      const billingSubscription =
-        await getBillingSubscriptionByStripeSubscriptionId(subscription.id);
-
-      if (!billingSubscription) {
+      if (!stripeSubscriptionId) {
         throw new Error(
-          `Billing subscription not found after upsert: ${subscription.id}`,
+          `Could not extract subscription id from invoice event ${eventId}`,
         );
       }
 
-      await syncEntitlementFromBillingSubscription(billingSubscription);
+      await reconcileSubscriptionById(stripeSubscriptionId);
     }
 
     await markStripeEventProcessed(eventId);
