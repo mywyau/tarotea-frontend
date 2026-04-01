@@ -58,8 +58,25 @@ async function checkBillingStatus() {
       return
     }
 
-    if (status.value !== "delayed") {
-      status.value = "loading"
+    if (data.isActivating) {
+      if (status.value !== "delayed") {
+        status.value = "loading"
+      }
+      return
+    }
+
+    // not active and not activating = stop polling and show fallback
+    status.value = "error"
+    errorMessage.value = "No active subscription was found for this account."
+
+    if (intervalId) {
+      clearInterval(intervalId)
+      intervalId = null
+    }
+
+    if (delayedTimer) {
+      clearTimeout(delayedTimer)
+      delayedTimer = null
     }
   } catch (error: any) {
     console.error("Failed to load billing status", error)
