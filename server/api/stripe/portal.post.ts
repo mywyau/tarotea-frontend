@@ -1,24 +1,44 @@
-import Stripe from "stripe";
+// server/api/stripe/portal.post.ts
 
-// import Stripe from 'stripe'
+import { createError } from "h3";
+import { stripe } from "~/server/services/billing/stripeClient";
 import { getAuthenticatedUserFromDB } from "~/server/utils/getAuthenticatedUserFromDB";
 
+function getAppUrl(): string {
+  const appUrl = process.env.APP_URL?.trim();
+
+  if (!appUrl) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "APP_URL is not configured",
+    });
+  }
+
+  return appUrl.replace(/\/+$/, "");
+}
+
 export default defineEventHandler(async (event) => {
-  const config = useRuntimeConfig();
-
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: "2023-10-16",
-  });
-
   const user = await getAuthenticatedUserFromDB(event);
 
-  if (!user?.stripeCustomerId) {
-    throw createError({ statusCode: 401 });
+  if (!user) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+    });
   }
+
+  if (!user.stripeCustomerId) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "No Stripe customer found for user",
+    });
+  }
+
+  const appUrl = getAppUrl();
 
   const session = await stripe.billingPortal.sessions.create({
     customer: user.stripeCustomerId,
-    return_url: `${config.public.siteUrl}/account`,
+    return_url: `${appUrl}/account`,
   });
 
   return { url: session.url };
