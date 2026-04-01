@@ -6,6 +6,7 @@ import { upsertBillingSubscription } from "~/server/services/billing/upsertBilli
 
 type ProcessStripeEventResult =
   | { ok: true; alreadyProcessed: true }
+  | { ok: true; alreadyProcessing: true }
   | { ok: true; processed: true; eventType: string }
   | { ok: false; failed: true; eventType?: string; message: string };
 
@@ -15,6 +16,45 @@ type StripeEventRow = {
   status: string;
   payload: Stripe.Event;
 };
+
+async function markStripeEventProcessing(
+  eventId: string,
+): Promise<"claimed" | "already_processed" | "already_processing" | "missing"> {
+  const { rows } = await db.query<{ status: string }>(
+    `
+      update stripe_events
+      set
+        status = 'processing',
+        error_message = null
+      where event_id = $1
+        and status in ('received', 'failed')
+      returning status
+    `,
+    [eventId],
+  );
+
+  if (rows[0]) {
+    return "claimed";
+  }
+
+  const existing = await db.query<{ status: string }>(
+    `
+      select status
+      from stripe_events
+      where event_id = $1
+      limit 1
+    `,
+    [eventId],
+  );
+
+  const status = existing.rows[0]?.status;
+
+  if (!status) return "missing";
+  if (status === "processed") return "already_processed";
+  if (status === "processing") return "already_processing";
+
+  return "missing";
+}
 
 async function markStripeEventProcessed(eventId: string) {
   await db.query(
@@ -71,6 +111,30 @@ function isSubscriptionEventType(eventType: string): boolean {
 export async function processStripeEvent(
   eventId: string,
 ): Promise<ProcessStripeEventResult> {
+  const claimResult = await markStripeEventProcessing(eventId);
+
+  if (claimResult === "already_processed") {
+    return {
+      ok: true,
+      alreadyProcessed: true,
+    };
+  }
+
+  if (claimResult === "already_processing") {
+    return {
+      ok: true,
+      alreadyProcessing: true,
+    };
+  }
+
+  if (claimResult === "missing") {
+    return {
+      ok: false,
+      failed: true,
+      message: `Stripe event not found: ${eventId}`,
+    };
+  }
+
   const { rows } = await db.query(
     `
       select event_id, event_type, status, payload
@@ -87,14 +151,7 @@ export async function processStripeEvent(
     return {
       ok: false,
       failed: true,
-      message: `Stripe event not found: ${eventId}`,
-    };
-  }
-
-  if (row.status === "processed") {
-    return {
-      ok: true,
-      alreadyProcessed: true,
+      message: `Stripe event not found after claim: ${eventId}`,
     };
   }
 
