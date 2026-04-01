@@ -315,6 +315,45 @@ export const topics = [
   },
 ];
 
+const allTopicIds = [
+  "survival-essentials",
+  "greetings-polite",
+  "basic-verbs",
+  "fruits-vegetables",
+  "clothing",
+  "dim-sum",
+  "restaurant-menu",
+  "colours",
+  "math",
+  "measure-quantities",
+  "time-dates",
+  "family-members",
+  "countries",
+  "emotions",
+  "furniture",
+  "sports-fitness",
+  "weather",
+  "technology",
+  "housing",
+  "transport-travel",
+  "health",
+  "daily-life",
+  "materials",
+  "animals",
+  "science",
+  "hobbies-interests",
+  "buildings-local-services",
+  "business",
+  "jobs-professions",
+  "gemstones-jewellery",
+  "landforms-natural-disasters",
+  "news-media",
+  "plants-gardening",
+  "music",
+  "politics",
+  "onomatopoeia",
+];
+
 export const sortedTopics = [...topics].sort((a, b) => {
   // Coming soon topics go to the end
   if (a.comingSoon !== b.comingSoon) {
