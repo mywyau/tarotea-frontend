@@ -1,99 +1,101 @@
-import { createError, getHeader, readBody } from "h3";
-import Stripe from "stripe";
+// server/api/stripe/checkout.post.ts
+
+import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
+import { getOrCreateStripeCustomer } from "~/server/services/billing/getOrCreateStripeCustomer";
+import { stripe } from "~/server/services/billing/stripeClient";
 import { requireUser } from "~/server/utils/requireUser";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2023-10-16",
-});
+type Billing = "monthly" | "yearly";
+
+type CheckoutBody = {
+  billing?: Billing;
+};
+
+function getAppUrl(): string {
+  const appUrl = process.env.SITE_URL?.trim();
+
+  if (!appUrl) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "SITE_URL is not configured",
+    });
+  }
+
+  return appUrl.replace(/\/+$/, "");
+}
+
+function getPriceIdForBilling(billing: Billing): string {
+  const priceId =
+    billing === "monthly"
+      ? process.env.STRIPE_PRICE_ID_MONTHLY
+      : process.env.STRIPE_PRICE_ID_YEARLY;
+
+  if (!priceId) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: `Missing Stripe price id for ${billing}`,
+    });
+  }
+
+  return priceId;
+}
+
+function assertBilling(value: unknown): Billing {
+  if (value === "monthly" || value === "yearly") {
+    return value;
+  }
+
+  throw createError({
+    statusCode: 400,
+    statusMessage: "Invalid billing option",
+  });
+}
 
 export default defineEventHandler(async (event) => {
-  // 🔐 Authenticated user
   const auth = await requireUser(event);
-  const userId = auth.sub
+  const userId = auth.sub;
 
-  // 👤 Fetch user email
-  const { rows } = await db.query(`select email from users where id = $1`, [
-    userId,
-  ]);
+  const body = (await readBody(event)) as CheckoutBody | undefined;
+  const billing = assertBilling(body?.billing);
 
-  if (!rows[0]?.email) {
+  const { rows } = await db.query<{ email: string | null }>(
+    `
+      select email
+      from users
+      where id = $1
+      limit 1
+    `,
+    [userId],
+  );
+
+  const userEmail = rows[0]?.email?.trim();
+
+  if (!userEmail) {
     throw createError({
       statusCode: 400,
       statusMessage: "User email not found",
     });
   }
 
-  const userEmail = rows[0].email;
+  const customerId = await getOrCreateStripeCustomer(userId, userEmail);
+  const priceId = getPriceIdForBilling(billing);
+  const appUrl = getAppUrl();
 
-  // 📦 Request body
-  const body = await readBody(event);
-  const { billing } = body as { billing: "monthly" | "yearly" };
+  const idempotencyKey = crypto.randomUUID();
 
-  if (billing !== "monthly" && billing !== "yearly") {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Invalid billing option",
-    });
-  }
-
-  const lookupKey =
-    billing === "monthly"
-      ? process.env.STRIPE_PRICE_MONTHLY
-      : process.env.STRIPE_PRICE_YEARLY;
-
-  if (!lookupKey) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Stripe price lookup key missing",
-    });
-  }
-
-  const prices = await stripe.prices.list({
-    lookup_keys: [lookupKey],
-    limit: 1,
-  });
-
-  if (!prices.data.length) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: `No Stripe price found for ${lookupKey}`,
-    });
-  }
-
-  const priceId = prices.data[0].id;
-
-  const origin =
-    getHeader(event, "origin") || `https://${getHeader(event, "host")}`;
-
-  if (!origin) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Unable to determine origin",
-    });
-  }
-
-  const idempotencyKey = `checkout:${userId}:${billing}:${Math.floor(Date.now() / 10_000)}`;
-
-  // 🧾 Create Checkout Session
   const session = await stripe.checkout.sessions.create(
     {
       mode: "subscription",
-
-      line_items: [{ price: priceId, quantity: 1 }],
-
-      success_url: `${origin}/billing/success`,
-      cancel_url: `${origin}/billing/cancel`,
-
+      customer: customerId,
       client_reference_id: userId,
-
-      customer_email: userEmail, // ✅ CORRECT
-
+      line_items: [{ price: priceId, quantity: 1 }],
+      success_url: `${appUrl}/billing/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/billing/cancel`,
       metadata: {
         userId,
         plan: billing,
       },
-
       subscription_data: {
         metadata: {
           userId,
@@ -102,9 +104,16 @@ export default defineEventHandler(async (event) => {
       },
     },
     {
-      idempotencyKey: idempotencyKey,
+      idempotencyKey,
     },
   );
+
+  if (!session.url) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Stripe checkout session did not return a URL",
+    });
+  }
 
   return { url: session.url };
 });
