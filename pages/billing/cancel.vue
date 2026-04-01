@@ -46,7 +46,7 @@ const isSubscribed = computed(() =>
               style="background-color:#A8CAE0;" :class="isSubscribed
                 ? 'opacity-60 cursor-not-allowed'
                 : 'hover:brightness-110 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('monthly')">
-              Monthly plan · £5.99
+              Monthly plan · £4.99
             </button>
 
             <!-- Yearly (KEEP BLACK) -->
@@ -54,7 +54,7 @@ const isSubscribed = computed(() =>
               ? 'opacity-60 cursor-not-allowed'
               : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
               style="background-color:rgba(244,205,39,0.35);">
-              Yearly plan · £59.99
+              Yearly plan · £49.99
             </button>
           </div>
 
