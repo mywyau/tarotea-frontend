@@ -5,7 +5,7 @@ import { stripe } from "~/server/services/billing/stripeClient";
 import { getAuthenticatedUserFromDB } from "~/server/utils/getAuthenticatedUserFromDB";
 
 function getAppUrl(): string {
-  const appUrl = process.env.APP_URL?.trim();
+  const appUrl = process.env.SITE_URL?.trim();
 
   if (!appUrl) {
     throw createError({
