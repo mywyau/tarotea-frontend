@@ -3,7 +3,7 @@ import { computed, nextTick, ref, watch } from "vue"
 
 definePageMeta({
   ssr: false,
-  middleware:["level-word-access-client"]
+  middleware: ["writing-access"]
 })
 
 type VocabWord = {

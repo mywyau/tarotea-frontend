@@ -4,6 +4,7 @@ import { computed, nextTick, ref, watch } from "vue"
 
 definePageMeta({
     ssr: false,
+    middleware: ["writing-access"]
 })
 
 type ExampleSentence = {
