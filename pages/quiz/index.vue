@@ -33,9 +33,6 @@ const canEnterLevel = (level: any) => {
   <main class="levels-page max-w-4xl mx-auto py-10 px-2 space-y-10">
 
     <div class="mb-6">
-      <!-- <NuxtLink :to="`/`" class="text-black text-sm hover:underline"> -->
-        <!-- ← Home -->
-      <!-- </NuxtLink> -->
       <BackLink />
     </div>
 

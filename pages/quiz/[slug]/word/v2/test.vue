@@ -36,6 +36,31 @@ type FinalizeResponse = {
     deduped?: boolean
 }
 
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
+const playbackRate = ref(1)
+
+let currentWordAudio: HTMLAudioElement | null = null
+
+const currentWordAudioSrc = computed(() => {
+    const wordId = question.value?.wordId
+    if (!wordId) return null
+    return `${cdnBase}/audio/${wordId}.mp3`
+})
+
+async function playCurrentWordAudio() {
+    if (!currentWordAudioSrc.value) return
+
+    try {
+        currentWordAudio?.pause()
+        currentWordAudio = new Audio(currentWordAudioSrc.value)
+        currentWordAudio.playbackRate = playbackRate.value
+        await currentWordAudio.play()
+    } catch (err) {
+        console.warn('Level quiz word audio failed', err)
+    }
+}
+
 const finalizeAttemptId = ref<string | null>(null)
 const finalizeCompleted = ref(false)
 const finalizeError = ref<string | null>(null)
@@ -373,6 +398,8 @@ async function answer(index: number) {
         playIncorrectJingle()
     }
 
+    await playCurrentWordAudio()
+
     const wordId = question.value.wordId
     const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
 
@@ -395,6 +422,9 @@ async function answer(index: number) {
 }
 
 async function next() {
+    currentWordAudio?.pause()
+    currentWordAudio = null
+
     answered.value = false
     selectedIndex.value = null
 
@@ -507,10 +537,6 @@ watch(
 
 <template>
     <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
-        <!-- <NuxtLink v-if="current < questions.length" :to="`/quiz/${slug}/word/start-quiz`"
-            class="text-sm text-black hover:underline">
-            ← Restart Quiz
-        </NuxtLink> -->
 
         <BackLink />
 
