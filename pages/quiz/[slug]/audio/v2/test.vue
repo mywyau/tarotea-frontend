@@ -5,9 +5,11 @@ definePageMeta({
 })
 
 import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 import {
+  playCorrectJingle,
+  playIncorrectJingle,
   playQuizCompleteFailSong,
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
@@ -49,6 +51,56 @@ const finalizeAttemptId = ref<string | null>(null)
 const finalizeCompleted = ref(false)
 const finalizeError = ref<string | null>(null)
 const completionSoundPlayed = ref(false)
+
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => {
+  return frozenElapsedMs.value ?? elapsedMs.value
+})
+
+const formattedElapsedTime = computed(() => {
+  return formatDuration(displayedElapsedMs.value)
+})
 
 function createAttemptId() {
   if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
@@ -112,6 +164,10 @@ function resetQuizRunState() {
   xpDelta.value = null
   currentXp.value = null
   currentStreak.value = null
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+  quizStartedAt.value = null
+  stopTimer()
 }
 
 const { data, error } = await useFetch<LevelData>(
@@ -411,6 +467,8 @@ async function next() {
   current.value++
 
   if (current.value >= questions.value.length) {
+    freezeTimer()
+
     if (answerLog.value.length > 0) {
       await finalizeQuiz()
     }
@@ -474,6 +532,8 @@ watch(
     const firstId = qs[0]?.wordId
     currentStreak.value = progressMap[firstId]?.streak ?? 0
     currentXp.value = progressMap[firstId]?.xp ?? 0
+
+    startTimer()
   },
   { immediate: true }
 )
@@ -515,6 +575,12 @@ watch(
   },
   { immediate: true }
 )
+
+onBeforeUnmount(() => {
+  stopTimer()
+  stop()
+})
+
 </script>
 
 <template>
@@ -669,7 +735,7 @@ watch(
               </p>
 
               <p class="hero-subtext">
-                {{ score }} / {{ questions.length }} correct
+                Time: {{ formattedElapsedTime }}
               </p>
             </div>
           </transition>
