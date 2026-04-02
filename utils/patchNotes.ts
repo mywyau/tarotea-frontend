@@ -15,6 +15,16 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
+    date: "2 April 2026",
+    title: "Add writing examples via Hanzi Writer",
+    items: [
+      "Continuously improving architecture and add writing examples",
+      "General improvements and fixes",
+      "Add audio to vocab only based quizzes on answer to help with association",
+      "Add blurred out vocab to audio only quizzes to help with association",
+    ],
+  },
+  {
     date: "28 March 2026",
     title: "Rearchitecture and general improvements",
     items: [
