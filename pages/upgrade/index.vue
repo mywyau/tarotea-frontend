@@ -56,13 +56,12 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
         <!-- Benefits -->
         <ul class="list-disc pl-5 text-left text-gray-700 space-y-2 max-w-sm mx-auto leading-relaxed">
-          <li>Get greater language exposure with full access to all content</li>
-          <li>Unlock over 2500 word tiles and over 10000 sentences to help with your studies</li>
-          <li>Train to improve recognition and recall with our randomised quizzes and exercises</li>
-          <li>Practice and check your pronunciation with 3000 Echo Lab requests per month</li>
-          <li>High quality audio for every word</li>
-          <li>Neatly organised and structured content</li>
-          <li>Increase exposure to unseen and less frequently visited words via our xp system</li>
+          <li>Greater language exposure with full access to all content</li>
+          <li>Unlock over 2500 word tiles</li>
+          <li>Unlock over 10000 sentences to help with your studies</li>
+          <li>Train to improve recognition and recall with our exercises and activities</li>
+          <li>Practice your pronunciation with 3000 Echo Lab requests per month</li>
+          <li>Increase exposure to weaker words via our xp system</li>
           <li>Access new topics, words and features added regularly</li>
         </ul>
 
