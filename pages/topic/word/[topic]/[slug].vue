@@ -93,11 +93,6 @@ watchEffect(() => {
 <template>
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
-        <!-- Back link -->
-        <!-- <NuxtLink :to="`/topic/words/${topic}`" class="inline-block text-sm text-black hover:underline"> -->
-            <!-- ← {{ formattedTopic }} Vocabulary -->
-        <!-- </NuxtLink> -->
-
         <BackLink />
 
         <!-- Word header -->
@@ -132,10 +127,16 @@ watchEffect(() => {
 
             </div>
 
-            <div class="pt-5 sm:pt-6">
+            <div class="flex items-center justify-center gap-3">
                 <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`"
                     :playback-rate="playbackRate" size="lg" />
+
+                <NuxtLink :to="`/writing/vocab/${word.id}`"
+                    class="bg-white hover:bg-gray-50 inline-flex items-center justify-center text-base px-4 py-3 rounded-md shadow-sm transition border">
+                    <span class="text-white">✏️</span>
+                </NuxtLink>
             </div>
+
         </section>
 
         <!-- Usage -->
@@ -194,26 +195,10 @@ watchEffect(() => {
 
                             <div class="flex items-center justify-center gap-3">
 
-                                <!-- <NuxtLink
-                                    :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/${index}`"
-                                    class="text-xs px-2 py-1 rounded-md bg-black shadow-sm hover:brightness-125 transition">
-                                    <span class="bg-gradient-to-r
-                      from-[#d48fd0]
-                      via-[#b57bc3]
-                      via-[#6faed6]
-                      to-[#d48fd0]
-                      bg-clip-text text-transparent">
-                                        ▶︎
-                                    </span>
-                                </NuxtLink> -->
-
-                                <!-- <NuxtLink
-                                    :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/${index}`"
-                                    class="topic-btn-blush text-xs px-2 py-1 rounded-md shadow-sm transition">
-                                    <span class="text-black">
-                                        ▶︎
-                                    </span>
-                                </NuxtLink> -->
+                                <NuxtLink :to="`/writing/sentences/${word.id}/${index}`"
+                                    class="bg-white hover:bg-gray-50 text-xs px-2 py-1 rounded-md shadow-sm transition border">
+                                    <span class="text-black">✏️</span>
+                                </NuxtLink>
 
                                 <NuxtLink
                                     :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/v2/${index}`"

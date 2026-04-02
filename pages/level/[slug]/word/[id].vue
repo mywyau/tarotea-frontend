@@ -142,7 +142,7 @@ watchEffect(() => {
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
           size="lg" />
 
-        <NuxtLink :to="`/writing/${word.id}`"
+        <NuxtLink :to="`/writing/vocab/${word.id}`"
           class="bg-white hover:bg-gray-50 inline-flex items-center justify-center text-base px-4 py-3 rounded-md shadow-sm transition border">
           <span class="text-white">✏️</span>
         </NuxtLink>

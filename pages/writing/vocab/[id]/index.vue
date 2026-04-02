@@ -3,6 +3,7 @@ import { computed, nextTick, ref, watch } from "vue"
 
 definePageMeta({
   ssr: false,
+  middleware:["level-word-access-client"]
 })
 
 type VocabWord = {
@@ -22,7 +23,7 @@ type WriterLike = {
 }
 
 const route = useRoute()
-const wordId = computed(() => route.params.id as string)
+const wordId = computed(() => route.params.word as string)
 
 const {
   data: word,
@@ -40,6 +41,8 @@ const currentCharIndex = ref(0)
 const isLoading = ref(false)
 const isReady = ref(false)
 const loadError = ref<string | null>(null)
+
+const unsupportedCharacter = ref<string | null>(null)
 
 async function animateCurrentCharacter() {
   if (!writer.value) return
@@ -115,6 +118,7 @@ async function loadWriter(char: string) {
   isLoading.value = true
   isReady.value = false
   loadError.value = null
+  unsupportedCharacter.value = null
 
   try {
     writerHost.value.innerHTML = ""
@@ -138,17 +142,24 @@ async function loadWriter(char: string) {
       onLoadCharDataSuccess: () => {
         isReady.value = true
         isLoading.value = false
+        unsupportedCharacter.value = null
         writer.value?.hideCharacter({ duration: 0 })
         writer.value?.showOutline({ duration: 0 })
       },
       onLoadCharDataError: () => {
-        loadError.value = `Could not load stroke data for “${char}”.`
+        unsupportedCharacter.value = char
+        isReady.value = false
         isLoading.value = false
+        loadError.value = null
+
+        if (writerHost.value) {
+          writerHost.value.innerHTML = ""
+        }
       },
     })
-
   } catch (err) {
     console.error(err)
+    unsupportedCharacter.value = null
     loadError.value = "Failed to initialise Hanzi Writer."
     isLoading.value = false
   }
@@ -276,6 +287,10 @@ watch(
 
             <div v-else-if="loadError" class="max-w-sm text-center text-sm text-red-600">
               {{ loadError }}
+            </div>
+
+            <div v-else-if="unsupportedCharacter" class="max-w-sm text-center text-sm text-amber-700">
+              Stroke data is not supported for “{{ unsupportedCharacter }}”.
             </div>
 
             <div v-else-if="!currentCharacter" class="max-w-sm text-center text-sm text-gray-500">
