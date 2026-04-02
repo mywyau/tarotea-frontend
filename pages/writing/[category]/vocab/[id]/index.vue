@@ -23,7 +23,7 @@ type WriterLike = {
 }
 
 const route = useRoute()
-const wordId = computed(() => route.params.word as string)
+const wordId = computed(() => route.params.id as string)
 
 const {
   data: word,
