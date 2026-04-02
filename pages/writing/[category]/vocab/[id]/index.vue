@@ -216,91 +216,105 @@ watch(
         </div>
 
         <template v-else>
-          <div class="rounded-xl bg-gray-50 px-4 py-3">
-            <p class="text-sm text-gray-500">Word</p>
-            <p class="mt-1 text-2xl font-bold text-gray-900">{{ word.word }}</p>
-            <p class="mt-1 text-sm text-gray-600">{{ word.jyutping || "" }}</p>
-            <p class="mt-1 text-sm text-gray-600">{{ word.meaning || "" }}</p>
-          </div>
+          <div class="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+            <!-- Left side -->
+            <div class="space-y-5">
+              <div class="rounded-xl bg-gray-50 px-4 py-3">
+                <p class="text-sm text-gray-500">Word</p>
+                <p class="mt-1 text-2xl font-bold text-gray-900">{{ word.word }}</p>
+                <p class="mt-1 text-sm text-gray-600">{{ word.jyutping || "" }}</p>
+                <p class="mt-1 text-sm text-gray-600">{{ word.meaning || "" }}</p>
+              </div>
 
-          <div class="mt-5 flex flex-wrap gap-2">
-            <button type="button"
-              class="rounded-xl border border-gray-900 bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-              :disabled="!isReady" @click="animateCurrentCharacter">
-              Play strokes
-            </button>
+              <div
+                class="flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4">
+                <div v-if="isLoading" class="text-sm text-gray-500">
+                  Loading character data…
+                </div>
 
-            <button type="button"
-              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-              :disabled="!isReady" @click="loopAnimation">
-              Loop animation
-            </button>
+                <div v-else-if="loadError" class="max-w-sm text-center text-sm text-red-600">
+                  {{ loadError }}
+                </div>
 
-            <button type="button"
-              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-              :disabled="!isReady || !selectedCharacters.length" @click="animateWholeWord">
-              Play whole word
-            </button>
+                <div v-else-if="unsupportedCharacter" class="max-w-sm text-center text-sm text-amber-700">
+                  Stroke data is not supported for “{{ unsupportedCharacter }}”.
+                </div>
 
-            <button type="button"
-              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-              :disabled="currentCharIndex === 0" @click="previousCharacter">
-              Previous character
-            </button>
+                <div v-else-if="!currentCharacter" class="max-w-sm text-center text-sm text-gray-500">
+                  No Chinese character available for this word.
+                </div>
 
-            <button type="button"
-              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-              :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
-              Next character
-            </button>
-
-          </div>
-
-          <div class="mt-3 flex flex-wrap gap-2">
-            <button type="button"
-              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-              :disabled="!isReady" @click="showOnlyOutline">
-              Outline only
-            </button>
-
-            <button type="button"
-              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-              :disabled="!isReady" @click="showCharacterAndOutline">
-              Show full character
-            </button>
-          </div>
-
-          <div class="mt-5 rounded-xl bg-gray-50 px-4 py-3 text-sm text-gray-700">
-            <span class="font-medium">Current character:</span>
-            <span class="ml-2 text-xl font-semibold text-gray-900">
-              {{ currentCharacter || "—" }}
-            </span>
-
-            <!-- <span class="ml-4 font-medium">Progress:</span>
-            <span class="ml-2">{{ progressLabel }}</span> -->
-          </div>
-
-          <div
-            class="mt-6 flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4">
-            <div v-if="isLoading" class="text-sm text-gray-500">
-              Loading character data…
+                <div ref="writerHost" class="h-[320px] w-[320px]" />
+              </div>
             </div>
 
-            <div v-else-if="loadError" class="max-w-sm text-center text-sm text-red-600">
-              {{ loadError }}
-            </div>
+            <!-- Right side panel -->
+            <aside class="h-fit rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              <div class="mb-4">
+                <p class="text-sm font-medium text-gray-500">Current character</p>
+                <p class="mt-1 text-3xl font-bold text-gray-900">
+                  {{ currentCharacter || "—" }}
+                </p>
+                <p class="mt-2 text-sm text-gray-600">
+                  Progress: {{ progressLabel }}
+                </p>
+              </div>
 
-            <div v-else-if="unsupportedCharacter" class="max-w-sm text-center text-sm text-amber-700">
-              Stroke data is not supported for “{{ unsupportedCharacter }}”.
-            </div>
+              <div class="space-y-3">
+                <button type="button"
+                  class="w-full rounded-xl border border-gray-900 bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                  :disabled="!isReady" @click="animateCurrentCharacter">
+                  Play strokes
+                </button>
 
-            <div v-else-if="!currentCharacter" class="max-w-sm text-center text-sm text-gray-500">
-              No Chinese character available for this word.
-            </div>
+                <button type="button"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                  :disabled="!isReady" @click="loopAnimation">
+                  Loop animation
+                </button>
 
-            <div ref="writerHost" class="h-[320px] w-[320px]" />
+                <button type="button"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                  :disabled="!isReady || !selectedCharacters.length" @click="animateWholeWord">
+                  Play whole word
+                </button>
+              </div>
+
+              <div class="my-5 border-t border-gray-200"></div>
+
+              <div class="space-y-3">
+                <button type="button"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                  :disabled="currentCharIndex === 0" @click="previousCharacter">
+                  Previous character
+                </button>
+
+                <button type="button"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                  :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
+                  Next character
+                </button>
+              </div>
+
+              <div class="my-5 border-t border-gray-200"></div>
+
+              <div class="space-y-3">
+                <button type="button"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                  :disabled="!isReady" @click="showOnlyOutline">
+                  Outline only
+                </button>
+
+                <button type="button"
+                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                  :disabled="!isReady" @click="showCharacterAndOutline">
+                  Show full character
+                </button>
+              </div>
+            </aside>
           </div>
         </template>
+
       </section>
     </div>
   </div>
