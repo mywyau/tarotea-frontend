@@ -225,18 +225,6 @@ watch(
 
           <div class="mt-5 flex flex-wrap gap-2">
             <button type="button"
-              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-              :disabled="currentCharIndex === 0" @click="previousCharacter">
-              Previous character
-            </button>
-
-            <button type="button"
-              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-              :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
-              Next character
-            </button>
-
-            <button type="button"
               class="rounded-xl border border-gray-900 bg-gray-900 px-4 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
               :disabled="!isReady" @click="animateCurrentCharacter">
               Play strokes
@@ -253,6 +241,19 @@ watch(
               :disabled="!isReady || !selectedCharacters.length" @click="animateWholeWord">
               Play whole word
             </button>
+
+            <button type="button"
+              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+              :disabled="currentCharIndex === 0" @click="previousCharacter">
+              Previous character
+            </button>
+
+            <button type="button"
+              class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+              :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
+              Next character
+            </button>
+
           </div>
 
           <div class="mt-3 flex flex-wrap gap-2">
