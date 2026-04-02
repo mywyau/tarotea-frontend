@@ -138,9 +138,14 @@ watchEffect(() => {
         </div>
       </div>
 
-      <div class="">
+      <div class="flex items-center justify-center gap-3">
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
           size="lg" />
+
+        <NuxtLink :to="`/writing/${word.id}`"
+          class="bg-white hover:bg-gray-50 inline-flex items-center justify-center text-base px-4 py-3 rounded-md shadow-sm transition border">
+          <span class="text-white">✏️</span>
+        </NuxtLink>
       </div>
 
     </section>
@@ -218,6 +223,11 @@ watchEffect(() => {
                     ▶︎
                   </span>
                 </NuxtLink> -->
+
+                <NuxtLink :to="`/writing/sentences/${word.id}/${index}`"
+                  class="bg-white hover:bg-gray-50 text-xs px-2 py-1 rounded-md shadow-sm transition border">
+                  <span class="text-black">✏️</span>
+                </NuxtLink>
 
                 <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
                   class="level-btn-blue text-xs px-2 py-1 rounded-md shadow-sm transition">
@@ -301,5 +311,14 @@ watchEffect(() => {
 
 .level-btn-blue:hover {
   background: rgb(159, 189, 255);
+}
+
+.level-btn-black {
+  background: rgb(63, 63, 63);
+  transition: background-color 0.2s ease;
+}
+
+.level-btn-black:hover {
+  background: rgb(0, 0, 0);
 }
 </style>
