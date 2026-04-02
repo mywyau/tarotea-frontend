@@ -4,8 +4,8 @@ definePageMeta({
   ssr: false
 })
 
-import { computed, onMounted, ref, watch } from 'vue'
 import { generateAudioQuiz } from '@/utils/quiz/generateAudioQuiz'
+import { computed, onMounted, ref, watch } from 'vue'
 
 import {
   playQuizCompleteFailSong,
@@ -424,6 +424,12 @@ async function next() {
   }
 }
 
+const currentWord = computed(() => {
+  const wordId = question.value?.wordId
+  if (!wordId) return null
+  return wordsForLevel.value.find(w => w.id === wordId) ?? null
+})
+
 onMounted(async () => {
   try {
     const token = await getAccessToken()
@@ -513,14 +519,6 @@ watch(
 
 <template>
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
-    <!-- <NuxtLink
-      v-if="current < questions.length"
-      :to="`/quiz/${slug}/audio/start-quiz`"
-      class="text-sm text-black hover:underline"
-    >
-      ← Restart Quiz
-    </NuxtLink> -->
-
 
     <BackLink />
 
@@ -531,10 +529,8 @@ watch(
 
       <div class="flex items-center gap-3 mb-6">
         <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
-          <div
-            class="bg-purple-300 h-3 rounded-full transition-all duration-300"
-            :style="{ width: progressPercent + '%' }"
-          />
+          <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
+            :style="{ width: progressPercent + '%' }" />
         </div>
 
         <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
@@ -542,22 +538,32 @@ watch(
         </span>
       </div>
 
+      <div class="min-h-[110px] flex flex-col items-center justify-center gap-2">
+        <p v-if="currentWord" class="text-4xl font-semibold" :class="answered
+          ? 'blur-0 opacity-100'
+          : 'blur-md opacity-60 select-none'">
+          {{ currentWord.word }}
+        </p>
+
+        <p v-if="answered && currentWord?.jyutping" class="text-sm text-gray-500">
+          {{ currentWord.jyutping }}
+        </p>
+
+        <p v-if="answered && currentWord?.meaning" class="text-sm text-gray-700">
+          {{ currentWord.meaning }}
+        </p>
+      </div>
+
       <div v-if="showQuiz" class="space-y-6">
         <div v-if="question?.type === 'audio'" class="text-center">
-          <AudioButton
-            :key="question.audioKey"
-            :src="`${cdnBase}/audio/${question.audioKey}`"
-            autoplay
-          />
+          <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
         </div>
 
         <div class="min-h-[50px] space-y-3">
           <div class="flex items-center justify-center gap-3">
             <div class="w-32 h-1 bg-gray-200 rounded">
-              <div
-                class="h-1 bg-green-500 rounded transition-all duration-500"
-                :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }"
-              />
+              <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
             </div>
 
             <div class="relative flex items-center">
@@ -566,11 +572,8 @@ watch(
               </span>
 
               <transition name="xp-fall">
-                <span
-                  v-if="xpDelta !== null"
-                  class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                  :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'"
-                >
+                <span v-if="xpDelta !== null" class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                  :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
                   {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                 </span>
               </transition>
@@ -585,39 +588,30 @@ watch(
         </div>
 
         <div class="grid grid-cols-2 gap-4">
-          <button
-            v-for="(option, i) in question.options"
-            :key="i"
-            class="answer-tile aspect-square rounded-xl flex items-center justify-center
+          <button v-for="(option, i) in question.options" :key="i" class="answer-tile aspect-square rounded-xl flex items-center justify-center
               text-xl sm:text-lg md:text-xl lg:text-2xl font-semibold text-center p-6 select-none
-              transition-all duration-200 ease-out shadow-sm active:scale-95"
-            :style="{
-              backgroundColor:
-                !answered
-                  ? tileColors[i]
-                  : i === question.correctIndex
-                    ? '#BBF7D0'
-                    : i === selectedIndex
-                      ? '#FECACA'
-                      : tileColors[i]
-            }"
-            :class="[
-              !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
-              answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-              answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-            ]"
-            @click="answer(i)"
-          >
+              transition-all duration-200 ease-out shadow-sm active:scale-95" :style="{
+                backgroundColor:
+                  !answered
+                    ? tileColors[i]
+                    : i === question.correctIndex
+                      ? '#BBF7D0'
+                      : i === selectedIndex
+                        ? '#FECACA'
+                        : tileColors[i]
+              }" :class="[
+                !answered && 'hover:-translate-y-1 hover:scale-[1.02] hover:shadow-lg hover:brightness-110',
+                answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
+                answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
+              ]" @click="answer(i)">
             {{ option }}
           </button>
         </div>
 
         <div class="h-10">
-          <button
-            v-if="answered"
+          <button v-if="answered"
             class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
-            @click="next"
-          >
+            @click="next">
             Next
           </button>
         </div>
@@ -653,10 +647,8 @@ watch(
             {{ finalizeError }}
           </p>
 
-          <button
-            class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
-            @click="finalizeQuiz"
-          >
+          <button class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
+            @click="finalizeQuiz">
             Retry Saving Results
           </button>
         </div>
@@ -683,12 +675,8 @@ watch(
           </transition>
 
           <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-            <div
-              v-for="tile in completionTiles"
-              :key="tile.label"
-              class="stat-card hover:brightness-110"
-              :class="tile.className"
-            >
+            <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+              :class="tile.className">
               <p class="stat-label">
                 {{ tile.label }}
               </p>
@@ -705,11 +693,8 @@ watch(
             </h3>
 
             <div class="flex flex-wrap gap-2">
-              <span
-                v-for="word in correctWords"
-                :key="word!.id"
-                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125"
-              >
+              <span v-for="word in correctWords" :key="word!.id"
+                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
                 {{ word!.word }}
               </span>
             </div>
@@ -721,30 +706,23 @@ watch(
             </h3>
 
             <div class="flex flex-wrap gap-2">
-              <span
-                v-for="word in missedWords"
-                :key="word!.id"
-                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125"
-              >
+              <span v-for="word in missedWords" :key="word!.id"
+                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
                 {{ word!.word }}
               </span>
             </div>
           </div>
 
           <div class="pt-2 space-y-3">
-            <NuxtLink
-              :to="`/quiz/${slug}/audio/start-quiz`"
+            <NuxtLink :to="`/quiz/${slug}/audio/start-quiz`"
               class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-              style="background-color:#A8CAE0;"
-            >
+              style="background-color:#A8CAE0;">
               Play Again
             </NuxtLink>
 
-            <NuxtLink
-              :to="`/level/${slug}`"
+            <NuxtLink :to="`/level/${slug}`"
               class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-              style="background-color:rgba(244,205,39,0.35);"
-            >
+              style="background-color:rgba(244,205,39,0.35);">
               Back to {{ levelTitles[slug] }}
             </NuxtLink>
           </div>
