@@ -77,6 +77,12 @@ const finalizeAttemptId = ref<string | null>(null)
 const finalizeCompleted = ref(false)
 const finalizeError = ref<string | null>(null)
 
+const currentWord = computed(() => {
+    const wordId = question.value?.wordId
+    if (!wordId) return null
+    return wordsById.value[wordId] ?? null
+})
+
 function createAttemptId() {
     if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
         return crypto.randomUUID()
@@ -489,9 +495,6 @@ watch(
 
 <template>
     <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
-        <!-- <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline">
-            ← Back to topic quizzes
-        </NuxtLink> -->
 
         <BackLink />
 
@@ -528,6 +531,24 @@ watch(
             </div>
 
             <div v-else-if="showQuiz" class="space-y-6">
+
+                <div class="min-h-[110px] flex flex-col items-center justify-center gap-2">
+                    <p v-if="currentWord" class="text-4xl font-semibold" :class="answered
+                        ? 'blur-0 opacity-100'
+                        : 'blur-md opacity-60 select-none'">
+                        {{ currentWord.word }}
+                    </p>
+
+                    <p v-if="answered && currentWord?.jyutping" class="text-sm text-gray-500">
+                        {{ currentWord.jyutping }}
+                    </p>
+
+                    <p v-if="answered && currentWord?.meaning" class="text-sm text-gray-700">
+                        {{ currentWord.meaning }}
+                    </p>
+                </div>
+
+
                 <div v-if="question?.type === 'audio'" class="text-center">
                     <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
                 </div>
