@@ -110,10 +110,6 @@ onMounted(async () => {
 <template>
   <main class="topics-page max-w-3xl mx-auto py-12 px-4 space-y-10">
 
-    <!-- <NuxtLink :to="`/`" class="inline-block text-sm text-black hover:underline">
-      ← Home
-    </NuxtLink> -->
-
     <BackLink />
 
     <header class="rounded-lg header-card">
@@ -128,7 +124,6 @@ onMounted(async () => {
       <li v-for="topic in paginatedTopics" :key="topic.id" class="topic-card rounded-lg p-4 space-y-3 transition"
         :class="[
           topic.comingSoon
-            // || (topic.requiresPaid && !canEnterTopic(topic))
             ? 'is-disabled'
             : 'is-active'
         ]">

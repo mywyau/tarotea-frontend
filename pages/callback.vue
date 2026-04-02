@@ -85,7 +85,7 @@ onMounted(async () => {
     </template>
 
     <template v-else>
-      <p class="text-gray-500">
+      <p class="text-gray-700">
         Signing you in…
       </p>
     </template>

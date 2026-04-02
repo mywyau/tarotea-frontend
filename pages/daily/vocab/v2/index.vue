@@ -164,6 +164,22 @@ const completionTiles = computed(() => [
   },
 ])
 
+const showQuizView = computed(() => {
+  return !loading.value && !dailyLocked.value && !showCompleteView.value && !submitting.value && !!currentQuestion.value
+})
+
+const showCalculating = computed(() => {
+  return !loading.value && !dailyLocked.value && submitting.value
+})
+
+const showResults = computed(() => {
+  return !loading.value && !dailyLocked.value && showCompleteView.value
+})
+
+const showEmptyState = computed(() => {
+  return !loading.value && !dailyLocked.value && !showCompleteView.value && !submitting.value && !currentQuestion.value
+})
+
 const STREAK_CAP = 5
 
 function dailyDeltaFor(correct: boolean, streakBefore: number) {
@@ -346,6 +362,7 @@ async function submitAnswers() {
     backgroundStatus.value = submit.status
 
     await sleep(1300)
+
     showCompleteView.value = true
     playCompletionSound()
 
@@ -434,9 +451,6 @@ onMounted(async () => {
 <template>
   <div class="max-w-xl mx-auto px-4 py-8">
     <div class="mb-6">
-      <!-- <NuxtLink to="/" class="text-black text-sm hover:underline"> -->
-      <!-- ← Back to Home -->
-      <!-- </NuxtLink> -->
       <BackLink />
     </div>
 
@@ -487,194 +501,181 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div v-else class="relative min-h-[700px]">
-        <div v-if="!showCompleteView && !submitting && currentQuestion" class="flex items-center gap-3 mb-6">
-          <div class="flex-1 bg-gray-200 rounded-lg h-3 relative overflow-hidden">
-            <div :class="[
-              'h-3 rounded-lg transition-[width] duration-500 ease-out relative',
-              progressPercent > 80
-                ? 'bg-purple-400 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
-                : 'bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]'
-            ]" :style="{ width: `${progressPercent}%` }" />
-          </div>
-
-          <span class="text-sm text-gray-500 whitespace-nowrap">
-            {{ answeredCount }} / {{ totalQuestions }}
-          </span>
-        </div>
-
-        <div v-if="!showCompleteView && !submitting && currentQuestion" class="py-8 rounded-2xl transition-all">
-          <p class="text-3xl font-medium text-center mb-2">
-            {{ currentQuestion.word }}
-          </p>
-
-          <div class="flex flex-col items-center gap-2 mb-6">
-            <div class="w-40 h-2 bg-gray-200 rounded">
+      <div v-else class="min-h-[700px]">
+        <div v-if="showQuizView">
+          <div class="flex items-center gap-3 mb-6">
+            <div class="flex-1 bg-gray-200 rounded-lg h-3 relative overflow-hidden">
               <div :class="[
-                'h-2 bg-green-500 rounded transition-[width] duration-500 ease-out',
-                mergingXp ? 'ring-2 ring-green-300' : ''
-              ]" :style="{ width: `${Math.min((currentXp / 1000) * 100, 100)}%` }" />
+                'h-3 rounded-lg transition-[width] duration-500 ease-out relative',
+                progressPercent > 80
+                  ? 'bg-purple-400 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
+                  : 'bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]'
+              ]" :style="{ width: `${progressPercent}%` }" />
             </div>
 
-            <div class="relative text-sm text-gray-500">
-              {{ currentXp }} XP
-
-              <transition name="xp-fall">
-                <span v-if="xpDelta !== null" :class="[
-                  'absolute left-full ml-2 font-semibold transition-all duration-200',
-                  xpDelta > 0 ? 'text-green-600' : 'text-red-600',
-                  mergingXp ? 'opacity-0 scale-75 -translate-y-2' : ''
-                ]">
-                  {{ xpDelta > 0 ? `+${xpDelta}` : xpDelta }}
-                </span>
-              </transition>
-            </div>
-
-            <div class="h-5 flex items-center justify-center">
-              <span class="text-xs text-orange-500">
-                {{ currentStreak > 0 ? `${currentStreak} streak` : '' }}
-              </span>
-            </div>
-
-            <div class="text-center">
-              <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay />
-            </div>
+            <span class="text-sm text-gray-500 whitespace-nowrap">
+              {{ answeredCount }} / {{ totalQuestions }}
+            </span>
           </div>
 
-          <div class="grid gap-4">
-            <button v-for="(option, i) in questionOptions" :key="option.id" :disabled="showResult || submitting"
-              @click="selectAnswer(option.meaning)"
-              class="rounded-lg px-6 py-4 text-center transition-all duration-300 ease-out shadow-sm active:scale-95 hover:brightness-110 disabled:opacity-80 disabled:cursor-not-allowed"
-              :style="{
-                backgroundColor:
-                  !showResult
-                    ? tileColors[i]
-                    : option.meaning === currentQuestion.meaning
-                      ? '#BBF7D0'
-                      : selected === option.meaning
-                        ? '#FECACA'
-                        : tileColors[i]
-              }" :class="[
-                showResult && option.meaning === currentQuestion.meaning && 'ring-2 ring-emerald-400',
-                showResult && selected === option.meaning && option.meaning !== currentQuestion.meaning && 'animate-shake ring-2 ring-rose-400'
-              ]">
-              {{ option.meaning }}
-            </button>
-          </div>
-
-          <transition name="next-fade">
-            <button v-if="showResult && readyForNext && currentIndex < questions.length - 1" @click="nextQuestion"
-              class="mt-6 w-full next-btn-blue font-medium text-black p-3 rounded-lg transition-transform duration-150 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]">
-              Next
-            </button>
-          </transition>
-
-          <div v-if="submitError" class="mt-6 rounded-xl p-4 text-center result-1">
-            <p class="font-medium text-gray-900">
-              {{ submitError }}
+          <div class="py-8 rounded-2xl transition-all">
+            <p class="text-3xl font-medium text-center mb-2">
+              {{ currentQuestion.word }}
             </p>
 
-            <button class="mt-3 px-5 py-3 rounded-lg bg-black text-white hover:opacity-90" @click="submitAnswers">
-              Retry finalise
-            </button>
+            <div class="flex flex-col items-center gap-2 mb-6">
+              <div class="w-40 h-2 bg-gray-200 rounded">
+                <div :class="[
+                  'h-2 bg-green-500 rounded transition-[width] duration-500 ease-out',
+                  mergingXp ? 'ring-2 ring-green-300' : ''
+                ]" :style="{ width: `${Math.min((currentXp / 1000) * 100, 100)}%` }" />
+              </div>
+
+              <div class="relative text-sm text-gray-500">
+                {{ currentXp }} XP
+
+                <transition name="xp-fall">
+                  <span v-if="xpDelta !== null" :class="[
+                    'absolute left-full ml-2 font-semibold transition-all duration-200',
+                    xpDelta > 0 ? 'text-green-600' : 'text-red-600',
+                    mergingXp ? 'opacity-0 scale-75 -translate-y-2' : ''
+                  ]">
+                    {{ xpDelta > 0 ? `+${xpDelta}` : xpDelta }}
+                  </span>
+                </transition>
+              </div>
+
+              <div class="h-5 flex items-center justify-center">
+                <span class="text-xs text-orange-500">
+                  {{ currentStreak > 0 ? `${currentStreak} streak` : '' }}
+                </span>
+              </div>
+
+              <div class="text-center">
+                <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay />
+              </div>
+            </div>
+
+            <div class="grid gap-4">
+              <button v-for="(option, i) in questionOptions" :key="option.id" :disabled="showResult || submitting"
+                @click="selectAnswer(option.meaning)"
+                class="rounded-lg px-6 py-4 text-center transition-all duration-300 ease-out shadow-sm active:scale-95 hover:brightness-110 disabled:opacity-80 disabled:cursor-not-allowed"
+                :style="{
+                  backgroundColor:
+                    !showResult
+                      ? tileColors[i]
+                      : option.meaning === currentQuestion.meaning
+                        ? '#BBF7D0'
+                        : selected === option.meaning
+                          ? '#FECACA'
+                          : tileColors[i]
+                }" :class="[
+            showResult && option.meaning === currentQuestion.meaning && 'ring-2 ring-emerald-400',
+            showResult && selected === option.meaning && option.meaning !== currentQuestion.meaning && 'animate-shake ring-2 ring-rose-400'
+          ]">
+                {{ option.meaning }}
+              </button>
+            </div>
+
+            <transition name="next-fade">
+              <button v-if="showResult && readyForNext && currentIndex < questions.length - 1" @click="nextQuestion"
+                class="mt-6 w-full next-btn-blue font-medium text-black p-3 rounded-lg transition-transform duration-150 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]">
+                Next
+              </button>
+            </transition>
+
+            <div v-if="submitError" class="mt-6 rounded-xl p-4 text-center result-1">
+              <p class="font-medium text-gray-900">
+                {{ submitError }}
+              </p>
+
+              <button class="mt-3 px-5 py-3 rounded-lg bg-black text-white hover:opacity-90" @click="submitAnswers">
+                Retry finalise
+              </button>
+            </div>
           </div>
         </div>
 
-        <transition name="finalise-fade">
-          <div v-if="submitting" class="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div class="loader mb-6"></div>
+        <transition name="fade-scale" mode="out-in">
+          <div v-if="showCalculating" key="calculating" class="stat-card hero-card result-2 space-y-4">
+            <div class="spinner mx-auto"></div>
 
-            <p class="text-lg font-semibold text-purple-600">
-              Finalising your score...
+            <p class="stat-label">
+              Calculating
             </p>
 
-            <p class="text-sm text-gray-500 mt-2">
+            <h2 class="hero-title">
+              Finalising your daily training...
+            </h2>
+
+            <p class="hero-subtext">
               Saving answers and calculating XP
             </p>
           </div>
-        </transition>
 
-        <transition name="complete-fade">
-          <div v-if="showCompleteView" class="absolute inset-0 overflow-y-auto px-4 py-6">
-            <div class="space-y-6">
-              <transition name="card-fade" appear>
-                <div class="stat-card hero-card" :class="resultHeroClass">
-                  <p class="stat-label">
-                    Daily Exercise Complete
-                  </p>
-
-                  <h2 class="hero-title">
-                    {{ resultMeta.title }}
-                  </h2>
-
-                  <p class="hero-score">
-                    {{ animatedAccuracy }}%
-                  </p>
-
-                  <p class="hero-subtext">
-                    {{ correctCount }} / {{ totalQuestions }} correct
-                  </p>
-                </div>
-              </transition>
-
-              <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
-                  :class="tile.className">
-                  <p class="stat-label">
-                    {{ tile.label }}
-                  </p>
-
-                  <p class="stat-value">
-                    {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
-                  </p>
-                </div>
-              </transition-group>
-
-              <!-- <div
-                v-if="isBackgroundSyncing"
-                class="stat-card text-center"
-                style="background-color: rgba(168, 202, 224, 0.25);"
-              >
+          <div v-else-if="showResults" key="results" class="space-y-6">
+            <transition name="card-fade" appear>
+              <div class="stat-card hero-card" :class="resultHeroClass">
                 <p class="stat-label">
-                  Syncing progress
+                  Daily Exercise Complete
                 </p>
 
-                <p class="text-sm text-gray-700 mt-2">
-                  Your score is saved. XP and streak updates are still being processed.
-                </p>
-              </div> -->
+                <h2 class="hero-title">
+                  {{ resultMeta.title }}
+                </h2>
 
-              <div class="text-center">
+                <p class="hero-score">
+                  {{ animatedAccuracy }}%
+                </p>
+
+                <p class="hero-subtext">
+                  {{ correctCount }} / {{ totalQuestions }} correct
+                </p>
+              </div>
+            </transition>
+
+            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+              <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+                :class="tile.className">
                 <p class="stat-label">
-                  Next daily unlocks in
+                  {{ tile.label }}
                 </p>
 
-                <div class="countdown-pill mt-4">
-                  <span class="countdown-text brightness-125">
-                    {{ timeRemaining }}
-                  </span>
-                </div>
+                <p class="stat-value">
+                  {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
+                </p>
               </div>
+            </transition-group>
 
-              <div class="pt-2 space-y-3">
-                <NuxtLink to="/"
-                  class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                  style="background-color:#A8CAE0;">
-                  Back to home
-                </NuxtLink>
+            <div class="text-center">
+              <p class="stat-label">
+                Next daily unlocks in
+              </p>
 
-                <NuxtLink to="/topics/quiz"
-                  class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                  style="background-color:rgba(244,205,39,0.35);">
-                  Explore more practice
-                </NuxtLink>
+              <div class="countdown-pill mt-4">
+                <span class="countdown-text brightness-125">
+                  {{ timeRemaining }}
+                </span>
               </div>
+            </div>
+
+            <div class="pt-2 space-y-3">
+              <NuxtLink to="/"
+                class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+                style="background-color:#A8CAE0;">
+                Back to home
+              </NuxtLink>
+
+              <NuxtLink to="/topics/quiz"
+                class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
+                style="background-color:rgba(244,205,39,0.35);">
+                Explore more practice
+              </NuxtLink>
             </div>
           </div>
         </transition>
 
-        <div v-if="!loading && !dailyLocked && !showCompleteView && !submitting && !currentQuestion"
-          class="text-center py-10 text-gray-500">
+        <div v-if="showEmptyState" class="text-center py-10 text-gray-500">
           No daily questions available right now.
         </div>
       </div>
@@ -796,13 +797,13 @@ onMounted(async () => {
   }
 }
 
-.loader {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 3px solid rgba(168, 85, 247, 0.2);
-  border-top: 3px solid rgb(168, 85, 247);
-  animation: spin 0.9s linear infinite;
+.spinner {
+    width: 52px;
+    height: 52px;
+    border-radius: 9999px;
+    border: 4px solid rgba(17, 24, 39, 0.12);
+    border-top-color: rgba(17, 24, 39, 0.75);
+    animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {
