@@ -200,6 +200,10 @@ onBeforeUnmount(() => {
         <p class="text-xs text-gray-400 pt-4">
           You can safely close this page.
         </p>
+
+        <p class="text-xs text-gray-400 pt-4">
+          Thank you for supporting TaroTea!
+        </p>
       </template>
 
       <template v-else>

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  middleware: ['logged-in'],
+  // middleware: ['logged-in'],
+  middleware: ['coming-soon'],
 })
 
 import {
@@ -586,7 +587,8 @@ watch(
       <BackLink />
     </div>
 
-    <header v-if="state !== 'complete' && state !== 'loading' && state !== 'locked'" class="space-y-3">
+    <header v-if="state !== 'complete' && state !== 'loading' && state !== 'locked' && state !== 'finalizing'"
+      class="space-y-3">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
         Daily Jyutping Challenge
       </h1>
@@ -610,78 +612,84 @@ watch(
         {{ errorMessage }}
       </div>
 
-      <div v-else-if="state === 'finalizing'" class="flex flex-col items-center justify-center text-center py-10">
-        <div class="loader mb-6"></div>
+      <transition v-else-if="state === 'finalizing' || state === 'complete'" name="fade-scale" mode="out-in">
+        <div v-if="state === 'finalizing'" key="finalizing" class="stat-card hero-card result-2 space-y-4">
+          <div class="spinner mx-auto"></div>
 
-        <p class="text-lg font-semibold text-purple-600">
-          Finalising your score...
-        </p>
-
-        <p class="text-sm text-gray-500 mt-2">
-          Saving your result
-        </p>
-      </div>
-
-      <div v-else-if="state === 'complete'" class="space-y-6">
-        <transition name="card-fade" appear>
-          <div class="stat-card hero-card" :class="resultHeroClass">
-            <p class="stat-label">
-              Daily Exercise Complete
-            </p>
-
-            <h2 class="hero-title">
-              {{ resultMeta.title }}
-            </h2>
-
-            <p class="hero-score">
-              {{ animatedAccuracy }}%
-            </p>
-
-            <p class="hero-subtext">
-              {{ correctCount }} / {{ totalQuestions }} correct
-            </p>
-          </div>
-        </transition>
-
-        <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-          <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
-            :class="tile.className">
-            <p class="stat-label">
-              {{ tile.label }}
-            </p>
-
-            <p class="stat-value">
-              {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
-            </p>
-          </div>
-        </transition-group>
-
-        <div class="text-center">
           <p class="stat-label">
-            Next daily unlocks in
+            Calculating
           </p>
 
-          <div class="countdown-pill mt-4">
-            <span class="countdown-text brightness-125">
-              {{ timeRemaining }}
-            </span>
+          <h2 class="hero-title">
+            Finalising your daily challenge...
+          </h2>
+
+          <p class="hero-subtext">
+            Saving your result and preparing your score
+          </p>
+        </div>
+
+        <div v-else key="complete" class="space-y-6">
+          <transition name="card-fade" appear>
+            <div class="stat-card hero-card" :class="resultHeroClass">
+              <p class="stat-label">
+                Daily Exercise Complete
+              </p>
+
+              <h2 class="hero-title">
+                {{ resultMeta.title }}
+              </h2>
+
+              <p class="hero-score">
+                {{ animatedAccuracy }}%
+              </p>
+
+              <p class="hero-subtext">
+                {{ correctCount }} / {{ totalQuestions }} correct
+              </p>
+            </div>
+          </transition>
+
+          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
+              :class="tile.className">
+              <p class="stat-label">
+                {{ tile.label }}
+              </p>
+
+              <p class="stat-value">
+                {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
+              </p>
+            </div>
+          </transition-group>
+
+          <div class="text-center">
+            <p class="stat-label">
+              Next daily unlocks in
+            </p>
+
+            <div class="countdown-pill mt-4">
+              <span class="countdown-text brightness-125">
+                {{ timeRemaining }}
+              </span>
+            </div>
+          </div>
+
+          <div class="pt-2 space-y-3">
+            <NuxtLink to="/"
+              class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+              style="background-color:#A8CAE0;">
+              Back to home
+            </NuxtLink>
+
+            <NuxtLink to="/topics/quiz"
+              class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
+              style="background-color:rgba(244,205,39,0.35);">
+              Explore more practice
+            </NuxtLink>
           </div>
         </div>
-
-        <div class="pt-2 space-y-3">
-          <NuxtLink to="/"
-            class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-            style="background-color:#A8CAE0;">
-            Back to home
-          </NuxtLink>
-
-          <NuxtLink to="/topics/quiz"
-            class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-            style="background-color:rgba(244,205,39,0.35);">
-            Explore more practice
-          </NuxtLink>
-        </div>
-      </div>
+      </transition>
 
       <div v-else-if="state === 'locked'" class="py-8 text-center space-y-6">
         <div class="inline-block rounded-xl px-4 py-2 text-2xl font-medium text-black">
@@ -693,9 +701,7 @@ watch(
         </p>
 
         <div class="max-w-md mx-auto text-left space-y-4">
-
           <div class="flex items-center justify-between">
-
             <span class="text-sm font-semibold text-gray-800">
               {{ unlockProgressLabel }}
             </span>
@@ -834,14 +840,15 @@ watch(
 </template>
 
 <style scoped>
-.loader {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  border: 3px solid rgba(168, 85, 247, 0.2);
-  border-top: 3px solid rgb(168, 85, 247);
+.spinner {
+  width: 52px;
+  height: 52px;
+  border-radius: 9999px;
+  border: 4px solid rgba(17, 24, 39, 0.12);
+  border-top-color: rgba(17, 24, 39, 0.75);
   animation: spin 0.9s linear infinite;
 }
+
 
 @keyframes spin {
   to {
@@ -947,5 +954,16 @@ watch(
 
 .next-btn-blue {
   background: rgb(126, 147, 255);
+}
+
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
 }
 </style>

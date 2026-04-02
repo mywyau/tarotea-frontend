@@ -570,9 +570,9 @@ onMounted(async () => {
                           ? '#FECACA'
                           : tileColors[i]
                 }" :class="[
-            showResult && option.meaning === currentQuestion.meaning && 'ring-2 ring-emerald-400',
-            showResult && selected === option.meaning && option.meaning !== currentQuestion.meaning && 'animate-shake ring-2 ring-rose-400'
-          ]">
+                  showResult && option.meaning === currentQuestion.meaning && 'ring-2 ring-emerald-400',
+                  showResult && selected === option.meaning && option.meaning !== currentQuestion.meaning && 'animate-shake ring-2 ring-rose-400'
+                ]">
                 {{ option.meaning }}
               </button>
             </div>
@@ -597,6 +597,7 @@ onMounted(async () => {
         </div>
 
         <transition name="fade-scale" mode="out-in">
+          
           <div v-if="showCalculating" key="calculating" class="stat-card hero-card result-2 space-y-4">
             <div class="spinner mx-auto"></div>
 
@@ -798,12 +799,12 @@ onMounted(async () => {
 }
 
 .spinner {
-    width: 52px;
-    height: 52px;
-    border-radius: 9999px;
-    border: 4px solid rgba(17, 24, 39, 0.12);
-    border-top-color: rgba(17, 24, 39, 0.75);
-    animation: spin 0.9s linear infinite;
+  width: 52px;
+  height: 52px;
+  border-radius: 9999px;
+  border: 4px solid rgba(17, 24, 39, 0.12);
+  border-top-color: rgba(17, 24, 39, 0.75);
+  animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {
@@ -910,5 +911,16 @@ onMounted(async () => {
 
 .next-btn-blue {
   background: rgb(126, 147, 255);
+}
+
+.fade-scale-enter-active,
+.fade-scale-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fade-scale-enter-from,
+.fade-scale-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
 }
 </style>
