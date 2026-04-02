@@ -20,6 +20,9 @@ import { masteryXp } from '~/utils/xp/helpers'
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)
 
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
+const playbackRate = ref(1)
 
 const { getAccessToken } = await useAuth()
 
@@ -83,6 +86,12 @@ const wordProgressMap = ref<Record<string, WordProgress>>({})
 const STREAK_CAP = 5
 const WRONG_PENALTY = -12
 const MIN_CALCULATING_MS = 1800
+
+const currentWord = computed(() => {
+  const wordId = question.value?.wordId
+  if (!wordId) return null
+  return wordsById.value[wordId] ?? null
+})
 
 function deltaFor(correct: boolean, streakBefore: number) {
   if (!correct) return WRONG_PENALTY
@@ -325,6 +334,28 @@ const completionTiles = computed(() => [
   }
 ])
 
+const currentWordAudioSrc = computed(() => {
+  const wordId = question.value?.wordId
+  if (!wordId) return null
+  return `${cdnBase}/audio/${wordId}.mp3`
+})
+
+let currentWordAudio: HTMLAudioElement | null = null
+
+async function playCurrentWordAudio() {
+  if (!currentWordAudioSrc.value) return
+
+  try {
+    currentWordAudio?.pause()
+    currentWordAudio = new Audio(currentWordAudioSrc.value)
+    currentWordAudio.playbackRate = playbackRate.value
+    currentWordAudio.volume = 1
+    await currentWordAudio.play()
+  } catch (err) {
+    console.warn('Word audio playback was blocked or failed', err)
+  }
+}
+
 async function answer(index: number) {
   if (answered.value) return
   if (!question.value) return
@@ -345,6 +376,8 @@ async function answer(index: number) {
   } else {
     playIncorrectJingle()
   }
+
+  await playCurrentWordAudio()
 
   const wordId = question.value.wordId
   const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
@@ -427,6 +460,9 @@ async function finalizeTopicQuiz() {
 
 async function next() {
   stop()
+  currentWordAudio?.pause()
+  currentWordAudio = null
+
   answered.value = false
   selectedIndex.value = null
 
@@ -487,9 +523,6 @@ watch(
 
 <template>
   <main class="max-w-xl mx-auto px-4 py-16 space-y-8">
-    <!-- <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline"> -->
-      <!-- ← Back to topic quizzes -->
-    <!-- </NuxtLink> -->
 
     <BackLink />
 
@@ -530,6 +563,11 @@ watch(
         <p class="text-4xl font-semibold min-h-[64px] flex items-center justify-center">
           {{ question.prompt }}
         </p>
+
+        <!-- <div class="h-12 flex items-center justify-center">
+          <AudioButton v-if="answered && currentWord?.id" :src="`${cdnBase}/audio/${currentWord.id}.mp3`"
+            :playback-rate="playbackRate" size="lg" />
+        </div> -->
 
         <div class="min-h-[50px] space-y-3">
           <div class="flex items-center justify-center gap-3">

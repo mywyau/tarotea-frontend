@@ -139,6 +139,7 @@ watchEffect(() => {
       </div>
 
       <div class="flex items-center justify-center gap-3">
+        
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
           size="lg" />
 
