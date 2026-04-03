@@ -511,7 +511,7 @@ onMounted(async () => {
             // '/api/word-progress/weakestV2',
             '/api/word-progress/weakestV3',
             {
-                query: { level: slug.value },
+                query: { level: slug.value, limit: 30 },
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
