@@ -151,31 +151,47 @@ async function enqueueFinalizeJob(
 }
 
 export default defineEventHandler(async (event) => {
-  const auth = await requireUser(event);
-  const userId = auth.sub;
+  const t0 = performance.now();
 
-  const body = (await readBody(event)) as FinalizeBody | undefined;
-
-  if (!body) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Invalid payload",
-    });
-  }
-
-  const attemptId = assertAttemptId(body.attemptId);
-  const mode = normalizeMode(body);
-  const wordOutcomeMap = buildWordOutcomeMap(body.answers);
-
-  const rawAnswers = [...wordOutcomeMap.entries()].map(([wordId, correct]) => ({
-    wordId,
-    correct,
-  }));
-
-  const totalQuestions = rawAnswers.length;
-  const correctCount = rawAnswers.reduce((sum, answer) => sum + (answer.correct ? 1 : 0), 0);
+  let attemptId = "unknown";
+  let userId = "unknown";
+  let mode: QuizMode | "unknown" = "unknown";
 
   try {
+    const tAuth0 = performance.now();
+    const auth = await requireUser(event);
+    userId = auth.sub;
+    const tAuth1 = performance.now();
+
+    const tBody0 = performance.now();
+    const body = (await readBody(event)) as FinalizeBody | undefined;
+    const tBody1 = performance.now();
+
+    if (!body) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid payload",
+      });
+    }
+
+    const tValidate0 = performance.now();
+    attemptId = assertAttemptId(body.attemptId);
+    mode = normalizeMode(body);
+    const wordOutcomeMap = buildWordOutcomeMap(body.answers);
+
+    const rawAnswers = [...wordOutcomeMap.entries()].map(([wordId, correct]) => ({
+      wordId,
+      correct,
+    }));
+
+    const totalQuestions = rawAnswers.length;
+    const correctCount = rawAnswers.reduce(
+      (sum, answer) => sum + (answer.correct ? 1 : 0),
+      0,
+    );
+    const tValidate1 = performance.now();
+
+    const tInsert0 = performance.now();
     const insertResult = await db.query<{ id: string }>(
       `
       insert into xp_quiz_events
@@ -208,10 +224,14 @@ export default defineEventHandler(async (event) => {
         correctCount,
       ],
     );
+    const tInsert1 = performance.now();
 
     const inserted = insertResult.rowCount > 0;
 
+    let enqueueMs = 0;
+
     if (inserted) {
+      const tEnqueue0 = performance.now();
       try {
         await enqueueFinalizeJob(event, { attemptId, userId });
       } catch (enqueueError) {
@@ -221,12 +241,25 @@ export default defineEventHandler(async (event) => {
           mode,
           enqueueError,
         });
-
-        // Optional: keep this row discoverable by a sweeper job.
-        // Could add columns like:
-        // enqueue_failed_at, last_enqueue_error, queued_at
       }
+      const tEnqueue1 = performance.now();
+      enqueueMs = tEnqueue1 - tEnqueue0;
     }
+
+    const totalMs = performance.now() - t0;
+
+    console.log("VOCAB FINALIZE TIMING", {
+      userId,
+      attemptId,
+      mode,
+      inserted,
+      authMs: Math.round(tAuth1 - tAuth0),
+      bodyMs: Math.round(tBody1 - tBody0),
+      validateMs: Math.round(tValidate1 - tValidate0),
+      insertMs: Math.round(tInsert1 - tInsert0),
+      enqueueMs: Math.round(enqueueMs),
+      totalMs: Math.round(totalMs),
+    });
 
     return {
       attemptId,
@@ -240,10 +273,13 @@ export default defineEventHandler(async (event) => {
       },
     };
   } catch (error) {
+    const totalMs = performance.now() - t0;
+
     console.error("VOCAB FINALIZE V4 FAILED", {
       userId,
       attemptId,
       mode,
+      totalMs: Math.round(totalMs),
       error,
     });
 
