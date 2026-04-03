@@ -231,8 +231,8 @@ async function enqueueFinalizeJob(
     deduplicationId: job.attemptId,
     flowControl: {
       key: "quiz-xp-word-progress",
-      parallelism: 20,
-      rate: 800,
+      parallelism: 50,
+      rate: 2400,
       period: "1m",
     },
   });
