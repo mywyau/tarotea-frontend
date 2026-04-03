@@ -539,7 +539,7 @@ watch(
         const progressMap = await $fetch<
             Record<string, { xp: number; streak: number }>
         >(
-            '/api/word-progress/v2',
+            '/api/word-progress/v3',
             {
                 query: { wordIds: wordIds.join(',') },
                 headers: { Authorization: `Bearer ${token}` }
