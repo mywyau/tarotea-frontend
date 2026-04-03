@@ -563,12 +563,7 @@ watch(
         <p class="text-4xl font-semibold min-h-[64px] flex items-center justify-center">
           {{ question.prompt }}
         </p>
-
-        <!-- <div class="h-12 flex items-center justify-center">
-          <AudioButton v-if="answered && currentWord?.id" :src="`${cdnBase}/audio/${currentWord.id}.mp3`"
-            :playback-rate="playbackRate" size="lg" />
-        </div> -->
-
+        
         <div class="min-h-[50px] space-y-3">
           <div class="flex items-center justify-center gap-3">
             <div class="w-32 h-1 bg-gray-200 rounded">

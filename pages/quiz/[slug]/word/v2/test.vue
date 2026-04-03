@@ -389,7 +389,6 @@ async function finalizeQuiz() {
         const token = await getAccessToken()
 
         const res = await $fetch<FinalizeResponse>(
-            // '/api/quiz/grind/finalize-v2',
             '/api/quiz/grind/finalize-v3',
             {
                 method: 'POST',
@@ -510,8 +509,6 @@ onMounted(async () => {
         const token = await getAccessToken()
 
         const weakest = await $fetch<{ id: string }[]>(
-            // '/api/word-progress/weakest',
-            // '/api/word-progress/weakestV2',
             '/api/word-progress/weakestV3',
             {
                 query: { level: slug.value, limit: 30 },

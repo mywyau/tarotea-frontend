@@ -386,14 +386,6 @@ watch(
     }
 )
 
-// watch(
-//   () => data.value,
-//   () => {
-//     resetQuizStateFromStartPayload()
-//   },
-//   { immediate: true }
-// )
-
 watch(
     () => data.value,
     (value) => {
