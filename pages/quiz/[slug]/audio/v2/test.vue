@@ -371,7 +371,7 @@ async function finalizeQuiz() {
   try {
     const token = await getAccessToken()
 
-    const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v2', {
+    const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v4', {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`
@@ -493,7 +493,7 @@ onMounted(async () => {
     const token = await getAccessToken()
 
     const weakest = await $fetch<{ id: string }[]>(
-      '/api/word-progress/weakestV2',
+      '/api/word-progress/weakestV3',
       {
         query: { level: slug.value },
         headers: {
@@ -522,7 +522,7 @@ watch(
 
     const progressMap = await $fetch<
       Record<string, { xp: number; streak: number }>
-    >('/api/word-progress/v2', {
+    >('/api/word-progress/v3', {
       query: { wordIds: wordIds.join(',') },
       headers: { Authorization: `Bearer ${token}` }
     })
