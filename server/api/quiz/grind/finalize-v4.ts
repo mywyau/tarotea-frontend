@@ -84,7 +84,7 @@ function buildWordOutcomeMap(rawAnswers: unknown): Map<string, boolean> {
     if (typeof wordId !== "string" || !wordId.trim()) continue;
     if (typeof correct !== "boolean") continue;
 
-    if (!map.has(wordId)) {
+    if (!map.has(wordId.trim())) {
       map.set(wordId.trim(), correct);
     }
   }
@@ -195,40 +195,52 @@ export default defineEventHandler(async (event) => {
     );
     const tValidate1 = performance.now();
 
-    const tInsert0 = performance.now();
-    const insertResult = await db.query<{ id: string }>(
-      `
-      insert into xp_quiz_events
-        (
-          attempt_id,
-          user_id,
+    const tAcquire0 = performance.now();
+    const client = await db.connect();
+    const tAcquire1 = performance.now();
+
+    let insertResult;
+    let dbQueryMs = 0;
+
+    try {
+      const tQuery0 = performance.now();
+      insertResult = await client.query<{ id: string }>(
+        `
+        insert into xp_quiz_events
+          (
+            attempt_id,
+            user_id,
+            mode,
+            session_key,
+            payload,
+            total_questions,
+            correct_count,
+            processed,
+            processed_at
+          )
+        values
+          ($1, $2, $3, $4, $5::jsonb, $6, $7, false, null)
+        on conflict (user_id, attempt_id) do nothing
+        returning attempt_id as id
+        `,
+        [
+          attemptId,
+          userId,
           mode,
-          session_key,
-          payload,
-          total_questions,
-          correct_count,
-          processed,
-          processed_at
-        )
-      values
-        ($1, $2, $3, $4, $5::jsonb, $6, $7, false, null)
-      on conflict (user_id, attempt_id) do nothing
-      returning attempt_id as id
-      `,
-      [
-        attemptId,
-        userId,
-        mode,
-        attemptId,
-        JSON.stringify({
-          answers: rawAnswers,
-          version: 1,
-        }),
-        totalQuestions,
-        correctCount,
-      ],
-    );
-    const tInsert1 = performance.now();
+          attemptId,
+          JSON.stringify({
+            answers: rawAnswers,
+            version: 2,
+          }),
+          totalQuestions,
+          correctCount,
+        ],
+      );
+      const tQuery1 = performance.now();
+      dbQueryMs = tQuery1 - tQuery0;
+    } finally {
+      client.release();
+    }
 
     const inserted = insertResult.rowCount > 0;
 
@@ -260,7 +272,8 @@ export default defineEventHandler(async (event) => {
       authMs: Math.round(tAuth1 - tAuth0),
       bodyMs: Math.round(tBody1 - tBody0),
       validateMs: Math.round(tValidate1 - tValidate0),
-      insertMs: Math.round(tInsert1 - tInsert0),
+      dbAcquireMs: Math.round(tAcquire1 - tAcquire0),
+      dbQueryMs: Math.round(dbQueryMs),
       enqueueMs: Math.round(enqueueMs),
       totalMs: Math.round(totalMs),
     });
