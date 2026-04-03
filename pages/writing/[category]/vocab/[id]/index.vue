@@ -228,9 +228,6 @@ watch(
 
               <div
                 class="flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4">
-                <!-- <div v-if="isLoading" class="text-sm text-gray-500">
-                  Loading character data…
-                </div> -->
 
                 <div v-if="loadError" class="max-w-sm text-center text-sm text-red-600">
                   {{ loadError }}

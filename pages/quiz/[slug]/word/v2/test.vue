@@ -508,7 +508,8 @@ onMounted(async () => {
 
         const weakest = await $fetch<{ id: string }[]>(
             // '/api/word-progress/weakest',
-            '/api/word-progress/weakestV2',
+            // '/api/word-progress/weakestV2',
+            '/api/word-progress/weakestV3',
             {
                 query: { level: slug.value },
                 headers: {
