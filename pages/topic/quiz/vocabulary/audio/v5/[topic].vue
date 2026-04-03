@@ -390,7 +390,7 @@ async function finalizeAudioQuiz() {
         const token = await getAccessToken()
         const attemptId = ensureFinalizeAttemptId()
 
-        const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v2', {
+        const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v4', {
             method: 'POST',
             headers: { Authorization: `Bearer ${token}` },
             body: {
