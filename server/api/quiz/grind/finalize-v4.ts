@@ -122,6 +122,10 @@ function getQstashClient(event: Parameters<typeof defineEventHandler>[0]): Clien
   return qstashClient;
 }
 
+function safeDeduplicationId(job: { attemptId: string; userId: string }): string {
+  return `${job.userId}__${job.attemptId}`.replace(/[^a-zA-Z0-9._-]/g, "_");
+}
+
 async function enqueueFinalizeJob(
   event: Parameters<typeof defineEventHandler>[0],
   job: { attemptId: string; userId: string },
@@ -140,7 +144,7 @@ async function enqueueFinalizeJob(
     url: workerUrl,
     body: job,
     retries: 3,
-    deduplicationId: `${job.userId}:${job.attemptId}`,
+    deduplicationId: safeDeduplicationId(job),
     flowControl: {
       key: "quiz-finalize-vocab",
       parallelism: 20,
