@@ -4,7 +4,7 @@ definePageMeta({
   ssr: false,
 })
 
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, ref, watch, onBeforeUnmount, type Ref } from '
 
 import {
   playCorrectJingle,
@@ -106,6 +106,56 @@ const {
 const activeSessionKey = ref('')
 const quizTitle = ref('Sentence Audio Quiz')
 const questions = ref<AudioSentenceQuizQuestion[]>([])
+
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => {
+  return frozenElapsedMs.value ?? elapsedMs.value
+})
+
+const formattedElapsedTime = computed(() => {
+  return formatDuration(displayedElapsedMs.value)
+})
 
 const hasQuestions = computed(() => questions.value.length > 0)
 
@@ -227,6 +277,7 @@ function runCompletionAnimations() {
 
 function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
   stop()
+  stopTimer()
 
   current.value = 0
   score.value = 0
@@ -237,6 +288,9 @@ function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
   finishing.value = false
   totalXpEarned.value = 0
   xpDelta.value = null
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+  quizStartedAt.value = null
   resetCompletionAnimations()
 
   wordProgressMap.value = { ...(payload.progress ?? {}) }
@@ -248,6 +302,10 @@ function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
   currentStreak.value = firstWordId
     ? wordProgressMap.value[firstWordId]?.streak ?? 0
     : 0
+
+  if (payload.quiz.questions?.length) {
+    startTimer()
+  }
 }
 
 async function finalizeQuiz() {
@@ -327,6 +385,8 @@ async function next() {
   current.value++
 
   if (current.value >= questions.value.length) {
+    freezeTimer()
+
     if (answerLog.value.length > 0) {
       await finalizeQuiz()
     }
@@ -405,6 +465,7 @@ watch(
   () => slug.value,
   () => {
     stop()
+    stopTimer()
     activeSessionKey.value = ''
     quizTitle.value = 'Sentence Audio Quiz'
     questions.value = []
@@ -420,9 +481,17 @@ watch(
     currentXp.value = 0
     currentStreak.value = 0
     xpDelta.value = null
+    elapsedMs.value = 0
+    frozenElapsedMs.value = null
+    quizStartedAt.value = null
     resetCompletionAnimations()
   }
 )
+
+onBeforeUnmount(() => {
+  stop()
+  stopTimer()
+})
 </script>
 
 <template>
@@ -445,10 +514,8 @@ watch(
           Failed to load sentence audio quiz
         </p>
 
-        <button
-          class="next-btn-blue rounded-xl font-medium text-black px-6 py-2 hover:brightness-110"
-          @click="refresh()"
-        >
+        <button class="next-btn-blue rounded-xl font-medium text-black px-6 py-2 hover:brightness-110"
+          @click="refresh()">
           Retry
         </button>
       </div>
@@ -456,10 +523,8 @@ watch(
       <template v-else>
         <div class="flex items-center gap-3 mb-6">
           <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
-            <div
-              class="bg-purple-300 h-3 rounded-full transition-all duration-300"
-              :style="{ width: progressPercent + '%' }"
-            />
+            <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
+              :style="{ width: progressPercent + '%' }" />
           </div>
 
           <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
@@ -470,10 +535,8 @@ watch(
         <div v-if="showQuiz" class="space-y-6">
           <div class="space-y-6">
             <div class="flex flex-col items-center justify-center min-h-[80px]">
-              <div
-                class="space-y-2 transition-all duration-300"
-                :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'"
-              >
+              <div class="space-y-2 transition-all duration-300"
+                :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
                 <p class="text-2xl text-black leading-relaxed font-semibold text-center">
                   {{ question.prompt }}
                 </p>
@@ -485,20 +548,14 @@ watch(
             </div>
 
             <div class="flex items-center justify-center min-h-[72px]">
-              <AudioButton
-                v-if="question"
-                :key="question.audioKey"
-                :src="`${cdnBase}/audio/${question.audioKey}`"
-                autoplay
-              />
+              <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`"
+                autoplay />
             </div>
 
             <div class="text-center space-y-4">
               <div class="relative">
-                <div
-                  class="space-y-1"
-                  :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'"
-                >
+                <div class="space-y-1"
+                  :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
                   <p class="text-xs uppercase tracking-wide text-gray-500">
                     Target word
                   </p>
@@ -514,16 +571,12 @@ watch(
               </div>
 
               <div class="relative">
-                <div
-                  class="min-h-[50px] space-y-3 transition-all duration-300"
-                  :class="!answered && 'blur-md opacity-70 select-none'"
-                >
+                <div class="min-h-[50px] space-y-3 transition-all duration-300"
+                  :class="!answered && 'blur-md opacity-70 select-none'">
                   <div class="flex items-center justify-center gap-3">
                     <div class="w-32 h-1 bg-gray-200 rounded">
-                      <div
-                        class="h-1 bg-green-500 rounded transition-all duration-500"
-                        :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }"
-                      />
+                      <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                        :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                     </div>
 
                     <div class="relative flex items-center">
@@ -532,11 +585,9 @@ watch(
                       </span>
 
                       <transition name="xp-fall">
-                        <span
-                          v-if="xpDelta !== null"
+                        <span v-if="xpDelta !== null"
                           class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                          :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'"
-                        >
+                          :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
                           {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                         </span>
                       </transition>
@@ -553,9 +604,7 @@ watch(
             </div>
 
             <div class="grid grid-cols-1 gap-4 w-full">
-              <button
-                v-for="(option, i) in question.options"
-                :key="i"
+              <button v-for="(option, i) in question.options" :key="i"
                 class="rounded-xl flex items-center justify-center text-lg font-medium text-center p-5 select-none transition-all duration-200 ease-out shadow-sm active:scale-95"
                 :style="{
                   backgroundColor:
@@ -566,24 +615,19 @@ watch(
                         : i === selectedIndex
                           ? '#FECACA'
                           : tileColors[i]
-                }"
-                :class="[
+                }" :class="[
                   !answered && 'hover:-translate-y-1 hover:shadow-lg hover:bg-gray-50 hover:brightness-110',
                   answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
                   answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-                ]"
-                @click="answer(i)"
-              >
+                ]" @click="answer(i)">
                 {{ option }}
               </button>
             </div>
 
             <div class="h-10 mt-6">
-              <button
-                v-if="answered"
+              <button v-if="answered"
                 class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
-                @click="next"
-              >
+                @click="next">
                 Next
               </button>
             </div>
@@ -623,7 +667,7 @@ watch(
                 </p>
 
                 <p class="hero-subtext">
-                  {{ score }} / {{ questions.length }} correct
+                  Time: {{ formattedElapsedTime }}
                 </p>
               </div>
             </transition>
@@ -648,19 +692,15 @@ watch(
             </transition-group>
 
             <div class="pt-2 space-y-3">
-              <NuxtLink
-                :to="`/quiz`"
+              <NuxtLink :to="`/quiz`"
                 class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:#A8CAE0;"
-              >
+                style="background-color:#A8CAE0;">
                 Play Again
               </NuxtLink>
 
-              <NuxtLink
-                :to="`/level/${slug}`"
+              <NuxtLink :to="`/level/${slug}`"
                 class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:rgba(244,205,39,0.35);"
-              >
+                style="background-color:rgba(244,205,39,0.35);">
                 Back to level
               </NuxtLink>
             </div>
