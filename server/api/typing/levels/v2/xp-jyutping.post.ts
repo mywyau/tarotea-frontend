@@ -104,13 +104,41 @@ function rollupAnswersByWord(
     });
   }
 
+  rolledUp.sort((a, b) => a.wordId.localeCompare(b.wordId));
   return rolledUp;
 }
 
+function nowMs() {
+  return performance.now();
+}
+
+async function timedStep<T>(
+  timings: Record<string, number>,
+  label: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const start = nowMs();
+  try {
+    return await fn();
+  } finally {
+    timings[label] = Math.round(nowMs() - start);
+  }
+}
+
+function logSummary(details: Record<string, unknown>) {
+  console.info("[dojo-level-worker]", JSON.stringify(details));
+}
+
 export default defineEventHandler(async (event) => {
+  const requestStart = nowMs();
+  const timings: Record<string, number> = {};
+
   const config = useRuntimeConfig();
 
-  const rawBody = await readRawBody(event, "utf8");
+  const rawBody = await timedStep(timings, "readBodyMs", async () => {
+    return readRawBody(event, "utf8");
+  });
+
   if (!rawBody) {
     throw createError({
       statusCode: 400,
@@ -131,10 +159,12 @@ export default defineEventHandler(async (event) => {
     nextSigningKey: config.qstashNextSigningKey,
   });
 
-  const isValid = await receiver.verify({
-    signature,
-    body: rawBody,
-    url: `${config.public.siteUrl}/api/typing/levels/v2/xp-jyutping`,
+  const isValid = await timedStep(timings, "verifyMs", async () => {
+    return receiver.verify({
+      signature,
+      body: rawBody,
+      url: `${config.public.siteUrl}/api/typing/levels/v2/xp-jyutping`,
+    });
   });
 
   if (!isValid) {
@@ -164,26 +194,37 @@ export default defineEventHandler(async (event) => {
   let alreadyProcessed = false;
 
   try {
-    await client.query("BEGIN");
+    await timedStep(timings, "beginMs", async () => {
+      await client.query("BEGIN");
+    });
 
-    const eventRes = await client.query<ExistingEventRow>(
-      `
-      select
-        id,
-        mode,
-        total_delta,
-        correct_count,
-        total_questions,
-        processed,
-        payload
-      from xp_jyutping_events
-      where user_id = $1
-        and session_key = $2
-      limit 1
-      for update
-      `,
-      [userId, sessionKey]
-    );
+    await timedStep(timings, "userLockMs", async () => {
+      await client.query(
+        `select pg_advisory_xact_lock(hashtext($1))`,
+        [userId]
+      );
+    });
+
+    const eventRes = await timedStep(timings, "eventLookupMs", async () => {
+      return client.query<ExistingEventRow>(
+        `
+        select
+          id,
+          mode,
+          total_delta,
+          correct_count,
+          total_questions,
+          processed,
+          payload
+        from xp_jyutping_events
+        where user_id = $1
+          and session_key = $2
+        limit 1
+        for update
+        `,
+        [userId, sessionKey]
+      );
+    });
 
     if (eventRes.rows.length === 0) {
       throw createError({
@@ -209,7 +250,9 @@ export default defineEventHandler(async (event) => {
 
     if (quizEvent.processed) {
       alreadyProcessed = true;
-      await client.query("COMMIT");
+      await timedStep(timings, "commitMs", async () => {
+        await client.query("COMMIT");
+      });
     } else {
       const storedPayload = parseStoredPayload(quizEvent.payload);
       const payloadAnswers = storedPayload.answers ?? [];
@@ -221,29 +264,42 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      const uniqueWordIds = [...new Set(payloadAnswers.map((a) => a.wordId))];
+      const uniqueWordIds = [...new Set(payloadAnswers.map((a) => a.wordId))].sort();
 
       const existingWordRowsRes = uniqueWordIds.length
-        ? await client.query<{
-            word_id: string;
-            xp: number | string | null;
-            streak: number | string | null;
-          }>(
-            `
-            select word_id, xp, streak
-            from user_word_progress
-            where user_id = $1
-              and word_id = any($2::text[])
-            `,
-            [userId, uniqueWordIds]
-          )
-        : {
-            rows: [] as Array<{
+        ? await timedStep(timings, "existingProgressReadMs", async () => {
+            return client.query<{
               word_id: string;
               xp: number | string | null;
               streak: number | string | null;
-            }>,
-          };
+            }>(
+              `
+              select word_id, xp, streak
+              from user_word_progress
+              where user_id = $1
+                and word_id = any($2::text[])
+              order by word_id
+              `,
+              [userId, uniqueWordIds]
+            );
+          })
+        : { rows: [] as Array<{ word_id: string; xp: number | string | null; streak: number | string | null }> };
+
+      if (uniqueWordIds.length > 0) {
+        await timedStep(timings, "progressRowLockMs", async () => {
+          await client.query(
+            `
+            select word_id
+            from user_word_progress
+            where user_id = $1
+              and word_id = any($2::text[])
+            order by word_id
+            for update
+            `,
+            [userId, uniqueWordIds]
+          );
+        });
+      }
 
       const existingMap = new Map<string, { xp: number; streak: number }>(
         existingWordRowsRes.rows.map((row) => [
@@ -255,79 +311,82 @@ export default defineEventHandler(async (event) => {
         ])
       );
 
-      const rolledUpWordProgress = rollupAnswersByWord(
-        payloadAnswers,
-        existingMap
-      );
+      const rolledUpWordProgress = rollupAnswersByWord(payloadAnswers, existingMap);
 
       if (rolledUpWordProgress.length > 0) {
-        await client.query(
-          `
-          insert into user_word_progress (
-            user_id,
-            word_id,
-            xp,
-            streak,
-            correct_count,
-            wrong_count,
-            last_seen_at,
-            last_correct_at,
-            created_at,
-            updated_at
-          )
-          select
-            $1,
-            t.word_id,
-            t.xp,
-            t.streak,
-            t.correct_inc,
-            t.wrong_inc,
-            now(),
-            case when t.correct_inc > 0 then now() else null end,
-            now(),
-            now()
-          from unnest(
-            $2::text[],
-            $3::int[],
-            $4::int[],
-            $5::int[],
-            $6::int[]
-          ) as t(word_id, xp, streak, correct_inc, wrong_inc)
-          on conflict (user_id, word_id)
-          do update set
-            xp = excluded.xp,
-            streak = excluded.streak,
-            correct_count = coalesce(user_word_progress.correct_count, 0) + excluded.correct_count,
-            wrong_count = coalesce(user_word_progress.wrong_count, 0) + excluded.wrong_count,
-            last_seen_at = now(),
-            last_correct_at = case
-              when excluded.correct_count > 0 then now()
-              else user_word_progress.last_correct_at
-            end,
-            updated_at = now()
-          `,
-          [
-            userId,
-            rolledUpWordProgress.map((r) => r.wordId),
-            rolledUpWordProgress.map((r) => r.xp),
-            rolledUpWordProgress.map((r) => r.streak),
-            rolledUpWordProgress.map((r) => r.correctInc),
-            rolledUpWordProgress.map((r) => r.wrongInc),
-          ]
-        );
+        await timedStep(timings, "progressUpsertMs", async () => {
+          await client.query(
+            `
+            insert into user_word_progress (
+              user_id,
+              word_id,
+              xp,
+              streak,
+              correct_count,
+              wrong_count,
+              last_seen_at,
+              last_correct_at,
+              created_at,
+              updated_at
+            )
+            select
+              $1,
+              t.word_id,
+              t.xp,
+              t.streak,
+              t.correct_inc,
+              t.wrong_inc,
+              now(),
+              case when t.correct_inc > 0 then now() else null end,
+              now(),
+              now()
+            from unnest(
+              $2::text[],
+              $3::int[],
+              $4::int[],
+              $5::int[],
+              $6::int[]
+            ) as t(word_id, xp, streak, correct_inc, wrong_inc)
+            on conflict (user_id, word_id)
+            do update set
+              xp = excluded.xp,
+              streak = excluded.streak,
+              correct_count = coalesce(user_word_progress.correct_count, 0) + excluded.correct_count,
+              wrong_count = coalesce(user_word_progress.wrong_count, 0) + excluded.wrong_count,
+              last_seen_at = now(),
+              last_correct_at = case
+                when excluded.correct_count > 0 then now()
+                else user_word_progress.last_correct_at
+              end,
+              updated_at = now()
+            `,
+            [
+              userId,
+              rolledUpWordProgress.map((r) => r.wordId),
+              rolledUpWordProgress.map((r) => r.xp),
+              rolledUpWordProgress.map((r) => r.streak),
+              rolledUpWordProgress.map((r) => r.correctInc),
+              rolledUpWordProgress.map((r) => r.wrongInc),
+            ]
+          );
+        });
       }
 
-      await client.query(
-        `
-        update xp_jyutping_events
-        set processed = true,
-            processed_at = now()
-        where id = $1
-        `,
-        [quizEvent.id]
-      );
+      await timedStep(timings, "eventUpdateMs", async () => {
+        await client.query(
+          `
+          update xp_jyutping_events
+          set processed = true,
+              processed_at = now()
+          where id = $1
+          `,
+          [quizEvent.id]
+        );
+      });
 
-      await client.query("COMMIT");
+      await timedStep(timings, "commitMs", async () => {
+        await client.query("COMMIT");
+      });
     }
   } catch (error) {
     await client.query("ROLLBACK");
@@ -336,9 +395,15 @@ export default defineEventHandler(async (event) => {
     client.release();
   }
 
-  await redis
-    .del(`dojo:typing:level:${userId}:${sessionKey}`)
-    .catch(() => {});
+  await redis.del(`dojo:typing:level:${userId}:${sessionKey}`).catch(() => {});
+
+  logSummary({
+    userId,
+    sessionKey,
+    deduped: alreadyProcessed,
+    ...timings,
+    totalMs: Math.round(nowMs() - requestStart),
+  });
 
   return {
     session: sessionStats,
