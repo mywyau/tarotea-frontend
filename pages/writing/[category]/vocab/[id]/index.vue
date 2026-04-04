@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from "vue"
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 definePageMeta({
   ssr: false,
@@ -127,9 +127,9 @@ async function loadWriter(char: string) {
     const HanziWriter = (mod as { default?: any }).default ?? mod
 
     writer.value = HanziWriter.create(writerHost.value, char, {
-      width: 320,
-      height: 320,
-      padding: 20,
+      width: writerSize.value,
+      height: writerSize.value,
+      padding: writerSize.value < 260 ? 12 : 20,
       showOutline: true,
       showCharacter: false,
       outlineColor: "#d1d5db",
@@ -138,7 +138,7 @@ async function loadWriter(char: string) {
       strokeHighlightSpeed: 2,
       delayBetweenStrokes: 250,
       delayBetweenLoops: 1200,
-      drawingWidth: 18,
+      drawingWidth: writerSize.value < 260 ? 14 : 18,
       onLoadCharDataSuccess: () => {
         isReady.value = true
         isLoading.value = false
@@ -165,6 +165,26 @@ async function loadWriter(char: string) {
   }
 }
 
+const writerSize = ref(320)
+
+function updateWriterSize() {
+  if (!process.client) return
+
+  const width = window.innerWidth
+  if (width < 400) writerSize.value = 220
+  else if (width < 640) writerSize.value = 260
+  else writerSize.value = 320
+}
+
+onMounted(() => {
+  updateWriterSize()
+  window.addEventListener("resize", updateWriterSize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener("resize", updateWriterSize)
+})
+
 watch(
   () => word.value?.id,
   () => {
@@ -185,19 +205,18 @@ watch(
 
 <template>
 
-  <div class="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
 
     <div class="mb-6">
       <BackLink />
     </div>
-
 
     <div class="mb-6">
 
       <p class="text-sm font-medium uppercase tracking-wide text-gray-500">
         Writing Practice
       </p>
-      <h1 class="mt-2 text-3xl font-bold text-gray-900">
+      <h1 class="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">
         Follow the brush strokes
       </h1>
       <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-600">
@@ -216,7 +235,7 @@ watch(
         </div>
 
         <template v-else>
-          <div class="mt-5 grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+          <div class="mt-5 grid gap-6 md:grid-cols-[minmax(0,1fr)_280px]">
             <!-- Left side -->
             <div class="space-y-5">
               <div class="rounded-xl bg-gray-50 px-4 py-3">
@@ -226,8 +245,50 @@ watch(
                 <p class="mt-1 text-sm text-gray-600">{{ word.meaning || "" }}</p>
               </div>
 
+              <div class="rounded-xl border border-gray-200 bg-white p-4 md:hidden">
+                <div class="mb-4">
+                  <p class="text-sm font-medium text-gray-500">Current character</p>
+                  <p class="mt-1 text-3xl font-bold text-gray-900">
+                    {{ currentCharacter || "—" }}
+                  </p>
+                  <p class="mt-2 text-sm text-gray-600">
+                    Progress: {{ progressLabel }}
+                  </p>
+                </div>
+
+                <div class="space-y-3">
+                  <button type="button"
+                    class="w-full rounded-xl border border-gray-900 bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
+                    :disabled="!isReady" @click="animateCurrentCharacter">
+                    Play strokes
+                  </button>
+
+                  <button type="button"
+                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                    :disabled="!isReady || !selectedCharacters.length" @click="animateWholeWord">
+                    Play whole word
+                  </button>
+                </div>
+
+                <div class="my-5 border-t border-gray-200"></div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <button type="button"
+                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                    :disabled="currentCharIndex === 0" @click="previousCharacter">
+                    Previous
+                  </button>
+
+                  <button type="button"
+                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
+                    :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
+                    Next
+                  </button>
+                </div>
+              </div>
+
               <div
-                class="flex min-h-[360px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4">
+                class="flex min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] items-center justify-center rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
 
                 <div v-if="loadError" class="max-w-sm text-center text-sm text-red-600">
                   {{ loadError }}
@@ -241,12 +302,14 @@ watch(
                   No Chinese character available for this word.
                 </div>
 
-                <div ref="writerHost" class="h-[320px] w-[320px]" />
+                <div ref="writerHost" :style="{ width: `${writerSize}px`, height: `${writerSize}px` }" />
               </div>
             </div>
 
             <!-- Right side panel -->
-            <aside class="h-fit rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+            <aside class="hidden md:sticky md:top-6 md:block h-fit rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+              
+
               <div class="mb-4">
                 <p class="text-sm font-medium text-gray-500">Current character</p>
                 <p class="mt-1 text-3xl font-bold text-gray-900">
@@ -255,6 +318,16 @@ watch(
                 <p class="mt-2 text-sm text-gray-600">
                   Progress: {{ progressLabel }}
                 </p>
+              </div>
+
+              <div v-if="selectedCharacters.length > 1" class="mb-5 flex flex-wrap gap-2">
+                <button v-for="(char, index) in selectedCharacters" :key="`${char}-${index}`" type="button"
+                  class="rounded-lg border px-3 py-1.5 text-base font-semibold transition" :class="index === currentCharIndex
+                    ? 'border-gray-900 bg-gray-900 text-white'
+                    : 'border-gray-300 bg-white text-gray-900'
+                    " @click="currentCharIndex = index">
+                  {{ char }}
+                </button>
               </div>
 
               <div class="space-y-3">
