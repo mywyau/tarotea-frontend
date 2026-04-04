@@ -193,7 +193,7 @@ watch(
 )
 
 watch(
-  [() => currentCharacter.value, writerHost],
+  [() => currentCharacter.value, writerHost, () => writerSize.value],
   async ([char, host]) => {
     if (!char || !host) return
     await nextTick()
@@ -201,6 +201,7 @@ watch(
   },
   { immediate: true, flush: "post" },
 )
+
 </script>
 
 <template>
