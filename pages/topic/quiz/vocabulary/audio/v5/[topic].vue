@@ -66,11 +66,11 @@ type FinalizeResponse = {
         mode: string
         correctCount: number
         totalQuestions: number
-        xpEarned: number
     }
     attemptId: string
     queued?: boolean
     deduped?: boolean
+    status?: string
 }
 
 const finalizeAttemptId = ref<string | null>(null)
@@ -109,6 +109,31 @@ function resetFinalizeState() {
     resetCompletionAnimations()
 }
 
+function calculateQuizXpEarned() {
+    const localProgress: Record<string, WordProgress> = Object.fromEntries(
+        Object.entries(initialProgressMap.value).map(([wordId, progress]) => [
+            wordId,
+            { ...progress }
+        ])
+    )
+
+    let total = 0
+
+    for (const answer of answerLog.value) {
+        const prev = localProgress[answer.wordId] ?? { xp: 0, streak: 0 }
+        const delta = deltaFor(answer.correct, prev.streak)
+
+        total += delta
+
+        localProgress[answer.wordId] = {
+            xp: Math.max(0, prev.xp + delta),
+            streak: answer.correct ? prev.streak + 1 : 0
+        }
+    }
+
+    return total
+}
+
 const quizData = ref<TopicAudioQuizPayload | null>(null)
 const quizLoading = ref(false)
 const quizLoadError = ref<string | null>(null)
@@ -132,6 +157,7 @@ const completionAnimated = ref(false)
 const completionSoundPlayed = ref(false)
 
 const wordProgressMap = ref<Record<string, WordProgress>>({})
+const initialProgressMap = ref<Record<string, WordProgress>>({})
 
 const tileColors = ref<string[]>([])
 
@@ -169,6 +195,7 @@ function resetQuizState() {
     selectedIndex.value = null
     answerLog.value = []
     wordProgressMap.value = {}
+    initialProgressMap.value = {}
     currentXp.value = null
     currentStreak.value = null
     xpDelta.value = null
@@ -194,7 +221,20 @@ async function loadQuiz() {
         )
 
         quizData.value = res
-        wordProgressMap.value = { ...res.progressMap }
+
+        wordProgressMap.value = Object.fromEntries(
+            Object.entries(res.progressMap).map(([wordId, progress]) => [
+                wordId,
+                { ...progress }
+            ])
+        )
+
+        initialProgressMap.value = Object.fromEntries(
+            Object.entries(res.progressMap).map(([wordId, progress]) => [
+                wordId,
+                { ...progress }
+            ])
+        )
 
         const firstId = res.questions[0]?.wordId
         currentStreak.value = firstId
@@ -407,7 +447,7 @@ async function finalizeAudioQuiz() {
             await sleep(remaining)
         }
 
-        totalXpEarned.value = res.quiz.xpEarned
+        totalXpEarned.value = calculateQuizXpEarned()
         finalizeCompleted.value = true
 
         console.info('Finalize topic audio quiz succeeded', {

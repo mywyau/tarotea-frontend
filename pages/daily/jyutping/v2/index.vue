@@ -1,8 +1,8 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  // middleware: ['logged-in'],
-  middleware: ['coming-soon'],
+  middleware: ['logged-in'],
+  // middleware: ['coming-soon'],
 })
 
 import {
