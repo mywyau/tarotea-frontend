@@ -600,12 +600,7 @@ watch(
 
 <template>
   <main class="mx-auto max-w-xl px-6 pt-12 pb-28 sm:pb-12">
-    <!-- <div class="mb-6">
-      <NuxtLink :to="`/dojo/topic`" class="text-black text-sm hover:underline">
-        ← Back to Topic Dojo
-      </NuxtLink>
-    </div> -->
-
+    
     <div class="mb-6">
       <BackLink />
     </div>
