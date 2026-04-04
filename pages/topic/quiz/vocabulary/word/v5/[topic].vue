@@ -138,6 +138,63 @@ const selectedIndex = ref<number | null>(null)
 
 const tileColors = ref<string[]>([])
 
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function resetTimer() {
+  stopTimer()
+  quizStartedAt.value = null
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => {
+  return frozenElapsedMs.value ?? elapsedMs.value
+})
+
+const formattedElapsedTime = computed(() => {
+  return formatDuration(displayedElapsedMs.value)
+})
+
 function generateTileColors() {
   tileColors.value = shuffleFisherYates(brandColours).slice(0, 4)
 }
@@ -172,6 +229,7 @@ function resetQuizState() {
   xpDelta.value = null
   currentXp.value = null
   currentStreak.value = null
+  resetTimer()
   resetFinalizeState()
 }
 
@@ -204,6 +262,10 @@ async function loadQuiz() {
     currentXp.value = firstId
       ? (res.progressMap[firstId]?.xp ?? 0)
       : 0
+
+    if (res.questions?.length) {
+      startTimer()
+    }
   } catch (err) {
     console.error('Load topic quiz failed', err)
     quizLoadError.value = 'Could not load quiz.'
@@ -469,6 +531,8 @@ async function next() {
   current.value++
 
   if (current.value >= questions.value.length) {
+    freezeTimer()
+
     if (answerLog.value.length > 0) {
       await finalizeTopicQuiz()
     }
@@ -486,7 +550,10 @@ async function next() {
 watch(
   () => showResults.value,
   (visible) => {
+
     if (!visible) return
+
+    stopTimer()
 
     if (!completionAnimated.value) {
       completionAnimated.value = true
@@ -518,6 +585,13 @@ watch(
   },
   { immediate: true }
 )
+
+onBeforeUnmount(() => {
+  stop()
+  stopTimer()
+  currentWordAudio?.pause()
+  currentWordAudio = null
+})
 </script>
 
 
@@ -563,7 +637,7 @@ watch(
         <p class="text-4xl font-semibold min-h-[64px] flex items-center justify-center">
           {{ question.prompt }}
         </p>
-        
+
         <div class="min-h-[50px] space-y-3">
           <div class="flex items-center justify-center gap-3">
             <div class="w-32 h-1 bg-gray-200 rounded">
@@ -673,9 +747,9 @@ watch(
                 {{ animatedAccuracy }}%
               </p>
 
-              <p class="hero-subtext">
-                {{ score }} / {{ questions.length }} correct
-              </p>
+              <div class="hero-subtext space-y-1">
+                <p>Time: {{ formattedElapsedTime }}</p>
+              </div>
             </div>
           </transition>
 

@@ -408,10 +408,7 @@ watch(
 
 <template>
   <main class="max-w-2xl mx-auto px-4 py-16 space-y-8">
-    <!-- <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline"> -->
-      <!-- ← Back to topic quizzes -->
-    <!-- </NuxtLink> -->
-
+    
     <BackLink />
 
     <section class="text-center space-y-4">
