@@ -31,11 +31,11 @@ type FinalizeResponse = {
         mode: string
         correctCount: number
         totalQuestions: number
-        xpEarned: number
     }
     attemptId: string
     queued?: boolean
     deduped?: boolean
+    status?: string
 }
 
 const quizStartedAt = ref<number | null>(null)
@@ -153,10 +153,37 @@ function resetQuizRunState() {
     xpDelta.value = null
     currentXp.value = null
     currentStreak.value = null
+    initialProgressMap.value = {}
+    wordProgressMap.value = {}
     elapsedMs.value = 0
     frozenElapsedMs.value = null
     quizStartedAt.value = null
     stopTimer()
+}
+
+function calculateQuizXpEarned() {
+    const localProgress: Record<string, { xp: number; streak: number }> = Object.fromEntries(
+        Object.entries(initialProgressMap.value).map(([wordId, progress]) => [
+            wordId,
+            { ...progress }
+        ])
+    )
+
+    let total = 0
+
+    for (const answer of answerLog.value) {
+        const prev = localProgress[answer.wordId] ?? { xp: 0, streak: 0 }
+        const delta = deltaFor(answer.correct, prev.streak)
+
+        total += delta
+
+        localProgress[answer.wordId] = {
+            xp: Math.max(0, prev.xp + delta),
+            streak: answer.correct ? prev.streak + 1 : 0
+        }
+    }
+
+    return total
 }
 
 const answerLog = ref<QuizAnswer[]>([])
@@ -179,6 +206,7 @@ const currentXp = ref<number | null>(null)
 const currentStreak = ref<number | null>(null)
 
 const wordProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
+const initialProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
 
 const { getAccessToken } = await useAuth()
 
@@ -409,7 +437,7 @@ async function finalizeQuiz() {
             await sleep(remaining)
         }
 
-        totalXpEarned.value = res.quiz.xpEarned
+        totalXpEarned.value = calculateQuizXpEarned()
         finalizeCompleted.value = true
 
         console.info('Quiz finalized', {
@@ -546,7 +574,19 @@ watch(
             }
         )
 
-        wordProgressMap.value = progressMap
+        wordProgressMap.value = Object.fromEntries(
+            Object.entries(progressMap).map(([wordId, progress]) => [
+                wordId,
+                { ...progress }
+            ])
+        )
+
+        initialProgressMap.value = Object.fromEntries(
+            Object.entries(progressMap).map(([wordId, progress]) => [
+                wordId,
+                { ...progress }
+            ])
+        )
 
         const firstId = qs[0]?.wordId
         currentStreak.value = progressMap[firstId]?.streak ?? 0
