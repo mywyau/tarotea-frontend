@@ -4,7 +4,7 @@ definePageMeta({
   ssr: false,
 })
 
-import { computed, ref, watch, onBeforeUnmount, type Ref } from '
+import { computed, onBeforeUnmount, ref, watch, type Ref } from 'vue'
 
 import {
   playCorrectJingle,
@@ -13,6 +13,7 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
+
 import { brandColours } from '~/utils/branding/helpers'
 import { shuffleFisherYates } from '~/utils/shuffle'
 import { masteryXp } from '~/utils/xp/helpers'
