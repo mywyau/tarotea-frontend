@@ -7,6 +7,7 @@ import { topics } from "~/utils/topics/topics";
 import { totalQuestions, weakestWordRatio } from "~/utils/weakestWords";
 
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
+const SENTENCE_CONTENT_CACHE_TTL_SECONDS = 60 * 10;
 
 type Scope = "level" | "topic";
 type Variant = "chinese";
@@ -40,14 +41,21 @@ type QuizSession = {
   }>;
 };
 
+type CachedSentenceContent = {
+  items: TrainSentence[];
+  sourceWordIds: string[];
+};
+
 function getSessionRedisKey(userId: string, sessionKey: string) {
   return `dojo:sentence:${userId}:${sessionKey}`;
 }
 
+function getContentCacheKey(scope: Scope, slug: string) {
+  return `dojo:sentence:content:${scope}:${slug}`;
+}
+
 function resolveScope(rawScope: string): Scope {
-  if (rawScope === "level" || rawScope === "topic") {
-    return rawScope;
-  }
+  if (rawScope === "level" || rawScope === "topic") return rawScope;
 
   throw createError({
     statusCode: 400,
@@ -56,9 +64,7 @@ function resolveScope(rawScope: string): Scope {
 }
 
 function resolveVariant(rawVariant: string): Variant {
-  if (rawVariant === "chinese") {
-    return rawVariant;
-  }
+  if (rawVariant === "chinese") return rawVariant;
 
   throw createError({
     statusCode: 400,
@@ -100,40 +106,70 @@ function pickWeightedSentences(
   limit: number,
   weakestRatio: number,
 ) {
-  const uniqueAll = all.filter(
-    (item, index, arr) =>
-      arr.findIndex((x) => x.sentenceId === item.sentenceId) === index,
-  );
-
+  const seenSentenceIds = new Set<string>();
   const weakestSet = new Set(weakestIds);
 
-  const weak = uniqueAll.filter((s) => weakestSet.has(s.sourceWordId));
-  const normal = uniqueAll.filter((s) => !weakestSet.has(s.sourceWordId));
+  const weak: TrainSentence[] = [];
+  const normal: TrainSentence[] = [];
 
-  const safeLimit = Math.min(limit, uniqueAll.length);
+  for (const sentence of all) {
+    if (seenSentenceIds.has(sentence.sentenceId)) continue;
+    seenSentenceIds.add(sentence.sentenceId);
+
+    if (weakestSet.has(sentence.sourceWordId)) {
+      weak.push(sentence);
+    } else {
+      normal.push(sentence);
+    }
+  }
+
+  const safeLimit = Math.min(limit, weak.length + normal.length);
   const weakTarget = Math.min(
     Math.round(safeLimit * weakestRatio),
     weak.length,
   );
 
-  const pickedWeak = shuffleArray(weak).slice(0, weakTarget);
-  const pickedNormal = shuffleArray(normal).slice(
-    0,
-    safeLimit - pickedWeak.length,
-  );
+  const shuffledWeak = shuffleArray(weak);
+  const shuffledNormal = shuffleArray(normal);
 
-  const selected = [...pickedWeak, ...pickedNormal];
+  const selected = [
+    ...shuffledWeak.slice(0, weakTarget),
+    ...shuffledNormal.slice(0, safeLimit - weakTarget),
+  ];
 
   if (selected.length < safeLimit) {
     const used = new Set(selected.map((s) => s.sentenceId));
-    const remaining = shuffleArray(
-      uniqueAll.filter((s) => !used.has(s.sentenceId)),
-    );
 
-    selected.push(...remaining.slice(0, safeLimit - selected.length));
+    for (const sentence of [...shuffledWeak, ...shuffledNormal]) {
+      if (selected.length >= safeLimit) break;
+      if (used.has(sentence.sentenceId)) continue;
+      used.add(sentence.sentenceId);
+      selected.push(sentence);
+    }
   }
 
   return shuffleArray(selected);
+}
+
+function nowMs() {
+  return performance.now();
+}
+
+async function timedStep<T>(
+  timings: Record<string, number>,
+  label: string,
+  fn: () => Promise<T>,
+): Promise<T> {
+  const start = nowMs();
+  try {
+    return await fn();
+  } finally {
+    timings[label] = Math.round(nowMs() - start);
+  }
+}
+
+function logSummary(details: Record<string, unknown>) {
+  console.info("[dojo-sentence-start]", JSON.stringify(details));
 }
 
 async function loadSentenceSet(
@@ -151,7 +187,6 @@ async function loadSentenceSet(
       );
     }
 
-    // Adjust this path only if your topic sentence CDN folder differs.
     return await $fetch<SentenceSetResponse>(
       `${cdnBase}/topic-sentences/${slug}-sentences.json`,
     );
@@ -163,8 +198,54 @@ async function loadSentenceSet(
   }
 }
 
+async function getCachedSentenceContent(
+  scope: Scope,
+  slug: string,
+  timings: Record<string, number>,
+): Promise<CachedSentenceContent> {
+  const cacheKey = getContentCacheKey(scope, slug);
+
+  const cached = await timedStep(timings, "contentCacheReadMs", async () => {
+    return redis.get(cacheKey);
+  });
+
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached) as CachedSentenceContent;
+      if (parsed && Array.isArray(parsed.items) && Array.isArray(parsed.sourceWordIds)) {
+        timings.contentSource = 0;
+        return parsed;
+      }
+    } catch {
+      // ignore bad cache
+    }
+  }
+
+  const sentenceSet = await timedStep(timings, "cdnFetchMs", async () => {
+    return loadSentenceSet(scope, slug);
+  });
+
+  const content = await timedStep(timings, "contentBuildMs", async () => {
+    const items = Array.isArray(sentenceSet.items) ? sentenceSet.items : [];
+    const sourceWordIds = [...new Set(items.map((s) => s.sourceWordId))];
+    return { items, sourceWordIds };
+  });
+
+  await timedStep(timings, "contentCacheWriteMs", async () => {
+    await redis.set(cacheKey, JSON.stringify(content), {
+      ex: SENTENCE_CONTENT_CACHE_TTL_SECONDS,
+    });
+  });
+
+  timings.contentSource = 1;
+  return content;
+}
+
 export default defineEventHandler(async (event) => {
-  const auth = await requireUser(event);
+  const requestStart = nowMs();
+  const timings: Record<string, number> = {};
+
+  const auth = await timedStep(timings, "authMs", async () => requireUser(event));
   const userId = auth.sub;
 
   const query = getQuery(event);
@@ -180,8 +261,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const sentenceSet = await loadSentenceSet(scope, slug);
-  const allSentences = sentenceSet.items ?? [];
+  const { items: allSentences, sourceWordIds: allWordIds } = await timedStep(
+    timings,
+    "loadContentMs",
+    async () => getCachedSentenceContent(scope, slug, timings),
+  );
 
   if (!allSentences.length) {
     const sessionKey = crypto.randomUUID();
@@ -195,11 +279,23 @@ export default defineEventHandler(async (event) => {
       allowedSentences: [],
     };
 
-    await redis.set(
-      getSessionRedisKey(userId, sessionKey),
-      JSON.stringify(session),
-      { ex: QUIZ_SESSION_TTL_SECONDS },
-    );
+    await timedStep(timings, "sessionWriteMs", async () => {
+      await redis.set(
+        getSessionRedisKey(userId, sessionKey),
+        JSON.stringify(session),
+        { ex: QUIZ_SESSION_TTL_SECONDS },
+      );
+    });
+
+    logSummary({
+      scope,
+      slug,
+      variant,
+      totalSentencesAvailable: 0,
+      selectedSentences: 0,
+      ...timings,
+      totalMs: Math.round(nowMs() - requestStart),
+    });
 
     return {
       sessionKey,
@@ -214,42 +310,49 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const allWordIds = [...new Set(allSentences.map((s) => s.sourceWordId))];
+  const progressRes = await timedStep(timings, "progressQueryMs", async () => {
+    return db.query<{
+      word_id: string;
+      xp: number | string | null;
+    }>(
+      `
+      select word_id, xp
+      from user_word_progress
+      where user_id = $1
+        and word_id = any($2::text[])
+      `,
+      [userId, allWordIds],
+    );
+  });
 
-  const progressRes = await db.query<{
-    word_id: string;
-    xp: number | string | null;
-  }>(
-    `
-    select word_id, xp
-    from user_word_progress
-    where user_id = $1
-      and word_id = any($2::text[])
-    `,
-    [userId, allWordIds],
-  );
+  const xpMap = await timedStep(timings, "xpMapBuildMs", async () => {
+    return new Map<string, number>(
+      progressRes.rows.map((row) => [row.word_id, Number(row.xp ?? 0)]),
+    );
+  });
 
-  const xpMap = new Map<string, number>(
-    progressRes.rows.map((row) => [row.word_id, Number(row.xp ?? 0)]),
-  );
+  const weakestIds = await timedStep(timings, "weakestSortMs", async () => {
+    return [...allWordIds].sort((a, b) => (xpMap.get(a) ?? 0) - (xpMap.get(b) ?? 0));
+  });
 
-  const weakestIds = [...allWordIds].sort(
-    (a, b) => (xpMap.get(a) ?? 0) - (xpMap.get(b) ?? 0),
-  );
+  const selected = await timedStep(timings, "selectionMs", async () => {
+    return pickWeightedSentences(
+      allSentences,
+      weakestIds,
+      totalQuestions,
+      weakestWordRatio,
+    );
+  });
 
-  const selected = pickWeightedSentences(
-    allSentences,
-    weakestIds,
-    totalQuestions,
-    weakestWordRatio,
-  );
-
-  const progress: Record<string, { xp: number }> = {};
-  for (const sentence of selected) {
-    progress[sentence.sourceWordId] = {
-      xp: xpMap.get(sentence.sourceWordId) ?? 0,
-    };
-  }
+  const progress = await timedStep(timings, "responseShapeMs", async () => {
+    const shaped: Record<string, { xp: number }> = {};
+    for (const sentence of selected) {
+      shaped[sentence.sourceWordId] = {
+        xp: xpMap.get(sentence.sourceWordId) ?? 0,
+      };
+    }
+    return shaped;
+  });
 
   const sessionKey = crypto.randomUUID();
 
@@ -265,13 +368,15 @@ export default defineEventHandler(async (event) => {
     })),
   };
 
-  await redis.set(
-    getSessionRedisKey(userId, sessionKey),
-    JSON.stringify(session),
-    { ex: QUIZ_SESSION_TTL_SECONDS },
-  );
+  await timedStep(timings, "sessionWriteMs", async () => {
+    await redis.set(
+      getSessionRedisKey(userId, sessionKey),
+      JSON.stringify(session),
+      { ex: QUIZ_SESSION_TTL_SECONDS },
+    );
+  });
 
-  return {
+  const response = {
     sessionKey,
     session: {
       mode,
@@ -289,4 +394,18 @@ export default defineEventHandler(async (event) => {
     },
     progress,
   };
+
+  logSummary({
+    scope,
+    slug,
+    variant,
+    cacheHit: timings.contentSource === 0,
+    totalSentencesAvailable: allSentences.length,
+    uniqueSourceWordIds: allWordIds.length,
+    selectedSentences: selected.length,
+    ...timings,
+    totalMs: Math.round(nowMs() - requestStart),
+  });
+
+  return response;
 });
