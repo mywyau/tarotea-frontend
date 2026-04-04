@@ -8,6 +8,7 @@ import { totalQuestions, weakestWordRatio } from "~/utils/weakestWords";
 
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
 const SENTENCE_CONTENT_CACHE_TTL_SECONDS = 60 * 10;
+const LOCAL_SENTENCE_CONTENT_CACHE_TTL_MS = 60 * 1000;
 
 type Scope = "level" | "topic";
 type Variant = "chinese";
@@ -46,12 +47,31 @@ type CachedSentenceContent = {
   sourceWordIds: string[];
 };
 
+type LocalCacheEntry<T> = {
+  expiresAt: number;
+  value: T;
+};
+
+const localSentenceContentCache = new Map<
+  string,
+  LocalCacheEntry<CachedSentenceContent>
+>();
+
+const inflightSentenceContent = new Map<
+  string,
+  Promise<CachedSentenceContent>
+>();
+
 function getSessionRedisKey(userId: string, sessionKey: string) {
   return `dojo:sentence:${userId}:${sessionKey}`;
 }
 
 function getContentCacheKey(scope: Scope, slug: string) {
   return `dojo:sentence:content:${scope}:${slug}`;
+}
+
+function getInflightKey(scope: Scope, slug: string) {
+  return `${scope}:${slug}`;
 }
 
 function resolveScope(rawScope: string): Scope {
@@ -172,6 +192,35 @@ function logSummary(details: Record<string, unknown>) {
   console.info("[dojo-sentence-start]", JSON.stringify(details));
 }
 
+function getLocalSentenceContent(
+  scope: Scope,
+  slug: string,
+): CachedSentenceContent | null {
+  const key = getInflightKey(scope, slug);
+  const entry = localSentenceContentCache.get(key);
+
+  if (!entry) return null;
+
+  if (entry.expiresAt <= Date.now()) {
+    localSentenceContentCache.delete(key);
+    return null;
+  }
+
+  return entry.value;
+}
+
+function setLocalSentenceContent(
+  scope: Scope,
+  slug: string,
+  value: CachedSentenceContent,
+) {
+  const key = getInflightKey(scope, slug);
+  localSentenceContentCache.set(key, {
+    value,
+    expiresAt: Date.now() + LOCAL_SENTENCE_CONTENT_CACHE_TTL_MS,
+  });
+}
+
 async function loadSentenceSet(
   scope: Scope,
   slug: string,
@@ -198,28 +247,12 @@ async function loadSentenceSet(
   }
 }
 
-async function getCachedSentenceContent(
+async function buildAndCacheSentenceContent(
   scope: Scope,
   slug: string,
   timings: Record<string, number>,
 ): Promise<CachedSentenceContent> {
   const cacheKey = getContentCacheKey(scope, slug);
-
-  const cached = await timedStep(timings, "contentCacheReadMs", async () => {
-    return redis.get(cacheKey);
-  });
-
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached) as CachedSentenceContent;
-      if (parsed && Array.isArray(parsed.items) && Array.isArray(parsed.sourceWordIds)) {
-        timings.contentSource = 0;
-        return parsed;
-      }
-    } catch {
-      // ignore bad cache
-    }
-  }
 
   const sentenceSet = await timedStep(timings, "cdnFetchMs", async () => {
     return loadSentenceSet(scope, slug);
@@ -231,14 +264,73 @@ async function getCachedSentenceContent(
     return { items, sourceWordIds };
   });
 
+  setLocalSentenceContent(scope, slug, content);
+
   await timedStep(timings, "contentCacheWriteMs", async () => {
     await redis.set(cacheKey, JSON.stringify(content), {
       ex: SENTENCE_CONTENT_CACHE_TTL_SECONDS,
     });
   });
 
-  timings.contentSource = 1;
   return content;
+}
+
+async function getCachedSentenceContent(
+  scope: Scope,
+  slug: string,
+  timings: Record<string, number>,
+): Promise<CachedSentenceContent> {
+  const local = getLocalSentenceContent(scope, slug);
+  if (local) {
+    timings.contentSource = 0;
+    timings.localCacheHit = 1;
+    return local;
+  }
+
+  const cacheKey = getContentCacheKey(scope, slug);
+
+  const cached = await timedStep(timings, "contentCacheReadMs", async () => {
+    return redis.get(cacheKey);
+  });
+
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached) as CachedSentenceContent;
+
+      if (
+        parsed &&
+        Array.isArray(parsed.items) &&
+        Array.isArray(parsed.sourceWordIds)
+      ) {
+        setLocalSentenceContent(scope, slug, parsed);
+        timings.contentSource = 1;
+        timings.localCacheHit = 0;
+        return parsed;
+      }
+    } catch {
+      // ignore bad cache and rebuild
+    }
+  }
+
+  const inflightKey = getInflightKey(scope, slug);
+  const existingInflight = inflightSentenceContent.get(inflightKey);
+
+  if (existingInflight) {
+    timings.contentSource = 2;
+    timings.localCacheHit = 0;
+    return timedStep(timings, "inflightWaitMs", async () => existingInflight);
+  }
+
+  const promise = buildAndCacheSentenceContent(scope, slug, timings)
+    .finally(() => {
+      inflightSentenceContent.delete(inflightKey);
+    });
+
+  inflightSentenceContent.set(inflightKey, promise);
+
+  timings.contentSource = 3;
+  timings.localCacheHit = 0;
+  return promise;
 }
 
 export default defineEventHandler(async (event) => {
@@ -287,15 +379,29 @@ export default defineEventHandler(async (event) => {
       );
     });
 
-    logSummary({
-      scope,
-      slug,
-      variant,
-      totalSentencesAvailable: 0,
-      selectedSentences: 0,
-      ...timings,
-      totalMs: Math.round(nowMs() - requestStart),
-    });
+    const totalMs = Math.round(nowMs() - requestStart);
+
+    if (totalMs > 1000) {
+      console.warn("[dojo-sentence-start-slow]", JSON.stringify({
+        scope,
+        slug,
+        variant,
+        totalSentencesAvailable: 0,
+        selectedSentences: 0,
+        ...timings,
+        totalMs,
+      }));
+    } else {
+      logSummary({
+        scope,
+        slug,
+        variant,
+        totalSentencesAvailable: 0,
+        selectedSentences: 0,
+        ...timings,
+        totalMs,
+      });
+    }
 
     return {
       sessionKey,
@@ -332,7 +438,9 @@ export default defineEventHandler(async (event) => {
   });
 
   const weakestIds = await timedStep(timings, "weakestSortMs", async () => {
-    return [...allWordIds].sort((a, b) => (xpMap.get(a) ?? 0) - (xpMap.get(b) ?? 0));
+    return [...allWordIds].sort(
+      (a, b) => (xpMap.get(a) ?? 0) - (xpMap.get(b) ?? 0),
+    );
   });
 
   const selected = await timedStep(timings, "selectionMs", async () => {
@@ -346,11 +454,13 @@ export default defineEventHandler(async (event) => {
 
   const progress = await timedStep(timings, "responseShapeMs", async () => {
     const shaped: Record<string, { xp: number }> = {};
+
     for (const sentence of selected) {
       shaped[sentence.sourceWordId] = {
         xp: xpMap.get(sentence.sourceWordId) ?? 0,
       };
     }
+
     return shaped;
   });
 
@@ -395,17 +505,33 @@ export default defineEventHandler(async (event) => {
     progress,
   };
 
-  logSummary({
+  const totalMs = Math.round(nowMs() - requestStart);
+  const logPayload = {
     scope,
     slug,
     variant,
-    cacheHit: timings.contentSource === 0,
+    cacheHit:
+      timings.contentSource === 0 || timings.contentSource === 1,
+    contentSource:
+      timings.contentSource === 0
+        ? "local"
+        : timings.contentSource === 1
+          ? "redis"
+          : timings.contentSource === 2
+            ? "inflight"
+            : "rebuilt",
     totalSentencesAvailable: allSentences.length,
     uniqueSourceWordIds: allWordIds.length,
     selectedSentences: selected.length,
     ...timings,
-    totalMs: Math.round(nowMs() - requestStart),
-  });
+    totalMs,
+  };
+
+  if (totalMs > 1000) {
+    console.warn("[dojo-sentence-start-slow]", JSON.stringify(logPayload));
+  } else {
+    logSummary(logPayload);
+  }
 
   return response;
 });
