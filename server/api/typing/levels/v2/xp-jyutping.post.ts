@@ -36,7 +36,7 @@ function isDojoMode(mode: string): mode is DojoMode {
 }
 
 function parseStoredPayload(
-  payload: ExistingEventRow["payload"]
+  payload: ExistingEventRow["payload"],
 ): StoredEventPayload {
   if (!payload) {
     throw createError({
@@ -57,7 +57,7 @@ function parseStoredPayload(
 
 function rollupAnswersByWord(
   answers: PayloadAnswer[],
-  existingMap: Map<string, { xp: number; streak: number }>
+  existingMap: Map<string, { xp: number; streak: number }>,
 ) {
   const grouped = new Map<string, PayloadAnswer[]>();
 
@@ -73,6 +73,7 @@ function rollupAnswersByWord(
     streak: number;
     correctInc: number;
     wrongInc: number;
+    appliedDelta: number;
   }> = [];
 
   for (const [wordId, wordAnswers] of grouped.entries()) {
@@ -82,9 +83,12 @@ function rollupAnswersByWord(
     let streak = existing.streak;
     let correctInc = 0;
     let wrongInc = 0;
+    let appliedDelta = 0;
 
     for (const answer of wordAnswers) {
+      const beforeXp = xp;
       xp = Math.min(masteryXp, Math.max(0, xp + answer.delta));
+      appliedDelta += xp - beforeXp;
 
       if (answer.correct) {
         streak += 1;
@@ -101,6 +105,7 @@ function rollupAnswersByWord(
       streak,
       correctInc,
       wrongInc,
+      appliedDelta,
     });
   }
 
@@ -199,10 +204,9 @@ export default defineEventHandler(async (event) => {
     });
 
     await timedStep(timings, "userLockMs", async () => {
-      await client.query(
-        `select pg_advisory_xact_lock(hashtext($1))`,
-        [userId]
-      );
+      await client.query(`select pg_advisory_xact_lock(hashtext($1))`, [
+        userId,
+      ]);
     });
 
     const eventRes = await timedStep(timings, "eventLookupMs", async () => {
@@ -222,7 +226,7 @@ export default defineEventHandler(async (event) => {
         limit 1
         for update
         `,
-        [userId, sessionKey]
+        [userId, sessionKey],
       );
     });
 
@@ -264,7 +268,9 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      const uniqueWordIds = [...new Set(payloadAnswers.map((a) => a.wordId))].sort();
+      const uniqueWordIds = [
+        ...new Set(payloadAnswers.map((a) => a.wordId)),
+      ].sort();
 
       const existingWordRowsRes = uniqueWordIds.length
         ? await timedStep(timings, "existingProgressReadMs", async () => {
@@ -280,10 +286,16 @@ export default defineEventHandler(async (event) => {
                 and word_id = any($2::text[])
               order by word_id
               `,
-              [userId, uniqueWordIds]
+              [userId, uniqueWordIds],
             );
           })
-        : { rows: [] as Array<{ word_id: string; xp: number | string | null; streak: number | string | null }> };
+        : {
+            rows: [] as Array<{
+              word_id: string;
+              xp: number | string | null;
+              streak: number | string | null;
+            }>,
+          };
 
       if (uniqueWordIds.length > 0) {
         await timedStep(timings, "progressRowLockMs", async () => {
@@ -296,7 +308,7 @@ export default defineEventHandler(async (event) => {
             order by word_id
             for update
             `,
-            [userId, uniqueWordIds]
+            [userId, uniqueWordIds],
           );
         });
       }
@@ -308,10 +320,18 @@ export default defineEventHandler(async (event) => {
             xp: Number(row.xp ?? 0),
             streak: Number(row.streak ?? 0),
           },
-        ])
+        ]),
       );
 
-      const rolledUpWordProgress = rollupAnswersByWord(payloadAnswers, existingMap);
+      const rolledUpWordProgress = rollupAnswersByWord(
+        payloadAnswers,
+        existingMap,
+      );
+
+      const appliedTotalDelta = rolledUpWordProgress.reduce(
+        (sum, row) => sum + row.appliedDelta,
+        0,
+      );
 
       if (rolledUpWordProgress.length > 0) {
         await timedStep(timings, "progressUpsertMs", async () => {
@@ -367,7 +387,7 @@ export default defineEventHandler(async (event) => {
               rolledUpWordProgress.map((r) => r.streak),
               rolledUpWordProgress.map((r) => r.correctInc),
               rolledUpWordProgress.map((r) => r.wrongInc),
-            ]
+            ],
           );
         });
       }
@@ -375,12 +395,13 @@ export default defineEventHandler(async (event) => {
       await timedStep(timings, "eventUpdateMs", async () => {
         await client.query(
           `
-          update xp_jyutping_events
-          set processed = true,
-              processed_at = now()
-          where id = $1
-          `,
-          [quizEvent.id]
+        update xp_jyutping_events
+        set processed = true,
+            processed_at = now(),
+            applied_total_delta = $2
+        where id = $1
+        `,
+          [quizEvent.id, appliedTotalDelta],
         );
       });
 

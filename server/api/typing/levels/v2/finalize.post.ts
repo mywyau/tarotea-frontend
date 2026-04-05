@@ -36,6 +36,7 @@ type ExistingEventRow = {
   id: number | string;
   mode: string;
   total_delta: number | string | null;
+  applied_total_delta: number | string | null;
   correct_count: number | string | null;
   total_questions: number | string | null;
   processed: boolean | null;
@@ -132,6 +133,7 @@ export default defineEventHandler(async (event) => {
         id,
         mode,
         total_delta,
+        applied_total_delta,
         correct_count,
         total_questions,
         processed
@@ -166,7 +168,7 @@ export default defineEventHandler(async (event) => {
 
       return {
         session: {
-          xpEarned: Number(existing.total_delta ?? 0),
+          xpEarned: Number(existing.applied_total_delta ?? existing.total_delta ?? 0),
           correctCount: Number(existing.correct_count ?? 0),
           totalWords: Number(existing.total_questions ?? 0),
         },
@@ -188,7 +190,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       session: {
-        xpEarned: Number(existing.total_delta ?? 0),
+        xpEarned: Number(existing.applied_total_delta ?? existing.total_delta ?? 0),
         correctCount: Number(existing.correct_count ?? 0),
         totalWords: Number(existing.total_questions ?? 0),
       },
@@ -326,6 +328,7 @@ export default defineEventHandler(async (event) => {
           id,
           mode,
           total_delta,
+          applied_total_delta,
           correct_count,
           total_questions,
           processed
@@ -369,7 +372,7 @@ export default defineEventHandler(async (event) => {
 
     return {
       session: {
-        xpEarned: Number(existing.total_delta ?? 0),
+        xpEarned: Number(existing.applied_total_delta ?? existing.total_delta ?? 0),
         correctCount: Number(existing.correct_count ?? 0),
         totalWords: Number(existing.total_questions ?? 0),
       },
