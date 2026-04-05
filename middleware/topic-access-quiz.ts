@@ -6,7 +6,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const topic = to.params.topic as string;
   if (!topic) return;
 
-  const { authReady, isLoggedIn, isLoggedOut, resolve, entitlement } = useMeStateV2();
+  const { isLoggedIn, isLoggedOut, resolve, entitlement } = useMeStateV2();
 
   await resolve();
 

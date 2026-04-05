@@ -1,13 +1,7 @@
 export default defineNuxtRouteMiddleware(() => {
   const {
-    state,
-    authReady,
     isLoggedIn,
     isLoggedOut,
-    user,
-    entitlement,
-    isCanceling,
-    currentPeriodEnd,
     resolve,
   } = useMeStateV2();
 

@@ -205,28 +205,25 @@ watch(
 </script>
 
 <template>
-
-  <div class="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-8 lg:px-8">
-
-    <div class="mb-6">
+  <div class="mx-auto max-w-4xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
+    <div class="mb-4 sm:mb-6">
       <BackLink />
     </div>
 
-    <div class="mb-6">
-
-      <p class="text-sm font-medium uppercase tracking-wide text-gray-500">
+    <div class="mb-4 sm:mb-6">
+      <p class="text-xs font-medium uppercase tracking-wide text-gray-500 sm:text-sm">
         Writing Practice
       </p>
-      <h1 class="mt-2 text-2xl font-bold text-gray-900 sm:text-3xl">
+      <h1 class="mt-1 text-2xl font-bold text-gray-900 sm:mt-2 sm:text-3xl">
         Follow the brush strokes
       </h1>
-      <p class="mt-3 max-w-3xl text-sm leading-6 text-gray-600">
+      <p class="mt-2 max-w-3xl text-sm leading-5 text-gray-600 sm:mt-3 sm:leading-6">
         Watch the stroke order for this word and move through each character one by one.
       </p>
     </div>
 
-    <div class="grid gap-6">
-      <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div class="grid gap-4 sm:gap-6">
+      <section class="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:p-5">
         <div v-if="pending" class="text-sm text-gray-500">
           Loading word...
         </div>
@@ -236,156 +233,155 @@ watch(
         </div>
 
         <template v-else>
-          <div class="mt-5 grid gap-6 md:grid-cols-[minmax(0,1fr)_280px]">
+          <div class="mt-3 grid gap-4 sm:mt-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
             <!-- Left side -->
-            <div class="space-y-5">
-              <div class="rounded-xl bg-gray-50 px-4 py-3">
-                <p class="text-sm text-gray-500">Word</p>
-                <p class="mt-1 text-2xl font-bold text-gray-900">{{ word.word }}</p>
-                <p class="mt-1 text-sm text-gray-600">{{ word.jyutping || "" }}</p>
-                <p class="mt-1 text-sm text-gray-600">{{ word.meaning || "" }}</p>
-              </div>
-
-              <div class="rounded-xl border border-gray-200 bg-white p-4 md:hidden">
-                <div class="mb-4">
-                  <p class="text-sm font-medium text-gray-500">Current character</p>
-                  <p class="mt-1 text-3xl font-bold text-gray-900">
-                    {{ currentCharacter || "—" }}
-                  </p>
-                  <p class="mt-2 text-sm text-gray-600">
-                    Progress: {{ progressLabel }}
-                  </p>
-                </div>
-
-                <div class="space-y-3">
-                  <button type="button"
-                    class="w-full rounded-xl border border-gray-900 bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                    :disabled="!isReady" @click="animateCurrentCharacter">
-                    Play strokes
-                  </button>
-
-                  <button type="button"
-                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                    :disabled="!isReady || !selectedCharacters.length" @click="animateWholeWord">
-                    Play whole word
-                  </button>
-                </div>
-
-                <div class="my-5 border-t border-gray-200"></div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <button type="button"
-                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                    :disabled="currentCharIndex === 0" @click="previousCharacter">
-                    Previous
-                  </button>
-
-                  <button type="button"
-                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                    :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
-                    Next
-                  </button>
-                </div>
+            <div class="space-y-4 sm:space-y-5">
+              <div class="rounded-xl bg-gray-50 px-3 py-3 sm:px-4">
+                <p class="text-xs text-gray-500 sm:text-sm">Word</p>
+                <p class="mt-1 break-words text-xl font-bold text-gray-900 sm:text-2xl">
+                  {{ word.word }}
+                </p>
+                <p class="mt-2 text-xs leading-5 text-gray-600 sm:text-sm">
+                  {{ word.jyutping || "" }}
+                </p>
+                <p class="mt-1 text-xs leading-5 text-gray-600 sm:text-sm">
+                  {{ word.meaning || "" }}
+                </p>
               </div>
 
               <div
-                class="flex min-h-[260px] sm:min-h-[320px] lg:min-h-[380px] items-center justify-center rounded-2xl border border-gray-200 bg-white p-4 sm:p-6">
-
+                class="flex min-h-[260px] sm:min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-3 sm:p-4"
+              >
                 <div v-if="loadError" class="max-w-sm text-center text-sm text-red-600">
                   {{ loadError }}
                 </div>
 
-                <div v-else-if="unsupportedCharacter" class="max-w-sm text-center text-sm text-amber-700">
-                  This tool is not supported for “{{ unsupportedCharacter }}” due to missing stroke data.
+                <div
+                  v-else-if="unsupportedCharacter"
+                  class="max-w-sm text-center text-sm text-amber-700"
+                >
+                  We do not have stroke data for “{{ unsupportedCharacter }}” yet, so writing
+                  practice is not available for this character.
                 </div>
 
                 <div v-else-if="!currentCharacter" class="max-w-sm text-center text-sm text-gray-500">
                   No Chinese character available for this word.
                 </div>
 
-                <div ref="writerHost" :style="{ width: `${writerSize}px`, height: `${writerSize}px` }" />
+                <div
+                  ref="writerHost"
+                  :style="{ width: `${writerSize}px`, height: `${writerSize}px` }"
+                />
               </div>
             </div>
 
             <!-- Right side panel -->
-            <aside class="hidden md:sticky md:top-6 md:block h-fit rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
-              
-
-              <div class="mb-4">
-                <p class="text-sm font-medium text-gray-500">Current character</p>
-                <p class="mt-1 text-3xl font-bold text-gray-900">
+            <aside class="h-fit rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
+              <div class="mb-3 sm:mb-4">
+                <p class="text-xs font-medium text-gray-500 sm:text-sm">Current character</p>
+                <p class="mt-1 text-2xl font-bold text-gray-900 sm:text-3xl">
                   {{ currentCharacter || "—" }}
                 </p>
-                <p class="mt-2 text-sm text-gray-600">
+                <p class="mt-1.5 text-xs text-gray-600 sm:mt-2 sm:text-sm">
                   Progress: {{ progressLabel }}
                 </p>
               </div>
 
-              <div v-if="selectedCharacters.length > 1" class="mb-5 flex flex-wrap gap-2">
-                <button v-for="(char, index) in selectedCharacters" :key="`${char}-${index}`" type="button"
-                  class="rounded-lg border px-3 py-1.5 text-base font-semibold transition" :class="index === currentCharIndex
-                    ? 'border-gray-900 bg-gray-900 text-white'
-                    : 'border-gray-300 bg-white text-gray-900'
-                    " @click="currentCharIndex = index">
+              <div
+                v-if="selectedCharacters.length > 1"
+                class="mb-4 flex flex-wrap gap-2 sm:mb-5"
+              >
+                <button
+                  v-for="(char, index) in selectedCharacters"
+                  :key="`${char}-${index}`"
+                  type="button"
+                  class="rounded-lg border px-3 py-1.5 text-base font-semibold transition"
+                  :class="
+                    index === currentCharIndex
+                      ? 'border-gray-900 bg-gray-900 text-white'
+                      : 'border-gray-300 bg-white text-gray-900'
+                  "
+                  @click="currentCharIndex = index"
+                >
                   {{ char }}
                 </button>
               </div>
 
-              <div class="space-y-3">
-                <button type="button"
-                  class="w-full rounded-xl border border-gray-900 bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50"
-                  :disabled="!isReady" @click="animateCurrentCharacter">
+              <div class="space-y-2.5 sm:space-y-3">
+                <button
+                  type="button"
+                  class="w-full rounded-xl border border-gray-900 bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  :disabled="!isReady"
+                  @click="animateCurrentCharacter"
+                >
                   Play strokes
                 </button>
 
-                <button type="button"
-                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                  :disabled="!isReady" @click="loopAnimation">
+                <button
+                  type="button"
+                  class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  :disabled="!isReady"
+                  @click="loopAnimation"
+                >
                   Loop animation
                 </button>
 
-                <button type="button"
-                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                  :disabled="!isReady || !selectedCharacters.length" @click="animateWholeWord">
+                <button
+                  type="button"
+                  class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  :disabled="!isReady || !selectedCharacters.length"
+                  @click="animateWholeWord"
+                >
                   Play whole word
                 </button>
               </div>
 
-              <div class="my-5 border-t border-gray-200"></div>
+              <div class="my-4 border-t border-gray-200 sm:my-5"></div>
 
-              <div class="space-y-3">
-                <button type="button"
-                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                  :disabled="currentCharIndex === 0" @click="previousCharacter">
+              <div class="space-y-2.5 sm:space-y-3">
+                <button
+                  type="button"
+                  class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  :disabled="currentCharIndex === 0"
+                  @click="previousCharacter"
+                >
                   Previous character
                 </button>
 
-                <button type="button"
-                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                  :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
+                <button
+                  type="button"
+                  class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  :disabled="currentCharIndex >= selectedCharacters.length - 1"
+                  @click="nextCharacter"
+                >
                   Next character
                 </button>
               </div>
 
-              <div class="my-5 border-t border-gray-200"></div>
+              <div class="my-4 border-t border-gray-200 sm:my-5"></div>
 
-              <div class="space-y-3">
-                <button type="button"
-                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                  :disabled="!isReady" @click="showOnlyOutline">
+              <div class="space-y-2.5 sm:space-y-3">
+                <button
+                  type="button"
+                  class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  :disabled="!isReady"
+                  @click="showOnlyOutline"
+                >
                   Outline only
                 </button>
 
-                <button type="button"
-                  class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50"
-                  :disabled="!isReady" @click="showCharacterAndOutline">
+                <button
+                  type="button"
+                  class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  :disabled="!isReady"
+                  @click="showCharacterAndOutline"
+                >
                   Show full character
                 </button>
               </div>
             </aside>
           </div>
         </template>
-
       </section>
     </div>
   </div>
