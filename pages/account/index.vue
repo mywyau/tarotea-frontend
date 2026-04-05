@@ -14,6 +14,7 @@ const deleteConfirmInput = ref('')
 
 const animatedRemaining = ref(0)
 const animatedAttempts = ref(0)
+const showDeletePanel = ref(false)
 
 const aiUsage = ref<{
     attempts: number
@@ -21,9 +22,42 @@ const aiUsage = ref<{
     limit: number
 } | null>(null)
 
+// async function deleteAccount() {
+//     if (!isLoggedIn.value) return
+//     if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
+
+//     deleting.value = true
+//     try {
+//         const auth = await useAuth()
+//         const token = await auth.getAccessToken()
+
+//         await $fetch('/api/account', {
+//             method: 'DELETE',
+//             headers: { Authorization: `Bearer ${token}` },
+//             body: { confirm: 'DELETE' }
+//         })
+
+//         await auth.client?.logout({
+//             logoutParams: { returnTo: window.location.origin }
+//         })
+//     } catch (err: any) {
+//         console.error('Account deletion failed', err)
+//         alert(err?.data?.statusMessage ?? 'Something went wrong deleting your account. Please try again.')
+//     } finally {
+//         deleting.value = false
+//         deleteConfirmInput.value = ''
+//     }
+// }
+
 async function deleteAccount() {
     if (!isLoggedIn.value) return
     if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
+
+    const ok = window.confirm(
+        'Are you sure you want to permanently delete your account? This cannot be undone.'
+    )
+
+    if (!ok) return
 
     deleting.value = true
     try {
@@ -45,8 +79,10 @@ async function deleteAccount() {
     } finally {
         deleting.value = false
         deleteConfirmInput.value = ''
+        showDeletePanel.value = false
     }
 }
+
 
 async function fetchAIUsage() {
     if (!isLoggedIn.value) return
@@ -109,7 +145,7 @@ watch(aiUsage, (val) => {
             <div class="max-w-xl mx-auto space-y-8">
 
                 <BackLink />
-                
+
                 <!-- Header -->
                 <header class="space-y-2">
                     <h1 class="text-3xl font-semibold text-gray-900">Account</h1>
@@ -216,7 +252,7 @@ watch(aiUsage, (val) => {
                             <div>
                                 <h2 class="text-base font-semibold text-gray-900">Danger zone</h2>
 
-                                <p class="text-sm text-red-800 mt-4">
+                                <p class="mt-4 text-sm text-red-800">
                                     Deleting your account permanently removes your account, data and subscription.
                                 </p>
                             </div>
@@ -230,29 +266,45 @@ watch(aiUsage, (val) => {
                         <div class="space-y-2 text-sm text-red-800/90">
                             <p>This action cannot be undone.</p>
                             <p>It will also cancel any active subscription so it won’t renew.</p>
-                            <p>No automatic refunds for unused time.</p>
+                            <p>Unused time will not be refunded .</p>
                         </div>
 
-                        <div class="space-y-2 pt-2">
-                            <label class="block text-sm text-gray-900">
-                                Type <span class="font-mono font-semibold">delete</span> to confirm
-                            </label>
+                        <div class="pt-2">
+                            <button v-if="!showDeletePanel" type="button"
+                                class="w-full rounded-lg py-3 font-semibold border border-red-300 text-red-800 bg-white/70 backdrop-blur hover:bg-white transition"
+                                @click="showDeletePanel = true">
+                                Show delete options
+                            </button>
 
-                            <input v-model="deleteConfirmInput" type="text" placeholder="delete" class="w-full rounded-lg border px-4 py-2 text-sm
-                       bg-white/80 backdrop-blur
-                       border-red-300/60
-                       focus:outline-none focus:ring-2 focus:ring-red-300" />
+                            <div v-else class="space-y-4">
+                                <div class="space-y-2">
+                                    <label class="block text-sm text-gray-900">
+                                        Type <span class="font-mono font-semibold">delete</span> to confirm
+                                    </label>
+
+                                    <input v-model="deleteConfirmInput" type="text" placeholder="delete"
+                                        class="w-full rounded-lg border px-4 py-2 text-sm bg-white/80 backdrop-blur border-red-300/60 focus:outline-none focus:ring-2 focus:ring-red-300" />
+                                </div>
+
+                                <div class="flex flex-col gap-2 sm:flex-row">
+                                    <button type="button"
+                                        class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
+                                        :disabled="deleting" @click="
+                                            showDeletePanel = false;
+                                        deleteConfirmInput = '';
+                                        ">
+                                        Cancel
+                                    </button>
+
+                                    <button type="button"
+                                        class="w-full rounded-lg py-3 font-semibold border border-red-400/70 text-red-800 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'"
+                                        @click="deleteAccount">
+                                        {{ deleting ? 'Deleting account…' : 'Delete account' }}
+                                    </button>
+                                </div>
+                            </div>
                         </div>
-
-                        <button type="button" class="w-full rounded-lg py-3 font-semibold
-                     border border-red-400/70 text-red-800
-                     bg-white/70 backdrop-blur
-                     hover:bg-white transition
-                     disabled:opacity-50 disabled:cursor-not-allowed"
-                            :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'"
-                            @click="deleteAccount">
-                            {{ deleting ? 'Deleting account…' : 'Delete account' }}
-                        </button>
                     </section>
                 </div>
 
