@@ -296,7 +296,7 @@ watch(
                 </div>
 
                 <div v-else-if="unsupportedCharacter" class="max-w-sm text-center text-sm text-amber-700">
-                  Stroke data is not supported for “{{ unsupportedCharacter }}”.
+                  This tool is not supported for “{{ unsupportedCharacter }}” due to missing stroke data.
                 </div>
 
                 <div v-else-if="!currentCharacter" class="max-w-sm text-center text-sm text-gray-500">
