@@ -417,7 +417,8 @@ async function finalizeQuiz() {
         const token = await getAccessToken()
 
         const res = await $fetch<FinalizeResponse>(
-            '/api/quiz/grind/finalize-v4',
+            // '/api/quiz/grind/finalize-v4',
+            '/api/quiz/grind/finalize-v5',
             {
                 method: 'POST',
                 headers: {

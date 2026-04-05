@@ -399,17 +399,20 @@ async function finalizeQuiz() {
   try {
     const token = await getAccessToken()
 
-    const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v4', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: {
-        attemptId,
-        mode: 'grind-level-audio',
-        answers: answerLog.value
-      }
-    })
+    const res = await $fetch<FinalizeResponse>(
+      // '/api/quiz/grind/finalize-v4',
+      '/api/quiz/grind/finalize-v5',
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        body: {
+          attemptId,
+          mode: 'grind-level-audio',
+          answers: answerLog.value
+        }
+      })
 
     const elapsed = Date.now() - startedAt
     const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
