@@ -6,15 +6,15 @@ const {
     entitlement,
     isCanceling,
     currentPeriodEnd,
-    resolve
 } = useMeStateV2()
 
 const deleting = ref(false)
 const deleteConfirmInput = ref('')
 
 const animatedRemaining = ref(0)
-const animatedAttempts = ref(0)
 const showDeletePanel = ref(false)
+
+const deleteError = ref('')
 
 const aiUsage = ref<{
     attempts: number
@@ -22,44 +22,14 @@ const aiUsage = ref<{
     limit: number
 } | null>(null)
 
-// async function deleteAccount() {
-//     if (!isLoggedIn.value) return
-//     if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
-
-//     deleting.value = true
-//     try {
-//         const auth = await useAuth()
-//         const token = await auth.getAccessToken()
-
-//         await $fetch('/api/account', {
-//             method: 'DELETE',
-//             headers: { Authorization: `Bearer ${token}` },
-//             body: { confirm: 'DELETE' }
-//         })
-
-//         await auth.client?.logout({
-//             logoutParams: { returnTo: window.location.origin }
-//         })
-//     } catch (err: any) {
-//         console.error('Account deletion failed', err)
-//         alert(err?.data?.statusMessage ?? 'Something went wrong deleting your account. Please try again.')
-//     } finally {
-//         deleting.value = false
-//         deleteConfirmInput.value = ''
-//     }
-// }
 
 async function deleteAccount() {
     if (!isLoggedIn.value) return
     if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
 
-    const ok = window.confirm(
-        'Are you sure you want to permanently delete your account? This cannot be undone.'
-    )
-
-    if (!ok) return
-
+    deleteError.value = ''
     deleting.value = true
+
     try {
         const auth = await useAuth()
         const token = await auth.getAccessToken()
@@ -75,14 +45,18 @@ async function deleteAccount() {
         })
     } catch (err: any) {
         console.error('Account deletion failed', err)
-        alert(err?.data?.statusMessage ?? 'Something went wrong deleting your account. Please try again.')
+        deleteError.value =
+            err?.data?.statusMessage ??
+            'Something went wrong deleting your account. Please try again.'
     } finally {
         deleting.value = false
         deleteConfirmInput.value = ''
-        showDeletePanel.value = false
+
+        if (!deleteError.value) {
+            showDeletePanel.value = false
+        }
     }
 }
-
 
 async function fetchAIUsage() {
     if (!isLoggedIn.value) return
@@ -99,7 +73,6 @@ async function fetchAIUsage() {
 
     aiUsage.value = usage
     animateCount(animatedRemaining, usage.remaining)
-    animateCount(animatedAttempts, usage.attempts)
 }
 
 async function openBillingPortal() {
@@ -266,13 +239,17 @@ watch(aiUsage, (val) => {
                         <div class="space-y-2 text-sm text-red-800/90">
                             <p>This action cannot be undone.</p>
                             <p>It will also cancel any active subscription so it won’t renew.</p>
-                            <p>Unused time will not be refunded .</p>
+                            <p>Unused time will not be refunded.</p>
                         </div>
 
                         <div class="pt-2">
                             <button v-if="!showDeletePanel" type="button"
                                 class="w-full rounded-lg py-3 font-semibold border border-red-300 text-red-800 bg-white/70 backdrop-blur hover:bg-white transition"
-                                @click="showDeletePanel = true">
+                                @click="
+                                    showDeletePanel = true;
+                                deleteError = '';
+                                deleteConfirmInput = '';
+                                ">
                                 Show delete options
                             </button>
 
@@ -286,12 +263,18 @@ watch(aiUsage, (val) => {
                                         class="w-full rounded-lg border px-4 py-2 text-sm bg-white/80 backdrop-blur border-red-300/60 focus:outline-none focus:ring-2 focus:ring-red-300" />
                                 </div>
 
+                                <div v-if="deleteError"
+                                    class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+                                    {{ deleteError }}
+                                </div>
+
                                 <div class="flex flex-col gap-2 sm:flex-row">
                                     <button type="button"
                                         class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
                                         :disabled="deleting" @click="
                                             showDeletePanel = false;
                                         deleteConfirmInput = '';
+                                        deleteError = '';
                                         ">
                                         Cancel
                                     </button>
@@ -300,7 +283,7 @@ watch(aiUsage, (val) => {
                                         class="w-full rounded-lg py-3 font-semibold border border-red-400/70 text-red-800 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
                                         :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'"
                                         @click="deleteAccount">
-                                        {{ deleting ? 'Deleting account…' : 'Delete account' }}
+                                        {{ deleting ? 'Deleting account…' : 'Permanently delete account' }}
                                     </button>
                                 </div>
                             </div>
@@ -309,13 +292,12 @@ watch(aiUsage, (val) => {
                 </div>
 
                 <!-- Not signed in -->
-                <div v-else class="rounded-lg backdrop-blur p-6 text-center space-y-6"
-                    style="background-color:#EAB8E4;">
-                    <p class="text-black font-medium">You’re not signed in.</p>
+                <div v-else class="rounded-lg backdrop-blur p-6 text-center space-y-6">
+                    <p class="text-black font-medium text-xl">You’re not signed in.</p>
                     <p class="text-sm text-black">Sign in to manage your account and subscription.</p>
                     <div class="mt-">
                         <NuxtLink to="/" class="inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-semibold
-                    transition bg-black text-white">
+                    transition text-black hover:underline">
                             Go home
                         </NuxtLink>
                     </div>
