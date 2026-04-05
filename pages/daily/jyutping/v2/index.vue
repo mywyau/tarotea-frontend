@@ -706,13 +706,13 @@ watch(
               {{ unlockProgressLabel }}
             </span>
 
-            <span class="text-sm font-semibold text-purple-700">
+            <span class="text-sm font-semibold text-purple-600">
               {{ unlockProgressPercent }}%
             </span>
           </div>
 
           <div class="w-full h-3 rounded-full bg-gray-200 overflow-hidden">
-            <div class="h-3 rounded-full bg-purple-500 transition-[width] duration-500 ease-out"
+            <div class="h-3 rounded-full bg-purple-300 transition-[width] duration-500 ease-out"
               :style="{ width: `${unlockProgressPercent}%` }" />
           </div>
 
