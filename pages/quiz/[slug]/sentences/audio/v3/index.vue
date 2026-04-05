@@ -92,12 +92,15 @@ const {
 } = await useAsyncData(
   () => `level-sentences-audio-start-${slug.value}`,
   () =>
-    authedFetch<SentenceQuizStartResponse>('/api/sentences/v2/start', {
-      query: {
-        scope: 'level',
-        slug: slug.value,
-      },
-    }),
+    authedFetch<SentenceQuizStartResponse>(
+      // '/api/sentences/v2/start',
+      '/api/sentences/v3/start',
+      {
+        query: {
+          scope: 'level',
+          slug: slug.value,
+        },
+      }),
   {
     watch: [slug],
     server: false,
@@ -317,13 +320,16 @@ async function finalizeQuiz() {
 
   try {
     const [res] = await Promise.all([
-      authedFetch<SentenceQuizFinalizeResponse>('/api/sentences/v2/finalize', {
-        method: 'POST',
-        body: {
-          sessionKey: activeSessionKey.value,
-          answers: answerLog.value,
-        },
-      }),
+      authedFetch<SentenceQuizFinalizeResponse>(
+        // '/api/sentences/v2/finalize',
+        '/api/sentences/v3/finalize',
+        {
+          method: 'POST',
+          body: {
+            sessionKey: activeSessionKey.value,
+            answers: answerLog.value,
+          },
+        }),
       sleep(MIN_CALCULATING_MS),
     ])
 
