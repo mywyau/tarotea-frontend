@@ -292,7 +292,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     const totalMs = performance.now() - t0;
 
-    console.error("VOCAB FINALIZE V4 FAILED", {
+    console.error("VOCAB FINALIZE V5 FAILED", {
       userId,
       attemptId,
       mode,

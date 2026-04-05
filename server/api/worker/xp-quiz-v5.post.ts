@@ -252,7 +252,7 @@ async function verifyQStashRequest(
     nextSigningKey,
   });
 
-  const workerUrl = `${appBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v4`;
+  const workerUrl = `${appBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v5`;
 
   const isValid = await receiver.verify({
     signature,
@@ -493,7 +493,7 @@ export default defineEventHandler(async (event) => {
   } catch (error) {
     await client.query("ROLLBACK");
 
-    console.error("XP QUIZ WORKER V4 FAILED", {
+    console.error("XP QUIZ WORKER V5 FAILED", {
       attemptId: job.attemptId,
       userId: job.userId,
       qstashMessageId,
