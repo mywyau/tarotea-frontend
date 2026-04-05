@@ -247,13 +247,15 @@ async function finalizeQuiz() {
 
   try {
     const [res] = await Promise.all([
-      authedFetch<SentenceQuizFinalizeResponse>('/api/sentences/topics/v2/finalize', {
-        method: 'POST',
-        body: {
-          sessionKey: activeSessionKey.value,
-          answers: answerLog.value,
-        },
-      }),
+      authedFetch<SentenceQuizFinalizeResponse>(
+        '/api/sentences/topics/v3/finalize',
+        {
+          method: 'POST',
+          body: {
+            sessionKey: activeSessionKey.value,
+            answers: answerLog.value,
+          },
+        }),
       sleep(MIN_CALCULATING_MS),
     ])
 
@@ -408,7 +410,7 @@ watch(
 
 <template>
   <main class="max-w-2xl mx-auto px-4 py-16 space-y-8">
-    
+
     <BackLink />
 
     <section class="text-center space-y-4">
