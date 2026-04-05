@@ -192,38 +192,38 @@ watchEffect(() => {
       </h2>
 
       <ul class="space-y-5">
-          <li v-for="(example, index) in word.examples" :key="example.sentence" class="example-card rounded-lg p-4">
-            <div class="space-y-3">
-              <div class="text-lg leading-relaxed text-gray-900 break-words">
-                {{ example.sentence }}
-              </div>
+        <li v-for="(example, index) in word.examples" :key="example.sentence" class="example-card rounded-lg p-4">
+          <div class="space-y-3">
+            <div class="flex justify-end">
+              <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
+                  class="inline-flex items-center justify-center rounded-md border bg-white px-2 py-1 text-xs shadow-sm transition hover:bg-gray-50">
+                  <span class="text-black">✏️</span>
+                </NuxtLink>
 
-              <div class="flex justify-end">
-                <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-                  <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
-                    class="inline-flex items-center justify-center rounded-md border bg-white px-2 py-1 text-xs shadow-sm transition hover:bg-gray-50">
-                    <span class="text-black">✏️</span>
-                  </NuxtLink>
+                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
+                  class="level-btn-blue inline-flex items-center justify-center rounded-md px-2 py-1 text-xs shadow-sm transition">
+                  <span class="text-black">▶︎</span>
+                </NuxtLink>
 
-                  <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
-                    class="level-btn-blue inline-flex items-center justify-center rounded-md px-2 py-1 text-xs shadow-sm transition">
-                    <span class="text-black">▶︎</span>
-                  </NuxtLink>
-
-                  <AudioButton v-if="word.audio?.examples?.[index]"
-                    :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm" />
-                </div>
-              </div>
-
-              <div class="text-sm text-gray-500 break-words">
-                {{ example.jyutping }}
-              </div>
-
-              <div class="text-sm text-gray-700 break-words">
-                {{ example.meaning }}
+                <AudioButton v-if="word.audio?.examples?.[index]"
+                  :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm" />
               </div>
             </div>
-          </li>
+
+            <div class="text-lg leading-relaxed text-gray-900 break-words">
+              {{ example.sentence }}
+            </div>
+
+            <div class="text-sm text-gray-500 break-words">
+              {{ example.jyutping }}
+            </div>
+
+            <div class="text-sm text-gray-700 break-words">
+              {{ example.meaning }}
+            </div>
+          </div>
+        </li>
       </ul>
 
       <div class="text-center mt-10">
