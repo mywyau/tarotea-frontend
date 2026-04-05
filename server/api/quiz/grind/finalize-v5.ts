@@ -137,7 +137,7 @@ async function enqueueFinalizeJob(
     throw new Error("Missing public.siteUrl runtime config");
   }
 
-  const workerUrl = `${workerBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v4`;
+  const workerUrl = `${workerBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v5`;
   const client = getQstashClient(event);
 
   await client.publishJSON({
