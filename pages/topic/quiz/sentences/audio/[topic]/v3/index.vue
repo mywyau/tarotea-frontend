@@ -260,13 +260,16 @@ async function finalizeQuiz() {
 
   try {
     const [res] = await Promise.all([
-      authedFetch<TopicSentenceQuizFinalizeResponse>('/api/sentences/topics/v2/finalize', {
-        method: 'POST',
-        body: {
-          sessionKey: activeSessionKey.value,
-          answers: answerLog.value,
-        },
-      }),
+      authedFetch<TopicSentenceQuizFinalizeResponse>(
+        // '/api/sentences/topics/v2/finalize',
+        '/api/sentences/topics/v3/finalize',
+        {
+          method: 'POST',
+          body: {
+            sessionKey: activeSessionKey.value,
+            answers: answerLog.value,
+          },
+        }),
       sleep(MIN_CALCULATING_MS),
     ])
 
