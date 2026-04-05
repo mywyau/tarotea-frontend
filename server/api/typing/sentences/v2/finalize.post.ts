@@ -38,6 +38,7 @@ type ExistingEventRow = {
   id: number | string;
   mode: string;
   total_delta: number | string | null;
+  applied_total_delta: number | string | null;
   correct_count: number | string | null;
   total_questions: number | string | null;
   processed: boolean | null;
@@ -91,7 +92,9 @@ export default defineEventHandler(async (event) => {
   const requestStart = nowMs();
   const timings: Record<string, number> = {};
 
-  const auth = await timedStep(timings, "authMs", async () => requireUser(event));
+  const auth = await timedStep(timings, "authMs", async () =>
+    requireUser(event),
+  );
   const userId = auth.sub;
 
   const body = await timedStep(timings, "readBodyMs", async () => {
@@ -135,13 +138,17 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const existingEventRes = await timedStep(timings, "existingEventLookupMs", async () => {
-    return db.query<ExistingEventRow>(
-      `
+  const existingEventRes = await timedStep(
+    timings,
+    "existingEventLookupMs",
+    async () => {
+      return db.query<ExistingEventRow>(
+        `
       select
         id,
         mode,
         total_delta,
+        applied_total_delta,
         correct_count,
         total_questions,
         processed
@@ -150,9 +157,10 @@ export default defineEventHandler(async (event) => {
         and session_key = $2
       limit 1
       `,
-      [userId, sessionKey],
-    );
-  });
+        [userId, sessionKey],
+      );
+    },
+  );
 
   if (existingEventRes.rows.length > 0) {
     const existing = existingEventRes.rows[0];
@@ -176,7 +184,9 @@ export default defineEventHandler(async (event) => {
 
       return {
         session: {
-          xpEarned: Number(existing.total_delta ?? 0),
+          xpEarned: Number(
+            existing.applied_total_delta ?? existing.total_delta ?? 0,
+          ),
           correctCount: Number(existing.correct_count ?? 0),
           totalSentences: Number(existing.total_questions ?? 0),
         },
@@ -198,7 +208,9 @@ export default defineEventHandler(async (event) => {
 
     return {
       session: {
-        xpEarned: Number(existing.total_delta ?? 0),
+        xpEarned: Number(
+          existing.applied_total_delta ?? existing.total_delta ?? 0,
+        ),
         correctCount: Number(existing.correct_count ?? 0),
         totalSentences: Number(existing.total_questions ?? 0),
       },
@@ -208,7 +220,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const rawSession = await timedStep(timings, "sessionReadMs", async () => {
-    return redis.get<QuizSession | string>(getSessionRedisKey(userId, sessionKey));
+    return redis.get<QuizSession | string>(
+      getSessionRedisKey(userId, sessionKey),
+    );
   });
 
   if (!rawSession) {
@@ -239,62 +253,67 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const buildResult = await timedStep(timings, "attemptValidationMs", async () => {
-    const allowedPairs = new Set(
-      (session.allowedSentences ?? []).map(
-        (s) => `${s.sentenceId}:${s.sourceWordId}`,
-      ),
-    );
+  const buildResult = await timedStep(
+    timings,
+    "attemptValidationMs",
+    async () => {
+      const allowedPairs = new Set(
+        (session.allowedSentences ?? []).map(
+          (s) => `${s.sentenceId}:${s.sourceWordId}`,
+        ),
+      );
 
-    const attemptMap = new Map<string, SentenceBatchAttempt>();
+      const attemptMap = new Map<string, SentenceBatchAttempt>();
 
-    for (const attempt of body.attempts) {
-      if (!attempt?.sentenceId || !attempt?.sourceWordId) continue;
+      for (const attempt of body.attempts) {
+        if (!attempt?.sentenceId || !attempt?.sourceWordId) continue;
 
-      const pairKey = `${attempt.sentenceId}:${attempt.sourceWordId}`;
+        const pairKey = `${attempt.sentenceId}:${attempt.sourceWordId}`;
 
-      if (!allowedPairs.has(pairKey)) {
+        if (!allowedPairs.has(pairKey)) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: `Invalid sentence attempt: ${pairKey}`,
+          });
+        }
+
+        if (!attemptMap.has(attempt.sentenceId)) {
+          attemptMap.set(attempt.sentenceId, {
+            sentenceId: attempt.sentenceId,
+            sourceWordId: attempt.sourceWordId,
+            passed: !!attempt.passed,
+            hintUsed: !!attempt.hintUsed,
+          });
+        }
+      }
+
+      const attempts = [...attemptMap.values()];
+
+      if (attempts.length === 0) {
         throw createError({
           statusCode: 400,
-          statusMessage: `Invalid sentence attempt: ${pairKey}`,
+          statusMessage: "No attempts",
         });
       }
 
-      if (!attemptMap.has(attempt.sentenceId)) {
-        attemptMap.set(attempt.sentenceId, {
-          sentenceId: attempt.sentenceId,
-          sourceWordId: attempt.sourceWordId,
-          passed: !!attempt.passed,
-          hintUsed: !!attempt.hintUsed,
-        });
-      }
-    }
+      const payloadAnswers = attempts.map((attempt) => ({
+        sentenceId: attempt.sentenceId,
+        wordId: attempt.sourceWordId,
+        correct: !!attempt.passed,
+        hintUsed: !!attempt.hintUsed,
+        delta: deltaFor(attempt, session.mode),
+      }));
 
-    const attempts = [...attemptMap.values()];
+      const correctCount = payloadAnswers.filter((a) => a.correct).length;
+      const totalDelta = payloadAnswers.reduce((acc, a) => acc + a.delta, 0);
+      const totalSentences = session.allowedSentences.length;
 
-    if (attempts.length === 0) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "No attempts",
-      });
-    }
+      return { payloadAnswers, correctCount, totalDelta, totalSentences };
+    },
+  );
 
-    const payloadAnswers = attempts.map((attempt) => ({
-      sentenceId: attempt.sentenceId,
-      wordId: attempt.sourceWordId,
-      correct: !!attempt.passed,
-      hintUsed: !!attempt.hintUsed,
-      delta: deltaFor(attempt, session.mode),
-    }));
-
-    const correctCount = payloadAnswers.filter((a) => a.correct).length;
-    const totalDelta = payloadAnswers.reduce((acc, a) => acc + a.delta, 0);
-    const totalSentences = session.allowedSentences.length;
-
-    return { payloadAnswers, correctCount, totalDelta, totalSentences };
-  });
-
-  const { payloadAnswers, correctCount, totalDelta, totalSentences } = buildResult;
+  const { payloadAnswers, correctCount, totalDelta, totalSentences } =
+    buildResult;
 
   const insertRes = await timedStep(timings, "insertEventMs", async () => {
     return db.query<{ id: number | string }>(
@@ -340,13 +359,17 @@ export default defineEventHandler(async (event) => {
   });
 
   if (insertRes.rows.length === 0) {
-    const racedEventRes = await timedStep(timings, "racedEventLookupMs", async () => {
-      return db.query<ExistingEventRow>(
-        `
+    const racedEventRes = await timedStep(
+      timings,
+      "racedEventLookupMs",
+      async () => {
+        return db.query<ExistingEventRow>(
+          `
         select
           id,
           mode,
           total_delta,
+          applied_total_delta,
           correct_count,
           total_questions,
           processed
@@ -355,9 +378,10 @@ export default defineEventHandler(async (event) => {
           and session_key = $2
         limit 1
         `,
-        [userId, sessionKey],
-      );
-    });
+          [userId, sessionKey],
+        );
+      },
+    );
 
     if (racedEventRes.rows.length === 0) {
       throw createError({
@@ -390,7 +414,9 @@ export default defineEventHandler(async (event) => {
 
     return {
       session: {
-        xpEarned: Number(existing.total_delta ?? 0),
+        xpEarned: Number(
+          existing.applied_total_delta ?? existing.total_delta ?? 0,
+        ),
         correctCount: Number(existing.correct_count ?? 0),
         totalSentences: Number(existing.total_questions ?? 0),
       },

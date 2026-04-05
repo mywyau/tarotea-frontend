@@ -9,9 +9,7 @@ type WorkerBody = {
   sessionKey: string;
 };
 
-type DojoMode =
-  | "dojo-level-sentences-chinese"
-  | "dojo-topic-sentences-chinese";
+type DojoMode = "dojo-level-sentences-chinese" | "dojo-topic-sentences-chinese";
 
 type PayloadAnswer = {
   sentenceId?: string;
@@ -28,6 +26,7 @@ type ExistingEventRow = {
   id: number | string;
   mode: string;
   total_delta: number | string | null;
+  applied_total_delta: number | string | null;
   correct_count: number | string | null;
   total_questions: number | string | null;
   processed: boolean | null;
@@ -83,6 +82,7 @@ function rollupAnswersByWord(
     streak: number;
     correctInc: number;
     wrongInc: number;
+    appliedDelta: number;
   }> = [];
 
   for (const [wordId, wordAnswers] of grouped.entries()) {
@@ -92,9 +92,12 @@ function rollupAnswersByWord(
     let streak = existing.streak;
     let correctInc = 0;
     let wrongInc = 0;
+    let appliedDelta = 0;
 
     for (const answer of wordAnswers) {
+      const beforeXp = xp;
       xp = Math.min(masteryXp, Math.max(0, xp + answer.delta));
+      appliedDelta += xp - beforeXp;
 
       if (answer.correct) {
         streak += 1;
@@ -111,6 +114,7 @@ function rollupAnswersByWord(
       streak,
       correctInc,
       wrongInc,
+      appliedDelta,
     });
   }
 
@@ -209,10 +213,9 @@ export default defineEventHandler(async (event) => {
     });
 
     await timedStep(timings, "userLockMs", async () => {
-      await client.query(
-        `select pg_advisory_xact_lock(hashtext($1))`,
-        [userId],
-      );
+      await client.query(`select pg_advisory_xact_lock(hashtext($1))`, [
+        userId,
+      ]);
     });
 
     const eventRes = await timedStep(timings, "eventLookupMs", async () => {
@@ -222,6 +225,7 @@ export default defineEventHandler(async (event) => {
           id,
           mode,
           total_delta,
+          applied_total_delta,
           correct_count,
           total_questions,
           processed,
@@ -275,7 +279,9 @@ export default defineEventHandler(async (event) => {
         });
       }
 
-      const uniqueWordIds = [...new Set(payloadAnswers.map((a) => a.wordId))].sort();
+      const uniqueWordIds = [
+        ...new Set(payloadAnswers.map((a) => a.wordId)),
+      ].sort();
 
       const existingWordRowsRes = uniqueWordIds.length
         ? await timedStep(timings, "existingProgressReadMs", async () => {
@@ -331,6 +337,11 @@ export default defineEventHandler(async (event) => {
       const rolledUpWordProgress = rollupAnswersByWord(
         payloadAnswers,
         existingMap,
+      );
+
+      const appliedTotalDelta = rolledUpWordProgress.reduce(
+        (sum, row) => sum + row.appliedDelta,
+        0,
       );
 
       if (rolledUpWordProgress.length > 0) {
@@ -395,12 +406,13 @@ export default defineEventHandler(async (event) => {
       await timedStep(timings, "eventUpdateMs", async () => {
         await client.query(
           `
-          update xp_jyutping_events
-          set processed = true,
-              processed_at = now()
-          where id = $1
+            update xp_jyutping_events
+            set processed = true,
+                processed_at = now(),
+                applied_total_delta = $2
+            where id = $1
           `,
-          [quizEvent.id],
+          [quizEvent.id, appliedTotalDelta],
         );
       });
 
