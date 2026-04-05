@@ -187,25 +187,19 @@ watchEffect(() => {
             <ul class="space-y-5 list-none pl-0">
                 <li v-for="(example, index) in word.examples" :key="example.sentence"
                     class="example-card rounded-lg p-4">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between gap-4">
-                            <span class="text-lg text-gray-900">
-                                {{ example.sentence }}
-                            </span>
-
-                            <div class="flex items-center justify-center gap-3">
-
+                    <div class="space-y-3">
+                        <!-- buttons aligned right -->
+                        <div class="flex justify-end">
+                            <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                                 <NuxtLink :to="`/writing/${topic}/sentences/${word.id}/${index}`"
-                                    class="bg-white hover:bg-gray-50 text-xs px-2 py-1 rounded-md shadow-sm transition border">
+                                    class="inline-flex items-center justify-center rounded-md border bg-white px-2 py-1 text-xs shadow-sm transition hover:bg-gray-50">
                                     <span class="text-black">✏️</span>
                                 </NuxtLink>
 
                                 <NuxtLink
                                     :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/v2/${index}`"
-                                    class="topic-btn-blue text-xs px-2 py-1 rounded-md shadow-sm transition">
-                                    <span class="text-black">
-                                        ▶︎
-                                    </span>
+                                    class="topic-btn-blue inline-flex items-center justify-center rounded-md px-2 py-1 text-xs shadow-sm transition">
+                                    <span class="text-black">▶︎</span>
                                 </NuxtLink>
 
                                 <AudioButton v-if="word.audio?.examples?.[index]"
@@ -214,11 +208,16 @@ watchEffect(() => {
                             </div>
                         </div>
 
-                        <div class="text-sm text-gray-500">
+                        <!-- sentence on its own line -->
+                        <div class="text-lg leading-relaxed text-gray-900 break-words">
+                            {{ example.sentence }}
+                        </div>
+
+                        <div class="text-sm text-gray-500 break-words">
                             {{ example.jyutping }}
                         </div>
 
-                        <div class="text-sm text-gray-700">
+                        <div class="text-sm text-gray-700 break-words">
                             {{ example.meaning }}
                         </div>
                     </div>
