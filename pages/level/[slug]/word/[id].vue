@@ -100,11 +100,6 @@ watchEffect(() => {
 
   <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
-    <!-- Back link -->
-    <!-- <NuxtLink :to="`/level/${level}`" class="inline-block text-sm text-black hover:underline">
-      ← {{ formattedLevel }} Vocab
-    </NuxtLink> -->
-
     <BackLink />
 
     <!-- Word header -->
@@ -139,7 +134,7 @@ watchEffect(() => {
       </div>
 
       <div class="flex items-center justify-center gap-3">
-        
+
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
           size="lg" />
 
@@ -197,60 +192,38 @@ watchEffect(() => {
       </h2>
 
       <ul class="space-y-5">
-        <li v-for="(example, index) in word.examples" :key="example.sentence" class="example-card rounded-lg p-4">
-          <div class="space-y-2">
-            <div class="flex items-center justify-between gap-4">
-              <span class="text-lg text-gray-900">
+          <li v-for="(example, index) in word.examples" :key="example.sentence" class="example-card rounded-lg p-4">
+            <div class="space-y-3">
+              <div class="text-lg leading-relaxed text-gray-900 break-words">
                 {{ example.sentence }}
-              </span>
-
-              <div class="flex items-center justify-center gap-3">
-
-                <!-- <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/${index}`"
-                  class="text-xs px-2 py-1 rounded-md bg-black shadow-sm hover:brightness-125 transition">
-                  <span class="bg-gradient-to-r
-                      from-[#d48fd0]
-                      via-[#b57bc3]
-                      via-[#6faed6]
-                      to-[#d48fd0]
-                      bg-clip-text text-transparent">
-                    ▶︎
-                  </span>
-                </NuxtLink> -->
-
-                <!-- <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/${index}`"
-                  class="topic-btn-blue text-xs px-2 py-1 rounded-md shadow-sm transition">
-                  <span class="text-black">
-                    ▶︎
-                  </span>
-                </NuxtLink> -->
-
-                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
-                  class="bg-white hover:bg-gray-50 text-xs px-2 py-1 rounded-md shadow-sm transition border">
-                  <span class="text-black">✏️</span>
-                </NuxtLink>
-
-                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
-                  class="level-btn-blue text-xs px-2 py-1 rounded-md shadow-sm transition">
-                  <span class="text-black">
-                    ▶︎
-                  </span>
-                </NuxtLink>
-
-                <AudioButton v-if="word.audio?.examples?.[index]"
-                  :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm" />
               </div>
 
-            </div>
-            <div class="text-sm text-gray-500">
-              {{ example.jyutping }}
-            </div>
+              <div class="flex justify-end">
+                <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                  <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
+                    class="inline-flex items-center justify-center rounded-md border bg-white px-2 py-1 text-xs shadow-sm transition hover:bg-gray-50">
+                    <span class="text-black">✏️</span>
+                  </NuxtLink>
 
-            <div class="text-sm text-gray-700">
-              {{ example.meaning }}
+                  <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
+                    class="level-btn-blue inline-flex items-center justify-center rounded-md px-2 py-1 text-xs shadow-sm transition">
+                    <span class="text-black">▶︎</span>
+                  </NuxtLink>
+
+                  <AudioButton v-if="word.audio?.examples?.[index]"
+                    :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm" />
+                </div>
+              </div>
+
+              <div class="text-sm text-gray-500 break-words">
+                {{ example.jyutping }}
+              </div>
+
+              <div class="text-sm text-gray-700 break-words">
+                {{ example.meaning }}
+              </div>
             </div>
-          </div>
-        </li>
+          </li>
       </ul>
 
       <div class="text-center mt-10">
