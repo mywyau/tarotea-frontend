@@ -54,7 +54,8 @@ const { data: stats } = await useFetch('/api/stats', {
       <div class="grid grid-cols-1 sm:grid-cols-1 gap-5">
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
-            {{ stats?.totalUsers ?? '—' }}
+            <!-- {{ stats?.totalUsers ?? '—' }} -->
+            {{ stats?.paidUsers ?? '—' }}
           </div>
           <div class="text-sm text-gray-700 mt-1">
             Learners
