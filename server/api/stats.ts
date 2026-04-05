@@ -1,22 +1,28 @@
 import { db } from "~/server/repositories/db";
+import { setHeader } from "h3";
 
-export default defineEventHandler(async () => {
+export default defineEventHandler(async (event) => {
   
-  const { rows: userRows } = await db.query(
-    `SELECT COUNT(*)::int AS count FROM users`,
-  );
+  setHeader(event, "Cache-Control", "s-maxage=60, stale-while-revalidate=300");
 
-  const { rows: paidRows } = await db.query(
+  const { rows } = await db.query<{
+    total_users: number;
+    paid_users: number;
+  }>(
     `
-    SELECT COUNT(*)::int AS count
-    FROM entitlements
-    WHERE subscription_status = 'active'
-      AND plan IN ('monthly', 'yearly')
+    SELECT
+      (SELECT COUNT(*)::int FROM users) AS total_users,
+      (
+        SELECT COUNT(DISTINCT user_id)::int
+        FROM entitlements
+        WHERE subscription_status = 'active'
+          AND plan IN ('monthly', 'yearly')
+      ) AS paid_users
     `,
   );
 
   return {
-    totalUsers: userRows[0]?.count ?? 0,
-    paidUsers: paidRows[0]?.count ?? 0,
+    totalUsers: rows[0]?.total_users ?? 0,
+    paidUsers: rows[0]?.paid_users ?? 0,
   };
 });
