@@ -237,7 +237,7 @@ watch(
 
         <div class="mb-4 sm:mb-6">
             <p class="text-xs font-medium uppercase tracking-wide text-gray-500 sm:text-sm">
-                Writing Practice
+                Writing
             </p>
             <h1 class="mt-1 text-2xl font-bold text-gray-900 sm:mt-2 sm:text-3xl">
                 Follow the brush strokes

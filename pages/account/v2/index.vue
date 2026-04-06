@@ -24,39 +24,35 @@ const aiUsage = ref<{
 
 
 async function deleteAccount() {
-    if (!isLoggedIn.value) return
-    if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
+  if (!isLoggedIn.value) return
+  if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
 
-    deleteError.value = ''
-    deleting.value = true
- 
-    try {
-        const auth = await useAuth()
-        const token = await auth.getAccessToken()
+  deleteError.value = ''
+  deleting.value = true
 
-        await $fetch('/api/account', {
-            method: 'DELETE',
-            headers: { Authorization: `Bearer ${token}` },
-            body: { confirm: 'DELETE' }
-        })
+  try {
+    const auth = await useAuth()
+    const token = await auth.getAccessToken()
 
-        await auth.client?.logout({
-            logoutParams: { returnTo: window.location.origin }
-        })
-    } catch (err: any) {
-        console.error('Account deletion failed', err)
-        deleteError.value =
-            err?.data?.statusMessage ??
-            'Something went wrong deleting your account. Please try again.'
-    } finally {
-        deleting.value = false
-        deleteConfirmInput.value = ''
+    await $fetch('/api/account', {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+      body: { confirm: 'DELETE' }
+    })
 
-        if (!deleteError.value) {
-            showDeletePanel.value = false
-        }
-    }
+    await auth.client?.logout({
+      logoutParams: { returnTo: window.location.origin }
+    })
+  } catch (err: any) {
+    console.error('Account deletion failed', err)
+    deleteError.value =
+      err?.data?.statusMessage ??
+      'Something went wrong deleting your account. Please try again.'
+  } finally {
+    deleting.value = false
+  }
 }
+
 
 async function fetchAIUsage() {
     if (!isLoggedIn.value) return
@@ -94,11 +90,15 @@ const remainingPercent = computed(() => {
     return (aiUsage.value.remaining / aiUsage.value.limit) * 100
 })
 
-watchEffect(() => {
-    if (authReady.value && isLoggedIn.value) {
-        fetchAIUsage()
+watch(
+  () => [authReady.value, isLoggedIn.value],
+  async ([ready, loggedIn]) => {
+    if (ready && loggedIn && !aiUsage.value) {
+      await fetchAIUsage()
     }
-})
+  },
+  { immediate: true }
+)
 
 const animatedPercent = ref(0)
 
