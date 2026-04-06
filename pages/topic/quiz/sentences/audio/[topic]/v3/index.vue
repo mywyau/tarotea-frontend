@@ -479,7 +479,7 @@ watch(
         <div v-if="showQuiz" class="space-y-6">
           <div class="space-y-6">
             <div class="flex flex-col items-center justify-center min-h-[80px]">
-              <div class="space-y-2 transition-all duration-300"
+              <div class="space-y-2"
                 :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
                 <p class="text-2xl text-black leading-relaxed font-semibold text-center">
                   {{ question.prompt }}
