@@ -1,23 +1,23 @@
-import { createRemoteJWKSet, jwtVerify } from 'jose'
+import { createRemoteJWKSet, jwtVerify } from "jose";
 
-const auth0Domain = process.env.AUTH0_DOMAIN!
-const auth0Audience = process.env.AUTH0_AUDIENCE!
+const auth0Domain = process.env.AUTH0_DOMAIN!;
+const auth0Audience = process.env.AUTH0_AUDIENCE!;
 
 /* ------------------------------------------------------------------ */
 /* Token verification (used for authenticated requests from frontend) */
 /* ------------------------------------------------------------------ */
 
 const jwks = createRemoteJWKSet(
-  new URL(`https://${auth0Domain}/.well-known/jwks.json`)
-)
+  new URL(`https://${auth0Domain}/.well-known/jwks.json`),
+);
 
 export async function verifyAuth0Token(token: string) {
   const { payload } = await jwtVerify(token, jwks, {
     issuer: `https://${auth0Domain}/`,
-    audience: auth0Audience
-  })
+    audience: auth0Audience,
+  });
 
-  return payload
+  return payload;
 }
 
 /* ------------------------------------------------ */
@@ -25,50 +25,56 @@ export async function verifyAuth0Token(token: string) {
 /* ------------------------------------------------ */
 
 let cachedManagementToken: {
-  token: string
-  expiresAt: number
-} | null = null
+  token: string;
+  expiresAt: number;
+} | null = null;
 
 async function getManagementToken(): Promise<string> {
-  if (
-    cachedManagementToken &&
-    cachedManagementToken.expiresAt > Date.now()
-  ) {
-    return cachedManagementToken.token
+  if (cachedManagementToken && cachedManagementToken.expiresAt > Date.now()) {
+    return cachedManagementToken.token;
   }
 
-  const res = await fetch(
-    `https://${auth0Domain}/oauth/token`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        client_id: process.env.AUTH0_MGMT_CLIENT_ID,
-        client_secret: process.env.AUTH0_MGMT_CLIENT_SECRET,
-        audience: `https://${auth0Domain}/api/v2/`,
-        grant_type: 'client_credentials'
-      })
-    }
-  )
+  const auth0Domain = process.env.AUTH0_DOMAIN!;
+  const auth0Audience = process.env.AUTH0_AUDIENCE!;
+  const auth0MgmtAudience =
+    process.env.AUTH0_MGMT_AUDIENCE || `https://${auth0Domain}/api/v2/`;
+
+  console.log("Auth0 management config", {
+    domain: auth0Domain,
+    audience: auth0MgmtAudience,
+    hasMgmtClientId: Boolean(process.env.AUTH0_MGMT_CLIENT_ID),
+    hasMgmtClientSecret: Boolean(process.env.AUTH0_MGMT_CLIENT_SECRET),
+  });
+
+  const res = await fetch(`https://${auth0Domain}/oauth/token`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      client_id: process.env.AUTH0_MGMT_CLIENT_ID,
+      client_secret: process.env.AUTH0_MGMT_CLIENT_SECRET,
+      audience: auth0MgmtAudience,
+      grant_type: "client_credentials",
+    }),
+  });
 
   if (!res.ok) {
-    const text = await res.text()
+    const text = await res.text();
     throw new Error(
-      `Failed to fetch Auth0 management token (${res.status}): ${text}`
-    )
+      `Failed to fetch Auth0 management token (${res.status}): ${text}`,
+    );
   }
 
-  const { access_token, expires_in } = await res.json()
+  const { access_token, expires_in } = await res.json();
 
   cachedManagementToken = {
     token: access_token,
     // refresh 60s early
-    expiresAt: Date.now() + expires_in * 1000 - 60_000
-  }
+    expiresAt: Date.now() + expires_in * 1000 - 60_000,
+  };
 
-  return access_token
+  return access_token;
 }
 
 /* ---------------------------- */
@@ -77,30 +83,28 @@ async function getManagementToken(): Promise<string> {
 
 export async function deleteAuth0User(auth0UserId: string): Promise<void> {
   if (!auth0UserId) {
-    throw new Error('Missing Auth0 user id')
+    throw new Error("Missing Auth0 user id");
   }
 
-  const token = await getManagementToken()
+  const token = await getManagementToken();
 
   const res = await fetch(
     `https://${auth0Domain}/api/v2/users/${encodeURIComponent(auth0UserId)}`,
     {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  )
+        Authorization: `Bearer ${token}`,
+      },
+    },
+  );
 
   // Already deleted → treat as success (idempotent)
   if (res.status === 404) {
-    return
+    return;
   }
 
   if (!res.ok) {
-    const text = await res.text()
-    throw new Error(
-      `Failed to delete Auth0 user (${res.status}): ${text}`
-    )
+    const text = await res.text();
+    throw new Error(`Failed to delete Auth0 user (${res.status}): ${text}`);
   }
 }
