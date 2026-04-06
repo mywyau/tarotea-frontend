@@ -1,4 +1,11 @@
 <script setup lang="ts">
+
+definePageMeta({
+  middleware: ['logged-in'],
+//   middleware: ['coming-soon'],
+  ssr: true,
+})
+
 const {
     authReady,
     isLoggedIn,
@@ -120,7 +127,7 @@ watch(aiUsage, (val) => {
                 <BackLink />
 
                 <!-- Header -->
-                <header class="space-y-2">
+                <header v-if="isLoggedIn" class="space-y-2">
                     <h1 class="text-3xl font-semibold text-gray-900">Account</h1>
                     <p class="text-sm text-gray-600">
                         Manage your plan, billing, and account settings.
@@ -293,7 +300,7 @@ watch(aiUsage, (val) => {
                 </div>
 
                 <!-- Not signed in -->
-                <div v-else class="rounded-lg backdrop-blur p-6 text-center space-y-6">
+                <div v-else class="rounded-lg backdrop-blur p-6 text-center space-y-6"> 
                     <p class="text-black font-medium text-xl">You’re not signed in.</p>
                     <p class="text-sm text-black">Sign in to manage your account and subscription.</p>
                     <div class="mt-">

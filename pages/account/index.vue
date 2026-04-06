@@ -1,4 +1,11 @@
 <script setup lang="ts">
+
+definePageMeta({
+//   middleware: ['logged-in'],
+  middleware: ['coming-soon'],
+  ssr: true,
+})
+
 const {
     authReady,
     isLoggedIn,
