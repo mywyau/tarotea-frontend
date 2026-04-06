@@ -24,33 +24,38 @@ const aiUsage = ref<{
 
 
 async function deleteAccount() {
-  if (!isLoggedIn.value) return
-  if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
+    if (!isLoggedIn.value) return
+    if (deleteConfirmInput.value.trim().toLowerCase() !== 'delete') return
 
-  deleteError.value = ''
-  deleting.value = true
+    deleteError.value = ''
+    deleting.value = true
 
-  try {
-    const auth = await useAuth()
-    const token = await auth.getAccessToken()
+    try {
+        const auth = await useAuth()
+        const token = await auth.getAccessToken()
 
-    await $fetch('/api/account', {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` },
-      body: { confirm: 'DELETE' }
-    })
+        await $fetch('/api/account/v2', {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` },
+            body: { confirm: 'DELETE' }
+        })
 
-    await auth.client?.logout({
-      logoutParams: { returnTo: window.location.origin }
-    })
-  } catch (err: any) {
-    console.error('Account deletion failed', err)
-    deleteError.value =
-      err?.data?.statusMessage ??
-      'Something went wrong deleting your account. Please try again.'
-  } finally {
-    deleting.value = false
-  }
+        await auth.client?.logout({
+            logoutParams: { returnTo: window.location.origin }
+        })
+    } catch (err: any) {
+        console.error('Account deletion failed', err)
+        deleteError.value =
+            err?.data?.statusMessage ??
+            'Something went wrong deleting your account. Please try again.'
+    } finally {
+        deleting.value = false
+        deleteConfirmInput.value = ''
+
+        if (!deleteError.value) {
+            showDeletePanel.value = false
+        }
+    }
 }
 
 
@@ -84,11 +89,6 @@ async function openBillingPortal() {
 
     window.location.href = url
 }
-
-const remainingPercent = computed(() => {
-    if (!aiUsage.value) return 0
-    return (aiUsage.value.remaining / aiUsage.value.limit) * 100
-})
 
 watch(
   () => [authReady.value, isLoggedIn.value],
@@ -227,6 +227,7 @@ watch(aiUsage, (val) => {
 
                                 <p class="mt-4 text-sm text-red-800">
                                     Deleting your account permanently removes your account, data and subscription.
+                                    Your subscription will be canceled, and you will be signed out immediately.
                                 </p>
                             </div>
 
