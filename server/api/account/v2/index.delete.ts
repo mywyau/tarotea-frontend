@@ -39,10 +39,21 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  const siteUrl = process.env.SITE_URL;
+  if (!siteUrl) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "SITE_URL is not configured",
+    });
+  }
+
+  const workerUrl = `${siteUrl}/api/account/v2/worker-delete`;
+
   const client = await db.connect();
 
   let jobId: number | null = null;
   let alreadyInProgress = false;
+  let createdNewJob = false;
 
   try {
     await client.query("BEGIN");
@@ -63,6 +74,40 @@ export default defineEventHandler(async (event) => {
 
     if (lockRes.rowCount === 0) {
       alreadyInProgress = true;
+
+      const existingJobRes = await client.query(
+        `
+        SELECT id, status
+        FROM account_deletion_jobs
+        WHERE user_id = $1
+          AND status IN ('pending', 'failed')
+        ORDER BY created_at DESC
+        LIMIT 1
+        `,
+        [user.id]
+      );
+
+      if (existingJobRes.rowCount > 0) {
+        jobId = Number(existingJobRes.rows[0].id);
+      } else {
+        const repairJobRes = await client.query(
+          `
+          INSERT INTO account_deletion_jobs (
+            user_id,
+            status,
+            attempt_count,
+            created_at
+          )
+          VALUES ($1, 'pending', 0, NOW())
+          RETURNING id
+          `,
+          [user.id]
+        );
+
+        jobId = Number(repairJobRes.rows[0].id);
+        createdNewJob = true;
+      }
+
       await client.query("COMMIT");
     } else {
       const jobRes = await client.query(
@@ -80,6 +125,7 @@ export default defineEventHandler(async (event) => {
       );
 
       jobId = Number(jobRes.rows[0].id);
+      createdNewJob = true;
 
       await client.query("COMMIT");
     }
@@ -90,22 +136,30 @@ export default defineEventHandler(async (event) => {
     client.release();
   }
 
-  if (!alreadyInProgress && jobId !== null) {
+  if (jobId !== null) {
     try {
-      await qstash.publishJSON({
-        url: `${process.env.SITE_URL}/api/account/v2/worker-delete`,
+      const publishResult = await qstash.publishJSON({
+        url: workerUrl,
         body: {
           jobId,
           userId: user.id,
         },
-        deduplicationId: `account-delete:${user.id}`,
+        deduplicationId: `account_delete_${jobId}`
+      });
+
+      console.log("Published account deletion job", {
+        userId: user.id,
+        jobId,
+        workerUrl,
+        createdNewJob,
+        alreadyInProgress,
+        publishResult,
       });
     } catch (err) {
-      // Queue publish failed after DB commit.
-      // Keep the job as pending so it can be retried manually or by a sweeper.
       console.error("Failed to publish account deletion job", {
         userId: user.id,
         jobId,
+        workerUrl,
         error: err,
       });
 
@@ -114,14 +168,21 @@ export default defineEventHandler(async (event) => {
         statusMessage: "Failed to queue account deletion",
       });
     }
+  } else {
+    throw createError({
+      statusCode: 500,
+      statusMessage: "No deletion job could be created or found",
+    });
   }
 
   setResponseStatus(event, 202);
 
   return {
     success: true,
-    queued: !alreadyInProgress,
+    queued: true,
     alreadyInProgress,
+    createdNewJob,
+    jobId,
     status: "pending",
   };
 });
