@@ -56,7 +56,7 @@ onBeforeUnmount(() => {
         <div v-if="menuOpen" class="menu-panel">
           <!-- Logged in -->
           <template v-if="isLoggedIn">
-            <NuxtLink to="/account"
+            <NuxtLink to="/account/v2"
               class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
               @click="closeMenu">
               Account
