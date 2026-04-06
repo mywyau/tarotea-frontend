@@ -86,7 +86,7 @@ export default defineEventHandler(async (event) => {
 
     await client.query("COMMIT");
 
-    // --- Stripe cancellation ---
+    // 1. Cancel Stripe
     if (user.stripe_customer_id) {
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
         apiVersion: "2023-10-16",
@@ -103,7 +103,6 @@ export default defineEventHandler(async (event) => {
           try {
             await stripe.subscriptions.cancel(sub.id);
           } catch (err: any) {
-            // Ignore already-canceled / already-missing style errors if needed
             const message = String(err?.message ?? "");
             if (!message.toLowerCase().includes("no such subscription")) {
               throw err;
@@ -113,20 +112,13 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // --- App data deletion ---
+    // 2. Delete Auth0 first
+    await deleteAuth0User(body.userId);
+
+    // 3. Delete app data last
     await deleteUserData(body.userId);
 
-    // --- Auth0 deletion ---
-    try {
-      await deleteAuth0User(body.userId);
-    } catch (err) {
-      // You can choose whether this should fail the whole job.
-      // My preference: fail the job so it can be retried and audited.
-      throw new Error(
-        `Auth0 deletion failed: ${err instanceof Error ? err.message : String(err)}`
-      );
-    }
-
+    // 4. Mark job completed
     await db.query(
       `
       UPDATE account_deletion_jobs
@@ -138,6 +130,7 @@ export default defineEventHandler(async (event) => {
       [body.jobId]
     );
 
+    // Only keep this if users row still exists after deleteUserData
     await db.query(
       `
       UPDATE users
