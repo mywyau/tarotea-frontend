@@ -86,7 +86,7 @@ export default defineEventHandler(async (event) => {
 
     await client.query("COMMIT");
 
-    // 1. Cancel Stripe
+    // 1. Cancel Stripe first
     if (user.stripe_customer_id) {
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
         apiVersion: "2023-10-16",
@@ -112,10 +112,10 @@ export default defineEventHandler(async (event) => {
       }
     }
 
-    // 2. Delete Auth0 first
+    // 2. Delete Auth0 before deleting local DB data
     await deleteAuth0User(body.userId);
 
-    // 3. Delete app data last
+    // 3. Delete local app data last
     await deleteUserData(body.userId);
 
     // 4. Mark job completed
@@ -128,17 +128,6 @@ export default defineEventHandler(async (event) => {
       WHERE id = $1
       `,
       [body.jobId]
-    );
-
-    // Only keep this if users row still exists after deleteUserData
-    await db.query(
-      `
-      UPDATE users
-      SET deletion_status = 'completed',
-          deleted_at = NOW()
-      WHERE id = $1
-      `,
-      [body.userId]
     );
 
     return {
