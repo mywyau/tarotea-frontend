@@ -93,7 +93,7 @@ export default defineEventHandler(async (event) => {
   if (!alreadyInProgress && jobId !== null) {
     try {
       await qstash.publishJSON({
-        url: `${process.env.APP_BASE_URL}/api/account/v2/worker-delete`,
+        url: `${process.env.SITE_BASE_URL}/api/account/v2/worker-delete`,
         body: {
           jobId,
           userId: user.id,
