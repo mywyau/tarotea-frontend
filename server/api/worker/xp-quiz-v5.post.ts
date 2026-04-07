@@ -507,8 +507,7 @@
 //   }
 // });
 
-
-// new api 
+// new api
 
 import { useRuntimeConfig } from "#imports";
 import { Receiver } from "@upstash/qstash";
@@ -1004,25 +1003,24 @@ export default defineEventHandler(async (event) => {
 
     await client.query(
       `
-      insert into user_stats (
-        user_id,
-        total_xp,
-        words_maxed,
-        words_seen,
-        total_correct,
-        total_wrong,
-        created_at,
-        updated_at
-      )
-      values ($1, $2, $3, $4, $5, $6, now(), now())
-      on conflict (user_id)
-      do update set
-        total_xp = user_stats.total_xp + excluded.total_xp,
-        words_maxed = user_stats.words_maxed + excluded.words_maxed,
-        words_seen = user_stats.words_seen + excluded.words_seen,
-        total_correct = user_stats.total_correct + excluded.total_correct,
-        total_wrong = user_stats.total_wrong + excluded.total_wrong,
-        updated_at = now()
+        insert into user_stats (
+          user_id,
+          total_xp,
+          words_maxed,
+          words_seen,
+          total_correct,
+          total_wrong,
+          updated_at
+        )
+        values ($1, $2, $3, $4, $5, $6, now())
+        on conflict (user_id)
+        do update set
+          total_xp = user_stats.total_xp + excluded.total_xp,
+          words_maxed = user_stats.words_maxed + excluded.words_maxed,
+          words_seen = user_stats.words_seen + excluded.words_seen,
+          total_correct = user_stats.total_correct + excluded.total_correct,
+          total_wrong = user_stats.total_wrong + excluded.total_wrong,
+          updated_at = now()
       `,
       [
         job.userId,
@@ -1057,15 +1055,7 @@ export default defineEventHandler(async (event) => {
         jyutping_completed = user_stats_daily.jyutping_completed + excluded.jyutping_completed,
         updated_at = now()
       `,
-      [
-        job.userId,
-        statDate,
-        appliedTotalDelta,
-        correctCount,
-        wrongCount,
-        1,
-        0,
-      ],
+      [job.userId, statDate, appliedTotalDelta, correctCount, wrongCount, 1, 0],
     );
 
     await client.query(
