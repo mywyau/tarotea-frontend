@@ -1,6 +1,7 @@
 import { createError, getQuery } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 import { levelTitles } from "~/utils/levels/levels";
 import { generateWeightedWords } from "~/utils/quiz/generateWeightedWords";
@@ -162,6 +163,8 @@ export default defineEventHandler(async (event) => {
   });
 
   const userId = auth.sub;
+
+  await enforceRateLimit(`rl:start:typing-level-sentences:${userId}`, 20, 60);
 
   const query = getQuery(event);
   const scope = String(query.scope ?? "level");

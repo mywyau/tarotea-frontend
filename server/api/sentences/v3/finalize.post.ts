@@ -10,6 +10,7 @@ import type {
   FinalizeBody,
   QuizSession,
 } from "~/server/services/sentence-quiz/finalize/type";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
 type ExistingEventRow = {
@@ -57,6 +58,9 @@ async function publishSentenceWorker(args: {
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
+
+  await enforceRateLimit(`rl:finalize:level-sentences:${userId}`, 20, 60);
+
   const body = (await readBody(event)) as FinalizeBody;
 
   if (!body?.sessionKey) {

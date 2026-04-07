@@ -2,6 +2,7 @@ import { Client } from "@upstash/qstash";
 import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 import {
   chineseXp,
@@ -84,6 +85,8 @@ export default defineEventHandler(async (event) => {
 
   const auth = await timedStep(timings, "authMs", async () => requireUser(event));
   const userId = auth.sub;
+
+  await enforceRateLimit(`rl:finalize:typing-level-sentences:${userId}`, 20, 60);
 
   const body = await timedStep(timings, "readBodyMs", async () => {
     return (await readBody(event)) as FinalizeBody;

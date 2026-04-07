@@ -1,6 +1,7 @@
 import { createError, getQuery } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 import { generateWeightedWords } from "~/utils/quiz/generateWeightedWords";
 import { topics } from "~/utils/topics/topics";
@@ -65,6 +66,8 @@ function resolveTitle(variant: DojoVariant, slug: string) {
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
+
+  await enforceRateLimit(`rl:start:typing-topic-sentences:${userId}`, 20, 60);
 
   const query = getQuery(event);
   const scope = String(query.scope ?? "topic");

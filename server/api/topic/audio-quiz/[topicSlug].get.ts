@@ -3,6 +3,7 @@
 import { createError, getRouterParam } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
 type TopicWord = {
@@ -425,6 +426,7 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
+  await enforceRateLimit(`rl:topic-audio-quiz:${userId}`, 20, 60); // gentler rate limit
   const topicSlug = getRouterParam(event, "topicSlug");
 
   if (!topicSlug) {

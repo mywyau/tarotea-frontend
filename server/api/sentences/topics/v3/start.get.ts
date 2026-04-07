@@ -8,6 +8,7 @@ import {
   TopicSentenceItem,
   QuizSession,
 } from "~/server/services/topic/sentence-quiz/start/types";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 import { buildSentenceQuiz } from "~/utils/quiz/buildSentenceQuiz";
 import { shuffleFisherYates } from "~/utils/shuffle";
@@ -18,6 +19,8 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
   const query = getQuery(event);
+
+  await enforceRateLimit(`rl:start:topic-sentences:${userId}`, 20, 60);
 
   const scope = String(query.scope ?? "topic");
   const slug = String(query.slug ?? "");

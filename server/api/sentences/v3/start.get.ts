@@ -8,6 +8,7 @@ import {
   LevelSentenceItem,
   QuizSession,
 } from "~/server/services/sentence-quiz/start/types";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 import { buildSentenceQuiz } from "~/utils/quiz/buildSentenceQuiz";
 import { shuffleFisherYates } from "~/utils/shuffle";
@@ -17,6 +18,9 @@ const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
+
+  await enforceRateLimit(`rl:start:level-sentences:${userId}`, 20, 60);
+
   const query = getQuery(event);
 
   const scope = String(query.scope ?? "level");

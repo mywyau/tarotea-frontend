@@ -3,6 +3,7 @@
 import { createError, getRouterParam } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
 type TopicWord = {
@@ -368,9 +369,10 @@ function buildTopicQuiz(
 }
 
 export default defineEventHandler(async (event) => {
-  
   const auth = await requireUser(event);
   const userId = auth.sub;
+
+  await enforceRateLimit(`rl:topic-quiz:${userId}`, 20, 60); // gentler ratelimit
 
   const topicSlug = getRouterParam(event, "topicSlug");
 
