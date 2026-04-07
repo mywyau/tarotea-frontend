@@ -1,6 +1,5 @@
 // server/api/daily/jyutping/v2/xp-worker.post.ts
 
-
 import { Receiver } from "@upstash/qstash";
 import {
   createError,
@@ -9,6 +8,8 @@ import {
   readRawBody,
 } from "h3";
 import { db } from "~/server/repositories/db";
+import { redis } from "~/server/repositories/redis";
+import { masteryXp } from "~/utils/xp/helpers";
 
 type WorkerBody = {
   eventId: number | string;
@@ -24,13 +25,34 @@ type Payload = {
   }>;
 };
 
-type AggregatedWord = {
-  wordId: string;
-  delta: number;
-  correct: boolean;
+type ExistingEventRow = {
+  id: number | string;
+  user_id: string;
+  payload: Payload | string | null;
+  total_delta: number | string | null;
+  applied_total_delta: number | string | null;
+  correct_count: number | string | null;
+  total_questions: number | string | null;
+  processed: boolean | null;
 };
 
-const MASTERY_CAP = 1000;
+type ExistingWordRow = {
+  word_id: string;
+  xp: number | string | null;
+  streak: number | string | null;
+};
+
+type AggregatedWordUpdate = {
+  wordId: string;
+  xpBefore: number;
+  xpAfter: number;
+  appliedDelta: number;
+  correctCount: number;
+  wrongCount: number;
+  finalCorrect: boolean;
+  finalStreak: number;
+  existedBefore: boolean;
+};
 
 function requiredEnv(name: string): string {
   const value = process.env[name];
@@ -50,11 +72,11 @@ function getReceiver() {
   });
 }
 
-function getPublicUrl(event: Parameters<typeof defineEventHandler>[0] extends (
-  event: infer E,
-) => any
-  ? E
-  : never): string {
+function getPublicUrl(
+  event: Parameters<typeof defineEventHandler>[0] extends (event: infer E) => any
+    ? E
+    : never,
+): string {
   const proto = getHeader(event, "x-forwarded-proto") ?? "https";
   const host =
     getHeader(event, "x-forwarded-host") ?? getHeader(event, "host");
@@ -69,33 +91,95 @@ function getPublicUrl(event: Parameters<typeof defineEventHandler>[0] extends (
   return `${proto}://${host}${event.path}`;
 }
 
-function aggregateAnswers(
+function buildAggregatedUpdates(
   answers: Payload["answers"],
-): AggregatedWord[] {
-  const byWord = new Map<string, AggregatedWord>();
+  existingMap: Map<string, { xp: number; streak: number }>,
+): {
+  updates: AggregatedWordUpdate[];
+  appliedTotalDelta: number;
+  correctCount: number;
+  totalQuestions: number;
+  newWordsSeenCount: number;
+  newWordsMaxedCount: number;
+} {
+  const perWord = new Map<string, AggregatedWordUpdate>();
+
+  let appliedTotalDelta = 0;
+  let correctCount = 0;
 
   for (const answer of answers) {
     if (!answer?.wordId) continue;
 
-    const existing = byWord.get(answer.wordId);
+    const current = perWord.get(answer.wordId);
+    const baseXp = existingMap.get(answer.wordId)?.xp ?? 0;
+    const baseStreak = existingMap.get(answer.wordId)?.streak ?? 0;
+    const existedBefore = existingMap.has(answer.wordId);
 
-    if (!existing) {
-      byWord.set(answer.wordId, {
+    const xpBeforeForAnswer = current ? current.xpAfter : baseXp;
+    const streakBefore = current ? current.finalStreak : baseStreak;
+
+    const xpAfterForAnswer = Math.min(
+      masteryXp,
+      Math.max(0, xpBeforeForAnswer + Number(answer.delta ?? 0)),
+    );
+    const appliedDeltaForAnswer = xpAfterForAnswer - xpBeforeForAnswer;
+    const nextStreak = answer.correct
+      ? Math.min(masteryXp, streakBefore + 1)
+      : 0;
+
+    appliedTotalDelta += appliedDeltaForAnswer;
+    if (answer.correct) correctCount += 1;
+
+    if (!current) {
+      perWord.set(answer.wordId, {
         wordId: answer.wordId,
-        delta: Number(answer.delta ?? 0),
-        correct: !!answer.correct,
+        xpBefore: baseXp,
+        xpAfter: xpAfterForAnswer,
+        appliedDelta: appliedDeltaForAnswer,
+        correctCount: answer.correct ? 1 : 0,
+        wrongCount: answer.correct ? 0 : 1,
+        finalCorrect: !!answer.correct,
+        finalStreak: nextStreak,
+        existedBefore,
       });
       continue;
     }
 
-    byWord.set(answer.wordId, {
-      wordId: answer.wordId,
-      delta: existing.delta + Number(answer.delta ?? 0),
-      correct: existing.correct || !!answer.correct,
-    });
+    current.xpAfter = xpAfterForAnswer;
+    current.appliedDelta += appliedDeltaForAnswer;
+    current.correctCount += answer.correct ? 1 : 0;
+    current.wrongCount += answer.correct ? 0 : 1;
+    current.finalCorrect = !!answer.correct;
+    current.finalStreak = nextStreak;
   }
 
-  return [...byWord.values()];
+  const updates = [...perWord.values()];
+  const totalQuestions = answers.length;
+
+  let newWordsSeenCount = 0;
+  let newWordsMaxedCount = 0;
+
+  for (const update of updates) {
+    if (!update.existedBefore) {
+      newWordsSeenCount += 1;
+    }
+
+    const wasMaxedBefore = update.xpBefore >= masteryXp;
+    const isMaxedAfter = update.xpAfter >= masteryXp;
+
+    if (!wasMaxedBefore && isMaxedAfter) {
+      newWordsMaxedCount += 1;
+    }
+  }
+
+  return {
+    updates,
+    appliedTotalDelta,
+    correctCount,
+    totalQuestions,
+    newWordsSeenCount,
+    newWordsMaxedCount,
+  };
 }
 
 export default defineEventHandler(async (event) => {
@@ -153,12 +237,21 @@ export default defineEventHandler(async (event) => {
   });
 
   const client = await db.connect();
-  await client.query("BEGIN");
 
   try {
-    const eventRes = await client.query(
+    await client.query("BEGIN");
+
+    const eventRes = await client.query<ExistingEventRow>(
       `
-      select id, user_id, payload, processed
+      select
+        id,
+        user_id,
+        payload,
+        total_delta,
+        applied_total_delta,
+        correct_count,
+        total_questions,
+        processed
       from xp_jyutping_events
       where id = $1
         and user_id = $2
@@ -199,13 +292,18 @@ export default defineEventHandler(async (event) => {
         `
         update xp_jyutping_events
         set processed = true,
-            processed_at = now()
+            processed_at = now(),
+            applied_total_delta = 0,
+            correct_count = 0,
+            total_questions = 0
         where id = $1
         `,
         [eventId],
       );
 
       await client.query("COMMIT");
+
+      await redis.del(`user:stats:v2:${userId}`).catch(() => {});
 
       return {
         ok: true,
@@ -215,98 +313,187 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    const aggregated = aggregateAnswers(answers);
-    const wordIds = aggregated.map((item) => item.wordId);
+    const uniqueWordIds = [...new Set(answers.map((item) => item.wordId).filter(Boolean))];
 
-    if (!wordIds.length) {
+    const existingWordRowsRes = uniqueWordIds.length
+      ? await client.query<ExistingWordRow>(
+          `
+          select word_id, xp, streak
+          from user_word_progress
+          where user_id = $1
+            and word_id = any($2::text[])
+          `,
+          [userId, uniqueWordIds],
+        )
+      : { rows: [] as ExistingWordRow[] };
+
+    const existingMap = new Map<string, { xp: number; streak: number }>(
+      existingWordRowsRes.rows.map((row) => [
+        row.word_id,
+        {
+          xp: Number(row.xp ?? 0),
+          streak: Number(row.streak ?? 0),
+        },
+      ]),
+    );
+
+    const {
+      updates,
+      appliedTotalDelta,
+      correctCount,
+      totalQuestions,
+      newWordsSeenCount,
+      newWordsMaxedCount,
+    } = buildAggregatedUpdates(answers, existingMap);
+
+    const wrongCount = totalQuestions - correctCount;
+    const statDate = new Date().toISOString().slice(0, 10);
+
+    if (updates.length > 0) {
       await client.query(
         `
-        update xp_jyutping_events
-        set processed = true,
-            processed_at = now()
-        where id = $1
+        insert into user_word_progress
+          (
+            user_id,
+            word_id,
+            xp,
+            streak,
+            correct_count,
+            wrong_count,
+            last_seen_at,
+            last_correct_at,
+            created_at,
+            updated_at
+          )
+        select
+          $1::text,
+          data.word_id,
+          data.final_xp,
+          data.final_streak,
+          data.correct_count,
+          data.wrong_count,
+          now(),
+          case when data.final_correct then now() else null end,
+          now(),
+          now()
+        from unnest(
+          $2::text[],
+          $3::int[],
+          $4::int[],
+          $5::int[],
+          $6::int[],
+          $7::boolean[]
+        ) as data(
+          word_id,
+          final_xp,
+          final_streak,
+          correct_count,
+          wrong_count,
+          final_correct
+        )
+        on conflict (user_id, word_id)
+        do update set
+          xp = excluded.xp,
+          streak = excluded.streak,
+          correct_count = coalesce(user_word_progress.correct_count, 0) + excluded.correct_count,
+          wrong_count = coalesce(user_word_progress.wrong_count, 0) + excluded.wrong_count,
+          last_seen_at = now(),
+          last_correct_at = case
+            when excluded.last_correct_at is not null then now()
+            else user_word_progress.last_correct_at
+          end,
+          updated_at = now()
         `,
-        [eventId],
+        [
+          userId,
+          updates.map((u) => u.wordId),
+          updates.map((u) => u.xpAfter),
+          updates.map((u) => u.finalStreak),
+          updates.map((u) => u.correctCount),
+          updates.map((u) => u.wrongCount),
+          updates.map((u) => u.finalCorrect),
+        ],
       );
-
-      await client.query("COMMIT");
-
-      return {
-        ok: true,
-        processedJyutpingEvents: 1,
-        appliedAnswers: 0,
-        eventId,
-      };
     }
-
-    const deltas = aggregated.map((item) => item.delta);
-    const corrects = aggregated.map((item) => item.correct);
 
     await client.query(
       `
-      insert into user_word_progress
-        (
-          user_id,
-          word_id,
-          xp,
-          streak,
-          correct_count,
-          wrong_count,
-          last_seen_at,
-          last_correct_at,
-          updated_at
-        )
-      select
-        $1::text,
-        u.word_id,
-        greatest(0, u.delta),
-        case when u.correct then 1 else 0 end,
-        case when u.correct then 1 else 0 end,
-        case when u.correct then 0 else 1 end,
-        now(),
-        case when u.correct then now() else null end,
-        now()
-      from unnest($2::text[], $3::int[], $4::boolean[])
-        as u(word_id, delta, correct)
-      on conflict (user_id, word_id)
+      insert into user_stats (
+        user_id,
+        total_xp,
+        words_maxed,
+        words_seen,
+        total_correct,
+        total_wrong,
+        updated_at
+      )
+      values ($1, $2, $3, $4, $5, $6, now())
+      on conflict (user_id)
       do update set
-        xp = least(
-               $5::int,
-               greatest(0, user_word_progress.xp + excluded.xp)
-             ),
-        streak = case
-          when excluded.correct_count = 1
-            then least($5::int, user_word_progress.streak + 1)
-          else 0
-        end,
-        correct_count = user_word_progress.correct_count + excluded.correct_count,
-        wrong_count = user_word_progress.wrong_count + excluded.wrong_count,
-        last_seen_at = now(),
-        last_correct_at = case
-          when excluded.correct_count = 1 then now()
-          else user_word_progress.last_correct_at
-        end,
+        total_xp = user_stats.total_xp + excluded.total_xp,
+        words_maxed = user_stats.words_maxed + excluded.words_maxed,
+        words_seen = user_stats.words_seen + excluded.words_seen,
+        total_correct = user_stats.total_correct + excluded.total_correct,
+        total_wrong = user_stats.total_wrong + excluded.total_wrong,
         updated_at = now()
       `,
-      [userId, wordIds, deltas, corrects, MASTERY_CAP],
+      [
+        userId,
+        appliedTotalDelta,
+        newWordsMaxedCount,
+        newWordsSeenCount,
+        correctCount,
+        wrongCount,
+      ],
+    );
+
+    await client.query(
+      `
+      insert into user_stats_daily (
+        user_id,
+        stat_date,
+        xp_gained,
+        correct_count,
+        wrong_count,
+        quizzes_completed,
+        jyutping_completed,
+        created_at,
+        updated_at
+      )
+      values ($1, $2::date, $3, $4, $5, $6, $7, now(), now())
+      on conflict (user_id, stat_date)
+      do update set
+        xp_gained = user_stats_daily.xp_gained + excluded.xp_gained,
+        correct_count = user_stats_daily.correct_count + excluded.correct_count,
+        wrong_count = user_stats_daily.wrong_count + excluded.wrong_count,
+        quizzes_completed = user_stats_daily.quizzes_completed + excluded.quizzes_completed,
+        jyutping_completed = user_stats_daily.jyutping_completed + excluded.jyutping_completed,
+        updated_at = now()
+      `,
+      [userId, statDate, appliedTotalDelta, correctCount, wrongCount, 0, 1],
     );
 
     await client.query(
       `
       update xp_jyutping_events
       set processed = true,
-          processed_at = now()
+          processed_at = now(),
+          applied_total_delta = $2,
+          correct_count = $3,
+          total_questions = $4
       where id = $1
       `,
-      [eventId],
+      [eventId, appliedTotalDelta, correctCount, totalQuestions],
     );
 
     await client.query("COMMIT");
 
+    await redis.del(`user:stats:v2:${userId}`).catch(() => {});
+
     return {
       ok: true,
       processedJyutpingEvents: 1,
-      appliedAnswers: wordIds.length,
+      appliedAnswers: updates.length,
       eventId,
     };
   } catch (error) {
