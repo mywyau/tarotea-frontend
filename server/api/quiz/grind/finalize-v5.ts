@@ -1,7 +1,8 @@
 import { useRuntimeConfig } from "#imports";
-import { createError, readBody } from "h3";
 import { Client } from "@upstash/qstash";
+import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
 type Answer = {
@@ -108,7 +109,9 @@ function buildWordOutcomeMap(rawAnswers: unknown): Map<string, boolean> {
 
 let qstashClient: Client | null = null;
 
-function getQstashClient(event: Parameters<typeof defineEventHandler>[0]): Client {
+function getQstashClient(
+  event: Parameters<typeof defineEventHandler>[0],
+): Client {
   if (qstashClient) return qstashClient;
 
   const config = useRuntimeConfig(event);
@@ -122,7 +125,10 @@ function getQstashClient(event: Parameters<typeof defineEventHandler>[0]): Clien
   return qstashClient;
 }
 
-function safeDeduplicationId(job: { attemptId: string; userId: string }): string {
+function safeDeduplicationId(job: {
+  attemptId: string;
+  userId: string;
+}): string {
   return `${job.userId}__${job.attemptId}`.replace(/[^a-zA-Z0-9._-]/g, "_");
 }
 
@@ -167,6 +173,10 @@ export default defineEventHandler(async (event) => {
     userId = auth.sub;
     const tAuth1 = performance.now();
 
+    const tRate0 = performance.now();
+    await enforceRateLimit(`rl:quiz-finalize:${userId}`, 10, 60);
+    const tRate1 = performance.now();
+
     const tBody0 = performance.now();
     const body = (await readBody(event)) as FinalizeBody | undefined;
     const tBody1 = performance.now();
@@ -183,10 +193,12 @@ export default defineEventHandler(async (event) => {
     mode = normalizeMode(body);
     const wordOutcomeMap = buildWordOutcomeMap(body.answers);
 
-    const rawAnswers = [...wordOutcomeMap.entries()].map(([wordId, correct]) => ({
-      wordId,
-      correct,
-    }));
+    const rawAnswers = [...wordOutcomeMap.entries()].map(
+      ([wordId, correct]) => ({
+        wordId,
+        correct,
+      }),
+    );
 
     const totalQuestions = rawAnswers.length;
     const correctCount = rawAnswers.reduce(
@@ -270,6 +282,7 @@ export default defineEventHandler(async (event) => {
       mode,
       inserted,
       authMs: Math.round(tAuth1 - tAuth0),
+      rateMs: Math.round(tRate1 - tRate0),
       bodyMs: Math.round(tBody1 - tBody0),
       validateMs: Math.round(tValidate1 - tValidate0),
       dbAcquireMs: Math.round(tAcquire1 - tAcquire0),
@@ -289,7 +302,7 @@ export default defineEventHandler(async (event) => {
         totalQuestions,
       },
     };
-  } catch (error) {
+  } catch (error: any) {
     const totalMs = performance.now() - t0;
 
     console.error("VOCAB FINALIZE V5 FAILED", {
@@ -299,6 +312,10 @@ export default defineEventHandler(async (event) => {
       totalMs: Math.round(totalMs),
       error,
     });
+
+    if (error?.statusCode) {
+      throw error;
+    }
 
     throw createError({
       statusCode: 503,
