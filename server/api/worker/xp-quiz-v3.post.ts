@@ -1,344 +1,344 @@
-import { useRuntimeConfig } from "#imports";
-import { Receiver } from "@upstash/qstash";
-import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
-import { db } from "~/server/repositories/db";
+// import { useRuntimeConfig } from "#imports";
+// import { Receiver } from "@upstash/qstash";
+// import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
+// import { db } from "~/server/repositories/db";
 
-type WorkerJob = {
-  attemptId: string;
-  userId: string;
-};
+// type WorkerJob = {
+//   attemptId: string;
+//   userId: string;
+// };
 
-type PayloadAnswer = {
-  wordId: string;
-  correct: boolean;
-  delta: number;
-};
+// type PayloadAnswer = {
+//   wordId: string;
+//   correct: boolean;
+//   delta: number;
+// };
 
-type QuizEventRow = {
-  id: string | number;
-  payload: unknown;
-  processed: boolean;
-};
+// type QuizEventRow = {
+//   id: string | number;
+//   payload: unknown;
+//   processed: boolean;
+// };
 
-type AggregatedWordUpdate = {
-  wordId: string;
-  delta: number;
-  correct: boolean;
-};
+// type AggregatedWordUpdate = {
+//   wordId: string;
+//   delta: number;
+//   correct: boolean;
+// };
 
-function parseWorkerJob(raw: string): WorkerJob {
-  let parsed: unknown;
+// function parseWorkerJob(raw: string): WorkerJob {
+//   let parsed: unknown;
 
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Invalid worker payload JSON",
-    });
-  }
+//   try {
+//     parsed = JSON.parse(raw);
+//   } catch {
+//     throw createError({
+//       statusCode: 400,
+//       statusMessage: "Invalid worker payload JSON",
+//     });
+//   }
 
-  if (!parsed || typeof parsed !== "object") {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Invalid worker payload",
-    });
-  }
+//   if (!parsed || typeof parsed !== "object") {
+//     throw createError({
+//       statusCode: 400,
+//       statusMessage: "Invalid worker payload",
+//     });
+//   }
 
-  const attemptId = (parsed as { attemptId?: unknown }).attemptId;
-  const userId = (parsed as { userId?: unknown }).userId;
+//   const attemptId = (parsed as { attemptId?: unknown }).attemptId;
+//   const userId = (parsed as { userId?: unknown }).userId;
 
-  if (typeof attemptId !== "string" || !attemptId.trim()) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Missing attemptId",
-    });
-  }
+//   if (typeof attemptId !== "string" || !attemptId.trim()) {
+//     throw createError({
+//       statusCode: 400,
+//       statusMessage: "Missing attemptId",
+//     });
+//   }
 
-  if (typeof userId !== "string" || !userId.trim()) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Missing userId",
-    });
-  }
+//   if (typeof userId !== "string" || !userId.trim()) {
+//     throw createError({
+//       statusCode: 400,
+//       statusMessage: "Missing userId",
+//     });
+//   }
 
-  return {
-    attemptId: attemptId.trim(),
-    userId: userId.trim(),
-  };
-}
+//   return {
+//     attemptId: attemptId.trim(),
+//     userId: userId.trim(),
+//   };
+// }
 
-function parsePayloadAnswers(payload: unknown): PayloadAnswer[] {
-  let parsedPayload = payload;
+// function parsePayloadAnswers(payload: unknown): PayloadAnswer[] {
+//   let parsedPayload = payload;
 
-  if (typeof payload === "string") {
-    try {
-      parsedPayload = JSON.parse(payload);
-    } catch {
-      throw createError({
-        statusCode: 500,
-        statusMessage: "Stored quiz payload is not valid JSON",
-      });
-    }
-  }
+//   if (typeof payload === "string") {
+//     try {
+//       parsedPayload = JSON.parse(payload);
+//     } catch {
+//       throw createError({
+//         statusCode: 500,
+//         statusMessage: "Stored quiz payload is not valid JSON",
+//       });
+//     }
+//   }
 
-  const answers = (parsedPayload as { answers?: unknown })?.answers;
+//   const answers = (parsedPayload as { answers?: unknown })?.answers;
 
-  if (!Array.isArray(answers)) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Stored quiz payload is missing answers",
-    });
-  }
+//   if (!Array.isArray(answers)) {
+//     throw createError({
+//       statusCode: 500,
+//       statusMessage: "Stored quiz payload is missing answers",
+//     });
+//   }
 
-  const normalized: PayloadAnswer[] = [];
+//   const normalized: PayloadAnswer[] = [];
 
-  for (const item of answers) {
-    if (!item || typeof item !== "object") continue;
+//   for (const item of answers) {
+//     if (!item || typeof item !== "object") continue;
 
-    const wordId = (item as { wordId?: unknown }).wordId;
-    const correct = (item as { correct?: unknown }).correct;
-    const delta = (item as { delta?: unknown }).delta;
+//     const wordId = (item as { wordId?: unknown }).wordId;
+//     const correct = (item as { correct?: unknown }).correct;
+//     const delta = (item as { delta?: unknown }).delta;
 
-    if (typeof wordId !== "string" || !wordId.trim()) continue;
-    if (typeof correct !== "boolean") continue;
-    if (typeof delta !== "number" || !Number.isFinite(delta)) continue;
+//     if (typeof wordId !== "string" || !wordId.trim()) continue;
+//     if (typeof correct !== "boolean") continue;
+//     if (typeof delta !== "number" || !Number.isFinite(delta)) continue;
 
-    normalized.push({
-      wordId: wordId.trim(),
-      correct,
-      delta,
-    });
-  }
+//     normalized.push({
+//       wordId: wordId.trim(),
+//       correct,
+//       delta,
+//     });
+//   }
 
-  if (normalized.length === 0) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Stored quiz payload contains no valid answers",
-    });
-  }
+//   if (normalized.length === 0) {
+//     throw createError({
+//       statusCode: 500,
+//       statusMessage: "Stored quiz payload contains no valid answers",
+//     });
+//   }
 
-  return normalized;
-}
+//   return normalized;
+// }
 
-function aggregateAnswers(answers: PayloadAnswer[]): AggregatedWordUpdate[] {
-  const map = new Map<string, AggregatedWordUpdate>();
+// function aggregateAnswers(answers: PayloadAnswer[]): AggregatedWordUpdate[] {
+//   const map = new Map<string, AggregatedWordUpdate>();
 
-  for (const answer of answers) {
-    const existing = map.get(answer.wordId);
+//   for (const answer of answers) {
+//     const existing = map.get(answer.wordId);
 
-    if (!existing) {
-      map.set(answer.wordId, {
-        wordId: answer.wordId,
-        delta: answer.delta,
-        correct: answer.correct,
-      });
-      continue;
-    }
+//     if (!existing) {
+//       map.set(answer.wordId, {
+//         wordId: answer.wordId,
+//         delta: answer.delta,
+//         correct: answer.correct,
+//       });
+//       continue;
+//     }
 
-    existing.delta += answer.delta;
-    existing.correct = existing.correct && answer.correct;
-  }
+//     existing.delta += answer.delta;
+//     existing.correct = existing.correct && answer.correct;
+//   }
 
-  return [...map.values()];
-}
+//   return [...map.values()];
+// }
 
-async function verifyQStashRequest(
-  event: Parameters<typeof defineEventHandler>[0],
-  rawBody: string,
-): Promise<void> {
-  const config = useRuntimeConfig(event);
+// async function verifyQStashRequest(
+//   event: Parameters<typeof defineEventHandler>[0],
+//   rawBody: string,
+// ): Promise<void> {
+//   const config = useRuntimeConfig(event);
 
-  const currentSigningKey = config.qstashCurrentSigningKey as
-    | string
-    | undefined;
-  const nextSigningKey = config.qstashNextSigningKey as string | undefined;
-  const appBaseUrl = config.public.siteUrl as string | undefined;
+//   const currentSigningKey = config.qstashCurrentSigningKey as
+//     | string
+//     | undefined;
+//   const nextSigningKey = config.qstashNextSigningKey as string | undefined;
+//   const appBaseUrl = config.public.siteUrl as string | undefined;
 
-  if (!currentSigningKey || !nextSigningKey) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Missing QStash signing keys",
-    });
-  }
+//   if (!currentSigningKey || !nextSigningKey) {
+//     throw createError({
+//       statusCode: 500,
+//       statusMessage: "Missing QStash signing keys",
+//     });
+//   }
 
-  if (!appBaseUrl) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Missing public.siteUrl",
-    });
-  }
+//   if (!appBaseUrl) {
+//     throw createError({
+//       statusCode: 500,
+//       statusMessage: "Missing public.siteUrl",
+//     });
+//   }
 
-  const signature = getHeader(event, "Upstash-Signature");
+//   const signature = getHeader(event, "Upstash-Signature");
 
-  if (!signature) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Missing Upstash signature",
-    });
-  }
+//   if (!signature) {
+//     throw createError({
+//       statusCode: 401,
+//       statusMessage: "Missing Upstash signature",
+//     });
+//   }
 
-  const receiver = new Receiver({
-    currentSigningKey,
-    nextSigningKey,
-  });
+//   const receiver = new Receiver({
+//     currentSigningKey,
+//     nextSigningKey,
+//   });
 
-  const workerUrl = `${appBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v3`;
+//   const workerUrl = `${appBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v3`;
 
-  console.log("Verifying QStash request", {
-    workerUrl,
-    signaturePresent: !!signature,
-  });
+//   console.log("Verifying QStash request", {
+//     workerUrl,
+//     signaturePresent: !!signature,
+//   });
 
-  const isValid = await receiver.verify({
-    signature,
-    body: rawBody,
-    url: workerUrl,
-  });
+//   const isValid = await receiver.verify({
+//     signature,
+//     body: rawBody,
+//     url: workerUrl,
+//   });
 
-  if (!isValid) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Invalid Upstash signature",
-    });
-  }
-}
+//   if (!isValid) {
+//     throw createError({
+//       statusCode: 401,
+//       statusMessage: "Invalid Upstash signature",
+//     });
+//   }
+// }
 
-export default defineEventHandler(async (event) => {
-  console.log("XP worker reached", {
-    host: getHeader(event, "host"),
-    proto: getHeader(event, "x-forwarded-proto"),
-    signaturePresent: !!getHeader(event, "Upstash-Signature"),
-    messageId: getHeader(event, "Upstash-Message-Id"),
-  });
+// export default defineEventHandler(async (event) => {
+//   console.log("XP worker reached", {
+//     host: getHeader(event, "host"),
+//     proto: getHeader(event, "x-forwarded-proto"),
+//     signaturePresent: !!getHeader(event, "Upstash-Signature"),
+//     messageId: getHeader(event, "Upstash-Message-Id"),
+//   });
 
-  const rawBody = await readRawBody(event, "utf8");
+//   const rawBody = await readRawBody(event, "utf8");
 
-  if (!rawBody) {
-    throw createError({
-      statusCode: 400,
-      statusMessage: "Missing request body",
-    });
-  }
+//   if (!rawBody) {
+//     throw createError({
+//       statusCode: 400,
+//       statusMessage: "Missing request body",
+//     });
+//   }
 
-  await verifyQStashRequest(event, rawBody);
+//   await verifyQStashRequest(event, rawBody);
 
-  const job = parseWorkerJob(rawBody);
-  const qstashMessageId = getHeader(event, "Upstash-Message-Id");
-  const qstashRetried = getHeader(event, "Upstash-Retried");
+//   const job = parseWorkerJob(rawBody);
+//   const qstashMessageId = getHeader(event, "Upstash-Message-Id");
+//   const qstashRetried = getHeader(event, "Upstash-Retried");
 
-  const client = await db.connect();
+//   const client = await db.connect();
 
-  try {
-    await client.query("BEGIN");
+//   try {
+//     await client.query("BEGIN");
 
-    const eventResult = await client.query<QuizEventRow>(
-      `
-      select id, payload, processed
-      from xp_quiz_events
-      where user_id = $1
-        and attempt_id = $2
-      for update
-      `,
-      [job.userId, job.attemptId],
-    );
+//     const eventResult = await client.query<QuizEventRow>(
+//       `
+//       select id, payload, processed
+//       from xp_quiz_events
+//       where user_id = $1
+//         and attempt_id = $2
+//       for update
+//       `,
+//       [job.userId, job.attemptId],
+//     );
 
-    const quizEvent = eventResult.rows[0];
+//     const quizEvent = eventResult.rows[0];
 
-    if (!quizEvent) {
-      throw createError({
-        statusCode: 500,
-        statusMessage: "Quiz event not found for worker job",
-      });
-    }
+//     if (!quizEvent) {
+//       throw createError({
+//         statusCode: 500,
+//         statusMessage: "Quiz event not found for worker job",
+//       });
+//     }
 
-    if (quizEvent.processed) {
-      await client.query("COMMIT");
+//     if (quizEvent.processed) {
+//       await client.query("COMMIT");
 
-      return {
-        ok: true,
-        status: "already-processed",
-        attemptId: job.attemptId,
-        messageId: qstashMessageId,
-        retried: qstashRetried,
-      };
-    }
+//       return {
+//         ok: true,
+//         status: "already-processed",
+//         attemptId: job.attemptId,
+//         messageId: qstashMessageId,
+//         retried: qstashRetried,
+//       };
+//     }
 
-    const payloadAnswers = parsePayloadAnswers(quizEvent.payload);
-    const updates = aggregateAnswers(payloadAnswers);
+//     const payloadAnswers = parsePayloadAnswers(quizEvent.payload);
+//     const updates = aggregateAnswers(payloadAnswers);
 
-    const wordIds = updates.map((u) => u.wordId);
-    const deltas = updates.map((u) => u.delta);
-    const correctFlags = updates.map((u) => u.correct);
+//     const wordIds = updates.map((u) => u.wordId);
+//     const deltas = updates.map((u) => u.delta);
+//     const correctFlags = updates.map((u) => u.correct);
 
-    await client.query(
-      `
-  update user_word_progress as uwp
-  set
-    xp = greatest(0, coalesce(uwp.xp, 0) + data.delta),
-    streak = case
-      when data.correct then coalesce(uwp.streak, 0) + 1
-      else 0
-    end,
-    updated_at = now()
-  from unnest($2::text[], $3::int[], $4::boolean[]) as data(word_id, delta, correct)
-  where uwp.user_id = $1
-    and uwp.word_id = data.word_id
-  `,
-      [job.userId, wordIds, deltas, correctFlags],
-    );
+//     await client.query(
+//       `
+//   update user_word_progress as uwp
+//   set
+//     xp = greatest(0, coalesce(uwp.xp, 0) + data.delta),
+//     streak = case
+//       when data.correct then coalesce(uwp.streak, 0) + 1
+//       else 0
+//     end,
+//     updated_at = now()
+//   from unnest($2::text[], $3::int[], $4::boolean[]) as data(word_id, delta, correct)
+//   where uwp.user_id = $1
+//     and uwp.word_id = data.word_id
+//   `,
+//       [job.userId, wordIds, deltas, correctFlags],
+//     );
 
-    await client.query(
-      `
-  insert into user_word_progress
-    (user_id, word_id, xp, streak, created_at, updated_at)
-  select
-    $1::text as user_id,
-    data.word_id,
-    greatest(0, data.delta) as xp,
-    case when data.correct then 1 else 0 end as streak,
-    now(),
-    now()
-  from unnest($2::text[], $3::int[], $4::boolean[]) as data(word_id, delta, correct)
-  on conflict (user_id, word_id) do nothing
-  `,
-      [job.userId, wordIds, deltas, correctFlags],
-    );
+//     await client.query(
+//       `
+//   insert into user_word_progress
+//     (user_id, word_id, xp, streak, created_at, updated_at)
+//   select
+//     $1::text as user_id,
+//     data.word_id,
+//     greatest(0, data.delta) as xp,
+//     case when data.correct then 1 else 0 end as streak,
+//     now(),
+//     now()
+//   from unnest($2::text[], $3::int[], $4::boolean[]) as data(word_id, delta, correct)
+//   on conflict (user_id, word_id) do nothing
+//   `,
+//       [job.userId, wordIds, deltas, correctFlags],
+//     );
 
-    await client.query(
-      `
-      update xp_quiz_events
-      set processed = true,
-          processed_at = now()
-      where user_id = $1
-        and attempt_id = $2
-      `,
-      [job.userId, job.attemptId],
-    );
+//     await client.query(
+//       `
+//       update xp_quiz_events
+//       set processed = true,
+//           processed_at = now()
+//       where user_id = $1
+//         and attempt_id = $2
+//       `,
+//       [job.userId, job.attemptId],
+//     );
 
-    await client.query("COMMIT");
+//     await client.query("COMMIT");
 
-    return {
-      ok: true,
-      status: "processed",
-      attemptId: job.attemptId,
-      processedWords: updates.length,
-      messageId: qstashMessageId,
-      retried: qstashRetried,
-    };
-  } catch (error) {
-    await client.query("ROLLBACK");
+//     return {
+//       ok: true,
+//       status: "processed",
+//       attemptId: job.attemptId,
+//       processedWords: updates.length,
+//       messageId: qstashMessageId,
+//       retried: qstashRetried,
+//     };
+//   } catch (error) {
+//     await client.query("ROLLBACK");
 
-    console.error("XP QUIZ WORKER FAILED", {
-      attemptId: job.attemptId,
-      userId: job.userId,
-      qstashMessageId,
-      qstashRetried,
-      error,
-    });
+//     console.error("XP QUIZ WORKER FAILED", {
+//       attemptId: job.attemptId,
+//       userId: job.userId,
+//       qstashMessageId,
+//       qstashRetried,
+//       error,
+//     });
 
-    throw error;
-  } finally {
-    client.release();
-  }
-});
+//     throw error;
+//   } finally {
+//     client.release();
+//   }
+// });

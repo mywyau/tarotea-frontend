@@ -3,6 +3,7 @@ import { createError, getHeader, readRawBody } from "h3";
 import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { masteryXp } from "~/utils/xp/helpers";
 
 type PayloadAnswer = {
   wordId: string;
@@ -32,6 +33,7 @@ type ExistingEventRow = {
   id: number | string;
   mode: string;
   total_delta: number | string | null;
+  applied_total_delta: number | string | null;
   correct_count: number | string | null;
   total_questions: number | string | null;
   processed: boolean | null;
@@ -42,6 +44,21 @@ type SentenceProgressRow = {
   sentence_id: string;
   seen_count: number | string | null;
   last_seen_at: string | null;
+};
+
+type ExistingWordRow = {
+  word_id: string;
+  xp: number | string | null;
+  streak: number | string | null;
+};
+
+type RolledUpWordProgress = {
+  wordId: string;
+  xpBefore: number;
+  xpAfter: number;
+  streak: number;
+  appliedDelta: number;
+  existedBefore: boolean;
 };
 
 function parseStoredPayload(
@@ -70,7 +87,7 @@ function parseStoredPayload(
 function rollupAnswersByWord(
   answers: PayloadAnswer[],
   existingMap: Map<string, { xp: number; streak: number }>,
-) {
+): RolledUpWordProgress[] {
   const grouped = new Map<string, PayloadAnswer[]>();
 
   for (const answer of answers) {
@@ -79,16 +96,13 @@ function rollupAnswersByWord(
     grouped.set(answer.wordId, current);
   }
 
-  const rolledUp: Array<{
-    wordId: string;
-    xp: number;
-    streak: number;
-    appliedDelta: number;
-  }> = [];
+  const rolledUp: RolledUpWordProgress[] = [];
 
   for (const [wordId, wordAnswers] of grouped.entries()) {
     const existing = existingMap.get(wordId) ?? { xp: 0, streak: 0 };
+    const existedBefore = existingMap.has(wordId);
 
+    const xpBefore = existing.xp;
     let xp = existing.xp;
     let streak = existing.streak;
     let appliedDelta = 0;
@@ -102,9 +116,11 @@ function rollupAnswersByWord(
 
     rolledUp.push({
       wordId,
-      xp,
+      xpBefore,
+      xpAfter: xp,
       streak,
       appliedDelta,
+      existedBefore,
     });
   }
 
@@ -167,6 +183,7 @@ export default defineEventHandler(async (event) => {
         id,
         mode,
         total_delta,
+        applied_total_delta,
         correct_count,
         total_questions,
         processed,
@@ -190,12 +207,15 @@ export default defineEventHandler(async (event) => {
     const quizEvent = eventRes.rows[0];
 
     quizMode = quizEvent.mode;
-    correctCount = Number(quizEvent.correct_count ?? 0);
-    totalQuestions = Number(quizEvent.total_questions ?? 0);
-    xpEarned = Number(quizEvent.total_delta ?? 0);
 
     if (quizEvent.processed) {
       alreadyProcessed = true;
+      correctCount = Number(quizEvent.correct_count ?? 0);
+      totalQuestions = Number(quizEvent.total_questions ?? 0);
+      xpEarned = Number(
+        quizEvent.applied_total_delta ?? quizEvent.total_delta ?? 0,
+      );
+
       await client.query("COMMIT");
     } else {
       const storedPayload = parseStoredPayload(quizEvent.payload);
@@ -209,14 +229,16 @@ export default defineEventHandler(async (event) => {
         });
       }
 
+      correctCount = Number(
+        quizEvent.correct_count ??
+          payloadAnswers.filter((answer) => answer.correct).length,
+      );
+      totalQuestions = Number(quizEvent.total_questions ?? payloadAnswers.length);
+
       const uniqueWordIds = [...new Set(payloadAnswers.map((a) => a.wordId))];
 
       const existingWordRowsRes = uniqueWordIds.length
-        ? await client.query<{
-            word_id: string;
-            xp: number | string | null;
-            streak: number | string | null;
-          }>(
+        ? await client.query<ExistingWordRow>(
             `
             select word_id, xp, streak
             from user_word_progress
@@ -225,13 +247,7 @@ export default defineEventHandler(async (event) => {
             `,
             [userId, uniqueWordIds],
           )
-        : {
-            rows: [] as Array<{
-              word_id: string;
-              xp: number | string | null;
-              streak: number | string | null;
-            }>,
-          };
+        : { rows: [] as ExistingWordRow[] };
 
       const existingMap = new Map<string, { xp: number; streak: number }>(
         existingWordRowsRes.rows.map((row) => [
@@ -252,6 +268,22 @@ export default defineEventHandler(async (event) => {
         (sum, row) => sum + row.appliedDelta,
         0,
       );
+
+      const wrongCount = totalQuestions - correctCount;
+      const statDate = new Date().toISOString().slice(0, 10);
+
+      const newWordsSeenCount = rolledUpWordProgress.reduce(
+        (sum, row) => sum + (row.existedBefore ? 0 : 1),
+        0,
+      );
+
+      const newWordsMaxedCount = rolledUpWordProgress.reduce((sum, row) => {
+        const wasMaxedBefore = row.xpBefore >= masteryXp;
+        const isMaxedAfter = row.xpAfter >= masteryXp;
+        return sum + (!wasMaxedBefore && isMaxedAfter ? 1 : 0);
+      }, 0);
+
+      xpEarned = appliedTotalDelta;
 
       if (rolledUpWordProgress.length > 0) {
         await client.query(
@@ -285,7 +317,7 @@ export default defineEventHandler(async (event) => {
           [
             userId,
             rolledUpWordProgress.map((r) => r.wordId),
-            rolledUpWordProgress.map((r) => r.xp),
+            rolledUpWordProgress.map((r) => r.xpAfter),
             rolledUpWordProgress.map((r) => r.streak),
           ],
         );
@@ -351,6 +383,63 @@ export default defineEventHandler(async (event) => {
 
       await client.query(
         `
+        insert into user_stats (
+          user_id,
+          total_xp,
+          words_maxed,
+          words_seen,
+          total_correct,
+          total_wrong,
+          updated_at
+        )
+        values ($1, $2, $3, $4, $5, $6, now())
+        on conflict (user_id)
+        do update set
+          total_xp = user_stats.total_xp + excluded.total_xp,
+          words_maxed = user_stats.words_maxed + excluded.words_maxed,
+          words_seen = user_stats.words_seen + excluded.words_seen,
+          total_correct = user_stats.total_correct + excluded.total_correct,
+          total_wrong = user_stats.total_wrong + excluded.total_wrong,
+          updated_at = now()
+        `,
+        [
+          userId,
+          appliedTotalDelta,
+          newWordsMaxedCount,
+          newWordsSeenCount,
+          correctCount,
+          wrongCount,
+        ],
+      );
+
+      await client.query(
+        `
+        insert into user_stats_daily (
+          user_id,
+          stat_date,
+          xp_gained,
+          correct_count,
+          wrong_count,
+          quizzes_completed,
+          jyutping_completed,
+          created_at,
+          updated_at
+        )
+        values ($1, $2::date, $3, $4, $5, $6, $7, now(), now())
+        on conflict (user_id, stat_date)
+        do update set
+          xp_gained = user_stats_daily.xp_gained + excluded.xp_gained,
+          correct_count = user_stats_daily.correct_count + excluded.correct_count,
+          wrong_count = user_stats_daily.wrong_count + excluded.wrong_count,
+          quizzes_completed = user_stats_daily.quizzes_completed + excluded.quizzes_completed,
+          jyutping_completed = user_stats_daily.jyutping_completed + excluded.jyutping_completed,
+          updated_at = now()
+        `,
+        [userId, statDate, appliedTotalDelta, correctCount, wrongCount, 1, 0],
+      );
+
+      await client.query(
+        `
           update xp_quiz_events
           set processed = true,
               processed_at = now(),
@@ -399,6 +488,7 @@ export default defineEventHandler(async (event) => {
   }
 
   await redis.del(`quiz:sentences:${userId}:${sessionKey}`).catch(() => {});
+  await redis.del(`user:stats:v2:${userId}`).catch(() => {});
 
   return {
     quiz: {
