@@ -9,10 +9,9 @@ type WorkerBody = {
   sessionKey: string;
 };
 
-type DojoMode = "dojo-level-sentences-chinese" | "dojo-topic-sentences-chinese";
+type DojoMode = "dojo-topic-jyutping" | "dojo-topic-chinese";
 
 type PayloadAnswer = {
-  sentenceId?: string;
   wordId: string;
   correct: boolean;
   delta: number;
@@ -33,24 +32,34 @@ type ExistingEventRow = {
   payload: StoredEventPayload | string | null;
 };
 
-function getSessionRedisKey(userId: string, sessionKey: string) {
-  return `dojo:sentence:${userId}:${sessionKey}`;
-}
+type ExistingWordRow = {
+  word_id: string;
+  xp: number | string | null;
+  streak: number | string | null;
+};
+
+type RolledUpWordProgress = {
+  wordId: string;
+  xpBefore: number;
+  xpAfter: number;
+  streak: number;
+  correctInc: number;
+  wrongInc: number;
+  appliedDelta: number;
+  existedBefore: boolean;
+};
 
 function isDojoMode(mode: string): mode is DojoMode {
-  return (
-    mode === "dojo-level-sentences-chinese" ||
-    mode === "dojo-topic-sentences-chinese"
-  );
+  return mode === "dojo-topic-jyutping" || mode === "dojo-topic-chinese";
 }
 
 function parseStoredPayload(
-  payload: ExistingEventRow["payload"],
+  payload: ExistingEventRow["payload"]
 ): StoredEventPayload {
   if (!payload) {
     throw createError({
       statusCode: 500,
-      statusMessage: "Sentence dojo event payload missing",
+      statusMessage: "Dojo event payload missing",
     });
   }
 
@@ -66,8 +75,8 @@ function parseStoredPayload(
 
 function rollupAnswersByWord(
   answers: PayloadAnswer[],
-  existingMap: Map<string, { xp: number; streak: number }>,
-) {
+  existingMap: Map<string, { xp: number; streak: number }>
+): RolledUpWordProgress[] {
   const grouped = new Map<string, PayloadAnswer[]>();
 
   for (const answer of answers) {
@@ -76,18 +85,13 @@ function rollupAnswersByWord(
     grouped.set(answer.wordId, current);
   }
 
-  const rolledUp: Array<{
-    wordId: string;
-    xp: number;
-    streak: number;
-    correctInc: number;
-    wrongInc: number;
-    appliedDelta: number;
-  }> = [];
+  const rolledUp: RolledUpWordProgress[] = [];
 
   for (const [wordId, wordAnswers] of grouped.entries()) {
     const existing = existingMap.get(wordId) ?? { xp: 0, streak: 0 };
+    const existedBefore = existingMap.has(wordId);
 
+    const xpBefore = existing.xp;
     let xp = existing.xp;
     let streak = existing.streak;
     let correctInc = 0;
@@ -110,11 +114,13 @@ function rollupAnswersByWord(
 
     rolledUp.push({
       wordId,
-      xp,
+      xpBefore,
+      xpAfter: xp,
       streak,
       correctInc,
       wrongInc,
       appliedDelta,
+      existedBefore,
     });
   }
 
@@ -122,37 +128,10 @@ function rollupAnswersByWord(
   return rolledUp;
 }
 
-function nowMs() {
-  return performance.now();
-}
-
-async function timedStep<T>(
-  timings: Record<string, number>,
-  label: string,
-  fn: () => Promise<T>,
-): Promise<T> {
-  const start = nowMs();
-  try {
-    return await fn();
-  } finally {
-    timings[label] = Math.round(nowMs() - start);
-  }
-}
-
-function logSummary(details: Record<string, unknown>) {
-  console.info("[dojo-sentence-worker]", JSON.stringify(details));
-}
-
 export default defineEventHandler(async (event) => {
-  const requestStart = nowMs();
-  const timings: Record<string, number> = {};
-
   const config = useRuntimeConfig();
 
-  const rawBody = await timedStep(timings, "readBodyMs", async () => {
-    return readRawBody(event, "utf8");
-  });
-
+  const rawBody = await readRawBody(event, "utf8");
   if (!rawBody) {
     throw createError({
       statusCode: 400,
@@ -173,12 +152,10 @@ export default defineEventHandler(async (event) => {
     nextSigningKey: config.qstashNextSigningKey,
   });
 
-  const isValid = await timedStep(timings, "verifyMs", async () => {
-    return receiver.verify({
-      signature,
-      body: rawBody,
-      url: `${config.public.siteUrl}/api/typing/sentences/v2/xp-chinese`,
-    });
+  const isValid = await receiver.verify({
+    signature,
+    body: rawBody,
+    url: `${config.public.siteUrl}/api/typing/topic/v2/xp-jyutping`,
   });
 
   if (!isValid) {
@@ -203,47 +180,37 @@ export default defineEventHandler(async (event) => {
   let sessionStats = {
     xpEarned: 0,
     correctCount: 0,
-    totalSentences: 0,
+    totalWords: 0,
   };
   let alreadyProcessed = false;
 
   try {
-    await timedStep(timings, "beginMs", async () => {
-      await client.query("BEGIN");
-    });
+    await client.query("BEGIN");
 
-    await timedStep(timings, "userLockMs", async () => {
-      await client.query(`select pg_advisory_xact_lock(hashtext($1))`, [
-        userId,
-      ]);
-    });
-
-    const eventRes = await timedStep(timings, "eventLookupMs", async () => {
-      return client.query<ExistingEventRow>(
-        `
-        select
-          id,
-          mode,
-          total_delta,
-          applied_total_delta,
-          correct_count,
-          total_questions,
-          processed,
-          payload
-        from xp_jyutping_events
-        where user_id = $1
-          and session_key = $2
-        limit 1
-        for update
-        `,
-        [userId, sessionKey],
-      );
-    });
+    const eventRes = await client.query<ExistingEventRow>(
+      `
+      select
+        id,
+        mode,
+        total_delta,
+        applied_total_delta,
+        correct_count,
+        total_questions,
+        processed,
+        payload
+      from xp_jyutping_events
+      where user_id = $1
+        and session_key = $2
+      limit 1
+      for update
+      `,
+      [userId, sessionKey]
+    );
 
     if (eventRes.rows.length === 0) {
       throw createError({
         statusCode: 404,
-        statusMessage: "Sentence dojo event not found",
+        statusMessage: "Dojo event not found",
       });
     }
 
@@ -252,22 +219,22 @@ export default defineEventHandler(async (event) => {
     if (!isDojoMode(quizEvent.mode)) {
       throw createError({
         statusCode: 400,
-        statusMessage: "Invalid sentence dojo event",
+        statusMessage: "Invalid topic dojo event",
       });
     }
-
-    sessionStats = {
-      xpEarned: Number(quizEvent.total_delta ?? 0),
-      correctCount: Number(quizEvent.correct_count ?? 0),
-      totalSentences: Number(quizEvent.total_questions ?? 0),
-    };
 
     if (quizEvent.processed) {
       alreadyProcessed = true;
 
-      await timedStep(timings, "commitMs", async () => {
-        await client.query("COMMIT");
-      });
+      sessionStats = {
+        xpEarned: Number(
+          quizEvent.applied_total_delta ?? quizEvent.total_delta ?? 0
+        ),
+        correctCount: Number(quizEvent.correct_count ?? 0),
+        totalWords: Number(quizEvent.total_questions ?? 0),
+      };
+
+      await client.query("COMMIT");
     } else {
       const storedPayload = parseStoredPayload(quizEvent.payload);
       const payloadAnswers = storedPayload.answers ?? [];
@@ -275,54 +242,23 @@ export default defineEventHandler(async (event) => {
       if (payloadAnswers.length === 0) {
         throw createError({
           statusCode: 500,
-          statusMessage: "Sentence dojo event has no answers payload",
+          statusMessage: "Dojo event has no answers payload",
         });
       }
 
-      const uniqueWordIds = [
-        ...new Set(payloadAnswers.map((a) => a.wordId)),
-      ].sort();
+      const uniqueWordIds = [...new Set(payloadAnswers.map((a) => a.wordId))];
 
       const existingWordRowsRes = uniqueWordIds.length
-        ? await timedStep(timings, "existingProgressReadMs", async () => {
-            return client.query<{
-              word_id: string;
-              xp: number | string | null;
-              streak: number | string | null;
-            }>(
-              `
-              select word_id, xp, streak
-              from user_word_progress
-              where user_id = $1
-                and word_id = any($2::text[])
-              order by word_id
-              `,
-              [userId, uniqueWordIds],
-            );
-          })
-        : {
-            rows: [] as Array<{
-              word_id: string;
-              xp: number | string | null;
-              streak: number | string | null;
-            }>,
-          };
-
-      if (uniqueWordIds.length > 0) {
-        await timedStep(timings, "progressRowLockMs", async () => {
-          await client.query(
+        ? await client.query<ExistingWordRow>(
             `
-            select word_id
+            select word_id, xp, streak
             from user_word_progress
             where user_id = $1
               and word_id = any($2::text[])
-            order by word_id
-            for update
             `,
-            [userId, uniqueWordIds],
-          );
-        });
-      }
+            [userId, uniqueWordIds]
+          )
+        : { rows: [] as ExistingWordRow[] };
 
       const existingMap = new Map<string, { xp: number; streak: number }>(
         existingWordRowsRes.rows.map((row) => [
@@ -331,94 +267,169 @@ export default defineEventHandler(async (event) => {
             xp: Number(row.xp ?? 0),
             streak: Number(row.streak ?? 0),
           },
-        ]),
+        ])
       );
 
       const rolledUpWordProgress = rollupAnswersByWord(
         payloadAnswers,
-        existingMap,
+        existingMap
       );
 
       const appliedTotalDelta = rolledUpWordProgress.reduce(
         (sum, row) => sum + row.appliedDelta,
-        0,
+        0
       );
 
-      if (rolledUpWordProgress.length > 0) {
-        await timedStep(timings, "progressUpsertMs", async () => {
-          await client.query(
-            `
-            insert into user_word_progress (
-              user_id,
-              word_id,
-              xp,
-              streak,
-              correct_count,
-              wrong_count,
-              last_seen_at,
-              last_correct_at,
-              created_at,
-              updated_at
-            )
-            select
-              $1,
-              t.word_id,
-              t.xp,
-              t.streak,
-              t.correct_inc,
-              t.wrong_inc,
-              now(),
-              case when t.correct_inc > 0 then now() else null end,
-              now(),
-              now()
-            from unnest(
-              $2::text[],
-              $3::int[],
-              $4::int[],
-              $5::int[],
-              $6::int[]
-            ) as t(word_id, xp, streak, correct_inc, wrong_inc)
-            on conflict (user_id, word_id)
-            do update set
-              xp = excluded.xp,
-              streak = excluded.streak,
-              correct_count = coalesce(user_word_progress.correct_count, 0) + excluded.correct_count,
-              wrong_count = coalesce(user_word_progress.wrong_count, 0) + excluded.wrong_count,
-              last_seen_at = now(),
-              last_correct_at = case
-                when excluded.correct_count > 0 then now()
-                else user_word_progress.last_correct_at
-              end,
-              updated_at = now()
-            `,
-            [
-              userId,
-              rolledUpWordProgress.map((r) => r.wordId),
-              rolledUpWordProgress.map((r) => r.xp),
-              rolledUpWordProgress.map((r) => r.streak),
-              rolledUpWordProgress.map((r) => r.correctInc),
-              rolledUpWordProgress.map((r) => r.wrongInc),
-            ],
-          );
-        });
-      }
+      const correctCount = payloadAnswers.filter((a) => a.correct).length;
+      const totalWords = payloadAnswers.length;
+      const wrongCount = totalWords - correctCount;
+      const statDate = new Date().toISOString().slice(0, 10);
 
-      await timedStep(timings, "eventUpdateMs", async () => {
+      const newWordsSeenCount = rolledUpWordProgress.reduce(
+        (sum, row) => sum + (row.existedBefore ? 0 : 1),
+        0
+      );
+
+      const newWordsMaxedCount = rolledUpWordProgress.reduce((sum, row) => {
+        const wasMaxedBefore = row.xpBefore >= masteryXp;
+        const isMaxedAfter = row.xpAfter >= masteryXp;
+        return sum + (!wasMaxedBefore && isMaxedAfter ? 1 : 0);
+      }, 0);
+
+      sessionStats = {
+        xpEarned: appliedTotalDelta,
+        correctCount,
+        totalWords,
+      };
+
+      if (rolledUpWordProgress.length > 0) {
         await client.query(
           `
-            update xp_jyutping_events
-            set processed = true,
-                processed_at = now(),
-                applied_total_delta = $2
-            where id = $1
+          insert into user_word_progress (
+            user_id,
+            word_id,
+            xp,
+            streak,
+            correct_count,
+            wrong_count,
+            last_seen_at,
+            last_correct_at,
+            created_at,
+            updated_at
+          )
+          select
+            $1,
+            t.word_id,
+            t.xp_after,
+            t.streak,
+            t.correct_inc,
+            t.wrong_inc,
+            now(),
+            case when t.correct_inc > 0 then now() else null end,
+            now(),
+            now()
+          from unnest(
+            $2::text[],
+            $3::int[],
+            $4::int[],
+            $5::int[],
+            $6::int[]
+          ) as t(word_id, xp_after, streak, correct_inc, wrong_inc)
+          on conflict (user_id, word_id)
+          do update set
+            xp = excluded.xp,
+            streak = excluded.streak,
+            correct_count = coalesce(user_word_progress.correct_count, 0) + excluded.correct_count,
+            wrong_count = coalesce(user_word_progress.wrong_count, 0) + excluded.wrong_count,
+            last_seen_at = now(),
+            last_correct_at = case
+              when excluded.correct_count > 0 then now()
+              else user_word_progress.last_correct_at
+            end,
+            updated_at = now()
           `,
-          [quizEvent.id, appliedTotalDelta],
+          [
+            userId,
+            rolledUpWordProgress.map((r) => r.wordId),
+            rolledUpWordProgress.map((r) => r.xpAfter),
+            rolledUpWordProgress.map((r) => r.streak),
+            rolledUpWordProgress.map((r) => r.correctInc),
+            rolledUpWordProgress.map((r) => r.wrongInc),
+          ]
         );
-      });
+      }
 
-      await timedStep(timings, "commitMs", async () => {
-        await client.query("COMMIT");
-      });
+      await client.query(
+        `
+        insert into user_stats (
+          user_id,
+          total_xp,
+          words_maxed,
+          words_seen,
+          total_correct,
+          total_wrong,
+          updated_at
+        )
+        values ($1, $2, $3, $4, $5, $6, now())
+        on conflict (user_id)
+        do update set
+          total_xp = user_stats.total_xp + excluded.total_xp,
+          words_maxed = user_stats.words_maxed + excluded.words_maxed,
+          words_seen = user_stats.words_seen + excluded.words_seen,
+          total_correct = user_stats.total_correct + excluded.total_correct,
+          total_wrong = user_stats.total_wrong + excluded.total_wrong,
+          updated_at = now()
+        `,
+        [
+          userId,
+          appliedTotalDelta,
+          newWordsMaxedCount,
+          newWordsSeenCount,
+          correctCount,
+          wrongCount,
+        ]
+      );
+
+      await client.query(
+        `
+        insert into user_stats_daily (
+          user_id,
+          stat_date,
+          xp_gained,
+          correct_count,
+          wrong_count,
+          quizzes_completed,
+          jyutping_completed,
+          created_at,
+          updated_at
+        )
+        values ($1, $2::date, $3, $4, $5, $6, $7, now(), now())
+        on conflict (user_id, stat_date)
+        do update set
+          xp_gained = user_stats_daily.xp_gained + excluded.xp_gained,
+          correct_count = user_stats_daily.correct_count + excluded.correct_count,
+          wrong_count = user_stats_daily.wrong_count + excluded.wrong_count,
+          quizzes_completed = user_stats_daily.quizzes_completed + excluded.quizzes_completed,
+          jyutping_completed = user_stats_daily.jyutping_completed + excluded.jyutping_completed,
+          updated_at = now()
+        `,
+        [userId, statDate, appliedTotalDelta, correctCount, wrongCount, 0, 1]
+      );
+
+      await client.query(
+        `
+        update xp_jyutping_events
+        set processed = true,
+            processed_at = now(),
+            applied_total_delta = $2,
+            correct_count = $3,
+            total_questions = $4
+        where id = $1
+        `,
+        [quizEvent.id, appliedTotalDelta, correctCount, totalWords]
+      );
+
+      await client.query("COMMIT");
     }
   } catch (error) {
     await client.query("ROLLBACK");
@@ -427,15 +438,10 @@ export default defineEventHandler(async (event) => {
     client.release();
   }
 
-  await redis.del(getSessionRedisKey(userId, sessionKey)).catch(() => {});
-
-  logSummary({
-    userId,
-    sessionKey,
-    deduped: alreadyProcessed,
-    ...timings,
-    totalMs: Math.round(nowMs() - requestStart),
-  });
+  await redis
+    .del(`dojo:typing:topic:${userId}:${sessionKey}`)
+    .catch(() => {});
+  await redis.del(`user:stats:v2:${userId}`).catch(() => {});
 
   return {
     session: sessionStats,
