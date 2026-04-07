@@ -31,20 +31,10 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
     ),
     db.query(
       `
-        select coalesce(sum(delta), 0) as xp_this_week
-        from (
-          select q.total_delta as delta
-          from xp_quiz_events q
-          where q.user_id = $1
-            and q.created_at >= now() - interval '7 days'
-
-          union all
-
-          select j.total_delta as delta
-          from xp_jyutping_events j
-          where j.user_id = $1
-            and j.created_at >= now() - interval '7 days'
-        ) combined
+        select coalesce(sum(xp_gained), 0) as xp_this_week
+        from user_stats_daily
+        where user_id = $1
+          and stat_date >= current_date - 6
       `,
       [userId]
     ),

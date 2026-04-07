@@ -41,12 +41,6 @@ const masteryPercent = computed(() => {
 
 const isMastered = computed(() => xp.value >= masteryXp)
 
-const formattedTopic = computed(() =>
-    topic.value
-        .replace(/-/g, " ")
-        .replace(/\b\w/g, c => c.toUpperCase())
-)
-
 onMounted(async () => {
     try {
         const { getAccessToken } = await useAuth()
@@ -64,11 +58,6 @@ onMounted(async () => {
 
         xp.value = progressMap[slug.value]?.xp ?? 0
         streak.value = progressMap[slug.value]?.streak ?? 0
-
-        // console.log("XP loaded:", xp.value)
-        // console.log("Streak loaded:", streak.value)
-        // console.log("Word ID:", slug.value)
-
     } catch {
         // not logged in or error → ignore
     }

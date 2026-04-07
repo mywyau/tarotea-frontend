@@ -62,7 +62,7 @@ onBeforeUnmount(() => {
               Account
             </NuxtLink>
 
-            <NuxtLink to="/stats"
+            <NuxtLink to="/stats/v2"
               class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
               @click="closeMenu">
               Stats
