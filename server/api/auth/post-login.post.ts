@@ -1,5 +1,6 @@
-import { readBody, createError } from "h3";
+import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
 type PostLoginBody = {
@@ -8,9 +9,11 @@ type PostLoginBody = {
 
 export default defineEventHandler(async (event) => {
   const authUser = await requireUser(event);
-  const body = await readBody<PostLoginBody>(event);
-
   const userId = authUser.sub;
+
+  await enforceRateLimit(`rl:post-login:${userId}`, 10, 60);
+
+  const body = await readBody<PostLoginBody>(event);
   const email = authUser.email ?? body?.email;
 
   if (!userId || !email) {
