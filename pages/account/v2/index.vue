@@ -1,9 +1,9 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['logged-in'],
-//   middleware: ['coming-soon'],
-  ssr: true,
+    middleware: ['logged-in'],
+    //   middleware: ['coming-soon'],
+    ssr: true,
 })
 
 const {
@@ -28,6 +28,8 @@ const aiUsage = ref<{
     remaining: number
     limit: number
 } | null>(null)
+
+const aiUsageLoading = ref(true)
 
 
 async function deleteAccount() {
@@ -65,22 +67,27 @@ async function deleteAccount() {
     }
 }
 
-
 async function fetchAIUsage() {
     if (!isLoggedIn.value) return
 
-    const auth = await useAuth()
-    const token = await auth.getAccessToken()
+    aiUsageLoading.value = true
 
-    const usage = await $fetch("/api/ai/usage", {
-        method: "GET",
-        headers: {
-            Authorization: `Bearer ${token}`
-        }
-    })
+    try {
+        const auth = await useAuth()
+        const token = await auth.getAccessToken()
 
-    aiUsage.value = usage
-    animateCount(animatedRemaining, usage.remaining)
+        const usage = await $fetch("/api/ai/usage", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        })
+
+        aiUsage.value = usage
+        animateCount(animatedRemaining, usage.remaining)
+    } finally {
+        aiUsageLoading.value = false
+    }
 }
 
 async function openBillingPortal() {
@@ -98,19 +105,19 @@ async function openBillingPortal() {
 }
 
 watch(
-  () => [authReady.value, isLoggedIn.value],
-  async ([ready, loggedIn]) => {
-    if (ready && loggedIn && !aiUsage.value) {
-      await fetchAIUsage()
-    }
-  },
-  { immediate: true }
+    () => [authReady.value, isLoggedIn.value],
+    async ([ready, loggedIn]) => {
+        if (ready && loggedIn && !aiUsage.value) {
+            await fetchAIUsage()
+        }
+    },
+    { immediate: true }
 )
 
 const animatedPercent = ref(0)
 
 watch(aiUsage, (val) => {
-    if (!val) return
+    if (!val || !val.limit) return
     const percent = (val.remaining / val.limit) * 100
     animateCount(animatedPercent, percent)
 })
@@ -180,19 +187,31 @@ watch(aiUsage, (val) => {
 
                     <!-- AI Usage card -->
                     <section class="rounded-lg backdrop-blur p-5 space-y-3" style="background-color:#F6E1E1;">
-                        <div class=" flex items-center justify-between gap-3">
+                        <div class="text-sm text-gray-700 mt-3 space-y-2 min-h-[80px]">
+                            <div class="font-medium">AI Usage</div>
 
-                            <div v-if="aiUsage" class="text-sm text-gray-700 mt-3 space-y-2">
+                            <template v-if="aiUsageLoading">
+                                <div class="h-5 w-40 rounded bg-white/50 animate-pulse"></div>
+                                <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+                                    <div class="h-2 w-1/3 rounded bg-white/50 animate-pulse"></div>
+                                </div>
+                            </template>
 
-                                <div class="font-medium">AI Usage</div>
-
-                                <!-- <p>{{ aiUsage.remaining.toLocaleString() }} requests remaining</p> -->
+                            <template v-else-if="aiUsage">
                                 <p>{{ animatedRemaining.toLocaleString() }} requests remaining</p>
 
-                                <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-                                    <div class="h-2 bg-blue-300" :style="{ width: animatedPercent + '%' }"></div>
+                                <div class="w-2/3 h-2 bg-gray-300 rounded overflow-hidden">
+                                    <div class="h-2 bg-blue-300 transition-[width] duration-500 ease-out"
+                                        :style="{ width: animatedPercent + '%' }"></div>
                                 </div>
-                            </div>
+                            </template>
+
+                            <template v-else>
+                                <p class="text-gray-600">Unable to load AI usage right now.</p>
+                                <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+                                    <div class="h-2 w-0 bg-blue-300"></div>
+                                </div>
+                            </template>
                         </div>
                     </section>
 
@@ -300,7 +319,7 @@ watch(aiUsage, (val) => {
                 </div>
 
                 <!-- Not signed in -->
-                <div v-else class="rounded-lg backdrop-blur p-6 text-center space-y-6"> 
+                <div v-else class="rounded-lg backdrop-blur p-6 text-center space-y-6">
                     <p class="text-black font-medium text-xl">You’re not signed in.</p>
                     <p class="text-sm text-black">Sign in to manage your account and subscription.</p>
                     <div class="mt-">
