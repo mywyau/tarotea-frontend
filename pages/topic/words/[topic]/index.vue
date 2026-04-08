@@ -157,7 +157,7 @@ const gatedCategories = computed(() => {
 
       <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 
-        <WordTile v-for="word in category.words" :key="word.id" v-bind="{
+        <WordTile v-for="word in category.words" :key="word.id" :id="word.id" v-bind="{
           word: word.word,
           jyutping: word.jyutping,
           meaning: word.meaning,

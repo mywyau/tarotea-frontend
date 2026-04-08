@@ -150,8 +150,12 @@ watchEffect(() => {
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
         <!-- <BackLink :fallback="`topic/words/${topic}`" /> -->
-
+<!-- 
         <NuxtLink :to="`/topic/words/${topic}`" class="text-sm text-black hover:underline">
+            ← Back
+        </NuxtLink> -->
+
+        <NuxtLink :to="`/topic/words/${topic}#${word.id}`" class="text-sm text-black hover:underline">
             ← Back
         </NuxtLink>
 
@@ -170,20 +174,6 @@ watchEffect(() => {
                 {{ word.meaning }}
             </div>
 
-            <div class="flex items-center justify-between gap-4">
-                <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`"
-                    class="text-6xl text-gray-800 hover:text-blue-500 transition" aria-label="Previous word">
-                    ‹
-                </NuxtLink>
-
-                <div v-else class="w-6" />
-
-                <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`"
-                    class="text-6xl text-gray-800 hover:text-blue-500 transition" aria-label="Next word">
-                    ›
-                </NuxtLink>
-            </div>
-
             <!-- XP block -->
             <div class="pt-6 space-y-3">
 
@@ -199,6 +189,20 @@ watchEffect(() => {
                         :style="{ width: masteryPercent + '%' }" />
                 </div>
 
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
+                <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`"
+                    class="text-6xl text-gray-800 hover:text-blue-500 transition" aria-label="Previous word">
+                    ‹
+                </NuxtLink>
+
+                <div v-else class="w-6" />
+
+                <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`"
+                    class="text-6xl text-gray-800 hover:text-blue-500 transition" aria-label="Next word">
+                    ›
+                </NuxtLink>
             </div>
 
             <div class="flex items-center justify-center gap-3">

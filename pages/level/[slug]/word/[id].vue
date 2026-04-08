@@ -3,13 +3,39 @@ import { useAudioVolume } from '~/composables/useAudioVolume'
 import { useAuth } from '~/composables/useAuth'
 import { masteryXp } from '~/utils/xp/helpers'
 
-import BackLink from '~/components/BackLink.vue'
-
 
 definePageMeta({
   middleware: ['level-word-access-client'],
   ssr: true,
 })
+
+
+type LevelIndex = {
+  id?: string
+  slug?: string
+  title?: string
+  description?: string
+  categories?: Record<string, Array<{
+    id: string
+    word: string
+    jyutping: string
+    meaning: string
+  }>>
+  words?: Array<{
+    id: string
+    word: string
+    jyutping: string
+    meaning: string
+  }>
+}
+
+type LevelWordItem = {
+  id: string
+  word: string
+  jyutping: string
+  meaning: string
+  categoryKey?: string
+}
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
@@ -27,6 +53,53 @@ const { data, error } = await useFetch(
     server: true,
   }
 )
+
+const { data: levelIndex } = await useFetch<LevelIndex>(
+  () => `/api/index/levels/${level.value}`,
+  {
+    key: () => `level-index-${level.value}`,
+    server: true,
+    credentials: 'include',
+  }
+)
+
+const orderedLevelWords = computed<LevelWordItem[]>(() => {
+  if (levelIndex.value?.categories) {
+    return Object.entries(levelIndex.value.categories).flatMap(([categoryKey, words]) =>
+      words.map((entry) => ({
+        ...entry,
+        categoryKey
+      }))
+    )
+  }
+
+  if (levelIndex.value?.words) {
+    return levelIndex.value.words.map((entry) => ({
+      ...entry
+    }))
+  }
+
+  return []
+})
+
+const currentIndex = computed(() => {
+  const currentWordId = word.value?.id
+  if (!currentWordId) return -1
+
+  return orderedLevelWords.value.findIndex((entry) => entry.id === currentWordId)
+})
+
+const prevWord = computed(() => {
+  const i = currentIndex.value
+  if (i <= 0) return null
+  return orderedLevelWords.value[i - 1]
+})
+
+const nextWord = computed(() => {
+  const i = currentIndex.value
+  if (i === -1 || i >= orderedLevelWords.value.length - 1) return null
+  return orderedLevelWords.value[i + 1]
+})
 
 const { volume } = useAudioVolume()
 
@@ -100,7 +173,11 @@ watchEffect(() => {
 
   <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
-    <BackLink />
+    <!-- <BackLink /> -->
+
+    <NuxtLink :to="`/level/${level}#${word.id}`" class="text-sm text-black hover:underline">
+      ← Back
+    </NuxtLink>
 
     <!-- Word header -->
     <section class="text-center space-y-4 sm:space-y-6 word-card rounded-xl p-6 sm:p-8">
@@ -131,6 +208,20 @@ watchEffect(() => {
         <div class="w-full max-w-xs mx-auto h-2 rounded-full overflow-hidden bg-gray-300">
           <div class="h-2 bg-green-500 transition-all duration-700 ease-out" :style="{ width: masteryPercent + '%' }" />
         </div>
+      </div>
+
+      <div class="flex items-center justify-between w-full">
+        <NuxtLink v-if="prevWord" :to="`/level/${level}/word/${prevWord.id}`"
+          class="text-6xl leading-none text-gray-800 hover:text-blue-500 transition" aria-label="Previous word">
+          ‹
+        </NuxtLink>
+
+        <div v-else class="w-10" />
+
+        <NuxtLink v-if="nextWord" :to="`/level/${level}/word/${nextWord.id}`"
+          class="text-6xl leading-none text-gray-800 hover:text-blue-500 transition" aria-label="Next word">
+          ›
+        </NuxtLink>
       </div>
 
       <div class="flex items-center justify-center gap-3">
