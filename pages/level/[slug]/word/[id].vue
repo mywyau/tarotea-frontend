@@ -125,9 +125,6 @@ const isMastered = computed(() => xp.value >= masteryXp)
 
 const playbackRate = ref(1)
 
-const goBack = useGoBack()
-
-
 onMounted(async () => {
   try {
     const { getAccessToken } = await useAuth()

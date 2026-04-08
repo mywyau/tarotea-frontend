@@ -140,7 +140,12 @@ const gatedCategories = computed(() => {
 <template>
   <main v-if="authReady" class="max-w-4xl mx-auto px-4 py-12 space-y-10">
 
-    <BackLink />
+    <!-- <BackLink /> -->
+
+    <NuxtLink :to="`/topics`" class="text-sm text-black hover:underline">
+      ← Back
+    </NuxtLink>
+
 
     <header class="rounded-lg header-card">
       <h1 class="topic-heading">{{ topic.title }}</h1>
