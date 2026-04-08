@@ -1,6 +1,7 @@
 import { requireUser } from "@/server/utils/requireUser";
-import { db } from "~/server/repositories/db";
 import { createError, setHeader } from "h3";
+import { db } from "~/server/repositories/db";
+import { enforceRateLimit } from "../utils/rate-limiting/rateLimit";
 
 type SubscriptionStatus = "active" | "trialing" | "past_due" | "canceled";
 
@@ -23,6 +24,8 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
 
   const authUser = await requireUser(event);
   const userId = authUser.sub;
+
+  await enforceRateLimit(`rl:me:${userId}`, 120, 60);
 
   console.log(
     JSON.stringify({

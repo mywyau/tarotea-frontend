@@ -4,6 +4,7 @@ import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
 import { consumeWhisperAttemptMonthly } from "../repositories/whisper/consumeWhisperAttemptMonthly";
 import { consumeWhisperAttemptSubscriptionMonthV2 } from "../repositories/whisper/consumeWhisperAttemptSubscriptionMonthV2";
 import { getUserEntitlement } from "../utils/getEntitlement";
+import { enforceRateLimit } from "../utils/rate-limiting/rateLimit";
 import { requireUser } from "../utils/requireUser";
 import { getCurrentAllowanceWindow } from "../utils/whisper/getCurrentAllowanceWindow";
 import {
@@ -27,6 +28,18 @@ export default defineEventHandler(async (event) => {
     entitlement &&
     entitlement.subscription_status === "active" &&
     ["monthly", "yearly"].includes(entitlement.plan);
+
+  await enforceRateLimit(`rl:pronunciation:${userId}`, isPaid ? 20 : 5, 60);
+
+  const lockKey = `lock:pronunciation:${userId}`;
+  const acquired = await redis.set(lockKey, "1", { nx: true, ex: 30 });
+
+  if (!acquired) {
+    throw createError({
+      statusCode: 429,
+      statusMessage: "Pronunciation check already in progress",
+    });
+  }
 
   const limit = isPaid ? whisperRequestLimit : whisperRequestLimitFree;
   const MAX_AUDIO_SIZE = 1_000_000;
@@ -99,11 +112,11 @@ export default defineEventHandler(async (event) => {
       response_format: "json",
       include: ["logprobs"],
       prompt: `
-Do not normalize toward any expected answer.
-Transcribe exactly what was spoken.
-If the speech is Mandarin, return pinyin with tone numbers.
-If the speech is Cantonese, return Chinese characters only.
-If the speech is English, return English.`,
+        Do not normalize toward any expected answer.
+        Transcribe exactly what was spoken.
+        If the speech is Mandarin, return pinyin with tone numbers.
+        If the speech is Cantonese, return Chinese characters only.
+        If the speech is English, return English.`,
     });
 
     const transcript = transcription.text ?? "";
