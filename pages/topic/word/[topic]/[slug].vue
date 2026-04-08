@@ -7,6 +7,26 @@ definePageMeta({
 
 import { masteryXp } from '~/utils/xp/helpers'
 
+type TopicIndex = {
+    topic: string
+    title: string
+    description: string
+    categories: Record<string, Array<{
+        id: string
+        word: string
+        jyutping: string
+        meaning: string
+    }>>
+}
+
+type TopicWordItem = {
+    id: string
+    word: string
+    jyutping: string
+    meaning: string
+    categoryKey: string
+}
+
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -23,6 +43,53 @@ const { data, error } = await useFetch(
         server: true
     }
 )
+
+// const { data: topicWords } = await useFetch(
+//   () => `/api/topics/${topic.value}/words`,
+//   {
+//     key: () => `topic-words-${topic.value}`,
+//     server: true
+//   }
+// )
+
+const { data: topicIndex } = await useFetch<TopicIndex>(
+    () => `/api/index/topics/${topic.value}`,
+    {
+        key: () => `topic-index-${topic.value}`,
+        server: true
+    }
+)
+
+const orderedTopicWords = computed<TopicWordItem[]>(() => {
+    const categories = topicIndex.value?.categories
+    if (!categories) return []
+
+    return Object.entries(categories).flatMap(([categoryKey, words]) =>
+        words.map((entry) => ({
+            ...entry,
+            categoryKey
+        }))
+    )
+})
+
+const currentIndex = computed(() => {
+    const currentWordId = word.value?.id
+    if (!currentWordId) return -1
+
+    return orderedTopicWords.value.findIndex((entry) => entry.id === currentWordId)
+})
+
+const prevWord = computed(() => {
+    const i = currentIndex.value
+    if (i <= 0) return null
+    return orderedTopicWords.value[i - 1]
+})
+
+const nextWord = computed(() => {
+    const i = currentIndex.value
+    if (i === -1 || i >= orderedTopicWords.value.length - 1) return null
+    return orderedTopicWords.value[i + 1]
+})
 
 const { volume } = useAudioVolume()
 
@@ -82,7 +149,11 @@ watchEffect(() => {
 <template>
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
-        <BackLink />
+        <!-- <BackLink :fallback="`topic/words/${topic}`" /> -->
+
+        <NuxtLink :to="`/topic/words/${topic}`" class="text-sm text-black hover:underline">
+            ← Back
+        </NuxtLink>
 
         <!-- Word header -->
         <section class="text-center space-y-4 sm:space-y-4 word-card rounded-xl p-6 sm:p-8">
@@ -97,6 +168,20 @@ watchEffect(() => {
 
             <div class="text-lg text-gray-700">
                 {{ word.meaning }}
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
+                <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`"
+                    class="text-6xl text-gray-800 hover:text-blue-500 transition" aria-label="Previous word">
+                    ‹
+                </NuxtLink>
+
+                <div v-else class="w-6" />
+
+                <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`"
+                    class="text-6xl text-gray-800 hover:text-blue-500 transition" aria-label="Next word">
+                    ›
+                </NuxtLink>
             </div>
 
             <!-- XP block -->

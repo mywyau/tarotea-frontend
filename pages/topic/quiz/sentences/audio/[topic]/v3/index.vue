@@ -438,9 +438,6 @@ watch(
 
 <template>
   <main class="max-w-2xl mx-auto px-4 py-16 space-y-8">
-    <!-- <NuxtLink v-if="current < questions.length" :to="`/topics/quiz`" class="text-black text-sm hover:underline">
-      ← Back to topic quizzes
-    </NuxtLink> -->
 
     <BackLink />
 
@@ -642,11 +639,11 @@ watch(
                 Play Again
               </NuxtLink>
 
-              <NuxtLink :to="`/topic/words/${slug}`"
+              <!-- <NuxtLink :to="`/topic/words/${slug}`"
                 class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
                 style="background-color:rgba(244,205,39,0.35);">
                 Back to Topic
-              </NuxtLink>
+              </NuxtLink> -->
             </div>
           </div>
         </transition>

@@ -709,11 +709,11 @@ watch(
                 Play again
               </button>
 
-              <NuxtLink to="/dojo/topic/"
+              <!-- <NuxtLink to="/dojo/topic/"
                 class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
                 style="background-color:rgba(244,205,39,0.35);">
                 Back to Topic Dojo
-              </NuxtLink>
+              </NuxtLink> -->
             </div>
           </div>
         </transition>
