@@ -14,6 +14,9 @@ import {
   similarity,
 } from "../utils/whisper/helpers";
 
+import { redis } from "~/server/repositories/redis";
+
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
