@@ -106,7 +106,12 @@ onMounted(async () => {
 <template>
   <main class="topics-page max-w-3xl mx-auto py-12 px-4 space-y-10">
 
-    <BackLink />
+    <!-- <BackLink /> -->
+
+    <NuxtLink :to="`/`" class="text-sm text-black hover:underline">
+      ← Back
+    </NuxtLink>
+
 
     <header class="rounded-lg header-card">
       <h1 class="topic-heading">Topics</h1>

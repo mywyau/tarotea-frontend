@@ -2,42 +2,18 @@ import type { Entitlement } from "~/types/auth/entitlements";
 
 export const freeTopics = new Set([
   "survival-essentials",
-  "greetings-polite",
-  "basic-verbs",
-  "fruits-vegetables",
-  "clothing",
-  "dim-sum",
-  "restaurant-menu",
 ]);
 
 export const freeTopicsList = [
   "survival-essentials",
-  "greetings-polite",
-  "basic-verbs",
-  "fruits-vegetables",
-  "clothing",
-  "dim-sum",
-  "restaurant-menu",
 ];
 
 export const freeTopicsQuiz = [
   "survival-essentials",
-  "greetings-polite",
-  "basic-verbs",
-  "fruits-vegetables",
-  "clothing",
-  "dim-sum",
-  "restaurant-menu",
 ];
 
 export const freeTopicsJyutpingDojo = [
   "survival-essentials",
-  "greetings-polite",
-  "basic-verbs",
-  "fruits-vegetables",
-  "clothing",
-  "dim-sum",
-  "restaurant-menu",
 ];
 
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {

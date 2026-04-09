@@ -37,7 +37,7 @@ onMounted(async () => {
 
     <!-- <BackLink /> -->
 
-    <NuxtLink :to="`/levels`" class="text-sm text-black hover:underline">
+    <NuxtLink :to="`/`" class="text-sm text-black hover:underline">
       ← Back
     </NuxtLink>
 
