@@ -1,11 +1,10 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: true,
-  // middleware: ['level-access'],
+  middleware: ['coming-soon'],
 })
 
 const route = useRoute()
-const router = useRouter()
 
 const slug = route.params.slug as string
 const wordId = route.params.wordId as string
@@ -13,19 +12,6 @@ const wordId = route.params.wordId as string
 const loading = ref(false)
 const errorMessage = ref('')
 const confirmingUnlock = ref(false)
-
-function openConfirmUnlock() {
-  if (loading.value) return
-  if (unlockSummary.value.creditsAvailable < 1) return
-
-  errorMessage.value = ''
-  confirmingUnlock.value = true
-}
-
-function cancelConfirmUnlock() {
-  if (loading.value) return
-  confirmingUnlock.value = false
-}
 
 const unlockSummary = ref({
   totalXp: 0,
@@ -106,7 +92,6 @@ async function unlockWord() {
 
     showUnlockPanel.value = false
 
-    // await router.push(`/level/${slug}/word/${wordId}`)
     await navigateTo(wordPagePath)
   } catch (err: any) {
     errorMessage.value = err?.data?.statusMessage ?? 'Failed to unlock word.'
@@ -116,6 +101,7 @@ async function unlockWord() {
 }
 
 onMounted(loadData)
+
 </script>
 
 <template>
@@ -134,23 +120,23 @@ onMounted(loadData)
       <p class="word-label">Tile</p>
       <h2 class="word-text mt-2">{{ word.word }}</h2>
       <p v-if="word.jyutping" class="word-jyutping mt-2">{{ word.jyutping }}</p>
-      <p v-if="word.meaning" class="word-meaning mt-3">{{ word.meaning }}</p>
+      <p v-if="word.meaning" class="word-meaning font-bold mt-3">{{ word.meaning }}</p>
     </section>
 
     <section class="stats-grid">
-      <div class="stat-card page-card rounded-lg">
-        <p class="stat-label">Total XP</p>
-        <p class="stat-value">{{ unlockSummary.totalXp }}</p>
+      <div class="stat-card page-card rounded-xl stat-0">
+        <p class="stat-label">XP</p>
+        <p class="stat-value font-bold">{{ unlockSummary.totalXp }}</p>
       </div>
 
-      <div class="stat-card page-card rounded-lg">
+      <div class="stat-card page-card rounded-lg stat-1">
         <p class="stat-label">TaroKeys available</p>
-        <p class="stat-value">{{ unlockSummary.creditsAvailable }}</p>
+        <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
       </div>
 
-      <div class="stat-card page-card rounded-lg">
+      <div class="stat-card page-card rounded-lg stat-2">
         <p class="stat-label">TaroKeys used</p>
-        <p class="stat-value">{{ unlockSummary.creditsSpent }}</p>
+        <p class="stat-value font-bold">{{ unlockSummary.creditsSpent }}</p>
       </div>
     </section>
 
@@ -165,7 +151,7 @@ onMounted(loadData)
           <h2 class="text-base font-semibold text-gray-900">Unlock tile</h2>
 
           <p class="mt-4 text-sm text-gray-700">
-            Unlock this tile permanently for this level using
+            Unlock this tile permanently by using
             <span class="font-semibold">1 TaroKey</span>.
           </p>
         </div>
@@ -176,8 +162,7 @@ onMounted(loadData)
       </div>
 
       <div class="space-y-2 text-sm text-gray-700">
-        <p>This tile will be added to your permanent study pool for this level.</p>
-        <!-- <p>You can then access its word page and include it in learning flows tied to unlocked words.</p> -->
+        <p>This tile will be added to your permanent study pool.</p>
       </div>
 
       <div class="pt-2">
@@ -208,7 +193,7 @@ onMounted(loadData)
 
             <div class="flex flex-col gap-2 sm:flex-row">
               <button type="button"
-                class="w-full rounded-lg py-3 font-semibold border border-black/10 text-white bg-black hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                class="confirm-btn-blush w-full rounded-lg py-3 font-semibold x hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="loading || unlockSummary.creditsAvailable < 1" @click="unlockWord">
                 {{ loading ? 'Unlocking…' : 'Confirm unlock' }}
               </button>
@@ -245,7 +230,6 @@ onMounted(loadData)
 .page-card {
   backdrop-filter: blur(6px);
   background: rgba(255, 255, 255, 0.58);
-  border: 1px solid rgba(17, 24, 39, 0.08);
   padding: 1.1rem;
 }
 
@@ -375,5 +359,25 @@ onMounted(loadData)
     width: 100%;
     min-width: 0;
   }
+}
+
+.stat-0 {
+  background: rgba(234, 184, 228, 0.45);
+}
+
+.stat-1 {
+  background: rgba(168, 202, 224, 0.45);
+}
+
+.stat-2 {
+  background: rgba(244, 205, 39, 0.35);
+}
+
+.confirm-btn-blush {
+  background: rgb(249, 166, 166);
+}
+
+.confirm-btn-blush:hover {
+  background: rgb(204, 136, 136);
 }
 </style>

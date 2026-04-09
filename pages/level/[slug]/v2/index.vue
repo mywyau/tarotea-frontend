@@ -25,7 +25,6 @@ if (!isLevelId(slug)) {
 const levelNumber: number = levelIdToNumbers(slug)
 
 const {
-  authReady,
   isLoggedIn,
   entitlement,
 } = useMeStateV2()
@@ -39,7 +38,6 @@ const { data: levelCdnData, error } = await useFetch(
   }
 )
 
-
 const unlockMap = ref<Record<string, true>>({})
 
 const unlockSummary = ref({
@@ -48,8 +46,6 @@ const unlockSummary = ref({
   creditsSpent: 0,
   creditsAvailable: 0,
 })
-
-const unlockingWordId = ref<string | null>(null)
 
 async function loadUnlocks() {
   try {
@@ -91,48 +87,6 @@ async function loadUnlocks() {
       creditsSpent: 0,
       creditsAvailable: 0,
     }
-  }
-}
-
-async function unlockWord(wordId: string) {
-  if (unlockingWordId.value) return
-  if (unlockSummary.value.creditsAvailable < 1) return
-
-  try {
-    unlockingWordId.value = wordId
-
-    const { getAccessToken } = await useAuth()
-    const token = await getAccessToken()
-
-    const result = await $fetch<{
-      ok: boolean
-      alreadyUnlocked?: boolean
-      wordId: string
-      totalXp?: number
-      creditsEarned?: number
-      creditsSpent?: number
-      creditsAvailable?: number
-    }>('/api/word-unlocks', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: { wordId }
-    })
-
-    unlockMap.value = {
-      ...unlockMap.value,
-      [wordId]: true,
-    }
-
-    if (!result.alreadyUnlocked) {
-      unlockSummary.value = {
-        totalXp: result.totalXp ?? unlockSummary.value.totalXp,
-        creditsEarned: result.creditsEarned ?? unlockSummary.value.creditsEarned,
-        creditsSpent: result.creditsSpent ?? unlockSummary.value.creditsSpent,
-        creditsAvailable: result.creditsAvailable ?? unlockSummary.value.creditsAvailable,
-      }
-    }
-  } finally {
-    unlockingWordId.value = null
   }
 }
 
@@ -185,8 +139,6 @@ const getXp = (id: string) =>
 const isMastered = (id: string) =>
   (progressMap.value?.[id]?.xp ?? 0) >= masteryXp
 
-// const FREE_WORD_LIMIT = 10
-
 function getColorFromId(id: string) {
   let hash = 0
 
@@ -227,7 +179,6 @@ const gatedCategories = computed(() => {
   })
 })
 
-
 onMounted(async () => {
   await Promise.all([
     loadProgress(),
@@ -240,7 +191,9 @@ onMounted(async () => {
 <template>
   <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-10">
 
-    <BackLink />
+    <NuxtLink :to="`/levels`" class="text-sm text-black hover:underline">
+      ← Back
+    </NuxtLink>
 
     <header class="rounded-lg header-card">
       <h1 class="level-heading">{{ levelCdnData.title }}</h1>
@@ -266,19 +219,6 @@ onMounted(async () => {
             : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping" :meaning="word.meaning"
             :xp="getXp(word.id)" :mastered="isMastered(word.id)" :class="word.locked ? 'locked-tile' : ''"
             :style="{ background: word.tileColor }" />
-
-          <!-- <div v-if="word.locked" class="unlock-row">
-            <button class="unlock-button" :disabled="unlockSummary.creditsAvailable < 1 || unlockingWordId === word.id"
-              @click="unlockWord(word.id)">
-              {{
-                unlockingWordId === word.id
-                  ? 'Unlocking...'
-                  : unlockSummary.creditsAvailable > 0
-                    ? 'Unlock word'
-                    : 'No credits'
-              }}
-            </button>
-          </div> -->
         </div>
       </div>
 

@@ -10,13 +10,9 @@ import { sortedTopics } from '@/utils/topics/topics'
 import { computed, onMounted, ref } from 'vue'
 
 const {
-  state,
   authReady,
   isLoggedIn,
-  user,
   entitlement,
-  isCanceling,
-  currentPeriodEnd,
   resolve,
 } = useMeStateV2()
 
