@@ -1,4 +1,4 @@
-import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/redis";
+import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import {

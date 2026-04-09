@@ -1,5 +1,5 @@
 import { isLevelId, levelIdToNumbers } from "@/utils/levels/levels";
-import { FREE_LEVEL_WORD_LIMIT } from "~/config/levels-config";
+import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
 import {
   canAccessLevelWord,
   isComingSoon,

@@ -12,6 +12,20 @@ const wordId = route.params.wordId as string
 
 const loading = ref(false)
 const errorMessage = ref('')
+const confirmingUnlock = ref(false)
+
+function openConfirmUnlock() {
+  if (loading.value) return
+  if (unlockSummary.value.creditsAvailable < 1) return
+
+  errorMessage.value = ''
+  confirmingUnlock.value = true
+}
+
+function cancelConfirmUnlock() {
+  if (loading.value) return
+  confirmingUnlock.value = false
+}
 
 const unlockSummary = ref({
   totalXp: 0,
@@ -26,6 +40,23 @@ const word = ref<null | {
   jyutping?: string
   meaning?: string
 }>(null)
+
+const showUnlockPanel = ref(false)
+
+function openUnlockPanel() {
+  if (loading.value) return
+  if (unlockSummary.value.creditsAvailable < 1) return
+
+  errorMessage.value = ''
+  showUnlockPanel.value = true
+}
+
+function closeUnlockPanel() {
+  if (loading.value) return
+
+  showUnlockPanel.value = false
+  errorMessage.value = ''
+}
 
 async function loadData() {
   try {
@@ -69,6 +100,8 @@ async function unlockWord() {
       headers: { Authorization: `Bearer ${token}` },
       body: { wordId }
     })
+
+    showUnlockPanel.value = false
 
     await router.push(`/level/${slug}/word/${wordId}`)
   } catch (err: any) {
@@ -120,20 +153,76 @@ onMounted(loadData)
       {{ errorMessage }}
     </div>
 
-    <section class="rounded-lg text-center space-y-4">
-      <p class="action-text">
-        Unlock this word and add it to your permanent study pool for this level.
-      </p>
+    <section class="rounded-lg border p-5 space-y-4"
+      style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <h2 class="text-base font-semibold text-gray-900">Unlock tile</h2>
 
-      <button class="rounded-lg bg-black text-white py-2 px-4" :disabled="loading || unlockSummary.creditsAvailable < 1"
-        @click="unlockWord">
-        {{ loading ? 'Unlocking...' : 'Unlock word' }}
-      </button>
+          <p class="mt-4 text-sm text-gray-700">
+            Unlock this tile permanently for this level using
+            <span class="font-semibold">1 TaroKey</span>.
+          </p>
+        </div>
 
-      <p v-if="unlockSummary.creditsAvailable < 1" class="helper-text">
-        You do not have enough TaroKeys yet.
-      </p>
+        <span class="text-xs font-semibold text-gray-900 rounded-lg px-3 py-1 bg-blue-300/80">
+          Permanent
+        </span>
+      </div>
+
+      <div class="space-y-2 text-sm text-gray-700">
+        <p>This tile will be added to your permanent study pool for this level.</p>
+        <!-- <p>You can then access its word page and include it in learning flows tied to unlocked words.</p> -->
+      </div>
+
+      <div class="pt-2">
+        <button v-if="!showUnlockPanel" type="button"
+          class="w-full rounded-lg py-3 font-semibold border border-black/10 text-gray-900 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+          :disabled="loading || unlockSummary.creditsAvailable < 1" @click="openUnlockPanel">
+          Show unlock options
+        </button>
+
+        <Transition name="reveal-panel">
+          <div v-if="showUnlockPanel" class="space-y-4">
+            <div class="rounded-lg border px-4 py-3 text-sm text-gray-800 bg-white/75 border-black/10">
+              <p>
+                Spend <span class="font-semibold">1 TaroKey</span> to unlock
+                <span class="font-semibold">{{ word?.word ?? 'this tile' }}</span>?
+              </p>
+
+              <p class="mt-2 text-gray-600">
+                You currently have
+                <span class="font-semibold">{{ unlockSummary.creditsAvailable }}</span>
+                TaroKey<span v-if="unlockSummary.creditsAvailable !== 1">s</span> available.
+              </p>
+            </div>
+
+            <div v-if="errorMessage" class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+              {{ errorMessage }}
+            </div>
+
+            <div class="flex flex-col gap-2 sm:flex-row">
+              <button type="button"
+                class="w-full rounded-lg py-3 font-semibold border border-black/10 text-white bg-black hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="loading || unlockSummary.creditsAvailable < 1" @click="unlockWord">
+                {{ loading ? 'Unlocking…' : 'Confirm unlock' }}
+              </button>
+
+              <button type="button"
+                class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
+                :disabled="loading" @click="closeUnlockPanel">
+                Cancel
+              </button>
+            </div>
+          </div>
+        </Transition>
+
+        <p v-if="unlockSummary.creditsAvailable < 1" class="helper-text mt-3">
+          You do not have enough TaroKeys yet.
+        </p>
+      </div>
     </section>
+
   </main>
 </template>
 

@@ -1,4 +1,4 @@
-import { FREE_WORD_LIMIT } from "~/config/topics-config";
+import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {

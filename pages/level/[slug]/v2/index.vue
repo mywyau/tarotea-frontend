@@ -8,11 +8,11 @@ definePageMeta({
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
+import { FREE_LEVEL_WORD_LIMIT } from '~/config/level/levels-config'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
 import { masteryXp } from '~/utils/xp/helpers'
-import { FREE_LEVEL_WORD_LIMIT } from '~/config/levels-config'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -247,8 +247,8 @@ onMounted(async () => {
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
-    <div v-if="!canAccessLevel(isLoggedIn, entitlement)" class="unlock-summary">
-      Unlock credits: {{ unlockSummary.creditsAvailable }}
+    <div v-if="!canAccessLevel(isLoggedIn, entitlement)" class="unlock-summary ">
+      TaroKeys: <span class="font-bold">{{ unlockSummary.creditsAvailable }}</span>
     </div>
 
     <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
@@ -368,7 +368,7 @@ onMounted(async () => {
 }
 
 .unlock-summary {
-  font-size: 0.75rem;
+  font-size: 1.0rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgba(17, 24, 39, 0.75);

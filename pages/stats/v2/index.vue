@@ -39,23 +39,24 @@ const stats = computed<StatCard[]>(() => {
       suffix: 'xp'
     },
     {
-      label: 'Words Maxed',
-      value: toNumber(statsData.value.words_maxed)
+      label: 'XP Last 7 Days',
+      value: toNumber(statsData.value.xp_this_week),
+      suffix: 'xp',
+      signed: true
     },
     {
       label: 'Words Seen',
       value: toNumber(statsData.value.words_seen)
     },
     {
+      label: 'Words Maxed',
+      value: toNumber(statsData.value.words_maxed)
+    },
+    {
       label: 'Correct Answers',
       value: toNumber(statsData.value.total_correct)
     },
-    {
-      label: 'XP Last 7 Days',
-      value: toNumber(statsData.value.xp_this_week),
-      suffix: 'xp',
-      signed: true
-    }
+
   ]
 })
 
@@ -149,17 +150,10 @@ onMounted(async () => {
         Your Stats
       </h1>
 
-      <transition-group
-        name="card-fade"
-        tag="div"
-        class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6"
-      >
-        <div
-          v-for="(stat, index) in stats"
-          :key="stat.label"
-          class="stat-card hover:brightness-110"
-          :class="`stat-${index}`"
-        >
+      <transition-group name="card-fade" tag="div"
+        class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4 sm:gap-6">
+        <div v-for="(stat, index) in stats" :key="stat.label" class="stat-card hover:brightness-110"
+          :class="`stat-${index}`">
           <p class="stat-label">
             {{ stat.label }}
           </p>

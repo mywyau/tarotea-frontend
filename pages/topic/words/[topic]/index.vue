@@ -8,7 +8,7 @@ definePageMeta({
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
-import { FREE_WORD_LIMIT } from '~/config/topics-config'
+import { FREE_WORD_LIMIT } from '~/config/topic/topics-config'
 import { canAccessTopic, freeTopics } from '~/utils/topics/permissions'
 import { masteryXp } from '~/utils/xp/helpers'
 

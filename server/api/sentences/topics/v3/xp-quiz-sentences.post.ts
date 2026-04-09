@@ -419,10 +419,9 @@
 //   };
 // });
 
-
 import { Receiver } from "@upstash/qstash";
 import { createError, getHeader, readRawBody } from "h3";
-import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/redis";
+import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { masteryXp } from "~/utils/xp/helpers";
@@ -662,7 +661,9 @@ export default defineEventHandler(async (event) => {
         quizEvent.correct_count ??
           payloadAnswers.filter((answer) => answer.correct).length,
       );
-      totalQuestions = Number(quizEvent.total_questions ?? payloadAnswers.length);
+      totalQuestions = Number(
+        quizEvent.total_questions ?? payloadAnswers.length,
+      );
 
       const uniqueWordIds = [...new Set(payloadAnswers.map((a) => a.wordId))];
 
@@ -916,7 +917,9 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  await redis.del(`quiz:topic-sentences:${userId}:${sessionKey}`).catch(() => {});
+  await redis
+    .del(`quiz:topic-sentences:${userId}:${sessionKey}`)
+    .catch(() => {});
   await redis.del(`user:stats:v2:${userId}`).catch(() => {});
 
   return {

@@ -8,7 +8,7 @@ definePageMeta({
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
-import { FREE_LEVEL_WORD_LIMIT } from '~/config/levels-config'
+import { FREE_LEVEL_WORD_LIMIT } from '~/config/level/levels-config'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
@@ -160,10 +160,10 @@ onMounted(loadProgress)
 
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <!-- <div v-for="word in category.words" :key="word.id" :id="word.id"> -->
-          <WordTile v-for="word in category.words" :key="word.id" :id="word.id"
-            :to="word.locked ? null : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping"
-            :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)"
-            :class="word.locked ? 'locked-tile' : ''" :style="{ background: word.tileColor }" />
+        <WordTile v-for="word in category.words" :key="word.id" :id="word.id"
+          :to="word.locked ? null : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping"
+          :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)"
+          :class="word.locked ? 'locked-tile' : ''" :style="{ background: word.tileColor }" />
         <!-- </div> -->
       </div>
     </section>

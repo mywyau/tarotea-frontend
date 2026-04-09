@@ -1,4 +1,4 @@
-import { FREE_LEVELS } from "~/config/levels-config";
+import { FREE_LEVELS } from "~/config/level/levels-config";
 import type { Entitlement } from "~/types/auth/entitlements";
 
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {

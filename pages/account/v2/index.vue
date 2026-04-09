@@ -142,8 +142,7 @@ watch(aiUsage, (val) => {
                 </header>
 
                 <!-- Loading -->
-                <div v-if="!isLoggedIn"
-                    class="rounded-lg backdrop-blur p-5 text-gray-800">
+                <div v-if="!isLoggedIn" class="rounded-lg backdrop-blur p-5 text-gray-800">
                     Loading Account details…
                 </div>
 
@@ -297,6 +296,12 @@ watch(aiUsage, (val) => {
 
                                 <div class="flex flex-col gap-2 sm:flex-row">
                                     <button type="button"
+                                        class="w-full rounded-lg py-3 font-semibold border border-red-400/70 text-red-800 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                        :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'"
+                                        @click="deleteAccount">
+                                        {{ deleting ? 'Deleting account…' : 'Permanently delete account' }}
+                                    </button>
+                                    <button type="button"
                                         class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
                                         :disabled="deleting" @click="
                                             showDeletePanel = false;
@@ -304,13 +309,6 @@ watch(aiUsage, (val) => {
                                         deleteError = '';
                                         ">
                                         Cancel
-                                    </button>
-
-                                    <button type="button"
-                                        class="w-full rounded-lg py-3 font-semibold border border-red-400/70 text-red-800 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-                                        :disabled="deleting || deleteConfirmInput.trim().toLowerCase() !== 'delete'"
-                                        @click="deleteAccount">
-                                        {{ deleting ? 'Deleting account…' : 'Permanently delete account' }}
                                     </button>
                                 </div>
                             </div>
