@@ -142,9 +142,9 @@ watch(aiUsage, (val) => {
                 </header>
 
                 <!-- Loading -->
-                <div v-if="!authReady"
-                    class="rounded-lg border border-black/5 bg-white/70 backdrop-blur p-5 text-gray-600">
-                    Loading…
+                <div v-if="!isLoggedIn"
+                    class="rounded-lg backdrop-blur p-5 text-gray-800">
+                    Loading Account details…
                 </div>
 
                 <!-- Account details -->
