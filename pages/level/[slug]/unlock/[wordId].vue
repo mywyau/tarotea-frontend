@@ -58,6 +58,9 @@ function closeUnlockPanel() {
   errorMessage.value = ''
 }
 
+const wordApiPath: string = `/api/words/${wordId}`
+const wordPagePath: string = `/level/${slug}/word/${wordId}`
+
 async function loadData() {
   try {
     const { getAccessToken } = await useAuth()
@@ -81,7 +84,7 @@ async function loadData() {
       creditsAvailable: unlocks.creditsAvailable,
     }
 
-    word.value = await $fetch(`/api/words/${wordId}`)
+    word.value = await $fetch(wordApiPath)
   } catch {
     errorMessage.value = 'Failed to load unlock details.'
   }
@@ -103,7 +106,8 @@ async function unlockWord() {
 
     showUnlockPanel.value = false
 
-    await router.push(`/level/${slug}/word/${wordId}`)
+    // await router.push(`/level/${slug}/word/${wordId}`)
+    await navigateTo(wordPagePath)
   } catch (err: any) {
     errorMessage.value = err?.data?.statusMessage ?? 'Failed to unlock word.'
   } finally {
@@ -116,6 +120,7 @@ onMounted(loadData)
 
 <template>
   <main class="unlock-page max-w-2xl mx-auto px-4 py-10 sm:py-12 space-y-8">
+
     <BackLink :to="`/level/${slug}/v2`" />
 
     <header class="rounded-lg header-card">

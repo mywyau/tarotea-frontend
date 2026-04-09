@@ -7,14 +7,14 @@ import {
 } from "~/utils/levels/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
-  if (process.server) return; // middleware runs on client only
+  if (process.server) return;
 
   const slug = to.params.slug as string;
   const id = to.params.id as string;
 
   if (!slug || !id) return;
 
-  const { entitlement, resolve } = useMeStateV2();
+  const { entitlement, resolve, isLoggedIn } = useMeStateV2();
 
   await resolve();
 
@@ -37,15 +37,37 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
-  // Free preview (first 10 words)
+  // Free preview
   const levels = await $fetch(`/api/index/levels/${slug}`);
-  const allWords = Object.values(levels.categories).flat();
+  const allWords = Object.values(levels.categories).flat() as Array<{ id: string }>;
   const freePreviewIds = allWords
     .slice(0, FREE_LEVEL_WORD_LIMIT)
-    .map((w: any) => w.id);
+    .map((w) => w.id);
 
   if (freePreviewIds.includes(id)) return;
 
-  // Final fallback
+  // Individually unlocked word
+  if (isLoggedIn.value) {
+    try {
+      const { getAccessToken } = await useAuth();
+      const token = await getAccessToken();
+
+      const result = await $fetch<{
+        unlockedWordIds: string[];
+      }>("/api/word-unlocks", {
+        query: { wordIds: id },
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (result.unlockedWordIds.includes(id)) {
+        return;
+      }
+    } catch {
+      // ignore and fall through to upgrade
+    }
+  }
+
   return navigateTo("/upgrade");
 });
