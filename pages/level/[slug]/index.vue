@@ -132,21 +132,6 @@ const gatedCategories = computed(() => {
   })
 })
 
-// onMounted(async () => {
-//   const hash = window.location.hash?.slice(1)
-//   if (!hash) return
-
-//   await nextTick()
-
-//   const el = document.getElementById(hash)
-//   if (el) {
-//     el.scrollIntoView({
-//       behavior: 'smooth',
-//       block: 'center'
-//     })
-//   }
-// })
-
 onMounted(loadProgress)
 
 </script>
@@ -154,7 +139,11 @@ onMounted(loadProgress)
 <template>
   <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-10">
 
-    <BackLink />
+    <!-- <BackLink /> -->
+
+    <NuxtLink :to="`/levels`" class="text-sm text-black hover:underline">
+      ← Back
+    </NuxtLink>
 
     <header class="rounded-lg header-card">
       <h1 class="level-heading">{{ levelCdnData.title }}</h1>

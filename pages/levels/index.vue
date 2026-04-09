@@ -58,7 +58,7 @@ onMounted(async () => {
         }">
 
         <!-- Accessible level -->
-        <NuxtLink v-if="true" :to="`/level/${level.id}`" class="block space-y-3">
+        <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="block space-y-3">
 
           <div class="flex items-start justify-between gap-4">
             <div>
