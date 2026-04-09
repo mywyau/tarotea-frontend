@@ -8,11 +8,11 @@ definePageMeta({
 import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
-import { FREE_LEVEL_WORD_LIMIT } from '~/config/levels-config'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
 import { masteryXp } from '~/utils/xp/helpers'
+import { FREE_LEVEL_WORD_LIMIT } from '~/config/levels-config'
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -267,7 +267,7 @@ onMounted(async () => {
             :xp="getXp(word.id)" :mastered="isMastered(word.id)" :class="word.locked ? 'locked-tile' : ''"
             :style="{ background: word.tileColor }" />
 
-          <div v-if="word.locked" class="unlock-row">
+          <!-- <div v-if="word.locked" class="unlock-row">
             <button class="unlock-button" :disabled="unlockSummary.creditsAvailable < 1 || unlockingWordId === word.id"
               @click="unlockWord(word.id)">
               {{
@@ -278,7 +278,7 @@ onMounted(async () => {
                     : 'No credits'
               }}
             </button>
-          </div>
+          </div> -->
         </div>
       </div>
 

@@ -1,3 +1,4 @@
+import { FREE_LEVELS } from "~/config/levels-config";
 import type { Entitlement } from "~/types/auth/entitlements";
 
 export function hasPaidAccess(entitlement: Entitlement | null): boolean {
@@ -12,7 +13,7 @@ export function hasPaidAccess(entitlement: Entitlement | null): boolean {
 }
 
 export function isFreeLevel(level: number) {
-  return level <= 3;
+  return level <= FREE_LEVELS;
 }
 
 export function isComingSoon(level: number) {
