@@ -1,7 +1,8 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 
 definePageMeta({
   // middleware: ['level-access'],
+  middleware: ['content-not-available'],
   ssr: true,
 })
 
@@ -134,12 +135,10 @@ const gatedCategories = computed(() => {
 
 onMounted(loadProgress)
 
-</script>
+</script> -->
 
 <template>
   <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-10">
-
-    <!-- <BackLink /> -->
 
     <NuxtLink :to="`/levels`" class="text-sm text-black hover:underline">
       ← Back
