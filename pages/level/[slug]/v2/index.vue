@@ -34,7 +34,7 @@ const { data: levelCdnData, error } = await useFetch(
   `/api/index/levels/${slug}`,
   {
     server: true,
-    credentials: 'include', // 👈 cookies
+    // credentials: 'include', // 👈 cookies
   }
 )
 

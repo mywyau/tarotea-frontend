@@ -11,7 +11,6 @@ const wordId = route.params.wordId as string
 
 const loading = ref(false)
 const errorMessage = ref('')
-const confirmingUnlock = ref(false)
 
 const unlockSummary = ref({
   totalXp: 0,
