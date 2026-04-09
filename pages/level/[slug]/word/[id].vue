@@ -209,14 +209,14 @@ watchEffect(() => {
 
       <div class="flex items-center justify-between w-full">
         <NuxtLink v-if="prevWord" :to="`/level/${level}/word/${prevWord.id}`"
-          class="text-6xl leading-none text-gray-800 hover:text-blue-500 transition" aria-label="Previous word">
+          class="text-6xl leading-none text-gray-800 hover:text-blue-500 hover:brightness-125 transition" aria-label="Previous word">
           ‹
         </NuxtLink>
 
         <div v-else class="w-10" />
 
         <NuxtLink v-if="nextWord" :to="`/level/${level}/word/${nextWord.id}`"
-          class="text-6xl leading-none text-gray-800 hover:text-blue-500 transition" aria-label="Next word">
+          class="text-6xl leading-none text-gray-800 hover:text-blue-500 hover:brightness-125 transition" aria-label="Next word">
           ›
         </NuxtLink>
       </div>

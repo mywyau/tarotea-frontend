@@ -187,14 +187,14 @@ watchEffect(() => {
 
             <div class="flex items-center justify-between gap-4">
                 <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`"
-                    class="text-6xl text-gray-800 hover:text-blue-500 transition" aria-label="Previous word">
+                    class="text-6xl text-gray-800 hover:text-blue-500 hover:brightness-125 transition" aria-label="Previous word">
                     ‹
                 </NuxtLink>
 
                 <div v-else class="w-6" />
 
                 <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`"
-                    class="text-6xl text-gray-800 hover:text-blue-500 transition" aria-label="Next word">
+                    class="text-6xl text-gray-800 hover:text-blue-500 hover:brightness-125 transition" aria-label="Next word">
                     ›
                 </NuxtLink>
             </div>
