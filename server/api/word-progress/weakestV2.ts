@@ -1,7 +1,7 @@
 // server/api/word-progress/weakestV2.ts
 
 import { createError, getQuery } from "h3";
-import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/redis";
+import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
@@ -200,7 +200,6 @@ async function loadCandidateWordIds(
       if (parsed) {
         return parsed;
       }
-      
     } catch (error) {
       console.error(
         "[word-progress/weakestV2] topic scope Redis GET failed",

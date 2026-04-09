@@ -1,5 +1,5 @@
 import { createError, getQuery } from "h3";
-import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/redis";
+import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
@@ -86,7 +86,10 @@ async function loadCandidateWordIds(
       const parsed = parseCachedWordIds(cached);
       if (parsed?.length) return parsed;
     } catch (error) {
-      console.error("[word-progress/weakestV3] level scope Redis GET failed", error);
+      console.error(
+        "[word-progress/weakestV3] level scope Redis GET failed",
+        error,
+      );
     }
 
     const { rows } = await db.query(
@@ -107,7 +110,10 @@ async function loadCandidateWordIds(
     try {
       await redis.set(cacheKey, JSON.stringify(ids));
     } catch (error) {
-      console.error("[word-progress/weakestV3] level scope Redis SET failed", error);
+      console.error(
+        "[word-progress/weakestV3] level scope Redis SET failed",
+        error,
+      );
     }
 
     return ids;
@@ -121,7 +127,10 @@ async function loadCandidateWordIds(
       const parsed = parseCachedWordIds(cached);
       if (parsed?.length) return parsed;
     } catch (error) {
-      console.error("[word-progress/weakestV3] topic scope Redis GET failed", error);
+      console.error(
+        "[word-progress/weakestV3] topic scope Redis GET failed",
+        error,
+      );
     }
 
     const { rows } = await db.query(
@@ -142,7 +151,10 @@ async function loadCandidateWordIds(
     try {
       await redis.set(cacheKey, JSON.stringify(ids));
     } catch (error) {
-      console.error("[word-progress/weakestV3] topic scope Redis SET failed", error);
+      console.error(
+        "[word-progress/weakestV3] topic scope Redis SET failed",
+        error,
+      );
     }
 
     return ids;
@@ -191,7 +203,10 @@ export default defineEventHandler(async (event) => {
     try {
       await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
     } catch (error) {
-      console.error("[word-progress/weakestV3] Redis EXPIRE after HMGET failed", error);
+      console.error(
+        "[word-progress/weakestV3] Redis EXPIRE after HMGET failed",
+        error,
+      );
     }
   } catch (error) {
     console.error("[word-progress/weakestV3] Redis HMGET failed", error);
@@ -252,7 +267,10 @@ export default defineEventHandler(async (event) => {
         try {
           await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
         } catch (error) {
-          console.error("[word-progress/weakestV3] Redis EXPIRE after HSET failed", error);
+          console.error(
+            "[word-progress/weakestV3] Redis EXPIRE after HSET failed",
+            error,
+          );
         }
       }
     } catch (error) {

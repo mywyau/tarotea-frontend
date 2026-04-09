@@ -44,14 +44,6 @@ const { data, error } = await useFetch(
     }
 )
 
-// const { data: topicWords } = await useFetch(
-//   () => `/api/topics/${topic.value}/words`,
-//   {
-//     key: () => `topic-words-${topic.value}`,
-//     server: true
-//   }
-// )
-
 const { data: topicIndex } = await useFetch<TopicIndex>(
     () => `/api/index/topics/${topic.value}`,
     {

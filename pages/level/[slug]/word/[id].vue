@@ -172,9 +172,14 @@ watchEffect(() => {
 
     <!-- <BackLink /> -->
 
-    <NuxtLink :to="`/level/${level}#${word.id}`" class="text-sm text-black hover:underline">
+    <!-- <NuxtLink :to="`/level/${level}#${word.id}`" class="text-sm text-black hover:underline">
+      ← Back
+    </NuxtLink> -->
+
+    <NuxtLink :to="`/level/${level}/v2#${word.id}`" class="text-sm text-black hover:underline">
       ← Back
     </NuxtLink>
+
 
     <!-- Word header -->
     <section class="text-center space-y-4 sm:space-y-6 word-card rounded-xl p-6 sm:p-8">
@@ -209,14 +214,16 @@ watchEffect(() => {
 
       <div class="flex items-center justify-between w-full">
         <NuxtLink v-if="prevWord" :to="`/level/${level}/word/${prevWord.id}`"
-          class="text-6xl leading-none text-gray-800 hover:text-blue-500 hover:brightness-125 transition" aria-label="Previous word">
+          class="text-6xl leading-none text-gray-800 hover:text-blue-500 hover:brightness-125 transition"
+          aria-label="Previous word">
           ‹
         </NuxtLink>
 
         <div v-else class="w-10" />
 
         <NuxtLink v-if="nextWord" :to="`/level/${level}/word/${nextWord.id}`"
-          class="text-6xl leading-none text-gray-800 hover:text-blue-500 hover:brightness-125 transition" aria-label="Next word">
+          class="text-6xl leading-none text-gray-800 hover:text-blue-500 hover:brightness-125 transition"
+          aria-label="Next word">
           ›
         </NuxtLink>
       </div>

@@ -1,5 +1,5 @@
 import { createError, getQuery } from "h3";
-import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/redis";
+import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
@@ -72,7 +72,10 @@ export default defineEventHandler(async (event) => {
     try {
       await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
     } catch (error) {
-      console.error("[word-progress/v2] Redis EXPIRE after HMGET failed", error);
+      console.error(
+        "[word-progress/v2] Redis EXPIRE after HMGET failed",
+        error,
+      );
     }
   } catch (error) {
     console.error("[word-progress/v2] Redis HMGET failed", error);
@@ -138,7 +141,10 @@ export default defineEventHandler(async (event) => {
       try {
         await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
       } catch (error) {
-        console.error("[word-progress/v2] Redis EXPIRE after HSET failed", error);
+        console.error(
+          "[word-progress/v2] Redis EXPIRE after HSET failed",
+          error,
+        );
       }
     }
   } catch (error) {

@@ -1,8 +1,7 @@
-<!-- <script setup lang="ts">
+<script setup lang="ts">
 
 definePageMeta({
   // middleware: ['level-access'],
-  middleware: ['content-not-available'],
   ssr: true,
 })
 
@@ -26,23 +25,70 @@ if (!isLevelId(slug)) {
 const levelNumber: number = levelIdToNumbers(slug)
 
 const {
-  authReady,
   isLoggedIn,
   entitlement,
 } = useMeStateV2()
-
-if (!entitlement.value === null) {
-  throw createError({ statusCode: 404 })
-}
 
 // SSR-safe fetch (no gating, no nulls)
 const { data: levelCdnData, error } = await useFetch(
   `/api/index/levels/${slug}`,
   {
     server: true,
-    credentials: 'include', // 👈 cookies
+    // credentials: 'include', // 👈 cookies
   }
 )
+
+const unlockMap = ref<Record<string, true>>({})
+
+const unlockSummary = ref({
+  totalXp: 0,
+  creditsEarned: 0,
+  creditsSpent: 0,
+  creditsAvailable: 0,
+})
+
+async function loadUnlocks() {
+  try {
+    const { getAccessToken } = await useAuth()
+    const token = await getAccessToken()
+
+    const wordIds = Object.values(levelCdnData.value.categories)
+      .flat()
+      .map((w: any) => w.id)
+
+    if (!wordIds.length) return
+
+    const result = await $fetch<{
+      totalXp: number
+      creditsEarned: number
+      creditsSpent: number
+      creditsAvailable: number
+      unlockedWordIds: string[]
+    }>('/api/word-unlocks', {
+      query: { wordIds: wordIds.join(',') },
+      headers: { Authorization: `Bearer ${token}` }
+    })
+
+    unlockSummary.value = {
+      totalXp: result.totalXp,
+      creditsEarned: result.creditsEarned,
+      creditsSpent: result.creditsSpent,
+      creditsAvailable: result.creditsAvailable,
+    }
+
+    unlockMap.value = Object.fromEntries(
+      result.unlockedWordIds.map((id) => [id, true as const])
+    )
+  } catch {
+    unlockMap.value = {}
+    unlockSummary.value = {
+      totalXp: 0,
+      creditsEarned: 0,
+      creditsSpent: 0,
+      creditsAvailable: 0,
+    }
+  }
+}
 
 // Handle backend responses
 if (error.value?.statusCode === 403) {
@@ -93,8 +139,6 @@ const getXp = (id: string) =>
 const isMastered = (id: string) =>
   (progressMap.value?.[id]?.xp ?? 0) >= masteryXp
 
-// const FREE_WORD_LIMIT = 10
-
 function getColorFromId(id: string) {
   let hash = 0
 
@@ -107,25 +151,27 @@ function getColorFromId(id: string) {
 }
 
 const gatedCategories = computed(() => {
-
   let globalIndex = 0
 
   return categories.value.map(category => {
     return {
       ...category,
       words: category.words.map((word: any) => {
-
-        const shouldLock =
+        const paywallLocked =
           !isFreeLevel(levelNumber) &&
           !canAccessLevel(isLoggedIn.value, entitlement.value) &&
           globalIndex >= FREE_LEVEL_WORD_LIMIT
 
+        const unlockedByUser = !!unlockMap.value[word.id]
+        const locked = paywallLocked && !unlockedByUser
 
         globalIndex++
 
         return {
           ...word,
-          locked: shouldLock,
+          paywallLocked,
+          unlockedByUser,
+          locked,
           tileColor: getColorFromId(word.id)
         }
       })
@@ -133,9 +179,14 @@ const gatedCategories = computed(() => {
   })
 })
 
-onMounted(loadProgress)
+onMounted(async () => {
+  await Promise.all([
+    loadProgress(),
+    loadUnlocks(),
+  ])
+})
 
-</script> -->
+</script>
 
 <template>
   <main class="level-page max-w-4xl mx-auto px-4 py-10 sm:py-12 space-y-10">
@@ -149,6 +200,10 @@ onMounted(loadProgress)
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
+    <div v-if="!canAccessLevel(isLoggedIn, entitlement)" class="unlock-summary ">
+      TaroKeys: <span class="font-bold">{{ unlockSummary.creditsAvailable }}</span>
+    </div>
+
     <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
 
       <div class="flex items-baseline justify-between gap-4">
@@ -158,13 +213,15 @@ onMounted(loadProgress)
       </div>
 
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        <!-- <div v-for="word in category.words" :key="word.id" :id="word.id"> -->
-        <WordTile v-for="word in category.words" :key="word.id" :id="word.id"
-          :to="word.locked ? null : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping"
-          :meaning="word.meaning" :xp="getXp(word.id)" :mastered="isMastered(word.id)"
-          :class="word.locked ? 'locked-tile' : ''" :style="{ background: word.tileColor }" />
-        <!-- </div> -->
+        <div v-for="word in category.words" :key="word.id" :id="word.id" class="tile-shell">
+          <WordTile :id="word.id" :to="word.locked
+            ? `/level/${slug}/unlock/${word.id}`
+            : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping" :meaning="word.meaning"
+            :xp="getXp(word.id)" :mastered="isMastered(word.id)" :class="word.locked ? 'locked-tile' : ''"
+            :style="{ background: word.tileColor }" />
+        </div>
       </div>
+
     </section>
 
   </main>
@@ -214,10 +271,46 @@ onMounted(loadProgress)
   border-color: rgba(214, 163, 209, 0.55);
 }
 
+
+.tile-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .locked-tile {
   opacity: 0.38;
-  pointer-events: none;
   user-select: none;
   filter: grayscale(0.15);
+}
+
+.unlock-row {
+  display: flex;
+  justify-content: center;
+}
+
+.unlock-button {
+  border: 0;
+  border-radius: 100px;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(255, 255, 255, 0.92);
+  color: #111827;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+}
+
+.unlock-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.unlock-summary {
+  font-size: 1.0rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.75);
 }
 </style>
