@@ -55,6 +55,33 @@ const categories = computed(() =>
   }))
 )
 
+const allTopicWords = computed(() => {
+  return Object.values(topic.value.categories).flat() as Array<{ id: string }>
+})
+
+const accessibleWordCount = computed(() => {
+  return gatedCategories.value.reduce((count, category) => {
+    return count + category.words.filter((word) => !word.locked).length
+  }, 0)
+})
+
+const totalWords = computed(() => {
+  return allTopicWords.value.length
+})
+
+// const unlockedWordCount = computed(() => {
+//   return allTopicWords.value.reduce((count, word) => {
+//     return count + (unlockMap.value[word.id] ? 1 : 0)
+//   }, 0)
+// })
+
+const lockedWordCount = computed(() => {
+  return gatedCategories.value.reduce((count, category) => {
+    return count + category.words.filter((word) => word.locked).length
+  }, 0)
+})
+
+
 const progressMap = ref<Record<string, { xp: number; streak: number }>>({})
 
 async function loadProgress() {
@@ -194,18 +221,29 @@ onMounted(async () => {
       <p class="topic-subheading mt-2">{{ topic.description }}</p>
     </header>
 
-    <div
-      v-if="!canAccessTopic(isLoggedIn, entitlement, topic.id)"
-      class="unlock-summary"
-    >
-      TaroKeys: <span class="font-bold">{{ unlockSummary.creditsAvailable }}</span>
-    </div>
+    <section class="stats-grid">
+      <div class="stat-card page-card rounded-xl stat-0">
+        <p class="stat-label">Total words</p>
+        <p class="stat-value font-bold">{{ totalWords }}</p>
+      </div>
 
-    <section
-      v-for="category in gatedCategories"
-      :key="category.key"
-      class="space-y-6"
-    >
+      <div class="stat-card page-card rounded-xl stat-1">
+        <p class="stat-label">Accessible words</p>
+        <p class="stat-value font-bold">{{ accessibleWordCount }}</p>
+      </div>
+
+      <div v-if="!hasPaidAccess && !isTopicFree" class="stat-card page-card rounded-xl stat-2">
+        <p class="stat-label">TaroKeys</p>
+        <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
+      </div>
+
+      <div class="stat-card page-card rounded-xl stat-3">
+        <p class="stat-label">Locked words</p>
+        <p class="stat-value font-bold">{{ lockedWordCount }}</p>
+      </div>
+    </section>
+
+    <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
       <div class="flex items-baseline justify-between gap-4">
         <h2 class="category-heading">
           {{ category.title }}
@@ -213,25 +251,12 @@ onMounted(async () => {
       </div>
 
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        <div
-          v-for="word in category.words"
-          :key="word.id"
-          :id="word.id"
-          class="tile-shell"
-        >
-          <WordTile
-            :id="word.id"
-            :to="word.locked
-              ? `/topic/${slug}/unlock/${word.id}`
-              : `/topic/word/${slug}/${word.id}`"
-            :word="word.word"
-            :jyutping="word.jyutping"
-            :meaning="word.meaning"
-            :xp="getXp(word.id)"
-            :mastered="isMastered(word.id)"
-            :class="word.locked ? 'locked-tile' : ''"
-            :style="{ background: word.tileColor }"
-          />
+        <div v-for="word in category.words" :key="word.id" :id="word.id" class="tile-shell">
+          <WordTile :id="word.id" :to="word.locked
+            ? `/topic/${slug}/unlock/${word.id}`
+            : `/topic/word/${slug}/${word.id}`" :word="word.word" :jyutping="word.jyutping" :meaning="word.meaning"
+            :xp="getXp(word.id)" :mastered="isMastered(word.id)" :class="word.locked ? 'locked-tile' : ''"
+            :style="{ background: word.tileColor }" />
         </div>
       </div>
     </section>
@@ -291,5 +316,56 @@ onMounted(async () => {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgba(17, 24, 39, 0.75);
+}
+
+.page-card {
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.58);
+  padding: 1.1rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(17, 24, 39, 0.62);
+}
+
+.stat-value {
+  margin-top: 0.45rem;
+  font-size: 1.05rem;
+  color: rgba(0, 0, 0);
+}
+
+.stat-0 {
+  background: rgba(234, 184, 228, 0.45);
+}
+
+.stat-1 {
+  background: rgba(88, 199, 95, 0.45);
+}
+
+.stat-2 {
+  background: rgba(244, 205, 39, 0.35);
+}
+
+.stat-3 {
+  background: rgba(111, 92, 202, 0.35);
+}
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

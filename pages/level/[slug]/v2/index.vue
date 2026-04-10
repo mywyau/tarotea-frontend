@@ -150,6 +150,39 @@ function getColorFromId(id: string) {
   return tileColours[index]
 }
 
+// const gatedCategories = computed(() => {
+//   let globalIndex = 0
+
+//   return categories.value.map(category => {
+//     return {
+//       ...category,
+//       words: category.words.map((word: any) => {
+//         const paywallLocked =
+//           !isFreeLevel(levelNumber) &&
+//           !canAccessLevel(isLoggedIn.value, entitlement.value) &&
+//           globalIndex >= FREE_LEVEL_WORD_LIMIT
+
+//         const unlockedByUser = !!unlockMap.value[word.id]
+//         const locked = paywallLocked && !unlockedByUser
+
+//         globalIndex++
+
+//         return {
+//           ...word,
+//           paywallLocked,
+//           unlockedByUser,
+//           locked,
+//           tileColor: getColorFromId(word.id)
+//         }
+//       })
+//     }
+//   })
+// })
+
+const hasPaidAccess = computed(() => {
+  return canAccessLevel(isLoggedIn.value, entitlement.value)
+})
+
 const gatedCategories = computed(() => {
   let globalIndex = 0
 
@@ -159,7 +192,7 @@ const gatedCategories = computed(() => {
       words: category.words.map((word: any) => {
         const paywallLocked =
           !isFreeLevel(levelNumber) &&
-          !canAccessLevel(isLoggedIn.value, entitlement.value) &&
+          !hasPaidAccess.value &&
           globalIndex >= FREE_LEVEL_WORD_LIMIT
 
         const unlockedByUser = !!unlockMap.value[word.id]
@@ -177,6 +210,26 @@ const gatedCategories = computed(() => {
       })
     }
   })
+})
+
+const allLevelWords = computed(() => {
+  return Object.values(levelCdnData.value.categories).flat() as Array<{ id: string }>
+})
+
+const totalWords = computed(() => {
+  return allLevelWords.value.length
+})
+
+const accessibleWordCount = computed(() => {
+  return gatedCategories.value.reduce((count, category) => {
+    return count + category.words.filter((word) => !word.locked).length
+  }, 0)
+})
+
+const lockedWordCount = computed(() => {
+  return gatedCategories.value.reduce((count, category) => {
+    return count + category.words.filter((word) => word.locked).length
+  }, 0)
 })
 
 onMounted(async () => {
@@ -200,9 +253,31 @@ onMounted(async () => {
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
-    <div v-if="!canAccessLevel(isLoggedIn, entitlement)" class="unlock-summary ">
+    <section class="stats-grid">
+      <div class="stat-card page-card rounded-xl stat-0">
+        <p class="stat-label">Total words</p>
+        <p class="stat-value font-bold">{{ totalWords }}</p>
+      </div>
+
+      <div class="stat-card page-card rounded-xl stat-1">
+        <p class="stat-label">Accessible words</p>
+        <p class="stat-value font-bold">{{ accessibleWordCount }}</p>
+      </div>
+
+      <div v-if="!hasPaidAccess" class="stat-card page-card rounded-xl stat-2">
+        <p class="stat-label">TaroKeys</p>
+        <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
+      </div>
+
+      <div class="stat-card page-card rounded-xl stat-3">
+        <p class="stat-label">Locked words</p>
+        <p class="stat-value font-bold">{{ lockedWordCount }}</p>
+      </div>
+    </section>
+
+    <!-- <div v-if="!canAccessLevel(isLoggedIn, entitlement)" class="unlock-summary ">
       TaroKeys: <span class="font-bold">{{ unlockSummary.creditsAvailable }}</span>
-    </div>
+    </div> -->
 
     <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
 
@@ -312,5 +387,56 @@ onMounted(async () => {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgba(17, 24, 39, 0.75);
+}
+
+.page-card {
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.58);
+  padding: 1.1rem;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.stat-card {
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(17, 24, 39, 0.62);
+}
+
+.stat-value {
+  margin-top: 0.45rem;
+  font-size: 1.05rem;
+  color: rgba(0, 0, 0);
+}
+
+.stat-0 {
+  background: rgba(234, 184, 228, 0.45);
+}
+
+.stat-1 {
+  background: rgba(88, 199, 95, 0.45);
+}
+
+.stat-2 {
+  background: rgba(244, 205, 39, 0.35);
+}
+
+.stat-3 {
+  background: rgba(111, 92, 202, 0.35);
+}
+
+@media (max-width: 640px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
