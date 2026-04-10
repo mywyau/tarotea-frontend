@@ -94,13 +94,16 @@ const {
 } = await useAsyncData(
   () => `jyutping-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>('/api/typing/levels/v2/start', {
-      query: {
-        scope: 'level',
-        slug: slug.value,
-        variant: 'jyutping',
-      },
-    }),
+    authedFetch<DojoStartResponse>(
+      // '/api/typing/levels/v2/start',
+      '/api/typing/levels/v2/start-v2',
+      {
+        query: {
+          scope: 'level',
+          slug: slug.value,
+          variant: 'jyutping',
+        },
+      }),
   {
     watch: [slug],
     server: false,

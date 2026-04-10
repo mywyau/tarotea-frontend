@@ -26,18 +26,20 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo("/please-sign-in");
   }
 
-  // Free levels
-  if (isFreeLevel(levelNumber)) return;
+  // // Free levels
+  // if (isFreeLevel(levelNumber)) return;
 
   // Coming soon
   if (isComingSoon(levelNumber)) {
     return navigateTo("/coming-soon");
   }
 
+  return;
+
   // Full paid access
-  if (canAccessLevelQuiz(levelNumber, entitlement.value)) {
-    return;
-  }
+  // if (canAccessLevelQuiz(levelNumber, entitlement.value)) {
+  //   return;
+  // }
 
   // Final fallback
   return navigateTo("/upgrade");

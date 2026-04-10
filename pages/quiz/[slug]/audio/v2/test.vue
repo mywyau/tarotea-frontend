@@ -199,7 +199,9 @@ function calculateQuizXpEarned() {
 }
 
 const { data, error } = await useFetch<LevelData>(
-  () => `/api/vocab-quiz/${slug.value}`,
+  () => 
+  // `/api/vocab-quiz/${slug.value}`,
+  `/api/vocab-quiz/v2/${slug.value}`,
   {
     key: () => `audio-quiz-${slug.value}`,
     server: false
@@ -524,7 +526,8 @@ onMounted(async () => {
     const token = await getAccessToken()
 
     const weakest = await $fetch<{ id: string }[]>(
-      '/api/word-progress/weakestV3',
+      // '/api/word-progress/weakestV3',
+      '/api/word-progress/weakestV4',
       {
         query: { level: slug.value },
         headers: {

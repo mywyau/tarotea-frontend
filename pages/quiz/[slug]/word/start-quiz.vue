@@ -7,7 +7,6 @@ definePageMeta({
 
 // import { getLevelNumber } from '~/utils/levels/levels'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
-import { canAccessLevel } from '~/utils/levels/permissions'
 
 const route = useRoute()
 // const slug = computed(() => route.params.slug as string | undefined)
@@ -65,16 +64,19 @@ onMounted(() => {
 
 // --- helpers ---
 
+// const canEnterLevel = () => {
+
+//   if (!isLoggedIn.value) return false
+
+//   if (levelNumber! <= 3) return true
+
+//   if (!isLoggedIn.value) return false
+
+//   return canAccessLevel(isLoggedIn.value, entitlement.value)
+// }
+
 const canEnterLevel = () => {
-
-  if (!authReady.value) return false
-
-  if (levelNumber! <= 3) return true
-
-  // Paid levels
-  if (!isLoggedIn.value) return false
-
-  return canAccessLevel(isLoggedIn.value, entitlement.value)
+  if (isLoggedIn.value) { return true } else { return false }
 }
 
 </script>
@@ -155,7 +157,6 @@ const canEnterLevel = () => {
 </template>
 
 <style scoped>
-
 .level-heading {
   font-size: 1.3rem;
   text-transform: uppercase;

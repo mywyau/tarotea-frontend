@@ -93,8 +93,8 @@ const {
   () => `level-sentences-audio-start-${slug.value}`,
   () =>
     authedFetch<SentenceQuizStartResponse>(
-      // '/api/sentences/v2/start',
-      '/api/sentences/v3/start',
+      // '/api/sentences/v3/start',
+      '/api/sentences/v3/start-v2',
       {
         query: {
           scope: 'level',

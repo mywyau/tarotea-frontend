@@ -1,16 +1,25 @@
-// server/api/topic/quiz/[topicSlug].get.ts
+// server/api/topic/audio-quiz/[topicSlug].get.ts
 
+import { getUserEntitlement } from "#imports";
 import { createError, getRouterParam } from "h3";
+import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
+import { Entitlement } from "~/types/auth/entitlements";
+import { shuffleFisherYates } from "~/utils/shuffle";
+import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
 
 type TopicWord = {
   id: string;
   word: string;
   jyutping: string;
   meaning: string;
+  audioKey?: string;
+  audio?: string;
+  audioFile?: string;
 };
 
 type TopicData = {
@@ -25,39 +34,27 @@ type WordProgress = {
   streak: number;
 };
 
-type QuizQuestion = {
+type AudioQuizQuestion = {
+  type: "audio";
   wordId: string;
-  prompt: string;
+  audioKey: string;
   options: string[];
   correctIndex: number;
 };
 
-type TopicQuizResponse = {
+type TopicAudioQuizResponse = {
   topic: string;
   title: string;
   description: string;
   totalQuestions: number;
-  questions: QuizQuestion[];
+  questions: AudioQuizQuestion[];
   progressMap: Record<string, WordProgress>;
   wordsById: Record<string, TopicWord>;
 };
 
 const TOTAL_QUESTIONS = 20;
-
-// Tune these to match the feel you want
-const WEAKEST_QUESTION_RATIO = 0.8; // 80% of quiz comes from weakest pool
-const WEAKEST_POOL_RATIO = 0.8; // weakest pool = bottom 80% of topic words by XP
-
-function shuffleFisherYates<T>(input: T[]): T[] {
-  const arr = [...input];
-
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-
-  return arr;
-}
+const WEAKEST_QUESTION_RATIO = 0.9;
+const WEAKEST_POOL_RATIO = 0.9;
 
 function parseCachedWordProgress(raw: unknown): WordProgress | null {
   if (!raw || typeof raw !== "string") return null;
@@ -97,6 +94,63 @@ function buildWordsById(words: TopicWord[]): Record<string, TopicWord> {
   return Object.fromEntries(words.map((w) => [w.id, w]));
 }
 
+function pickProgressMap(
+  progressMap: Record<string, WordProgress>,
+  wordIds: string[],
+): Record<string, WordProgress> {
+  return Object.fromEntries(
+    wordIds.map((id) => [id, progressMap[id] ?? { xp: 0, streak: 0 }]),
+  );
+}
+
+function normalizeAudioKey(raw: string): string {
+  const trimmed = raw.trim();
+
+  if (!trimmed) return trimmed;
+
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    try {
+      const url = new URL(trimmed);
+      const marker = "/audio/";
+      const idx = url.pathname.indexOf(marker);
+
+      if (idx >= 0) {
+        return url.pathname.slice(idx + marker.length).replace(/^\/+/, "");
+      }
+
+      return url.pathname.replace(/^\/+/, "");
+    } catch {
+      return trimmed;
+    }
+  }
+
+  if (trimmed.startsWith("/audio/")) {
+    return trimmed.replace(/^\/audio\//, "");
+  }
+
+  if (trimmed.startsWith("audio/")) {
+    return trimmed.replace(/^audio\//, "");
+  }
+
+  return trimmed;
+}
+
+function resolveAudioKey(word: TopicWord): string | null {
+  const candidates = [word.audioKey, word.audio, word.audioFile];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" && candidate.trim()) {
+      return normalizeAudioKey(candidate);
+    }
+  }
+
+  if (word.id?.trim()) {
+    return `${word.id}.mp3`;
+  }
+
+  return null;
+}
+
 function parseCachedTopicData(raw: unknown): TopicData | null {
   if (!raw) return null;
 
@@ -116,6 +170,7 @@ function parseCachedTopicData(raw: unknown): TopicData | null {
 }
 
 async function loadTopicData(topicSlug: string): Promise<TopicData> {
+
   const cacheKey = `topic_data:${topicSlug}`;
 
   try {
@@ -126,7 +181,7 @@ async function loadTopicData(topicSlug: string): Promise<TopicData> {
       return parsed;
     }
   } catch (error) {
-    console.error("[topics/quiz] topic cache GET failed", error);
+    console.error("[topic/audio-quiz] topic cache GET failed", error);
   }
 
   const cdnBase = useRuntimeConfig().public.cdnBase;
@@ -145,7 +200,7 @@ async function loadTopicData(topicSlug: string): Promise<TopicData> {
   try {
     await redis.set(cacheKey, JSON.stringify(data));
   } catch (error) {
-    console.error("[topics/quiz] topic cache SET failed", error);
+    console.error("[topic/audio-quiz] topic cache SET failed", error);
   }
 
   return data;
@@ -173,7 +228,7 @@ async function loadProgressMap(
       cachedById = (result ?? {}) as Record<string, unknown>;
     }
   } catch (error) {
-    console.error("[topics/quiz] Redis HMGET failed", error);
+    console.error("[topic/audio-quiz] Redis HMGET failed", error);
     cachedById = {};
   }
 
@@ -234,7 +289,7 @@ async function loadProgressMap(
       await redis.hset(redisKey, redisWrites);
     }
   } catch (error) {
-    console.error("[topics/quiz] Redis HSET failed", error);
+    console.error("[topic/audio-quiz] Redis HSET failed", error);
   }
 
   return progressMap;
@@ -303,67 +358,54 @@ function selectWeightedWords(
   return shuffleFisherYates(selected);
 }
 
-function buildLabel(
-  word: TopicWord,
-  direction: "word-to-meaning" | "meaning-to-word",
-): string {
-  return direction === "word-to-meaning" ? word.meaning : word.word;
-}
-
-function buildPrompt(
-  word: TopicWord,
-  direction: "word-to-meaning" | "meaning-to-word",
-): string {
-  return direction === "word-to-meaning" ? word.word : word.meaning;
-}
-
-function pickDistractorLabels(
+function pickDistractorOptions(
   currentWord: TopicWord,
   allWords: TopicWord[],
-  direction: "word-to-meaning" | "meaning-to-word",
   count = 3,
 ): string[] {
-  const correctLabel = buildLabel(currentWord, direction);
-  const seen = new Set<string>([correctLabel]);
-
-  const labels: string[] = [];
+  const correct = currentWord.word.trim();
+  const seen = new Set<string>([correct]);
+  const options: string[] = [];
 
   for (const word of shuffleFisherYates(allWords)) {
     if (word.id === currentWord.id) continue;
 
-    const label = buildLabel(word, direction)?.trim();
-    if (!label) continue;
-    if (seen.has(label)) continue;
+    const candidate = word.word?.trim();
+    if (!candidate) continue;
+    if (seen.has(candidate)) continue;
 
-    seen.add(label);
-    labels.push(label);
+    seen.add(candidate);
+    options.push(candidate);
 
-    if (labels.length >= count) break;
+    if (options.length >= count) break;
   }
 
-  return labels;
+  return options;
 }
 
-function buildTopicQuiz(
+function buildTopicAudioQuiz(
   selectedWords: TopicWord[],
   allWords: TopicWord[],
-): QuizQuestion[] {
+): AudioQuizQuestion[] {
   return shuffleFisherYates(selectedWords).map((word) => {
-    const direction =
-      Math.random() > 0.5 ? "word-to-meaning" : "meaning-to-word";
+    const audioKey = resolveAudioKey(word);
 
-    const correctLabel = buildLabel(word, direction);
-    const prompt = buildPrompt(word, direction);
+    if (!audioKey) {
+      throw createError({
+        statusCode: 500,
+        statusMessage: `Missing audio for word ${word.id}`,
+      });
+    }
 
-    const distractors = pickDistractorLabels(word, allWords, direction, 3);
-
-    const options = shuffleFisherYates([correctLabel, ...distractors]);
+    const distractors = pickDistractorOptions(word, allWords, 3);
+    const options = shuffleFisherYates([word.word, ...distractors]);
 
     return {
+      type: "audio" as const,
       wordId: word.id,
-      prompt,
+      audioKey,
       options,
-      correctIndex: options.indexOf(correctLabel),
+      correctIndex: options.indexOf(word.word),
     };
   });
 }
@@ -372,7 +414,7 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  await enforceRateLimit(`rl:topic-quiz:${userId}`, 20, 60); // gentler ratelimit
+  await enforceRateLimit(`rl:topic-audio-quiz:${userId}`, 20, 60);
 
   const topicSlug = getRouterParam(event, "topicSlug");
 
@@ -389,28 +431,67 @@ export default defineEventHandler(async (event) => {
   if (!allWords.length) {
     throw createError({
       statusCode: 404,
-      statusMessage: "No quiz words found for topic",
+      statusMessage: "No topic words found for topic",
     });
   }
 
   const allWordIds = allWords.map((w) => w.id);
-  const progressMap = await loadProgressMap(userId, allWordIds);
 
-  const selectedWords = selectWeightedWords(
-    allWords,
-    progressMap,
-    Math.min(TOTAL_QUESTIONS, allWords.length),
+  let accessibleWords = allWords;
+
+  if (!freeTopics.has(topicSlug)) {
+    const entitlement = (await getUserEntitlement(
+      userId,
+    )) as Entitlement | null;
+    const hasFullAccess = canAccessTopicWord(true, entitlement, topicSlug);
+
+    if (!hasFullAccess) {
+      const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
+      const unlockedWordIds = await getUnlockedWordIdsForUser(
+        userId,
+        allWordIds,
+      );
+      const accessibleWordIdSet = new Set([
+        ...freePreviewIds,
+        ...unlockedWordIds,
+      ]);
+
+      accessibleWords = allWords.filter((word) =>
+        accessibleWordIdSet.has(word.id),
+      );
+    }
+  }
+
+  const accessibleAudioWords = accessibleWords.filter(
+    (word) => !!resolveAudioKey(word),
   );
 
-  const questions = buildTopicQuiz(selectedWords, allWords);
+  if (!accessibleAudioWords.length) {
+    throw createError({
+      statusCode: 404,
+      statusMessage: "No audio quiz words available for topic",
+    });
+  }
 
-  return <TopicQuizResponse>{
+  const accessibleAudioWordIds = accessibleAudioWords.map((w) => w.id);
+  const fullProgressMap = await loadProgressMap(userId, accessibleAudioWordIds);
+
+  const selectedWords = selectWeightedWords(
+    accessibleAudioWords,
+    fullProgressMap,
+    Math.min(TOTAL_QUESTIONS, accessibleAudioWords.length),
+  );
+
+  const questions = buildTopicAudioQuiz(selectedWords, accessibleAudioWords);
+  const selectedWordIds = selectedWords.map((w) => w.id);
+
+  return <TopicAudioQuizResponse>{
     topic: topicData.topic,
     title: topicData.title,
     description: topicData.description,
     totalQuestions: questions.length,
     questions,
-    progressMap,
+    progressMap: pickProgressMap(fullProgressMap, selectedWordIds),
     wordsById: buildWordsById(selectedWords),
   };
 });

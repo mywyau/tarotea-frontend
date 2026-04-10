@@ -16,18 +16,27 @@ const {
 
 const isComingSoon = (level: any) => level.comingSoon === true
 
+// const canEnterLevel = (level: any) => {
+
+//   if (isLoggedOut.value) return false
+
+//   if (isComingSoon(level)) return false
+
+//   if (isFreeLevel(level.number)) return true
+
+//   // 🔒 Paid levels require login
+//   if (!isLoggedIn.value) return false
+
+//   return canAccessLevel(isLoggedIn.value, entitlement.value!)
+// }
+
+
 const canEnterLevel = (level: any) => {
 
-  if (isLoggedOut.value) return false
-
   if (isComingSoon(level)) return false
-
-  if (isFreeLevel(level.number)) return true
-
-  // 🔒 Paid levels require login
-  if (!isLoggedIn.value) return false
-
-  return canAccessLevel(isLoggedIn.value, entitlement.value!)
+  
+  // 🔒 Exercises require login
+  if (isLoggedIn.value) { return true } else { return false }
 }
 
 </script>

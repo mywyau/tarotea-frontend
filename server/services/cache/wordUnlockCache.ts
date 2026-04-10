@@ -71,6 +71,7 @@ export async function getUnlockedWordIdsForUser(
     new Set(wordIds.map((wordId) => wordId.trim()).filter(Boolean))
   )
 
+  console.log(`unlocked words: `, trimmedWordIds)
   if (trimmedWordIds.length === 0) {
     return []
   }

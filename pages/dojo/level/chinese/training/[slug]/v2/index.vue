@@ -82,13 +82,16 @@ const {
 } = await useAsyncData(
   () => `chinese-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>('/api/typing/levels/v2/start', {
-      query: {
-        scope: 'level',
-        slug: slug.value,
-        variant: 'chinese',
-      },
-    }),
+    authedFetch<DojoStartResponse>(
+      // '/api/typing/levels/v2/start',
+      '/api/typing/levels/v2/start-v2',
+      {
+        query: {
+          scope: 'level',
+          slug: slug.value,
+          variant: 'chinese',
+        },
+      }),
   {
     watch: [slug],
     server: false,
@@ -527,7 +530,7 @@ watch(
 
 <template>
   <main class="mx-auto max-w-xl px-6 py-12">
-    
+
     <div class="mb-6">
       <BackLink />
     </div>

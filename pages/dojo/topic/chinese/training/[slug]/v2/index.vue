@@ -77,13 +77,16 @@ const {
 } = await useAsyncData(
   () => `topic-chinese-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>('/api/typing/topic/v2/start', {
-      query: {
-        scope: 'topic',
-        slug: slug.value,
-        variant: 'chinese',
-      },
-    }),
+    authedFetch<DojoStartResponse>(
+      // '/api/typing/topic/v2/start',
+      '/api/typing/topic/v2/start-v2',
+      {
+        query: {
+          scope: 'topic',
+          slug: slug.value,
+          variant: 'chinese',
+        },
+      }),
   {
     watch: [slug],
     server: false,

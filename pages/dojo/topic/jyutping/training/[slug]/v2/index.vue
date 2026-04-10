@@ -94,13 +94,16 @@ const {
 } = await useAsyncData(
   () => `topic-jyutping-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>('/api/typing/topic/v2/start', {
-      query: {
-        scope: 'topic',
-        slug: slug.value,
-        variant: 'jyutping',
-      },
-    }),
+    authedFetch<DojoStartResponse>(
+      // '/api/typing/topic/v2/start',
+      '/api/typing/topic/v2/start-v2',
+      {
+        query: {
+          scope: 'topic',
+          slug: slug.value,
+          variant: 'jyutping',
+        },
+      }),
   {
     watch: [slug],
     server: false,
@@ -600,7 +603,7 @@ watch(
 
 <template>
   <main class="mx-auto max-w-xl px-6 pt-12 pb-28 sm:pb-12">
-    
+
     <div class="mb-6">
       <BackLink />
     </div>

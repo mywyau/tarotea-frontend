@@ -1,10 +1,16 @@
 // server/api/topic/quiz/[topicSlug].get.ts
 
+import { getUserEntitlement } from "#imports";
 import { createError, getRouterParam } from "h3";
+import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
+import { Entitlement } from "~/types/auth/entitlements";
+import { shuffleFisherYates } from "~/utils/shuffle";
+import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
 
 type TopicWord = {
   id: string;
@@ -43,21 +49,8 @@ type TopicQuizResponse = {
 };
 
 const TOTAL_QUESTIONS = 20;
-
-// Tune these to match the feel you want
-const WEAKEST_QUESTION_RATIO = 0.8; // 80% of quiz comes from weakest pool
-const WEAKEST_POOL_RATIO = 0.8; // weakest pool = bottom 80% of topic words by XP
-
-function shuffleFisherYates<T>(input: T[]): T[] {
-  const arr = [...input];
-
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-
-  return arr;
-}
+const WEAKEST_QUESTION_RATIO = 0.9;
+const WEAKEST_POOL_RATIO = 0.9;
 
 function parseCachedWordProgress(raw: unknown): WordProgress | null {
   if (!raw || typeof raw !== "string") return null;
@@ -356,7 +349,6 @@ function buildTopicQuiz(
     const prompt = buildPrompt(word, direction);
 
     const distractors = pickDistractorLabels(word, allWords, direction, 3);
-
     const options = shuffleFisherYates([correctLabel, ...distractors]);
 
     return {
@@ -372,7 +364,7 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  await enforceRateLimit(`rl:topic-quiz:${userId}`, 20, 60); // gentler ratelimit
+  await enforceRateLimit(`rl:topic-quiz:${userId}`, 20, 60);
 
   const topicSlug = getRouterParam(event, "topicSlug");
 
@@ -384,6 +376,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const topicData = await loadTopicData(topicSlug);
+
   const allWords = flattenTopicWords(topicData);
 
   if (!allWords.length) {
@@ -394,15 +387,49 @@ export default defineEventHandler(async (event) => {
   }
 
   const allWordIds = allWords.map((w) => w.id);
-  const progressMap = await loadProgressMap(userId, allWordIds);
+
+  let accessibleWords = allWords;
+
+  if (!freeTopics.has(topicSlug)) {
+    const entitlement = (await getUserEntitlement(
+      userId,
+    )) as Entitlement | null;
+    const hasFullAccess = canAccessTopicWord(true, entitlement, topicSlug);
+
+    if (!hasFullAccess) {
+      const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
+      const unlockedWordIds = await getUnlockedWordIdsForUser(
+        userId,
+        allWordIds,
+      );
+      const accessibleWordIdSet = new Set([
+        ...freePreviewIds,
+        ...unlockedWordIds,
+      ]);
+
+      accessibleWords = allWords.filter((word) =>
+        accessibleWordIdSet.has(word.id),
+      );
+    }
+  }
+
+  if (!accessibleWords.length) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "No quiz words available for this topic",
+    });
+  }
+
+  const accessibleWordIds = accessibleWords.map((w) => w.id);
+  const progressMap = await loadProgressMap(userId, accessibleWordIds);
 
   const selectedWords = selectWeightedWords(
-    allWords,
+    accessibleWords,
     progressMap,
-    Math.min(TOTAL_QUESTIONS, allWords.length),
+    Math.min(TOTAL_QUESTIONS, accessibleWords.length),
   );
 
-  const questions = buildTopicQuiz(selectedWords, allWords);
+  const questions = buildTopicQuiz(selectedWords, accessibleWords);
 
   return <TopicQuizResponse>{
     topic: topicData.topic,

@@ -6,10 +6,9 @@ definePageMeta({
 })
 
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
-import { canAccessLevelWord } from '~/utils/levels/permissions'
 
 const route = useRoute()
-// const slug = computed(() => route.params.slug as string | undefined)
+
 const slug = route.params.slug as string
 
 // we check the path slug
@@ -20,17 +19,15 @@ if (!isLevelId(slug)) {
 const levelNumber: number = levelIdToNumbers(slug)
 
 const {
-  state,
   authReady,
   isLoggedIn,
-  user,
-  entitlement,
-  isCanceling,
-  currentPeriodEnd,
-  resolve,
 } = useMeStateV2()
 
-const canEnterLevel = canAccessLevelWord(levelNumber, entitlement.value!)
+// const canEnterLevel = canAccessLevelWord(levelNumber, entitlement.value!)
+
+const canEnterLevel = () => {
+  if (isLoggedIn.value) { return true } else { return false }
+}
 
 const tips = [
   "XP is awarded when you complete the quiz.",
@@ -40,7 +37,7 @@ const tips = [
   "Questions are randomized every session.",
   "Each word has a maximum of 500 XP.",
   "Streaks are tracked separately for each word.",
-  "Earn at least 5 XP for every correct answer.",  
+  "Earn at least 5 XP for every correct answer.",
   "Wrong answers cost 12 XP and reset your streak for that word.",
   "Streaks cap at 5 correct answers in a row for a given word.",
   "Streak XP: 5 → 7 → 9 → 13 → 15."
@@ -134,7 +131,6 @@ watchEffect(() => {
 </template>
 
 <style scoped>
-
 .level-heading {
   font-size: 1.3rem;
   text-transform: uppercase;
