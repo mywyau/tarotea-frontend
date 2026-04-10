@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { xpNeededForOneTaroKey } from '~/config/unlock/unlock-config'
+
 definePageMeta({
   ssr: true,
-  // middleware: ['coming-soon'],
   middleware: ['logged-in'],
 })
 
@@ -28,6 +30,19 @@ const word = ref<null | {
 }>(null)
 
 const showUnlockPanel = ref(false)
+
+const xpUntilNextKey = computed(() => {
+  const totalXp = unlockSummary.value.totalXp
+  const remainder = totalXp % xpNeededForOneTaroKey
+
+  return remainder === 0
+    ? xpNeededForOneTaroKey
+    : xpNeededForOneTaroKey - remainder
+})
+
+const nextKeyAtXp = computed(() => {
+  return unlockSummary.value.totalXp + xpUntilNextKey.value
+})
 
 function openUnlockPanel() {
   if (loading.value) return
@@ -101,11 +116,10 @@ async function unlockWord() {
 }
 
 onMounted(loadData)
-
 </script>
 
 <template>
-  <main class="unlock-page max-w-2xl mx-auto px-4 py-10 sm:py-12 space-y-8">
+  <main class="unlock-page max-w-3xl mx-auto px-4 py-10 sm:py-12 space-y-8">
 
     <BackLink :to="`/level/${slug}/v2`" />
 
@@ -125,8 +139,13 @@ onMounted(loadData)
 
     <section class="stats-grid">
       <div class="stat-card page-card rounded-xl stat-0">
-        <p class="stat-label">XP</p>
+        <p class="stat-label">Total XP</p>
         <p class="stat-value font-bold">{{ unlockSummary.totalXp }}</p>
+      </div>
+
+      <div class="stat-card page-card rounded-lg stat-3">
+        <p class="stat-label">XP until next key</p>
+        <p class="stat-value font-bold">{{ xpUntilNextKey }}</p>
       </div>
 
       <div class="stat-card page-card rounded-lg stat-1">
@@ -163,6 +182,17 @@ onMounted(loadData)
 
       <div class="space-y-2 text-sm text-gray-700">
         <p>This tile will be added to your permanent study pool.</p>
+      </div>
+
+      <div class="space-y-2 text-sm text-gray-700">
+        <p>
+          You get 1 key every
+          <span class="font-semibold">{{ xpNeededForOneTaroKey }} xp</span>.
+        </p>
+        <p class="text-gray-600">
+          Your next TaroKey unlocks in
+          <span class="font-semibold">{{ xpUntilNextKey }} xp</span>. At <span class="font-semibold">{{ nextKeyAtXp }} xp</span>.
+        </p>
       </div>
 
       <div class="pt-2">
@@ -278,7 +308,7 @@ onMounted(loadData)
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -371,6 +401,10 @@ onMounted(loadData)
 
 .stat-2 {
   background: rgba(244, 205, 39, 0.35);
+}
+
+.stat-3 {
+  background: rgba(111, 92, 202, 0.35);
 }
 
 .confirm-btn-blush {
