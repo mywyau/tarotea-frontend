@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { xpNeededForOneTaroKey } from '~/config/unlock/unlock-config'
+
 definePageMeta({
   ssr: true,
-  // middleware: ['coming-soon'],
   middleware: ['logged-in'],
 })
 
@@ -29,6 +31,19 @@ const word = ref<null | {
 
 const showUnlockPanel = ref(false)
 
+const xpUntilNextKey = computed(() => {
+  const totalXp = unlockSummary.value.totalXp
+  const remainder = totalXp % xpNeededForOneTaroKey
+
+  return remainder === 0
+    ? xpNeededForOneTaroKey
+    : xpNeededForOneTaroKey - remainder
+})
+
+const nextKeyAtXp = computed(() => {
+  return unlockSummary.value.totalXp + xpUntilNextKey.value
+})
+
 function openUnlockPanel() {
   if (loading.value) return
   if (unlockSummary.value.creditsAvailable < 1) return
@@ -44,8 +59,8 @@ function closeUnlockPanel() {
   errorMessage.value = ''
 }
 
-const wordApiPath: string = `/api/words/${wordId}`
-const wordPagePath: string = `/topic/word/${slug}/${wordId}`
+const wordApiPath = `/api/words/${wordId}`
+const wordPagePath = `/topic/word/${slug}/${wordId}`
 
 async function loadData() {
   try {
@@ -100,18 +115,16 @@ async function unlockWord() {
 }
 
 onMounted(loadData)
-
 </script>
 
 <template>
-  <main class="unlock-page max-w-2xl mx-auto px-4 py-10 sm:py-12 space-y-8">
-
+  <main class="unlock-page max-w-3xl mx-auto px-4 py-10 sm:py-12 space-y-8">
     <BackLink :to="`/topic/words/${slug}/v2`" />
 
     <header class="rounded-lg header-card">
       <h1 class="page-heading">Unlock word</h1>
       <p class="page-subheading mt-2">
-        Use <span class="font-bold"> 1 </span> TaroKey to access this Tile permanently.
+        Use <span class="font-bold">1</span> TaroKey to access this Tile permanently.
       </p>
     </header>
 
@@ -124,8 +137,13 @@ onMounted(loadData)
 
     <section class="stats-grid">
       <div class="stat-card page-card rounded-xl stat-0">
-        <p class="stat-label">XP</p>
+        <p class="stat-label">Total XP</p>
         <p class="stat-value font-bold">{{ unlockSummary.totalXp }}</p>
+      </div>
+
+      <div class="stat-card page-card rounded-lg stat-3">
+        <p class="stat-label">XP until next key</p>
+        <p class="stat-value font-bold">{{ xpUntilNextKey }}</p>
       </div>
 
       <div class="stat-card page-card rounded-lg stat-1">
@@ -143,8 +161,10 @@ onMounted(loadData)
       {{ errorMessage }}
     </div>
 
-    <section class="rounded-lg border p-5 space-y-4"
-      style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);">
+    <section
+      class="rounded-lg border p-5 space-y-4"
+      style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);"
+    >
       <div class="flex items-start justify-between gap-4">
         <div>
           <h2 class="text-base font-semibold text-gray-900">Unlock tile</h2>
@@ -164,10 +184,26 @@ onMounted(loadData)
         <p>This tile will be added to your permanent study pool.</p>
       </div>
 
+      <div class="space-y-2 text-sm text-gray-700">
+        <p>
+          You get 1 key every
+          <span class="font-semibold">{{ xpNeededForOneTaroKey }} xp</span>.
+        </p>
+        <p class="text-gray-600">
+          Your next TaroKey unlocks in
+          <span class="font-semibold">{{ xpUntilNextKey }} xp</span>.
+          At <span class="font-semibold">{{ nextKeyAtXp }} xp</span>.
+        </p>
+      </div>
+
       <div class="pt-2">
-        <button v-if="!showUnlockPanel" type="button"
+        <button
+          v-if="!showUnlockPanel"
+          type="button"
           class="w-full rounded-lg py-3 font-semibold border border-black/10 text-gray-900 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="loading || unlockSummary.creditsAvailable < 1" @click="openUnlockPanel">
+          :disabled="loading || unlockSummary.creditsAvailable < 1"
+          @click="openUnlockPanel"
+        >
           Show unlock options
         </button>
 
@@ -186,20 +222,29 @@ onMounted(loadData)
               </p>
             </div>
 
-            <div v-if="errorMessage" class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+            <div
+              v-if="errorMessage"
+              class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+            >
               {{ errorMessage }}
             </div>
 
             <div class="flex flex-col gap-2 sm:flex-row">
-              <button type="button"
-                class="confirm-btn-blush w-full rounded-lg py-3 font-semibold hover:brightness-110 hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="loading || unlockSummary.creditsAvailable < 1" @click="unlockWord">
+              <button
+                type="button"
+                class="confirm-btn-blush w-full rounded-lg py-3 font-semibold hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="loading || unlockSummary.creditsAvailable < 1"
+                @click="unlockWord"
+              >
                 {{ loading ? 'Unlocking…' : 'Confirm unlock' }}
               </button>
 
-              <button type="button"
+              <button
+                type="button"
                 class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
-                :disabled="loading" @click="closeUnlockPanel">
+                :disabled="loading"
+                @click="closeUnlockPanel"
+              >
                 Cancel
               </button>
             </div>
@@ -211,7 +256,6 @@ onMounted(loadData)
         </p>
       </div>
     </section>
-
   </main>
 </template>
 
@@ -246,11 +290,6 @@ onMounted(loadData)
   color: rgba(17, 24, 39, 0.65);
 }
 
-.word-card {
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
-}
-
 .word-label {
   font-size: 0.72rem;
   text-transform: uppercase;
@@ -277,7 +316,7 @@ onMounted(loadData)
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
@@ -296,39 +335,6 @@ onMounted(loadData)
   margin-top: 0.45rem;
   font-size: 1.05rem;
   color: rgba(0, 0, 0);
-}
-
-.action-card {
-  padding-top: 1.4rem;
-  padding-bottom: 1.4rem;
-}
-
-.action-text {
-  font-size: 0.9rem;
-  color: rgba(17, 24, 39, 0.82);
-}
-
-.unlock-button {
-  border: 0;
-  border-radius: 999px;
-  padding: 0.8rem 1.2rem;
-  min-width: 12rem;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  background: rgba(17, 24, 39, 0.96);
-  color: white;
-  cursor: pointer;
-  transition: transform 0.14s ease, opacity 0.14s ease;
-}
-
-.unlock-button:hover:not(:disabled) {
-  transform: translateY(-1px);
-}
-
-.unlock-button:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
 }
 
 .helper-text {
@@ -353,11 +359,6 @@ onMounted(loadData)
   .word-text {
     font-size: 1.8rem;
   }
-
-  .unlock-button {
-    width: 100%;
-    min-width: 0;
-  }
 }
 
 .stat-0 {
@@ -370,6 +371,10 @@ onMounted(loadData)
 
 .stat-2 {
   background: rgba(244, 205, 39, 0.35);
+}
+
+.stat-3 {
+  background: rgba(111, 92, 202, 0.35);
 }
 
 .confirm-btn-blush {
