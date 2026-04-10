@@ -1,8 +1,9 @@
 <script setup lang="ts">
 
 definePageMeta({
-    middleware: ['topic-word-access-v2'],
     ssr: true,
+    // middleware: ['topic-word-access-v2'],
+    middleware: ["word-access"]
 })
 
 import { masteryXp } from '~/utils/xp/helpers'
@@ -179,20 +180,23 @@ watchEffect(() => {
 
             <div class="flex items-center justify-between gap-4">
                 <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`"
-                    class="text-6xl text-gray-800 hover:text-blue-500 hover:brightness-125 transition" aria-label="Previous word">
+                    class="text-6xl text-gray-800 hover:text-blue-500 hover:brightness-125 transition"
+                    aria-label="Previous word">
                     ‹
                 </NuxtLink>
 
                 <div v-else class="w-6" />
 
                 <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`"
-                    class="text-6xl text-gray-800 hover:text-blue-500 hover:brightness-125 transition" aria-label="Next word">
+                    class="text-6xl text-gray-800 hover:text-blue-500 hover:brightness-125 transition"
+                    aria-label="Next word">
                     ›
                 </NuxtLink>
             </div>
 
             <div class="flex items-center justify-center gap-3">
-                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate" size="lg" />
+                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`"
+                    :playback-rate="playbackRate" size="lg" />
 
                 <NuxtLink :to="`/writing/${topic}/vocab/${word.id}`"
                     class="bg-white hover:bg-gray-50 inline-flex items-center justify-center text-base px-4 py-3 rounded-md shadow-sm transition border">

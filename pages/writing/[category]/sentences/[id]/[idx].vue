@@ -3,7 +3,8 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
 
 definePageMeta({
     ssr: false,
-    middleware: ["writing-access"]
+    // middleware: ["writing-access"],
+    middleware: ["word-access"]
 })
 
 type ExampleSentence = {
