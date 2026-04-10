@@ -178,16 +178,16 @@ async function loadWriter(char: string) {
         writer.value = HanziWriter.create(writerHost.value, char, {
             width: writerSize.value,
             height: writerSize.value,
-            padding: writerPadding.value,
+            padding: writerSize.value < 260 ? 12 : 20,
             showOutline: true,
             showCharacter: false,
-            outlineColor: "#d1d5db",
-            strokeColor: "#111827",
+            // outlineColor: "#d6a3d1",
+            // strokeColor: "#7e93ff",
             strokeAnimationSpeed: 1,
             strokeHighlightSpeed: 2,
             delayBetweenStrokes: 250,
             delayBetweenLoops: 1200,
-            drawingWidth: drawingWidth.value,
+            drawingWidth: writerSize.value < 260 ? 14 : 18,
             onLoadCharDataSuccess: () => {
                 isReady.value = true
                 isLoading.value = false
@@ -206,6 +206,7 @@ async function loadWriter(char: string) {
                 }
             },
         })
+
     } catch (err) {
         console.error(err)
         unsupportedCharacter.value = null
@@ -232,48 +233,47 @@ watch(
 )
 
 onMounted(() => {
-  ready.value = true
+    ready.value = true
 })
 </script>
 
 <template>
-    <div v-if="ready" class="mx-auto max-w-4xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
+    <div v-if="ready" class="sentence-page mx-auto max-w-4xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
         <div class="mb-4 sm:mb-6">
             <BackLink />
         </div>
 
-        <div class="mb-4 sm:mb-6">
-            <p class="text-xs font-medium uppercase tracking-wide text-gray-500 sm:text-sm">
+        <header class="header-card rounded-2xl p-4 sm:p-6">
+            <p class="page-eyebrow text-xs font-medium uppercase tracking-wide sm:text-sm">
                 Writing
             </p>
-            <h1 class="mt-1 text-2xl font-bold text-gray-900 sm:mt-2 sm:text-3xl">
+            <h1 class="page-heading mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
                 Follow the brush strokes
             </h1>
-            <p class="mt-2 max-w-3xl text-sm leading-5 text-gray-600 sm:mt-3 sm:leading-6">
+            <p class="page-subheading mt-2 max-w-3xl text-sm leading-5 sm:mt-3 sm:leading-6">
                 Watch the stroke order for this sentence and move through each character one by one.
             </p>
-        </div>
+        </header>
 
-        <div class="grid gap-4 sm:gap-6">
-            <section class="rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:p-5">
-                <div v-if="pending" class="text-sm text-gray-500">
+        <div class="mt-4 grid gap-4 sm:mt-6 sm:gap-6">
+            <section class="page-card rounded-2xl p-3 shadow-sm sm:p-5">
+                <div v-if="pending" class="status-text">
                     Loading sentence...
                 </div>
 
-                <div v-else-if="error || !word" class="text-sm text-red-600">
+                <div v-else-if="error || !word" class="status-text status-error">
                     Could not load this word.
                 </div>
 
-                <div v-else-if="!selectedExample" class="text-sm text-red-600">
+                <div v-else-if="!selectedExample" class="status-text status-error">
                     Sentence not found.
                 </div>
 
                 <template v-else>
-                    <div class="mt-3 grid gap-4 sm:mt-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
-                        <!-- Left side -->
+                    <div class="mt-3 grid gap-4 sm:mt-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
                         <div class="space-y-4 sm:space-y-5">
-                            <div class="rounded-xl bg-gray-50 px-3 py-3 sm:px-4">
-                                <p class="text-xs text-gray-500 sm:text-sm">Sentence</p>
+                            <div class="content-card rounded-xl px-3 py-3 sm:px-4">
+                                <p class="card-label text-xs sm:text-sm">Sentence</p>
                                 <p class="mt-1 break-words text-xl font-bold text-gray-900 sm:text-2xl">
                                     {{ selectedExample.sentence }}
                                 </p>
@@ -286,17 +286,17 @@ onMounted(() => {
                             </div>
 
                             <div
-                                class="flex min-h-[260px] sm:min-h-[320px] items-center justify-center rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-3 sm:p-4">
-                                <div v-if="loadError" class="max-w-sm text-center text-sm text-red-600">
+                                class="writer-card flex min-h-[260px] items-center justify-center rounded-2xl p-3 sm:min-h-[320px] sm:p-4">
+                                <div v-if="loadError" class="max-w-sm text-center text-sm status-error">
                                     {{ loadError }}
                                 </div>
 
-                                <div v-else-if="unsupportedCharacter"
-                                    class="max-w-sm text-center text-sm text-amber-700">
-                                    We do not have stroke data for “{{ unsupportedCharacter }}” yet, so writing practice is not available for this character.
+                                <div v-else-if="unsupportedCharacter" class="max-w-sm text-center text-sm status-warn">
+                                    We do not have stroke data for “{{ unsupportedCharacter }}” yet, so writing
+                                    practice is not available for this character.
                                 </div>
 
-                                <div v-else-if="!currentCharacter" class="max-w-sm text-center text-sm text-gray-500">
+                                <div v-else-if="!currentCharacter" class="max-w-sm text-center text-sm status-text">
                                     No Chinese character available for this sentence.
                                 </div>
 
@@ -305,10 +305,9 @@ onMounted(() => {
                             </div>
                         </div>
 
-                        <!-- Right side panel -->
-                        <aside class="h-fit rounded-2xl border border-gray-200 bg-white p-3 shadow-sm sm:p-4">
+                        <aside class="side-card h-fit rounded-2xl p-3 shadow-sm sm:p-4">
                             <div class="mb-3 sm:mb-4">
-                                <p class="text-xs font-medium text-gray-500 sm:text-sm">Current character</p>
+                                <p class="card-label text-xs font-medium sm:text-sm">Current character</p>
                                 <p class="mt-1 text-2xl font-bold text-gray-900 sm:text-3xl">
                                     {{ currentCharacter || "—" }}
                                 </p>
@@ -319,52 +318,52 @@ onMounted(() => {
 
                             <div class="space-y-2.5 sm:space-y-3">
                                 <button type="button"
-                                    class="w-full rounded-xl border border-gray-900 bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:opacity-90 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    class="btn-primary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="!isReady" @click="animateCurrentCharacter">
                                     Play strokes
                                 </button>
 
                                 <button type="button"
-                                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="!isReady" @click="loopAnimation">
                                     Loop animation
                                 </button>
 
                                 <button type="button"
-                                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="!isReady || !selectedCharacters.length" @click="animateWholeSentence">
                                     Play whole sentence
                                 </button>
                             </div>
 
-                            <div class="my-4 border-t border-gray-200 sm:my-5"></div>
+                            <div class="section-divider my-4 sm:my-5"></div>
 
                             <div class="space-y-2.5 sm:space-y-3">
                                 <button type="button"
-                                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="currentCharIndex === 0" @click="previousCharacter">
                                     Previous character
                                 </button>
 
                                 <button type="button"
-                                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="currentCharIndex >= selectedCharacters.length - 1"
                                     @click="nextCharacter">
                                     Next character
                                 </button>
                             </div>
 
-                            <div class="my-4 border-t border-gray-200 sm:my-5"></div>
+                            <div class="section-divider my-4 sm:my-5"></div>
 
                             <div class="space-y-2.5 sm:space-y-3">
                                 <button type="button"
-                                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    class="btn-tertiary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="!isReady" @click="showOnlyOutline">
                                     Outline only
                                 </button>
 
                                 <button type="button"
-                                    class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-medium text-gray-800 transition hover:border-gray-900 disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    class="btn-tertiary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="!isReady" @click="showCharacterAndOutline">
                                     Show full character
                                 </button>
@@ -376,3 +375,261 @@ onMounted(() => {
         </div>
     </div>
 </template>
+
+<!-- <style scoped>
+.sentence-page {
+    --pink: #eab8e4;
+    --purple: #d6a3d1;
+    --blue: #a8cae0;
+    --yellow: #f4cd27;
+    --blush: #f6e1e1;
+}
+
+.header-card {
+    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.page-card {
+    background: rgba(255, 255, 255, 0.58);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.content-card {
+    background: rgba(168, 202, 224, 0.22);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.writer-card {
+    background: rgba(246, 225, 225, 0.38);
+    border: 1px dashed rgba(17, 24, 39, 0.18);
+}
+
+.side-card {
+    background: rgba(255, 255, 255, 0.62);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    backdrop-filter: blur(8px);
+}
+
+.page-eyebrow {
+    color: rgba(17, 24, 39, 0.62);
+}
+
+.page-heading {
+    color: rgba(0, 0, 0);
+}
+
+.page-subheading {
+    color: rgba(17, 24, 39, 0.72);
+}
+
+.card-label {
+    color: rgba(17, 24, 39, 0.62);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.section-divider {
+    border-top: 1px solid rgba(17, 24, 39, 0.1);
+}
+
+.status-text {
+    color: rgba(17, 24, 39, 0.68);
+}
+
+.status-error {
+    color: rgb(185, 28, 28);
+}
+
+.status-warn {
+    color: rgb(146, 64, 14);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-tertiary {
+    border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.btn-primary {
+    background: rgb(126, 147, 255);
+    color: white;
+    box-shadow: 0 10px 22px rgba(126, 147, 255, 0.22);
+}
+
+.btn-primary:hover:not(:disabled) {
+    filter: brightness(1.05);
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: rgba(168, 202, 224, 0.38);
+    color: rgba(17, 24, 39, 0.92);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background: rgba(214, 163, 209, 0.30);
+    transform: translateY(-1px);
+}
+
+.btn-tertiary {
+    background: rgba(246, 225, 225, 0.62);
+    color: rgba(17, 24, 39, 0.92);
+}
+
+.btn-tertiary:hover:not(:disabled) {
+    background: rgba(234, 184, 228, 0.26);
+    transform: translateY(-1px);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-tertiary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+@media (max-width: 640px) {
+    .header-card,
+    .page-card,
+    .side-card {
+        backdrop-filter: blur(6px);
+    }
+}
+</style> -->
+<style scoped>
+.sentence-page {
+  --pink: #eab8e4;
+  --purple: #d6a3d1;
+  --blue: #a8cae0;
+  --yellow: #f4cd27;
+  --blush: #f6e1e1;
+  --ink: #1f2937;
+  --ink-strong: #111827;
+}
+
+.header-card {
+  background: rgba(234, 184, 228, 0.32);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  backdrop-filter: blur(8px);
+  color: var(--ink-strong);
+}
+
+.page-heading {
+  color: var(--ink-strong);
+}
+
+.page-subheading {
+  color: rgba(31, 41, 55, 0.82);
+}
+
+.page-eyebrow {
+  color: rgba(31, 41, 55, 0.62);
+}
+
+.page-card {
+  background: rgba(255, 255, 255, 0.36);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
+  backdrop-filter: blur(10px);
+}
+
+.content-card {
+  background: rgba(168, 202, 224, 0.24);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  color: var(--ink-strong);
+}
+
+.writer-card {
+  background: rgba(246, 225, 225, 0.42);
+  border: 1px dashed rgba(17, 24, 39, 0.18);
+}
+
+.side-card {
+  background: rgba(255, 255, 255, 0.42);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+  backdrop-filter: blur(8px);
+  color: var(--ink-strong);
+}
+
+.card-label {
+  color: rgba(31, 41, 55, 0.62);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.section-divider {
+  border-top: 1px solid rgba(17, 24, 39, 0.1);
+}
+
+.status-text {
+  color: rgba(31, 41, 55, 0.68);
+}
+
+.status-error {
+  color: rgb(185, 28, 28);
+}
+
+.status-warn {
+  color: rgb(146, 64, 14);
+}
+
+.btn-primary,
+.btn-secondary,
+.btn-tertiary {
+  border: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.btn-primary {
+  background: rgb(126, 147, 255);
+  color: white;
+  box-shadow: 0 10px 22px rgba(126, 147, 255, 0.22);
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: rgba(168, 202, 224, 0.38);
+  color: var(--ink-strong);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(214, 163, 209, 0.34);
+  transform: translateY(-1px);
+}
+
+.btn-tertiary {
+  background: rgba(246, 225, 225, 0.66);
+  color: var(--ink-strong);
+}
+
+.btn-tertiary:hover:not(:disabled) {
+  background: rgba(234, 184, 228, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-primary:disabled,
+.btn-secondary:disabled,
+.btn-tertiary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (max-width: 640px) {
+  .header-card,
+  .page-card,
+  .side-card,
+  .content-card,
+  .writer-card {
+    backdrop-filter: blur(6px);
+  }
+}
+</style>
