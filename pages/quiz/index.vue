@@ -18,13 +18,18 @@ onMounted(async () => {
   }
 })
 
+// const canEnterLevel = (level: any) => {
+
+//   if (isComingSoon(level)) return false
+
+//   if (isFreeLevel(level.number)) return true
+
+//   return canAccessLevelQuiz(level, entitlement.value!)
+// }
+
 const canEnterLevel = (level: any) => {
 
-  if (isComingSoon(level)) return false
-
-  if (isFreeLevel(level.number)) return true
-
-  return canAccessLevelQuiz(level, entitlement.value!)
+  return true
 }
 
 </script>

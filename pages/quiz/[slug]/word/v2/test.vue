@@ -210,10 +210,19 @@ const initialProgressMap = ref<Record<string, { xp: number; streak: number }>>({
 
 const { getAccessToken } = await useAuth()
 
+const token = await getAccessToken()
+
+const { authReady, isLoggedIn } = useMeStateV2() // for now just to prevent hydration redirect jitters
+
 const { data, error } = await useFetch<LevelData>(
-    () => `/api/vocab-quiz/${slug.value}`,
+    () =>
+        // `/api/vocab-quiz/${slug.value}`,
+        `/api/vocab-quiz/v2/${slug.value}`,
     {
-        key: () => `vocab-quiz-${slug.value}`,
+        key: () => `vocab-quiz-${slug.value}-${isLoggedIn.value ? 'authed' : 'anon'}`,
+        headers: token
+            ? { Authorization: `Bearer ${token}` }
+            : undefined,
         // server: true
     }
 )
@@ -538,7 +547,8 @@ onMounted(async () => {
         const token = await getAccessToken()
 
         const weakest = await $fetch<{ id: string }[]>(
-            '/api/word-progress/weakestV3',
+            // '/api/word-progress/weakestV3',
+            '/api/word-progress/weakestV4',
             {
                 query: { level: slug.value, limit: 30 },
                 headers: {
