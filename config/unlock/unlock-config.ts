@@ -1,2 +1,2 @@
-export const taroKeyXp = 300
-export const xpNeededForOneTaroKey = 300
+export const taroKeyXp = 500
+export const xpNeededForOneTaroKey = 500
