@@ -1,34 +1,35 @@
-import { createError, getQuery } from "h3"
-import { db } from "~/server/repositories/db"
-import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache"
-import { requireUser } from "~/server/utils/requireUser"
+import { createError, getQuery } from "h3";
+import { xpNeededForOneTaroKey } from "~/config/unlock/unlock-config";
+import { db } from "~/server/repositories/db";
+import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
+import { requireUser } from "~/server/utils/requireUser";
 
 function normalizeWordIds(input: unknown): string[] {
-  if (typeof input !== "string") return []
+  if (typeof input !== "string") return [];
 
   return Array.from(
     new Set(
       input
         .split(",")
         .map((value) => value.trim())
-        .filter(Boolean)
-    )
-  )
+        .filter(Boolean),
+    ),
+  );
 }
 
 export default defineEventHandler(async (event) => {
-  const user = await requireUser(event)
-  const userId = user.sub
+  const user = await requireUser(event);
+  const userId = user.sub;
 
   if (!userId) {
     throw createError({
       statusCode: 401,
       statusMessage: "User id missing",
-    })
+    });
   }
 
-  const query = getQuery(event)
-  const wordIds = normalizeWordIds(query.wordIds)
+  const query = getQuery(event);
+  const wordIds = normalizeWordIds(query.wordIds);
 
   const [statsResult, spentResult, unlockedWordIds] = await Promise.all([
     db.query<{ total_xp: number | null }>(
@@ -38,7 +39,7 @@ export default defineEventHandler(async (event) => {
       where user_id = $1
       limit 1
       `,
-      [userId]
+      [userId],
     ),
     db.query<{ spent: number | null }>(
       `
@@ -47,15 +48,15 @@ export default defineEventHandler(async (event) => {
       where user_id = $1
         and unlock_source = 'xp_credit'
       `,
-      [userId]
+      [userId],
     ),
     getUnlockedWordIdsForUser(userId, wordIds),
-  ])
+  ]);
 
-  const totalXp = Number(statsResult.rows[0]?.total_xp ?? 0)
-  const creditsEarned = Math.floor(totalXp / 500)
-  const creditsSpent = Number(spentResult.rows[0]?.spent ?? 0)
-  const creditsAvailable = Math.max(0, creditsEarned - creditsSpent)
+  const totalXp = Number(statsResult.rows[0]?.total_xp ?? 0);
+  const creditsEarned = Math.floor(totalXp / xpNeededForOneTaroKey);
+  const creditsSpent = Number(spentResult.rows[0]?.spent ?? 0);
+  const creditsAvailable = Math.max(0, creditsEarned - creditsSpent);
 
   return {
     totalXp,
@@ -63,5 +64,5 @@ export default defineEventHandler(async (event) => {
     creditsSpent,
     creditsAvailable,
     unlockedWordIds,
-  }
-})
+  };
+});

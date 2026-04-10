@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 
 definePageMeta({
   // middleware: ['topic-access'],
@@ -9,6 +9,7 @@ import WordTile from '@/components/WordTile.vue'
 import { createError } from 'nuxt/app'
 import { computed, onMounted, ref } from 'vue'
 import { FREE_WORD_LIMIT } from '~/config/topic/topics-config'
+import { tileColours } from '~/utils/branding/helpers'
 import { canAccessTopic, freeTopics } from '~/utils/topics/permissions'
 import { masteryXp } from '~/utils/xp/helpers'
 
@@ -29,14 +30,8 @@ const isTopicFree = computed(() => {
   return freeTopics.has(slug)
 })
 
-const TILE_COLORS = [
-  'rgba(234, 184, 228, 0.75)', // pink
-  'rgba(214, 163, 209, 0.75)', // purple
-  'rgba(168, 202, 224, 0.75)', // blue
-  'rgba(246, 225, 225, 0.75)', // blush
-  'rgba(244, 194, 215, 0.75)', // rose
-  'rgba(244, 205, 39, 0.35)'  // yellow 
-]
+const TILE_COLORS = tileColours
+
 
 if (error.value?.statusCode === 403) {
   throw createError({ statusCode: 403, statusMessage: 'Topic locked' })
@@ -88,9 +83,6 @@ onMounted(loadProgress)
 
 const getXp = (id: string) =>
   progressMap.value?.[id]?.xp ?? 0
-
-const getStreak = (id: string) =>
-  progressMap.value?.[id]?.streak ?? 0
 
 const isMastered = (id: string) =>
   (progressMap.value?.[id]?.xp ?? 0) >= masteryXp
@@ -194,4 +186,4 @@ const gatedCategories = computed(() => {
   letter-spacing: 0.06em;
   color: rgba(0, 0, 0);
 }
-</style>
+</style> -->

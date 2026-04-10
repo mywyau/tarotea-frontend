@@ -5,11 +5,9 @@ definePageMeta({
   ssr: false
 })
 
-// import { getLevelNumber } from '~/utils/levels/levels'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 
 const route = useRoute()
-// const slug = computed(() => route.params.slug as string | undefined)
 const slug = route.params.slug as string
 
 // we check the path slug
@@ -22,8 +20,6 @@ const levelNumber: number = levelIdToNumbers(slug)
 const {
   authReady,
   isLoggedIn,
-  entitlement,
-  resolve,
 } = useMeStateV2()
 
 
