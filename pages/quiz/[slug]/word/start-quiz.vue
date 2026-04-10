@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 definePageMeta({
-  middleware: ['level-access'],
+  middleware: ['level-quiz-access'],
   ssr: false
 })
 
