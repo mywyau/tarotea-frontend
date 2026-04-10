@@ -35,6 +35,8 @@ const route = useRoute()
 const wordId = computed(() => route.params.id as string)
 const sentenceIndex = computed(() => Number(route.params.idx))
 
+const ready = ref(false)
+
 const {
     data: word,
     pending,
@@ -228,6 +230,10 @@ watch(
     },
     { immediate: true, flush: "post" },
 )
+
+onMounted(() => {
+  ready.value = true
+})
 </script>
 
 <template>
