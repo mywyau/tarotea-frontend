@@ -1,42 +1,40 @@
-import { createError, readBody } from "h3"
-import { db } from "~/server/repositories/db"
-import { requireUser } from "~/server/utils/requireUser"
+import { createError, readBody } from "h3";
+import { db } from "~/server/repositories/db";
+import { addWordUnlockToCache } from "~/server/services/cache/wordUnlockCache";
+import { requireUser } from "~/server/utils/requireUser";
 
 type Body = {
-  wordId: string
-}
+  wordId: string;
+};
 
 export default defineEventHandler(async (event) => {
-  const user = await requireUser(event)
-  const body = await readBody<Body>(event)
+  const user = await requireUser(event);
+  const body = await readBody<Body>(event);
 
-  const userId = user.sub
-  const wordId = body.wordId?.trim()
+  const userId = user.sub;
+  const wordId = body.wordId?.trim();
 
   if (!userId) {
     throw createError({
       statusCode: 401,
       statusMessage: "User id missing",
-    })
+    });
   }
 
   if (!wordId) {
     throw createError({
       statusCode: 400,
       statusMessage: "wordId is required",
-    })
+    });
   }
 
-  const client = await db.connect()
+  const client = await db.connect();
 
   try {
-    await client.query("BEGIN")
+    await client.query("BEGIN");
 
     // Prevent concurrent unlock requests from overspending credits.
-    await client.query(
-      `select pg_advisory_xact_lock(hashtext($1))`,
-      [userId]
-    )
+    await client.query(`select pg_advisory_xact_lock(hashtext($1))`, [userId]);
 
     const existingResult = await client.query(
       `
@@ -46,17 +44,23 @@ export default defineEventHandler(async (event) => {
         and word_id = $2
       limit 1
       `,
-      [userId, wordId]
-    )
+      [userId, wordId],
+    );
 
     if ((existingResult.rowCount ?? 0) > 0) {
-      await client.query("COMMIT")
+      await client.query("COMMIT");
+
+      try {
+        await addWordUnlockToCache(userId, wordId);
+      } catch {
+        // ignore cache failure; DB is source of truth
+      }
 
       return {
         ok: true,
         alreadyUnlocked: true,
         wordId,
-      }
+      };
     }
 
     const statsResult = await client.query<{ total_xp: number | null }>(
@@ -66,11 +70,11 @@ export default defineEventHandler(async (event) => {
       where user_id = $1
       limit 1
       `,
-      [userId]
-    )
+      [userId],
+    );
 
-    const totalXp = Number(statsResult.rows[0]?.total_xp ?? 0)
-    const creditsEarned = Math.floor(totalXp / 500)
+    const totalXp = Number(statsResult.rows[0]?.total_xp ?? 0);
+    const creditsEarned = Math.floor(totalXp / 500);
 
     const spentResult = await client.query<{ spent: number | null }>(
       `
@@ -79,17 +83,17 @@ export default defineEventHandler(async (event) => {
       where user_id = $1
         and unlock_source = 'xp_credit'
       `,
-      [userId]
-    )
+      [userId],
+    );
 
-    const creditsSpent = Number(spentResult.rows[0]?.spent ?? 0)
-    const creditsAvailable = Math.max(0, creditsEarned - creditsSpent)
+    const creditsSpent = Number(spentResult.rows[0]?.spent ?? 0);
+    const creditsAvailable = Math.max(0, creditsEarned - creditsSpent);
 
     if (creditsAvailable < 1) {
       throw createError({
         statusCode: 403,
         statusMessage: "Not enough unlock credits",
-      })
+      });
     }
 
     const insertResult = await client.query(
@@ -103,11 +107,17 @@ export default defineEventHandler(async (event) => {
       values ($1, $2, 'xp_credit', 1)
       on conflict (user_id, word_id) do nothing
       `,
-      [userId, wordId]
-    )
+      [userId, wordId],
+    );
 
     if ((insertResult.rowCount ?? 0) === 0) {
-      await client.query("COMMIT")
+      await client.query("COMMIT");
+
+      try {
+        await addWordUnlockToCache(userId, wordId);
+      } catch {
+        // ignore cache failure; DB is source of truth
+      }
 
       return {
         ok: true,
@@ -117,10 +127,16 @@ export default defineEventHandler(async (event) => {
         creditsEarned,
         creditsSpent,
         creditsAvailable,
-      }
+      };
     }
 
-    await client.query("COMMIT")
+    await client.query("COMMIT");
+
+    try {
+      await addWordUnlockToCache(userId, wordId);
+    } catch {
+      // ignore cache failure; DB is source of truth
+    }
 
     return {
       ok: true,
@@ -129,15 +145,15 @@ export default defineEventHandler(async (event) => {
       creditsEarned,
       creditsSpent: creditsSpent + 1,
       creditsAvailable: creditsAvailable - 1,
-    }
+    };
   } catch (error) {
     try {
-      await client.query("ROLLBACK")
+      await client.query("ROLLBACK");
     } catch {
       // ignore rollback failure
     }
-    throw error
+    throw error;
   } finally {
-    client.release()
+    client.release();
   }
-})
+});

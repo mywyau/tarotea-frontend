@@ -2,7 +2,7 @@ import { isLevelId, levelIdToNumbers } from "@/utils/levels/levels";
 import {
   canAccessLevelQuiz,
   isComingSoon,
-  isFreeLevel
+  isFreeLevel,
 } from "~/utils/levels/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
@@ -12,7 +12,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   if (!slug) return;
 
-  const { authReady, isLoggedIn, isLoggedOut, entitlement, resolve } = useMeStateV2();
+  const { isLoggedOut, entitlement, resolve } = useMeStateV2();
 
   await resolve();
 
@@ -20,9 +20,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     throw createError({ statusCode: 404 });
   }
 
-  const levelNumber:number = levelIdToNumbers(slug);
+  const levelNumber: number = levelIdToNumbers(slug);
 
-  if(isLoggedOut.value) {
+  if (isLoggedOut.value) {
     return navigateTo("/please-sign-in");
   }
 

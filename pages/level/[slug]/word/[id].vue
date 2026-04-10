@@ -5,7 +5,7 @@ import { masteryXp } from '~/utils/xp/helpers'
 
 
 definePageMeta({
-  middleware: ['level-word-access-client'],
+  middleware: ['level-word-access-v2-client'],
   ssr: true,
 })
 
