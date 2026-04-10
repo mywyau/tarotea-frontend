@@ -32,6 +32,14 @@ export function canAccessLevel(
   return canEnterLevel(userEntitlement);
 }
 
+export function canAccessLevelV2(
+  isLoggedIn: boolean,
+  userEntitlement: Entitlement | null,
+): boolean {
+  if (!isLoggedIn) return false;
+  return canEnterLevel(userEntitlement);
+}
+
 export function canAccessLevelWord(
   levelNumber: number,
   entitlement: Entitlement | null,
