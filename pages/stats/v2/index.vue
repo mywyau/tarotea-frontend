@@ -7,6 +7,7 @@ type UserStats = {
   total_xp: number | string
   words_maxed: number | string
   words_seen: number | string
+  words_unlocked: number | string
   total_correct: number | string
   total_wrong: number | string
   xp_this_week: number | string
@@ -43,6 +44,10 @@ const stats = computed<StatCard[]>(() => {
       value: toNumber(statsData.value.xp_this_week),
       suffix: 'xp',
       signed: true
+    },
+    {
+      label: 'Words Unlocked',
+      value: toNumber(statsData.value.words_unlocked)
     },
     {
       label: 'Words Seen',
@@ -233,6 +238,10 @@ main {
 }
 
 .stat-4 {
-  background: rgba(214, 163, 209, 0.4);
+  background: rgba(122, 111, 203, 0.4);
+}
+
+.stat-5 {
+  background: rgba(130, 255, 111, 0.4);
 }
 </style>
