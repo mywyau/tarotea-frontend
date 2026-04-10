@@ -272,7 +272,8 @@ async function loadQuiz() {
     const token = await getAccessToken();
 
     const res = await $fetch<TopicQuizPayload>(
-      `/api/topic/quiz/${topicSlug.value}`,
+      // `/api/topic/quiz/${topicSlug.value}`,
+      `/api/topic/quiz/v2/${topicSlug.value}`,
       {
         headers: {
           Authorization: `Bearer ${token}`

@@ -47,7 +47,7 @@ export const topics = [
     comingSoon: false,
     description: "Learn to order your favourite dim sum.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "restaurant-menu",
@@ -55,7 +55,7 @@ export const topics = [
     comingSoon: false,
     description: "Study and learn to order your favourite dishes.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "colours",
@@ -64,7 +64,7 @@ export const topics = [
     description:
       "Learn common colours and simple words for describing shades, brightness and colour style.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "math",
@@ -73,7 +73,7 @@ export const topics = [
     description:
       "Learn common Cantonese words for school math, numbers, shapes, and measurement.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "measure-quantities",
@@ -82,7 +82,7 @@ export const topics = [
     description:
       "Describe amounts, sizes, prices, and quantities used in daily life and shopping.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "time-dates",
@@ -91,7 +91,7 @@ export const topics = [
     description:
       "Talk about time, days, dates, schedules, and when things happen.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "family-members",
@@ -99,7 +99,7 @@ export const topics = [
     comingSoon: false,
     description: "Talk about family members, and relatives.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "countries",
@@ -108,7 +108,7 @@ export const topics = [
     description:
       "Learn the names of countries commonly mentioned in conversation, travel, and news",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "emotions",
@@ -117,7 +117,7 @@ export const topics = [
     description:
       "Express emotions, moods, opinions, and personal reactions naturally.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "furniture",
@@ -126,7 +126,7 @@ export const topics = [
     description:
       "Describe your home, rooms, furniture, and everyday household items.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "sports-fitness",
@@ -135,7 +135,7 @@ export const topics = [
     description:
       "Talk about exercise, sports, health routines, and physical activities.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "weather",
@@ -143,7 +143,7 @@ export const topics = [
     comingSoon: false,
     description: "Talk about the weather, seasons, temperature, and climate.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "technology",
@@ -151,7 +151,7 @@ export const topics = [
     comingSoon: false,
     description: "Talk about phones, computers, apps, and everyday tech usage.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "housing",
@@ -160,7 +160,7 @@ export const topics = [
     description:
       "Discuss renting, housing issues, utilities, and living arrangements.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "transport-travel",
@@ -169,7 +169,7 @@ export const topics = [
     description:
       "Use transport, ask for directions, talk about travel plans, and get around the city.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "health",
@@ -178,7 +178,7 @@ export const topics = [
     description:
       "Describe how you feel, talk about common health issues, and seek basic help.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "daily-life",
@@ -187,7 +187,7 @@ export const topics = [
     description:
       "Talk about daily habits, routines, plans, and everyday activities.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "materials",
@@ -196,7 +196,7 @@ export const topics = [
     description:
       "Talk about what things are made of, including everyday materials, fabrics, building materials, and common material properties.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "animals",
@@ -205,7 +205,7 @@ export const topics = [
     description:
       "Learn words for common animals, pets, farm animals, wild animals, and simple animal actions.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "science",
@@ -214,7 +214,7 @@ export const topics = [
     description:
       "Learn common Cantonese words for science, biology, chemistry, physics, and space",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "hobbies-interests",
@@ -222,7 +222,7 @@ export const topics = [
     comingSoon: false,
     description: "Discuss hobbies, interests, and things you enjoy doing.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "buildings-local-services",
@@ -231,7 +231,7 @@ export const topics = [
     description:
       "Learn common places, buildings, shops, and local services you find in a town or city.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "business",
@@ -240,7 +240,7 @@ export const topics = [
     description:
       "Learn common words for business, companies, office work, meetings, sales, and professional communication.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "jobs-professions",
@@ -248,7 +248,7 @@ export const topics = [
     comingSoon: false,
     description: "Talk about jobs, roles, and what people do for work.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "gemstones-jewellery",
@@ -257,7 +257,7 @@ export const topics = [
     description:
       "Study jewellery, gemstones, precious materials, and accessories used in shopping and everyday conversation.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "landforms-natural-disasters",
@@ -266,7 +266,7 @@ export const topics = [
     description:
       "Learn words for mountains, valleys, rivers, volcanoes, earthquakes, floods, and other natural features and disasters.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "news-media",
@@ -275,7 +275,7 @@ export const topics = [
     description:
       "Learn common words used in news, media, and online content, including reporting, journalism, and digital platforms.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "plants-gardening",
@@ -284,7 +284,7 @@ export const topics = [
     description:
       "Learn common Cantonese words for plants, flowers, trees, leaves, and other nature-related vocabulary.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "music",
@@ -293,7 +293,7 @@ export const topics = [
     description:
       "Study you favourite music genres, instruments and all things music.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "politics",
@@ -302,7 +302,7 @@ export const topics = [
     description:
       "Get down and serious with governenance, political terminology and views.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
   {
     id: "onomatopoeia",
@@ -311,7 +311,7 @@ export const topics = [
     description:
       "Get expressive with onomatopoeic expressions used for sounds, movement, feelings, and vivid everyday descriptions.",
     requiresPaid: false,
-    quizRequiresPaid: true,
+    quizRequiresPaid: false,
   },
 ];
 

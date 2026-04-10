@@ -212,7 +212,8 @@ async function loadQuiz() {
         const token = await getAccessToken()
 
         const res = await $fetch<TopicAudioQuizPayload>(
-            `/api/topic/audio-quiz/${slug.value}`,
+            // `/api/topic/audio-quiz/${slug.value}`,
+            `/api/topic/audio-quiz/v2/${slug.value}`,
             {
                 headers: {
                     Authorization: `Bearer ${token}`
