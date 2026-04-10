@@ -44,7 +44,7 @@ function closeUnlockPanel() {
 }
 
 const wordApiPath: string = `/api/words/${wordId}`
-const wordPagePath: string = `/level/${slug}/word/${wordId}`
+const wordPagePath: string = `/topic/word/${slug}/${wordId}`
 
 async function loadData() {
   try {
@@ -90,7 +90,6 @@ async function unlockWord() {
     })
 
     showUnlockPanel.value = false
-
     await navigateTo(wordPagePath)
   } catch (err: any) {
     errorMessage.value = err?.data?.statusMessage ?? 'Failed to unlock word.'
@@ -106,7 +105,7 @@ onMounted(loadData)
 <template>
   <main class="unlock-page max-w-2xl mx-auto px-4 py-10 sm:py-12 space-y-8">
 
-    <BackLink :to="`/level/${slug}/v2`" />
+    <BackLink :to="`/topic/words/${slug}/v2`" />
 
     <header class="rounded-lg header-card">
       <h1 class="page-heading">Unlock word</h1>

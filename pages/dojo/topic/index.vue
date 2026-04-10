@@ -55,12 +55,7 @@ const paginatedTopics = computed(() => {
 
 <template>
   <main class="topics-page max-w-4xl mx-auto py-10 px-2 space-y-10">
-    <!-- <div class="mb-6">
-      <NuxtLink :to="`/dojo`" class="text-black text-sm hover:underline">
-        ← Dojo
-      </NuxtLink>
-    </div> -->
-
+    
     <BackLink />
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">

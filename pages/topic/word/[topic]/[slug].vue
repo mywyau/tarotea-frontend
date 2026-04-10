@@ -141,7 +141,7 @@ watchEffect(() => {
 <template>
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
-        <NuxtLink :to="`/topic/words/${topic}#${word.id}`" class="text-sm text-black hover:underline">
+        <NuxtLink :to="`/topic/words/${topic}/v2#${word.id}`" class="text-sm text-black hover:underline">
             ← Back
         </NuxtLink>
 
@@ -192,8 +192,7 @@ watchEffect(() => {
             </div>
 
             <div class="flex items-center justify-center gap-3">
-                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`"
-                    :playback-rate="playbackRate" size="lg" />
+                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate" size="lg" />
 
                 <NuxtLink :to="`/writing/${topic}/vocab/${word.id}`"
                     class="bg-white hover:bg-gray-50 inline-flex items-center justify-center text-base px-4 py-3 rounded-md shadow-sm transition border">
