@@ -237,7 +237,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <div class="mx-auto max-w-4xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
+    <div v-if="ready" class="mx-auto max-w-4xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
         <div class="mb-4 sm:mb-6">
             <BackLink />
         </div>
