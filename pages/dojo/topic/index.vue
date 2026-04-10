@@ -18,18 +18,26 @@ const {
 
 const isComingSoon = (topic: Topic) => topic.comingSoon === true
 
+// const canEnterTopic = (topic: Topic) => {
+
+//   if (isLoggedOut.value) return false
+
+//   if (isComingSoon(topic)) return false
+
+//   if (isFreeTopicsJyutpingDojo(topic.id)) return true
+
+//   // 🔒 Paid topics require login
+//   if (!isLoggedIn.value) return false
+
+//   return canAccessTopic(isLoggedIn.value, entitlement.value, topic.id)
+// }
+
 const canEnterTopic = (topic: Topic) => {
 
-  if (isLoggedOut.value) return false
-
   if (isComingSoon(topic)) return false
-
-  if (isFreeTopicsJyutpingDojo(topic.id)) return true
-
-  // 🔒 Paid topics require login
-  if (!isLoggedIn.value) return false
-
-  return canAccessTopic(isLoggedIn.value, entitlement.value, topic.id)
+  
+  // 🔒 Exercises require login
+  if (isLoggedIn.value) { return true } else { return false }
 }
 
 const ITEMS_PER_PAGE = 12

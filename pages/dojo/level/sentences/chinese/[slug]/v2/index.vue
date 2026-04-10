@@ -82,13 +82,16 @@ const {
 } = await useAsyncData(
   () => `sentence-dojo-start-${slug.value}`,
   () =>
-    authedFetch<SentenceDojoStartResponse>('/api/typing/sentences/v2/start', {
-      query: {
-        scope: 'level',
-        slug: slug.value,
-        variant: 'chinese',
-      },
-    }),
+    authedFetch<SentenceDojoStartResponse>(
+      // '/api/typing/sentences/v2/start',
+      '/api/typing/sentences/v2/start-v2',
+      {
+        query: {
+          scope: 'level',
+          slug: slug.value,
+          variant: 'chinese',
+        },
+      }),
   {
     watch: [slug],
     server: false,
