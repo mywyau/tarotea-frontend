@@ -25,6 +25,7 @@ const qstash = new QStashClient({
 });
 
 export default defineEventHandler(async (event) => {
+
   assertMethod(event, "DELETE");
 
   const user = await getUserFromSession(event);

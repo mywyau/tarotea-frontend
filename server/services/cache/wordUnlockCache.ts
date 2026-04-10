@@ -2,6 +2,7 @@ import { db } from "~/server/repositories/db"
 import { redis } from "~/server/repositories/redis"
 
 const UNLOCK_KEY_PREFIX = "word-unlocks:v1:user"
+const UNLOCK_CACHE_TTL_SECONDS = 60 * 60 * 24 * 7
 
 export function unlockSetKey(userId: string) {
   return `${UNLOCK_KEY_PREFIX}:${userId}`
@@ -12,7 +13,10 @@ export function unlockHydratedKey(userId: string) {
 }
 
 export async function ensureWordUnlocksHydrated(userId: string) {
-  const hydrated = await redis.get(unlockHydratedKey(userId))
+  const hydratedKey = unlockHydratedKey(userId)
+  const setKey = unlockSetKey(userId)
+
+  const hydrated = await redis.get(hydratedKey)
 
   if (hydrated) {
     return
@@ -36,20 +40,23 @@ export async function ensureWordUnlocksHydrated(userId: string) {
   )
 
   if (wordIds.length > 0) {
-    await redis.sadd(unlockSetKey(userId), ...wordIds)
+    await redis.sadd(setKey, ...wordIds)
+    await redis.expire(setKey, UNLOCK_CACHE_TTL_SECONDS)
   }
 
-  // No TTL: unlocks are permanent.
-  await redis.set(unlockHydratedKey(userId), "1")
+  await redis.set(hydratedKey, "1", { ex: UNLOCK_CACHE_TTL_SECONDS })
 }
 
 export async function addWordUnlockToCache(userId: string, wordId: string) {
   const trimmedWordId = wordId.trim()
-
   if (!trimmedWordId) return
 
-  await redis.sadd(unlockSetKey(userId), trimmedWordId)
-  await redis.set(unlockHydratedKey(userId), "1")
+  const setKey = unlockSetKey(userId)
+  const hydratedKey = unlockHydratedKey(userId)
+
+  await redis.sadd(setKey, trimmedWordId)
+  await redis.expire(setKey, UNLOCK_CACHE_TTL_SECONDS)
+  await redis.set(hydratedKey, "1", { ex: UNLOCK_CACHE_TTL_SECONDS })
 }
 
 export async function isWordUnlockedForUser(userId: string, wordId: string) {
@@ -71,7 +78,6 @@ export async function getUnlockedWordIdsForUser(
     new Set(wordIds.map((wordId) => wordId.trim()).filter(Boolean))
   )
 
-  console.log(`unlocked words: `, trimmedWordIds)
   if (trimmedWordIds.length === 0) {
     return []
   }
