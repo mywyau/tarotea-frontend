@@ -93,12 +93,15 @@ const {
 } = await useAsyncData(
   () => `topic-sentences-audio-start-${slug.value}`,
   () =>
-    authedFetch<TopicSentenceQuizStartResponse>('/api/sentences/topics/v3/start', {
-      query: {
-        scope: 'topic',
-        slug: slug.value,
-      },
-    }),
+    authedFetch<TopicSentenceQuizStartResponse>(
+      // '/api/sentences/topics/v3/start',
+      '/api/sentences/topics/v3/start-v2',
+      {
+        query: {
+          scope: 'topic',
+          slug: slug.value,
+        },
+      }),
   {
     watch: [slug],
     server: false,
@@ -476,8 +479,7 @@ watch(
         <div v-if="showQuiz" class="space-y-6">
           <div class="space-y-6">
             <div class="flex flex-col items-center justify-center min-h-[80px]">
-              <div class="space-y-2"
-                :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
+              <div class="space-y-2" :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
                 <p class="text-2xl text-black leading-relaxed font-semibold text-center">
                   {{ question.prompt }}
                 </p>

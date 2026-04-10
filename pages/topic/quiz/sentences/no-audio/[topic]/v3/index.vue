@@ -82,7 +82,10 @@ const {
 } = await useAsyncData(
   () => `topic-sentences-start-${slug.value}`,
   () =>
-    authedFetch<SentenceQuizStartResponse>('/api/sentences/topics/v3/start', {
+    authedFetch<SentenceQuizStartResponse>(
+      // '/api/sentences/topics/v3/start', 
+      '/api/sentences/topics/v3/start-v2', 
+      {
       query: {
         scope: 'topic',
         slug: slug.value,
