@@ -2,6 +2,7 @@
 definePageMeta({
   ssr: true,
   // middleware: ['coming-soon'],
+  middleware: ['logged-in'],
 })
 
 const route = useRoute()
