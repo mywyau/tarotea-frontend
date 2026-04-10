@@ -192,7 +192,7 @@ onMounted(loadData)
 
             <div class="flex flex-col gap-2 sm:flex-row">
               <button type="button"
-                class="confirm-btn-blush w-full rounded-lg py-3 font-semibold hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                class="confirm-btn-blush w-full rounded-lg py-3 font-semibold hover:brightness-110 hover:bg-gray-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
                 :disabled="loading || unlockSummary.creditsAvailable < 1" @click="unlockWord">
                 {{ loading ? 'Unlocking…' : 'Confirm unlock' }}
               </button>

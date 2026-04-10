@@ -1,10 +1,5 @@
 <script setup lang="ts">
 
-// definePageMeta({
-//   middleware: ['coming-soon'],
-//   ssr: true,
-// })
-
 import type { Topic } from '@/types/topic'
 import { sortedTopics } from '@/utils/topics/topics'
 import { computed, onMounted, ref } from 'vue'
@@ -38,7 +33,7 @@ function topicLink(topic: Topic) {
   if (topic.comingSoon) return "/coming-soon"
 
   if (!topic.requiresPaid) {
-    return `/topic/words/${topic.id}`
+    return `/topic/words/${topic.id}/v2`
   }
 }
 
@@ -105,8 +100,6 @@ onMounted(async () => {
 
 <template>
   <main class="topics-page max-w-3xl mx-auto py-12 px-4 space-y-10">
-
-    <!-- <BackLink /> -->
 
     <NuxtLink :to="`/`" class="text-sm text-black hover:underline">
       ← Back
