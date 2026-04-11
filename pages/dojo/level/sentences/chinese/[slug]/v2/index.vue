@@ -623,7 +623,8 @@ onBeforeUnmount(() => {
                 Sentence
               </div>
 
-              <div class="text-2xl font-medium text-gray-900 leading-relaxed">
+              <div class="text-2xl font-medium text-gray-900 leading-relaxed no-copy" @copy.prevent @cut.prevent
+                @contextmenu.prevent @dragstart.prevent @selectstart.prevent>
                 {{ current?.sentence }}
               </div>
 
@@ -916,5 +917,13 @@ onBeforeUnmount(() => {
   to {
     transform: rotate(360deg);
   }
+}
+
+.no-copy {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
 }
 </style>
