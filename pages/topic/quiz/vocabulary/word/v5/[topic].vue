@@ -608,7 +608,7 @@ watch(
       stop()
 
       setTimeout(() => {
-        if (percentage.value >= 90) {
+        if (percentage.value >= 80) {
           playQuizCompleteFanfareSong()
         } else if (percentage.value >= 50) {
           playQuizCompleteOkaySong()

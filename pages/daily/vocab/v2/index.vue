@@ -129,16 +129,16 @@ const incorrectCount = computed(() =>
 )
 
 const resultHeroClass = computed(() => {
-  if (percentage.value === 100) return "result-3"
-  if (percentage.value >= 70) return "result-0"
-  if (percentage.value >= 50) return "result-2"
+  if (percentage.value === 80) return "result-3"
+  if (percentage.value >= 60) return "result-0"
+  if (percentage.value >= 40) return "result-2"
   return "result-1"
 })
 
 const resultMeta = computed(() => {
-  if (percentage.value === 100) return { title: "Perfect" }
-  if (percentage.value >= 70) return { title: "Great job" }
-  if (percentage.value >= 50) return { title: "Nice try" }
+  if (percentage.value === 80) return { title: "Perfect" }
+  if (percentage.value >= 60) return { title: "Great job" }
+  if (percentage.value >= 40) return { title: "Nice try" }
   return { title: "Keep practicing" }
 })
 

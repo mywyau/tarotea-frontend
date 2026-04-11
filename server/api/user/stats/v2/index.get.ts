@@ -5,6 +5,7 @@ type UserStatsResponse = {
   total_xp: number;
   words_maxed: number;
   words_seen: number;
+  words_unlocked: number;
   total_correct: number;
   total_wrong: number;
   xp_this_week: number;
@@ -14,7 +15,7 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  const [statsResult, weeklyXpResult] = await Promise.all([
+  const [statsResult, weeklyXpResult, unlockedWordsResult] = await Promise.all([
     db.query(
       `
         select
@@ -38,15 +39,25 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
       `,
       [userId]
     ),
+    db.query(
+      `
+        select coalesce(count(distinct word_id), 0)::int as words_unlocked
+        from user_word_unlocks
+        where user_id = $1
+      `,
+      [userId]
+    ),
   ]);
 
   const statsRow = statsResult.rows[0];
   const weeklyRow = weeklyXpResult.rows[0];
+  const unlockedRow = unlockedWordsResult.rows[0];
 
   return {
     total_xp: Number(statsRow?.total_xp ?? 0),
     words_maxed: Number(statsRow?.words_maxed ?? 0),
     words_seen: Number(statsRow?.words_seen ?? 0),
+    words_unlocked: Number(unlockedRow?.words_unlocked ?? 0),
     total_correct: Number(statsRow?.total_correct ?? 0),
     total_wrong: Number(statsRow?.total_wrong ?? 0),
     xp_this_week: Number(weeklyRow?.xp_this_week ?? 0),
