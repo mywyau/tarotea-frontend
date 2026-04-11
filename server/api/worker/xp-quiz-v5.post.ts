@@ -513,7 +513,7 @@ import { useRuntimeConfig } from "#imports";
 import { Receiver } from "@upstash/qstash";
 import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
 import { db } from "~/server/repositories/db";
-import { masteryXp } from "~/utils/xp/helpers";
+import { masteryXp } from "@/config/xp/helpers";
 
 type WorkerJob = {
   attemptId: string;

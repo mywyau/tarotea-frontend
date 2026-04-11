@@ -2,7 +2,7 @@
 
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
-import { masteryXp } from "~/utils/xp/helpers";
+import { masteryXp } from "@/config/xp/helpers";
 
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);

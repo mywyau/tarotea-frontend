@@ -15,7 +15,7 @@ import {
 } from '@/utils/sounds'
 import { brandColours } from '~/utils/branding/helpers'
 import { shuffleFisherYates } from '~/utils/shuffle'
-import { masteryXp } from '~/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers';
 
 type SentenceQuizQuestion = {
     sentenceId: string

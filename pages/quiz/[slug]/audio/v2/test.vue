@@ -18,7 +18,7 @@ import {
 import type { LevelData, Word } from '~/types/level/quiz/types'
 import { brandColours } from '~/utils/branding/helpers'
 import { isLevelId, levelTitles } from '~/utils/levels/levels'
-import { masteryXp } from '~/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers';
 
 type QuizAnswer = { wordId: string; correct: boolean }
 

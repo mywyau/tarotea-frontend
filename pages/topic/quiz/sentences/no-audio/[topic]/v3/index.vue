@@ -15,7 +15,7 @@ import {
 } from '@/utils/sounds'
 import { brandColours } from '~/utils/branding/helpers'
 import { shuffleFisherYates } from '~/utils/shuffle'
-import { masteryXp } from '~/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers';
 
 type SentenceQuizQuestion = {
   sentenceId: string
@@ -84,13 +84,13 @@ const {
   () =>
     authedFetch<SentenceQuizStartResponse>(
       // '/api/sentences/topics/v3/start', 
-      '/api/sentences/topics/v3/start-v2', 
+      '/api/sentences/topics/v3/start-v2',
       {
-      query: {
-        scope: 'topic',
-        slug: slug.value,
-      },
-    }),
+        query: {
+          scope: 'topic',
+          slug: slug.value,
+        },
+      }),
   {
     watch: [slug],
     server: false,

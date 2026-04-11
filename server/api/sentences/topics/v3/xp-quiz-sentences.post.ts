@@ -424,7 +424,7 @@ import { createError, getHeader, readRawBody } from "h3";
 import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
-import { masteryXp } from "~/utils/xp/helpers";
+import { masteryXp } from "@/config/xp/helpers";
 
 type PayloadAnswer = {
   wordId: string;

@@ -1,5 +1,5 @@
 import { db } from "~/server/repositories/db";
-import { masteryXp } from "~/utils/xp/helpers";
+import { masteryXp } from "@/config/xp/helpers";
 
 export async function refreshUserStats(userId: string) {
   await db.query(
@@ -33,7 +33,7 @@ export async function refreshUserStats(userId: string) {
         total_wrong = excluded.total_wrong,
         updated_at = now()
     `,
-    [userId, masteryXp]
+    [userId, masteryXp],
   );
 
   await db.query(
@@ -45,6 +45,6 @@ export async function refreshUserStats(userId: string) {
       values ($1, now())
       on conflict (user_id) do nothing
     `,
-    [userId]
+    [userId],
   );
 }

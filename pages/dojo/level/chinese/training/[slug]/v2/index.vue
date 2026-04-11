@@ -13,7 +13,8 @@ import {
 } from '@/utils/sounds'
 
 import { chineseXp, chineseXpHintUsed } from '@/utils/dojo/xp'
-import { masteryXp } from '@/utils/xp/helpers'
+// import { masteryXp } from '@/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers'
 import { levelTitles } from '~/utils/levels/levels'
 
 type TrainWord = {

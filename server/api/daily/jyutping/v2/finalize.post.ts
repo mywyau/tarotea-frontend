@@ -1,12 +1,12 @@
 // server/api/daily/jyutping/finalize.post.ts
 import { createError, readBody } from "h3";
-import { db } from "~/server/repositories/db";
-import { requireUser } from "~/server/utils/requireUser";
-import { queueDailyJyutpingWorker } from "~/server/utils/qstash/dailyJyutping";
 import {
   dailyJyutpingFailXp,
   dailyJyutpingSuccessXp,
-} from "~/utils/xp/helpers";
+} from "~/config/xp/helpers";
+import { db } from "~/server/repositories/db";
+import { queueDailyJyutpingWorker } from "~/server/utils/qstash/dailyJyutping";
+import { requireUser } from "~/server/utils/requireUser";
 
 type SessionAnswer = {
   wordId: string;
@@ -49,9 +49,9 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  const body = (await readBody(event).catch(() => null)) as
-    | { answers?: SessionAnswer[] }
-    | null;
+  const body = (await readBody(event).catch(() => null)) as {
+    answers?: SessionAnswer[];
+  } | null;
 
   if (!body || !Array.isArray(body.answers)) {
     throw createError({

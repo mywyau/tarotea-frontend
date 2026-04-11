@@ -6,36 +6,18 @@ definePageMeta({
 })
 
 import type { Topic } from '~/types/topic'
-import { canAccessTopic, isFreeTopicsJyutpingDojo } from '~/utils/topics/permissions'
 import { sortedTopics } from '~/utils/topics/topics'
 
 const {
   isLoggedIn,
-  isLoggedOut,
-  entitlement,
-  resolve,
 } = useMeStateV2()
 
 const isComingSoon = (topic: Topic) => topic.comingSoon === true
 
-// const canEnterTopic = (topic: Topic) => {
-
-//   if (isLoggedOut.value) return false
-
-//   if (isComingSoon(topic)) return false
-
-//   if (isFreeTopicsJyutpingDojo(topic.id)) return true
-
-//   // 🔒 Paid topics require login
-//   if (!isLoggedIn.value) return false
-
-//   return canAccessTopic(isLoggedIn.value, entitlement.value, topic.id)
-// }
-
 const canEnterTopic = (topic: Topic) => {
 
   if (isComingSoon(topic)) return false
-  
+
   // 🔒 Exercises require login
   if (isLoggedIn.value) { return true } else { return false }
 }
@@ -63,7 +45,7 @@ const paginatedTopics = computed(() => {
 
 <template>
   <main class="topics-page max-w-4xl mx-auto py-10 px-2 space-y-10">
-    
+
     <BackLink />
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">

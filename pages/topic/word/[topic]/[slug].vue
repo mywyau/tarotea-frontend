@@ -6,7 +6,7 @@ definePageMeta({
     middleware: ["word-access"]
 })
 
-import { masteryXp } from '~/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers';
 
 type TopicIndex = {
     topic: string

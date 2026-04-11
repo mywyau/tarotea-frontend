@@ -9,7 +9,7 @@ import { createError } from 'nuxt/app'
 import { FREE_WORD_LIMIT } from '~/config/topic/topics-config'
 import { tileColours } from '~/utils/branding/helpers'
 import { canAccessTopic, freeTopics } from '~/utils/topics/permissions'
-import { masteryXp } from '~/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers';
 
 const route = useRoute()
 const slug = route.params.topic as string

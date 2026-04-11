@@ -8,7 +8,8 @@ import { computed, nextTick, ref, watch, type Ref } from 'vue'
 
 import { chineseXp, chineseXpHintUsed } from '@/utils/dojo/xp'
 import { playCorrectJingle, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from '@/utils/sounds'
-import { masteryXp } from '@/utils/xp/helpers'
+// import { masteryXp } from '@/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers'
 import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
 
 type TrainWord = {

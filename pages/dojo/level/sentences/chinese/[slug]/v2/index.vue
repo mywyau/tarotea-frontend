@@ -13,7 +13,8 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong,
 } from '@/utils/sounds'
-import { masteryXp } from '@/utils/xp/helpers'
+// import { masteryXp } from '@/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers'
 import { levelTitles } from '~/utils/levels/levels'
 
 type TrainSentence = {

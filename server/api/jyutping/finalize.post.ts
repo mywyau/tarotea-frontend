@@ -1,16 +1,18 @@
 import { createError, getHeader, readBody } from "h3";
+
+import {
+  chineseOnlyHintXp,
+  chineseOnlyXp,
+  jyutpingOnlyHintXp,
+  jyutpingOnlyXp,
+} from "~/config/xp/helpers";
+
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 import type {
   Attempt,
   BatchAttempt,
 } from "~/types/jyutping/jyutping-training-types";
-import {
-  chineseOnlyHintXp,
-  chineseOnlyXp,
-  jyutpingOnlyHintXp,
-  jyutpingOnlyXp,
-} from "~/utils/xp/helpers";
 
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);

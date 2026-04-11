@@ -1,15 +1,10 @@
 // server/api/daily/jyutping/v2/xp-worker.post.ts
 
 import { Receiver } from "@upstash/qstash";
-import {
-  createError,
-  defineEventHandler,
-  getHeader,
-  readRawBody,
-} from "h3";
+import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
-import { masteryXp } from "~/utils/xp/helpers";
+import { masteryXp } from "@/config/xp/helpers";
 
 type WorkerBody = {
   eventId: number | string;
@@ -73,13 +68,14 @@ function getReceiver() {
 }
 
 function getPublicUrl(
-  event: Parameters<typeof defineEventHandler>[0] extends (event: infer E) => any
+  event: Parameters<typeof defineEventHandler>[0] extends (
+    event: infer E,
+  ) => any
     ? E
     : never,
 ): string {
   const proto = getHeader(event, "x-forwarded-proto") ?? "https";
-  const host =
-    getHeader(event, "x-forwarded-host") ?? getHeader(event, "host");
+  const host = getHeader(event, "x-forwarded-host") ?? getHeader(event, "host");
 
   if (!host) {
     throw createError({
@@ -313,7 +309,9 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    const uniqueWordIds = [...new Set(answers.map((item) => item.wordId).filter(Boolean))];
+    const uniqueWordIds = [
+      ...new Set(answers.map((item) => item.wordId).filter(Boolean)),
+    ];
 
     const existingWordRowsRes = uniqueWordIds.length
       ? await client.query<ExistingWordRow>(

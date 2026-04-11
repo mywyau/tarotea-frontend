@@ -2,7 +2,7 @@ import { Receiver } from "@upstash/qstash";
 import { createError, getHeader, readRawBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
-import { masteryXp } from "~/utils/xp/helpers";
+import { masteryXp } from "@/config/xp/helpers";
 
 type WorkerBody = {
   userId: string;
@@ -54,7 +54,7 @@ function isDojoMode(mode: string): mode is DojoMode {
 }
 
 function parseStoredPayload(
-  payload: ExistingEventRow["payload"]
+  payload: ExistingEventRow["payload"],
 ): StoredEventPayload {
   if (!payload) {
     throw createError({
@@ -75,7 +75,7 @@ function parseStoredPayload(
 
 function rollupAnswersByWord(
   answers: PayloadAnswer[],
-  existingMap: Map<string, { xp: number; streak: number }>
+  existingMap: Map<string, { xp: number; streak: number }>,
 ): RolledUpWordProgress[] {
   const grouped = new Map<string, PayloadAnswer[]>();
 
@@ -204,7 +204,7 @@ export default defineEventHandler(async (event) => {
       limit 1
       for update
       `,
-      [userId, sessionKey]
+      [userId, sessionKey],
     );
 
     if (eventRes.rows.length === 0) {
@@ -228,7 +228,7 @@ export default defineEventHandler(async (event) => {
 
       sessionStats = {
         xpEarned: Number(
-          quizEvent.applied_total_delta ?? quizEvent.total_delta ?? 0
+          quizEvent.applied_total_delta ?? quizEvent.total_delta ?? 0,
         ),
         correctCount: Number(quizEvent.correct_count ?? 0),
         totalWords: Number(quizEvent.total_questions ?? 0),
@@ -256,7 +256,7 @@ export default defineEventHandler(async (event) => {
             where user_id = $1
               and word_id = any($2::text[])
             `,
-            [userId, uniqueWordIds]
+            [userId, uniqueWordIds],
           )
         : { rows: [] as ExistingWordRow[] };
 
@@ -267,17 +267,17 @@ export default defineEventHandler(async (event) => {
             xp: Number(row.xp ?? 0),
             streak: Number(row.streak ?? 0),
           },
-        ])
+        ]),
       );
 
       const rolledUpWordProgress = rollupAnswersByWord(
         payloadAnswers,
-        existingMap
+        existingMap,
       );
 
       const appliedTotalDelta = rolledUpWordProgress.reduce(
         (sum, row) => sum + row.appliedDelta,
-        0
+        0,
       );
 
       const correctCount = payloadAnswers.filter((a) => a.correct).length;
@@ -287,7 +287,7 @@ export default defineEventHandler(async (event) => {
 
       const newWordsSeenCount = rolledUpWordProgress.reduce(
         (sum, row) => sum + (row.existedBefore ? 0 : 1),
-        0
+        0,
       );
 
       const newWordsMaxedCount = rolledUpWordProgress.reduce((sum, row) => {
@@ -355,7 +355,7 @@ export default defineEventHandler(async (event) => {
             rolledUpWordProgress.map((r) => r.streak),
             rolledUpWordProgress.map((r) => r.correctInc),
             rolledUpWordProgress.map((r) => r.wrongInc),
-          ]
+          ],
         );
       }
 
@@ -387,7 +387,7 @@ export default defineEventHandler(async (event) => {
           newWordsSeenCount,
           correctCount,
           wrongCount,
-        ]
+        ],
       );
 
       await client.query(
@@ -413,7 +413,7 @@ export default defineEventHandler(async (event) => {
           jyutping_completed = user_stats_daily.jyutping_completed + excluded.jyutping_completed,
           updated_at = now()
         `,
-        [userId, statDate, appliedTotalDelta, correctCount, wrongCount, 0, 1]
+        [userId, statDate, appliedTotalDelta, correctCount, wrongCount, 0, 1],
       );
 
       await client.query(
@@ -426,7 +426,7 @@ export default defineEventHandler(async (event) => {
             total_questions = $4
         where id = $1
         `,
-        [quizEvent.id, appliedTotalDelta, correctCount, totalWords]
+        [quizEvent.id, appliedTotalDelta, correctCount, totalWords],
       );
 
       await client.query("COMMIT");
@@ -438,9 +438,7 @@ export default defineEventHandler(async (event) => {
     client.release();
   }
 
-  await redis
-    .del(`dojo:typing:topic:${userId}:${sessionKey}`)
-    .catch(() => {});
+  await redis.del(`dojo:typing:topic:${userId}:${sessionKey}`).catch(() => {});
   await redis.del(`user:stats:v2:${userId}`).catch(() => {});
 
   return {

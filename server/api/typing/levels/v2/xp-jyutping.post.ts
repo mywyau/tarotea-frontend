@@ -2,7 +2,7 @@ import { Receiver } from "@upstash/qstash";
 import { createError, getHeader, readRawBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
-import { masteryXp } from "~/utils/xp/helpers";
+import { masteryXp } from "@/config/xp/helpers";
 
 type WorkerBody = {
   userId: string;

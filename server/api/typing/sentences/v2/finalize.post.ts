@@ -1,12 +1,12 @@
 import { Client } from "@upstash/qstash";
 import { createError, readBody } from "h3";
-import { db } from "~/server/repositories/db";
-import { redis } from "~/server/repositories/redis";
-import { requireUser } from "~/server/utils/requireUser";
 import {
   chineseOnlySentenceHintXp,
   chineseOnlySentenceXp,
-} from "~/utils/xp/helpers";
+} from "~/config/xp/helpers";
+import { db } from "~/server/repositories/db";
+import { redis } from "~/server/repositories/redis";
+import { requireUser } from "~/server/utils/requireUser";
 
 type SentenceBatchAttempt = {
   sentenceId: string;

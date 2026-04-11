@@ -22,7 +22,8 @@ import {
 } from '@/utils/sounds'
 
 import { jyutpingXp, jyutpingXpHintUsed } from '@/utils/dojo/xp'
-import { masteryXp } from '@/utils/xp/helpers'
+// import { masteryXp } from '@/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers'
 import { levelTitles } from '~/utils/levels/levels'
 
 type TrainWord = {

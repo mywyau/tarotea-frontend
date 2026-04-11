@@ -12,7 +12,7 @@ import { FREE_LEVEL_WORD_LIMIT } from '~/config/level/levels-config'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
-import { masteryXp } from '~/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers';
 
 const route = useRoute()
 const slug = route.params.slug as string

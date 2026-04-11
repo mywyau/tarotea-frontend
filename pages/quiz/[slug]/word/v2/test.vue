@@ -19,7 +19,7 @@ import {
 import type { LevelData, Word } from '~/types/level/quiz/types'
 import { brandColours } from '~/utils/branding/helpers'
 import { levelTitles } from '~/utils/levels/levels'
-import { masteryXp } from '~/utils/xp/helpers'
+import { masteryXp } from '@/config/xp/helpers';
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
