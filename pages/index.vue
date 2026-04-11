@@ -130,29 +130,6 @@ const { data: stats } = await useFetch('/api/total-users-stats', {
               </div>
             </div>
           </NuxtLink>
-
-          <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
-        shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#D6A3D1;">
-            <div>
-              <div class="font-semibold text-gray-900">Coming soon</div>
-              <div class="text-xs text-gray-800 mt-1">
-                Something cool
-              </div>
-            </div>
-          </NuxtLink> -->
-
-
-          <!-- <NuxtLink to="/coming-soon" class="rounded-xl p-6 flex items-end
-        shadow-sm hover:shadow-md transition hover:brightness-110" style="background-color:#A8CAE0;">
-            <div>
-              <div class="font-semibold text-gray-900">Coming soon</div>
-              <div class="text-xs text-gray-800 mt-1">
-                Awesome
-              </div>
-            </div>
-          </NuxtLink>  -->
-
-
         </div>
       </div>
 

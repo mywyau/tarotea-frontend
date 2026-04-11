@@ -164,3 +164,62 @@ export function playQuizCompleteFailSong(volume = 0.55) {
     osc.stop(now + t + d);
   });
 }
+
+
+export function playWordUnlockFanfare(volume = 0.8) {
+  const ctx = getAudioContext();
+
+  if (ctx.state === "suspended") {
+    void ctx.resume();
+  }
+
+  const now = ctx.currentTime;
+
+  const master = ctx.createGain();
+  master.gain.setValueAtTime(0.0001, now);
+  master.gain.exponentialRampToValueAtTime(volume, now + 0.03);
+  master.gain.exponentialRampToValueAtTime(0.0001, now + 0.95);
+  master.connect(ctx.destination);
+
+  const notes = [
+    { t: 0.00, f: 783.99, d: 0.16 }, // G5
+    { t: 0.10, f: 987.77, d: 0.18 }, // B5
+    { t: 0.22, f: 1174.66, d: 0.22 }, // D6
+    { t: 0.38, f: 1567.98, d: 0.42 }, // G6
+  ];
+
+  notes.forEach(({ t, f, d }) => {
+    // Main tone
+    const osc = ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(f, now + t);
+    osc.frequency.exponentialRampToValueAtTime(f * 1.01, now + t + d);
+
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.0001, now + t);
+    gain.gain.exponentialRampToValueAtTime(0.55, now + t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + t + d);
+
+    osc.connect(gain);
+    gain.connect(master);
+
+    osc.start(now + t);
+    osc.stop(now + t + d);
+  });
+
+  // Small sparkle layer on the final note
+  const sparkle = ctx.createOscillator();
+  sparkle.type = "triangle";
+  sparkle.frequency.setValueAtTime(3135.96, now + 0.40); // G7
+
+  const sparkleGain = ctx.createGain();
+  sparkleGain.gain.setValueAtTime(0.0001, now + 0.40);
+  sparkleGain.gain.exponentialRampToValueAtTime(0.12, now + 0.43);
+  sparkleGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.72);
+
+  sparkle.connect(sparkleGain);
+  sparkleGain.connect(master);
+
+  sparkle.start(now + 0.40);
+  sparkle.stop(now + 0.72);
+}
