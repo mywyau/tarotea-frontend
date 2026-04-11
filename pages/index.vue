@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-const { data: stats } = await useFetch('/api/stats', {
+const { data: stats } = await useFetch('/api/total-users-stats', {
   server: true,
   lazy: true,
 })
@@ -13,34 +13,8 @@ const { data: stats } = await useFetch('/api/stats', {
     <div class="text-center">
 
       <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-black">
-        Learn Everyday Cantonese
+        Learn Cantonese
       </h1>
-
-      <!-- <p class="mt-4 text-lg text-gray-700 max-w-xl mx-auto">
-        Structured material and tools to help you on your studying journey.
-      </p> -->
-
-      <!-- <NuxtLink to="/topics" class="mt-8 inline-block font-semibold px-8 py-3 rounded-lg
-         bg-black
-         shadow-md hover:shadow-lg
-         hover:-translate-y-0.5
-         active:scale-[0.98]
-         transition-all duration-300">
-        <span class="bg-gradient-to-r
-           from-[#EAB8E4]
-           via-[#A8CAE0]
-           to-[#D6A3D1]
-           bg-clip-text text-transparent
-           transition-all duration-300
-           hover:brightness-125">
-          Start Learning
-        </span>
-      </NuxtLink> -->
-
-      <!-- <NuxtLink to="/topics"
-        class="topic-btn-blush mt-8 inline-block font-semibold px-8 py-3 rounded-lg text-black transition-colors">
-        Start Learning
-      </NuxtLink> -->
     </div>
 
     <!-- Stats -->
