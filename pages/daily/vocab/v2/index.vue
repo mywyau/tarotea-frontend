@@ -496,7 +496,7 @@ onMounted(async () => {
 
         <div class="pt-2">
           <NuxtLink to="/topics/quiz" class="inline-block rounded-lg px-4 py-3 font-medium text-black hover:underline">
-            Explore words
+            Explore quizzes
           </NuxtLink>
         </div>
       </div>
