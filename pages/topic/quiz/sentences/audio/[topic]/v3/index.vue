@@ -6,6 +6,7 @@ definePageMeta({
 
 import { computed, ref, watch, type Ref } from 'vue'
 
+import { masteryXp, sentenceQuizXp } from '@/config/xp/helpers'
 import {
   playCorrectJingle,
   playIncorrectJingle,
@@ -15,7 +16,6 @@ import {
 } from '@/utils/sounds'
 import { brandColours } from '~/utils/branding/helpers'
 import { shuffleFisherYates } from '~/utils/shuffle'
-import { masteryXp } from '@/config/xp/helpers';
 
 type SentenceQuizQuestion = {
   sentenceId: string
@@ -112,6 +112,56 @@ const activeSessionKey = ref('')
 const quizTitle = ref('Sentence Audio Quiz')
 const questions = ref<AudioSentenceQuizQuestion[]>([])
 
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => {
+  return frozenElapsedMs.value ?? elapsedMs.value
+})
+
+const formattedElapsedTime = computed(() => {
+  return formatDuration(displayedElapsedMs.value)
+})
+
 const hasQuestions = computed(() => questions.value.length > 0)
 
 const current = ref(0)
@@ -131,7 +181,7 @@ const WRONG_PENALTY = -12
 
 function deltaFor(correct: boolean, streakBefore: number) {
   if (!correct) return WRONG_PENALTY
-  return 10 + Math.min(streakBefore, STREAK_CAP) * 3
+  return sentenceQuizXp + Math.min(streakBefore, STREAK_CAP) * 2
 }
 
 const question = computed(() => questions.value[current.value])
@@ -232,6 +282,7 @@ function runCompletionAnimations() {
 
 function resetQuizStateFromStartPayload(payload: TopicSentenceQuizStartResponse) {
   stop()
+  stopTimer()
 
   current.value = 0
   score.value = 0
@@ -242,6 +293,9 @@ function resetQuizStateFromStartPayload(payload: TopicSentenceQuizStartResponse)
   finishing.value = false
   totalXpEarned.value = 0
   xpDelta.value = null
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+  quizStartedAt.value = null
   resetCompletionAnimations()
 
   wordProgressMap.value = { ...(payload.progress ?? {}) }
@@ -253,6 +307,10 @@ function resetQuizStateFromStartPayload(payload: TopicSentenceQuizStartResponse)
   currentStreak.value = firstWordId
     ? wordProgressMap.value[firstWordId]?.streak ?? 0
     : 0
+
+  if (payload.quiz.questions?.length) {
+    startTimer()
+  }
 }
 
 async function finalizeQuiz() {
@@ -341,6 +399,8 @@ async function next() {
   current.value++
 
   if (current.value >= questions.value.length) {
+    freezeTimer()
+
     if (answerLog.value.length > 0) {
       await finalizeQuiz()
     }
@@ -419,6 +479,7 @@ watch(
   () => slug.value,
   () => {
     stop()
+    stopTimer()
     activeSessionKey.value = ''
     quizTitle.value = 'Sentence Audio Quiz'
     questions.value = []
@@ -434,9 +495,18 @@ watch(
     currentXp.value = 0
     currentStreak.value = 0
     xpDelta.value = null
+    elapsedMs.value = 0
+    frozenElapsedMs.value = null
+    quizStartedAt.value = null
     resetCompletionAnimations()
   }
 )
+
+onBeforeUnmount(() => {
+  stop()
+  stopTimer()
+})
+
 </script>
 
 <template>
@@ -610,7 +680,7 @@ watch(
                 </p>
 
                 <p class="hero-subtext">
-                  {{ score }} / {{ questions.length }} correct
+                  Time: {{ formattedElapsedTime }}
                 </p>
               </div>
             </transition>

@@ -106,7 +106,7 @@ async function unlockWord() {
     })
 
     showUnlockPanel.value = false
-    playWordUnlockFanfare()
+    playWordUnlockFanfare(2.0)
     await navigateTo(wordPagePath)
   } catch (err: any) {
     errorMessage.value = err?.data?.statusMessage ?? 'Failed to unlock word.'

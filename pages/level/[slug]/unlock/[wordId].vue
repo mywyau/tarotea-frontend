@@ -106,7 +106,7 @@ async function unlockWord() {
     })
 
     showUnlockPanel.value = false
-    playWordUnlockFanfare()
+    playWordUnlockFanfare(2.0)
 
     await navigateTo(wordPagePath)
   } catch (err: any) {
@@ -192,7 +192,7 @@ onMounted(loadData)
       <div class="space-y-2 text-sm text-gray-700">
         <p>This tile will be added to your permanent study pool.</p>
       </div>
-      
+
       <div class="progress-card rounded-lg px-4 py-4 space-y-3">
         <div class="flex items-center justify-between gap-3 text-sm">
           <p class="text-gray-700 font-semibold">Next TaroKey</p>
