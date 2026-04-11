@@ -199,9 +199,9 @@ function calculateQuizXpEarned() {
 }
 
 const { data, error } = await useFetch<LevelData>(
-  () => 
-  // `/api/vocab-quiz/${slug.value}`,
-  `/api/vocab-quiz/v2/${slug.value}`,
+  () =>
+    // `/api/vocab-quiz/${slug.value}`,
+    `/api/vocab-quiz/v2/${slug.value}`,
   {
     key: () => `audio-quiz-${slug.value}`,
     server: false
@@ -304,9 +304,9 @@ const progressPercent = computed(() => {
 })
 
 const resultHeroClass = computed(() => {
-  if (accuracy.value === 100) return 'result-3'
-  if (accuracy.value >= 70) return 'result-0'
-  if (accuracy.value >= 50) return 'result-2'
+  if (accuracy.value === 80) return 'result-3'
+  if (accuracy.value >= 60) return 'result-0'
+  if (accuracy.value >= 40) return 'result-2'
   return 'result-1'
 })
 

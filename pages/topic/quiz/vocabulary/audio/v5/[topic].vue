@@ -318,7 +318,7 @@ const progressPercent = computed(() => {
 })
 
 const resultHeroClass = computed(() => {
-    if (accuracy.value === 100) return 'result-3'
+    if (accuracy.value === 80) return 'result-3'
     if (accuracy.value >= 70) return 'result-0'
     if (accuracy.value >= 50) return 'result-2'
     return 'result-1'
