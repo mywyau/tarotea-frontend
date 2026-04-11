@@ -14,8 +14,8 @@ import {
 } from '@/utils/sounds'
 
 import { masteryXp } from '@/config/xp/helpers'
-import { levelTitles } from '~/utils/levels/levels'
 import { chineseSentenceXp, chineseSentenceXpHintUsed } from '~/config/dojo/xp_config'
+import { levelTitles } from '~/utils/levels/levels'
 
 type TrainSentence = {
   sentenceId: string
@@ -101,6 +101,56 @@ const {
 
 const activeSessionKey = ref('')
 const title = ref('Sentence Dojo')
+
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => {
+  return frozenElapsedMs.value ?? elapsedMs.value
+})
+
+const formattedElapsedTime = computed(() => {
+  return formatDuration(displayedElapsedMs.value)
+})
 
 const sentences = ref<TrainSentence[]>([])
 const wordProgressMap = ref<Record<string, { xp: number }>>({})
@@ -221,9 +271,15 @@ const completionTiles = computed(() => [
     className: 'result-1',
   },
   {
+    label: 'Time',
+    value: formattedElapsedTime.value,
+    suffix: '',
+    className: 'result-0',
+  },
+  {
     label: 'XP Earned',
     value: animatedXpEarned.value,
-    suffix: 'XP',
+    suffix: ' XP',
     className: 'result-2',
     prefix: animatedXpEarned.value > 0 ? '+' : '',
   },
@@ -285,6 +341,8 @@ const live = computed(() => {
 })
 
 function applyStartPayload(payload: SentenceDojoStartResponse) {
+  stopTimer()
+
   activeSessionKey.value = payload.sessionKey
   title.value = payload.session.title ?? `Sentence Dojo - ${levelTitles[slug.value]}`
 
@@ -301,10 +359,17 @@ function applyStartPayload(payload: SentenceDojoStartResponse) {
   finalizeError.value = null
   xpDelta.value = null
   copied.value = false
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+  quizStartedAt.value = null
   resetCompletionAnimations()
 
   const firstId = sentences.value[0]?.sourceWordId
   currentXp.value = firstId ? (wordProgressMap.value[firstId]?.xp ?? 0) : 0
+
+  if (sentences.value.length > 0) {
+    startTimer()
+  }
 
   nextTick(() => {
     inputRef.value?.focus()
@@ -435,6 +500,7 @@ watch(
     await new Promise(r => setTimeout(r, 600))
 
     if (batchAttempts.value.length >= sentences.value.length) {
+      freezeTimer()
       await finalizeBatch()
       advancing = false
       return
@@ -471,6 +537,7 @@ watch(
 watch(
   () => slug.value,
   () => {
+    stopTimer()
     activeSessionKey.value = ''
     title.value = 'Sentence Dojo'
     sentences.value = []
@@ -486,9 +553,16 @@ watch(
     xpDelta.value = null
     currentXp.value = 0
     copied.value = false
+    elapsedMs.value = 0
+    frozenElapsedMs.value = null
+    quizStartedAt.value = null
     resetCompletionAnimations()
   }
 )
+
+onBeforeUnmount(() => {
+  stopTimer()
+})
 </script>
 
 <template>
@@ -536,11 +610,11 @@ watch(
               Sentence {{ idx + 1 }} / {{ sentences.length }}
             </div>
 
-            <button
+            <!-- <button
               class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
               type="button" @click="restartSession">
               New session
-            </button>
+            </button> -->
           </div>
 
           <div class="rounded-2xl bg-gray-50 p-5 space-y-5">
@@ -675,9 +749,14 @@ watch(
               <p class="hero-subtext">
                 {{ completedWordsCount }} / {{ totalWordsCount }} sentences completed
               </p>
+
+
+              <p class="hero-subtext">
+                Time: {{ formattedElapsedTime }}
+              </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
               <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
                 :class="tile.className">
                 <p class="stat-label">
@@ -685,7 +764,7 @@ watch(
                 </p>
 
                 <p class="stat-value">
-                  {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
+                  {{ tile.prefix ?? '' }}{{ tile.value }}<span v-if="tile.suffix"> {{ tile.suffix }}</span>
                 </p>
               </div>
             </div>

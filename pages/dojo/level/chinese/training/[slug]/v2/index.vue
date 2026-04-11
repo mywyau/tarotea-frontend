@@ -658,8 +658,8 @@ onBeforeUnmount(() => {
 
           <div class="rounded-2xl bg-gray-50 p-5">
             <transition name="fade-word" mode="out-in">
-              <div :key="current?.wordId" class="text-4xl sm:text-4xl text-center font-medium flex gap-1"
-                >
+              <div :key="current?.wordId" class="text-4xl sm:text-4xl text-center font-medium flex gap-1 no-copy"
+                @copy.prevent @cut.prevent @contextmenu.prevent @dragstart.prevent @selectstart.prevent>
                 <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
                   'text-green-600 font-semibold': charStates[i] === 'correct',
                   'text-gray-400': charStates[i] === 'idle'
