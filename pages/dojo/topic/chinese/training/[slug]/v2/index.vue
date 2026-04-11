@@ -11,9 +11,8 @@ import {
   chineseXpHintUsed
 } from "~/config/dojo/xp_config";
 
-import { playCorrectJingle, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from '@/utils/sounds';
-// import { masteryXp } from '@/utils/xp/helpers'
 import { masteryXp } from '@/config/xp/helpers';
+import { playCorrectJingle, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from '@/utils/sounds';
 import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers';
 
 type TrainWord = {
@@ -108,6 +107,56 @@ const topicTitle = computed(() =>
 
 const activeSessionKey = ref('')
 const title = ref('Chinese Dojo')
+
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => {
+  return frozenElapsedMs.value ?? elapsedMs.value
+})
+
+const formattedElapsedTime = computed(() => {
+  return formatDuration(displayedElapsedMs.value)
+})
 
 const words = ref<TrainWord[]>([])
 const wordProgressMap = ref<Record<string, { xp: number }>>({})
@@ -242,9 +291,15 @@ const completionTiles = computed(() => [
     className: 'result-1'
   },
   {
+    label: 'Time',
+    value: formattedElapsedTime.value,
+    suffix: '',
+    className: 'result-0'
+  },
+  {
     label: 'XP Earned',
     value: animatedXpEarned.value,
-    suffix: 'XP',
+    suffix: ' XP',
     className: 'result-2',
     prefix: animatedXpEarned.value > 0 ? '+' : ''
   }
@@ -309,6 +364,8 @@ function resetCompletionAnimations() {
 }
 
 function applyStartPayload(payload: DojoStartResponse) {
+  stopTimer()
+
   activeSessionKey.value = payload.sessionKey
   title.value = payload.session.title ?? `Chinese Dojo - ${topicTitle.value}`
 
@@ -324,10 +381,17 @@ function applyStartPayload(payload: DojoStartResponse) {
   finishing.value = false
   finalizeError.value = null
   xpDelta.value = null
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+  quizStartedAt.value = null
   resetCompletionAnimations()
 
   const firstId = words.value[0]?.wordId
   currentXp.value = firstId ? (wordProgressMap.value[firstId]?.xp ?? 0) : 0
+
+  if (words.value.length > 0) {
+    startTimer()
+  }
 
   nextTick(() => {
     inputRef.value?.focus()
@@ -466,6 +530,7 @@ watch(
     await new Promise(r => setTimeout(r, 600))
 
     if (batchAttempts.value.length >= words.value.length) {
+      freezeTimer()
       await finalizeBatch()
       advancing = false
       return
@@ -502,6 +567,7 @@ watch(
 watch(
   () => slug.value,
   () => {
+    stopTimer()
     activeSessionKey.value = ''
     title.value = 'Chinese Dojo'
     words.value = []
@@ -516,9 +582,16 @@ watch(
     finalizeError.value = null
     xpDelta.value = null
     currentXp.value = 0
+    elapsedMs.value = 0
+    frozenElapsedMs.value = null
+    quizStartedAt.value = null
     resetCompletionAnimations()
   }
 )
+
+onBeforeUnmount(() => {
+  stopTimer()
+})
 </script>
 
 <template>
@@ -697,7 +770,7 @@ watch(
               </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
               <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
                 :class="tile.className">
                 <p class="stat-label">
@@ -705,7 +778,7 @@ watch(
                 </p>
 
                 <p class="stat-value">
-                  {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
+                  {{ tile.prefix ?? '' }}{{ tile.value }}<span v-if="tile.suffix"> {{ tile.suffix }}</span>
                 </p>
               </div>
             </div>

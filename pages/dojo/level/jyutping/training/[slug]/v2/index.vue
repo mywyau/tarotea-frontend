@@ -857,10 +857,6 @@ onBeforeUnmount(() => {
               <p class="hero-subtext">
                 {{ completedWordsCount }} / {{ totalWordsCount }} words completed
               </p>
-
-              <p class="hero-subtext">
-                Time: {{ formattedElapsedTime }}
-              </p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
