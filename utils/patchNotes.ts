@@ -15,6 +15,16 @@ export const patchNotes: PatchNote[] = [
     ],
   },
   {
+    date: "11 April 2026",
+    title: "General sweep up",
+    items: [
+      "Improve site stability and add unlock xp mechanism",
+      "Swap to all content free via xp system, you can know unlock words using TaroKeys",
+      "Improve styling and consistency in branding in some areas of the app",
+      "Add word counts to topic and level pages and next and previous arrows to indiviual word pages"
+    ],
+  },
+  {
     date: "2 April 2026",
     title: "Add writing examples via Hanzi Writer",
     items: [
