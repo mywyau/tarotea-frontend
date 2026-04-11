@@ -129,7 +129,7 @@ const incorrectCount = computed(() =>
 )
 
 const resultHeroClass = computed(() => {
-  if (percentage.value === 80) return "result-3"
+  if (percentage.value >= 80) return "result-3"
   if (percentage.value >= 60) return "result-0"
   if (percentage.value >= 50) return "result-2"
   return "result-1"
