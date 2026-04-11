@@ -115,6 +115,14 @@ async function unlockWord() {
   }
 }
 
+const xpTowardsNextKey = computed(() => {
+  return unlockSummary.value.totalXp % xpNeededForOneTaroKey
+})
+
+const xpProgressPercent = computed(() => {
+  return (xpTowardsNextKey.value / xpNeededForOneTaroKey) * 100
+})
+
 onMounted(loadData)
 </script>
 
@@ -183,15 +191,23 @@ onMounted(loadData)
       <div class="space-y-2 text-sm text-gray-700">
         <p>This tile will be added to your permanent study pool.</p>
       </div>
+      
+      <div class="progress-card rounded-lg px-4 py-4 space-y-3">
+        <div class="flex items-center justify-between gap-3 text-sm">
+          <p class="text-gray-700 font-semibold">Next TaroKey</p>
+          <p class="text-gray-600">
+            <span class="font-semibold">{{ xpTowardsNextKey }}</span>
+            / {{ xpNeededForOneTaroKey }} xp
+          </p>
+        </div>
 
-      <div class="space-y-2 text-sm text-gray-700">
-        <p>
-          You get 1 key every
-          <span class="font-semibold">{{ xpNeededForOneTaroKey }} xp</span>.
-        </p>
-        <p class="text-gray-600">
-          Your next TaroKey unlocks in
-          <span class="font-semibold">{{ xpUntilNextKey }} xp</span>. At <span class="font-semibold">{{ nextKeyAtXp }} xp</span>.
+        <div class="progress-track">
+          <div class="progress-fill" :style="{ width: `${xpProgressPercent}%` }" />
+        </div>
+
+        <p class="text-sm text-gray-600">
+          <span class="font-semibold">{{ xpUntilNextKey }} xp</span>
+          until your next key
         </p>
       </div>
 
@@ -409,5 +425,26 @@ onMounted(loadData)
 
 .confirm-btn-blush {
   background: rgb(126, 147, 255);
+}
+
+.progress-card {
+  background: rgba(255, 255, 255, 0.46);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.progress-track {
+  width: 100%;
+  height: 0.8rem;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.08);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(168, 202, 224, 0.95);
+  transition: width 0.25s ease;
 }
 </style>

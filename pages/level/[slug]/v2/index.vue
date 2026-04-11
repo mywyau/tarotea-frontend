@@ -150,35 +150,6 @@ function getColorFromId(id: string) {
   return tileColours[index]
 }
 
-// const gatedCategories = computed(() => {
-//   let globalIndex = 0
-
-//   return categories.value.map(category => {
-//     return {
-//       ...category,
-//       words: category.words.map((word: any) => {
-//         const paywallLocked =
-//           !isFreeLevel(levelNumber) &&
-//           !canAccessLevel(isLoggedIn.value, entitlement.value) &&
-//           globalIndex >= FREE_LEVEL_WORD_LIMIT
-
-//         const unlockedByUser = !!unlockMap.value[word.id]
-//         const locked = paywallLocked && !unlockedByUser
-
-//         globalIndex++
-
-//         return {
-//           ...word,
-//           paywallLocked,
-//           unlockedByUser,
-//           locked,
-//           tileColor: getColorFromId(word.id)
-//         }
-//       })
-//     }
-//   })
-// })
-
 const hasPaidAccess = computed(() => {
   return canAccessLevel(isLoggedIn.value, entitlement.value)
 })

@@ -114,6 +114,14 @@ async function unlockWord() {
   }
 }
 
+const xpTowardsNextKey = computed(() => {
+  return unlockSummary.value.totalXp % xpNeededForOneTaroKey
+})
+
+const xpProgressPercent = computed(() => {
+  return (xpTowardsNextKey.value / xpNeededForOneTaroKey) * 100
+})
+
 onMounted(loadData)
 </script>
 
@@ -161,10 +169,8 @@ onMounted(loadData)
       {{ errorMessage }}
     </div>
 
-    <section
-      class="rounded-lg border p-5 space-y-4"
-      style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);"
-    >
+    <section class="rounded-lg border p-5 space-y-4"
+      style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);">
       <div class="flex items-start justify-between gap-4">
         <div>
           <h2 class="text-base font-semibold text-gray-900">Unlock tile</h2>
@@ -184,26 +190,29 @@ onMounted(loadData)
         <p>This tile will be added to your permanent study pool.</p>
       </div>
 
-      <div class="space-y-2 text-sm text-gray-700">
-        <p>
-          You get 1 key every
-          <span class="font-semibold">{{ xpNeededForOneTaroKey }} xp</span>.
-        </p>
-        <p class="text-gray-600">
-          Your next TaroKey unlocks in
-          <span class="font-semibold">{{ xpUntilNextKey }} xp</span>.
-          At <span class="font-semibold">{{ nextKeyAtXp }} xp</span>.
+      <div class="progress-card rounded-lg px-4 py-4 space-y-3">
+        <div class="flex items-center justify-between gap-3 text-sm">
+          <p class="text-gray-700 font-semibold">Next TaroKey</p>
+          <p class="text-gray-600">
+            <span class="font-semibold">{{ xpTowardsNextKey }}</span>
+            / {{ xpNeededForOneTaroKey }} xp
+          </p>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" :style="{ width: `${xpProgressPercent}%` }" />
+        </div>
+
+        <p class="text-sm text-gray-600">
+          <span class="font-semibold">{{ xpUntilNextKey }} xp</span>
+          until your next key
         </p>
       </div>
 
       <div class="pt-2">
-        <button
-          v-if="!showUnlockPanel"
-          type="button"
+        <button v-if="!showUnlockPanel" type="button"
           class="w-full rounded-lg py-3 font-semibold border border-black/10 text-gray-900 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="loading || unlockSummary.creditsAvailable < 1"
-          @click="openUnlockPanel"
-        >
+          :disabled="loading || unlockSummary.creditsAvailable < 1" @click="openUnlockPanel">
           Show unlock options
         </button>
 
@@ -222,29 +231,20 @@ onMounted(loadData)
               </p>
             </div>
 
-            <div
-              v-if="errorMessage"
-              class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
-            >
+            <div v-if="errorMessage" class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
               {{ errorMessage }}
             </div>
 
             <div class="flex flex-col gap-2 sm:flex-row">
-              <button
-                type="button"
+              <button type="button"
                 class="confirm-btn-blush w-full rounded-lg py-3 font-semibold hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="loading || unlockSummary.creditsAvailable < 1"
-                @click="unlockWord"
-              >
+                :disabled="loading || unlockSummary.creditsAvailable < 1" @click="unlockWord">
                 {{ loading ? 'Unlocking…' : 'Confirm unlock' }}
               </button>
 
-              <button
-                type="button"
+              <button type="button"
                 class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
-                :disabled="loading"
-                @click="closeUnlockPanel"
-              >
+                :disabled="loading" @click="closeUnlockPanel">
                 Cancel
               </button>
             </div>
@@ -379,5 +379,26 @@ onMounted(loadData)
 
 .confirm-btn-blush {
   background: rgb(126, 147, 255);
+}
+
+.progress-card {
+  background: rgba(255, 255, 255, 0.46);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  backdrop-filter: blur(6px);
+}
+
+.progress-track {
+  width: 100%;
+  height: 0.8rem;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.08);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: rgba(168, 202, 224, 0.95);
+  transition: width 0.25s ease;
 }
 </style>
