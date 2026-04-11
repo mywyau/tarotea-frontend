@@ -9,7 +9,7 @@ import {
   chineseXpHintUsed,
   jyutpingXp,
   jyutpingXpHintUsed,
-} from "~/utils/dojo/xp";
+} from "~/config/dojo/xp_config";
 
 type BatchAttempt = {
   wordId: string;

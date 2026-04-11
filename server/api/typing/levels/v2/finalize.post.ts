@@ -1,15 +1,15 @@
 import { Client } from "@upstash/qstash";
 import { createError, readBody } from "h3";
-import { db } from "~/server/repositories/db";
-import { redis } from "~/server/repositories/redis";
-import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
-import { requireUser } from "~/server/utils/requireUser";
 import {
   chineseXp,
   chineseXpHintUsed,
   jyutpingXp,
   jyutpingXpHintUsed,
-} from "~/utils/dojo/xp";
+} from "~/config/dojo/xp_config";
+import { db } from "~/server/repositories/db";
+import { redis } from "~/server/repositories/redis";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
+import { requireUser } from "~/server/utils/requireUser";
 
 type BatchAttempt = {
   wordId: string;
@@ -83,10 +83,16 @@ export default defineEventHandler(async (event) => {
   const requestStart = nowMs();
   const timings: Record<string, number> = {};
 
-  const auth = await timedStep(timings, "authMs", async () => requireUser(event));
+  const auth = await timedStep(timings, "authMs", async () =>
+    requireUser(event),
+  );
   const userId = auth.sub;
 
-  await enforceRateLimit(`rl:finalize:typing-level-sentences:${userId}`, 20, 60);
+  await enforceRateLimit(
+    `rl:finalize:typing-level-sentences:${userId}`,
+    20,
+    60,
+  );
 
   const body = await timedStep(timings, "readBodyMs", async () => {
     return (await readBody(event)) as FinalizeBody;
@@ -129,9 +135,12 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const existingEventRes = await timedStep(timings, "existingEventLookupMs", async () => {
-    return db.query<ExistingEventRow>(
-      `
+  const existingEventRes = await timedStep(
+    timings,
+    "existingEventLookupMs",
+    async () => {
+      return db.query<ExistingEventRow>(
+        `
       select
         id,
         mode,
@@ -145,9 +154,10 @@ export default defineEventHandler(async (event) => {
         and session_key = $2
       limit 1
       `,
-      [userId, sessionKey],
-    );
-  });
+        [userId, sessionKey],
+      );
+    },
+  );
 
   if (existingEventRes.rows.length > 0) {
     const existing = existingEventRes.rows[0];
@@ -171,7 +181,9 @@ export default defineEventHandler(async (event) => {
 
       return {
         session: {
-          xpEarned: Number(existing.applied_total_delta ?? existing.total_delta ?? 0),
+          xpEarned: Number(
+            existing.applied_total_delta ?? existing.total_delta ?? 0,
+          ),
           correctCount: Number(existing.correct_count ?? 0),
           totalWords: Number(existing.total_questions ?? 0),
         },
@@ -193,7 +205,9 @@ export default defineEventHandler(async (event) => {
 
     return {
       session: {
-        xpEarned: Number(existing.applied_total_delta ?? existing.total_delta ?? 0),
+        xpEarned: Number(
+          existing.applied_total_delta ?? existing.total_delta ?? 0,
+        ),
         correctCount: Number(existing.correct_count ?? 0),
         totalWords: Number(existing.total_questions ?? 0),
       },
@@ -235,50 +249,54 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const buildResult = await timedStep(timings, "attemptValidationMs", async () => {
-    const allowedWordIds = new Set(session.allowedWordIds ?? []);
-    const attemptMap = new Map<string, BatchAttempt>();
+  const buildResult = await timedStep(
+    timings,
+    "attemptValidationMs",
+    async () => {
+      const allowedWordIds = new Set(session.allowedWordIds ?? []);
+      const attemptMap = new Map<string, BatchAttempt>();
 
-    for (const attempt of body.attempts) {
-      if (!attempt?.wordId) continue;
+      for (const attempt of body.attempts) {
+        if (!attempt?.wordId) continue;
 
-      if (!allowedWordIds.has(attempt.wordId)) {
+        if (!allowedWordIds.has(attempt.wordId)) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: `Invalid wordId in attempts: ${attempt.wordId}`,
+          });
+        }
+
+        if (!attemptMap.has(attempt.wordId)) {
+          attemptMap.set(attempt.wordId, {
+            wordId: attempt.wordId,
+            passed: !!attempt.passed,
+            hintUsed: !!attempt.hintUsed,
+          });
+        }
+      }
+
+      const attempts = [...attemptMap.values()];
+
+      if (attempts.length === 0) {
         throw createError({
           statusCode: 400,
-          statusMessage: `Invalid wordId in attempts: ${attempt.wordId}`,
+          statusMessage: "No attempts",
         });
       }
 
-      if (!attemptMap.has(attempt.wordId)) {
-        attemptMap.set(attempt.wordId, {
-          wordId: attempt.wordId,
-          passed: !!attempt.passed,
-          hintUsed: !!attempt.hintUsed,
-        });
-      }
-    }
+      const payloadAnswers = attempts.map((attempt) => ({
+        wordId: attempt.wordId,
+        correct: !!attempt.passed,
+        delta: deltaFor(attempt, session.mode),
+      }));
 
-    const attempts = [...attemptMap.values()];
+      const correctCount = payloadAnswers.filter((a) => a.correct).length;
+      const totalDelta = payloadAnswers.reduce((acc, a) => acc + a.delta, 0);
+      const totalWords = session.allowedWordIds.length;
 
-    if (attempts.length === 0) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "No attempts",
-      });
-    }
-
-    const payloadAnswers = attempts.map((attempt) => ({
-      wordId: attempt.wordId,
-      correct: !!attempt.passed,
-      delta: deltaFor(attempt, session.mode),
-    }));
-
-    const correctCount = payloadAnswers.filter((a) => a.correct).length;
-    const totalDelta = payloadAnswers.reduce((acc, a) => acc + a.delta, 0);
-    const totalWords = session.allowedWordIds.length;
-
-    return { payloadAnswers, correctCount, totalDelta, totalWords };
-  });
+      return { payloadAnswers, correctCount, totalDelta, totalWords };
+    },
+  );
 
   const { payloadAnswers, correctCount, totalDelta, totalWords } = buildResult;
 
@@ -324,9 +342,12 @@ export default defineEventHandler(async (event) => {
   });
 
   if (insertRes.rows.length === 0) {
-    const racedEventRes = await timedStep(timings, "racedEventLookupMs", async () => {
-      return db.query<ExistingEventRow>(
-        `
+    const racedEventRes = await timedStep(
+      timings,
+      "racedEventLookupMs",
+      async () => {
+        return db.query<ExistingEventRow>(
+          `
         select
           id,
           mode,
@@ -340,9 +361,10 @@ export default defineEventHandler(async (event) => {
           and session_key = $2
         limit 1
         `,
-        [userId, sessionKey],
-      );
-    });
+          [userId, sessionKey],
+        );
+      },
+    );
 
     if (racedEventRes.rows.length === 0) {
       throw createError({
@@ -375,7 +397,9 @@ export default defineEventHandler(async (event) => {
 
     return {
       session: {
-        xpEarned: Number(existing.applied_total_delta ?? existing.total_delta ?? 0),
+        xpEarned: Number(
+          existing.applied_total_delta ?? existing.total_delta ?? 0,
+        ),
         correctCount: Number(existing.correct_count ?? 0),
         totalWords: Number(existing.total_questions ?? 0),
       },

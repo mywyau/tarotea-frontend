@@ -4,13 +4,17 @@ definePageMeta({
   middleware: ['logged-in'],
 })
 
-import { computed, nextTick, ref, watch, type Ref } from 'vue'
+import { computed, nextTick, ref, watch, type Ref } from 'vue';
 
-import { chineseXp, chineseXpHintUsed } from '@/utils/dojo/xp'
-import { playCorrectJingle, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from '@/utils/sounds'
+import {
+  chineseXp,
+  chineseXpHintUsed
+} from "~/config/dojo/xp_config";
+
+import { playCorrectJingle, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from '@/utils/sounds';
 // import { masteryXp } from '@/utils/xp/helpers'
-import { masteryXp } from '@/config/xp/helpers'
-import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
+import { masteryXp } from '@/config/xp/helpers';
+import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers';
 
 type TrainWord = {
   wordId: string

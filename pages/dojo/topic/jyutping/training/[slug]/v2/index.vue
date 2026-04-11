@@ -21,10 +21,9 @@ import {
   playQuizCompleteOkaySong,
 } from '@/utils/sounds'
 
-import { jyutpingXp, jyutpingXpHintUsed } from '@/utils/dojo/xp'
-// import { masteryXp } from '@/utils/xp/helpers'
 import { masteryXp } from '@/config/xp/helpers'
 
+import { jyutpingXp, jyutpingXpHintUsed } from '~/config/dojo/xp_config'
 import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
 
 type TrainWord = {

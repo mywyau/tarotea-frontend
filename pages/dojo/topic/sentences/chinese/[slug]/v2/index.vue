@@ -6,14 +6,14 @@ definePageMeta({
 
 import { computed, nextTick, ref, watch, type Ref } from 'vue'
 
-import { chineseSentenceXp, chineseSentenceXpHintUsed } from '@/utils/dojo/xp'
 import {
   playCorrectJingle,
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong,
 } from '@/utils/sounds'
-// import { masteryXp } from '@/utils/xp/helpers'
+
 import { masteryXp } from '@/config/xp/helpers'
+import { chineseSentenceXp, chineseSentenceXpHintUsed } from '~/config/dojo/xp_config'
 import { sortedTopicJyutpingQuizMeta } from '~/utils/topics/helpers'
 
 type TrainSentence = {
