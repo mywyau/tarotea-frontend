@@ -1,4 +1,4 @@
-export const masteryXp = 1500
+export const masteryXp = 2000
 
 export const jyutpingOnlyHintXp = 1
 export const jyutpingOnlyXp = 3
