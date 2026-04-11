@@ -219,7 +219,7 @@ onMounted(() => {
 
     <section class="hero-card rounded-2xl p-4 sm:p-6">
       <p class="eyebrow text-xs font-medium uppercase tracking-wide sm:text-sm">
-        Writing Practice
+        Learn how to write
       </p>
       <h1 class="mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
         Follow the brush strokes
@@ -317,16 +317,17 @@ onMounted(() => {
               <div class="panel-divider my-4 sm:my-5"></div>
 
               <div class="space-y-2.5 sm:space-y-3">
-                <button type="button"
-                  class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="currentCharIndex === 0" @click="previousCharacter">
-                  Previous character
-                </button>
 
                 <button type="button"
                   class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                   :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
                   Next character
+                </button>
+
+                <button type="button"
+                  class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  :disabled="currentCharIndex === 0" @click="previousCharacter">
+                  Previous character
                 </button>
               </div>
 
@@ -502,6 +503,7 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
+
   .hero-card,
   .practice-card,
   .control-panel,

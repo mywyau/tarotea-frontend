@@ -245,7 +245,7 @@ onMounted(() => {
 
         <header class="header-card rounded-2xl p-4 sm:p-6">
             <p class="page-eyebrow text-xs font-medium uppercase tracking-wide sm:text-sm">
-                Writing
+                Learn how to write
             </p>
             <h1 class="page-heading mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
                 Follow the brush strokes
@@ -339,17 +339,18 @@ onMounted(() => {
                             <div class="section-divider my-4 sm:my-5"></div>
 
                             <div class="space-y-2.5 sm:space-y-3">
-                                <button type="button"
-                                    class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                                    :disabled="currentCharIndex === 0" @click="previousCharacter">
-                                    Previous character
-                                </button>
 
                                 <button type="button"
                                     class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="currentCharIndex >= selectedCharacters.length - 1"
                                     @click="nextCharacter">
                                     Next character
+                                </button>
+
+                                <button type="button"
+                                    class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    :disabled="currentCharIndex === 0" @click="previousCharacter">
+                                    Previous character
                                 </button>
                             </div>
 
@@ -502,134 +503,135 @@ onMounted(() => {
 </style> -->
 <style scoped>
 .sentence-page {
-  --pink: #eab8e4;
-  --purple: #d6a3d1;
-  --blue: #a8cae0;
-  --yellow: #f4cd27;
-  --blush: #f6e1e1;
-  --ink: #1f2937;
-  --ink-strong: #111827;
+    --pink: #eab8e4;
+    --purple: #d6a3d1;
+    --blue: #a8cae0;
+    --yellow: #f4cd27;
+    --blush: #f6e1e1;
+    --ink: #1f2937;
+    --ink-strong: #111827;
 }
 
 .header-card {
-  background: rgba(234, 184, 228, 0.32);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  backdrop-filter: blur(8px);
-  color: var(--ink-strong);
+    background: rgba(234, 184, 228, 0.32);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    backdrop-filter: blur(8px);
+    color: var(--ink-strong);
 }
 
 .page-heading {
-  color: var(--ink-strong);
+    color: var(--ink-strong);
 }
 
 .page-subheading {
-  color: rgba(31, 41, 55, 0.82);
+    color: rgba(31, 41, 55, 0.82);
 }
 
 .page-eyebrow {
-  color: rgba(31, 41, 55, 0.62);
+    color: rgba(31, 41, 55, 0.62);
 }
 
 .page-card {
-  background: rgba(255, 255, 255, 0.36);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
-  backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.36);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
+    backdrop-filter: blur(10px);
 }
 
 .content-card {
-  background: rgba(168, 202, 224, 0.24);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  color: var(--ink-strong);
+    background: rgba(168, 202, 224, 0.24);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    color: var(--ink-strong);
 }
 
 .writer-card {
-  background: rgba(246, 225, 225, 0.42);
-  border: 1px dashed rgba(17, 24, 39, 0.18);
+    background: rgba(246, 225, 225, 0.42);
+    border: 1px dashed rgba(17, 24, 39, 0.18);
 }
 
 .side-card {
-  background: rgba(255, 255, 255, 0.42);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
-  backdrop-filter: blur(8px);
-  color: var(--ink-strong);
+    background: rgba(255, 255, 255, 0.42);
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+    backdrop-filter: blur(8px);
+    color: var(--ink-strong);
 }
 
 .card-label {
-  color: rgba(31, 41, 55, 0.62);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+    color: rgba(31, 41, 55, 0.62);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
 }
 
 .section-divider {
-  border-top: 1px solid rgba(17, 24, 39, 0.1);
+    border-top: 1px solid rgba(17, 24, 39, 0.1);
 }
 
 .status-text {
-  color: rgba(31, 41, 55, 0.68);
+    color: rgba(31, 41, 55, 0.68);
 }
 
 .status-error {
-  color: rgb(185, 28, 28);
+    color: rgb(185, 28, 28);
 }
 
 .status-warn {
-  color: rgb(146, 64, 14);
+    color: rgb(146, 64, 14);
 }
 
 .btn-primary,
 .btn-secondary,
 .btn-tertiary {
-  border: 1px solid rgba(17, 24, 39, 0.08);
+    border: 1px solid rgba(17, 24, 39, 0.08);
 }
 
 .btn-primary {
-  background: rgb(126, 147, 255);
-  color: white;
-  box-shadow: 0 10px 22px rgba(126, 147, 255, 0.22);
+    background: rgb(126, 147, 255);
+    color: white;
+    box-shadow: 0 10px 22px rgba(126, 147, 255, 0.22);
 }
 
 .btn-primary:hover:not(:disabled) {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
+    filter: brightness(1.05);
+    transform: translateY(-1px);
 }
 
 .btn-secondary {
-  background: rgba(168, 202, 224, 0.38);
-  color: var(--ink-strong);
+    background: rgba(168, 202, 224, 0.38);
+    color: var(--ink-strong);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  background: rgba(214, 163, 209, 0.34);
-  transform: translateY(-1px);
+    background: rgba(214, 163, 209, 0.34);
+    transform: translateY(-1px);
 }
 
 .btn-tertiary {
-  background: rgba(246, 225, 225, 0.66);
-  color: var(--ink-strong);
+    background: rgba(246, 225, 225, 0.66);
+    color: var(--ink-strong);
 }
 
 .btn-tertiary:hover:not(:disabled) {
-  background: rgba(234, 184, 228, 0.3);
-  transform: translateY(-1px);
+    background: rgba(234, 184, 228, 0.3);
+    transform: translateY(-1px);
 }
 
 .btn-primary:disabled,
 .btn-secondary:disabled,
 .btn-tertiary:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
 }
 
 @media (max-width: 640px) {
-  .header-card,
-  .page-card,
-  .side-card,
-  .content-card,
-  .writer-card {
-    backdrop-filter: blur(6px);
-  }
+
+    .header-card,
+    .page-card,
+    .side-card,
+    .content-card,
+    .writer-card {
+        backdrop-filter: blur(6px);
+    }
 }
 </style>
