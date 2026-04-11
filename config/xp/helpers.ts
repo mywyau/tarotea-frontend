@@ -1,4 +1,4 @@
-export const masteryXp = 2000
+export const masteryXp = 1000
 
 export const jyutpingOnlyHintXp = 1
 export const jyutpingOnlyXp = 3
@@ -11,3 +11,6 @@ export const chineseOnlySentenceXp = 15
 
 export const dailyJyutpingFailXp = 0
 export const dailyJyutpingSuccessXp = 20
+
+
+export const sentenceQuizXp = 10

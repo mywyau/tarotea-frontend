@@ -166,7 +166,7 @@ export function playQuizCompleteFailSong(volume = 0.55) {
 }
 
 
-export function playWordUnlockFanfare(volume = 0.8) {
+export function playWordUnlockFanfare(volume = 1.5) {
   const ctx = getAudioContext();
 
   if (ctx.state === "suspended") {

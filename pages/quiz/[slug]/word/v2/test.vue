@@ -16,10 +16,10 @@ import {
     playQuizCompleteOkaySong
 } from '@/utils/sounds'
 
+import { masteryXp } from '@/config/xp/helpers'
 import type { LevelData, Word } from '~/types/level/quiz/types'
 import { brandColours } from '~/utils/branding/helpers'
 import { levelTitles } from '~/utils/levels/levels'
-import { masteryXp } from '@/config/xp/helpers';
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -212,11 +212,10 @@ const { getAccessToken } = await useAuth()
 
 const token = await getAccessToken()
 
-const { authReady, isLoggedIn } = useMeStateV2() // for now just to prevent hydration redirect jitters
+const { isLoggedIn } = useMeStateV2() // for now just to prevent hydration redirect jitters
 
 const { data, error } = await useFetch<LevelData>(
     () =>
-        // `/api/vocab-quiz/${slug.value}`,
         `/api/vocab-quiz/v2/${slug.value}`,
     {
         key: () => `vocab-quiz-${slug.value}-${isLoggedIn.value ? 'authed' : 'anon'}`,

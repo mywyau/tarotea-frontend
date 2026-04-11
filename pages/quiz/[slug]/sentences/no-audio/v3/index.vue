@@ -15,7 +15,7 @@ import {
 } from '@/utils/sounds'
 import { brandColours } from '~/utils/branding/helpers'
 import { shuffleFisherYates } from '~/utils/shuffle'
-import { masteryXp } from '@/config/xp/helpers';
+import { masteryXp, sentenceQuizXp } from '@/config/xp/helpers';
 
 type SentenceQuizQuestion = {
     sentenceId: string
@@ -171,7 +171,7 @@ const WRONG_PENALTY = -12
 
 function deltaFor(correct: boolean, streakBefore: number) {
     if (!correct) return WRONG_PENALTY
-    return 10 + Math.min(streakBefore, STREAK_CAP) * 3
+    return sentenceQuizXp + Math.min(streakBefore, STREAK_CAP) * 3
 }
 
 const question = computed(() => questions.value[current.value])

@@ -14,9 +14,9 @@ import {
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
 
+import { masteryXp, sentenceQuizXp } from '@/config/xp/helpers'
 import { brandColours } from '~/utils/branding/helpers'
 import { shuffleFisherYates } from '~/utils/shuffle'
-import { masteryXp } from '@/config/xp/helpers';
 
 type SentenceQuizQuestion = {
   sentenceId: string
@@ -93,7 +93,6 @@ const {
   () => `level-sentences-audio-start-${slug.value}`,
   () =>
     authedFetch<SentenceQuizStartResponse>(
-      // '/api/sentences/v3/start',
       '/api/sentences/v3/start-v2',
       {
         query: {
@@ -180,7 +179,7 @@ const WRONG_PENALTY = -12
 
 function deltaFor(correct: boolean, streakBefore: number) {
   if (!correct) return WRONG_PENALTY
-  return 10 + Math.min(streakBefore, STREAK_CAP) * 3
+  return sentenceQuizXp + Math.min(streakBefore, STREAK_CAP) * 2
 }
 
 const question = computed(() => questions.value[current.value])
@@ -321,7 +320,6 @@ async function finalizeQuiz() {
   try {
     const [res] = await Promise.all([
       authedFetch<SentenceQuizFinalizeResponse>(
-        // '/api/sentences/v2/finalize',
         '/api/sentences/v3/finalize',
         {
           method: 'POST',
