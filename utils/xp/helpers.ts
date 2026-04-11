@@ -1,5 +1,4 @@
-export const masteryXp = 1000
-export const tileUnlockXp = 500
+export const masteryXp = 1500
 
 export const jyutpingOnlyHintXp = 1
 export const jyutpingOnlyXp = 3
