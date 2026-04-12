@@ -6,8 +6,8 @@ import {
   isWordUnlockedForUser,
 } from "~/server/services/cache/wordUnlockCache"
 
-const FREE_MIN_TOTAL_XP = 120
-const FREE_MIN_UNLOCKED_WORDS = 5
+const FREE_MIN_TOTAL_XP = 5000
+const FREE_MIN_UNLOCKED_WORDS = 10
 
 type EchoLabAccess = {
   allowed: boolean
