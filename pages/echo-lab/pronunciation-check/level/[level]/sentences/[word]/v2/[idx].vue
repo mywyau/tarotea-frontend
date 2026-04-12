@@ -19,10 +19,29 @@ const idx = computed(() => {
 
 const { authReady, isLoggedIn } = useMeStateV2()
 
-const { data, error } = await useFetch(
-  () => `/api/words/${wordSlug.value}`,
+// const { data, error } = await useFetch(
+//   () => `/api/words/${wordSlug.value}`,
+//   {
+//     key: () => `word-${wordSlug.value}`,
+//     server: true,
+//   }
+// )
+
+type WordResponse = {
+  examples?: Array<{
+    sentence?: string
+    jyutping?: string
+    meaning?: string
+  }>
+  audio?: {
+    examples?: string[]
+  }
+}
+
+const { data, error } = await useAsyncData<WordResponse>(
+  () => `word-${wordSlug.value}`,
+  () => $fetch(`/api/words/${wordSlug.value}` as string),
   {
-    key: () => `word-${wordSlug.value}`,
     server: true,
   }
 )
@@ -112,6 +131,35 @@ async function fetchAIUsage() {
     console.error("[frontend] failed to fetch AI usage", e)
   }
 }
+
+const echoLabAccess = ref<null | {
+  allowed: boolean
+  reason: string
+  totalXp: number
+  unlockedWordCount: number
+  minXp: number
+  minUnlockedWords: number
+  wordUnlocked: boolean
+}>(null)
+
+async function fetchEchoLabAccess() {
+  if (!isLoggedIn.value) return
+
+  try {
+    const auth = await useAuth()
+    const token = await auth.getAccessToken()
+
+    echoLabAccess.value = await $fetch("/api/echo-lab/access" as string, {
+      method: "GET",
+      query: { wordId: wordSlug.value },
+      headers: { Authorization: `Bearer ${token}` },
+    })
+  } catch (e) {
+    console.error("[frontend] failed to fetch echo lab access", e)
+  }
+}
+
+const canUseEchoLab = computed(() => echoLabAccess.value?.allowed ?? false)
 
 function getSupportedMimeType() {
   const candidates = [
@@ -384,9 +432,16 @@ const tips = [
 
 const tipIndex = ref(0)
 
+// watch([authReady, isLoggedIn], ([ready, loggedIn]) => {
+//   if (ready && loggedIn) {
+//     fetchAIUsage()
+//   }
+// }, { immediate: true })
+
 watch([authReady, isLoggedIn], ([ready, loggedIn]) => {
   if (ready && loggedIn) {
     fetchAIUsage()
+    fetchEchoLabAccess()
   }
 }, { immediate: true })
 
@@ -452,9 +507,28 @@ onUnmounted(() => {
           <p>4. Submit when ready</p>
         </div>
 
+        <div v-if="echoLabAccess && !echoLabAccess.allowed"
+          class="mx-auto max-w-md rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 space-y-2">
+          <p class="font-semibold">Echo Lab unlock required</p>
+
+          <p v-if="echoLabAccess.reason === 'needs_more_xp'">
+            Earn {{ Math.max(echoLabAccess.minXp - echoLabAccess.totalXp, 0) }} more XP to unlock free pronunciation
+            feedback.
+          </p>
+
+          <p v-else-if="echoLabAccess.reason === 'needs_more_unlocks'">
+            Unlock {{ Math.max(echoLabAccess.minUnlockedWords - echoLabAccess.unlockedWordCount, 0) }} more words to use
+            free pronunciation feedback.
+          </p>
+
+          <p v-else-if="echoLabAccess.reason === 'word_locked'">
+            Unlock this word first before using Echo Lab on it.
+          </p>
+        </div>
+
         <div class="flex flex-col items-center gap-8">
-          <button v-if="!recording && !recordingUrl" :disabled="loading || !practiceTarget" @click="startRecording"
-            class="px-4 py-2 bg-black font-semibold rounded disabled:opacity-50">
+          <button v-if="!recording && !recordingUrl" :disabled="loading || !practiceTarget || !canUseEchoLab"
+            @click="startRecording" class="px-4 py-2 bg-black font-semibold rounded disabled:opacity-50">
             <span
               class="bg-gradient-to-r from-[#7ec6f3] via-[#5aaee6] to-[#3f8fd8] bg-clip-text text-transparent hover:brightness-125 transition">
               Start Recording
@@ -501,7 +575,7 @@ onUnmounted(() => {
           </div>
 
           <div v-if="recordingUrl && !recording && !feedback" class="flex items-center gap-3">
-            <button @click="submitRecording" :disabled="loading"
+            <button @click="submitRecording" :disabled="loading || !canUseEchoLab"
               class="px-4 py-2 bg-black text-white font-semibold rounded hover:brightness-110 transition disabled:opacity-50">
               Submit Recording
             </button>
