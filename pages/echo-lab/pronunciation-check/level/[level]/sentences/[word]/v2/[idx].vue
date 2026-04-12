@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  middleware: "ai-whisper-access-level",
+  middleware: "word-access",
 })
 
 const route = useRoute()
