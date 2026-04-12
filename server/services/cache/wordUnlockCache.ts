@@ -92,3 +92,10 @@ export async function getUnlockedWordIdsForUser(
 
   return trimmedWordIds.filter((_, index) => Boolean(membership[index]))
 }
+
+export async function getUnlockedWordCountForUser(userId: string) {
+  await ensureWordUnlocksHydrated(userId)
+
+  const count = await redis.scard(unlockSetKey(userId))
+  return Number(count ?? 0)
+}

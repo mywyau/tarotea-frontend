@@ -296,8 +296,10 @@ async function submitRecording() {
 
     const formData = new FormData()
     formData.append("audio", recordedBlob.value, `recording.${extension}`)
-    formData.append("expectedJyutping", practiceTarget.value.jyutping)
-    formData.append("expectedChinese", practiceTarget.value.chinese)
+    // formData.append("expectedJyutping", practiceTarget.value.jyutping)
+    // formData.append("expectedChinese", practiceTarget.value.chinese)
+    formData.append("wordId", wordSlug.value)
+    formData.append("exampleIndex", String(idx.value))
 
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
@@ -308,11 +310,14 @@ async function submitRecording() {
       score: number
       remainingAttempts: number
       limit: number
-    }>("/api/pronunciation-check-v2", {
-      method: "POST",
-      body: formData,
-      headers: { Authorization: `Bearer ${token}` },
-    })
+    }>(
+      // "/api/pronunciation-check-v2",
+      "/api/pronunciation-check-v3",
+      {
+        method: "POST",
+        body: formData,
+        headers: { Authorization: `Bearer ${token}` },
+      })
 
     transcript.value = res.transcript
     feedback.value = res.feedback
