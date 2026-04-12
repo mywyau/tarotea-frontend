@@ -722,11 +722,11 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="flex flex-wrap gap-2">
-              <button
+              <!-- <button
                 class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                 type="button" @click="restartSession">
                 New session
-              </button>
+              </button> -->
 
               <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
             </div>
