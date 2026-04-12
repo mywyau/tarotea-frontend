@@ -50,12 +50,12 @@ const stats = computed<StatCard[]>(() => {
       value: toNumber(statsData.value.words_unlocked)
     },
     {
-      label: 'Words Seen',
-      value: toNumber(statsData.value.words_seen)
-    },
-    {
       label: 'Words Maxed',
       value: toNumber(statsData.value.words_maxed)
+    },
+    {
+      label: 'Words Seen',
+      value: toNumber(statsData.value.words_seen)
     },
     {
       label: 'Correct Answers',
