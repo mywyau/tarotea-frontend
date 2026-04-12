@@ -595,7 +595,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-xl px-6 pt-12 pb-28 sm:pb-12">
+  <main class="mx-auto max-w-2xl px-6 pt-12 pb-28 sm:pb-12">
 
     <div class="mb-6">
       <BackLink />

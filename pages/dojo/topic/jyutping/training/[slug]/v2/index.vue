@@ -122,6 +122,56 @@ const topicTitle = computed(() =>
 const activeSessionKey = ref('')
 const title = ref('Jyutping Dojo')
 
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
+
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => {
+  return frozenElapsedMs.value ?? elapsedMs.value
+})
+
+const formattedElapsedTime = computed(() => {
+  return formatDuration(displayedElapsedMs.value)
+})
+
 const words = ref<TrainWord[]>([])
 const wordProgressMap = ref<Record<string, { xp: number }>>({})
 
@@ -241,6 +291,12 @@ const completionTiles = computed(() => [
     className: 'result-1'
   },
   {
+    label: 'Time',
+    value: formattedElapsedTime.value,
+    suffix: '',
+    className: 'result-0'
+  },
+  {
     label: 'XP Earned',
     value: animatedXpEarned.value,
     suffix: 'XP',
@@ -278,6 +334,8 @@ function resetCompletionAnimations() {
 }
 
 function applyStartPayload(payload: DojoStartResponse) {
+  stopTimer()
+
   activeSessionKey.value = payload.sessionKey
   title.value = payload.session.title ?? `Jyutping Dojo - ${topicTitle.value}`
 
@@ -294,10 +352,17 @@ function applyStartPayload(payload: DojoStartResponse) {
   finalizeError.value = null
   xpDelta.value = null
   copied.value = false
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+  quizStartedAt.value = null
   resetCompletionAnimations()
 
   const firstId = words.value[0]?.wordId
   currentXp.value = firstId ? (wordProgressMap.value[firstId]?.xp ?? 0) : 0
+
+  if (words.value.length > 0) {
+    startTimer()
+  }
 
   nextTick(() => {
     inputRef.value?.focus()
@@ -546,6 +611,7 @@ watch(
     await new Promise(r => setTimeout(r, 600))
 
     if (batchAttempts.value.length >= words.value.length) {
+      freezeTimer()
       await finalizeBatch()
       advancing = false
       return
@@ -582,6 +648,7 @@ watch(
 watch(
   () => slug.value,
   () => {
+    stopTimer()
     activeSessionKey.value = ''
     title.value = 'Jyutping Dojo'
     words.value = []
@@ -597,13 +664,20 @@ watch(
     xpDelta.value = null
     currentXp.value = 0
     copied.value = false
+    elapsedMs.value = 0
+    frozenElapsedMs.value = null
+    quizStartedAt.value = null
     resetCompletionAnimations()
   }
 )
+
+onBeforeUnmount(() => {
+  stopTimer()
+})
 </script>
 
 <template>
-  <main class="mx-auto max-w-xl px-6 pt-12 pb-28 sm:pb-12">
+  <main class="mx-auto max-w-2xl px-6 pt-12 pb-28 sm:pb-12">
 
     <div class="mb-6">
       <BackLink />
@@ -793,7 +867,7 @@ watch(
               </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
               <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
                 :class="tile.className">
                 <p class="stat-label">
