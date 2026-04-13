@@ -106,7 +106,7 @@ async function unlockWord() {
     })
 
     showUnlockPanel.value = false
-    playWordUnlockFanfare(2.0)
+    playWordUnlockFanfare(3.0)
 
     await navigateTo(wordPagePath)
   } catch (err: any) {

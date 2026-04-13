@@ -1,7 +1,8 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
 import { redis } from "~/server/repositories/redis";
-import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
+// import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
+import { whisperRequestLimit, whisperRequestLimitFree } from "~/config/audio_config"
 import { consumeWhisperAttemptMonthlyBySubject } from "../repositories/whisper/consumeWhisperAttemptMonthlyBySubject";
 import { consumeWhisperAttemptSubscriptionMonthV2 } from "../repositories/whisper/consumeWhisperAttemptSubscriptionMonthV2";
 import { getUserEntitlement } from "../utils/getEntitlement";

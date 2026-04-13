@@ -4,6 +4,8 @@ definePageMeta({
   middleware: "word-access",
 })
 
+import { MAX_AUDIO_BYTES, MAX_RECORDING_SECONDS, whisperRequestLimit, whisperRequestLimitFree } from "~/config/audio_config"
+
 const route = useRoute()
 const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
@@ -18,14 +20,6 @@ const idx = computed(() => {
 })
 
 const { authReady, isLoggedIn } = useMeStateV2()
-
-// const { data, error } = await useFetch(
-//   () => `/api/words/${wordSlug.value}`,
-//   {
-//     key: () => `word-${wordSlug.value}`,
-//     server: true,
-//   }
-// )
 
 type WordResponse = {
   examples?: Array<{
@@ -71,9 +65,6 @@ const phraseAudioSrc = computed(() => {
   const filename = word.value?.audio?.examples?.[idx.value]
   return filename ? `${cdnBase}/audio/${filename}` : null
 })
-
-const MAX_RECORDING_SECONDS = 15
-const MAX_AUDIO_BYTES = 1_000_000
 
 const supported = ref(false)
 const recording = ref(false)

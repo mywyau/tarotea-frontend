@@ -19,8 +19,6 @@ function getLevelColor(index: number) {
   return brandColours[index % brandColours.length]
 }
 
-const goBack = useGoBack()
-
 // --- helpers ---
 
 // Resolve auth once on mount (safe + idempotent)

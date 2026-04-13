@@ -171,12 +171,6 @@ watchEffect(() => {
 
   <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
-    <!-- <BackLink /> -->
-
-    <!-- <NuxtLink :to="`/level/${level}#${word.id}`" class="text-sm text-black hover:underline">
-      ← Back
-    </NuxtLink> -->
-
     <NuxtLink :to="`/level/${level}/v2#${word.id}`" class="text-sm text-black hover:underline">
       ← Back
     </NuxtLink>

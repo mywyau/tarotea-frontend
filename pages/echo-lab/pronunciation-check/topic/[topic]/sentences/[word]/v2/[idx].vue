@@ -4,6 +4,8 @@ definePageMeta({
   middleware: "word-access",
 })
 
+import { MAX_AUDIO_BYTES, MAX_RECORDING_SECONDS, whisperRequestLimit, whisperRequestLimitFree } from "~/config/audio_config"
+
 const route = useRoute()
 const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
@@ -39,9 +41,6 @@ const { data, error } = await useAsyncData<WordResponse>(
 )
 
 const word = computed(() => data.value)
-
-const MAX_RECORDING_SECONDS = 15
-const MAX_AUDIO_BYTES = 1_000_000
 
 const selectedExample = computed(() => {
   return word.value?.examples?.[idx.value] ?? null
