@@ -218,14 +218,14 @@ onMounted(() => {
     </div>
 
     <section class="hero-card rounded-2xl p-4 sm:p-6">
-      <p class="eyebrow text-xs font-medium uppercase tracking-wide sm:text-sm">
-        Learn how to write
-      </p>
-      <h1 class="mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
+      <p class="page-eyebrow text-xs font-medium uppercase tracking-wide sm:text-sm">
         Follow the brush strokes
+      </p>
+      <h1 class="page-heading mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
+        Learn how to write
       </h1>
-      <p class="mt-2 max-w-3xl text-sm leading-5 sm:mt-3 sm:leading-6">
-        Watch the stroke order for this word and move through each character one by one.
+      <p class="page-subheading mt-2 max-w-3xl text-sm leading-5 sm:mt-3 sm:leading-6">
+        Grab some pen and paper and follow the brush strokes for this word and move through each character one by one.
       </p>
     </section>
 

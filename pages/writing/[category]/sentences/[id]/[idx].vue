@@ -245,13 +245,14 @@ onMounted(() => {
 
         <header class="header-card rounded-2xl p-4 sm:p-6">
             <p class="page-eyebrow text-xs font-medium uppercase tracking-wide sm:text-sm">
-                Learn how to write
+                Follow the brush strokes
             </p>
             <h1 class="page-heading mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
-                Follow the brush strokes
+                Learn how to write
             </h1>
             <p class="page-subheading mt-2 max-w-3xl text-sm leading-5 sm:mt-3 sm:leading-6">
-                Watch the stroke order for this sentence and move through each character one by one.
+                Grab some pen and paper and follow the brush strokes for this sentence. You can move through each
+                character one by one.
             </p>
         </header>
 
