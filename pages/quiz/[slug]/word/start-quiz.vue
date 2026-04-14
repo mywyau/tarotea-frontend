@@ -41,7 +41,7 @@ const primaryTips = [
   },
   {
     title: 'Try to complete each quiz!!',
-    body: 'Xp is only awarded at the end of the quiz. Try to finish each an every quiz.'
+    body: 'XP is only awarded at the end of the quiz. Try to finish each an every quiz.'
   }
 ]
 
