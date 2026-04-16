@@ -37,7 +37,7 @@ const primaryTips = [
   },
   {
     title: 'Wrong answers cost 12 XP',
-    body: 'A wrong answer resets that word’s streak and reduces XP back to base.'
+    body: 'A wrong answer resets that word’s streak and reduces the current XP gained for that word by 12.'
   },
   {
     title: 'Try to complete each quiz!!',
@@ -105,11 +105,11 @@ const canEnterLevel = () => {
           Start vocabulary quiz
         </NuxtLink>
 
-        <div class="mt-6">
+        <!-- <div class="mt-6">
           <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
             ← Level {{ levelNumber }} Vocab
           </NuxtLink>
-        </div>
+        </div> -->
       </div>
 
       <section class="tips-panel">
