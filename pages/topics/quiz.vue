@@ -3,7 +3,6 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 import type { TopicQuiz } from '~/types/topic'
-import { canAccessTopicQuiz } from '~/utils/topics/permissions'
 import { sortedTopics } from '~/utils/topics/topics'
 
 const {
@@ -65,15 +64,16 @@ function goToPage(page: number) {
 
 function canEnterTopic(topic: TopicQuiz): boolean {
 
-    if (topic.comingSoon) return false
+    // if (topic.comingSoon) return false
 
-    // ✅ Free topic → always accessible
-    if (!topic.quizRequiresPaid) return true
+    // // ✅ Free topic → always accessible
+    // if (!topic.quizRequiresPaid) return true
 
     // 🔒 Paid topic → requires login + entitlement
     if (!isLoggedIn.value) return false
 
-    return canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic.id)
+    // return canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic.id)
+    if (isLoggedIn.value) { return true } else { return false }
 }
 
 
@@ -138,11 +138,18 @@ onMounted(async () => {
                         Vocab
                     </NuxtLink>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/audio/v5/${topic.id}` : undefined"
+                    <NuxtLink
+                        :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/audio/v5/${topic.id}/start-quiz` : undefined"
                         class="topic-btn topic-btn-purple"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Audio Only
                     </NuxtLink>
+
+                    <!-- <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/audio/v5/${topic.id}` : undefined"
+                        class="topic-btn topic-btn-purple"
+                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
+                        Audio Only
+                    </NuxtLink> -->
 
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/no-audio/${topic.id}/v3` : undefined"
                         class="topic-btn topic-btn-yellow"

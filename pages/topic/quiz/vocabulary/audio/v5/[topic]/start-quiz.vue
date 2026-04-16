@@ -1,20 +1,16 @@
 <script setup lang="ts">
 definePageMeta({
-  middleware: ['level-quiz-access'],
+  middleware: ['topic-access-quiz'],
   ssr: false
 })
 
 import { createError } from 'h3'
-import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 
 const route = useRoute()
-const slug = route.params.slug as string
+const topicSlug = computed(() => route.params.topic as string)
 
-if (!isLevelId(slug)) {
-  throw createError({ statusCode: 404 })
-}
-
-const levelNumber: number = levelIdToNumbers(slug)
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
 
 const {
   authReady,
@@ -22,58 +18,58 @@ const {
 } = useMeStateV2()
 
 watchEffect(() => {
-  if (slug && levelNumber === null) {
+  if (topicSlug === null) {
     throw createError({
       statusCode: 404,
-      statusMessage: 'Level not found'
+      statusMessage: 'Topic not found'
     })
   }
 })
 
 const primaryTips = [
   {
-    title: 'Gain XP to unlock word tiles using TaroKeys',
-    body: 'Every correct answer gives XP and helps build up your TaroKeys.'
+    title: 'Listen first, then choose the meaning',
+    body: 'Each question plays Cantonese audio. Focus on recognising the word before answering.'
   },
   {
     title: 'Wrong answers cost 12 XP',
     body: 'A wrong answer resets that word’s streak and reduces the current XP gained for that word by 12.'
   },
   {
-    title: 'Try to complete each quiz!!',
-    body: 'XP is only awarded at the end of the quiz. Try to finish each an every quiz.'
+    title: 'Finish the quiz to receive XP',
+    body: 'XP is only awarded at the end of the quiz, so try to complete every session.'
   }
 ]
 
 const scoringTips = [
   'Streaks are tracked separately for each word.',
-  'Lower XP words will appear more often.',
+  'Lower XP or weaker words will appear more often.',
   'Earn at least 5 XP for every correct answer.',
   'Answer streaks increase the XP you earn.',
   'Streaks cap at 5 correct answers in a row for a given word.',
   'Streak XP: 5 → 7 → 9 → 13 → 15.',
   'Questions are randomized every session.',
-  'Practice Cantonese → English and English → Cantonese.',
-  'The quiz was designed with reading and recognition. Audio will play after each and every answer.'
+  'This quiz focuses on listening and recognition.',
+  'Replay the audio carefully before choosing your answer.',
 ]
 
 const showAllTips = ref(false)
 
-const canEnterLevel = () => {
-  return !!isLoggedIn.value
+const canEnterTopic = () => {
+  return isLoggedIn.value
 }
+
 </script>
 
 <template>
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
-
-    <!-- <NuxtLink :to="`/quiz/`" class="text-sm text-black hover:underline"> -->
-      <!-- ← Back -->
-    <!-- </NuxtLink> -->
+    <!-- <NuxtLink :to="`/quiz/`" class="text-sm text-black hover:underline">
+      ← Back
+    </NuxtLink> -->
 
     <BackLink />
 
-    <section v-if="authReady && !canEnterLevel()" class="quiz-card text-center space-y-4">
+    <section v-if="authReady && !canEnterTopic()" class="quiz-card text-center space-y-4">
       <h1 class="text-2xl font-semibold text-gray-900">
         Quiz locked
       </h1>
@@ -93,29 +89,22 @@ const canEnterLevel = () => {
 
     <section v-else class="quiz-card text-center space-y-6">
       <h1 class="text-3xl font-semibold text-gray-900 level-heading">
-        Level {{ levelNumber }}
+        {{ topicSlug }}
       </h1>
 
       <p class="text-black level-subheading">
-        Practice and test your understanding of the words from this level.
+        Practice and test your listening skills with the words from this topic.
       </p>
 
       <div class="pt-6">
-        <NuxtLink :to="`/quiz/${slug}/word/v2/test`" class="start-btn">
-          Start vocabulary quiz
+        <NuxtLink :to="`/topic/quiz/vocabulary/audio/v5/${topicSlug}`" class="start-btn">
+          Start topic audio quiz
         </NuxtLink>
-
-        <!-- <div class="mt-6">
-          <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
-            ← Level {{ levelNumber }} Vocab
-          </NuxtLink>
-        </div> -->
       </div>
 
       <section class="tips-panel">
         <div class="tips-header">
           <h2 class="tips-title">Before you start</h2>
-          <!-- <p class="tips-subtitle">The most important rules for this quiz.</p> -->
         </div>
 
         <div class="tips-grid">
@@ -178,13 +167,13 @@ const canEnterLevel = () => {
   padding: 0.75rem;
   font-weight: 600;
   text-align: center;
-  background: #A8CAE0;
+  background: #EAB8E4;
   color: #111827;
   transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .start-btn:hover {
-  background: #8fbfd6;
+  background: #d9a6d3;
   transform: translateY(-2px);
 }
 
@@ -204,10 +193,6 @@ const canEnterLevel = () => {
 .tips-panel {
   margin-top: 1rem;
   text-align: left;
-  /* background: #fff; */
-  /* border: 1px solid rgba(17, 24, 39, 0.08); */
-  /* border-radius: 20px; */
-  /* padding: 1rem; */
 }
 
 .tips-header {
@@ -218,12 +203,6 @@ const canEnterLevel = () => {
   font-size: 0.95rem;
   font-weight: 700;
   color: #111827;
-}
-
-.tips-subtitle {
-  margin-top: 0.25rem;
-  font-size: 0.85rem;
-  color: rgba(17, 24, 39, 0.65);
 }
 
 .tips-grid {
@@ -264,7 +243,7 @@ const canEnterLevel = () => {
 }
 
 .tips-toggle:hover {
-  background: rgba(168, 202, 224, 0.18);
+  background: rgba(234, 184, 228, 0.18);
 }
 
 .more-tips {

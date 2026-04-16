@@ -66,14 +66,10 @@ const canEnterLevel = () => {
 
 <template>
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
-    <NuxtLink :to="`/quiz/`" class="text-sm text-black hover:underline">
-      ← Back
-    </NuxtLink>
 
-    <section
-      v-if="authReady && !canEnterLevel()"
-      class="quiz-card text-center space-y-4"
-    >
+    <BackLink />
+
+    <section v-if="authReady && !canEnterLevel()" class="quiz-card text-center space-y-4">
       <h1 class="text-2xl font-semibold text-gray-900">
         Quiz locked
       </h1>
@@ -112,22 +108,14 @@ const canEnterLevel = () => {
         </div>
 
         <div class="tips-grid">
-          <article
-            v-for="tip in primaryTips"
-            :key="tip.title"
-            class="tip-card"
-          >
+          <article v-for="tip in primaryTips" :key="tip.title" class="tip-card">
             <h3 class="tip-card-title">{{ tip.title }}</h3>
             <p class="tip-card-body">{{ tip.body }}</p>
           </article>
         </div>
 
-        <button
-          class="tips-toggle"
-          type="button"
-          @click="showAllTips = !showAllTips"
-        >
-          {{ showAllTips ? 'Hide full scoring rules' : 'See full scoring rules' }}
+        <button class="tips-toggle" type="button" @click="showAllTips = !showAllTips">
+          {{ showAllTips ? 'Hide full scoring details' : 'See full scoring details' }}
         </button>
 
         <Transition name="tip-expand">
