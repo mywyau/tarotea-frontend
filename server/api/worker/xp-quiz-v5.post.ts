@@ -513,6 +513,7 @@ import { useRuntimeConfig } from "#imports";
 import { Receiver } from "@upstash/qstash";
 import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
 import { db } from "~/server/repositories/db";
+import { DAILY_MODE, dailyDeltaFor } from "~/server/utils/dailyQuiz";
 import { masteryXp } from "@/config/xp/helpers";
 
 type WorkerJob = {
@@ -523,6 +524,7 @@ type WorkerJob = {
 type RawPayloadAnswer = {
   wordId: string;
   correct: boolean;
+  delta?: number;
 };
 
 type QuizEventPayload = {
@@ -565,6 +567,22 @@ function deltaFor(correct: boolean, streakBefore: number): number {
 
   const effective = Math.min(streakBefore, STREAK_CAP);
   return 5 + effective * 2;
+}
+
+function resolveDelta(
+  mode: string,
+  answer: RawPayloadAnswer,
+  streakBefore: number,
+): number {
+  if (mode === DAILY_MODE) {
+    if (typeof answer.delta === "number" && Number.isFinite(answer.delta)) {
+      return answer.delta;
+    }
+
+    return dailyDeltaFor(answer.correct, streakBefore);
+  }
+
+  return deltaFor(answer.correct, streakBefore);
 }
 
 function parseWorkerJob(raw: string): WorkerJob {
@@ -639,6 +657,7 @@ function parsePayloadAnswers(payload: unknown): RawPayloadAnswer[] {
 
     const wordId = (item as { wordId?: unknown }).wordId;
     const correct = (item as { correct?: unknown }).correct;
+    const delta = (item as { delta?: unknown }).delta;
 
     if (typeof wordId !== "string" || !wordId.trim()) continue;
     if (typeof correct !== "boolean") continue;
@@ -646,6 +665,7 @@ function parsePayloadAnswers(payload: unknown): RawPayloadAnswer[] {
     normalized.push({
       wordId: wordId.trim(),
       correct,
+      delta: typeof delta === "number" && Number.isFinite(delta) ? delta : undefined,
     });
   }
 
@@ -660,6 +680,7 @@ function parsePayloadAnswers(payload: unknown): RawPayloadAnswer[] {
 }
 
 function buildAggregatedUpdates(
+  mode: string,
   answers: RawPayloadAnswer[],
   streakMap: Map<string, number>,
   xpMap: Map<string, number>,
@@ -690,7 +711,7 @@ function buildAggregatedUpdates(
 
     const xpBeforeForAnswer = current ? current.xpAfter : baseXp;
 
-    const delta = deltaFor(answer.correct, streakBefore);
+    const delta = resolveDelta(mode, answer, streakBefore);
     const xpAfterForAnswer = Math.max(0, xpBeforeForAnswer + delta);
     const appliedDeltaForAnswer = xpAfterForAnswer - xpBeforeForAnswer;
     const nextStreak = answer.correct ? streakBefore + 1 : 0;
@@ -892,7 +913,7 @@ export default defineEventHandler(async (event) => {
       totalQuestions,
       newWordsSeenCount,
       newWordsMaxedCount,
-    } = buildAggregatedUpdates(rawAnswers, streakMap, xpMap);
+    } = buildAggregatedUpdates(quizEvent.mode, rawAnswers, streakMap, xpMap);
 
     const wrongCount = totalQuestions - correctCount;
     const statDate = new Date().toISOString().slice(0, 10);
