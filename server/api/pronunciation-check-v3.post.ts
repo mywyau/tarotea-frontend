@@ -32,6 +32,10 @@ export default defineEventHandler(async (event) => {
   const wordId = form?.find((f) => f.name === "wordId")?.data?.toString() ?? "";
   const exampleIndexRaw =
     form?.find((f) => f.name === "exampleIndex")?.data?.toString() ?? "";
+  const scopeRaw = form?.find((f) => f.name === "scope")?.data?.toString() ?? "";
+  const slugRaw = form?.find((f) => f.name === "slug")?.data?.toString() ?? "";
+  const scope = scopeRaw === "level" || scopeRaw === "topic" ? scopeRaw : undefined;
+  const slug = slugRaw || undefined;
 
   const exampleIndex = Number.parseInt(exampleIndexRaw, 10);
 
@@ -42,7 +46,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const access = await getEchoLabAccess(userId, wordId);
+  const access = await getEchoLabAccess(userId, { wordId, scope, slug });
 
   if (!access.allowed) {
     throw createError({

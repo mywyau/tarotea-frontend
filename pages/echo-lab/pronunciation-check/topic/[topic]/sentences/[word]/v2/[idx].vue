@@ -12,6 +12,7 @@ const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
 const wordSlug = computed(() => decodeURIComponent(route.params.word as string))
+const topicSlug = computed(() => String(route.params.topic ?? ""))
 
 const idx = computed(() => {
   const raw = route.params.idx as string | undefined
@@ -146,7 +147,7 @@ async function fetchEchoLabAccess() {
       "/api/echo-lab/access",
       {
         method: "GET",
-        query: { wordId: wordSlug.value },
+        query: { wordId: wordSlug.value, scope: "topic", slug: topicSlug.value },
         headers: { Authorization: `Bearer ${token}` },
       })
   } catch (e) {
@@ -356,6 +357,8 @@ async function submitRecording() {
 
     formData.append("wordId", wordSlug.value)
     formData.append("exampleIndex", String(idx.value))
+    formData.append("scope", "topic")
+    formData.append("slug", topicSlug.value)
 
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
