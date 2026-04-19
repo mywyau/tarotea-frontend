@@ -548,72 +548,10 @@ onBeforeUnmount(() => {
 
         <div v-if="showQuiz" class="space-y-6">
           <div class="space-y-6">
-            <div class="flex flex-col items-center justify-center min-h-[80px]">
-              <div class="space-y-2" :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
-                <p class="text-2xl text-black leading-relaxed font-semibold text-center">
-                  {{ question.prompt }}
-                </p>
-
-                <p v-if="question.jyutping" class="text-sm text-gray-600 text-center">
-                  {{ question.jyutping }}
-                </p>
-              </div>
-            </div>
 
             <div class="flex items-center justify-center min-h-[72px]">
               <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`"
                 autoplay />
-            </div>
-
-            <div class="text-center space-y-4">
-              <div class="relative">
-                <div class="space-y-1"
-                  :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
-                  <p class="text-xs uppercase tracking-wide text-gray-500">
-                    Target word
-                  </p>
-
-                  <p class="text-base font-semibold text-black">
-                    {{ question.sourceWord }}
-                  </p>
-
-                  <p class="text-sm text-gray-600">
-                    {{ question.sourceWordJyutping }}
-                  </p>
-                </div>
-              </div>
-
-              <div class="relative">
-                <div class="min-h-[50px] space-y-3 transition-all duration-300"
-                  :class="!answered && 'blur-md opacity-70 select-none'">
-                  <div class="flex items-center justify-center gap-3">
-                    <div class="w-32 h-1 bg-gray-200 rounded">
-                      <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                        :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
-                    </div>
-
-                    <div class="relative flex items-center">
-                      <span class="text-sm text-gray-500 whitespace-nowrap">
-                        {{ currentXp ?? 0 }} / {{ masteryXp }} XP
-                      </span>
-
-                      <transition name="xp-fall">
-                        <span v-if="xpDelta !== null"
-                          class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                          :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-                          {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
-                        </span>
-                      </transition>
-                    </div>
-                  </div>
-
-                  <div class="h-5 flex items-center justify-center">
-                    <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
-                      {{ currentStreak }} streak
-                    </span>
-                  </div>
-                </div>
-              </div>
             </div>
 
             <div class="grid grid-cols-1 gap-4 w-full">
@@ -635,6 +573,69 @@ onBeforeUnmount(() => {
                 ]" @click="answer(i)">
                 {{ option }}
               </button>
+            </div>
+
+            <div v-if="answered" class="space-y-6">
+              <div class="flex flex-col items-center justify-center min-h-[80px]">
+                <div class="space-y-2">
+                  <p class="text-2xl text-black leading-relaxed font-semibold text-center">
+                    {{ question.prompt }}
+                  </p>
+
+                  <p v-if="question.jyutping" class="text-sm text-gray-600 text-center">
+                    {{ question.jyutping }}
+                  </p>
+                </div>
+              </div>
+
+              <div class="text-center space-y-4">
+                <div class="relative">
+                  <div class="space-y-1">
+                    <p class="text-xs uppercase tracking-wide text-gray-500">
+                      Target word
+                    </p>
+
+                    <p class="text-base font-semibold text-black">
+                      {{ question.sourceWord }}
+                    </p>
+
+                    <p class="text-sm text-gray-600">
+                      {{ question.sourceWordJyutping }}
+                    </p>
+                  </div>
+                </div>
+
+                <div class="relative">
+                  <div class="min-h-[50px] space-y-3 transition-all duration-300">
+                    <div class="flex items-center justify-center gap-3">
+                      <div class="w-32 h-1 bg-gray-200 rounded">
+                        <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                          :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
+                      </div>
+
+                      <div class="relative flex items-center">
+                        <span class="text-sm text-gray-500 whitespace-nowrap">
+                          {{ currentXp ?? 0 }} / {{ masteryXp }} XP
+                        </span>
+
+                        <transition name="xp-fall">
+                          <span v-if="xpDelta !== null"
+                            class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                            :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                            {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                          </span>
+                        </transition>
+                      </div>
+                    </div>
+
+                    <div class="h-5 flex items-center justify-center">
+                      <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
+                        {{ currentStreak }} streak
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="h-10 mt-6">
