@@ -516,14 +516,12 @@ onBeforeUnmount(() => {
 
     <section class="text-center space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3">
+
         <h1 class="text-2xl font-semibold level-heading">
           {{ quizTitle }}
         </h1>
 
         <div v-if="showQuiz && (current + 1) <= questions.length" class="flex items-center justify-center gap-3">
-          <div class="flex items-center justify-center min-h-[56px]">
-            <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
-          </div>
 
           <div class="w-32 bg-gray-200 rounded-full h-2">
             <div class="bg-purple-300 h-2 rounded-full transition-all duration-300"
@@ -533,6 +531,11 @@ onBeforeUnmount(() => {
           <span class="text-xs text-gray-500 whitespace-nowrap">
             {{ current + 1 }} / {{ questions.length }}
           </span>
+
+          <div class="flex items-center justify-center min-h-[56px]">
+            <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`"
+              autoplay />
+          </div>
         </div>
       </div>
 
@@ -572,7 +575,8 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="relative pt-2">
-                  <div class="min-h-[50px] space-y-3 transition-all duration-300" :class="!answered && 'blur-md opacity-70 select-none'">
+                  <div class="min-h-[50px] space-y-3 transition-all duration-300"
+                    :class="!answered && 'blur-md opacity-70 select-none'">
                     <div class="flex items-center justify-center gap-3">
                       <div class="w-32 h-1 bg-gray-200 rounded">
                         <div class="h-1 bg-green-500 rounded transition-all duration-500"
@@ -585,7 +589,8 @@ onBeforeUnmount(() => {
                         </span>
 
                         <transition name="xp-fall">
-                          <span v-if="xpDelta !== null" class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                          <span v-if="xpDelta !== null"
+                            class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
                             :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
                             {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
                           </span>
