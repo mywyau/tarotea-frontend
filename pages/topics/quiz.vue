@@ -70,10 +70,11 @@ function canEnterTopic(topic: TopicQuiz): boolean {
     // if (!topic.quizRequiresPaid) return true
 
     // 🔒 Paid topic → requires login + entitlement
-    if (!isLoggedIn.value) return false
+    // if (!isLoggedIn.value) return false
 
     // return canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic.id)
-    if (isLoggedIn.value) { return true } else { return false }
+    // if (isLoggedIn.value) { return true } else { return false }
+    return true
 }
 
 
