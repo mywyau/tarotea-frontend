@@ -1,204 +1,193 @@
 <script setup lang="ts">
-
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { onMounted } from 'vue'
-import { canAccessLevelQuiz, isComingSoon, isFreeLevel } from '~/utils/levels/permissions'
 
+const { authReady, resolve } = useMeStateV2()
 
-const {
-  authReady,
-  entitlement,
-  resolve,
-} = useMeStateV2()
-
-// Resolve auth once on mount (safe + idempotent)
 onMounted(async () => {
   if (!authReady.value) {
     await resolve()
   }
 })
 
-// const canEnterLevel = (level: any) => {
+const quizTypes = [
+  { id: 'word', label: 'Vocabulary', hint: 'Word recognition', className: 'tone-blue' },
+  { id: 'audio', label: 'Audio', hint: 'Listening focus', className: 'tone-purple' },
+  { id: 'sentences', label: 'Sentences', hint: 'Meaning in context', className: 'tone-yellow' },
+  { id: 'sentences-audio', label: 'Sentence Audio', hint: 'Audio + context', className: 'tone-blush' },
+]
 
-//   if (isComingSoon(level)) return false
-
-//   if (isFreeLevel(level.number)) return true
-
-//   return canAccessLevelQuiz(level, entitlement.value!)
-// }
-
-const canEnterLevel = (level: any) => {
-
-  return true
+function routeFor(levelId: string, quizId: string) {
+  if (quizId === 'word') return `/quiz/${levelId}/word/start-quiz`
+  if (quizId === 'audio') return `/quiz/${levelId}/audio/start-quiz`
+  if (quizId === 'sentences') return `/quiz/${levelId}/sentences/no-audio/v3/start-quiz`
+  return `/quiz/${levelId}/sentences/audio/v3/start-quiz`
 }
 
+const canEnterLevel = () => true
 </script>
 
 <template>
-  <main class="levels-page max-w-4xl mx-auto py-10 px-2 space-y-10">
+  <main class="quiz-selector max-w-5xl mx-auto py-10 px-4 space-y-8">
+    <BackLink />
 
-    <div class="mb-6">
-      <BackLink />
-    </div>
-
-    <!-- Header -->
-    <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="font-semibold level-heading">
-        Level Quiz
-      </h1>
-      <p class="text-gray-600 text-sm sm:text-base level-subheading">
-        Progress through structured and progressively trickier Cantonese content.
+    <header class="space-y-3">
+      <h1 class="page-title">Choose your quiz mode</h1>
+      <p class="page-subtitle">
+        Pick a level, then choose how you want to practice: word, audio, sentence, or sentence-audio.
       </p>
+
+      <div class="mode-chips">
+        <span v-for="mode in quizTypes" :key="mode.id" class="chip" :class="mode.className">
+          {{ mode.label }} · {{ mode.hint }}
+        </span>
+      </div>
     </header>
 
-    <!-- Grid -->
-    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <ul class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <li
+        v-for="quizLevel in levelSelectMetaData"
+        :key="quizLevel.id"
+        class="level-card"
+        :class="quizLevel.comingSoon ? 'is-locked' : ''"
+      >
+        <div>
+          <div class="card-top">
+            <h2 class="card-title">{{ quizLevel.title }}</h2>
+            <span v-if="quizLevel.comingSoon" class="pill">Coming soon</span>
+          </div>
 
-      <li v-for="quizLevel in levelSelectMetaData" :key="quizLevel.id" class="level-card" :class="[
-        quizLevel.comingSoon
-          ? 'level-locked'
-          : (!canEnterLevel(quizLevel) ? 'level-locked' : '')
-      ]">
-
-        <!-- Title -->
-        <div class="space-y-2">
-          <h2 class="text-lg font-semibold text-gray-900">
-            {{ quizLevel.title }}
-          </h2>
-
-          <p class="text-sm text-gray-600 leading-relaxed">
-            {{ quizLevel.description }}
-          </p>
-
-          <p v-if="quizLevel.comingSoon" class="text-xs text-gray-400 font-medium">
-            Coming soon
-          </p>
+          <p class="card-description">{{ quizLevel.description }}</p>
         </div>
 
-        <!-- Buttons -->
-        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`" class="level-btn level-btn-blue">
-            Vocabulary
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/audio/start-quiz`" class="level-btn level-btn-purple">
-            Audio
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/no-audio/v3/start-quiz`" class="level-btn level-btn-yellow">
-            Sentences
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/audio/v3/start-quiz`" class="level-btn level-btn-blush">
-            Sentence Audio Only
+        <div v-if="canEnterLevel() && !quizLevel.comingSoon" class="mode-grid">
+          <NuxtLink
+            v-for="mode in quizTypes"
+            :key="mode.id"
+            :to="routeFor(quizLevel.id, mode.id)"
+            class="mode-btn"
+            :class="mode.className"
+          >
+            <span class="mode-label">{{ mode.label }}</span>
+            <span class="mode-hint">{{ mode.hint }}</span>
           </NuxtLink>
         </div>
 
-        <!-- Locked -->
-        <p v-else-if="!quizLevel.comingSoon" class="text-xs text-center text-gray-500 pt-4">
-          Upgrade to unlock
-        </p>
-
+        <p v-else class="locked-copy">Upgrade to unlock this level.</p>
       </li>
-
     </ul>
-
   </main>
 </template>
 
-<style>
-.levels-page {
-  --pink: #EAB8E4;
-  --purple: #D6A3D1;
-  --blue: #A8CAE0;
-  --yellow: #F4CD27;
-  --blush: #F6E1E1;
+<style scoped>
+.page-title {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 700;
+  color: #111827;
 }
 
-.level-heading {
-  font-size: 1.3rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(0, 0, 0);
+.page-subtitle {
+  font-size: 0.95rem;
+  color: rgba(17, 24, 39, 0.74);
+  max-width: 52rem;
 }
 
-.level-subheading {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(17, 24, 39, 0.65);
+.mode-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
 }
 
-/* Card */
+.chip {
+  font-size: 0.74rem;
+  border-radius: 999px;
+  padding: 0.33rem 0.68rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
 .level-card {
   border-radius: 20px;
-  padding: 1.5rem;
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  padding: 1.2rem;
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(17, 24, 39, 0.07);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 1rem;
 }
 
-.level-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
-}
+.level-card.is-locked { opacity: 0.65; }
 
-.level-locked {
-  opacity: 0.6;
-}
-
-/* Buttons */
-.level-btn {
+.card-top {
   display: flex;
   align-items: center;
-  justify-content: center;
-  text-align: center;
-  min-height: 52px;
-  padding: 0.6rem 0.75rem;
-  font-size: 0.85rem;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 0.15s ease;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-/* Colour variations */
-.level-btn-blue {
-  background: rgba(168, 202, 224, 0.45);
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.pill {
+  font-size: 0.69rem;
+  border-radius: 999px;
+  background: #F6E1E1;
+  color: #374151;
+  padding: 0.22rem 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.card-description {
+  margin-top: 0.4rem;
+  font-size: 0.88rem;
+  color: rgba(17, 24, 39, 0.76);
+}
+
+.mode-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.mode-btn {
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+
+.mode-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.04);
+}
+
+.mode-label {
+  font-size: 0.84rem;
+  font-weight: 700;
   color: #1f2937;
 }
 
-.level-btn-blue:hover {
-  background: rgba(168, 202, 224, 0.65);
+.mode-hint {
+  font-size: 0.74rem;
+  color: rgba(17, 24, 39, 0.72);
 }
 
-.level-btn-purple {
-  background: rgba(214, 163, 209, 0.45);
-  color: #1f2937;
+.locked-copy {
+  font-size: 0.78rem;
+  color: rgba(17, 24, 39, 0.72);
 }
 
-.level-btn-purple:hover {
-  background: rgba(214, 163, 209, 0.65);
-}
-
-.level-btn-yellow {
-  background: rgba(244, 205, 39, 0.45);
-  color: #1f2937;
-}
-
-.level-btn-yellow:hover {
-  background: rgba(244, 205, 39, 0.65);
-}
-
-.level-btn-blush {
-  background: rgb(249, 166, 166);
-  color: #1f2937;
-}
-
-.level-btn-blush:hover {
-  background: rgb(204, 136, 136);
-}
+.tone-blue { background: rgba(168, 202, 224, 0.45); }
+.tone-purple { background: rgba(214, 163, 209, 0.45); }
+.tone-yellow { background: rgba(244, 205, 39, 0.42); }
+.tone-blush { background: rgba(246, 225, 225, 0.9); }
 </style>
