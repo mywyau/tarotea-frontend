@@ -178,29 +178,25 @@ watchEffect(() => {
 
             </div>
 
-            <div class="flex items-center justify-between gap-4">
-                <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`"
-                    class="text-6xl text-gray-800 hover:text-blue-500 hover:brightness-125 transition"
+            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`" class="nav-pill"
                     aria-label="Previous word">
-                    ‹
+                    ← Previous
                 </NuxtLink>
 
-                <div v-else class="w-6" />
-
-                <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`"
-                    class="text-6xl text-gray-800 hover:text-blue-500 hover:brightness-125 transition"
+                <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`" class="nav-pill"
                     aria-label="Next word">
-                    ›
+                    Next →
                 </NuxtLink>
             </div>
 
-            <div class="flex items-center justify-center gap-3">
+            <div class="flex items-center justify-center gap-3 pt-1">
                 <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`"
                     :playback-rate="playbackRate" size="lg" />
 
                 <NuxtLink :to="`/writing/${topic}/vocab/${word.id}`"
-                    class="bg-white hover:bg-gray-50 inline-flex items-center justify-center text-base px-4 py-3 rounded-md shadow-sm transition border">
-                    <span class="text-white">✏️</span>
+                    class="action-chip" aria-label="Practice writing this word">
+                    ✏️ Write
                 </NuxtLink>
             </div>
 
@@ -259,14 +255,15 @@ watchEffect(() => {
                         <div class="flex justify-end">
                             <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
                                 <NuxtLink :to="`/writing/${topic}/sentences/${word.id}/${index}`"
-                                    class="inline-flex items-center justify-center rounded-md border bg-white px-2 py-1 text-xs shadow-sm transition hover:bg-gray-50">
-                                    <span class="text-black">✏️</span>
+                                    class="action-chip action-chip-sm" aria-label="Practice writing this sentence">
+                                    ✏️ Write
                                 </NuxtLink>
 
                                 <NuxtLink
                                     :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/v2/${index}`"
-                                    class="topic-btn-blue inline-flex items-center justify-center rounded-md px-2 py-1 text-xs shadow-sm transition">
-                                    <span class="text-black">▶︎</span>
+                                    class="action-chip action-chip-sm"
+                                    aria-label="Practice pronunciation for this sentence">
+                                    ▶ Speak
                                 </NuxtLink>
 
                                 <AudioButton v-if="word.audio?.examples?.[index]"
@@ -338,12 +335,43 @@ watchEffect(() => {
             #EAB8E4);
 }
 
-.topic-btn-blue {
-    background: rgb(115, 159, 255);
-    transition: background-color 0.2s ease;
+.action-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #d1d5db;
+    background: #ffffff;
+    color: #111827;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.45rem 0.75rem;
+    border-radius: 0.6rem;
+    transition: all 0.2s ease;
 }
 
-.topic-btn-blue:hover {
-    background: rgb(159, 189, 255);
+.action-chip:hover {
+    border-color: #9ca3af;
+    background: #f9fafb;
+}
+
+.action-chip-sm {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.55rem;
+}
+
+.nav-pill {
+    border: 1px solid #d1d5db;
+    border-radius: 9999px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    color: #374151;
+    background: #fff;
+    transition: all 0.2s ease;
+}
+
+.nav-pill:hover {
+    border-color: #9ca3af;
+    color: #111827;
+    background: #f9fafb;
 }
 </style>
