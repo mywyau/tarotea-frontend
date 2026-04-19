@@ -733,7 +733,10 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
+                ⏱ {{ formattedElapsedTime }}
+              </span>
               <!-- <button
                 class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                 type="button" @click="restartSession">
