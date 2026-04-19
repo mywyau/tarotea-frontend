@@ -5,6 +5,8 @@ export const brandColours = [
   '#F2CACA',                // blush
   '#D6A3D1',                // deeper purple
   'rgba(244,205,39,0.35)',  // yellow
+  'rgba(88,199,95,0.45)',   // accessible words green
+  'rgba(111,92,202,0.35)',  // soft indigo
 ]
 
 export const tileColours = [
