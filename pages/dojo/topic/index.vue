@@ -126,6 +126,7 @@ const paginatedTopics = computed(() => {
   --blue: #A8CAE0;
   --yellow: #F4CD27;
   --blush: #F6E1E1;
+  min-height: 65vh;
 }
 
 .topics-heading {

@@ -7,7 +7,7 @@ definePageMeta({
 </script>
 
 <template>
-  <main class="max-w-3xl mx-auto py-20 px-6 space-y-10">
+  <main class="dojo-home max-w-3xl mx-auto py-20 px-6 space-y-10">
 
     <BackLink />
 
@@ -26,8 +26,8 @@ definePageMeta({
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
 
       <!-- Level Training -->
-      <NuxtLink to="/dojo/level" class="rounded-2xl p-8 shadow-sm hover:shadow-md transition
-               hover:-translate-y-1 active:scale-[0.99]" style="background-color:#A8CAE0;">
+      <NuxtLink to="/dojo/level" class="dojo-tile dojo-tile-blue rounded-2xl p-8 shadow-sm hover:shadow-md transition
+               hover:-translate-y-1 active:scale-[0.99]">
         <div class="space-y-3">
           <div class="text-xl font-semibold text-black">
             Level Training
@@ -39,8 +39,8 @@ definePageMeta({
       </NuxtLink>
 
       <!-- Topic Training -->
-      <NuxtLink to="/dojo/topic" class="rounded-2xl p-8 shadow-sm hover:shadow-md transition
-               hover:-translate-y-1 active:scale-[0.99]" style="background-color:#EAB8E4;">
+      <NuxtLink to="/dojo/topic" class="dojo-tile dojo-tile-pink rounded-2xl p-8 shadow-sm hover:shadow-md transition
+               hover:-translate-y-1 active:scale-[0.99]">
         <div class=" space-y-3">
           <div class="text-xl font-semibold text-black">
             Topic Training
@@ -60,6 +60,12 @@ main {
   min-height: 60vh;
 }
 
+.dojo-home {
+  --pink: #EAB8E4;
+  --blue: #A8CAE0;
+  --blush: #F6E1E1;
+}
+
 .dojo-heading {
   font-size: 1.3rem;
   text-transform: uppercase;
@@ -72,5 +78,18 @@ main {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgba(17, 24, 39, 0.65);
+}
+
+.dojo-tile {
+  color: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.dojo-tile-blue {
+  background-color: var(--blue);
+}
+
+.dojo-tile-pink {
+  background-color: var(--pink);
 }
 </style>

@@ -607,13 +607,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-2xl px-6 py-12">
+  <main class="dojo-training-page mx-auto max-w-2xl px-6 py-12">
 
     <div class="mb-6">
       <BackLink />
     </div>
 
-    <header class="space-y-4">
+    <header class="dojo-training-header space-y-4">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
         {{ title || `Chinese Dojo - ${levelTitles[slug]}` }}
       </h1>
@@ -819,6 +819,26 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.dojo-training-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  --yellow: rgba(244, 205, 39, 0.35);
+  --blush: #F6E1E1;
+  min-height: 70vh;
+}
+
+.dojo-training-header h1 {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dojo-training-header p {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+}
+
 .xp-fall-enter-active {
   transition: transform 0.45s ease-out, opacity 0.45s ease-out;
 }
