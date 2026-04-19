@@ -269,7 +269,7 @@ async function pollForCompletionInBackground() {
     const token = await getAccessToken()
 
     for (let i = 0; i < 20; i++) {
-      const result = await $fetch<DailyResultResponse>("/api/daily/vocab/v2/result", {
+      const result = await $fetch<DailyResultResponse>("/api/daily/vocab/v2/reload", {
         headers: { Authorization: `Bearer ${token}` },
         query: { mode: DAILY_MODE },
       })

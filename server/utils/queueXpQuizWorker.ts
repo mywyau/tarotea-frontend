@@ -13,7 +13,7 @@ export async function queueXpQuizWorker(input: QueueXpQuizWorkerInput) {
   });
 
   await qstash.publishJSON({
-    url: `${runtimeConfig.public.siteUrl}/api/worker/xp-quiz-v3`,
+    url: `${runtimeConfig.public.siteUrl}/api/worker/xp-quiz-v5`,
     body: {
       attemptId: input.attemptId,
       userId: input.userId,
