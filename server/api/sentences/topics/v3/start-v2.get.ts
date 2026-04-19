@@ -20,6 +20,24 @@ import { shuffleFisherYates } from "~/utils/shuffle";
 
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
 
+type TopicIndexData = {
+  categories?: Record<string, Array<{ id?: string }>>;
+};
+
+async function loadCanonicalTopicWordIds(slug: string): Promise<string[]> {
+  try {
+    const topic = await $fetch<TopicIndexData>(`/api/index/topics/${slug}`);
+    const ids = Object.values(topic.categories ?? {})
+      .flat()
+      .map((word) => word.id ?? "")
+      .filter(Boolean);
+
+    return [...new Set(ids)];
+  } catch {
+    return [];
+  }
+}
+
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
@@ -66,9 +84,13 @@ export default defineEventHandler(async (event) => {
   // Build the ordered source-word pool for this sentence set.
   // If you want preview order to match the topic tiles exactly,
   // later extract this from the topic access helper instead.
-  const sourceWordIdsInOrder = [
+  const sentenceSourceWordIdsInOrder = [
     ...new Set(allItems.map((item) => item.sourceWordId).filter(Boolean)),
   ];
+  const canonicalWordIdsInOrder = await loadCanonicalTopicWordIds(slug);
+  const sourceWordIdsInOrder = canonicalWordIdsInOrder.length
+    ? canonicalWordIdsInOrder
+    : sentenceSourceWordIdsInOrder;
 
   let accessibleWordIdSet = new Set<string>(sourceWordIdsInOrder);
 
@@ -90,8 +112,11 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const accessibleItems = allItems.filter((item) =>
-    accessibleWordIdSet.has(item.sourceWordId),
+  const sourceWordIdSet = new Set(sourceWordIdsInOrder);
+  const accessibleItems = allItems.filter(
+    (item) =>
+      sourceWordIdSet.has(item.sourceWordId) &&
+      accessibleWordIdSet.has(item.sourceWordId),
   );
 
   if (!accessibleItems.length) {

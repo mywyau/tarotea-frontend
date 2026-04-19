@@ -25,6 +25,24 @@ import { shuffleFisherYates } from "~/utils/shuffle";
 
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
 
+type LevelIndexData = {
+  categories?: Record<string, Array<{ id?: string }>>;
+};
+
+async function loadCanonicalLevelWordIds(slug: string): Promise<string[]> {
+  try {
+    const level = await $fetch<LevelIndexData>(`/api/index/levels/${slug}`);
+    const ids = Object.values(level.categories ?? {})
+      .flat()
+      .map((word) => word.id ?? "")
+      .filter(Boolean);
+
+    return [...new Set(ids)];
+  } catch {
+    return [];
+  }
+}
+
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
@@ -85,9 +103,13 @@ export default defineEventHandler(async (event) => {
 
   const allItems = data.items ?? [];
 
-  const sourceWordIdsInOrder = [
+  const sentenceSourceWordIdsInOrder = [
     ...new Set(allItems.map((item) => item.sourceWordId).filter(Boolean)),
   ];
+  const canonicalWordIdsInOrder = await loadCanonicalLevelWordIds(slug);
+  const sourceWordIdsInOrder = canonicalWordIdsInOrder.length
+    ? canonicalWordIdsInOrder
+    : sentenceSourceWordIdsInOrder;
 
   let accessibleWordIdSet = new Set<string>(sourceWordIdsInOrder);
 
@@ -109,8 +131,11 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const accessibleItems = allItems.filter((item) =>
-    accessibleWordIdSet.has(item.sourceWordId),
+  const sourceWordIdSet = new Set(sourceWordIdsInOrder);
+  const accessibleItems = allItems.filter(
+    (item) =>
+      sourceWordIdSet.has(item.sourceWordId) &&
+      accessibleWordIdSet.has(item.sourceWordId),
   );
 
   if (!accessibleItems.length) {
