@@ -207,30 +207,26 @@ watchEffect(() => {
         </div>
       </div>
 
-      <div class="flex items-center justify-between w-full">
-        <NuxtLink v-if="prevWord" :to="`/level/${level}/word/${prevWord.id}`"
-          class="text-6xl leading-none text-gray-800 hover:text-blue-500 hover:brightness-125 transition"
-          aria-label="Previous word">
+      <div class="flex items-center justify-between w-full pt-1">
+        <NuxtLink v-if="prevWord" :to="`/level/${level}/word/${prevWord.id}`" class="edge-arrow" aria-label="Previous word">
           ‹
         </NuxtLink>
 
         <div v-else class="w-10" />
 
-        <NuxtLink v-if="nextWord" :to="`/level/${level}/word/${nextWord.id}`"
-          class="text-6xl leading-none text-gray-800 hover:text-blue-500 hover:brightness-125 transition"
-          aria-label="Next word">
+        <NuxtLink v-if="nextWord" :to="`/level/${level}/word/${nextWord.id}`" class="edge-arrow" aria-label="Next word">
           ›
         </NuxtLink>
       </div>
 
-      <div class="flex items-center justify-center gap-3">
+      <div class="flex items-center justify-center gap-3 pt-1">
 
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
           size="lg" />
 
         <NuxtLink :to="`/writing/${level}/vocab/${word.id}`"
-          class="bg-white hover:bg-gray-50 inline-flex items-center justify-center text-base px-4 py-3 rounded-md shadow-sm transition border">
-          <span class="text-white">✏️</span>
+          class="action-chip" aria-label="Practice writing this word">
+          ✏️ Write
         </NuxtLink>
       </div>
 
@@ -286,14 +282,14 @@ watchEffect(() => {
           <div class="space-y-3">
             <div class="flex justify-end">
               <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
-                  class="inline-flex items-center justify-center rounded-md border bg-white px-2 py-1 text-xs shadow-sm transition hover:bg-gray-50">
-                  <span class="text-black">✏️</span>
+                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`" class="action-chip action-chip-sm"
+                  aria-label="Practice writing this sentence">
+                  ✏️ Write
                 </NuxtLink>
 
                 <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
-                  class="level-btn-blue inline-flex items-center justify-center rounded-md px-2 py-1 text-xs shadow-sm transition">
-                  <span class="text-black">▶︎</span>
+                  class="action-chip action-chip-sm" aria-label="Practice pronunciation for this sentence">
+                  ▶ Speak
                 </NuxtLink>
 
                 <AudioButton v-if="word.audio?.examples?.[index]"
@@ -368,21 +364,39 @@ watchEffect(() => {
       #EAB8E4);
 }
 
-.level-btn-blue {
-  background: rgb(115, 159, 255);
-  transition: background-color 0.2s ease;
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #111827;
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.45rem 0.75rem;
+  border-radius: 0.6rem;
+  transition: all 0.2s ease;
 }
 
-.level-btn-blue:hover {
-  background: rgb(159, 189, 255);
+.action-chip:hover {
+  border-color: #9ca3af;
+  background: #f9fafb;
 }
 
-.level-btn-black {
-  background: rgb(63, 63, 63);
-  transition: background-color 0.2s ease;
+.action-chip-sm {
+  font-size: 0.75rem;
+  padding: 0.3rem 0.55rem;
 }
 
-.level-btn-black:hover {
-  background: rgb(0, 0, 0);
+.edge-arrow {
+    font-size: 4rem;
+    line-height: 1;
+    color: #4b5563;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.edge-arrow:hover {
+    color: #5162ff;
+    transform: scale(1.04);
 }
 </style>
