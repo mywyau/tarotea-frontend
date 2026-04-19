@@ -389,14 +389,14 @@ watchEffect(() => {
 }
 
 .edge-arrow {
-  font-size: 3rem;
-  line-height: 1;
-  color: #4b5563;
-  transition: color 0.2s ease, transform 0.2s ease;
+    font-size: 4rem;
+    line-height: 1;
+    color: #4b5563;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .edge-arrow:hover {
-  color: #111827;
-  transform: scale(1.04);
+    color: #5162ff;
+    transform: scale(1.04);
 }
 </style>
