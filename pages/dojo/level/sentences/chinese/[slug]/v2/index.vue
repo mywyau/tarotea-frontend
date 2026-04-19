@@ -195,6 +195,11 @@ const totalWordsCount = computed(() =>
   sessionResult.value?.totalSentences ?? sentences.value.length
 )
 
+const exerciseProgressPercent = computed(() => {
+  if (!sentences.value.length) return 0
+  return Math.min((idx.value / sentences.value.length) * 100, 100)
+})
+
 const hintsUsedCount = computed(() =>
   batchAttempts.value.filter(a => a.hintUsed).length
 )
@@ -606,8 +611,15 @@ onBeforeUnmount(() => {
       <div v-else class="space-y-5">
         <div v-if="showTraining" class="space-y-5">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="text-xs text-black">
-              Sentence {{ idx + 1 }} / {{ sentences.length }}
+            <div class="w-full sm:w-auto">
+              <div class="text-xs text-black">
+                Sentence {{ idx + 1 }} / {{ sentences.length }}
+              </div>
+
+              <div class="mt-2 h-1.5 w-full min-w-[180px] overflow-hidden rounded-full bg-gray-200/80">
+                <div class="dojo-mini-progress h-full rounded-full transition-all duration-300"
+                  :style="{ width: `${exerciseProgressPercent}%` }" />
+              </div>
             </div>
 
             <!-- <button
@@ -906,6 +918,10 @@ onBeforeUnmount(() => {
   margin-top: 0.65rem;
   font-size: 0.95rem;
   color: rgba(17, 24, 39, 0.68);
+}
+
+.dojo-mini-progress {
+  background: linear-gradient(90deg, #f5b7b1 0%, #f8d58f 45%, #9fd6bf 100%);
 }
 
 .fade-scale-enter-active,
