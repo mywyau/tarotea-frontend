@@ -511,9 +511,14 @@ onBeforeUnmount(() => {
           {{ quizTitle }}
         </h1>
 
-        <div v-if="showQuiz && (current + 1) <= questions.length" class="flex items-center justify-center gap-2">
+        <div v-if="showQuiz && (current + 1) <= questions.length" class="flex items-center justify-center gap-3">
+          <div class="flex items-center justify-center min-h-[56px]">
+            <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
+          </div>
+
           <div class="w-32 bg-gray-200 rounded-full h-2">
-            <div class="bg-purple-300 h-2 rounded-full transition-all duration-300" :style="{ width: progressPercent + '%' }" />
+            <div class="bg-purple-300 h-2 rounded-full transition-all duration-300"
+              :style="{ width: progressPercent + '%' }" />
           </div>
 
           <span class="text-xs text-gray-500 whitespace-nowrap">
@@ -541,11 +546,6 @@ onBeforeUnmount(() => {
         <div v-if="showQuiz" class="space-y-6">
           <div class="space-y-6">
             <div class="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-              <div class="flex items-center justify-center min-h-[56px]">
-                <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`"
-                  autoplay />
-              </div>
-
               <div class="text-center">
                 <div class="space-y-1 transition-all duration-300"
                   :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
