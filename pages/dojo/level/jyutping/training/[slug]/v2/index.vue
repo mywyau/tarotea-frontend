@@ -206,6 +206,11 @@ const normalizedAnswer = computed(() =>
 const completedWordsCount = computed(() => sessionResult.value?.correctCount ?? 0)
 const totalWordsCount = computed(() => sessionResult.value?.totalWords ?? words.value.length)
 
+const exerciseProgressPercent = computed(() => {
+  if (!words.value.length) return 0
+  return Math.min((idx.value / words.value.length) * 100, 100)
+})
+
 const hintsUsedCount = computed(() =>
   batchAttempts.value.filter(a => a.hintUsed).length
 )
@@ -669,13 +674,13 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-2xl px-6 pt-12 pb-28 sm:pb-12">
+  <main class="dojo-training-page mx-auto max-w-2xl px-6 pt-12 pb-28 sm:pb-12">
 
     <div class="mb-6">
       <BackLink />
     </div>
 
-    <header class="space-y-4">
+    <header class="dojo-training-header space-y-4">
       <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
         {{ title || `Jyutping Dojo - ${levelTitles[slug]}` }}
       </h1>
@@ -709,11 +714,21 @@ onBeforeUnmount(() => {
       <div v-else class="space-y-5">
         <div v-if="showTraining" class="space-y-5">
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="text-xs text-black">
-              Word {{ idx + 1 }} / {{ words.length }}
+            <div class="w-full sm:w-auto">
+              <div class="text-xs text-black">
+                Word {{ idx + 1 }} / {{ words.length }}
+              </div>
+
+              <div class="mt-2 h-1.5 w-full min-w-[180px] overflow-hidden rounded-full bg-gray-200/80">
+                <div class="dojo-mini-progress h-full rounded-full transition-all duration-300"
+                  :style="{ width: `${exerciseProgressPercent}%` }" />
+              </div>
             </div>
 
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
+                ⏱ {{ formattedElapsedTime }}
+              </span>
               <!-- <button
                 class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                 type="button" @click="restartSession">
@@ -893,6 +908,26 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
+.dojo-training-page {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  --yellow: rgba(244, 205, 39, 0.35);
+  --blush: #F6E1E1;
+  min-height: 70vh;
+}
+
+.dojo-training-header h1 {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.dojo-training-header p {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.72rem;
+}
+
 .xp-fall-enter-active {
   transition: transform 0.45s ease-out, opacity 0.45s ease-out;
 }
@@ -1013,6 +1048,10 @@ onBeforeUnmount(() => {
   margin-top: 0.65rem;
   font-size: 0.95rem;
   color: rgba(17, 24, 39, 0.68);
+}
+
+.dojo-mini-progress {
+  background: linear-gradient(90deg, #f5b7b1 0%, #f8d58f 45%, #9fd6bf 100%);
 }
 
 .fade-scale-enter-active,

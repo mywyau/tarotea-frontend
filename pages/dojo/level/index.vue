@@ -56,10 +56,10 @@ const canEnterLevel = (level: any) => {
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="text-3xl font-semibold text-gray-900">
+      <h1 class="text-3xl font-semibold level-heading">
         Level Dojo
       </h1>
-      <p class="text-gray-600 text-sm sm:text-base">
+      <p class="level-subheading">
         Strenghten your phonetic and typing proficiency with our exercises
       </p>
     </header>
@@ -130,12 +130,25 @@ const canEnterLevel = (level: any) => {
 </template>
 
 <style>
-:root {
+.levels-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;
   --blue: #A8CAE0;
   --yellow: #ffec95;
   --blush: #F6E1E1;
+}
+
+.level-heading {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39);
+}
+
+.level-subheading {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
 }
 
 /* Card */
