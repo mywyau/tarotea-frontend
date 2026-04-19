@@ -178,15 +178,17 @@ watchEffect(() => {
 
             </div>
 
-            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
-                <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`" class="nav-pill"
+            <div class="flex items-center justify-between w-full pt-1">
+                <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`" class="edge-arrow"
                     aria-label="Previous word">
-                    ← Previous
+                    ‹
                 </NuxtLink>
 
-                <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`" class="nav-pill"
+                <div v-else class="w-10" />
+
+                <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`" class="edge-arrow"
                     aria-label="Next word">
-                    Next →
+                    ›
                 </NuxtLink>
             </div>
 
@@ -359,19 +361,15 @@ watchEffect(() => {
     padding: 0.3rem 0.55rem;
 }
 
-.nav-pill {
-    border: 1px solid #d1d5db;
-    border-radius: 9999px;
-    padding: 0.35rem 0.75rem;
-    font-size: 0.8rem;
-    color: #374151;
-    background: #fff;
-    transition: all 0.2s ease;
+.edge-arrow {
+    font-size: 3rem;
+    line-height: 1;
+    color: #4b5563;
+    transition: color 0.2s ease, transform 0.2s ease;
 }
 
-.nav-pill:hover {
-    border-color: #9ca3af;
+.edge-arrow:hover {
     color: #111827;
-    background: #f9fafb;
+    transform: scale(1.04);
 }
 </style>
