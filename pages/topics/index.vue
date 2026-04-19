@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import type { Topic } from '@/types/topic'
+import { brandColours } from '@/utils/branding/helpers'
 import { sortedTopics } from '@/utils/topics/topics'
 import { computed, onMounted, ref } from 'vue'
 
@@ -35,6 +36,20 @@ function topicLink(topic: Topic) {
   if (!topic.requiresPaid) {
     return `/topic/words/${topic.id}/v2`
   }
+}
+
+
+function getTopicColor(topic: Topic, index: number) {
+  if (topic.comingSoon) return 'rgba(246, 225, 225, 0.35)'
+
+  const seed = `${topic.id}-${index}`
+  let hash = 0
+
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
+  }
+
+  return brandColours[hash % brandColours.length]
 }
 
 const ITEMS_PER_PAGE = 12
@@ -115,12 +130,12 @@ onMounted(async () => {
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
 
-      <li v-for="topic in paginatedTopics" :key="topic.id" class="topic-card rounded-lg p-4 space-y-3 transition"
+      <li v-for="(topic, index) in paginatedTopics" :key="topic.id" class="topic-card rounded-lg p-4 space-y-3 transition"
         :class="[
           topic.comingSoon
             ? 'is-disabled'
             : 'is-active'
-        ]">
+        ]" :style="{ backgroundColor: getTopicColor(topic, index) }">
 
         <NuxtLink :to="topicLink(topic)" class="block space-y-3">
           <!-- Title row -->
@@ -222,14 +237,12 @@ onMounted(async () => {
 
 /* Topic cards */
 .topic-card {
-  background: rgba(165, 213, 245, 0.441);
   backdrop-filter: blur(6px);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
 }
 
 .topic-card.is-active:hover {
   transform: translateY(-1px);
-  background: rgba(215, 239, 255, 0.893);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
 
