@@ -526,40 +526,29 @@ onBeforeUnmount(() => {
       </div>
 
       <template v-else>
-        <div class="flex items-center gap-3 mb-6">
-          <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
-            <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
-              :style="{ width: progressPercent + '%' }" />
-          </div>
-
-          <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
-            {{ current + 1 }} / {{ questions.length }}
-          </span>
-        </div>
-
         <div v-if="showQuiz" class="space-y-6">
           <div class="space-y-6">
-            <div class="flex flex-col items-center justify-center min-h-[80px]">
-              <div class="space-y-2 transition-all duration-300"
-                :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
-                <p class="text-2xl text-black leading-relaxed font-semibold text-center">
-                  {{ question.prompt }}
-                </p>
+            <div class="flex flex-wrap items-center justify-center gap-4 md:gap-6">
+              <div v-if="(current + 1) <= questions.length" class="w-full sm:w-auto sm:min-w-[220px]">
+                <div class="flex items-center justify-center sm:justify-start gap-3">
+                  <div class="w-40 sm:w-48 bg-gray-200 rounded-full h-2">
+                    <div class="bg-purple-300 h-2 rounded-full transition-all duration-300"
+                      :style="{ width: progressPercent + '%' }" />
+                  </div>
 
-                <p v-if="question.jyutping" class="text-sm text-gray-600 text-center">
-                  {{ question.jyutping }}
-                </p>
+                  <span class="text-xs text-gray-500 whitespace-nowrap">
+                    {{ current + 1 }} / {{ questions.length }}
+                  </span>
+                </div>
               </div>
-            </div>
 
-            <div class="flex items-center justify-center min-h-[72px]">
-              <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`"
-                autoplay />
-            </div>
+              <div class="flex items-center justify-center min-h-[56px]">
+                <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`"
+                  autoplay />
+              </div>
 
-            <div class="text-center space-y-4">
-              <div class="relative">
-                <div class="space-y-1"
+              <div class="text-center sm:text-left">
+                <div class="space-y-1 transition-all duration-300"
                   :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
                   <p class="text-xs uppercase tracking-wide text-gray-500">
                     Target word
@@ -574,36 +563,47 @@ onBeforeUnmount(() => {
                   </p>
                 </div>
               </div>
+            </div>
 
-              <div class="relative">
-                <div class="min-h-[50px] space-y-3 transition-all duration-300"
-                  :class="!answered && 'blur-md opacity-70 select-none'">
-                  <div class="flex items-center justify-center gap-3">
-                    <div class="w-32 h-1 bg-gray-200 rounded">
-                      <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                        :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
-                    </div>
+            <div class="flex flex-col items-center justify-center min-h-[80px]">
+              <div class="space-y-2 transition-all duration-300"
+                :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
+                <p class="text-2xl text-black leading-relaxed font-semibold text-center">
+                  {{ question.prompt }}
+                </p>
 
-                    <div class="relative flex items-center">
-                      <span class="text-sm text-gray-500 whitespace-nowrap">
-                        {{ currentXp ?? 0 }} / {{ masteryXp }} XP
-                      </span>
+                <p v-if="question.jyutping" class="text-sm text-gray-600 text-center">
+                  {{ question.jyutping }}
+                </p>
+              </div>
+            </div>
 
-                      <transition name="xp-fall">
-                        <span v-if="xpDelta !== null"
-                          class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                          :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-                          {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
-                        </span>
-                      </transition>
-                    </div>
+            <div class="relative">
+              <div class="min-h-[50px] space-y-3 transition-all duration-300" :class="!answered && 'blur-md opacity-70 select-none'">
+                <div class="flex items-center justify-center gap-3">
+                  <div class="w-32 h-1 bg-gray-200 rounded">
+                    <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                      :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                   </div>
 
-                  <div class="h-5 flex items-center justify-center">
-                    <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
-                      {{ currentStreak }} streak
+                  <div class="relative flex items-center">
+                    <span class="text-sm text-gray-500 whitespace-nowrap">
+                      {{ currentXp ?? 0 }} / {{ masteryXp }} XP
                     </span>
+
+                    <transition name="xp-fall">
+                      <span v-if="xpDelta !== null" class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                        :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                        {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                      </span>
+                    </transition>
                   </div>
+                </div>
+
+                <div class="h-5 flex items-center justify-center">
+                  <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
+                    {{ currentStreak }} streak
+                  </span>
                 </div>
               </div>
             </div>
