@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  middleware: "auth-required",
+  middleware: "logged-in",
 })
 
 type PitchContour = { values: number[] }
