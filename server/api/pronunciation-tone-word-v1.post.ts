@@ -46,8 +46,6 @@ export default defineEventHandler(async (event) => {
   const audioFile = form?.find((f) => f.name === "audio")
   const expectedJyutping =
     form?.find((f) => f.name === "expectedJyutping")?.data?.toString().trim() ?? ""
-  const heardJyutping =
-    form?.find((f) => f.name === "heardJyutping")?.data?.toString().trim().toLowerCase() ?? ""
   const pitchSummaryRaw = form?.find((f) => f.name === "pitchSummary")?.data?.toString() ?? ""
   const acousticContours = parseAcousticContours(pitchSummaryRaw)
 
@@ -59,9 +57,6 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: "Missing expected jyutping" })
   }
 
-  if (!heardJyutping) {
-    throw createError({ statusCode: 400, statusMessage: "Missing heard jyutping (manual transcription)" })
-  }
 
   if (audioFile.data.length > MAX_AUDIO_SIZE) {
     throw createError({ statusCode: 400, statusMessage: "Audio file too large" })
@@ -69,12 +64,13 @@ export default defineEventHandler(async (event) => {
 
   const result = scoreWordToneAttempt({
     expectedJyutping,
-    heardJyutping,
+    heardJyutping: "",
     acousticContours,
+    toneOnly: true,
   })
 
   return {
-    heardJyutping,
+    heardJyutping: "",
     expectedJyutping,
     soundScore: result.soundScore,
     textToneScore: result.textToneScore,
@@ -86,6 +82,6 @@ export default defineEventHandler(async (event) => {
     toneErrors: result.toneErrors,
     expectedTokens: result.expectedTokens,
     heardTokens: result.heardTokens,
-    engine: "non-ai-hybrid",
+    engine: "non-ai-tone-only",
   }
 })

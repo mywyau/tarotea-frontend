@@ -74,8 +74,6 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
   const slope = (end - start) / Math.max(start, 1)
   const range = (max - min) / Math.max(mean, 1)
 
-  // Coarse Cantonese tone contour heuristics:
-  // 1 high level, 2 high rising, 3 mid level, 4 low falling, 5 low rising, 6 low level
   if (tone === "1") return clamp(100 - Math.abs(slope) * 260 - Math.abs(range - 0.12) * 140, 0, 100)
   if (tone === "2") return clamp(40 + slope * 240 - Math.abs(range - 0.22) * 120, 0, 100)
   if (tone === "3") return clamp(100 - Math.abs(slope) * 220 - Math.abs(range - 0.1) * 140, 0, 100)
@@ -106,19 +104,20 @@ function scoreAcousticTones(expectedTokens: string[], contours: AcousticSyllable
 
 export function scoreWordToneAttempt(params: {
   expectedJyutping: string
-  heardJyutping: string
+  heardJyutping?: string
   acousticContours?: AcousticSyllableContour[]
+  toneOnly?: boolean
 }): ToneWordScore {
   const expectedTokens = tokenizeJyutping(params.expectedJyutping)
-  const heardTokens = tokenizeJyutping(params.heardJyutping)
+  const heardTokens = tokenizeJyutping(params.heardJyutping ?? "")
 
   const totalSyllables = expectedTokens.length
 
   if (!expectedTokens.length) {
     return {
-      heardJyutping: params.heardJyutping,
+      heardJyutping: params.heardJyutping ?? "",
       normalizedExpected: normalizeJyutping(params.expectedJyutping),
-      normalizedHeard: normalizeJyutping(params.heardJyutping),
+      normalizedHeard: normalizeJyutping(params.heardJyutping ?? ""),
       expectedTokens,
       heardTokens,
       soundScore: 0,
@@ -151,11 +150,11 @@ export function scoreWordToneAttempt(params: {
 
       if (expectedTone && expectedTone === heardTone) {
         toneMatches += 1
-      } else if (expectedTone) {
+      } else if (expectedTone && heard) {
         toneErrors.push({
           syllable: i + 1,
           expected,
-          heard: heard || "(missing)",
+          heard,
         })
       }
     }
@@ -164,28 +163,37 @@ export function scoreWordToneAttempt(params: {
   const soundScore = Math.round((soundMatches / totalSyllables) * 100)
   const textToneScore = Math.round((toneMatches / totalSyllables) * 100)
   const acousticToneScore = scoreAcousticTones(expectedTokens, params.acousticContours ?? [])
-  const toneScore =
-    acousticToneScore === null
+
+  const toneOnly = Boolean(params.toneOnly)
+
+  const toneScore = toneOnly
+    ? acousticToneScore ?? 0
+    : acousticToneScore === null
       ? textToneScore
       : Math.round(clamp(textToneScore * 0.5 + acousticToneScore * 0.5, 0, 100))
 
-  const overallScore = Math.round(clamp(soundScore * 0.7 + toneScore * 0.3, 0, 100))
+  const overallScore = toneOnly
+    ? toneScore
+    : Math.round(clamp(soundScore * 0.7 + toneScore * 0.3, 0, 100))
 
   const matchType: ToneWordScore["matchType"] =
-    soundScore === 100 && toneScore === 100
+    overallScore === 100
       ? "perfect"
-      : soundScore === 100 && toneScore < 100
-        ? "sound-only"
-        : overallScore >= 80
-          ? "close"
-          : overallScore >= 50
-            ? "partial"
-            : "wrong"
+      : overallScore >= 80
+        ? "close"
+        : overallScore >= 50
+          ? "partial"
+          : "wrong"
 
-  const feedback =
-    matchType === "perfect"
+  const feedback = toneOnly
+    ? overallScore >= 85
+      ? "Great tone contour match."
+      : overallScore >= 60
+        ? "Tone contour is close. Try to keep the shape more consistent."
+        : "Tone contour does not match well yet. Try again and focus on pitch shape."
+    : matchType === "perfect"
       ? "Perfect — sound and tone both match."
-      : matchType === "sound-only"
+      : soundScore === 100 && toneScore < 100
         ? `Good sound. Tone mismatch on syllable ${toneErrors.map((x) => x.syllable).join(", ")}.`
         : matchType === "close"
           ? "Close. You are mostly right, but there are tone or syllable misses."
@@ -194,9 +202,9 @@ export function scoreWordToneAttempt(params: {
             : "Not quite. Listen again and try matching both the sound and the tone."
 
   return {
-    heardJyutping: params.heardJyutping,
+    heardJyutping: params.heardJyutping ?? "",
     normalizedExpected: normalizeJyutping(params.expectedJyutping),
-    normalizedHeard: normalizeJyutping(params.heardJyutping),
+    normalizedHeard: normalizeJyutping(params.heardJyutping ?? ""),
     expectedTokens,
     heardTokens,
     soundScore,
