@@ -39,7 +39,7 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event)
   const userId = auth.sub
 
-  await enforceRateLimit(`rl:pronunciation:tone-word:${userId}`, 10, 60)
+  await enforceRateLimit(`rl:pronunciation:tone-word:${userId}`, 60, 60)
 
   const form = await readMultipartFormData(event)
 
