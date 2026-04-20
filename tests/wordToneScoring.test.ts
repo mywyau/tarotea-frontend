@@ -158,4 +158,16 @@ describe("scoreWordToneAttempt", () => {
     expect(result.feedback.toLowerCase()).not.toContain("still off")
   })
 
+  it("keeps single-syllable rising tone words like lei2 from being under-scored", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "lei2",
+      acousticContours: [{ values: [158, 159, 160, 161, 162] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThanOrEqual(72)
+    expect(result.feedback.toLowerCase()).not.toContain("still off")
+  })
+
 })

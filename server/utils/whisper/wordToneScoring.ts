@@ -316,6 +316,28 @@ function buildSingleWordToneBoost(params: {
   return boost
 }
 
+function applySingleWordToneFloor(params: {
+  toneOnly: boolean
+  expectedTokens: string[]
+  acousticContours?: AcousticSyllableContour[]
+  toneScore: number
+}) {
+  if (!params.toneOnly || params.expectedTokens.length !== 1) {
+    return params.toneScore
+  }
+
+  const token = params.expectedTokens[0]
+  const tone = getTone(token)
+  const shape = summarizeContourShape((params.acousticContours ?? [])[0])
+
+  if ((tone === "2" || tone === "5") && shape && shape.direction !== "falling") {
+    // Single rising tones like lei2/caang2 can be naturally subtle.
+    return Math.max(params.toneScore, 72)
+  }
+
+  return params.toneScore
+}
+
 export function scoreWordToneAttempt(params: {
   expectedJyutping: string
   heardJyutping?: string
@@ -400,7 +422,7 @@ export function scoreWordToneAttempt(params: {
       ? textToneScore
       : Math.round(clamp(textToneScore * 0.5 + fusedAcoustic * 0.5, 0, 100))
 
-  const toneScore =
+  const toneScoreRaw =
     toneOnly && expectedTokens.length >= 3 && toneScoreBase > 0
       ? Math.round(
           clamp(
@@ -424,6 +446,13 @@ export function scoreWordToneAttempt(params: {
             ),
           )
         : toneScoreBase
+
+  const toneScore = applySingleWordToneFloor({
+    toneOnly,
+    expectedTokens,
+    acousticContours: params.acousticContours,
+    toneScore: toneScoreRaw,
+  })
 
   const overallScore = toneOnly
     ? toneScore
