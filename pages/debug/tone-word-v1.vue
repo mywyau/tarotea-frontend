@@ -8,10 +8,47 @@ type PitchContour = { values: number[] }
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
+const route = useRoute()
+
+type WordMeta = {
+  id?: string
+  word?: string
+  jyutping?: string
+  audio?: {
+    word?: string
+  }
+}
+
+const wordIdFromRoute = computed(() => {
+  const fromQuery = route.query.wordId
+  return typeof fromQuery === "string" ? decodeURIComponent(fromQuery) : ""
+})
 
 const expectedChinese = ref("你")
 const expectedJyutping = ref("nei5")
 const referenceAudioPath = ref("")
+
+const { data: selectedWord } = await useAsyncData<WordMeta | null>(
+  () => `tone-word-debug-${wordIdFromRoute.value || "none"}`,
+  async () => {
+    if (!wordIdFromRoute.value) return null
+    return await $fetch(`/api/words/${encodeURIComponent(wordIdFromRoute.value)}`)
+  },
+  { watch: [wordIdFromRoute] },
+)
+
+const hasAutoFilledFromWord = ref(false)
+
+watchEffect(() => {
+  const w = selectedWord.value
+  if (!w || hasAutoFilledFromWord.value) return
+
+  if (w.word) expectedChinese.value = w.word
+  if (w.jyutping) expectedJyutping.value = w.jyutping
+  if (w.audio?.word) referenceAudioPath.value = `audio/${w.audio.word}`
+
+  hasAutoFilledFromWord.value = true
+})
 
 const recording = ref(false)
 const loading = ref(false)
@@ -297,6 +334,7 @@ async function runToneCheck() {
       <h1 class="text-3xl font-bold">Tone Check V1 (Non-AI: Tone-Only)</h1>
       <p class="mt-2 text-sm text-slate-300">
         Manual tester page for a non-AI tone-only flow using acoustic pitch contours.
+        <span v-if="wordIdFromRoute" class="block text-xs text-slate-400">Word ID: {{ wordIdFromRoute }}</span>
       </p>
 
       <div class="mt-6 grid gap-4 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
