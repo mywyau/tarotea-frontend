@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { useAudioVolume } from '~/composables/useAudioVolume'
-import { useAuth } from '~/composables/useAuth'
 import { masteryXp } from '@/config/xp/helpers';
+import { useAudioVolume } from '~/composables/useAudioVolume';
+import { useAuth } from '~/composables/useAuth';
 
 
 definePageMeta({
@@ -208,7 +208,8 @@ watchEffect(() => {
       </div>
 
       <div class="flex items-center justify-between w-full pt-1">
-        <NuxtLink v-if="prevWord" :to="`/level/${level}/word/${prevWord.id}`" class="edge-arrow" aria-label="Previous word">
+        <NuxtLink v-if="prevWord" :to="`/level/${level}/word/${prevWord.id}`" class="edge-arrow"
+          aria-label="Previous word">
           ‹
         </NuxtLink>
 
@@ -224,14 +225,13 @@ watchEffect(() => {
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
           size="lg" />
 
-        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`"
-          class="action-chip" aria-label="Practice writing this word">
+        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip"
+          aria-label="Practice writing this word">
           ✏️ Write
         </NuxtLink>
 
-        <NuxtLink :to="`/debug/tone-word-v1/${word.id}`"
-          class="action-chip" aria-label="Open tone checker for this word">
-          🎯 Tone Check
+        <NuxtLink :to="`/tone-forge/${word.id}`" class="action-chip" aria-label="Open tone checker for this word">
+          Tone Forge
         </NuxtLink>
       </div>
 
@@ -394,14 +394,14 @@ watchEffect(() => {
 }
 
 .edge-arrow {
-    font-size: 4rem;
-    line-height: 1;
-    color: #4b5563;
-    transition: color 0.2s ease, transform 0.2s ease;
+  font-size: 4rem;
+  line-height: 1;
+  color: #4b5563;
+  transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .edge-arrow:hover {
-    color: #5162ff;
-    transform: scale(1.04);
+  color: #5162ff;
+  transform: scale(1.04);
 }
 </style>
