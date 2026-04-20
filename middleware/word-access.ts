@@ -29,11 +29,33 @@ async function getOptionalAuthHeaders() {
   }
 }
 
+function firstParam(
+  value: string | string[] | undefined,
+): string | undefined {
+  if (Array.isArray(value)) {
+    return value[0];
+  }
+
+  return value;
+}
+
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return;
 
-  const category = to.params.category as string | undefined;
-  const id = to.params.id as string | undefined;
+  const categoryParam =
+    firstParam(to.params.category as string | string[] | undefined) ??
+    firstParam(to.params.topic as string | string[] | undefined) ??
+    firstParam(to.params.slug as string | string[] | undefined);
+
+  const wordIdParam =
+    firstParam(to.params.id as string | string[] | undefined) ??
+    firstParam(to.params.wordId as string | string[] | undefined) ??
+    (to.params.topic
+      ? firstParam(to.params.slug as string | string[] | undefined)
+      : undefined);
+
+  const category = categoryParam ? decodeURIComponent(categoryParam) : undefined;
+  const id = wordIdParam ? decodeURIComponent(wordIdParam) : undefined;
 
   if (!category || !id) return;
 
