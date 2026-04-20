@@ -92,6 +92,10 @@ const canEnterLevel = (level: any) => {
           <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/audio/v3/start-quiz`" class="level-btn level-btn-blush">
             Sentence Audio Only
           </NuxtLink>
+
+          <NuxtLink :to="`/quiz/${quizLevel.id}/tone-gate`" class="level-btn level-btn-green">
+            Tone Gate (Timed)
+          </NuxtLink>
         </div>
 
         <!-- Locked -->
@@ -200,5 +204,14 @@ const canEnterLevel = (level: any) => {
 
 .level-btn-blush:hover {
   background: rgb(204, 136, 136);
+}
+
+.level-btn-green {
+  background: rgba(88, 199, 95, 0.35);
+  color: #1f2937;
+}
+
+.level-btn-green:hover {
+  background: rgba(88, 199, 95, 0.55);
 }
 </style>
