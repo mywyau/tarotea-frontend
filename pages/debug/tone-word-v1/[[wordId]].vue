@@ -194,11 +194,20 @@ async function extractPitchContours(blob: Blob, expectedTokenCount: number): Pro
 async function fetchReferenceContours(expectedTokenCount: number): Promise<PitchContour[]> {
   if (!referenceAudioPath.value || !expectedTokenCount) return []
 
-  const response = await fetch(referenceAudioUrl.value)
-  if (!response.ok) throw new Error(`Failed to fetch reference audio: ${response.status}`)
+  try {
+    const response = await fetch(referenceAudioUrl.value)
 
-  const buffer = await response.arrayBuffer()
-  return extractPitchContoursFromArrayBuffer(buffer, expectedTokenCount)
+    if (!response.ok) {
+      console.warn("[tone-word-v1] reference audio fetch failed", response.status)
+      return []
+    }
+
+    const buffer = await response.arrayBuffer()
+    return extractPitchContoursFromArrayBuffer(buffer, expectedTokenCount)
+  } catch (error) {
+    console.warn("[tone-word-v1] failed to process reference audio", error)
+    return []
+  }
 }
 
 function playReferenceAudio() {
@@ -306,7 +315,7 @@ async function runToneCheck() {
     })
   } catch (error: any) {
     console.error("[tone-word-v1] failed", error)
-    errorMessage.value = error?.data?.statusMessage || "Tone check request failed."
+    errorMessage.value = error?.data?.statusMessage || error?.message || "Tone check request failed."
   } finally {
     loading.value = false
   }
