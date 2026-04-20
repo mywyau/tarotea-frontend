@@ -24,7 +24,7 @@ describe("scoreWordToneAttempt", () => {
     expect(result.soundScore).toBe(0)
     expect(result.textToneScore).toBe(0)
     expect(result.acousticToneScore).not.toBeNull()
-    expect(result.toneScore).toBe(Math.min((result.acousticToneScore ?? 0) + 4, 100))
+    expect(result.toneScore).toBe(Math.min((result.acousticToneScore ?? 0) + 5, 100))
     expect(result.overallScore).toBe(result.toneScore)
   })
 
@@ -144,6 +144,18 @@ describe("scoreWordToneAttempt", () => {
 
     expect(result.feedback).toContain("Syllable 1")
     expect(result.feedback).toContain("should rise")
+  })
+
+  it("is more generous for single-syllable rising tone words like caang2", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "caang2",
+      acousticContours: [{ values: [140, 143, 146, 149, 152] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThanOrEqual(75)
+    expect(result.feedback.toLowerCase()).not.toContain("still off")
   })
 
 })

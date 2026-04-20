@@ -79,7 +79,7 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
   const boundedRange = clamp(range, 0, 0.6)
 
   if (tone === "1") return clamp(97 - Math.abs(boundedSlope) * 150 - boundedRange * 40, 0, 100)
-  if (tone === "2") return clamp(56 + boundedSlope * 170 - Math.abs(boundedRange - 0.16) * 55, 0, 100)
+  if (tone === "2") return clamp(62 + boundedSlope * 175 - Math.abs(boundedRange - 0.14) * 45, 0, 100)
   if (tone === "3") return clamp(94 - Math.abs(boundedSlope) * 145 - boundedRange * 35, 0, 100)
   if (tone === "4") return clamp(56 + (-boundedSlope) * 180 - Math.abs(boundedRange - 0.18) * 55, 0, 100)
   if (tone === "5") return clamp(60 + boundedSlope * 165 - Math.abs(boundedRange - 0.1) * 55, 0, 100)
@@ -286,6 +286,36 @@ function explainToneIssue(
   return null
 }
 
+function buildSingleWordToneBoost(params: {
+  toneOnly: boolean
+  expectedTokens: string[]
+  acousticContours?: AcousticSyllableContour[]
+  toneScoreBase: number
+}) {
+  if (!params.toneOnly || params.expectedTokens.length !== 1 || params.toneScoreBase <= 0) {
+    return 0
+  }
+
+  const token = params.expectedTokens[0]
+  const tone = getTone(token)
+  const shape = summarizeContourShape((params.acousticContours ?? [])[0])
+
+  // Default small kindness boost for one-syllable tone-only words.
+  let boost = 5
+
+  // Extra help for rising tones (tone 2/5) when the contour is at least not falling.
+  if ((tone === "2" || tone === "5") && shape && shape.direction !== "falling") {
+    boost += 3
+  }
+
+  // If there is no contour summary, stay conservative.
+  if (!shape) {
+    boost = 4
+  }
+
+  return boost
+}
+
 export function scoreWordToneAttempt(params: {
   expectedJyutping: string
   heardJyutping?: string
@@ -380,7 +410,19 @@ export function scoreWordToneAttempt(params: {
           ),
         )
       : toneOnly && toneScoreBase > 0
-        ? Math.round(clamp(toneScoreBase + 4, 0, 100))
+        ? Math.round(
+            clamp(
+              toneScoreBase +
+                buildSingleWordToneBoost({
+                  toneOnly,
+                  expectedTokens,
+                  acousticContours: params.acousticContours,
+                  toneScoreBase,
+                }),
+              0,
+              100,
+            ),
+          )
         : toneScoreBase
 
   const overallScore = toneOnly
