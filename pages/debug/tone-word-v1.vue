@@ -8,6 +8,7 @@ type PitchContour = { values: number[] }
 
 const expectedChinese = ref("你")
 const expectedJyutping = ref("nei5")
+const heardJyutping = ref("nei5")
 
 const recording = ref(false)
 const loading = ref(false)
@@ -205,6 +206,11 @@ async function runToneCheck() {
     return
   }
 
+  if (!heardJyutping.value.trim()) {
+    errorMessage.value = "Heard jyutping is required (manual transcription)."
+    return
+  }
+
   loading.value = true
   errorMessage.value = ""
 
@@ -218,6 +224,7 @@ async function runToneCheck() {
 
     form.append("audio", recordedBlob.value, `tone-word.${extension}`)
     form.append("expectedJyutping", expectedJyutping.value.trim())
+    form.append("heardJyutping", heardJyutping.value.trim().toLowerCase())
     form.append("pitchSummary", JSON.stringify(contours))
 
     const auth = await useAuth()
@@ -242,9 +249,9 @@ async function runToneCheck() {
 <template>
   <div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-zinc-950 text-slate-100">
     <div class="mx-auto max-w-3xl px-4 py-10">
-      <h1 class="text-3xl font-bold">Tone Check V1 (Hybrid: ASR + Acoustic)</h1>
+      <h1 class="text-3xl font-bold">Tone Check V1 (Non-AI: Manual Jyutping + Acoustic)</h1>
       <p class="mt-2 text-sm text-slate-300">
-        Manual tester page for the mixed word-level tone scoring endpoint.
+        Manual tester page for a non-AI flow: manual jyutping + acoustic pitch contours.
       </p>
 
       <div class="mt-6 grid gap-4 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
@@ -262,6 +269,16 @@ async function runToneCheck() {
           <span class="text-xs uppercase tracking-wide text-slate-400">Expected Jyutping (required)</span>
           <input
             v-model="expectedJyutping"
+            class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
+            type="text"
+            placeholder="nei5"
+          >
+        </label>
+
+        <label class="grid gap-1">
+          <span class="text-xs uppercase tracking-wide text-slate-400">Heard Jyutping (manual, required)</span>
+          <input
+            v-model="heardJyutping"
             class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
             type="text"
             placeholder="nei5"
