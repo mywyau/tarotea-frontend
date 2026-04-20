@@ -113,4 +113,16 @@ describe("scoreWordToneAttempt", () => {
     expect(result.toneScore).toBeGreaterThan(60)
   })
 
+  it("handles slower/faster contour timing via DTW reference matching", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "sai2",
+      acousticContours: [{ values: [120, 125, 131, 138, 146, 154, 163] }],
+      referenceContours: [{ values: [120, 123, 126, 131, 138, 146, 154, 163, 170, 176] }],
+      toneOnly: true,
+    })
+
+    expect(result.referenceToneScore).not.toBeNull()
+    expect((result.referenceToneScore ?? 0)).toBeGreaterThan(60)
+  })
+
 })

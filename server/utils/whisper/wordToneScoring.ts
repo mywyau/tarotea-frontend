@@ -143,6 +143,33 @@ function zNormalize(values: number[]) {
   return values.map((v) => (v - mean) / std)
 }
 
+function dtwDistance(a: number[], b: number[]) {
+  const n = a.length
+  const m = b.length
+
+  if (!n || !m) return Number.POSITIVE_INFINITY
+
+  const dp: number[][] = Array.from({ length: n + 1 }, () =>
+    Array(m + 1).fill(Number.POSITIVE_INFINITY),
+  )
+  dp[0][0] = 0
+
+  for (let i = 1; i <= n; i++) {
+    for (let j = 1; j <= m; j++) {
+      const cost = Math.abs(a[i - 1] - b[j - 1])
+      dp[i][j] =
+        cost +
+        Math.min(
+          dp[i - 1][j], // insertion
+          dp[i][j - 1], // deletion
+          dp[i - 1][j - 1], // match
+        )
+    }
+  }
+
+  return dp[n][m] / (n + m)
+}
+
 function scoreReferenceSimilarity(
   userContours: AcousticSyllableContour[],
   referenceContours: AcousticSyllableContour[],
@@ -170,11 +197,12 @@ function scoreReferenceSimilarity(
       ...candidates.map((candidate) => {
         const rNorm = zNormalize(resample(candidate))
         const mad = safeMean(uNorm.map((value, idx) => Math.abs(value - rNorm[idx])))
+        const dtw = dtwDistance(uNorm, rNorm)
         const slopeUser = uNorm[uNorm.length - 1] - uNorm[0]
         const slopeRef = rNorm[rNorm.length - 1] - rNorm[0]
         const slopePenalty = Math.abs(slopeUser - slopeRef)
 
-        return clamp(100 - mad * 30 - slopePenalty * 15, 0, 100)
+        return clamp(100 - mad * 12 - dtw * 28 - slopePenalty * 10, 0, 100)
       }),
     )
 
