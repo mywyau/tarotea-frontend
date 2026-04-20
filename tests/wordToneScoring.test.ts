@@ -24,7 +24,7 @@ describe("scoreWordToneAttempt", () => {
     expect(result.soundScore).toBe(0)
     expect(result.textToneScore).toBe(0)
     expect(result.acousticToneScore).not.toBeNull()
-    expect(result.toneScore).toBe(result.acousticToneScore)
+    expect(result.toneScore).toBe(Math.min((result.acousticToneScore ?? 0) + 4, 100))
     expect(result.overallScore).toBe(result.toneScore)
   })
 
@@ -123,6 +123,27 @@ describe("scoreWordToneAttempt", () => {
 
     expect(result.referenceToneScore).not.toBeNull()
     expect((result.referenceToneScore ?? 0)).toBeGreaterThan(60)
+  })
+
+  it("applies a small generosity boost for tone-only single syllables", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "sai2",
+      acousticContours: [{ values: [140, 145, 150, 155, 161] }],
+      toneOnly: true,
+    })
+
+    expect(result.toneScore).toBeGreaterThan(60)
+  })
+
+  it("explains likely tone issues in a human-friendly way", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "sai2",
+      acousticContours: [{ values: [180, 172, 165, 159, 152] }],
+      toneOnly: true,
+    })
+
+    expect(result.feedback).toContain("Syllable 1")
+    expect(result.feedback).toContain("should rise")
   })
 
 })
