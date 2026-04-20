@@ -5,11 +5,6 @@ definePageMeta({
 })
 
 type PitchContour = { values: number[] }
-
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
-const route = useRoute()
-
 type WordMeta = {
   id?: string
   word?: string
@@ -19,13 +14,15 @@ type WordMeta = {
   }
 }
 
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
+const route = useRoute()
+
 const wordIdFromRoute = computed(() => {
   const fromQuery = route.query.wordId
   return typeof fromQuery === "string" ? decodeURIComponent(fromQuery) : ""
 })
 
-const expectedChinese = ref("你")
-const expectedJyutping = ref("nei5")
 const { data: selectedWord } = await useAsyncData<WordMeta | null>(
   () => `tone-word-debug-${wordIdFromRoute.value || "none"}`,
   async () => {
@@ -35,21 +32,14 @@ const { data: selectedWord } = await useAsyncData<WordMeta | null>(
   { watch: [wordIdFromRoute] },
 )
 
-const hasAutoFilledFromWord = ref(false)
-
-watchEffect(() => {
-  const w = selectedWord.value
-  if (!w || hasAutoFilledFromWord.value) return
-
-  if (w.word) expectedChinese.value = w.word
-  if (w.jyutping) expectedJyutping.value = w.jyutping
-
-  hasAutoFilledFromWord.value = true
-})
-
+const expectedChinese = computed(() => selectedWord.value?.word ?? "")
+const expectedJyutping = computed(() => selectedWord.value?.jyutping ?? "")
 const referenceAudioPath = computed(() => {
   const filename = selectedWord.value?.audio?.word
   return filename ? `audio/${filename}` : ""
+})
+const referenceAudioUrl = computed(() => {
+  return referenceAudioPath.value ? `${cdnBase}/${referenceAudioPath.value}` : ""
 })
 
 const recording = ref(false)
@@ -62,19 +52,13 @@ const recorderMimeType = ref("audio/webm")
 const recordedBlob = ref<Blob | null>(null)
 
 const result = ref<null | {
-  heardJyutping: string
   expectedJyutping: string
-  soundScore: number
-  textToneScore: number
   acousticToneScore: number | null
   referenceToneScore: number | null
   toneScore: number
   overallScore: number
   matchType: string
   feedback: string
-  toneErrors: Array<{ syllable: number; expected: string; heard: string }>
-  expectedTokens: string[]
-  heardTokens: string[]
 }>(null)
 
 const extractedPitchContours = ref<PitchContour[]>([])
@@ -105,10 +89,7 @@ function tokenizeJyutping(raw: string) {
 
 function estimatePitchHz(frame: Float32Array, sampleRate: number) {
   let rms = 0
-
-  for (let i = 0; i < frame.length; i++) {
-    rms += frame[i] * frame[i]
-  }
+  for (let i = 0; i < frame.length; i++) rms += frame[i] * frame[i]
 
   rms = Math.sqrt(rms / frame.length)
   if (rms < 0.01) return 0
@@ -170,9 +151,7 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
       const frame = channel.slice(offset, offset + frameSize)
       const pitch = estimatePitchHz(frame, audioBuffer.sampleRate)
 
-      if (pitch > 0) {
-        rawPitches.push(Math.round(pitch))
-      }
+      if (pitch > 0) rawPitches.push(Math.round(pitch))
     }
 
     if (!rawPitches.length) return []
@@ -180,7 +159,6 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
     const smoothed = smoothPitches(rawPitches)
     const trim = Math.floor(smoothed.length * 0.1)
     const trimmed = smoothed.slice(trim, Math.max(smoothed.length - trim, trim + 1))
-
     if (!trimmed.length) return []
 
     const contours: PitchContour[] = []
@@ -189,11 +167,7 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
     for (let i = 0; i < expectedTokenCount; i++) {
       const start = i * bucketSize
       const end = i === expectedTokenCount - 1 ? trimmed.length : (i + 1) * bucketSize
-      const values = trimmed.slice(start, end)
-
-      contours.push({
-        values: values.slice(0, 32),
-      })
+      contours.push({ values: trimmed.slice(start, end).slice(0, 32) })
     }
 
     return contours
@@ -210,21 +184,29 @@ async function extractPitchContours(blob: Blob, expectedTokenCount: number): Pro
 async function fetchReferenceContours(expectedTokenCount: number): Promise<PitchContour[]> {
   if (!referenceAudioPath.value || !expectedTokenCount) return []
 
-  const normalizedPath = referenceAudioPath.value.replace(/^\/+/, "")
-  const url = `${cdnBase}/${normalizedPath}`
-  const response = await fetch(url)
-
-  if (!response.ok) {
-    throw new Error(`Failed to fetch reference audio: ${response.status}`)
-  }
+  const response = await fetch(referenceAudioUrl.value)
+  if (!response.ok) throw new Error(`Failed to fetch reference audio: ${response.status}`)
 
   const buffer = await response.arrayBuffer()
   return extractPitchContoursFromArrayBuffer(buffer, expectedTokenCount)
 }
 
+function playReferenceAudio() {
+  if (!referenceAudioUrl.value) return
+  const audio = new Audio(referenceAudioUrl.value)
+  audio.play().catch(() => {
+    errorMessage.value = "Unable to play reference audio."
+  })
+}
+
 async function startRecording() {
   if (!navigator.mediaDevices || !window.MediaRecorder) {
     errorMessage.value = "MediaRecorder is not available on this browser/device."
+    return
+  }
+
+  if (!expectedJyutping.value) {
+    errorMessage.value = "Missing word data. Open this page from a word link."
     return
   }
 
@@ -240,24 +222,19 @@ async function startRecording() {
 
     const mimeType = getSupportedMimeType()
     recorderMimeType.value = mimeType
-
     mediaRecorder.value = new MediaRecorder(stream, { mimeType })
 
     mediaRecorder.value.ondataavailable = (event) => {
-      if (event.data && event.data.size > 0) {
-        audioChunks.push(event.data)
-      }
+      if (event.data && event.data.size > 0) audioChunks.push(event.data)
     }
 
     mediaRecorder.value.onstop = () => {
       const blob = new Blob(audioChunks, { type: recorderMimeType.value })
       recordedBlob.value = blob
 
-      if (recordingUrl.value) {
-        URL.revokeObjectURL(recordingUrl.value)
-      }
-
+      if (recordingUrl.value) URL.revokeObjectURL(recordingUrl.value)
       recordingUrl.value = URL.createObjectURL(blob)
+
       stopTracks()
       mediaRecorder.value = null
     }
@@ -272,10 +249,7 @@ async function startRecording() {
 }
 
 function stopRecording() {
-  if (!mediaRecorder.value || mediaRecorder.value.state === "inactive") {
-    return
-  }
-
+  if (!mediaRecorder.value || mediaRecorder.value.state === "inactive") return
   mediaRecorder.value.stop()
   recording.value = false
 }
@@ -286,11 +260,10 @@ async function runToneCheck() {
     return
   }
 
-  if (!expectedJyutping.value.trim()) {
-    errorMessage.value = "Expected jyutping is required."
+  if (!expectedJyutping.value) {
+    errorMessage.value = "Missing word data. Open this page from a word link."
     return
   }
-
 
   loading.value = true
   errorMessage.value = ""
@@ -307,7 +280,7 @@ async function runToneCheck() {
     referencePitchContours.value = referenceContours
 
     form.append("audio", recordedBlob.value, `tone-word.${extension}`)
-    form.append("expectedJyutping", expectedJyutping.value.trim())
+    form.append("expectedJyutping", expectedJyutping.value)
     form.append("pitchSummary", JSON.stringify(contours))
     form.append("referenceSummary", JSON.stringify(referenceContours))
 
@@ -335,37 +308,28 @@ async function runToneCheck() {
     <div class="mx-auto max-w-3xl px-4 py-10">
       <h1 class="text-3xl font-bold">Tone Check V1 (Non-AI: Tone-Only)</h1>
       <p class="mt-2 text-sm text-slate-300">
-        Manual tester page for a non-AI tone-only flow using acoustic pitch contours.
-        <span v-if="wordIdFromRoute" class="block text-xs text-slate-400">Word ID: {{ wordIdFromRoute }}</span>
-        <span v-if="referenceAudioPath" class="block text-xs text-slate-400">Using CDN reference: {{ referenceAudioPath }}</span>
-        <span v-else class="block text-xs text-amber-300">No reference audio loaded (open via a word page link).</span>
+        Word ID: <span class="font-semibold">{{ wordIdFromRoute || "(missing)" }}</span>
       </p>
 
-      <div class="mt-6 grid gap-4 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
-        <label class="grid gap-1">
-          <span class="text-xs uppercase tracking-wide text-slate-400">Expected Chinese (optional)</span>
-          <input
-            v-model="expectedChinese"
-            class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
-            type="text"
-            placeholder="你"
-          >
-        </label>
+      <div class="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+        <p class="text-xs uppercase tracking-wide text-slate-400">Target Chinese</p>
+        <p class="text-3xl font-semibold">{{ expectedChinese || "—" }}</p>
 
-        <label class="grid gap-1">
-          <span class="text-xs uppercase tracking-wide text-slate-400">Expected Jyutping (required)</span>
-          <input
-            v-model="expectedJyutping"
-            class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
-            type="text"
-            placeholder="nei5"
-          >
-        </label>
+        <p class="mt-3 text-xs uppercase tracking-wide text-slate-400">Target Jyutping</p>
+        <p class="text-xl">{{ expectedJyutping || "—" }}</p>
 
-        <div class="flex flex-wrap gap-3">
+        <div class="mt-4 flex flex-wrap gap-3">
+          <button
+            class="rounded-lg bg-violet-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-50"
+            :disabled="!referenceAudioUrl"
+            @click="playReferenceAudio"
+          >
+            ▶ Play Reference Audio
+          </button>
+
           <button
             class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-50"
-            :disabled="recording || loading"
+            :disabled="recording || loading || !expectedJyutping"
             @click="startRecording"
           >
             Start Recording
@@ -381,36 +345,36 @@ async function runToneCheck() {
 
           <button
             class="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-50"
-            :disabled="recording || !recordedBlob || loading"
+            :disabled="recording || !recordedBlob || loading || !expectedJyutping"
             @click="runToneCheck"
           >
             {{ loading ? "Checking..." : "Run Tone Check" }}
           </button>
         </div>
 
-        <p v-if="recording" class="text-sm text-amber-300">Recording... speak now.</p>
+        <p v-if="referenceAudioPath" class="mt-3 text-xs text-slate-400">Reference: {{ referenceAudioPath }}</p>
+        <p v-else class="mt-3 text-xs text-amber-300">No reference audio found for this word.</p>
+
+        <p v-if="recording" class="mt-2 text-sm text-amber-300">Recording... speak now.</p>
 
         <audio
           v-if="recordingUrl"
-          class="w-full"
+          class="mt-3 w-full"
           controls
           :src="recordingUrl"
         />
 
-        <p v-if="errorMessage" class="rounded-lg border border-rose-500/60 bg-rose-950/30 p-3 text-sm text-rose-200">
+        <p v-if="errorMessage" class="mt-3 rounded-lg border border-rose-500/60 bg-rose-950/30 p-3 text-sm text-rose-200">
           {{ errorMessage }}
         </p>
       </div>
 
-      <div
-        v-if="result"
-        class="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-5"
-      >
+      <div v-if="result" class="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
         <h2 class="text-xl font-semibold">Result</h2>
 
         <dl class="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           <div><dt class="text-slate-400">Expected Jyutping</dt><dd>{{ result.expectedJyutping }}</dd></div>
-                    <div><dt class="text-slate-400">Acoustic Tone Score</dt><dd>{{ result.acousticToneScore ?? "n/a" }}</dd></div>
+          <div><dt class="text-slate-400">Acoustic Tone Score</dt><dd>{{ result.acousticToneScore ?? "n/a" }}</dd></div>
           <div><dt class="text-slate-400">Reference Match Score</dt><dd>{{ result.referenceToneScore ?? "n/a" }}</dd></div>
           <div><dt class="text-slate-400">Final Tone Score</dt><dd>{{ result.toneScore }}</dd></div>
           <div><dt class="text-slate-400">Overall Score</dt><dd>{{ result.overallScore }}</dd></div>
@@ -422,15 +386,6 @@ async function runToneCheck() {
         <p class="mt-2 text-xs text-slate-400">
           Extracted pitch contours: {{ extractedPitchContours.length }} syllable bucket(s) · reference contours: {{ referencePitchContours.length }}
         </p>
-
-        <div v-if="result.toneErrors?.length" class="mt-4 rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-sm">
-          <p class="font-medium text-amber-200">Tone mismatches</p>
-          <ul class="mt-2 list-disc pl-5 text-amber-100">
-            <li v-for="toneError in result.toneErrors" :key="`${toneError.syllable}-${toneError.expected}`">
-              Syllable {{ toneError.syllable }}: expected {{ toneError.expected }}, heard {{ toneError.heard }}
-            </li>
-          </ul>
-        </div>
       </div>
     </div>
   </div>
