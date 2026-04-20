@@ -25,7 +25,6 @@ type ToneApiResponse = {
 
 const PASS_SCORE = 40
 const QUIZ_SIZE = 10
-const QUIZ_DURATION_SECONDS = 120
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -53,8 +52,8 @@ const currentIndex = ref(0)
 const passedCount = ref(0)
 const started = ref(false)
 const finished = ref(false)
-const timedOut = ref(false)
-const secondsLeft = ref(QUIZ_DURATION_SECONDS)
+const elapsedSeconds = ref(0)
+const startedAtMs = ref<number | null>(null)
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -229,24 +228,19 @@ function startQuiz() {
   feedback.value = ""
   lastToneScore.value = null
   finished.value = false
-  timedOut.value = false
   currentIndex.value = 0
   passedCount.value = 0
   quizWords.value = shuffle(allWords.value).slice(0, QUIZ_SIZE)
-  secondsLeft.value = QUIZ_DURATION_SECONDS
+  elapsedSeconds.value = 0
+  startedAtMs.value = Date.now()
   started.value = true
   resetRecordingState()
 
   stopTimer()
   timerInterval = setInterval(() => {
-    secondsLeft.value -= 1
-    if (secondsLeft.value <= 0) {
-      secondsLeft.value = 0
-      timedOut.value = true
-      finished.value = true
-      stopTimer()
-    }
-  }, 1000)
+    if (!startedAtMs.value) return
+    elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+  }, 250)
 }
 
 async function startRecording() {
@@ -331,19 +325,21 @@ async function submitAttempt() {
     lastToneScore.value = result.toneScore
     feedback.value = result.feedback
 
-    if (result.toneScore > PASS_SCORE) {
-      passedCount.value += 1
-      await playCurrentWordAudio()
+    if (result.toneScore > PASS_SCORE) passedCount.value += 1
 
-      if (currentIndex.value >= QUIZ_SIZE - 1) {
-        finished.value = true
-        stopTimer()
-      } else {
-        currentIndex.value += 1
+    await playCurrentWordAudio()
+
+    if (currentIndex.value >= QUIZ_SIZE - 1) {
+      finished.value = true
+      if (startedAtMs.value) {
+        elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
       }
-
-      resetRecordingState()
+      stopTimer()
+    } else {
+      currentIndex.value += 1
     }
+
+    resetRecordingState()
   } catch (err) {
     console.error("[tone-gate] submit failed", err)
     errorMessage.value = "Could not score your pronunciation. Please try again."
@@ -352,9 +348,9 @@ async function submitAttempt() {
   }
 }
 
-const formattedTime = computed(() => {
-  const minutes = Math.floor(secondsLeft.value / 60)
-  const seconds = secondsLeft.value % 60
+const formattedElapsedTime = computed(() => {
+  const minutes = Math.floor(elapsedSeconds.value / 60)
+  const seconds = elapsedSeconds.value % 60
   return `${minutes}:${seconds.toString().padStart(2, "0")}`
 })
 
@@ -371,8 +367,10 @@ onBeforeUnmount(() => {
     <header class="mb-6">
       <h1 class="text-2xl font-semibold">Tone Gate Quiz</h1>
       <p class="mt-2 text-sm text-gray-300">
-        10 words, timed. You can only move forward when your tone score is above
-        <span class="font-semibold text-emerald-300">{{ PASS_SCORE }}</span>.
+        10 words, untimed. Your total time is tracked and shown at the end.
+      </p>
+      <p class="mt-1 text-sm text-gray-300">
+        You always progress after each attempt; tone score feedback is still shown for learning.
       </p>
     </header>
 
@@ -385,7 +383,7 @@ onBeforeUnmount(() => {
       </div>
       <div v-else-if="!started">
         <p class="text-sm text-gray-300">
-          Press start to begin a {{ QUIZ_SIZE }}-word timed pronunciation gate challenge.
+          Press start to begin a {{ QUIZ_SIZE }}-word pronunciation challenge.
         </p>
         <button
           class="mt-4 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-black hover:bg-emerald-400"
@@ -397,13 +395,13 @@ onBeforeUnmount(() => {
 
       <div v-else-if="finished" class="space-y-3">
         <h2 class="text-xl font-semibold">
-          {{ timedOut ? "Time's up!" : "Quiz complete!" }}
+          Quiz complete!
         </h2>
         <p class="text-sm text-gray-300">
           Passed words: <span class="font-semibold text-emerald-300">{{ passedCount }}</span> / {{ QUIZ_SIZE }}
         </p>
         <p class="text-sm text-gray-300">
-          Time left: <span class="font-semibold">{{ formattedTime }}</span>
+          Total time: <span class="font-semibold text-amber-300">{{ formattedElapsedTime }}</span>
         </p>
         <button
           class="rounded-lg bg-sky-500 px-4 py-2 font-medium text-black hover:bg-sky-400"
@@ -417,7 +415,7 @@ onBeforeUnmount(() => {
         <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
           <p>Progress: <span class="font-semibold">{{ progressLabel }}</span></p>
           <p>Passed: <span class="font-semibold text-emerald-300">{{ passedCount }}</span> / {{ QUIZ_SIZE }}</p>
-          <p>Time left: <span class="font-semibold text-amber-300">{{ formattedTime }}</span></p>
+          <p>Elapsed: <span class="font-semibold text-amber-300">{{ formattedElapsedTime }}</span></p>
         </div>
 
         <div class="rounded-xl border border-white/10 bg-black/30 p-4">
@@ -461,7 +459,7 @@ onBeforeUnmount(() => {
             <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-300' : 'text-amber-300'">
               {{ lastToneScore }}
             </span>
-            <span class="text-gray-300"> (need > {{ PASS_SCORE }} to progress)</span>
+            <span class="text-gray-300"> (feedback only)</span>
           </p>
           <p class="mt-2 text-sm text-gray-200">{{ feedback }}</p>
         </div>
