@@ -26,8 +26,6 @@ const wordIdFromRoute = computed(() => {
 
 const expectedChinese = ref("你")
 const expectedJyutping = ref("nei5")
-const referenceAudioPath = ref("")
-
 const { data: selectedWord } = await useAsyncData<WordMeta | null>(
   () => `tone-word-debug-${wordIdFromRoute.value || "none"}`,
   async () => {
@@ -45,9 +43,13 @@ watchEffect(() => {
 
   if (w.word) expectedChinese.value = w.word
   if (w.jyutping) expectedJyutping.value = w.jyutping
-  if (w.audio?.word) referenceAudioPath.value = `audio/${w.audio.word}`
 
   hasAutoFilledFromWord.value = true
+})
+
+const referenceAudioPath = computed(() => {
+  const filename = selectedWord.value?.audio?.word
+  return filename ? `audio/${filename}` : ""
 })
 
 const recording = ref(false)
@@ -206,9 +208,9 @@ async function extractPitchContours(blob: Blob, expectedTokenCount: number): Pro
 }
 
 async function fetchReferenceContours(expectedTokenCount: number): Promise<PitchContour[]> {
-  if (!referenceAudioPath.value.trim() || !expectedTokenCount) return []
+  if (!referenceAudioPath.value || !expectedTokenCount) return []
 
-  const normalizedPath = referenceAudioPath.value.trim().replace(/^\/+/, "")
+  const normalizedPath = referenceAudioPath.value.replace(/^\/+/, "")
   const url = `${cdnBase}/${normalizedPath}`
   const response = await fetch(url)
 
@@ -335,6 +337,8 @@ async function runToneCheck() {
       <p class="mt-2 text-sm text-slate-300">
         Manual tester page for a non-AI tone-only flow using acoustic pitch contours.
         <span v-if="wordIdFromRoute" class="block text-xs text-slate-400">Word ID: {{ wordIdFromRoute }}</span>
+        <span v-if="referenceAudioPath" class="block text-xs text-slate-400">Using CDN reference: {{ referenceAudioPath }}</span>
+        <span v-else class="block text-xs text-amber-300">No reference audio loaded (open via a word page link).</span>
       </p>
 
       <div class="mt-6 grid gap-4 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
@@ -355,16 +359,6 @@ async function runToneCheck() {
             class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
             type="text"
             placeholder="nei5"
-          >
-        </label>
-
-        <label class="grid gap-1">
-          <span class="text-xs uppercase tracking-wide text-slate-400">Reference audio path on CDN (optional)</span>
-          <input
-            v-model="referenceAudioPath"
-            class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
-            type="text"
-            placeholder="audio/your-reference-file.mp3"
           >
         </label>
 
