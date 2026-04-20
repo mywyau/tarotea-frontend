@@ -1,3 +1,7 @@
+export type AcousticSyllableContour = {
+  values: number[]
+}
+
 export type ToneWordScore = {
   heardJyutping: string
   normalizedExpected: string
@@ -6,6 +10,8 @@ export type ToneWordScore = {
   heardTokens: string[]
   soundScore: number
   toneScore: number
+  textToneScore: number
+  acousticToneScore: number | null
   overallScore: number
   soundMatches: number
   toneMatches: number
@@ -48,9 +54,60 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
+function safeMean(values: number[]) {
+  if (!values.length) return 0
+  return values.reduce((sum, value) => sum + value, 0) / values.length
+}
+
+function scoreContourForTone(tone: string, contour: AcousticSyllableContour | undefined) {
+  if (!contour?.values?.length) return null
+
+  const values = contour.values.filter((v) => Number.isFinite(v) && v > 0)
+  if (!values.length) return null
+
+  const start = values[0]
+  const end = values[values.length - 1]
+  const mean = safeMean(values)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+
+  const slope = (end - start) / Math.max(start, 1)
+  const range = (max - min) / Math.max(mean, 1)
+
+  // Coarse Cantonese tone contour heuristics:
+  // 1 high level, 2 high rising, 3 mid level, 4 low falling, 5 low rising, 6 low level
+  if (tone === "1") return clamp(100 - Math.abs(slope) * 260 - Math.abs(range - 0.12) * 140, 0, 100)
+  if (tone === "2") return clamp(40 + slope * 240 - Math.abs(range - 0.22) * 120, 0, 100)
+  if (tone === "3") return clamp(100 - Math.abs(slope) * 220 - Math.abs(range - 0.1) * 140, 0, 100)
+  if (tone === "4") return clamp(40 + (-slope) * 260 - Math.abs(range - 0.25) * 120, 0, 100)
+  if (tone === "5") return clamp(40 + slope * 220 - Math.abs(range - 0.2) * 110, 0, 100)
+  if (tone === "6") return clamp(100 - Math.abs(slope) * 240 - Math.abs(range - 0.08) * 150, 0, 100)
+
+  return null
+}
+
+function scoreAcousticTones(expectedTokens: string[], contours: AcousticSyllableContour[]) {
+  if (!contours.length || !expectedTokens.length) return null
+
+  const syllableScores: number[] = []
+
+  for (let i = 0; i < expectedTokens.length; i++) {
+    const tone = getTone(expectedTokens[i])
+    const contourScore = scoreContourForTone(tone, contours[i])
+
+    if (typeof contourScore === "number") {
+      syllableScores.push(contourScore)
+    }
+  }
+
+  if (!syllableScores.length) return null
+  return Math.round(safeMean(syllableScores))
+}
+
 export function scoreWordToneAttempt(params: {
   expectedJyutping: string
   heardJyutping: string
+  acousticContours?: AcousticSyllableContour[]
 }): ToneWordScore {
   const expectedTokens = tokenizeJyutping(params.expectedJyutping)
   const heardTokens = tokenizeJyutping(params.heardJyutping)
@@ -66,6 +123,8 @@ export function scoreWordToneAttempt(params: {
       heardTokens,
       soundScore: 0,
       toneScore: 0,
+      textToneScore: 0,
+      acousticToneScore: null,
       overallScore: 0,
       soundMatches: 0,
       toneMatches: 0,
@@ -103,7 +162,13 @@ export function scoreWordToneAttempt(params: {
   }
 
   const soundScore = Math.round((soundMatches / totalSyllables) * 100)
-  const toneScore = Math.round((toneMatches / totalSyllables) * 100)
+  const textToneScore = Math.round((toneMatches / totalSyllables) * 100)
+  const acousticToneScore = scoreAcousticTones(expectedTokens, params.acousticContours ?? [])
+  const toneScore =
+    acousticToneScore === null
+      ? textToneScore
+      : Math.round(clamp(textToneScore * 0.5 + acousticToneScore * 0.5, 0, 100))
+
   const overallScore = Math.round(clamp(soundScore * 0.7 + toneScore * 0.3, 0, 100))
 
   const matchType: ToneWordScore["matchType"] =
@@ -136,6 +201,8 @@ export function scoreWordToneAttempt(params: {
     heardTokens,
     soundScore,
     toneScore,
+    textToneScore,
+    acousticToneScore,
     overallScore,
     soundMatches,
     toneMatches,

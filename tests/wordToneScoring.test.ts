@@ -10,6 +10,7 @@ describe("scoreWordToneAttempt", () => {
 
     expect(result.matchType).toBe("perfect")
     expect(result.soundScore).toBe(100)
+    expect(result.textToneScore).toBe(100)
     expect(result.toneScore).toBe(100)
     expect(result.toneErrors).toHaveLength(0)
   })
@@ -22,6 +23,7 @@ describe("scoreWordToneAttempt", () => {
 
     expect(result.matchType).toBe("sound-only")
     expect(result.soundScore).toBe(100)
+    expect(result.textToneScore).toBe(0)
     expect(result.toneScore).toBe(0)
     expect(result.toneErrors).toHaveLength(1)
   })
@@ -35,5 +37,17 @@ describe("scoreWordToneAttempt", () => {
     expect(result.matchType).toBe("wrong")
     expect(result.soundScore).toBe(0)
     expect(result.toneScore).toBe(0)
+  })
+
+  it("blends text tone score with acoustic tone score when contours exist", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "si1",
+      heardJyutping: "si1",
+      acousticContours: [{ values: [210, 212, 211, 210] }],
+    })
+
+    expect(result.textToneScore).toBe(100)
+    expect(typeof result.acousticToneScore).toBe("number")
+    expect(result.toneScore).toBeGreaterThan(70)
   })
 })
