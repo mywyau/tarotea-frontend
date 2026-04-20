@@ -25,6 +25,10 @@ const wordIdFromRoute = computed(() => {
     return decodeURIComponent(fromParam)
   }
 
+  if (Array.isArray(fromParam) && fromParam.length) {
+    return decodeURIComponent(fromParam[0])
+  }
+
   const fromQuery = route.query.wordId
   return typeof fromQuery === "string" ? decodeURIComponent(fromQuery) : ""
 })
