@@ -50,4 +50,15 @@ describe("scoreWordToneAttempt", () => {
     expect(typeof result.acousticToneScore).toBe("number")
     expect(result.toneScore).toBeGreaterThan(70)
   })
+  it("does not collapse to zero for a mild rising tone-5 contour", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "nei5",
+      acousticContours: [{ values: [155, 156, 157, 158, 159, 160] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThan(0)
+  })
+
 })

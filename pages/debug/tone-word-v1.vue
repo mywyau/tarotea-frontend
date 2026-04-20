@@ -93,6 +93,21 @@ function estimatePitchHz(frame: Float32Array, sampleRate: number) {
   return sampleRate / bestLag
 }
 
+function smoothPitches(values: number[]) {
+  if (values.length < 5) return values
+
+  const smoothed: number[] = []
+
+  for (let i = 0; i < values.length; i++) {
+    const left = Math.max(0, i - 2)
+    const right = Math.min(values.length, i + 3)
+    const window = values.slice(left, right).sort((a, b) => a - b)
+    smoothed.push(window[Math.floor(window.length / 2)])
+  }
+
+  return smoothed
+}
+
 async function extractPitchContours(blob: Blob, expectedTokenCount: number): Promise<PitchContour[]> {
   if (!expectedTokenCount) return []
 
@@ -118,13 +133,19 @@ async function extractPitchContours(blob: Blob, expectedTokenCount: number): Pro
 
     if (!rawPitches.length) return []
 
+    const smoothed = smoothPitches(rawPitches)
+    const trim = Math.floor(smoothed.length * 0.1)
+    const trimmed = smoothed.slice(trim, Math.max(smoothed.length - trim, trim + 1))
+
+    if (!trimmed.length) return []
+
     const contours: PitchContour[] = []
-    const bucketSize = Math.max(1, Math.floor(rawPitches.length / expectedTokenCount))
+    const bucketSize = Math.max(1, Math.floor(trimmed.length / expectedTokenCount))
 
     for (let i = 0; i < expectedTokenCount; i++) {
       const start = i * bucketSize
-      const end = i === expectedTokenCount - 1 ? rawPitches.length : (i + 1) * bucketSize
-      const values = rawPitches.slice(start, end)
+      const end = i === expectedTokenCount - 1 ? trimmed.length : (i + 1) * bucketSize
+      const values = trimmed.slice(start, end)
 
       contours.push({
         values: values.slice(0, 32),
@@ -317,10 +338,7 @@ async function runToneCheck() {
 
         <dl class="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           <div><dt class="text-slate-400">Expected Jyutping</dt><dd>{{ result.expectedJyutping }}</dd></div>
-          <div><dt class="text-slate-400">Heard Jyutping</dt><dd>{{ result.heardJyutping || "(empty)" }}</dd></div>
-          <div><dt class="text-slate-400">Sound Score</dt><dd>{{ result.soundScore }}</dd></div>
-          <div><dt class="text-slate-400">Text Tone Score</dt><dd>{{ result.textToneScore }}</dd></div>
-          <div><dt class="text-slate-400">Acoustic Tone Score</dt><dd>{{ result.acousticToneScore ?? "n/a" }}</dd></div>
+                    <div><dt class="text-slate-400">Acoustic Tone Score</dt><dd>{{ result.acousticToneScore ?? "n/a" }}</dd></div>
           <div><dt class="text-slate-400">Final Tone Score</dt><dd>{{ result.toneScore }}</dd></div>
           <div><dt class="text-slate-400">Overall Score</dt><dd>{{ result.overallScore }}</dd></div>
           <div><dt class="text-slate-400">Match Type</dt><dd>{{ result.matchType }}</dd></div>
