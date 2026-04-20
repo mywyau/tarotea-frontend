@@ -323,23 +323,23 @@ async function runToneCheck() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-zinc-950 text-slate-100">
+  <div class="min-h-screen bg-gradient-to-br from-rose-50 via-fuchsia-50 to-sky-50 text-gray-900">
     <div class="mx-auto max-w-3xl px-4 py-10">
       <h1 class="text-3xl font-bold">Tone Check V1 (Non-AI: Tone-Only)</h1>
-      <p class="mt-2 text-sm text-slate-300">
+      <p class="mt-2 text-sm text-gray-600">
         Word ID: <span class="font-semibold">{{ wordIdFromRoute || "(missing)" }}</span>
       </p>
 
-      <div class="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
-        <p class="text-xs uppercase tracking-wide text-slate-400">Target Chinese</p>
+      <div class="mt-6 rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm">
+        <p class="text-xs uppercase tracking-wide text-gray-500">Target Chinese</p>
         <p class="text-3xl font-semibold">{{ expectedChinese || "—" }}</p>
 
-        <p class="mt-3 text-xs uppercase tracking-wide text-slate-400">Target Jyutping</p>
+        <p class="mt-3 text-xs uppercase tracking-wide text-gray-500">Target Jyutping</p>
         <p class="text-xl">{{ expectedJyutping || "—" }}</p>
 
         <div class="mt-4 flex flex-wrap gap-3">
           <button
-            class="rounded-lg bg-violet-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-50"
+            class="rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
             :disabled="!referenceAudioUrl"
             @click="playReferenceAudio"
           >
@@ -347,7 +347,7 @@ async function runToneCheck() {
           </button>
 
           <button
-            class="rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-50"
+            class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
             :disabled="recording || loading || !expectedJyutping"
             @click="startRecording"
           >
@@ -355,7 +355,7 @@ async function runToneCheck() {
           </button>
 
           <button
-            class="rounded-lg bg-rose-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-50"
+            class="rounded-lg bg-[#F4C2D7] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
             :disabled="!recording || loading"
             @click="stopRecording"
           >
@@ -363,7 +363,7 @@ async function runToneCheck() {
           </button>
 
           <button
-            class="rounded-lg bg-sky-500 px-4 py-2 text-sm font-medium text-slate-950 disabled:opacity-50"
+            class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
             :disabled="recording || !recordedBlob || loading || !expectedJyutping"
             @click="runToneCheck"
           >
@@ -371,10 +371,10 @@ async function runToneCheck() {
           </button>
         </div>
 
-        <p v-if="referenceAudioPath" class="mt-3 text-xs text-slate-400">Reference: {{ referenceAudioPath }}</p>
-        <p v-else class="mt-3 text-xs text-amber-300">No reference audio found for this word.</p>
+        <p v-if="referenceAudioPath" class="mt-3 text-xs text-gray-500">Reference: {{ referenceAudioPath }}</p>
+        <p v-else class="mt-3 text-xs text-amber-700">No reference audio found for this word.</p>
 
-        <p v-if="recording" class="mt-2 text-sm text-amber-300">Recording... speak now.</p>
+        <p v-if="recording" class="mt-2 text-sm text-amber-700">Recording... speak now.</p>
 
         <audio
           v-if="recordingUrl"
@@ -383,26 +383,26 @@ async function runToneCheck() {
           :src="recordingUrl"
         />
 
-        <p v-if="errorMessage" class="mt-3 rounded-lg border border-rose-500/60 bg-rose-950/30 p-3 text-sm text-rose-200">
+        <p v-if="errorMessage" class="mt-3 rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
           {{ errorMessage }}
         </p>
       </div>
 
-      <div v-if="result" class="mt-6 rounded-2xl border border-slate-700 bg-slate-900/60 p-5">
+      <div v-if="result" class="mt-6 rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm">
         <h2 class="text-xl font-semibold">Result</h2>
 
         <dl class="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-          <div><dt class="text-slate-400">Expected Jyutping</dt><dd>{{ result.expectedJyutping }}</dd></div>
-          <div><dt class="text-slate-400">Acoustic Tone Score</dt><dd>{{ result.acousticToneScore ?? "n/a" }}</dd></div>
-          <div><dt class="text-slate-400">Reference Match Score</dt><dd>{{ result.referenceToneScore ?? "n/a" }}</dd></div>
-          <div><dt class="text-slate-400">Final Tone Score</dt><dd>{{ result.toneScore }}</dd></div>
-          <div><dt class="text-slate-400">Overall Score</dt><dd>{{ result.overallScore }}</dd></div>
-          <div><dt class="text-slate-400">Match Type</dt><dd>{{ result.matchType }}</dd></div>
+          <div><dt class="text-gray-500">Expected Jyutping</dt><dd>{{ result.expectedJyutping }}</dd></div>
+          <div><dt class="text-gray-500">Acoustic Tone Score</dt><dd>{{ result.acousticToneScore ?? "n/a" }}</dd></div>
+          <div><dt class="text-gray-500">Reference Match Score</dt><dd>{{ result.referenceToneScore ?? "n/a" }}</dd></div>
+          <div><dt class="text-gray-500">Final Tone Score</dt><dd>{{ result.toneScore }}</dd></div>
+          <div><dt class="text-gray-500">Overall Score</dt><dd>{{ result.overallScore }}</dd></div>
+          <div><dt class="text-gray-500">Match Type</dt><dd>{{ result.matchType }}</dd></div>
         </dl>
 
-        <p class="mt-3 text-sm text-slate-200">{{ result.feedback }}</p>
+        <p class="mt-3 text-sm text-gray-700">{{ result.feedback }}</p>
 
-        <p class="mt-2 text-xs text-slate-400">
+        <p class="mt-2 text-xs text-gray-500">
           Extracted pitch contours: {{ extractedPitchContours.length }} syllable bucket(s) · reference contours: {{ referencePitchContours.length }}
         </p>
       </div>
