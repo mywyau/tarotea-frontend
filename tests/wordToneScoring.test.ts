@@ -61,4 +61,17 @@ describe("scoreWordToneAttempt", () => {
     expect(result.toneScore).toBeGreaterThan(0)
   })
 
+  it("boosts tone-only scoring when user contour matches reference contour", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "nei5",
+      acousticContours: [{ values: [150, 152, 155, 157, 160] }],
+      referenceContours: [{ values: [149, 151, 154, 158, 161] }],
+      toneOnly: true,
+    })
+
+    expect(result.referenceToneScore).not.toBeNull()
+    expect((result.referenceToneScore ?? 0)).toBeGreaterThan(70)
+    expect(result.toneScore).toBeGreaterThan(60)
+  })
+
 })

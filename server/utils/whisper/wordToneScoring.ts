@@ -12,6 +12,7 @@ export type ToneWordScore = {
   toneScore: number
   textToneScore: number
   acousticToneScore: number | null
+  referenceToneScore: number | null
   overallScore: number
   soundMatches: number
   toneMatches: number
@@ -105,10 +106,67 @@ function scoreAcousticTones(expectedTokens: string[], contours: AcousticSyllable
   return Math.round(safeMean(syllableScores))
 }
 
+function resample(values: number[], targetLength = 24) {
+  if (!values.length) return []
+  if (values.length === targetLength) return values
+
+  const out: number[] = []
+
+  for (let i = 0; i < targetLength; i++) {
+    const t = (i * (values.length - 1)) / Math.max(targetLength - 1, 1)
+    const left = Math.floor(t)
+    const right = Math.min(values.length - 1, left + 1)
+    const alpha = t - left
+    out.push(values[left] * (1 - alpha) + values[right] * alpha)
+  }
+
+  return out
+}
+
+function zNormalize(values: number[]) {
+  if (!values.length) return []
+  const mean = safeMean(values)
+  const variance = safeMean(values.map((v) => (v - mean) ** 2))
+  const std = Math.sqrt(variance) || 1
+  return values.map((v) => (v - mean) / std)
+}
+
+function scoreReferenceSimilarity(
+  userContours: AcousticSyllableContour[],
+  referenceContours: AcousticSyllableContour[],
+) {
+  if (!userContours.length || !referenceContours.length) return null
+
+  const maxLen = Math.min(userContours.length, referenceContours.length)
+  const scores: number[] = []
+
+  for (let i = 0; i < maxLen; i++) {
+    const u = userContours[i]?.values ?? []
+    const r = referenceContours[i]?.values ?? []
+
+    if (u.length < 4 || r.length < 4) continue
+
+    const uNorm = zNormalize(resample(u))
+    const rNorm = zNormalize(resample(r))
+
+    const mad = safeMean(uNorm.map((value, idx) => Math.abs(value - rNorm[idx])))
+    const slopeUser = uNorm[uNorm.length - 1] - uNorm[0]
+    const slopeRef = rNorm[rNorm.length - 1] - rNorm[0]
+    const slopePenalty = Math.abs(slopeUser - slopeRef)
+
+    const score = clamp(100 - mad * 32 - slopePenalty * 18, 0, 100)
+    scores.push(score)
+  }
+
+  if (!scores.length) return null
+  return Math.round(safeMean(scores))
+}
+
 export function scoreWordToneAttempt(params: {
   expectedJyutping: string
   heardJyutping?: string
   acousticContours?: AcousticSyllableContour[]
+  referenceContours?: AcousticSyllableContour[]
   toneOnly?: boolean
 }): ToneWordScore {
   const expectedTokens = tokenizeJyutping(params.expectedJyutping)
@@ -127,6 +185,7 @@ export function scoreWordToneAttempt(params: {
       toneScore: 0,
       textToneScore: 0,
       acousticToneScore: null,
+      referenceToneScore: null,
       overallScore: 0,
       soundMatches: 0,
       toneMatches: 0,
@@ -166,14 +225,25 @@ export function scoreWordToneAttempt(params: {
   const soundScore = Math.round((soundMatches / totalSyllables) * 100)
   const textToneScore = Math.round((toneMatches / totalSyllables) * 100)
   const acousticToneScore = scoreAcousticTones(expectedTokens, params.acousticContours ?? [])
+  const referenceToneScore = scoreReferenceSimilarity(
+    params.acousticContours ?? [],
+    params.referenceContours ?? [],
+  )
 
   const toneOnly = Boolean(params.toneOnly)
 
+  const fusedAcoustic =
+    referenceToneScore === null
+      ? acousticToneScore
+      : acousticToneScore === null
+        ? referenceToneScore
+        : Math.round((acousticToneScore * 0.45) + (referenceToneScore * 0.55))
+
   const toneScore = toneOnly
-    ? acousticToneScore ?? 0
-    : acousticToneScore === null
+    ? fusedAcoustic ?? 0
+    : fusedAcoustic === null
       ? textToneScore
-      : Math.round(clamp(textToneScore * 0.5 + acousticToneScore * 0.5, 0, 100))
+      : Math.round(clamp(textToneScore * 0.5 + fusedAcoustic * 0.5, 0, 100))
 
   const overallScore = toneOnly
     ? toneScore
@@ -189,13 +259,15 @@ export function scoreWordToneAttempt(params: {
           : "wrong"
 
   const feedback = toneOnly
-    ? acousticToneScore === null
+    ? fusedAcoustic === null
       ? "Could not detect a stable pitch contour. Try speaking a little longer in a quiet room."
-      : overallScore >= 85
-        ? "Great tone contour match."
-        : overallScore >= 60
-          ? "Tone contour is close. Try to keep the shape more consistent."
-          : "Tone contour does not match well yet. Try again and focus on pitch shape."
+      : referenceToneScore !== null && referenceToneScore < 55
+        ? "Your pitch contour differs from the native reference. Try matching the shape of the sample audio."
+        : overallScore >= 85
+          ? "Great tone contour match."
+          : overallScore >= 60
+            ? "Tone contour is close. Try to keep the shape more consistent."
+            : "Tone contour does not match well yet. Try again and focus on pitch shape."
     : matchType === "perfect"
       ? "Perfect — sound and tone both match."
       : soundScore === 100 && toneScore < 100
@@ -216,6 +288,7 @@ export function scoreWordToneAttempt(params: {
     toneScore,
     textToneScore,
     acousticToneScore,
+    referenceToneScore,
     overallScore,
     soundMatches,
     toneMatches,

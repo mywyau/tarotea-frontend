@@ -47,7 +47,9 @@ export default defineEventHandler(async (event) => {
   const expectedJyutping =
     form?.find((f) => f.name === "expectedJyutping")?.data?.toString().trim() ?? ""
   const pitchSummaryRaw = form?.find((f) => f.name === "pitchSummary")?.data?.toString() ?? ""
+  const referenceSummaryRaw = form?.find((f) => f.name === "referenceSummary")?.data?.toString() ?? ""
   const acousticContours = parseAcousticContours(pitchSummaryRaw)
+  const referenceContours = parseAcousticContours(referenceSummaryRaw)
 
   if (!audioFile?.data?.length) {
     throw createError({ statusCode: 400, statusMessage: "Missing audio file" })
@@ -66,6 +68,7 @@ export default defineEventHandler(async (event) => {
     expectedJyutping,
     heardJyutping: "",
     acousticContours,
+    referenceContours,
     toneOnly: true,
   })
 
@@ -75,6 +78,7 @@ export default defineEventHandler(async (event) => {
     soundScore: result.soundScore,
     textToneScore: result.textToneScore,
     acousticToneScore: result.acousticToneScore,
+    referenceToneScore: result.referenceToneScore,
     toneScore: result.toneScore,
     overallScore: result.overallScore,
     matchType: result.matchType,

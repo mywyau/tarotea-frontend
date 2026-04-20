@@ -6,8 +6,12 @@ definePageMeta({
 
 type PitchContour = { values: number[] }
 
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
+
 const expectedChinese = ref("你")
 const expectedJyutping = ref("nei5")
+const referenceAudioPath = ref("")
 
 const recording = ref(false)
 const loading = ref(false)
@@ -24,6 +28,7 @@ const result = ref<null | {
   soundScore: number
   textToneScore: number
   acousticToneScore: number | null
+  referenceToneScore: number | null
   toneScore: number
   overallScore: number
   matchType: string
@@ -34,6 +39,7 @@ const result = ref<null | {
 }>(null)
 
 const extractedPitchContours = ref<PitchContour[]>([])
+const referencePitchContours = ref<PitchContour[]>([])
 
 let audioChunks: Blob[] = []
 
@@ -108,10 +114,9 @@ function smoothPitches(values: number[]) {
   return smoothed
 }
 
-async function extractPitchContours(blob: Blob, expectedTokenCount: number): Promise<PitchContour[]> {
+async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, expectedTokenCount: number): Promise<PitchContour[]> {
   if (!expectedTokenCount) return []
 
-  const arrayBuffer = await blob.arrayBuffer()
   const audioContext = new AudioContext()
 
   try {
@@ -158,6 +163,26 @@ async function extractPitchContours(blob: Blob, expectedTokenCount: number): Pro
   }
 }
 
+async function extractPitchContours(blob: Blob, expectedTokenCount: number): Promise<PitchContour[]> {
+  const arrayBuffer = await blob.arrayBuffer()
+  return extractPitchContoursFromArrayBuffer(arrayBuffer, expectedTokenCount)
+}
+
+async function fetchReferenceContours(expectedTokenCount: number): Promise<PitchContour[]> {
+  if (!referenceAudioPath.value.trim() || !expectedTokenCount) return []
+
+  const normalizedPath = referenceAudioPath.value.trim().replace(/^\/+/, "")
+  const url = `${cdnBase}/${normalizedPath}`
+  const response = await fetch(url)
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch reference audio: ${response.status}`)
+  }
+
+  const buffer = await response.arrayBuffer()
+  return extractPitchContoursFromArrayBuffer(buffer, expectedTokenCount)
+}
+
 async function startRecording() {
   if (!navigator.mediaDevices || !window.MediaRecorder) {
     errorMessage.value = "MediaRecorder is not available on this browser/device."
@@ -167,6 +192,7 @@ async function startRecording() {
   errorMessage.value = ""
   result.value = null
   extractedPitchContours.value = []
+  referencePitchContours.value = []
   audioChunks = []
 
   try {
@@ -238,9 +264,13 @@ async function runToneCheck() {
     const contours = await extractPitchContours(recordedBlob.value, expectedTokens.length)
     extractedPitchContours.value = contours
 
+    const referenceContours = await fetchReferenceContours(expectedTokens.length)
+    referencePitchContours.value = referenceContours
+
     form.append("audio", recordedBlob.value, `tone-word.${extension}`)
     form.append("expectedJyutping", expectedJyutping.value.trim())
     form.append("pitchSummary", JSON.stringify(contours))
+    form.append("referenceSummary", JSON.stringify(referenceContours))
 
     const auth = await useAuth()
     const token = await auth.getAccessToken()
@@ -287,6 +317,16 @@ async function runToneCheck() {
             class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
             type="text"
             placeholder="nei5"
+          >
+        </label>
+
+        <label class="grid gap-1">
+          <span class="text-xs uppercase tracking-wide text-slate-400">Reference audio path on CDN (optional)</span>
+          <input
+            v-model="referenceAudioPath"
+            class="rounded-lg border border-slate-600 bg-slate-950 px-3 py-2 text-sm"
+            type="text"
+            placeholder="audio/your-reference-file.mp3"
           >
         </label>
 
@@ -339,6 +379,7 @@ async function runToneCheck() {
         <dl class="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
           <div><dt class="text-slate-400">Expected Jyutping</dt><dd>{{ result.expectedJyutping }}</dd></div>
                     <div><dt class="text-slate-400">Acoustic Tone Score</dt><dd>{{ result.acousticToneScore ?? "n/a" }}</dd></div>
+          <div><dt class="text-slate-400">Reference Match Score</dt><dd>{{ result.referenceToneScore ?? "n/a" }}</dd></div>
           <div><dt class="text-slate-400">Final Tone Score</dt><dd>{{ result.toneScore }}</dd></div>
           <div><dt class="text-slate-400">Overall Score</dt><dd>{{ result.overallScore }}</dd></div>
           <div><dt class="text-slate-400">Match Type</dt><dd>{{ result.matchType }}</dd></div>
@@ -347,7 +388,7 @@ async function runToneCheck() {
         <p class="mt-3 text-sm text-slate-200">{{ result.feedback }}</p>
 
         <p class="mt-2 text-xs text-slate-400">
-          Extracted pitch contours: {{ extractedPitchContours.length }} syllable bucket(s)
+          Extracted pitch contours: {{ extractedPitchContours.length }} syllable bucket(s) · reference contours: {{ referencePitchContours.length }}
         </p>
 
         <div v-if="result.toneErrors?.length" class="mt-4 rounded-lg border border-amber-500/40 bg-amber-950/30 p-3 text-sm">
