@@ -1,6 +1,7 @@
 import { createError, readMultipartFormData } from "h3"
 import { requireUser } from "~/server/utils/requireUser"
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit"
+import { requirePaidUser } from "~/server/repositories/whisper/requirePaidUser"
 import {
   scoreWordToneAttempt,
   type AcousticSyllableContour,
@@ -39,6 +40,7 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event)
   const userId = auth.sub
 
+  await requirePaidUser(userId)
   await enforceRateLimit(`rl:pronunciation:tone-word:${userId}`, 60, 60)
 
   const form = await readMultipartFormData(event)
