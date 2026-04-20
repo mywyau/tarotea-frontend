@@ -24,7 +24,7 @@ describe("scoreWordToneAttempt", () => {
     expect(result.soundScore).toBe(0)
     expect(result.textToneScore).toBe(0)
     expect(result.acousticToneScore).not.toBeNull()
-    expect(result.toneScore).toBe(result.acousticToneScore)
+    expect(result.toneScore).toBe(Math.min((result.acousticToneScore ?? 0) + 5, 100))
     expect(result.overallScore).toBe(result.toneScore)
   })
 
@@ -123,6 +123,51 @@ describe("scoreWordToneAttempt", () => {
 
     expect(result.referenceToneScore).not.toBeNull()
     expect((result.referenceToneScore ?? 0)).toBeGreaterThan(60)
+  })
+
+  it("applies a small generosity boost for tone-only single syllables", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "sai2",
+      acousticContours: [{ values: [140, 145, 150, 155, 161] }],
+      toneOnly: true,
+    })
+
+    expect(result.toneScore).toBeGreaterThan(60)
+  })
+
+  it("explains likely tone issues in a human-friendly way", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "sai2",
+      acousticContours: [{ values: [180, 172, 165, 159, 152] }],
+      toneOnly: true,
+    })
+
+    expect(result.feedback).toContain("Syllable 1")
+    expect(result.feedback).toContain("should rise")
+  })
+
+  it("is more generous for single-syllable rising tone words like caang2", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "caang2",
+      acousticContours: [{ values: [140, 143, 146, 149, 152] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThanOrEqual(75)
+    expect(result.feedback.toLowerCase()).not.toContain("still off")
+  })
+
+  it("keeps single-syllable rising tone words like lei2 from being under-scored", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "lei2",
+      acousticContours: [{ values: [158, 159, 160, 161, 162] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThanOrEqual(72)
+    expect(result.feedback.toLowerCase()).not.toContain("still off")
   })
 
 })

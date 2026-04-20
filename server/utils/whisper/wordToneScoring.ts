@@ -78,12 +78,12 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
   const boundedSlope = clamp(slope, -0.4, 0.4)
   const boundedRange = clamp(range, 0, 0.6)
 
-  if (tone === "1") return clamp(95 - Math.abs(boundedSlope) * 180 - boundedRange * 50, 0, 100)
-  if (tone === "2") return clamp(50 + boundedSlope * 170 - Math.abs(boundedRange - 0.16) * 70, 0, 100)
-  if (tone === "3") return clamp(92 - Math.abs(boundedSlope) * 170 - boundedRange * 45, 0, 100)
-  if (tone === "4") return clamp(50 + (-boundedSlope) * 180 - Math.abs(boundedRange - 0.18) * 70, 0, 100)
-  if (tone === "5") return clamp(55 + boundedSlope * 165 - Math.abs(boundedRange - 0.1) * 65, 0, 100)
-  if (tone === "6") return clamp(90 - Math.abs(boundedSlope) * 180 - boundedRange * 45, 0, 100)
+  if (tone === "1") return clamp(97 - Math.abs(boundedSlope) * 150 - boundedRange * 40, 0, 100)
+  if (tone === "2") return clamp(62 + boundedSlope * 175 - Math.abs(boundedRange - 0.14) * 45, 0, 100)
+  if (tone === "3") return clamp(94 - Math.abs(boundedSlope) * 145 - boundedRange * 35, 0, 100)
+  if (tone === "4") return clamp(56 + (-boundedSlope) * 180 - Math.abs(boundedRange - 0.18) * 55, 0, 100)
+  if (tone === "5") return clamp(60 + boundedSlope * 165 - Math.abs(boundedRange - 0.1) * 55, 0, 100)
+  if (tone === "6") return clamp(92 - Math.abs(boundedSlope) * 150 - boundedRange * 35, 0, 100)
 
   return null
 }
@@ -212,6 +212,132 @@ function scoreReferenceSimilarity(
   return aggregateSyllableScores(scores, totalSyllables)
 }
 
+function describeExpectedTone(tone: string) {
+  if (tone === "1") return "high and level"
+  if (tone === "2") return "rising"
+  if (tone === "3") return "mid and level"
+  if (tone === "4") return "falling"
+  if (tone === "5") return "low rising"
+  if (tone === "6") return "low and level"
+  return "stable"
+}
+
+function summarizeContourShape(contour: AcousticSyllableContour | undefined) {
+  const values = (contour?.values ?? []).filter((v) => Number.isFinite(v) && v > 0)
+  if (values.length < 4) return null
+
+  const start = values[0]
+  const end = values[values.length - 1]
+  const mean = safeMean(values)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+
+  const slope = (end - start) / Math.max(start, 1)
+  const range = (max - min) / Math.max(mean, 1)
+
+  let direction: "rising" | "falling" | "level" = "level"
+  if (slope > 0.08) direction = "rising"
+  else if (slope < -0.08) direction = "falling"
+
+  let movement: "flat" | "moderate" | "wide" = "moderate"
+  if (range < 0.08) movement = "flat"
+  else if (range > 0.28) movement = "wide"
+
+  return { direction, movement }
+}
+
+function explainToneIssue(
+  token: string,
+  contour: AcousticSyllableContour | undefined,
+): string | null {
+  const tone = getTone(token)
+  const expected = describeExpectedTone(tone)
+  const shape = summarizeContourShape(contour)
+  if (!tone || !shape) return null
+
+  if (tone === "2" || tone === "5") {
+    if (shape.direction === "falling") {
+      return `should rise (${expected}), but your pitch fell`
+    }
+    if (shape.direction === "level" || shape.movement === "flat") {
+      return `should rise (${expected}), but your pitch stayed too flat`
+    }
+    return null
+  }
+
+  if (tone === "4") {
+    if (shape.direction === "rising") return `should fall (${expected}), but your pitch rose`
+    if (shape.direction === "level" || shape.movement === "flat") {
+      return `should fall (${expected}), but your pitch stayed too flat`
+    }
+    return null
+  }
+
+  if (tone === "1" || tone === "3" || tone === "6") {
+    if (shape.direction !== "level") {
+      return `should stay ${expected}, but your pitch moved ${shape.direction}`
+    }
+    if (shape.movement === "wide") {
+      return `should stay ${expected}, but there was too much pitch swing`
+    }
+    return null
+  }
+
+  return null
+}
+
+function buildSingleWordToneBoost(params: {
+  toneOnly: boolean
+  expectedTokens: string[]
+  acousticContours?: AcousticSyllableContour[]
+  toneScoreBase: number
+}) {
+  if (!params.toneOnly || params.expectedTokens.length !== 1 || params.toneScoreBase <= 0) {
+    return 0
+  }
+
+  const token = params.expectedTokens[0]
+  const tone = getTone(token)
+  const shape = summarizeContourShape((params.acousticContours ?? [])[0])
+
+  // Default small kindness boost for one-syllable tone-only words.
+  let boost = 5
+
+  // Extra help for rising tones (tone 2/5) when the contour is at least not falling.
+  if ((tone === "2" || tone === "5") && shape && shape.direction !== "falling") {
+    boost += 3
+  }
+
+  // If there is no contour summary, stay conservative.
+  if (!shape) {
+    boost = 4
+  }
+
+  return boost
+}
+
+function applySingleWordToneFloor(params: {
+  toneOnly: boolean
+  expectedTokens: string[]
+  acousticContours?: AcousticSyllableContour[]
+  toneScore: number
+}) {
+  if (!params.toneOnly || params.expectedTokens.length !== 1) {
+    return params.toneScore
+  }
+
+  const token = params.expectedTokens[0]
+  const tone = getTone(token)
+  const shape = summarizeContourShape((params.acousticContours ?? [])[0])
+
+  if ((tone === "2" || tone === "5") && shape && shape.direction !== "falling") {
+    // Single rising tones like lei2/caang2 can be naturally subtle.
+    return Math.max(params.toneScore, 72)
+  }
+
+  return params.toneScore
+}
+
 export function scoreWordToneAttempt(params: {
   expectedJyutping: string
   heardJyutping?: string
@@ -288,7 +414,7 @@ export function scoreWordToneAttempt(params: {
       ? acousticToneScore
       : acousticToneScore === null
         ? referenceToneScore
-        : Math.round((acousticToneScore * 0.7) + (referenceToneScore * 0.3))
+        : Math.round((acousticToneScore * 0.75) + (referenceToneScore * 0.25))
 
   const toneScoreBase = toneOnly
     ? fusedAcoustic ?? 0
@@ -296,16 +422,37 @@ export function scoreWordToneAttempt(params: {
       ? textToneScore
       : Math.round(clamp(textToneScore * 0.5 + fusedAcoustic * 0.5, 0, 100))
 
-  const toneScore =
+  const toneScoreRaw =
     toneOnly && expectedTokens.length >= 3 && toneScoreBase > 0
       ? Math.round(
           clamp(
-            toneScoreBase + 6 + ((acousticToneScore ?? 0) >= 70 ? 6 : 0),
+            toneScoreBase + 8 + ((acousticToneScore ?? 0) >= 70 ? 7 : 0),
             0,
             100,
           ),
         )
-      : toneScoreBase
+      : toneOnly && toneScoreBase > 0
+        ? Math.round(
+            clamp(
+              toneScoreBase +
+                buildSingleWordToneBoost({
+                  toneOnly,
+                  expectedTokens,
+                  acousticContours: params.acousticContours,
+                  toneScoreBase,
+                }),
+              0,
+              100,
+            ),
+          )
+        : toneScoreBase
+
+  const toneScore = applySingleWordToneFloor({
+    toneOnly,
+    expectedTokens,
+    acousticContours: params.acousticContours,
+    toneScore: toneScoreRaw,
+  })
 
   const overallScore = toneOnly
     ? toneScore
@@ -320,16 +467,29 @@ export function scoreWordToneAttempt(params: {
           ? "partial"
           : "wrong"
 
+  const toneIssueDetails = toneOnly
+    ? expectedTokens
+        .map((token, idx) => {
+          const issue = explainToneIssue(token, (params.acousticContours ?? [])[idx])
+          if (!issue) return null
+          return `Syllable ${idx + 1} (${token}): ${issue}.`
+        })
+        .filter((issue): issue is string => Boolean(issue))
+        .slice(0, 2)
+    : []
+
   const feedback = toneOnly
     ? fusedAcoustic === null
-      ? "Could not detect a stable pitch contour. Try speaking a little longer in a quiet room."
-      : referenceToneScore !== null && referenceToneScore < 55
-        ? "Your pitch contour differs from the native reference. Try matching the shape of the sample audio."
-        : overallScore >= 85
-          ? "Great tone contour match."
-          : overallScore >= 60
-            ? "Tone contour is close. Try to keep the shape more consistent."
-            : "Tone contour does not match well yet. Try again and focus on pitch shape."
+      ? "I couldn’t read a stable pitch shape yet. Try saying the word a little longer in a quieter place."
+      : overallScore >= 88
+        ? "Great job — your tone shape is very close to the target."
+        : overallScore >= 70
+          ? toneIssueDetails.length
+            ? `Nice attempt — you’re close. ${toneIssueDetails.join(" ")}`
+            : "Nice attempt — you’re close. Keep your pitch movement a little steadier."
+          : toneIssueDetails.length
+            ? `Good effort. ${toneIssueDetails.join(" ")} Try again slowly and copy the sample rhythm.`
+            : "Good effort. Your tone shape is still off. Try again slowly and copy the sample rhythm."
     : matchType === "perfect"
       ? "Perfect — sound and tone both match."
       : soundScore === 100 && toneScore < 100
