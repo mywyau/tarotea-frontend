@@ -88,6 +88,18 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
   return null
 }
 
+function aggregateSyllableScores(scores: number[], totalSyllables: number) {
+  if (!scores.length) return null
+
+  if (totalSyllables >= 3 && scores.length >= 3) {
+    const sorted = [...scores].sort((a, b) => a - b)
+    const trimmed = sorted.slice(1)
+    return Math.round(safeMean(trimmed))
+  }
+
+  return Math.round(safeMean(scores))
+}
+
 function scoreAcousticTones(expectedTokens: string[], contours: AcousticSyllableContour[]) {
   if (!contours.length || !expectedTokens.length) return null
 
@@ -103,7 +115,7 @@ function scoreAcousticTones(expectedTokens: string[], contours: AcousticSyllable
   }
 
   if (!syllableScores.length) return null
-  return Math.round(safeMean(syllableScores))
+  return aggregateSyllableScores(syllableScores, expectedTokens.length)
 }
 
 function resample(values: number[], targetLength = 24) {
@@ -134,6 +146,7 @@ function zNormalize(values: number[]) {
 function scoreReferenceSimilarity(
   userContours: AcousticSyllableContour[],
   referenceContours: AcousticSyllableContour[],
+  totalSyllables: number,
 ) {
   if (!userContours.length || !referenceContours.length) return null
 
@@ -142,24 +155,33 @@ function scoreReferenceSimilarity(
 
   for (let i = 0; i < maxLen; i++) {
     const u = userContours[i]?.values ?? []
-    const r = referenceContours[i]?.values ?? []
+    if (u.length < 4) continue
 
-    if (u.length < 4 || r.length < 4) continue
+    const candidates = [referenceContours[i - 1], referenceContours[i], referenceContours[i + 1]]
+      .filter(Boolean)
+      .map((contour) => contour?.values ?? [])
+      .filter((values) => values.length >= 4)
+
+    if (!candidates.length) continue
 
     const uNorm = zNormalize(resample(u))
-    const rNorm = zNormalize(resample(r))
 
-    const mad = safeMean(uNorm.map((value, idx) => Math.abs(value - rNorm[idx])))
-    const slopeUser = uNorm[uNorm.length - 1] - uNorm[0]
-    const slopeRef = rNorm[rNorm.length - 1] - rNorm[0]
-    const slopePenalty = Math.abs(slopeUser - slopeRef)
+    const best = Math.max(
+      ...candidates.map((candidate) => {
+        const rNorm = zNormalize(resample(candidate))
+        const mad = safeMean(uNorm.map((value, idx) => Math.abs(value - rNorm[idx])))
+        const slopeUser = uNorm[uNorm.length - 1] - uNorm[0]
+        const slopeRef = rNorm[rNorm.length - 1] - rNorm[0]
+        const slopePenalty = Math.abs(slopeUser - slopeRef)
 
-    const score = clamp(100 - mad * 32 - slopePenalty * 18, 0, 100)
-    scores.push(score)
+        return clamp(100 - mad * 30 - slopePenalty * 15, 0, 100)
+      }),
+    )
+
+    scores.push(best)
   }
 
-  if (!scores.length) return null
-  return Math.round(safeMean(scores))
+  return aggregateSyllableScores(scores, totalSyllables)
 }
 
 export function scoreWordToneAttempt(params: {
@@ -228,6 +250,7 @@ export function scoreWordToneAttempt(params: {
   const referenceToneScore = scoreReferenceSimilarity(
     params.acousticContours ?? [],
     params.referenceContours ?? [],
+    expectedTokens.length,
   )
 
   const toneOnly = Boolean(params.toneOnly)
@@ -239,11 +262,16 @@ export function scoreWordToneAttempt(params: {
         ? referenceToneScore
         : Math.round((acousticToneScore * 0.45) + (referenceToneScore * 0.55))
 
-  const toneScore = toneOnly
+  const toneScoreBase = toneOnly
     ? fusedAcoustic ?? 0
     : fusedAcoustic === null
       ? textToneScore
       : Math.round(clamp(textToneScore * 0.5 + fusedAcoustic * 0.5, 0, 100))
+
+  const toneScore =
+    toneOnly && expectedTokens.length >= 3 && toneScoreBase > 0
+      ? Math.round(clamp(toneScoreBase + 6, 0, 100))
+      : toneScoreBase
 
   const overallScore = toneOnly
     ? toneScore

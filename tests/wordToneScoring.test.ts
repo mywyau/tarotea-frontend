@@ -74,4 +74,23 @@ describe("scoreWordToneAttempt", () => {
     expect(result.toneScore).toBeGreaterThan(60)
   })
 
+  it("is more tolerant for multi-syllable words by trimming worst syllable", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "sai2 sau2 gaan1",
+      acousticContours: [
+        { values: [170, 175, 181, 188, 193] },
+        { values: [165, 169, 172, 177, 182] },
+        { values: [210, 160, 140, 130, 120] },
+      ],
+      referenceContours: [
+        { values: [168, 174, 180, 186, 192] },
+        { values: [163, 168, 171, 176, 181] },
+        { values: [160, 162, 164, 166, 168] },
+      ],
+      toneOnly: true,
+    })
+
+    expect(result.toneScore).toBeGreaterThan(45)
+  })
+
 })
