@@ -260,7 +260,7 @@ export function scoreWordToneAttempt(params: {
       ? acousticToneScore
       : acousticToneScore === null
         ? referenceToneScore
-        : Math.round((acousticToneScore * 0.45) + (referenceToneScore * 0.55))
+        : Math.round((acousticToneScore * 0.7) + (referenceToneScore * 0.3))
 
   const toneScoreBase = toneOnly
     ? fusedAcoustic ?? 0
@@ -270,7 +270,13 @@ export function scoreWordToneAttempt(params: {
 
   const toneScore =
     toneOnly && expectedTokens.length >= 3 && toneScoreBase > 0
-      ? Math.round(clamp(toneScoreBase + 6, 0, 100))
+      ? Math.round(
+          clamp(
+            toneScoreBase + 6 + ((acousticToneScore ?? 0) >= 70 ? 6 : 0),
+            0,
+            100,
+          ),
+        )
       : toneScoreBase
 
   const overallScore = toneOnly

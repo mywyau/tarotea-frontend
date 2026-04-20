@@ -93,4 +93,24 @@ describe("scoreWordToneAttempt", () => {
     expect(result.toneScore).toBeGreaterThan(45)
   })
 
+  it("leans more on acoustic tone score than reference for tone-only scoring", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "sai2 sau2 gaan1",
+      acousticContours: [
+        { values: [160, 165, 170, 176, 182] },
+        { values: [162, 167, 171, 176, 181] },
+        { values: [190, 191, 192, 193, 194] },
+      ],
+      referenceContours: [
+        { values: [220, 200, 180, 160, 140] },
+        { values: [220, 200, 180, 160, 140] },
+        { values: [220, 200, 180, 160, 140] },
+      ],
+      toneOnly: true,
+    })
+
+    expect((result.acousticToneScore ?? 0)).toBeGreaterThan((result.referenceToneScore ?? 0))
+    expect(result.toneScore).toBeGreaterThan(60)
+  })
+
 })
