@@ -1,7 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  middleware: ["auth-required", "level-quiz-access"],
+  middleware: ["logged-in", "level-quiz-access"],
 })
 
 type QuizWord = {
