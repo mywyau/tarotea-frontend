@@ -19,6 +19,12 @@ const cdnBase = runtimeConfig.public.cdnBase
 const route = useRoute()
 
 const wordIdFromRoute = computed(() => {
+  const fromParam = route.params.wordId
+
+  if (typeof fromParam === "string") {
+    return decodeURIComponent(fromParam)
+  }
+
   const fromQuery = route.query.wordId
   return typeof fromQuery === "string" ? decodeURIComponent(fromQuery) : ""
 })
