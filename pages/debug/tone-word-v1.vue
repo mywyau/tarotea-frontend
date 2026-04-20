@@ -27,7 +27,7 @@ const { data: selectedWord } = await useAsyncData<WordMeta | null>(
   () => `tone-word-debug-${wordIdFromRoute.value || "none"}`,
   async () => {
     if (!wordIdFromRoute.value) return null
-    return await $fetch(`/api/words/${encodeURIComponent(wordIdFromRoute.value)}`)
+    return await $fetch(`/api/words/${encodeURIComponent(wordIdFromRoute.value)}` as string)
   },
   { watch: [wordIdFromRoute] },
 )
