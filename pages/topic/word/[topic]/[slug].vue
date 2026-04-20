@@ -201,9 +201,9 @@ watchEffect(() => {
                     ✏️ Write
                 </NuxtLink>
 
-                <NuxtLink :to="`/debug/tone-word-v1/${word.id}`"
+                <NuxtLink :to="`/tone-forge/${word.id}`"
                     class="action-chip" aria-label="Open tone checker for this word">
-                    🎯 Tone Check
+                    Tone Forge
                 </NuxtLink>
             </div>
 

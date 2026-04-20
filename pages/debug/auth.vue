@@ -1,4 +1,4 @@
-<script setup lang="ts">
+<!-- <script setup lang="ts">
 
 definePageMeta({
     middleware: () => {
@@ -24,16 +24,16 @@ onMounted(async () => {
         await resolve()
     }
 })
-</script>
+</script> -->
 
-<template>
+<!-- <template>
     <main class="max-w-3xl mx-auto p-6 space-y-6">
 
         <h1 class="text-2xl font-semibold">
             Auth Debug Page
         </h1>
 
-        <!-- Status summary -->
+        
         <section class="border rounded p-4 space-y-2">
             <h2 class="font-medium">Summary</h2>
 
@@ -53,7 +53,7 @@ onMounted(async () => {
             </div>
         </section>
 
-        <!-- User data -->
+        
         <section class="border rounded p-4 space-y-2">
             <h2 class="font-medium">User</h2>
 
@@ -62,7 +62,7 @@ onMounted(async () => {
             </pre>
         </section>
 
-        <!-- Controls -->
+        
         <section class="border rounded p-4 space-y-3">
             <h2 class="font-medium">Controls</h2>
 
@@ -71,7 +71,7 @@ onMounted(async () => {
             </button>
         </section>
 
-        <!-- Raw state (last resort) -->
+        
         <section class="border rounded p-4 space-y-2">
             <h2 class="font-medium text-gray-600">
                 Raw state (for debugging)
@@ -82,4 +82,22 @@ onMounted(async () => {
             </pre>
         </section>
     </main>
+</template> -->
+
+
+<script setup lang="ts">
+
+definePageMeta({
+    middleware: () => {
+        if (process.env.NODE_ENV !== 'development') {
+            return navigateTo('/')
+        }
+    }
+})
+</script>
+
+<template>
+    <h1 class="text-2xl font-semibold">
+        Auth Debug Page does nothing you're not meant to be here
+    </h1>
 </template>
