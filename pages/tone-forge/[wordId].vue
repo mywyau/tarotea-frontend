@@ -81,6 +81,20 @@ const referencePitchContours = ref<PitchContour[]>([])
 
 let audioChunks: Blob[] = []
 
+function qualitativeScoreLabel(score: number | null | undefined) {
+  if (typeof score !== "number") return "Not enough audio yet"
+  if (score >= 88) return "Excellent"
+  if (score >= 70) return "Strong"
+  if (score >= 55) return "Promising"
+  if (score >= 40) return "Needs more consistency"
+  return "Try again"
+}
+
+const acousticToneLabel = computed(() => qualitativeScoreLabel(result.value?.acousticToneScore))
+const referenceToneLabel = computed(() => qualitativeScoreLabel(result.value?.referenceToneScore))
+const finalToneLabel = computed(() => qualitativeScoreLabel(result.value?.toneScore))
+const overallLabel = computed(() => qualitativeScoreLabel(result.value?.overallScore))
+
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
@@ -403,20 +417,20 @@ async function runToneCheck() {
             <dd>{{ result.expectedJyutping }}</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Acoustic Tone Score</dt>
-            <dd>{{ result.acousticToneScore ?? "n/a" }}</dd>
+            <dt class="text-gray-500">Acoustic Tone Check</dt>
+            <dd>{{ acousticToneLabel }}</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Reference Match Score</dt>
-            <dd>{{ result.referenceToneScore ?? "n/a" }}</dd>
+            <dt class="text-gray-500">Reference Match</dt>
+            <dd>{{ referenceToneLabel }}</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Final Tone Score</dt>
-            <dd>{{ result.toneScore }}</dd>
+            <dt class="text-gray-500">Final Tone Result</dt>
+            <dd>{{ finalToneLabel }}</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Overall Score</dt>
-            <dd>{{ result.overallScore }}</dd>
+            <dt class="text-gray-500">Overall Result</dt>
+            <dd>{{ overallLabel }}</dd>
           </div>
           <div>
             <dt class="text-gray-500">Match Type</dt>
