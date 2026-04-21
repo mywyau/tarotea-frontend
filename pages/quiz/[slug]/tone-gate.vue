@@ -75,6 +75,7 @@ const feedback = ref("")
 const successMessage = ref("")
 const lastToneScore = ref<number | null>(null)
 const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
+const nextWordCountdownMs = ref<number | null>(null)
 
 const recordedBlob = ref<Blob | null>(null)
 const recordingUrl = ref<string | null>(null)
@@ -85,6 +86,7 @@ let audioChunks: Blob[] = []
 
 let timerInterval: ReturnType<typeof setInterval> | null = null
 let currentWordAudio: HTMLAudioElement | null = null
+let nextWordCountdownInterval: ReturnType<typeof setInterval> | null = null
 
 const currentWord = computed(() => quizWords.value[currentIndex.value] ?? null)
 const progressLabel = computed(() => `${Math.min(currentIndex.value + 1, QUIZ_SIZE)} / ${QUIZ_SIZE}`)
@@ -120,6 +122,11 @@ const lastToneLabel = computed(() => {
   return "perfect"
 })
 
+const nextWordCountdownSeconds = computed(() => {
+  if (nextWordCountdownMs.value === null) return null
+  return Math.max(0, Math.ceil(nextWordCountdownMs.value / 1000))
+})
+
 function shuffle<T>(arr: T[]) {
   const copy = [...arr]
   for (let i = copy.length - 1; i > 0; i--) {
@@ -134,6 +141,14 @@ function stopTimer() {
     clearInterval(timerInterval)
     timerInterval = null
   }
+}
+
+function clearNextWordCountdown() {
+  if (nextWordCountdownInterval) {
+    clearInterval(nextWordCountdownInterval)
+    nextWordCountdownInterval = null
+  }
+  nextWordCountdownMs.value = null
 }
 
 function resetRecordingState() {
@@ -340,6 +355,18 @@ function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+async function waitForNextWord(ms: number) {
+  clearNextWordCountdown()
+  const endsAt = Date.now() + ms
+  nextWordCountdownMs.value = ms
+  nextWordCountdownInterval = setInterval(() => {
+    nextWordCountdownMs.value = Math.max(0, endsAt - Date.now())
+  }, 100)
+
+  await wait(ms)
+  clearNextWordCountdown()
+}
+
 async function submitAttempt() {
   if (!started.value || finished.value || !currentWord.value) return
   if (!recordedBlob.value) {
@@ -390,7 +417,7 @@ async function submitAttempt() {
       }
 
       successMessage.value = "✅ Nice pronunciation — moving to the next word!"
-      await wait(SUCCESS_MESSAGE_MS)
+      await waitForNextWord(SUCCESS_MESSAGE_MS)
 
       passedCount.value += 1
 
@@ -428,6 +455,7 @@ const formattedElapsedTime = computed(() => {
 
 onBeforeUnmount(() => {
   stopTimer()
+  clearNextWordCountdown()
   stopTracks()
   if (recordingUrl.value) URL.revokeObjectURL(recordingUrl.value)
   currentWordAudio?.pause()
@@ -523,6 +551,9 @@ onBeforeUnmount(() => {
           <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
           <p v-if="successMessage" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
             {{ successMessage }}
+            <span v-if="nextWordCountdownSeconds !== null" class="ml-1">
+              (next word in {{ nextWordCountdownSeconds }}s)
+            </span>
           </p>
           <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
 
