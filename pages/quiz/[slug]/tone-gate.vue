@@ -363,109 +363,111 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl px-4 py-8 text-white">
-    <header class="mb-6">
-      <h1 class="text-2xl font-semibold">Tone Gate Quiz</h1>
-      <p class="mt-2 text-sm text-gray-300">
-        10 words, untimed. Your total time is tracked and shown at the end.
-      </p>
-      <p class="mt-1 text-sm text-gray-300">
-        You always progress after each attempt; tone score feedback is still shown for learning.
-      </p>
-    </header>
-
-    <section
-      class="rounded-2xl border border-white/10 bg-slate-900/60 p-4 sm:p-6"
-    >
-      <div v-if="pending || loading" class="text-sm text-gray-300">Loading quiz words…</div>
-      <div v-else-if="error" class="text-sm text-rose-300">
-        Failed to load quiz data. Please refresh and try again.
-      </div>
-      <div v-else-if="!started">
-        <p class="text-sm text-gray-300">
-          Press start to begin a {{ QUIZ_SIZE }}-word pronunciation challenge.
+  <main class="min-h-screen bg-gradient-to-br from-rose-50 via-fuchsia-50 to-sky-50 text-gray-900">
+    <div class="mx-auto max-w-3xl px-4 py-10">
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold">Tone Gate Quiz</h1>
+        <p class="mt-2 text-sm text-gray-600">
+          10 words, untimed. Your total time is tracked and shown at the end.
         </p>
-        <button
-          class="mt-4 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-black hover:bg-emerald-400"
-          @click="startQuiz"
-        >
-          Start Quiz
-        </button>
-      </div>
-
-      <div v-else-if="finished" class="space-y-3">
-        <h2 class="text-xl font-semibold">
-          Quiz complete!
-        </h2>
-        <p class="text-sm text-gray-300">
-          Passed words: <span class="font-semibold text-emerald-300">{{ passedCount }}</span> / {{ QUIZ_SIZE }}
+        <p class="mt-1 text-sm text-gray-600">
+          You always progress after each attempt; tone score feedback is still shown for learning.
         </p>
-        <p class="text-sm text-gray-300">
-          Total time: <span class="font-semibold text-amber-300">{{ formattedElapsedTime }}</span>
-        </p>
-        <button
-          class="rounded-lg bg-sky-500 px-4 py-2 font-medium text-black hover:bg-sky-400"
-          @click="startQuiz"
-        >
-          Restart
-        </button>
-      </div>
+      </header>
 
-      <div v-else-if="currentWord" class="space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
-          <p>Progress: <span class="font-semibold">{{ progressLabel }}</span></p>
-          <p>Passed: <span class="font-semibold text-emerald-300">{{ passedCount }}</span> / {{ QUIZ_SIZE }}</p>
-          <p>Elapsed: <span class="font-semibold text-amber-300">{{ formattedElapsedTime }}</span></p>
+      <section class="rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm sm:p-6">
+        <div v-if="pending || loading" class="text-sm text-gray-600">Loading quiz words…</div>
+        <div v-else-if="error" class="rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
+          Failed to load quiz data. Please refresh and try again.
         </div>
-
-        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
-          <p class="text-xs uppercase tracking-wider text-gray-400">Target Chinese</p>
-          <p class="mt-1 text-3xl font-bold">{{ currentWord.word }}</p>
-          <p class="mt-3 text-xs uppercase tracking-wider text-gray-400">Target Jyutping</p>
-          <p class="mt-1 text-xl font-semibold">{{ currentWord.jyutping }}</p>
-          <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-300">{{ currentWord.meaning }}</p>
-        </div>
-
-        <div class="flex flex-wrap gap-3">
-          <button
-            class="rounded-lg bg-indigo-500 px-4 py-2 font-medium text-white disabled:opacity-40"
-            :disabled="recording || submitting"
-            @click="startRecording"
-          >
-            Start Recording
-          </button>
-          <button
-            class="rounded-lg bg-rose-500 px-4 py-2 font-medium text-white disabled:opacity-40"
-            :disabled="!recording || submitting"
-            @click="stopRecording"
-          >
-            Stop Recording
-          </button>
-          <button
-            class="rounded-lg bg-emerald-500 px-4 py-2 font-medium text-black disabled:opacity-40"
-            :disabled="recording || !recordedBlob || submitting"
-            @click="submitAttempt"
-          >
-            {{ submitting ? "Scoring..." : "Check Tone" }}
-          </button>
-        </div>
-
-        <p v-if="recording" class="text-sm text-amber-300">Recording... speak now.</p>
-        <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
-
-        <div v-if="lastToneScore !== null" class="rounded-xl border border-white/10 bg-black/30 p-4">
-          <p class="text-sm">
-            Tone score:
-            <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-300' : 'text-amber-300'">
-              {{ lastToneScore }}
-            </span>
-            <span class="text-gray-300"> (feedback only)</span>
+        <div v-else-if="!started">
+          <p class="text-sm text-gray-600">
+            Press start to begin a {{ QUIZ_SIZE }}-word pronunciation challenge.
           </p>
-          <p class="mt-2 text-sm text-gray-200">{{ feedback }}</p>
+          <button
+            class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
+            @click="startQuiz"
+          >
+            Start Quiz
+          </button>
         </div>
-      </div>
 
-      <p v-if="errorMessage" class="mt-4 text-sm text-rose-300">{{ errorMessage }}</p>
-    </section>
+        <div v-else-if="finished" class="space-y-3">
+          <h2 class="text-xl font-semibold">
+            Quiz complete!
+          </h2>
+          <p class="text-sm text-gray-700">
+            Passed words: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}
+          </p>
+          <p class="text-sm text-gray-700">
+            Total time: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span>
+          </p>
+          <button
+            class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
+            @click="startQuiz"
+          >
+            Restart
+          </button>
+        </div>
+
+        <div v-else-if="currentWord" class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-fuchsia-100 bg-fuchsia-50/60 p-3 text-sm text-gray-700">
+            <p>Progress: <span class="font-semibold text-gray-900">{{ progressLabel }}</span></p>
+            <p>Passed: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}</p>
+            <p>Elapsed: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span></p>
+          </div>
+
+          <div class="rounded-xl border border-fuchsia-100 bg-white p-4">
+            <p class="text-xs uppercase tracking-wider text-gray-500">Target Chinese</p>
+            <p class="mt-1 text-3xl font-bold text-gray-900">{{ currentWord.word }}</p>
+            <p class="mt-3 text-xs uppercase tracking-wider text-gray-500">Target Jyutping</p>
+            <p class="mt-1 text-xl font-semibold text-gray-900">{{ currentWord.jyutping }}</p>
+            <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-600">{{ currentWord.meaning }}</p>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button
+              class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="recording || submitting"
+              @click="startRecording"
+            >
+              Start Recording
+            </button>
+            <button
+              class="rounded-lg bg-[#F4C2D7] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="!recording || submitting"
+              @click="stopRecording"
+            >
+              Stop Recording
+            </button>
+            <button
+              class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="recording || !recordedBlob || submitting"
+              @click="submitAttempt"
+            >
+              {{ submitting ? "Scoring..." : "Check Tone" }}
+            </button>
+          </div>
+
+          <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
+          <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
+
+          <div v-if="lastToneScore !== null" class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4">
+            <p class="text-sm text-gray-700">
+              Tone score:
+              <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-700' : 'text-amber-700'">
+                {{ lastToneScore }}
+              </span>
+              <span class="text-gray-500"> (feedback only)</span>
+            </p>
+            <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
+          </div>
+        </div>
+
+        <p v-if="errorMessage" class="mt-4 rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
+          {{ errorMessage }}
+        </p>
+      </section>
+    </div>
   </main>
 </template>
