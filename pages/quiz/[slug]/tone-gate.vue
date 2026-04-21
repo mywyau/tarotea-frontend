@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { playCorrectJingle, playGoodJingle, playToneFailJingle } from "~/utils/sounds"
+import { playCorrectJingle, playGoodJingle } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: ["logged-in", "level-quiz-access"],
@@ -514,7 +514,7 @@ onBeforeUnmount(() => {
     <div class="mx-auto max-w-3xl px-4 py-10">
       <BackLink />
 
-      <header class="mb-6">
+      <header class="mb-6 mt-10">
         <h1 class="text-3xl font-bold">Echo Gecko</h1>
       </header>
 
@@ -542,8 +542,9 @@ onBeforeUnmount(() => {
           <section class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4 text-left">
             <h3 class="text-sm font-semibold text-gray-900">Before you start</h3>
             <ul class="mt-2 space-y-1 text-sm text-gray-700">
-              <li>• Use “Next” if your latest attempt was successful.</li>
-              <li>• Use “Skip” to move on without counting a pass.</li>
+              <li>• Make sure you are in a quiet area and can speak clearly.</li>
+              <li>• Make sure there are no microhpone obstructions.</li>
+              <li>• Use “Skip” if you are struggling with a word.</li>
             </ul>
           </section>
         </div>
@@ -623,14 +624,16 @@ onBeforeUnmount(() => {
               @click="skipWord">
               Skip
             </button>
-            <label class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
+            <label
+              class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
               <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-fuchsia-300 text-fuchsia-600" />
               Rapid mode (skip pause only)
             </label>
           </div>
 
           <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
-          <p v-if="successMessage && !rapidMode" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+          <p v-if="successMessage && !rapidMode"
+            class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
             {{ successMessage }}
             <span v-if="nextWordCountdownSeconds !== null" class="ml-1">
               (next word in {{ nextWordCountdownSeconds }}s)
@@ -670,7 +673,7 @@ onBeforeUnmount(() => {
                   heard <span class="font-semibold">{{ row.heardJyutping }}</span>
                   — tone <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
                   <!-- <span v-if="row.confidence !== null" class="text-gray-500"> -->
-                    <!-- (confidence {{ row.confidence }}) -->
+                  <!-- (confidence {{ row.confidence }}) -->
                   <!-- </span> -->
                 </li>
               </ul>

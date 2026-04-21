@@ -556,8 +556,6 @@ onBeforeUnmount(() => {
             <p class="text-xs uppercase tracking-[0.2em] text-fuchsia-700">Quiz Complete</p>
             <h2 class="mt-2 text-2xl font-semibold text-gray-900">Great job!</h2>
             <p class="mt-2 text-sm text-gray-700">
-              <!-- You passed <span class="font-semibold text-emerald-700">{{ passedCount }}</span> out of
-              <span class="font-semibold text-gray-900">{{ quizSize }}</span> words. -->
             </p>
           </div>
 
