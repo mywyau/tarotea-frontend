@@ -21,6 +21,13 @@ type ToneApiResponse = {
   feedback: string
   acousticToneScore: number | null
   referenceToneScore: number | null
+  detectedAcousticTones?: Array<{
+    syllable: number
+    token: string
+    expectedTone: string
+    detectedTone: string | null
+    confidence: number | null
+  }>
 }
 
 const PASS_SCORE = 40
@@ -61,6 +68,7 @@ const recording = ref(false)
 const errorMessage = ref("")
 const feedback = ref("")
 const lastToneScore = ref<number | null>(null)
+const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
 
 const recordedBlob = ref<Blob | null>(null)
 const recordingUrl = ref<string | null>(null)
@@ -234,6 +242,7 @@ function startQuiz() {
   errorMessage.value = ""
   feedback.value = ""
   lastToneScore.value = null
+  detectedToneRows.value = []
   finished.value = false
   currentIndex.value = 0
   passedCount.value = 0
@@ -262,6 +271,7 @@ async function startRecording() {
     errorMessage.value = ""
     feedback.value = ""
     lastToneScore.value = null
+    detectedToneRows.value = []
     resetRecordingState()
     audioChunks = []
 
@@ -331,6 +341,7 @@ async function submitAttempt() {
 
     lastToneScore.value = result.toneScore
     feedback.value = result.feedback
+    detectedToneRows.value = result.detectedAcousticTones ?? []
 
     if (result.toneScore > PASS_SCORE) {
       passedCount.value += 1
@@ -346,6 +357,11 @@ async function submitAttempt() {
       }
 
       resetRecordingState()
+      if (!finished.value) {
+        feedback.value = ""
+        lastToneScore.value = null
+        detectedToneRows.value = []
+      }
     }
   } catch (err) {
     console.error("[tone-gate] submit failed", err)
@@ -475,6 +491,20 @@ onBeforeUnmount(() => {
               <span class="text-gray-500"> (need above threshold to continue)</span>
             </p>
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
+            <div v-if="detectedToneRows?.length" class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
+              <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
+              <ul class="mt-2 space-y-1 text-sm text-gray-700">
+                <li v-for="row in detectedToneRows" :key="`tone-row-${row.syllable}`">
+                  <span class="font-medium">Syllable {{ row.syllable }}</span>
+                  <span class="text-gray-500"> ({{ row.token }})</span>:
+                  expected tone {{ row.expectedTone || "?" }}, detected
+                  <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
+                  <span v-if="row.confidence !== null" class="text-gray-500">
+                    (confidence {{ row.confidence }})
+                  </span>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
 

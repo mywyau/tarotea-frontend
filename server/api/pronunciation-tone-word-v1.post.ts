@@ -84,6 +84,7 @@ export default defineEventHandler(async (event) => {
     matchType: result.matchType,
     feedback: result.feedback,
     toneErrors: result.toneErrors,
+    detectedAcousticTones: result.detectedAcousticTones,
     expectedTokens: result.expectedTokens,
     heardTokens: result.heardTokens,
     engine: "non-ai-tone-only",

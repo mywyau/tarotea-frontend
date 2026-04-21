@@ -24,6 +24,13 @@ export type ToneWordScore = {
     expected: string
     heard: string
   }>
+  detectedAcousticTones: Array<{
+    syllable: number
+    token: string
+    expectedTone: string
+    detectedTone: string | null
+    confidence: number | null
+  }>
 }
 
 function normalizeJyutping(raw: string): string {
@@ -112,6 +119,22 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
   if (tone === "6") return clamp(92 - Math.abs(boundedSlope) * 150 - boundedRange * 35, 0, 100)
 
   return null
+}
+
+function detectToneFromContour(contour: AcousticSyllableContour | undefined) {
+  if (!contour?.values?.length) return { detectedTone: null as string | null, confidence: null as number | null }
+  const values = contour.values.filter((v) => Number.isFinite(v) && v > 0)
+  if (values.length < 2) return { detectedTone: null as string | null, confidence: null as number | null }
+
+  const candidates = ["1", "2", "3", "4", "5", "6"] as const
+  const scored = candidates
+    .map((tone) => ({ tone, score: scoreContourForTone(tone, { values }) ?? 0 }))
+    .sort((a, b) => b.score - a.score)
+
+  const best = scored[0]
+  const second = scored[1]
+  const confidence = clamp(Math.round(best.score - second.score), 0, 100)
+  return { detectedTone: best.tone, confidence }
 }
 
 function aggregateSyllableScores(scores: number[], totalSyllables: number) {
@@ -395,12 +418,24 @@ export function scoreWordToneAttempt(params: {
       matchType: "wrong",
       feedback: "No expected jyutping was provided.",
       toneErrors: [],
+      detectedAcousticTones: [],
     }
   }
 
   let soundMatches = 0
   let toneMatches = 0
   const toneErrors: ToneWordScore["toneErrors"] = []
+  const detectedAcousticTones: ToneWordScore["detectedAcousticTones"] = expectedTokens.map((token, idx) => {
+    const expectedTone = getTone(token)
+    const detected = detectToneFromContour((params.acousticContours ?? [])[idx])
+    return {
+      syllable: idx + 1,
+      token,
+      expectedTone,
+      detectedTone: detected.detectedTone,
+      confidence: detected.confidence,
+    }
+  })
 
   for (let i = 0; i < expectedTokens.length; i++) {
     const expected = expectedTokens[i]
@@ -549,5 +584,6 @@ export function scoreWordToneAttempt(params: {
     matchType,
     feedback,
     toneErrors,
+    detectedAcousticTones,
   }
 }

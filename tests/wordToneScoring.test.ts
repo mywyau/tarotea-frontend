@@ -192,6 +192,7 @@ describe("scoreWordToneAttempt", () => {
     expect(result.acousticToneScore).not.toBeNull()
     expect(result.toneScore).toBeGreaterThan(15)
     expect(result.toneScore).toBeLessThan(90)
+    expect(result.detectedAcousticTones[0]?.detectedTone).toBeTruthy()
   })
 
   it("avoids perfect 100 for single-syllable tone-only without reference", () => {
@@ -203,6 +204,21 @@ describe("scoreWordToneAttempt", () => {
 
     expect(result.referenceToneScore).toBeNull()
     expect(result.toneScore).toBeLessThanOrEqual(96)
+  })
+
+  it("returns detected acoustic tones per syllable", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "sai2 sau2",
+      acousticContours: [
+        { values: [120, 125, 130, 136, 142] },
+        { values: [130, 135, 141, 148, 155] },
+      ],
+      toneOnly: true,
+    })
+
+    expect(result.detectedAcousticTones).toHaveLength(2)
+    expect(result.detectedAcousticTones[0]?.token).toBe("sai2")
+    expect(result.detectedAcousticTones[0]?.detectedTone).toBeTruthy()
   })
 
 })
