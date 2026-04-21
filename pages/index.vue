@@ -13,7 +13,7 @@ const { data: stats } = await useFetch('/api/total-users-stats', {
     <div class="text-center">
 
       <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-black">
-        Learn Cantonese
+        Learn and practice Cantonese
       </h1>
     </div>
 
