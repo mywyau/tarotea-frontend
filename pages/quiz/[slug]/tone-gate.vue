@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { playCorrectJingle, playGoodJingle, playToneFailJingle } from "~/utils/sounds"
+import { playCorrectJingle, playGoodJingle, playIncorrectJingle } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: ["logged-in", "level-quiz-access"],
@@ -36,6 +36,7 @@ const NEAR_PERFECT_PASS_SCORE = 80
 const GOOD_JINGLE_MIN_SCORE = 30
 const JINGLE_DELAY_MS = 400
 const QUIZ_SIZE = 10
+const QUIZ_TIME_LIMIT_SECONDS = 120
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -65,6 +66,7 @@ const started = ref(false)
 const finished = ref(false)
 const elapsedSeconds = ref(0)
 const startedAtMs = ref<number | null>(null)
+const timerExpired = ref(false)
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -268,6 +270,7 @@ function startQuiz() {
   lastToneScore.value = null
   detectedToneRows.value = []
   finished.value = false
+  timerExpired.value = false
   currentIndex.value = 0
   passedCount.value = 0
   quizWords.value = shuffle(allWords.value).slice(0, QUIZ_SIZE)
@@ -280,6 +283,12 @@ function startQuiz() {
   timerInterval = setInterval(() => {
     if (!startedAtMs.value) return
     elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+    if (elapsedSeconds.value >= QUIZ_TIME_LIMIT_SECONDS) {
+      elapsedSeconds.value = QUIZ_TIME_LIMIT_SECONDS
+      finished.value = true
+      timerExpired.value = true
+      stopTimer()
+    }
   }, 250)
 }
 
@@ -417,6 +426,13 @@ const formattedElapsedTime = computed(() => {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`
 })
 
+const remainingSeconds = computed(() => Math.max(QUIZ_TIME_LIMIT_SECONDS - elapsedSeconds.value, 0))
+const formattedRemainingTime = computed(() => {
+  const minutes = Math.floor(remainingSeconds.value / 60)
+  const seconds = remainingSeconds.value % 60
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`
+})
+
 onBeforeUnmount(() => {
   stopTimer()
   stopTracks()
@@ -431,7 +447,7 @@ onBeforeUnmount(() => {
       <header class="mb-6">
         <h1 class="text-3xl font-bold">Tone Gate Quiz</h1>
         <p class="mt-2 text-sm text-gray-600">
-          10 words, untimed. Your total time is tracked and shown at the end.
+          10 words in 2 minutes. Beat as many words as you can before time runs out.
         </p>
         <p class="mt-1 text-sm text-gray-600">
           You can move to the next word after a strong attempt. We show qualitative feedback labels instead of numeric
@@ -459,6 +475,9 @@ onBeforeUnmount(() => {
           <h2 class="text-xl font-semibold">
             Quiz complete!
           </h2>
+          <p v-if="timerExpired" class="text-sm text-amber-700">
+            Time's up.
+          </p>
           <p class="text-sm text-gray-700">
             Passed words: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}
           </p>
@@ -478,6 +497,7 @@ onBeforeUnmount(() => {
             <p>Progress: <span class="font-semibold text-gray-900">{{ progressLabel }}</span></p>
             <p>Passed: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}</p>
             <p>Elapsed: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span></p>
+            <p>Time left: <span class="font-semibold text-rose-700">{{ formattedRemainingTime }}</span></p>
           </div>
 
           <div class="rounded-xl border border-fuchsia-100 bg-white p-4">
