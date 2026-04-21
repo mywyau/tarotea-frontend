@@ -21,11 +21,17 @@ type ToneApiResponse = {
   feedback: string
   acousticToneScore: number | null
   referenceToneScore: number | null
+  detectedAcousticTones?: Array<{
+    syllable: number
+    token: string
+    expectedTone: string
+    detectedTone: string | null
+    confidence: number | null
+  }>
 }
 
 const PASS_SCORE = 40
 const QUIZ_SIZE = 10
-const QUIZ_DURATION_SECONDS = 120
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -53,8 +59,8 @@ const currentIndex = ref(0)
 const passedCount = ref(0)
 const started = ref(false)
 const finished = ref(false)
-const timedOut = ref(false)
-const secondsLeft = ref(QUIZ_DURATION_SECONDS)
+const elapsedSeconds = ref(0)
+const startedAtMs = ref<number | null>(null)
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -62,6 +68,7 @@ const recording = ref(false)
 const errorMessage = ref("")
 const feedback = ref("")
 const lastToneScore = ref<number | null>(null)
+const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
 
 const recordedBlob = ref<Blob | null>(null)
 const recordingUrl = ref<string | null>(null)
@@ -78,6 +85,33 @@ const progressLabel = computed(() => `${Math.min(currentIndex.value + 1, QUIZ_SI
 const currentWordAudioUrl = computed(() => {
   const id = currentWord.value?.id
   return id ? `${cdnBase}/audio/${id}.mp3` : ""
+})
+
+function stripToneDigit(token: string) {
+  return token.replace(/[1-6]$/, "")
+}
+
+const detectedToneDisplayRows = computed(() => {
+  const rows = detectedToneRows.value ?? []
+  const chars = Array.from(currentWord.value?.word ?? "")
+  const hasOneToOneChars = chars.length === rows.length
+
+  return rows.map((row, idx) => {
+    const base = stripToneDigit(row.token)
+    const heardJyutping = row.detectedTone ? `${base}${row.detectedTone}` : `${base}?`
+    return {
+      ...row,
+      character: hasOneToOneChars ? chars[idx] : null,
+      heardJyutping,
+    }
+  })
+})
+const lastToneLabel = computed(() => {
+  if (lastToneScore.value === null) return ""
+  if (lastToneScore.value <= PASS_SCORE) return "not quite"
+  if (lastToneScore.value <= 60) return "good"
+  if (lastToneScore.value <= 80) return "very good"
+  return "perfect"
 })
 
 function shuffle<T>(arr: T[]) {
@@ -123,7 +157,7 @@ function estimatePitchHz(frame: Float32Array, sampleRate: number) {
   let rms = 0
   for (let i = 0; i < frame.length; i++) rms += frame[i] * frame[i]
   rms = Math.sqrt(rms / frame.length)
-  if (rms < 0.01) return 0
+  if (rms < 0.006) return 0
 
   const minHz = 75
   const maxHz = 450
@@ -228,25 +262,21 @@ function startQuiz() {
   errorMessage.value = ""
   feedback.value = ""
   lastToneScore.value = null
+  detectedToneRows.value = []
   finished.value = false
-  timedOut.value = false
   currentIndex.value = 0
   passedCount.value = 0
   quizWords.value = shuffle(allWords.value).slice(0, QUIZ_SIZE)
-  secondsLeft.value = QUIZ_DURATION_SECONDS
+  elapsedSeconds.value = 0
+  startedAtMs.value = Date.now()
   started.value = true
   resetRecordingState()
 
   stopTimer()
   timerInterval = setInterval(() => {
-    secondsLeft.value -= 1
-    if (secondsLeft.value <= 0) {
-      secondsLeft.value = 0
-      timedOut.value = true
-      finished.value = true
-      stopTimer()
-    }
-  }, 1000)
+    if (!startedAtMs.value) return
+    elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+  }, 250)
 }
 
 async function startRecording() {
@@ -261,6 +291,7 @@ async function startRecording() {
     errorMessage.value = ""
     feedback.value = ""
     lastToneScore.value = null
+    detectedToneRows.value = []
     resetRecordingState()
     audioChunks = []
 
@@ -330,19 +361,27 @@ async function submitAttempt() {
 
     lastToneScore.value = result.toneScore
     feedback.value = result.feedback
+    detectedToneRows.value = result.detectedAcousticTones ?? []
 
     if (result.toneScore > PASS_SCORE) {
       passedCount.value += 1
-      await playCurrentWordAudio()
 
       if (currentIndex.value >= QUIZ_SIZE - 1) {
         finished.value = true
+        if (startedAtMs.value) {
+          elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+        }
         stopTimer()
       } else {
         currentIndex.value += 1
       }
 
       resetRecordingState()
+      if (!finished.value) {
+        feedback.value = ""
+        lastToneScore.value = null
+        detectedToneRows.value = []
+      }
     }
   } catch (err) {
     console.error("[tone-gate] submit failed", err)
@@ -352,9 +391,9 @@ async function submitAttempt() {
   }
 }
 
-const formattedTime = computed(() => {
-  const minutes = Math.floor(secondsLeft.value / 60)
-  const seconds = secondsLeft.value % 60
+const formattedElapsedTime = computed(() => {
+  const minutes = Math.floor(elapsedSeconds.value / 60)
+  const seconds = elapsedSeconds.value % 60
   return `${minutes}:${seconds.toString().padStart(2, "0")}`
 })
 
@@ -367,107 +406,137 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="mx-auto max-w-3xl px-4 py-8 text-white">
-    <header class="mb-6">
-      <h1 class="text-2xl font-semibold">Tone Gate Quiz</h1>
-      <p class="mt-2 text-sm text-gray-300">
-        10 words, timed. You can only move forward when your tone score is above
-        <span class="font-semibold text-emerald-300">{{ PASS_SCORE }}</span>.
-      </p>
-    </header>
-
-    <section
-      class="rounded-2xl border border-white/10 bg-slate-900/60 p-4 sm:p-6"
-    >
-      <div v-if="pending || loading" class="text-sm text-gray-300">Loading quiz words…</div>
-      <div v-else-if="error" class="text-sm text-rose-300">
-        Failed to load quiz data. Please refresh and try again.
-      </div>
-      <div v-else-if="!started">
-        <p class="text-sm text-gray-300">
-          Press start to begin a {{ QUIZ_SIZE }}-word timed pronunciation gate challenge.
+  <main class="min-h-screen bg-gradient-to-br from-rose-50 via-fuchsia-50 to-sky-50 text-gray-900">
+    <div class="mx-auto max-w-3xl px-4 py-10">
+      <header class="mb-6">
+        <h1 class="text-3xl font-bold">Tone Gate Quiz</h1>
+        <p class="mt-2 text-sm text-gray-600">
+          10 words, untimed. Your total time is tracked and shown at the end.
         </p>
-        <button
-          class="mt-4 rounded-lg bg-emerald-500 px-4 py-2 font-medium text-black hover:bg-emerald-400"
-          @click="startQuiz"
-        >
-          Start Quiz
-        </button>
-      </div>
-
-      <div v-else-if="finished" class="space-y-3">
-        <h2 class="text-xl font-semibold">
-          {{ timedOut ? "Time's up!" : "Quiz complete!" }}
-        </h2>
-        <p class="text-sm text-gray-300">
-          Passed words: <span class="font-semibold text-emerald-300">{{ passedCount }}</span> / {{ QUIZ_SIZE }}
+        <p class="mt-1 text-sm text-gray-600">
+          You can move to the next word after a strong attempt. We show qualitative feedback labels instead of numeric scores.
         </p>
-        <p class="text-sm text-gray-300">
-          Time left: <span class="font-semibold">{{ formattedTime }}</span>
-        </p>
-        <button
-          class="rounded-lg bg-sky-500 px-4 py-2 font-medium text-black hover:bg-sky-400"
-          @click="startQuiz"
-        >
-          Restart
-        </button>
-      </div>
+      </header>
 
-      <div v-else-if="currentWord" class="space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-3 text-sm">
-          <p>Progress: <span class="font-semibold">{{ progressLabel }}</span></p>
-          <p>Passed: <span class="font-semibold text-emerald-300">{{ passedCount }}</span> / {{ QUIZ_SIZE }}</p>
-          <p>Time left: <span class="font-semibold text-amber-300">{{ formattedTime }}</span></p>
+      <section class="rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm sm:p-6">
+        <div v-if="pending || loading" class="text-sm text-gray-600">Loading quiz words…</div>
+        <div v-else-if="error" class="rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
+          Failed to load quiz data. Please refresh and try again.
         </div>
-
-        <div class="rounded-xl border border-white/10 bg-black/30 p-4">
-          <p class="text-xs uppercase tracking-wider text-gray-400">Target Chinese</p>
-          <p class="mt-1 text-3xl font-bold">{{ currentWord.word }}</p>
-          <p class="mt-3 text-xs uppercase tracking-wider text-gray-400">Target Jyutping</p>
-          <p class="mt-1 text-xl font-semibold">{{ currentWord.jyutping }}</p>
-          <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-300">{{ currentWord.meaning }}</p>
-        </div>
-
-        <div class="flex flex-wrap gap-3">
-          <button
-            class="rounded-lg bg-indigo-500 px-4 py-2 font-medium text-white disabled:opacity-40"
-            :disabled="recording || submitting"
-            @click="startRecording"
-          >
-            Start Recording
-          </button>
-          <button
-            class="rounded-lg bg-rose-500 px-4 py-2 font-medium text-white disabled:opacity-40"
-            :disabled="!recording || submitting"
-            @click="stopRecording"
-          >
-            Stop Recording
-          </button>
-          <button
-            class="rounded-lg bg-emerald-500 px-4 py-2 font-medium text-black disabled:opacity-40"
-            :disabled="recording || !recordedBlob || submitting"
-            @click="submitAttempt"
-          >
-            {{ submitting ? "Scoring..." : "Check Tone" }}
-          </button>
-        </div>
-
-        <p v-if="recording" class="text-sm text-amber-300">Recording... speak now.</p>
-        <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
-
-        <div v-if="lastToneScore !== null" class="rounded-xl border border-white/10 bg-black/30 p-4">
-          <p class="text-sm">
-            Tone score:
-            <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-300' : 'text-amber-300'">
-              {{ lastToneScore }}
-            </span>
-            <span class="text-gray-300"> (need > {{ PASS_SCORE }} to progress)</span>
+        <div v-else-if="!started">
+          <p class="text-sm text-gray-600">
+            Press start to begin a {{ QUIZ_SIZE }}-word pronunciation challenge.
           </p>
-          <p class="mt-2 text-sm text-gray-200">{{ feedback }}</p>
+          <button
+            class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
+            @click="startQuiz"
+          >
+            Start Quiz
+          </button>
         </div>
-      </div>
 
-      <p v-if="errorMessage" class="mt-4 text-sm text-rose-300">{{ errorMessage }}</p>
-    </section>
+        <div v-else-if="finished" class="space-y-3">
+          <h2 class="text-xl font-semibold">
+            Quiz complete!
+          </h2>
+          <p class="text-sm text-gray-700">
+            Passed words: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}
+          </p>
+          <p class="text-sm text-gray-700">
+            Total time: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span>
+          </p>
+          <button
+            class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
+            @click="startQuiz"
+          >
+            Restart
+          </button>
+        </div>
+
+        <div v-else-if="currentWord" class="space-y-4">
+          <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-fuchsia-100 bg-fuchsia-50/60 p-3 text-sm text-gray-700">
+            <p>Progress: <span class="font-semibold text-gray-900">{{ progressLabel }}</span></p>
+            <p>Passed: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}</p>
+            <p>Elapsed: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span></p>
+          </div>
+
+          <div class="rounded-xl border border-fuchsia-100 bg-white p-4">
+            <p class="text-xs uppercase tracking-wider text-gray-500">Target Chinese</p>
+            <p class="mt-1 text-3xl font-bold text-gray-900">{{ currentWord.word }}</p>
+            <p class="mt-3 text-xs uppercase tracking-wider text-gray-500">Target Jyutping</p>
+            <p class="mt-1 text-xl font-semibold text-gray-900">{{ currentWord.jyutping }}</p>
+            <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-600">{{ currentWord.meaning }}</p>
+            <button
+              class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="submitting || !currentWordAudioUrl"
+              @click="playCurrentWordAudio"
+            >
+              ▶ Play Chinese Audio
+            </button>
+          </div>
+
+          <div class="flex flex-wrap gap-3">
+            <button
+              class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="recording || submitting"
+              @click="startRecording"
+            >
+              Start Recording
+            </button>
+            <button
+              class="rounded-lg bg-[#F4C2D7] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="!recording || submitting"
+              @click="stopRecording"
+            >
+              Stop Recording
+            </button>
+            <button
+              class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="recording || !recordedBlob || submitting"
+              @click="submitAttempt"
+            >
+              {{ submitting ? "Scoring..." : "Check Tone" }}
+            </button>
+          </div>
+
+          <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
+          <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
+
+          <div v-if="lastToneScore !== null" class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4">
+            <p class="text-sm text-gray-700">
+              Feedback:
+              <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-700' : 'text-amber-700'">
+                {{ lastToneLabel }}
+              </span>
+              <span class="text-gray-500"> (need above threshold to continue)</span>
+            </p>
+            <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
+            <div v-if="detectedToneDisplayRows.length" class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
+              <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
+              <p class="mt-1 text-xs text-gray-500">
+                Detected tone is diagnostic. Final score also checks how closely your pitch shape matches the target contour.
+              </p>
+              <ul class="mt-2 space-y-1 text-sm text-gray-700">
+                <li v-for="row in detectedToneDisplayRows" :key="`tone-row-${row.syllable}`">
+                  <span class="font-medium">
+                    {{ row.character ? `Character ${row.character}` : `Syllable ${row.syllable}` }}
+                  </span>
+                  <span class="text-gray-500"> (target {{ row.token }})</span>:
+                  heard <span class="font-semibold">{{ row.heardJyutping }}</span>
+                  — tone <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
+                  <span v-if="row.confidence !== null" class="text-gray-500">
+                    (confidence {{ row.confidence }})
+                  </span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <p v-if="errorMessage" class="mt-4 rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
+          {{ errorMessage }}
+        </p>
+      </section>
+    </div>
   </main>
 </template>

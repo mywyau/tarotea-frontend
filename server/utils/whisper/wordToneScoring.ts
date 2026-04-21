@@ -24,6 +24,13 @@ export type ToneWordScore = {
     expected: string
     heard: string
   }>
+  detectedAcousticTones: Array<{
+    syllable: number
+    token: string
+    expectedTone: string
+    detectedTone: string | null
+    confidence: number | null
+  }>
 }
 
 function normalizeJyutping(raw: string): string {
@@ -60,11 +67,37 @@ function safeMean(values: number[]) {
   return values.reduce((sum, value) => sum + value, 0) / values.length
 }
 
+function scoreVeryShortContourForTone(tone: string, values: number[]) {
+  if (values.length < 2) return null
+
+  const start = values[0]
+  const end = values[values.length - 1]
+  const slope = clamp((end - start) / Math.max(start, 1), -0.25, 0.25)
+
+  if (tone === "2" || tone === "5") {
+    const risingBase = 52 + slope * 140
+    const downwardPenalty = slope < -0.02 ? 20 : 0
+    return clamp(risingBase - downwardPenalty, 15, 85)
+  }
+
+  if (tone === "4") {
+    return clamp(52 + (-slope) * 140 - (slope > 0.02 ? 16 : 0), 15, 85)
+  }
+
+  if (tone === "1" || tone === "3" || tone === "6") {
+    return clamp(58 - Math.abs(slope) * 180, 20, 86)
+  }
+
+  return clamp(50 - Math.abs(slope) * 120, 15, 82)
+}
+
 function scoreContourForTone(tone: string, contour: AcousticSyllableContour | undefined) {
   if (!contour?.values?.length) return null
 
   const values = contour.values.filter((v) => Number.isFinite(v) && v > 0)
-  if (values.length < 4) return null
+  if (values.length < 3) {
+    return scoreVeryShortContourForTone(tone, values)
+  }
 
   const start = values[0]
   const end = values[values.length - 1]
@@ -88,6 +121,22 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
   return null
 }
 
+function detectToneFromContour(contour: AcousticSyllableContour | undefined) {
+  if (!contour?.values?.length) return { detectedTone: null as string | null, confidence: null as number | null }
+  const values = contour.values.filter((v) => Number.isFinite(v) && v > 0)
+  if (values.length < 2) return { detectedTone: null as string | null, confidence: null as number | null }
+
+  const candidates = ["1", "2", "3", "4", "5", "6"] as const
+  const scored = candidates
+    .map((tone) => ({ tone, score: scoreContourForTone(tone, { values }) ?? 0 }))
+    .sort((a, b) => b.score - a.score)
+
+  const best = scored[0]
+  const second = scored[1]
+  const confidence = clamp(Math.round(best.score - second.score), 0, 100)
+  return { detectedTone: best.tone, confidence }
+}
+
 function aggregateSyllableScores(scores: number[], totalSyllables: number) {
   if (!scores.length) return null
 
@@ -107,10 +156,35 @@ function scoreAcousticTones(expectedTokens: string[], contours: AcousticSyllable
 
   for (let i = 0; i < expectedTokens.length; i++) {
     const tone = getTone(expectedTokens[i])
-    const contourScore = scoreContourForTone(tone, contours[i])
+    const contour = contours[i]
+    const contourScore = scoreContourForTone(tone, contour)
 
     if (typeof contourScore === "number") {
-      syllableScores.push(contourScore)
+      const detected = detectToneFromContour(contour)
+      let calibrated = contourScore
+
+      // If the best detected tone matches expected, avoid under-scoring strong but noisy contours.
+      if (detected.detectedTone === tone) {
+        const confidence = detected.confidence ?? 0
+        calibrated = Math.max(calibrated, 60 + Math.round(Math.min(confidence, 20) * 0.4))
+      }
+
+      // If contour is ambiguous (small confidence gap), reduce harsh penalties.
+      if (detected.detectedTone !== tone && detected.confidence !== null && detected.confidence <= 8) {
+        calibrated += 8
+      }
+
+      // Treat rising tones as a family for leniency on subtle rises (common in fluent speech).
+      if ((tone === "2" || tone === "5") && (detected.detectedTone === "2" || detected.detectedTone === "5")) {
+        calibrated = Math.max(calibrated, 62)
+      }
+
+      // Treat level tones as a family (1/3/6) where absolute register can vary by speaker.
+      if ((tone === "1" || tone === "3" || tone === "6") && (detected.detectedTone === "1" || detected.detectedTone === "3" || detected.detectedTone === "6")) {
+        calibrated = Math.max(calibrated, 58)
+      }
+
+      syllableScores.push(clamp(Math.round(calibrated), 0, 100))
     }
   }
 
@@ -224,7 +298,7 @@ function describeExpectedTone(tone: string) {
 
 function summarizeContourShape(contour: AcousticSyllableContour | undefined) {
   const values = (contour?.values ?? []).filter((v) => Number.isFinite(v) && v > 0)
-  if (values.length < 4) return null
+  if (values.length < 3) return null
 
   const start = values[0]
   const end = values[values.length - 1]
@@ -369,12 +443,24 @@ export function scoreWordToneAttempt(params: {
       matchType: "wrong",
       feedback: "No expected jyutping was provided.",
       toneErrors: [],
+      detectedAcousticTones: [],
     }
   }
 
   let soundMatches = 0
   let toneMatches = 0
   const toneErrors: ToneWordScore["toneErrors"] = []
+  const detectedAcousticTones: ToneWordScore["detectedAcousticTones"] = expectedTokens.map((token, idx) => {
+    const expectedTone = getTone(token)
+    const detected = detectToneFromContour((params.acousticContours ?? [])[idx])
+    return {
+      syllable: idx + 1,
+      token,
+      expectedTone,
+      detectedTone: detected.detectedTone,
+      confidence: detected.confidence,
+    }
+  })
 
   for (let i = 0; i < expectedTokens.length; i++) {
     const expected = expectedTokens[i]
@@ -454,9 +540,14 @@ export function scoreWordToneAttempt(params: {
     toneScore: toneScoreRaw,
   })
 
+  const boundedToneScore =
+    toneOnly && expectedTokens.length === 1 && referenceToneScore === null
+      ? Math.min(toneScore, 96)
+      : toneScore
+
   const overallScore = toneOnly
-    ? toneScore
-    : Math.round(clamp(soundScore * 0.7 + toneScore * 0.3, 0, 100))
+    ? boundedToneScore
+    : Math.round(clamp(soundScore * 0.7 + boundedToneScore * 0.3, 0, 100))
 
   const matchType: ToneWordScore["matchType"] =
     overallScore === 100
@@ -507,7 +598,7 @@ export function scoreWordToneAttempt(params: {
     expectedTokens,
     heardTokens,
     soundScore,
-    toneScore,
+    toneScore: boundedToneScore,
     textToneScore,
     acousticToneScore,
     referenceToneScore,
@@ -518,5 +609,6 @@ export function scoreWordToneAttempt(params: {
     matchType,
     feedback,
     toneErrors,
+    detectedAcousticTones,
   }
 }
