@@ -170,7 +170,7 @@ onMounted(loadData)
           <p class="stat-label">TaroKeys used</p>
           <p class="stat-value font-bold">{{ unlockSummary.creditsSpent }}</p>
         </div>
-      </div>
+      </section>
 
       <section class="rounded-lg border p-5 space-y-4"
         style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);">
