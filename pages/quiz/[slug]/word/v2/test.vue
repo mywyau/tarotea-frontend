@@ -671,7 +671,7 @@ onBeforeUnmount(() => {
 
             <div class="flex items-center gap-3 mb-6">
                 <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
-                    <div class="bg-blue-300 h-3 rounded-full transition-all duration-300"
+                    <div class="bg-blue-300 h-3 rounded-full transition-all duration-300 fluid-progress-fill"
                         :style="{ width: progressPercent + '%' }" />
                 </div>
 
@@ -689,7 +689,7 @@ onBeforeUnmount(() => {
                     <div class="min-h-[50px] space-y-3">
                         <div class="flex items-center justify-center gap-3">
                             <div class="w-32 h-1 bg-gray-200 rounded">
-                                <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                                <div class="h-1 bg-green-500 rounded transition-all duration-500 fluid-progress-fill"
                                     :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                             </div>
 

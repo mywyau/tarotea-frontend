@@ -711,7 +711,7 @@ onBeforeUnmount(() => {
             <div class="flex items-center max-w-xs mt-4">
               <div class="w-28 mr-2">
                 <div class="h-[3px] bg-gray-200 rounded">
-                  <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
+                  <div class="h-[3px] bg-green-500 rounded transition-all duration-500 fluid-progress-fill"
                     :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                 </div>
               </div>

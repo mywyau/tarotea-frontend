@@ -203,7 +203,7 @@ watchEffect(() => {
 
         <!-- Progress bar -->
         <div class="w-full max-w-xs mx-auto h-2 rounded-full overflow-hidden bg-gray-300">
-          <div class="h-2 bg-green-500 transition-all duration-700 ease-out" :style="{ width: masteryPercent + '%' }" />
+          <div class="h-2 bg-green-500 transition-all duration-700 ease-out fluid-progress-fill" :style="{ width: masteryPercent + '%' }" />
         </div>
       </div>
 

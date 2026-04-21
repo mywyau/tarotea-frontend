@@ -537,7 +537,7 @@ onUnmounted(() => {
             </span>
 
             <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-              <div class="h-2 bg-blue-300" :style="{ width: animatedPercent + '%' }" />
+              <div class="h-2 bg-blue-300 fluid-progress-fill" :style="{ width: animatedPercent + '%' }" />
             </div>
           </div>
 
@@ -547,7 +547,7 @@ onUnmounted(() => {
             </p>
 
             <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-              <div class="bg-red-500 h-2 transition-all duration-200 ease-out" :style="{ width: progress + '%' }" />
+              <div class="bg-red-500 h-2 transition-all duration-200 ease-out fluid-progress-fill" :style="{ width: progress + '%' }" />
             </div>
           </div>
 

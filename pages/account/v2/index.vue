@@ -200,7 +200,7 @@ watch(aiUsage, (val) => {
                                 <p>{{ animatedRemaining.toLocaleString() }} requests remaining</p>
 
                                 <div class="w-2/3 h-2 bg-gray-300 rounded overflow-hidden">
-                                    <div class="h-2 bg-blue-300 transition-[width] duration-500 ease-out"
+                                    <div class="h-2 bg-blue-300 transition-[width] duration-500 ease-out fluid-progress-fill"
                                         :style="{ width: animatedPercent + '%' }"></div>
                                 </div>
                             </template>

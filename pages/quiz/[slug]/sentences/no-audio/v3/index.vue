@@ -562,7 +562,7 @@ onBeforeUnmount(() => {
                                     :class="!answered && 'blur-md opacity-70 select-none'">
                                     <div class="flex items-center justify-center gap-3">
                                         <div class="w-32 h-1 bg-gray-200 rounded">
-                                            <div class="h-1 bg-green-500 rounded transition-all duration-500"
+                                            <div class="h-1 bg-green-500 rounded transition-all duration-500 fluid-progress-fill"
                                                 :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
                                         </div>
 
