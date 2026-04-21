@@ -34,6 +34,7 @@ type ToneApiResponse = {
 const PASS_SCORE = 40
 const NEAR_PERFECT_PASS_SCORE = 80
 const GOOD_JINGLE_MIN_SCORE = 30
+const JINGLE_DELAY_MS = 400
 const QUIZ_SIZE = 10
 
 const route = useRoute()
@@ -121,7 +122,7 @@ function shuffle<T>(arr: T[]) {
   const copy = [...arr]
   for (let i = copy.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1))
-    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+      ;[copy[i], copy[j]] = [copy[j], copy[i]]
   }
   return copy
 }
@@ -331,6 +332,10 @@ function stopRecording() {
   recording.value = false
 }
 
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 async function submitAttempt() {
   if (!started.value || finished.value || !currentWord.value) return
   if (!recordedBlob.value) {
@@ -365,6 +370,8 @@ async function submitAttempt() {
     lastToneScore.value = result.toneScore
     feedback.value = result.feedback
     detectedToneRows.value = result.detectedAcousticTones ?? []
+
+    await wait(JINGLE_DELAY_MS)
 
     if (result.toneScore < GOOD_JINGLE_MIN_SCORE) {
       playIncorrectJingle(0.5)
@@ -427,7 +434,8 @@ onBeforeUnmount(() => {
           10 words, untimed. Your total time is tracked and shown at the end.
         </p>
         <p class="mt-1 text-sm text-gray-600">
-          You can move to the next word after a strong attempt. We show qualitative feedback labels instead of numeric scores.
+          You can move to the next word after a strong attempt. We show qualitative feedback labels instead of numeric
+          scores.
         </p>
       </header>
 
@@ -442,8 +450,7 @@ onBeforeUnmount(() => {
           </p>
           <button
             class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
-            @click="startQuiz"
-          >
+            @click="startQuiz">
             Start Quiz
           </button>
         </div>
@@ -460,14 +467,14 @@ onBeforeUnmount(() => {
           </p>
           <button
             class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
-            @click="startQuiz"
-          >
+            @click="startQuiz">
             Restart
           </button>
         </div>
 
         <div v-else-if="currentWord" class="space-y-4">
-          <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-fuchsia-100 bg-fuchsia-50/60 p-3 text-sm text-gray-700">
+          <div
+            class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-fuchsia-100 bg-fuchsia-50/60 p-3 text-sm text-gray-700">
             <p>Progress: <span class="font-semibold text-gray-900">{{ progressLabel }}</span></p>
             <p>Passed: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}</p>
             <p>Elapsed: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span></p>
@@ -481,9 +488,7 @@ onBeforeUnmount(() => {
             <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-600">{{ currentWord.meaning }}</p>
             <button
               class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="submitting || !currentWordAudioUrl"
-              @click="playCurrentWordAudio"
-            >
+              :disabled="submitting || !currentWordAudioUrl" @click="playCurrentWordAudio">
               ▶ Play Chinese Audio
             </button>
           </div>
@@ -491,23 +496,17 @@ onBeforeUnmount(() => {
           <div class="flex flex-wrap gap-3">
             <button
               class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="recording || submitting"
-              @click="startRecording"
-            >
+              :disabled="recording || submitting" @click="startRecording">
               Start Recording
             </button>
             <button
               class="rounded-lg bg-[#F4C2D7] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="!recording || submitting"
-              @click="stopRecording"
-            >
+              :disabled="!recording || submitting" @click="stopRecording">
               Stop Recording
             </button>
             <button
               class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="recording || !recordedBlob || submitting"
-              @click="submitAttempt"
-            >
+              :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
               {{ submitting ? "Scoring..." : "Check Tone" }}
             </button>
           </div>
@@ -524,10 +523,12 @@ onBeforeUnmount(() => {
               <span class="text-gray-500"> (need above threshold to continue)</span>
             </p>
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
-            <div v-if="detectedToneDisplayRows.length" class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
+            <div v-if="detectedToneDisplayRows.length"
+              class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
               <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
               <p class="mt-1 text-xs text-gray-500">
-                Detected tone is diagnostic. Final score also checks how closely your pitch shape matches the target contour.
+                Detected tone is diagnostic. Final score also checks how closely your pitch shape matches the target
+                contour.
               </p>
               <ul class="mt-2 space-y-1 text-sm text-gray-700">
                 <li v-for="row in detectedToneDisplayRows" :key="`tone-row-${row.syllable}`">
