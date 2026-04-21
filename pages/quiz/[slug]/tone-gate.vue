@@ -608,6 +608,13 @@ onBeforeUnmount(() => {
               <span class="text-gray-500"> (need above threshold to continue)</span>
             </p>
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
+            <div class="mt-3">
+              <button
+                class="rounded-lg bg-[#CDE8C9] px-3 py-2 text-xs font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                :disabled="submitting || recording" @click="goToNextWord">
+                Next Word
+              </button>
+            </div>
             <div v-if="detectedToneDisplayRows.length"
               class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
               <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
