@@ -395,6 +395,7 @@ function applySingleWordToneFloor(params: {
   expectedTokens: string[]
   acousticContours?: AcousticSyllableContour[]
   toneScore: number
+  detectedAcousticTones?: ToneWordScore["detectedAcousticTones"]
 }) {
   if (!params.toneOnly || params.expectedTokens.length !== 1) {
     return params.toneScore
@@ -406,7 +407,23 @@ function applySingleWordToneFloor(params: {
 
   if ((tone === "2" || tone === "5") && shape && shape.direction !== "falling") {
     // Single rising tones like lei2/caang2 can be naturally subtle.
-    return Math.max(params.toneScore, 72)
+    return Math.max(params.toneScore, 74)
+  }
+
+  const detected = params.detectedAcousticTones?.[0]
+  if (!detected || detected.detectedTone !== tone) {
+    return params.toneScore
+  }
+
+  const confidence = detected.confidence ?? 0
+  const isLevelFamily = tone === "1" || tone === "3" || tone === "6"
+
+  if (confidence >= 12) {
+    return Math.max(params.toneScore, isLevelFamily ? 74 : 76)
+  }
+
+  if (confidence >= 4) {
+    return Math.max(params.toneScore, isLevelFamily ? 70 : 72)
   }
 
   return params.toneScore
@@ -538,6 +555,7 @@ export function scoreWordToneAttempt(params: {
     expectedTokens,
     acousticContours: params.acousticContours,
     toneScore: toneScoreRaw,
+    detectedAcousticTones,
   })
 
   const boundedToneScore =

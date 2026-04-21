@@ -513,13 +513,6 @@ onBeforeUnmount(() => {
     <div class="mx-auto max-w-3xl px-4 py-10">
       <header class="mb-6">
         <h1 class="text-3xl font-bold">Tone Gate Quiz</h1>
-        <p class="mt-2 text-sm text-gray-600">
-          10 words, untimed. Your total time is tracked and shown at the end.
-        </p>
-        <p class="mt-1 text-sm text-gray-600">
-          You can move to the next word after a strong attempt. We show qualitative feedback labels instead of numeric
-          scores.
-        </p>
       </header>
 
       <section class="rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm sm:p-6">
@@ -528,7 +521,7 @@ onBeforeUnmount(() => {
           Failed to load quiz data. Please refresh and try again.
         </div>
         <div v-else-if="!started">
-          <p class="text-sm text-gray-600">
+          <p class="text-base text-gray-600">
             Press start to begin a {{ QUIZ_SIZE }}-word pronunciation challenge.
           </p>
           <button
