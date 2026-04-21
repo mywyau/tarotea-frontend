@@ -319,7 +319,7 @@ async function runToneCheck() {
     })
 
     if (result.value.toneScore < GOOD_JINGLE_MIN_SCORE) {
-      playToneFailJingle(0.5)
+      playIncorrectJingle(0.5)
     } else if (result.value.toneScore < NEAR_PERFECT_PASS_SCORE) {
       playGoodJingle(0.55)
     } else {
