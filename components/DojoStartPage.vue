@@ -11,6 +11,7 @@ const props = defineProps<{
   startLabel: string
   xpRules: XpRule[]
   tips: string[]
+  keyboardSetupTips?: string[]
 }>()
 </script>
 
@@ -27,14 +28,25 @@ const props = defineProps<{
       </NuxtLink>
     </section>
 
-    <section class="start-card text-left space-y-4">
-      <h2 class="panel-title">XP breakdown</h2>
-      <ul class="panel-list space-y-2">
-        <li v-for="rule in props.xpRules" :key="`${rule.action}-${rule.xp}`" class="panel-item">
-          <span>{{ rule.action }}</span>
-          <strong>{{ rule.xp }}</strong>
-        </li>
-      </ul>
+    <section class="start-card text-left">
+      <details class="dropdown" open>
+        <summary class="panel-title">XP breakdown</summary>
+        <ul class="panel-list space-y-2 mt-3">
+          <li v-for="rule in props.xpRules" :key="`${rule.action}-${rule.xp}`" class="panel-item">
+            <span>{{ rule.action }}</span>
+            <strong>{{ rule.xp }}</strong>
+          </li>
+        </ul>
+      </details>
+    </section>
+
+    <section v-if="props.keyboardSetupTips?.length" class="start-card text-left">
+      <details class="dropdown">
+        <summary class="panel-title">Keyboard setup</summary>
+        <ul class="tips-list mt-3">
+          <li v-for="tip in props.keyboardSetupTips" :key="tip">{{ tip }}</li>
+        </ul>
+      </details>
     </section>
 
     <section class="start-card text-left space-y-4">
@@ -90,9 +102,25 @@ const props = defineProps<{
 }
 
 .panel-title {
+  cursor: pointer;
+  list-style: none;
   font-size: 0.92rem;
   font-weight: 700;
   color: #111827;
+}
+
+.panel-title::-webkit-details-marker {
+  display: none;
+}
+
+.panel-title::after {
+  content: '▾';
+  float: right;
+  color: rgba(17, 24, 39, 0.55);
+}
+
+.dropdown[open] .panel-title::after {
+  transform: rotate(180deg);
 }
 
 .panel-list,

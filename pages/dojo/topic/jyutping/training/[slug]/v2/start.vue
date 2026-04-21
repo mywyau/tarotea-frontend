@@ -26,8 +26,11 @@ const topicTitle = computed(() =>
       { action: 'Correct answer (hint used)', xp: `+${jyutpingXpHintUsed} XP` },
       { action: 'Wrong answer', xp: '0 XP (retry until correct)' }
     ]"
+    :keyboard-setup-tips="[
+      'Keep an English keyboard active so typing tone numbers is fast and consistent.',
+      'If available, enable keyboard shortcut switching so you can quickly return to number input.'
+    ]"
     :tips="[
-      'Keyboard tip: keep an English keyboard active so typing tone numbers is fast and consistent.',
       'Hinted answers still count but award lower XP than no-hint answers.',
       'Use repetition: replay difficult words and target smooth, low-friction typing.'
     ]"

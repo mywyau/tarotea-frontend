@@ -24,8 +24,11 @@ const levelNumber = computed(() => levelIdToNumbers(slug.value) ?? slug.value)
       { action: 'Correct answer (hint used)', xp: `+${jyutpingXpHintUsed} XP` },
       { action: 'Wrong answer', xp: '0 XP (retry until correct)' }
     ]"
+    :keyboard-setup-tips="[
+      'Set up a quick toggle to an English keyboard so number keys (1-6) are easy to type for tones.',
+      'On mobile, keep the number row visible (or long-press access) before starting for smoother flow.'
+    ]"
     :tips="[
-      'Keyboard tip: set up a quick toggle to an English keyboard so number keys (1-6) are easy to type for tones.',
       'Hints reveal Jyutping and reduce XP for that word, so save hints for tougher words.',
       'You can type without spaces and keep moving — speed + repetition helps lock patterns in.'
     ]"
