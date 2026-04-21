@@ -35,7 +35,7 @@ const PASS_SCORE = 40
 const NEAR_PERFECT_PASS_SCORE = 80
 const GOOD_JINGLE_MIN_SCORE = 30
 const JINGLE_DELAY_MS = 400
-const SUCCESS_MESSAGE_MS = 900
+const SUCCESS_MESSAGE_MS = 20000
 const QUIZ_SIZE = 10
 
 const route = useRoute()
