@@ -13,7 +13,7 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong,
 } from "@/utils/sounds"
-import { computed, onMounted, ref, watch } from "vue"
+import { computed, onMounted, onUnmounted, ref, watch } from "vue"
 import type { DailyWord } from "~/types/daily/DailyItem"
 import { brandColours } from "~/utils/branding/helpers"
 import { shuffleFisherYates } from "~/utils/shuffle"
@@ -102,6 +102,11 @@ const currentXp = ref(0)
 const currentStreak = ref(0)
 const answerLog = ref<DailyAnswer[]>([])
 const tileColors = ref<string[]>([])
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
 
 const animatedAccuracy = ref(0)
 const animatedXpEarned = ref(0)
@@ -142,6 +147,59 @@ const resultMeta = computed(() => {
   return { title: "Keep practicing" }
 })
 
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function resetTimer() {
+  stopTimer()
+  quizStartedAt.value = null
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`
+}
+
+const displayedElapsedMs = computed(() => frozenElapsedMs.value ?? elapsedMs.value)
+
+const formattedElapsedTime = computed(() => {
+  if (quizStartedAt.value === null && frozenElapsedMs.value === null) {
+    return "--"
+  }
+
+  return formatDuration(displayedElapsedMs.value)
+})
+
 const completionTiles = computed(() => [
   {
     label: "Correct",
@@ -161,6 +219,12 @@ const completionTiles = computed(() => [
     suffix: "XP",
     className: "result-2",
     prefix: animatedXpEarned.value > 0 ? "+" : "",
+  },
+  {
+    label: "Time",
+    value: formattedElapsedTime.value,
+    suffix: "",
+    className: "result-3",
   },
 ])
 
@@ -320,6 +384,7 @@ async function loadDailySession() {
     currentIndex.value = 0
     answerLog.value = []
     resetQuestionUi()
+    resetTimer()
     syncQuestionProgressFromServer()
     generateTileColors()
 
@@ -331,6 +396,10 @@ async function loadDailySession() {
       }
 
       return
+    }
+
+    if (session.questions.length > 0) {
+      startTimer()
     }
   } catch (err) {
     console.error("Failed to load daily session", err)
@@ -362,6 +431,7 @@ async function submitAnswers() {
     backgroundStatus.value = submit.status
 
     await sleep(1300)
+    freezeTimer()
 
     showCompleteView.value = true
     playCompletionSound()
@@ -429,6 +499,7 @@ watch(
   visible => {
     if (!visible || completionAnimated.value) return
 
+    freezeTimer()
     completionAnimated.value = true
     animateCount(animatedAccuracy, percentage.value, 2200)
     animateCount(animatedXpEarned, xpToday.value, 1000)
@@ -445,6 +516,10 @@ watch(
 
 onMounted(async () => {
   await loadDailySession()
+})
+
+onUnmounted(() => {
+  stopTimer()
 })
 </script>
 

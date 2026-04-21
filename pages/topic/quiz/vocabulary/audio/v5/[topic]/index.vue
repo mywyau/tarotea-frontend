@@ -4,7 +4,7 @@ definePageMeta({
     ssr: false,
 })
 
-import { computed, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue'
 
 import {
     playCorrectJingle,
@@ -160,10 +160,68 @@ const wordProgressMap = ref<Record<string, WordProgress>>({})
 const initialProgressMap = ref<Record<string, WordProgress>>({})
 
 const tileColors = ref<string[]>([])
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
 
 const STREAK_CAP = 5
 const WRONG_PENALTY = -12
 const MIN_CALCULATING_MS = 1500
+
+function stopTimer() {
+    if (timerInterval) {
+        clearInterval(timerInterval)
+        timerInterval = null
+    }
+}
+
+function startTimer() {
+    stopTimer()
+    quizStartedAt.value = Date.now()
+    elapsedMs.value = 0
+    frozenElapsedMs.value = null
+
+    timerInterval = setInterval(() => {
+        if (quizStartedAt.value !== null) {
+            elapsedMs.value = Date.now() - quizStartedAt.value
+        }
+    }, 250)
+}
+
+function freezeTimer() {
+    if (quizStartedAt.value === null) return
+
+    const finalMs = Date.now() - quizStartedAt.value
+    elapsedMs.value = finalMs
+    frozenElapsedMs.value = finalMs
+    stopTimer()
+}
+
+function resetTimer() {
+    stopTimer()
+    quizStartedAt.value = null
+    elapsedMs.value = 0
+    frozenElapsedMs.value = null
+}
+
+function formatDuration(ms: number) {
+    const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+    const minutes = Math.floor(totalSeconds / 60)
+    const seconds = totalSeconds % 60
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => frozenElapsedMs.value ?? elapsedMs.value)
+
+const formattedElapsedTime = computed(() => {
+    if (quizStartedAt.value === null && frozenElapsedMs.value === null) {
+        return '--'
+    }
+
+    return formatDuration(displayedElapsedMs.value)
+})
 
 function generateTileColors() {
     tileColors.value = shuffleFisherYates(brandColours).slice(0, 4)
@@ -199,6 +257,7 @@ function resetQuizState() {
     currentXp.value = null
     currentStreak.value = null
     xpDelta.value = null
+    resetTimer()
     resetFinalizeState()
 }
 
@@ -244,6 +303,7 @@ async function loadQuiz() {
         currentXp.value = firstId
             ? (res.progressMap[firstId]?.xp ?? 0)
             : 0
+        startTimer()
     } catch (err) {
         console.error('Load topic audio quiz failed', err)
         quizLoadError.value = 'Could not load audio quiz.'
@@ -373,6 +433,12 @@ const completionTiles = computed(() => [
         suffix: 'XP',
         className: 'result-2',
         prefix: animatedXpEarned.value > 0 ? '+' : ''
+    },
+    {
+        label: 'Time',
+        value: formattedElapsedTime.value,
+        suffix: '',
+        className: 'result-3'
     }
 ])
 
@@ -449,6 +515,7 @@ async function finalizeAudioQuiz() {
         }
 
         totalXpEarned.value = calculateQuizXpEarned()
+        freezeTimer()
         finalizeCompleted.value = true
 
         console.info('Finalize topic audio quiz succeeded', {
@@ -531,6 +598,10 @@ watch(
     },
     { immediate: true }
 )
+
+onUnmounted(() => {
+    stopTimer()
+})
 </script>
 
 
