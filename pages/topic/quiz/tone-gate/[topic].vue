@@ -545,7 +545,7 @@ onBeforeUnmount(() => {
             <h3 class="text-sm font-semibold text-gray-900">Before you start</h3>
             <ul class="mt-2 space-y-1 text-sm text-gray-700">
               <li>• Make sure you are in a quiet area and can speak clearly.</li>
-              <li>• Make sure there is no microhpone obstructions.</li>
+              <li>• Make sure there are no microhpone obstructions.</li>
               <li>• Use “Skip” if you are struggling with a word.</li>
             </ul>
           </section>
