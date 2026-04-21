@@ -94,7 +94,7 @@ const canEnterLevel = (level: any) => {
           </NuxtLink>
 
           <NuxtLink :to="`/quiz/${quizLevel.id}/tone-gate`" class="level-btn level-btn-green">
-            Tone Gate (Timed)
+            Tone Gate
           </NuxtLink>
         </div>
 
