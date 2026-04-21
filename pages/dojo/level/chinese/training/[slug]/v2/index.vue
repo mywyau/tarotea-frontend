@@ -665,7 +665,7 @@ onBeforeUnmount(() => {
 
             <div class="flex items-center gap-2">
               <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
-                ⏱ {{ formattedElapsedTime }}
+                {{ formattedElapsedTime }}
               </span>
               <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
             </div>
