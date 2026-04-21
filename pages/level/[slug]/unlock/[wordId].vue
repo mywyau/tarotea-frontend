@@ -14,6 +14,7 @@ const wordId = route.params.wordId as string
 
 const loading = ref(false)
 const errorMessage = ref('')
+const hasLoaded = ref(false)
 
 const unlockSummary = ref({
   totalXp: 0,
@@ -88,6 +89,8 @@ async function loadData() {
     word.value = await $fetch(wordApiPath)
   } catch {
     errorMessage.value = 'Failed to load unlock details.'
+  } finally {
+    hasLoaded.value = true
   }
 }
 
@@ -139,126 +142,128 @@ onMounted(loadData)
       </p>
     </header>
 
-    <section v-if="word" class="rounded-lg text-center">
-      <p class="word-label">Tile</p>
-      <h2 class="word-text mt-2">{{ word.word }}</h2>
-      <p v-if="word.jyutping" class="word-jyutping mt-2">{{ word.jyutping }}</p>
-      <p v-if="word.meaning" class="word-meaning font-bold mt-3">{{ word.meaning }}</p>
-    </section>
+    <template v-if="hasLoaded && word">
+      <section class="rounded-lg text-center">
+        <p class="word-label">Tile</p>
+        <h2 class="word-text mt-2">{{ word.word }}</h2>
+        <p v-if="word.jyutping" class="word-jyutping mt-2">{{ word.jyutping }}</p>
+        <p v-if="word.meaning" class="word-meaning font-bold mt-3">{{ word.meaning }}</p>
+      </section>
 
-    <section class="stats-grid">
-      <div class="stat-card page-card rounded-xl stat-0">
-        <p class="stat-label">Total XP</p>
-        <p class="stat-value font-bold">{{ unlockSummary.totalXp }}</p>
-      </div>
+      <section class="stats-grid">
+        <div class="stat-card page-card rounded-xl stat-0">
+          <p class="stat-label">Total XP</p>
+          <p class="stat-value font-bold">{{ unlockSummary.totalXp }}</p>
+        </div>
 
-      <div class="stat-card page-card rounded-lg stat-3">
-        <p class="stat-label">XP until next key</p>
-        <p class="stat-value font-bold">{{ xpUntilNextKey }}</p>
-      </div>
+        <div class="stat-card page-card rounded-lg stat-3">
+          <p class="stat-label">XP until next key</p>
+          <p class="stat-value font-bold">{{ xpUntilNextKey }}</p>
+        </div>
 
-      <div class="stat-card page-card rounded-lg stat-1">
-        <p class="stat-label">TaroKeys available</p>
-        <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
-      </div>
+        <div class="stat-card page-card rounded-lg stat-1">
+          <p class="stat-label">TaroKeys available</p>
+          <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
+        </div>
 
-      <div class="stat-card page-card rounded-lg stat-2">
-        <p class="stat-label">TaroKeys used</p>
-        <p class="stat-value font-bold">{{ unlockSummary.creditsSpent }}</p>
-      </div>
-    </section>
+        <div class="stat-card page-card rounded-lg stat-2">
+          <p class="stat-label">TaroKeys used</p>
+          <p class="stat-value font-bold">{{ unlockSummary.creditsSpent }}</p>
+        </div>
+      </section>
 
-    <div v-if="errorMessage" class="error-card page-card rounded-lg">
+      <section class="rounded-lg border p-5 space-y-4"
+        style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <h2 class="text-base font-semibold text-gray-900">Unlock tile</h2>
+
+            <p class="mt-4 text-sm text-gray-700">
+              Unlock this tile permanently by using
+              <span class="font-semibold">1 TaroKey</span>.
+            </p>
+          </div>
+
+          <span class="text-xs font-semibold text-gray-900 rounded-lg px-3 py-1 bg-blue-300/80">
+            Permanent
+          </span>
+        </div>
+
+        <div class="space-y-2 text-sm text-gray-700">
+          <p>This tile will be added to your permanent study pool.</p>
+        </div>
+
+        <div class="progress-card rounded-lg px-4 py-4 space-y-3">
+          <div class="flex items-center justify-between gap-3 text-sm">
+            <p class="text-gray-700 font-semibold">Next TaroKey</p>
+            <p class="text-gray-600">
+              <span class="font-semibold">{{ xpTowardsNextKey }}</span>
+              / {{ xpNeededForOneTaroKey }} xp
+            </p>
+          </div>
+
+          <div class="progress-track">
+            <div class="progress-fill" :style="{ width: `${xpProgressPercent}%` }" />
+          </div>
+
+          <p class="text-sm text-gray-600">
+            <span class="font-semibold">{{ xpUntilNextKey }} xp</span>
+            until your next key
+          </p>
+        </div>
+
+        <div class="pt-2">
+          <button v-if="!showUnlockPanel" type="button"
+            class="w-full rounded-lg py-3 font-semibold border border-black/10 text-gray-900 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="loading || unlockSummary.creditsAvailable < 1" @click="openUnlockPanel">
+            Show unlock options
+          </button>
+
+          <Transition name="reveal-panel">
+            <div v-if="showUnlockPanel" class="space-y-4">
+              <div class="rounded-lg border px-4 py-3 text-sm text-gray-800 bg-white/75 border-black/10">
+                <p>
+                  Spend <span class="font-semibold">1 TaroKey</span> to unlock
+                  <span class="font-semibold">{{ word?.word ?? 'this tile' }}</span>?
+                </p>
+
+                <p class="mt-2 text-gray-600">
+                  You currently have
+                  <span class="font-semibold">{{ unlockSummary.creditsAvailable }}</span>
+                  TaroKey<span v-if="unlockSummary.creditsAvailable !== 1">s</span> available.
+                </p>
+              </div>
+
+              <div v-if="errorMessage" class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+                {{ errorMessage }}
+              </div>
+
+              <div class="flex flex-col gap-2 sm:flex-row">
+                <button type="button"
+                  class="confirm-btn-blush w-full rounded-lg py-3 font-semibold hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  :disabled="loading || unlockSummary.creditsAvailable < 1" @click="unlockWord">
+                  {{ loading ? 'Unlocking…' : 'Confirm unlock' }}
+                </button>
+
+                <button type="button"
+                  class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
+                  :disabled="loading" @click="closeUnlockPanel">
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Transition>
+
+          <p v-if="unlockSummary.creditsAvailable < 1" class="helper-text mt-3">
+            You do not have enough TaroKeys yet.
+          </p>
+        </div>
+      </section>
+    </template>
+
+    <div v-else-if="hasLoaded && errorMessage" class="error-card page-card rounded-lg">
       {{ errorMessage }}
     </div>
-
-    <section class="rounded-lg border p-5 space-y-4"
-      style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h2 class="text-base font-semibold text-gray-900">Unlock tile</h2>
-
-          <p class="mt-4 text-sm text-gray-700">
-            Unlock this tile permanently by using
-            <span class="font-semibold">1 TaroKey</span>.
-          </p>
-        </div>
-
-        <span class="text-xs font-semibold text-gray-900 rounded-lg px-3 py-1 bg-blue-300/80">
-          Permanent
-        </span>
-      </div>
-
-      <div class="space-y-2 text-sm text-gray-700">
-        <p>This tile will be added to your permanent study pool.</p>
-      </div>
-
-      <div class="progress-card rounded-lg px-4 py-4 space-y-3">
-        <div class="flex items-center justify-between gap-3 text-sm">
-          <p class="text-gray-700 font-semibold">Next TaroKey</p>
-          <p class="text-gray-600">
-            <span class="font-semibold">{{ xpTowardsNextKey }}</span>
-            / {{ xpNeededForOneTaroKey }} xp
-          </p>
-        </div>
-
-        <div class="progress-track">
-          <div class="progress-fill" :style="{ width: `${xpProgressPercent}%` }" />
-        </div>
-
-        <p class="text-sm text-gray-600">
-          <span class="font-semibold">{{ xpUntilNextKey }} xp</span>
-          until your next key
-        </p>
-      </div>
-
-      <div class="pt-2">
-        <button v-if="!showUnlockPanel" type="button"
-          class="w-full rounded-lg py-3 font-semibold border border-black/10 text-gray-900 bg-white/70 backdrop-blur hover:bg-white transition disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="loading || unlockSummary.creditsAvailable < 1" @click="openUnlockPanel">
-          Show unlock options
-        </button>
-
-        <Transition name="reveal-panel">
-          <div v-if="showUnlockPanel" class="space-y-4">
-            <div class="rounded-lg border px-4 py-3 text-sm text-gray-800 bg-white/75 border-black/10">
-              <p>
-                Spend <span class="font-semibold">1 TaroKey</span> to unlock
-                <span class="font-semibold">{{ word?.word ?? 'this tile' }}</span>?
-              </p>
-
-              <p class="mt-2 text-gray-600">
-                You currently have
-                <span class="font-semibold">{{ unlockSummary.creditsAvailable }}</span>
-                TaroKey<span v-if="unlockSummary.creditsAvailable !== 1">s</span> available.
-              </p>
-            </div>
-
-            <div v-if="errorMessage" class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
-              {{ errorMessage }}
-            </div>
-
-            <div class="flex flex-col gap-2 sm:flex-row">
-              <button type="button"
-                class="confirm-btn-blush w-full rounded-lg py-3 font-semibold hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
-                :disabled="loading || unlockSummary.creditsAvailable < 1" @click="unlockWord">
-                {{ loading ? 'Unlocking…' : 'Confirm unlock' }}
-              </button>
-
-              <button type="button"
-                class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
-                :disabled="loading" @click="closeUnlockPanel">
-                Cancel
-              </button>
-            </div>
-          </div>
-        </Transition>
-
-        <p v-if="unlockSummary.creditsAvailable < 1" class="helper-text mt-3">
-          You do not have enough TaroKeys yet.
-        </p>
-      </div>
-    </section>
 
   </main>
 </template>
