@@ -86,6 +86,26 @@ const currentWordAudioUrl = computed(() => {
   const id = currentWord.value?.id
   return id ? `${cdnBase}/audio/${id}.mp3` : ""
 })
+
+function stripToneDigit(token: string) {
+  return token.replace(/[1-6]$/, "")
+}
+
+const detectedToneDisplayRows = computed(() => {
+  const rows = detectedToneRows.value ?? []
+  const chars = Array.from(currentWord.value?.word ?? "")
+  const hasOneToOneChars = chars.length === rows.length
+
+  return rows.map((row, idx) => {
+    const base = stripToneDigit(row.token)
+    const heardJyutping = row.detectedTone ? `${base}${row.detectedTone}` : `${base}?`
+    return {
+      ...row,
+      character: hasOneToOneChars ? chars[idx] : null,
+      heardJyutping,
+    }
+  })
+})
 const lastToneLabel = computed(() => {
   if (lastToneScore.value === null) return ""
   if (lastToneScore.value <= PASS_SCORE) return "not quite"
@@ -491,14 +511,16 @@ onBeforeUnmount(() => {
               <span class="text-gray-500"> (need above threshold to continue)</span>
             </p>
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
-            <div v-if="detectedToneRows?.length" class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
+            <div v-if="detectedToneDisplayRows.length" class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
               <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
               <ul class="mt-2 space-y-1 text-sm text-gray-700">
-                <li v-for="row in detectedToneRows" :key="`tone-row-${row.syllable}`">
-                  <span class="font-medium">Syllable {{ row.syllable }}</span>
-                  <span class="text-gray-500"> ({{ row.token }})</span>:
-                  expected tone {{ row.expectedTone || "?" }}, detected
-                  <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
+                <li v-for="row in detectedToneDisplayRows" :key="`tone-row-${row.syllable}`">
+                  <span class="font-medium">
+                    {{ row.character ? `Character ${row.character}` : `Syllable ${row.syllable}` }}
+                  </span>
+                  <span class="text-gray-500"> (target {{ row.token }})</span>:
+                  heard <span class="font-semibold">{{ row.heardJyutping }}</span>
+                  — tone <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
                   <span v-if="row.confidence !== null" class="text-gray-500">
                     (confidence {{ row.confidence }})
                   </span>
