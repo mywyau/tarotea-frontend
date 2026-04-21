@@ -512,6 +512,8 @@ onBeforeUnmount(() => {
 <template>
   <main class="min-h-screen text-gray-900">
     <div class="mx-auto max-w-3xl px-4 py-10">
+      <BackLink />
+
       <header class="mb-6">
         <h1 class="text-3xl font-bold">Echo Gecko</h1>
       </header>
@@ -521,31 +523,60 @@ onBeforeUnmount(() => {
         <div v-else-if="error" class="rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
           Failed to load quiz data. Please refresh and try again.
         </div>
-        <div v-else-if="!started">
-          <p class="text-base text-gray-600">
-            Press start to begin a {{ quizSize }} word pronunciation challenge.
-          </p>
+        <div v-else-if="!started" class="space-y-6 text-center">
+          <div class="space-y-2">
+            <p class="text-xs uppercase tracking-[0.2em] text-gray-500">
+              Pronunciation Challenge
+            </p>
+            <h2 class="text-2xl font-semibold text-gray-900">
+              Ready to start Echo Gecko?
+            </h2>
+            <p class="text-sm text-gray-600">
+              Complete {{ quizSize }} words and pass each pronunciation attempt to finish.
+            </p>
+          </div>
+
           <button
-            class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
+            class="w-full rounded-xl bg-[#A8CAE0] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
             @click="startQuiz">
-            Start Quiz
+            Start pronunciation quiz
           </button>
+
+          <section class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4 text-left">
+            <h3 class="text-sm font-semibold text-gray-900">Before you start</h3>
+            <ul class="mt-2 space-y-1 text-sm text-gray-700">
+              <li>• Pass a word with a score above {{ PASS_SCORE }} to count it.</li>
+              <li>• Use “Next” if your latest attempt was successful.</li>
+              <li>• Use “Skip” to move on without counting a pass.</li>
+            </ul>
+          </section>
         </div>
 
-        <div v-else-if="finished" class="space-y-3">
-          <h2 class="text-xl font-semibold">
-            Quiz complete!
-          </h2>
-          <p class="text-sm text-gray-700">
-            Passed words: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ quizSize }}
-          </p>
-          <p class="text-sm text-gray-700">
-            Total time: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span>
-          </p>
+        <div v-else-if="finished" class="space-y-6">
+          <div class="rounded-2xl border border-fuchsia-100 bg-fuchsia-50/60 p-5 text-center">
+            <p class="text-xs uppercase tracking-[0.2em] text-fuchsia-700">Quiz Complete</p>
+            <h2 class="mt-2 text-2xl font-semibold text-gray-900">Nice work!</h2>
+            <p class="mt-2 text-sm text-gray-700">
+              You passed <span class="font-semibold text-emerald-700">{{ passedCount }}</span> out of
+              <span class="font-semibold text-gray-900">{{ quizSize }}</span> words.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-center">
+              <p class="text-xs uppercase tracking-[0.18em] text-emerald-700">Passed Words</p>
+              <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ passedCount }} / {{ quizSize }}</p>
+            </div>
+            <div class="rounded-xl border border-fuchsia-100 bg-white p-4 text-center">
+              <p class="text-xs uppercase tracking-[0.18em] text-fuchsia-700">Total Time</p>
+              <p class="mt-2 text-2xl font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</p>
+            </div>
+          </div>
+
           <button
-            class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
+            class="w-full rounded-xl bg-[#A8CAE0] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
             @click="startQuiz">
-            Restart
+            Play again
           </button>
         </div>
 
