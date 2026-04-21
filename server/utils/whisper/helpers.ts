@@ -10,6 +10,14 @@ export function normalizeChinese(input: string) {
   return (input || "").replace(/[，。！？、,.!?\s]/g, "").trim();
 }
 
+export function normalizeRomanized(input: string) {
+  return (input || "")
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+}
+
 export function levenshtein(a: string, b: string): number {
   const dp = Array.from({ length: a.length + 1 }, () =>
     Array(b.length + 1).fill(0),
@@ -94,9 +102,25 @@ export function buildResult(params: {
 }) {
   const expected = normalizeChinese(params.expectedChinese);
   const heard = normalizeChinese(params.transcript);
+  const heardRomanized = normalizeRomanized(params.transcript);
+  const expectedRomanized = normalizeRomanized(params.expectedJyutping);
   const sim = similarity(expected, heard);
   const confidence = confidenceLabel(params.avgLogprob);
-  const unit = "phrase";
+  const unit = expected.length <= 2 ? "word" : "phrase";
+
+  if (
+    containsLatinLetters(params.transcript) &&
+    heardRomanized &&
+    expectedRomanized &&
+    heardRomanized === expectedRomanized
+  ) {
+    return {
+      score: 96,
+      matchType: "romanized-match",
+      confidence,
+      feedback: `Nice, I heard a correct romanized reading (${params.expectedJyutping}). Try saying it again as Cantonese Chinese characters for the best check.`,
+    };
+  }
 
   if (containsLatinLetters(params.transcript)) {
     return {
@@ -142,6 +166,19 @@ export function buildResult(params: {
       matchType: "exact",
       confidence,
       feedback: `Nice, I heard exactly “${params.expectedChinese}”. That means your ${unit} was perfectly understood. Keep aiming for something similar to this.`,
+    };
+  }
+
+  if (
+    expected.length === 1 &&
+    heard.length === 1 &&
+    confidence !== "low"
+  ) {
+    return {
+      score: Math.max(score, 72),
+      matchType: "single-char-homophone",
+      confidence,
+      feedback: `Close. I heard “${params.transcript}” while the target was “${params.expectedChinese}”. For single-character words, this is often a homophone mix-up, so you're likely very close.`,
     };
   }
 
