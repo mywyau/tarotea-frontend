@@ -407,20 +407,12 @@ async function runToneCheck() {
             <dd>{{ result.acousticToneScore ?? "n/a" }}</dd>
           </div>
           <div>
-            <dt class="text-gray-500">Reference Match Score</dt>
-            <dd>{{ result.referenceToneScore ?? "n/a" }}</dd>
-          </div>
-          <div>
             <dt class="text-gray-500">Final Tone Score</dt>
             <dd>{{ result.toneScore }}</dd>
           </div>
           <div>
             <dt class="text-gray-500">Overall Score</dt>
             <dd>{{ result.overallScore }}</dd>
-          </div>
-          <div>
-            <dt class="text-gray-500">Match Type</dt>
-            <dd>{{ result.matchType }}</dd>
           </div>
         </dl>
 
