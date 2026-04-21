@@ -525,7 +525,7 @@ onBeforeUnmount(() => {
         </div>
         <div v-else-if="!started">
           <p class="text-base text-gray-600">
-            Press start to begin a {{ quizSize }}-word pronunciation challenge.
+            Press start to begin a {{ quizSize }} word pronunciation challenge.
           </p>
           <button
             class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
