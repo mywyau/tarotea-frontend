@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { playCorrectJingle } from "~/utils/sounds"
+import { playCorrectJingle, playGoodJingle, playToneFailJingle } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: "logged-in",
@@ -54,6 +54,7 @@ const referenceAudioUrl = computed(() => {
 })
 
 const NEAR_PERFECT_PASS_SCORE = 80
+const GOOD_JINGLE_MIN_SCORE = 30
 
 const recording = ref(false)
 const loading = ref(false)
@@ -317,7 +318,11 @@ async function runToneCheck() {
       },
     })
 
-    if (result.value.toneScore >= NEAR_PERFECT_PASS_SCORE) {
+    if (result.value.toneScore < GOOD_JINGLE_MIN_SCORE) {
+      playToneFailJingle(0.5)
+    } else if (result.value.toneScore < NEAR_PERFECT_PASS_SCORE) {
+      playGoodJingle(0.55)
+    } else {
       playCorrectJingle(0.85)
     }
   } catch (error: any) {
