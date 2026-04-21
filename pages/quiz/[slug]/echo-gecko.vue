@@ -573,7 +573,7 @@ onBeforeUnmount(() => {
               <p class="stat-value">{{ passedCount }}</p>
             </div>
             <div class="stat-card result-1 text-center">
-              <p class="stat-label">Missed Words</p>
+              <p class="stat-label">Skipped Words</p>
               <p class="stat-value">{{ missedCount }}</p>
             </div>
             <div class="stat-card result-2 text-center">
