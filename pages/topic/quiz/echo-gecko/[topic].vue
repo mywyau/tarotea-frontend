@@ -481,6 +481,17 @@ const formattedElapsedTime = computed(() => {
   const seconds = elapsedSeconds.value % 60
   return `${minutes}:${seconds.toString().padStart(2, "0")}`
 })
+const missedCount = computed(() => Math.max(0, quizSize.value - passedCount.value))
+const passPercentage = computed(() => {
+  if (!quizSize.value) return 0
+  return Math.round((passedCount.value / quizSize.value) * 100)
+})
+const resultTitle = computed(() => {
+  if (passPercentage.value >= 90) return "Perfect"
+  if (passPercentage.value >= 70) return "Great job"
+  if (passPercentage.value >= 50) return "Nice try"
+  return "Keep practicing"
+})
 
 watch(rapidMode, (enabled) => {
   if (!enabled) return
@@ -552,20 +563,24 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-else-if="finished" class="space-y-6">
-          <div class="stat-card hero-card result-2 text-center">
+          <div class="stat-card hero-card result-3 text-center">
             <p class="stat-label">Quiz Complete</p>
-            <h2 class="hero-title">Great job!</h2>
-            <p class="hero-subtext">You cleared {{ passedCount }} out of {{ quizSize }} words.</p>
+            <h2 class="hero-title">{{ resultTitle }}</h2>
+            <p class="hero-score">{{ passPercentage }}%</p>
           </div>
 
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6">
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
             <div class="stat-card result-3 text-center">
               <p class="stat-label">Passed Words</p>
-              <p class="stat-value text-emerald-700">{{ passedCount }} / {{ quizSize }}</p>
+              <p class="stat-value">{{ passedCount }}</p>
+            </div>
+            <div class="stat-card result-1 text-center">
+              <p class="stat-label">Skipped Words</p>
+              <p class="stat-value">{{ missedCount }}</p>
             </div>
             <div class="stat-card result-2 text-center">
               <p class="stat-label">Total Time</p>
-              <p class="stat-value text-fuchsia-700">{{ formattedElapsedTime }}</p>
+              <p class="stat-value">{{ formattedElapsedTime }}</p>
             </div>
           </div>
 
@@ -684,60 +699,71 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .stat-card {
-  border-radius: 1rem;
-  border: 1px solid rgba(255, 255, 255, 0.55);
-  padding: 1rem;
-  backdrop-filter: blur(8px);
-  box-shadow: 0 20px 40px -30px rgba(79, 70, 229, 0.45);
-  transition: transform 0.18s ease, filter 0.18s ease;
+  border-radius: 22px;
+  padding: 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
-  filter: brightness(1.03);
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
 }
 
 .stat-label {
+  font-size: 0.7rem;
   text-transform: uppercase;
-  letter-spacing: 0.16em;
-  font-size: 0.66rem;
-  font-weight: 700;
-  color: rgba(55, 65, 81, 0.72);
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
 }
 
 .stat-value {
-  margin-top: 0.5rem;
-  font-size: 1.9rem;
+  font-size: 1.2rem;
   font-weight: 700;
-  line-height: 1.05;
+  margin-top: 0.75rem;
   color: #111827;
 }
 
 .hero-card {
-  padding: clamp(1.1rem, 3.1vw, 1.8rem);
+  padding: 2rem 1.5rem;
 }
 
 .hero-title {
-  margin-top: 0.5rem;
-  font-size: clamp(1.45rem, 2.8vw, 2rem);
-  line-height: 1.15;
+  font-size: 1.75rem;
   font-weight: 700;
+  margin-top: 0.35rem;
+  color: #111827;
+}
+
+.hero-score {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 600;
+  margin-top: 0.9rem;
   color: #111827;
 }
 
 .hero-subtext {
-  margin-top: 0.75rem;
+  margin-top: 0.65rem;
   font-size: 0.95rem;
-  color: rgba(31, 41, 55, 0.75);
+  color: rgba(17, 24, 39, 0.68);
+}
+
+.result-0 {
+  background: rgba(168, 202, 224, 0.45);
+}
+
+.result-1 {
+  background: rgba(246, 225, 225, 0.75);
 }
 
 .result-2 {
-  background: linear-gradient(120deg, rgba(216, 180, 254, 0.24), rgba(168, 202, 224, 0.3));
-  border-color: rgba(168, 139, 250, 0.3);
+  background: rgba(244, 205, 39, 0.35);
 }
 
 .result-3 {
-  background: linear-gradient(120deg, rgba(196, 255, 205, 0.3), rgba(205, 232, 201, 0.24));
-  border-color: rgba(16, 185, 129, 0.22);
+  background: rgba(168, 224, 182, 0.45);
 }
 </style>

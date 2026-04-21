@@ -480,6 +480,17 @@ const formattedElapsedTime = computed(() => {
   const seconds = elapsedSeconds.value % 60
   return `${minutes}:${seconds.toString().padStart(2, "0")}`
 })
+const missedCount = computed(() => Math.max(0, quizSize.value - passedCount.value))
+const passPercentage = computed(() => {
+  if (!quizSize.value) return 0
+  return Math.round((passedCount.value / quizSize.value) * 100)
+})
+const resultTitle = computed(() => {
+  if (passPercentage.value >= 90) return "Perfect"
+  if (passPercentage.value >= 70) return "Great job"
+  if (passPercentage.value >= 50) return "Nice try"
+  return "Keep practicing"
+})
 
 watch(rapidMode, (enabled) => {
   if (!enabled) return
@@ -550,23 +561,24 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-else-if="finished" class="space-y-6">
-          <div class="rounded-2xl border border-fuchsia-100 bg-fuchsia-50/60 p-5 text-center">
-            <p class="text-xs uppercase tracking-[0.2em] text-fuchsia-700">Quiz Complete</p>
-            <h2 class="mt-2 text-2xl font-semibold text-gray-900">Nice work!</h2>
-            <p class="mt-2 text-sm text-gray-700">
-              You passed <span class="font-semibold text-emerald-700">{{ passedCount }}</span> out of
-              <span class="font-semibold text-gray-900">{{ quizSize }}</span> words.
-            </p>
+          <div class="stat-card hero-card result-3 text-center">
+            <p class="stat-label">Quiz Complete</p>
+            <h2 class="hero-title">{{ resultTitle }}</h2>
+            <p class="hero-score">{{ passPercentage }}%</p>
           </div>
 
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div class="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-center">
-              <p class="text-xs uppercase tracking-[0.18em] text-emerald-700">Passed Words</p>
-              <p class="mt-2 text-2xl font-semibold text-emerald-700">{{ passedCount }} / {{ quizSize }}</p>
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
+            <div class="stat-card result-3 text-center">
+              <p class="stat-label">Passed Words</p>
+              <p class="stat-value">{{ passedCount }}</p>
             </div>
-            <div class="rounded-xl border border-fuchsia-100 bg-white p-4 text-center">
-              <p class="text-xs uppercase tracking-[0.18em] text-fuchsia-700">Total Time</p>
-              <p class="mt-2 text-2xl font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</p>
+            <div class="stat-card result-1 text-center">
+              <p class="stat-label">Skipped Words</p>
+              <p class="stat-value">{{ missedCount }}</p>
+            </div>
+            <div class="stat-card result-2 text-center">
+              <p class="stat-label">Total Time</p>
+              <p class="stat-value">{{ formattedElapsedTime }}</p>
             </div>
           </div>
 
@@ -688,3 +700,64 @@ onBeforeUnmount(() => {
     </div>
   </main>
 </template>
+
+<style scoped>
+.stat-card {
+  border-radius: 22px;
+  padding: 1.5rem;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.stat-value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 0.75rem;
+  color: #111827;
+}
+
+.hero-card {
+  padding: 2rem 1.5rem;
+}
+
+.hero-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 0.35rem;
+  color: #111827;
+}
+
+.hero-score {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: 600;
+  margin-top: 0.9rem;
+  color: #111827;
+}
+
+.result-1 {
+  background: rgba(246, 225, 225, 0.75);
+}
+
+.result-2 {
+  background: rgba(244, 205, 39, 0.35);
+}
+
+.result-3 {
+  background: rgba(168, 224, 182, 0.45);
+}
+</style>
