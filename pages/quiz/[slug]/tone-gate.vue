@@ -84,6 +84,7 @@ const recorderMimeType = ref("audio/webm")
 const mediaRecorder = ref<MediaRecorder | null>(null)
 const streamRef = ref<MediaStream | null>(null)
 let audioChunks: Blob[] = []
+const activeAttemptId = ref(0)
 
 let timerInterval: ReturnType<typeof setInterval> | null = null
 let currentWordAudio: HTMLAudioElement | null = null
@@ -181,6 +182,11 @@ function advanceToNextWord(options?: { countAsPass?: boolean }) {
   feedback.value = ""
   lastToneScore.value = null
   detectedToneRows.value = []
+}
+
+function invalidateActiveAttempt() {
+  activeAttemptId.value += 1
+  submitting.value = false
 }
 
 function stopTracks() {
@@ -405,6 +411,9 @@ async function submitAttempt() {
   }
 
   submitting.value = true
+  const attemptId = activeAttemptId.value + 1
+  activeAttemptId.value = attemptId
+  const wordIdAtSubmit = currentWord.value.id
   errorMessage.value = ""
   feedback.value = ""
   successMessage.value = ""
@@ -425,6 +434,7 @@ async function submitAttempt() {
       body: form,
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
+    if (attemptId !== activeAttemptId.value || currentWord.value?.id !== wordIdAtSubmit) return
 
     lastToneScore.value = result.toneScore
     feedback.value = result.feedback
@@ -432,6 +442,7 @@ async function submitAttempt() {
 
     if (!rapidMode.value) {
       await wait(JINGLE_DELAY_MS)
+      if (attemptId !== activeAttemptId.value || currentWord.value?.id !== wordIdAtSubmit) return
     }
 
     if (result.toneScore < GOOD_JINGLE_MIN_SCORE) {
@@ -448,6 +459,7 @@ async function submitAttempt() {
       if (!rapidMode.value) {
         successMessage.value = "✅ Nice pronunciation — moving to the next word!"
         await waitForNextWord(SUCCESS_MESSAGE_MS)
+        if (attemptId !== activeAttemptId.value || currentWord.value?.id !== wordIdAtSubmit) return
       }
 
       advanceToNextWord({ countAsPass: true })
@@ -456,7 +468,9 @@ async function submitAttempt() {
     console.error("[tone-gate] submit failed", err)
     errorMessage.value = "Could not score your pronunciation. Please try again."
   } finally {
-    submitting.value = false
+    if (attemptId === activeAttemptId.value) {
+      submitting.value = false
+    }
   }
 }
 
@@ -473,11 +487,15 @@ watch(rapidMode, (enabled) => {
 })
 
 function goToNextWord() {
+  if (recording.value) stopRecording()
+  invalidateActiveAttempt()
   const hasPassingAttempt = lastToneScore.value !== null && lastToneScore.value > PASS_SCORE
   advanceToNextWord({ countAsPass: hasPassingAttempt })
 }
 
 function skipWord() {
+  if (recording.value) stopRecording()
+  invalidateActiveAttempt()
   advanceToNextWord({ countAsPass: false })
 }
 
@@ -576,12 +594,12 @@ onBeforeUnmount(() => {
             </button>
             <button
               class="rounded-lg bg-[#CDE8C9] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="submitting || recording" @click="goToNextWord">
+              @click="goToNextWord">
               Next
             </button>
             <button
               class="rounded-lg bg-[#F6D8B8] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="submitting || recording" @click="skipWord">
+              @click="skipWord">
               Skip
             </button>
             <label class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
@@ -611,7 +629,7 @@ onBeforeUnmount(() => {
             <div class="mt-3">
               <button
                 class="rounded-lg bg-[#CDE8C9] px-3 py-2 text-xs font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-                :disabled="submitting || recording" @click="goToNextWord">
+                @click="goToNextWord">
                 Next Word
               </button>
             </div>
