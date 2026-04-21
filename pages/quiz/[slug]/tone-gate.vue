@@ -158,6 +158,31 @@ function resetRecordingState() {
   recordingUrl.value = null
 }
 
+function advanceToNextWord(options?: { countAsPass?: boolean }) {
+  if (!started.value || finished.value) return
+
+  if (options?.countAsPass) {
+    passedCount.value += 1
+  }
+
+  if (currentIndex.value >= QUIZ_SIZE - 1) {
+    finished.value = true
+    if (startedAtMs.value) {
+      elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+    }
+    stopTimer()
+  } else {
+    currentIndex.value += 1
+  }
+
+  clearNextWordCountdown()
+  resetRecordingState()
+  successMessage.value = ""
+  feedback.value = ""
+  lastToneScore.value = null
+  detectedToneRows.value = []
+}
+
 function stopTracks() {
   streamRef.value?.getTracks().forEach((track) => track.stop())
   streamRef.value = null
@@ -425,25 +450,7 @@ async function submitAttempt() {
         await waitForNextWord(SUCCESS_MESSAGE_MS)
       }
 
-      passedCount.value += 1
-
-      if (currentIndex.value >= QUIZ_SIZE - 1) {
-        finished.value = true
-        if (startedAtMs.value) {
-          elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
-        }
-        stopTimer()
-      } else {
-        currentIndex.value += 1
-      }
-
-      resetRecordingState()
-      successMessage.value = ""
-      if (!finished.value) {
-        feedback.value = ""
-        lastToneScore.value = null
-        detectedToneRows.value = []
-      }
+      advanceToNextWord({ countAsPass: true })
     }
   } catch (err) {
     console.error("[tone-gate] submit failed", err)
@@ -464,6 +471,15 @@ watch(rapidMode, (enabled) => {
   clearNextWordCountdown()
   successMessage.value = ""
 })
+
+function goToNextWord() {
+  const hasPassingAttempt = lastToneScore.value !== null && lastToneScore.value > PASS_SCORE
+  advanceToNextWord({ countAsPass: hasPassingAttempt })
+}
+
+function skipWord() {
+  advanceToNextWord({ countAsPass: false })
+}
 
 onBeforeUnmount(() => {
   stopTimer()
@@ -557,6 +573,16 @@ onBeforeUnmount(() => {
               class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
               {{ submitting ? "Scoring..." : "Check Tone" }}
+            </button>
+            <button
+              class="rounded-lg bg-[#CDE8C9] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="submitting || recording" @click="goToNextWord">
+              Next
+            </button>
+            <button
+              class="rounded-lg bg-[#F6D8B8] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="submitting || recording" @click="skipWord">
+              Skip
             </button>
             <label class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
               <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-fuchsia-300 text-fuchsia-600" />
