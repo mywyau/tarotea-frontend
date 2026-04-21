@@ -223,9 +223,9 @@ watchEffect(() => {
       <div class="flex items-center justify-center gap-3 pt-1">
 
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
-          size="lg" />
+          size="lg" class="tone-gate-play-btn" />
 
-        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip"
+        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write"
           aria-label="Practice writing this word">
           ✏️ Write
         </NuxtLink>
@@ -287,18 +287,19 @@ watchEffect(() => {
           <div class="space-y-3">
             <div class="flex justify-end">
               <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`" class="action-chip action-chip-sm"
+                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`" class="action-chip action-chip-sm action-chip-write"
                   aria-label="Practice writing this sentence">
                   ✏️ Write
                 </NuxtLink>
 
                 <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
-                  class="action-chip action-chip-sm" aria-label="Practice pronunciation for this sentence">
+                  class="action-chip action-chip-sm action-chip-speak" aria-label="Practice pronunciation for this sentence">
                   ▶ Speak
                 </NuxtLink>
 
                 <AudioButton v-if="word.audio?.examples?.[index]"
-                  :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm" />
+                  :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm"
+                  class="tone-gate-play-btn" />
               </div>
             </div>
 
@@ -388,9 +389,39 @@ watchEffect(() => {
   background: #f9fafb;
 }
 
+.action-chip-write {
+  border-color: transparent;
+  background: #A8CAE0;
+}
+
+.action-chip-write:hover {
+  background: #b7d4e7;
+  border-color: transparent;
+}
+
+.action-chip-speak {
+  border-color: transparent;
+  background: #F4C2D7;
+}
+
+.action-chip-speak:hover {
+  background: #f6cde0;
+  border-color: transparent;
+}
+
 .action-chip-sm {
   font-size: 0.75rem;
   padding: 0.3rem 0.55rem;
+}
+
+:deep(.tone-gate-play-btn) {
+  border-color: transparent !important;
+  background: #D6A3D1 !important;
+}
+
+:deep(.tone-gate-play-btn:hover) {
+  background: #deafda !important;
+  border-color: transparent !important;
 }
 
 .edge-arrow {
