@@ -164,6 +164,13 @@ onMounted(async () => {
                         Audio Only Sentences
                     </NuxtLink>
 
+
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/tone-gate/${topic.id}` : undefined"
+                        class="topic-btn topic-btn-green col-span-2"
+                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
+                        Tone Gate
+                    </NuxtLink>
+
                 </div>
 
                 <p v-if="!canEnterTopic(topic)" class="text-xs text-center text-gray-500 pt-3">
@@ -304,6 +311,15 @@ onMounted(async () => {
 
 .topic-btn-blush:hover {
     background: rgb(204, 136, 136);
+}
+
+.topic-btn-green {
+    background: rgba(205, 232, 201, 0.7);
+    color: #1f2937;
+}
+
+.topic-btn-green:hover {
+    background: rgba(192, 223, 188, 0.85);
 }
 
 .pagination-wrapper {
