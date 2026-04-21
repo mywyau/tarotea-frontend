@@ -16,20 +16,18 @@ const topicTitle = computed(() =>
 </script>
 
 <template>
-  <DojoStartPage
-    :heading="`${topicTitle} · Chinese dojo`"
+  <DojoStartPage :heading="`${topicTitle} · Chinese dojo`"
     description="Type Chinese words from this topic based on meanings to strengthen practical recall."
-    :start-to="`/dojo/topic/chinese/training/${slug}/v2`"
-    start-label="Start chinese exercise"
-    :xp-rules="[
+    :start-to="`/dojo/topic/chinese/training/${slug}/v2`" start-label="Start chinese exercise" :xp-rules="[
       { action: 'Correct answer (no hint)', xp: `+${chineseXp} XP` },
       { action: 'Correct answer (hint used)', xp: `+${chineseXpHintUsed} XP` },
       { action: 'Wrong answer', xp: '0 XP (retry until correct)' }
-    ]"
-    :tips="[
+    ]" :keyboard-setup-tips="[
+      'Set up or change to a Chinese based keyboard.',
+    ]" :tips="[
+      'You must answer in Chinese. Make sure the keyboard board is setup appropriately.',
       'Listen to word audio whenever available to link meaning, sound, and character form.',
-      'Hints can save a run, but they reduce XP for that answer.',
-      'Aim for complete sessions to reinforce a full topic in one pass.'
-    ]"
-  />
+      'Hints can speed up a run, but they reduce XP for that answer.',
+      'Aim for complete sessions to reinforce a full topic in one pass and to be awarded the xp.'
+    ]" />
 </template>
