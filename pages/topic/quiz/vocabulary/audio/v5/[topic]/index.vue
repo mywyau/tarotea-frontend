@@ -4,7 +4,7 @@ definePageMeta({
     ssr: false,
 })
 
-import { computed, onUnmounted, ref, watch } from 'vue'
+import { computed, onUnmounted, ref, watch } from 'vue';
 
 import {
     playCorrectJingle,
@@ -12,10 +12,10 @@ import {
     playQuizCompleteFailSong,
     playQuizCompleteFanfareSong,
     playQuizCompleteOkaySong
-} from '@/utils/sounds'
+} from '@/utils/sounds';
 
-import { brandColours } from '~/utils/branding/helpers'
 import { masteryXp } from '@/config/xp/helpers';
+import { brandColours } from '~/utils/branding/helpers';
 
 type TopicWord = {
     id: string
@@ -428,18 +428,19 @@ const completionTiles = computed(() => [
         className: 'result-1'
     },
     {
+        label: 'Time',
+        value: formattedElapsedTime.value,
+        suffix: '',
+        className: 'result-3'
+    },
+    {
         label: 'XP Earned',
         value: animatedXpEarned.value,
         suffix: 'XP',
         className: 'result-2',
         prefix: animatedXpEarned.value > 0 ? '+' : ''
     },
-    {
-        label: 'Time',
-        value: formattedElapsedTime.value,
-        suffix: '',
-        className: 'result-3'
-    }
+
 ])
 
 async function answer(index: number) {
@@ -773,10 +774,6 @@ onUnmounted(() => {
 
                             <p class="hero-score">
                                 {{ animatedAccuracy }}%
-                            </p>
-
-                            <p class="hero-subtext">
-                                {{ score }} / {{ questions.length }} correct
                             </p>
                         </div>
                     </transition>
