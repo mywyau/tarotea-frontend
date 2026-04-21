@@ -31,9 +31,9 @@ type ToneApiResponse = {
   }>
 }
 
-const PASS_SCORE = 40
-const NEAR_PERFECT_PASS_SCORE = 80
-const GOOD_JINGLE_MIN_SCORE = 30
+const PASS_SCORE = 25
+const NEAR_PERFECT_PASS_SCORE = 60
+const GOOD_JINGLE_MIN_SCORE = 25
 const JINGLE_DELAY_MS = 400
 const SUCCESS_MESSAGE_MS = 20000
 const QUIZ_SIZE = 10
