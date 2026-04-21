@@ -223,14 +223,15 @@ watchEffect(() => {
       <div class="flex items-center justify-center gap-3 pt-1">
 
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
-          size="lg" class="tone-gate-play-btn" />
+          size="md" class="tone-gate-play-btn" />
 
         <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write"
           aria-label="Practice writing this word">
           ✏️ Write
         </NuxtLink>
 
-        <NuxtLink :to="`/tone-forge/${word.id}`" class="action-chip" aria-label="Open tone checker for this word">
+        <NuxtLink :to="`/tone-forge/${word.id}`" class="action-chip action-chip-tone-forge"
+          aria-label="Open tone checker for this word">
           Tone Forge
         </NuxtLink>
       </div>
@@ -406,6 +407,16 @@ watchEffect(() => {
 
 .action-chip-speak:hover {
   background: #f6cde0;
+  border-color: transparent;
+}
+
+.action-chip-tone-forge {
+  border-color: transparent;
+  background: #CDE8C9;
+}
+
+.action-chip-tone-forge:hover {
+  background: #d8edd4;
   border-color: transparent;
 }
 
