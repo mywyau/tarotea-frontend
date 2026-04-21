@@ -103,15 +103,15 @@ const canEnterLevel = (level: any) => {
 
         <!-- Buttons -->
         <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/dojo/level/jyutping/training/${quizLevel.id}/v2`" class="level-btn level-btn-purple">
+          <NuxtLink :to="`/dojo/level/jyutping/training/${quizLevel.id}/v2/start`" class="level-btn level-btn-purple">
             Jyutping only
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/level/chinese/training/${quizLevel.id}/v2`" class="level-btn level-btn-blue">
+          <NuxtLink :to="`/dojo/level/chinese/training/${quizLevel.id}/v2/start`" class="level-btn level-btn-blue">
             Chinese only
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}/v2`"
+          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}/v2/start`"
             class="level-btn level-btn-blush col-span-2">
             Sentences Chinese Only
           </NuxtLink>

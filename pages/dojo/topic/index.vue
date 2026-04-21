@@ -97,15 +97,15 @@ const paginatedTopics = computed(() => {
         </div>
 
         <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/dojo/topic/jyutping/training/${quizTopic.id}/v2`" class="topic-btn topic-btn-purple">
+          <NuxtLink :to="`/dojo/topic/jyutping/training/${quizTopic.id}/v2/start`" class="topic-btn topic-btn-purple">
             Jyutping only
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/topic/chinese/training/${quizTopic.id}/v2`" class="topic-btn topic-btn-blue">
+          <NuxtLink :to="`/dojo/topic/chinese/training/${quizTopic.id}/v2/start`" class="topic-btn topic-btn-blue">
             Chinese only
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/topic/sentences/chinese/${quizTopic.id}/v2`"
+          <NuxtLink :to="`/dojo/topic/sentences/chinese/${quizTopic.id}/v2/start`"
             class="topic-btn topic-btn-blush col-span-2">
             Sentences Chinese Only
           </NuxtLink>
