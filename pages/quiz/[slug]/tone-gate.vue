@@ -31,9 +31,9 @@ type ToneApiResponse = {
   }>
 }
 
-const PASS_SCORE = 40
-const NEAR_PERFECT_PASS_SCORE = 80
-const GOOD_JINGLE_MIN_SCORE = 30
+const PASS_SCORE = 25
+const NEAR_PERFECT_PASS_SCORE = 60
+const GOOD_JINGLE_MIN_SCORE = 25
 const JINGLE_DELAY_MS = 400
 const SUCCESS_MESSAGE_MS = 20000
 const QUIZ_SIZE = 10
@@ -75,6 +75,8 @@ const feedback = ref("")
 const successMessage = ref("")
 const lastToneScore = ref<number | null>(null)
 const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
+const nextWordCountdownMs = ref<number | null>(null)
+const rapidMode = ref(false)
 
 const recordedBlob = ref<Blob | null>(null)
 const recordingUrl = ref<string | null>(null)
@@ -82,9 +84,11 @@ const recorderMimeType = ref("audio/webm")
 const mediaRecorder = ref<MediaRecorder | null>(null)
 const streamRef = ref<MediaStream | null>(null)
 let audioChunks: Blob[] = []
+const activeAttemptId = ref(0)
 
 let timerInterval: ReturnType<typeof setInterval> | null = null
 let currentWordAudio: HTMLAudioElement | null = null
+let nextWordCountdownInterval: ReturnType<typeof setInterval> | null = null
 
 const currentWord = computed(() => quizWords.value[currentIndex.value] ?? null)
 const progressLabel = computed(() => `${Math.min(currentIndex.value + 1, QUIZ_SIZE)} / ${QUIZ_SIZE}`)
@@ -120,6 +124,11 @@ const lastToneLabel = computed(() => {
   return "perfect"
 })
 
+const nextWordCountdownSeconds = computed(() => {
+  if (nextWordCountdownMs.value === null) return null
+  return Math.max(0, Math.ceil(nextWordCountdownMs.value / 1000))
+})
+
 function shuffle<T>(arr: T[]) {
   const copy = [...arr]
   for (let i = copy.length - 1; i > 0; i--) {
@@ -136,10 +145,48 @@ function stopTimer() {
   }
 }
 
+function clearNextWordCountdown() {
+  if (nextWordCountdownInterval) {
+    clearInterval(nextWordCountdownInterval)
+    nextWordCountdownInterval = null
+  }
+  nextWordCountdownMs.value = null
+}
+
 function resetRecordingState() {
   recordedBlob.value = null
   if (recordingUrl.value) URL.revokeObjectURL(recordingUrl.value)
   recordingUrl.value = null
+}
+
+function advanceToNextWord(options?: { countAsPass?: boolean }) {
+  if (!started.value || finished.value) return
+
+  if (options?.countAsPass) {
+    passedCount.value += 1
+  }
+
+  if (currentIndex.value >= QUIZ_SIZE - 1) {
+    finished.value = true
+    if (startedAtMs.value) {
+      elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+    }
+    stopTimer()
+  } else {
+    currentIndex.value += 1
+  }
+
+  clearNextWordCountdown()
+  resetRecordingState()
+  successMessage.value = ""
+  feedback.value = ""
+  lastToneScore.value = null
+  detectedToneRows.value = []
+}
+
+function invalidateActiveAttempt() {
+  activeAttemptId.value += 1
+  submitting.value = false
 }
 
 function stopTracks() {
@@ -340,6 +387,18 @@ function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+async function waitForNextWord(ms: number) {
+  clearNextWordCountdown()
+  const endsAt = Date.now() + ms
+  nextWordCountdownMs.value = ms
+  nextWordCountdownInterval = setInterval(() => {
+    nextWordCountdownMs.value = Math.max(0, endsAt - Date.now())
+  }, 100)
+
+  await wait(ms)
+  clearNextWordCountdown()
+}
+
 async function submitAttempt() {
   if (!started.value || finished.value || !currentWord.value) return
   if (!recordedBlob.value) {
@@ -352,9 +411,13 @@ async function submitAttempt() {
   }
 
   submitting.value = true
+  const attemptId = activeAttemptId.value + 1
+  activeAttemptId.value = attemptId
+  const wordIdAtSubmit = currentWord.value.id
   errorMessage.value = ""
   feedback.value = ""
   successMessage.value = ""
+  clearNextWordCountdown()
 
   try {
     const expectedTokens = tokenizeJyutping(currentWord.value.jyutping)
@@ -371,12 +434,16 @@ async function submitAttempt() {
       body: form,
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     })
+    if (attemptId !== activeAttemptId.value || currentWord.value?.id !== wordIdAtSubmit) return
 
     lastToneScore.value = result.toneScore
     feedback.value = result.feedback
     detectedToneRows.value = result.detectedAcousticTones ?? []
 
-    await wait(JINGLE_DELAY_MS)
+    if (!rapidMode.value) {
+      await wait(JINGLE_DELAY_MS)
+      if (attemptId !== activeAttemptId.value || currentWord.value?.id !== wordIdAtSubmit) return
+    }
 
     if (result.toneScore < GOOD_JINGLE_MIN_SCORE) {
       playIncorrectJingle(0.5)
@@ -389,34 +456,21 @@ async function submitAttempt() {
         playCorrectJingle(0.85)
       }
 
-      successMessage.value = "✅ Nice pronunciation — moving to the next word!"
-      await wait(SUCCESS_MESSAGE_MS)
-
-      passedCount.value += 1
-
-      if (currentIndex.value >= QUIZ_SIZE - 1) {
-        finished.value = true
-        if (startedAtMs.value) {
-          elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
-        }
-        stopTimer()
-      } else {
-        currentIndex.value += 1
+      if (!rapidMode.value) {
+        successMessage.value = "✅ Nice pronunciation — moving to the next word!"
+        await waitForNextWord(SUCCESS_MESSAGE_MS)
+        if (attemptId !== activeAttemptId.value || currentWord.value?.id !== wordIdAtSubmit) return
       }
 
-      resetRecordingState()
-      successMessage.value = ""
-      if (!finished.value) {
-        feedback.value = ""
-        lastToneScore.value = null
-        detectedToneRows.value = []
-      }
+      advanceToNextWord({ countAsPass: true })
     }
   } catch (err) {
     console.error("[tone-gate] submit failed", err)
     errorMessage.value = "Could not score your pronunciation. Please try again."
   } finally {
-    submitting.value = false
+    if (attemptId === activeAttemptId.value) {
+      submitting.value = false
+    }
   }
 }
 
@@ -426,8 +480,28 @@ const formattedElapsedTime = computed(() => {
   return `${minutes}:${seconds.toString().padStart(2, "0")}`
 })
 
+watch(rapidMode, (enabled) => {
+  if (!enabled) return
+  clearNextWordCountdown()
+  successMessage.value = ""
+})
+
+function goToNextWord() {
+  if (recording.value) stopRecording()
+  invalidateActiveAttempt()
+  const hasPassingAttempt = lastToneScore.value !== null && lastToneScore.value > PASS_SCORE
+  advanceToNextWord({ countAsPass: hasPassingAttempt })
+}
+
+function skipWord() {
+  if (recording.value) stopRecording()
+  invalidateActiveAttempt()
+  advanceToNextWord({ countAsPass: false })
+}
+
 onBeforeUnmount(() => {
   stopTimer()
+  clearNextWordCountdown()
   stopTracks()
   if (recordingUrl.value) URL.revokeObjectURL(recordingUrl.value)
   currentWordAudio?.pause()
@@ -518,11 +592,28 @@ onBeforeUnmount(() => {
               :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
               {{ submitting ? "Scoring..." : "Check Tone" }}
             </button>
+            <button
+              class="rounded-lg bg-[#CDE8C9] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              @click="goToNextWord">
+              Next
+            </button>
+            <button
+              class="rounded-lg bg-[#F6D8B8] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              @click="skipWord">
+              Skip
+            </button>
+            <label class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
+              <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-fuchsia-300 text-fuchsia-600" />
+              Rapid mode (skip pause only)
+            </label>
           </div>
 
           <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
-          <p v-if="successMessage" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+          <p v-if="successMessage && !rapidMode" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
             {{ successMessage }}
+            <span v-if="nextWordCountdownSeconds !== null" class="ml-1">
+              (next word in {{ nextWordCountdownSeconds }}s)
+            </span>
           </p>
           <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
 
@@ -535,6 +626,13 @@ onBeforeUnmount(() => {
               <span class="text-gray-500"> (need above threshold to continue)</span>
             </p>
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
+            <div class="mt-3">
+              <button
+                class="rounded-lg bg-[#CDE8C9] px-3 py-2 text-xs font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                @click="goToNextWord">
+                Next Word
+              </button>
+            </div>
             <div v-if="detectedToneDisplayRows.length"
               class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
               <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
