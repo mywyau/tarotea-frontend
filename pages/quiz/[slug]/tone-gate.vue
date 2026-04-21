@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { playCorrectJingle } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: ["logged-in", "level-quiz-access"],
@@ -31,6 +32,7 @@ type ToneApiResponse = {
 }
 
 const PASS_SCORE = 40
+const NEAR_PERFECT_PASS_SCORE = 80
 const QUIZ_SIZE = 10
 
 const route = useRoute()
@@ -364,6 +366,10 @@ async function submitAttempt() {
     detectedToneRows.value = result.detectedAcousticTones ?? []
 
     if (result.toneScore > PASS_SCORE) {
+      if (result.toneScore >= NEAR_PERFECT_PASS_SCORE) {
+        playCorrectJingle(0.85)
+      }
+
       passedCount.value += 1
 
       if (currentIndex.value >= QUIZ_SIZE - 1) {
