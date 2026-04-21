@@ -55,7 +55,7 @@ const referenceAudioUrl = computed(() => {
 
 const NEAR_PERFECT_PASS_SCORE = 80
 const GOOD_JINGLE_MIN_SCORE = 30
-const JINGLE_DELAY_MS = 180
+const JINGLE_DELAY_MS = 400
 
 const recording = ref(false)
 const loading = ref(false)
@@ -359,33 +359,25 @@ async function runToneCheck() {
         <div class="mt-4 flex flex-wrap gap-3">
           <button
             class="rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-            :disabled="!referenceAudioUrl"
-            @click="playReferenceAudio"
-          >
+            :disabled="!referenceAudioUrl" @click="playReferenceAudio">
             ▶ Play Reference Audio
           </button>
 
           <button
             class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-            :disabled="recording || loading || !expectedJyutping"
-            @click="startRecording"
-          >
+            :disabled="recording || loading || !expectedJyutping" @click="startRecording">
             Start Recording
           </button>
 
           <button
             class="rounded-lg bg-[#F4C2D7] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-            :disabled="!recording || loading"
-            @click="stopRecording"
-          >
+            :disabled="!recording || loading" @click="stopRecording">
             Stop
           </button>
 
           <button
             class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-            :disabled="recording || !recordedBlob || loading || !expectedJyutping"
-            @click="runToneCheck"
-          >
+            :disabled="recording || !recordedBlob || loading || !expectedJyutping" @click="runToneCheck">
             {{ loading ? "Checking..." : "Run Tone Check" }}
           </button>
         </div>
@@ -395,12 +387,7 @@ async function runToneCheck() {
 
         <p v-if="recording" class="mt-2 text-sm text-amber-700">Recording... speak now.</p>
 
-        <audio
-          v-if="recordingUrl"
-          class="mt-3 w-full"
-          controls
-          :src="recordingUrl"
-        />
+        <audio v-if="recordingUrl" class="mt-3 w-full" controls :src="recordingUrl" />
 
         <p v-if="errorMessage" class="mt-3 rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
           {{ errorMessage }}
@@ -411,18 +398,37 @@ async function runToneCheck() {
         <h2 class="text-xl font-semibold">Result</h2>
 
         <dl class="mt-4 grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
-          <div><dt class="text-gray-500">Expected Jyutping</dt><dd>{{ result.expectedJyutping }}</dd></div>
-          <div><dt class="text-gray-500">Acoustic Tone Score</dt><dd>{{ result.acousticToneScore ?? "n/a" }}</dd></div>
-          <div><dt class="text-gray-500">Reference Match Score</dt><dd>{{ result.referenceToneScore ?? "n/a" }}</dd></div>
-          <div><dt class="text-gray-500">Final Tone Score</dt><dd>{{ result.toneScore }}</dd></div>
-          <div><dt class="text-gray-500">Overall Score</dt><dd>{{ result.overallScore }}</dd></div>
-          <div><dt class="text-gray-500">Match Type</dt><dd>{{ result.matchType }}</dd></div>
+          <div>
+            <dt class="text-gray-500">Expected Jyutping</dt>
+            <dd>{{ result.expectedJyutping }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Acoustic Tone Score</dt>
+            <dd>{{ result.acousticToneScore ?? "n/a" }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Reference Match Score</dt>
+            <dd>{{ result.referenceToneScore ?? "n/a" }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Final Tone Score</dt>
+            <dd>{{ result.toneScore }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Overall Score</dt>
+            <dd>{{ result.overallScore }}</dd>
+          </div>
+          <div>
+            <dt class="text-gray-500">Match Type</dt>
+            <dd>{{ result.matchType }}</dd>
+          </div>
         </dl>
 
         <p class="mt-3 text-sm text-gray-700">{{ result.feedback }}</p>
 
         <p class="mt-2 text-xs text-gray-500">
-          Extracted pitch contours: {{ extractedPitchContours.length }} syllable bucket(s) · reference contours: {{ referencePitchContours.length }}
+          Extracted pitch contours: {{ extractedPitchContours.length }} syllable bucket(s) · reference contours: {{
+            referencePitchContours.length }}
         </p>
       </div>
     </div>
