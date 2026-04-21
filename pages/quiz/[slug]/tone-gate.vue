@@ -513,7 +513,7 @@ onBeforeUnmount(() => {
   <main class="min-h-screen text-gray-900">
     <div class="mx-auto max-w-3xl px-4 py-10">
       <header class="mb-6">
-        <h1 class="text-3xl font-bold">Tone Gate Quiz</h1>
+        <h1 class="text-3xl font-bold">Echo Gecko Quiz</h1>
       </header>
 
       <section class="rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm sm:p-6">

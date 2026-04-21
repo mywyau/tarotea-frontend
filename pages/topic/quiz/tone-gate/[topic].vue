@@ -514,7 +514,7 @@ onBeforeUnmount(() => {
   <main class="min-h-screen text-gray-900">
     <div class="mx-auto max-w-3xl px-4 py-10">
       <header class="mb-6">
-        <h1 class="text-3xl font-bold">Topic Tone Gate Quiz</h1>
+        <h1 class="text-3xl font-bold">Topic Echo Gecko Quiz</h1>
         <p class="mt-1 text-sm text-gray-600">{{ data?.title ?? topicSlug }}</p>
       </header>
 

@@ -161,7 +161,7 @@ onMounted(async () => {
                     <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/tone-gate/${topic.id}` : undefined"
                         class="topic-btn topic-btn-green col-span-2"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Tone Gate
+                        Echo Gecko
                     </NuxtLink>
 
                 </div>
