@@ -170,4 +170,16 @@ describe("scoreWordToneAttempt", () => {
     expect(result.feedback.toLowerCase()).not.toContain("still off")
   })
 
+  it("does not under-score short contours for keoi5", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "keoi5",
+      acousticContours: [{ values: [150, 152, 154] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThan(40)
+    expect(result.feedback.toLowerCase()).not.toContain("couldn’t read a stable pitch shape")
+  })
+
 })

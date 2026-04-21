@@ -64,7 +64,7 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
   if (!contour?.values?.length) return null
 
   const values = contour.values.filter((v) => Number.isFinite(v) && v > 0)
-  if (values.length < 4) return null
+  if (values.length < 3) return null
 
   const start = values[0]
   const end = values[values.length - 1]
@@ -224,7 +224,7 @@ function describeExpectedTone(tone: string) {
 
 function summarizeContourShape(contour: AcousticSyllableContour | undefined) {
   const values = (contour?.values ?? []).filter((v) => Number.isFinite(v) && v > 0)
-  if (values.length < 4) return null
+  if (values.length < 3) return null
 
   const start = values[0]
   const end = values[values.length - 1]
