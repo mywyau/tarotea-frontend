@@ -70,6 +70,11 @@ const animatedXpEarned = ref(0)
 const completionAnimated = ref(false)
 
 const syncPending = ref(false)
+const quizStartedAt = ref<number | null>(null)
+const elapsedMs = ref(0)
+const frozenElapsedMs = ref<number | null>(null)
+
+let timerInterval: ReturnType<typeof setInterval> | null = null
 
 const audio = ref<HTMLAudioElement | null>(null)
 
@@ -124,6 +129,59 @@ const resultMeta = computed(() => {
   return { title: 'Keep practicing' }
 })
 
+function stopTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval)
+    timerInterval = null
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  quizStartedAt.value = Date.now()
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+
+  timerInterval = setInterval(() => {
+    if (quizStartedAt.value !== null) {
+      elapsedMs.value = Date.now() - quizStartedAt.value
+    }
+  }, 250)
+}
+
+function freezeTimer() {
+  if (quizStartedAt.value === null) return
+
+  const finalMs = Date.now() - quizStartedAt.value
+  elapsedMs.value = finalMs
+  frozenElapsedMs.value = finalMs
+  stopTimer()
+}
+
+function resetTimer() {
+  stopTimer()
+  quizStartedAt.value = null
+  elapsedMs.value = 0
+  frozenElapsedMs.value = null
+}
+
+function formatDuration(ms: number) {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000))
+  const minutes = Math.floor(totalSeconds / 60)
+  const seconds = totalSeconds % 60
+  return `${minutes}:${seconds.toString().padStart(2, '0')}`
+}
+
+const displayedElapsedMs = computed(() => frozenElapsedMs.value ?? elapsedMs.value)
+
+const formattedElapsedTime = computed(() => {
+  if (quizStartedAt.value === null && frozenElapsedMs.value === null) {
+    return '--'
+  }
+
+  return formatDuration(displayedElapsedMs.value)
+})
+
 const completionTiles = computed(() => [
   {
     label: 'Correct',
@@ -143,6 +201,12 @@ const completionTiles = computed(() => [
     suffix: 'XP',
     className: 'result-2',
     prefix: animatedXpEarned.value > 0 ? '+' : ''
+  },
+  {
+    label: 'Time',
+    value: formattedElapsedTime.value,
+    suffix: '',
+    className: 'result-3'
   }
 ])
 
@@ -181,6 +245,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (tipInterval) clearInterval(tipInterval)
+  stopTimer()
 
   if (audio.value) {
     audio.value.pause()
@@ -284,6 +349,7 @@ function resetRunState() {
   correctCount.value = 0
   totalQuestions.value = 0
   syncPending.value = false
+  resetTimer()
   resetRoundState()
 }
 
@@ -437,6 +503,7 @@ async function startChallenge() {
 
     await loadWord(wordIds.value[0])
 
+    startTimer()
     state.value = 'playing'
   } catch (e: any) {
     errorMessage.value =
@@ -501,6 +568,7 @@ async function finishChallenge() {
 
   playCompletionSound()
   challenge.value = null
+  freezeTimer()
   state.value = 'complete'
 }
 
@@ -573,6 +641,7 @@ watch(
     if (value !== 'complete') return
     if (completionAnimated.value) return
 
+    freezeTimer()
     completionAnimated.value = true
     animateCount(animatedAccuracy, accuracy.value, 2200)
     animateCount(animatedXpEarned, xpEarned.value, 1000)
