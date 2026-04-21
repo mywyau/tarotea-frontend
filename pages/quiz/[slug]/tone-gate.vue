@@ -76,6 +76,7 @@ const successMessage = ref("")
 const lastToneScore = ref<number | null>(null)
 const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
 const nextWordCountdownMs = ref<number | null>(null)
+const rapidMode = ref(false)
 
 const recordedBlob = ref<Blob | null>(null)
 const recordingUrl = ref<string | null>(null)
@@ -382,6 +383,7 @@ async function submitAttempt() {
   errorMessage.value = ""
   feedback.value = ""
   successMessage.value = ""
+  clearNextWordCountdown()
 
   try {
     const expectedTokens = tokenizeJyutping(currentWord.value.jyutping)
@@ -400,24 +402,28 @@ async function submitAttempt() {
     })
 
     lastToneScore.value = result.toneScore
-    feedback.value = result.feedback
-    detectedToneRows.value = result.detectedAcousticTones ?? []
+    feedback.value = rapidMode.value ? "" : result.feedback
+    detectedToneRows.value = rapidMode.value ? [] : (result.detectedAcousticTones ?? [])
 
-    await wait(JINGLE_DELAY_MS)
+    if (!rapidMode.value) {
+      await wait(JINGLE_DELAY_MS)
+    }
 
-    if (result.toneScore < GOOD_JINGLE_MIN_SCORE) {
+    if (!rapidMode.value && result.toneScore < GOOD_JINGLE_MIN_SCORE) {
       playIncorrectJingle(0.5)
-    } else if (result.toneScore < NEAR_PERFECT_PASS_SCORE) {
+    } else if (!rapidMode.value && result.toneScore < NEAR_PERFECT_PASS_SCORE) {
       playGoodJingle(0.55)
     }
 
     if (result.toneScore > PASS_SCORE) {
-      if (result.toneScore >= NEAR_PERFECT_PASS_SCORE) {
+      if (!rapidMode.value && result.toneScore >= NEAR_PERFECT_PASS_SCORE) {
         playCorrectJingle(0.85)
       }
 
-      successMessage.value = "✅ Nice pronunciation — moving to the next word!"
-      await waitForNextWord(SUCCESS_MESSAGE_MS)
+      if (!rapidMode.value) {
+        successMessage.value = "✅ Nice pronunciation — moving to the next word!"
+        await waitForNextWord(SUCCESS_MESSAGE_MS)
+      }
 
       passedCount.value += 1
 
@@ -451,6 +457,12 @@ const formattedElapsedTime = computed(() => {
   const minutes = Math.floor(elapsedSeconds.value / 60)
   const seconds = elapsedSeconds.value % 60
   return `${minutes}:${seconds.toString().padStart(2, "0")}`
+})
+
+watch(rapidMode, (enabled) => {
+  if (!enabled) return
+  clearNextWordCountdown()
+  successMessage.value = ""
 })
 
 onBeforeUnmount(() => {
@@ -546,10 +558,14 @@ onBeforeUnmount(() => {
               :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
               {{ submitting ? "Scoring..." : "Check Tone" }}
             </button>
+            <label class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
+              <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-fuchsia-300 text-fuchsia-600" />
+              Rapid mode (skip feedback/pause)
+            </label>
           </div>
 
           <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
-          <p v-if="successMessage" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+          <p v-if="successMessage && !rapidMode" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
             {{ successMessage }}
             <span v-if="nextWordCountdownSeconds !== null" class="ml-1">
               (next word in {{ nextWordCountdownSeconds }}s)
@@ -557,7 +573,7 @@ onBeforeUnmount(() => {
           </p>
           <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
 
-          <div v-if="lastToneScore !== null" class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4">
+          <div v-if="lastToneScore !== null && !rapidMode" class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4">
             <p class="text-sm text-gray-700">
               Feedback:
               <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-700' : 'text-amber-700'">
