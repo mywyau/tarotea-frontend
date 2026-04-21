@@ -515,8 +515,8 @@ onBeforeUnmount(() => {
     <div class="mx-auto max-w-3xl px-4 py-10">
       <BackLink />
 
-      <header class="mb-6">
-        <h1 class="text-3xl font-bold">Topic Echo Gecko</h1>
+      <header class="mb-6 mt-10">
+        <h1 class="text-3xl font-bold">Echo Gecko</h1>
         <p class="mt-1 text-sm text-gray-600">{{ data?.title ?? topicSlug }}</p>
       </header>
 
@@ -530,9 +530,6 @@ onBeforeUnmount(() => {
             <p class="text-xs uppercase tracking-[0.2em] text-gray-500">
               Topic Pronunciation Challenge
             </p>
-            <h2 class="text-2xl font-semibold text-gray-900">
-              Ready to start Topic Echo Gecko?
-            </h2>
             <p class="text-sm text-gray-600">
               Complete {{ quizSize }} words from this topic and pass each pronunciation attempt.
             </p>
@@ -547,9 +544,9 @@ onBeforeUnmount(() => {
           <section class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4 text-left">
             <h3 class="text-sm font-semibold text-gray-900">Before you start</h3>
             <ul class="mt-2 space-y-1 text-sm text-gray-700">
-              <li>• Pass a word with a score above {{ PASS_SCORE }} to count it.</li>
-              <li>• Use “Next” if your latest attempt was successful.</li>
-              <li>• Use “Skip” to move on without counting a pass.</li>
+              <li>• Make sure you are in a quiet area and can speak clearly.</li>
+              <li>• Make sure there is no microhpone obstructions.</li>
+              <li>• Use “Skip” if you are struggling with a word.</li>
             </ul>
           </section>
         </div>
@@ -559,8 +556,8 @@ onBeforeUnmount(() => {
             <p class="text-xs uppercase tracking-[0.2em] text-fuchsia-700">Quiz Complete</p>
             <h2 class="mt-2 text-2xl font-semibold text-gray-900">Great job!</h2>
             <p class="mt-2 text-sm text-gray-700">
-              You passed <span class="font-semibold text-emerald-700">{{ passedCount }}</span> out of
-              <span class="font-semibold text-gray-900">{{ quizSize }}</span> words.
+              <!-- You passed <span class="font-semibold text-emerald-700">{{ passedCount }}</span> out of
+              <span class="font-semibold text-gray-900">{{ quizSize }}</span> words. -->
             </p>
           </div>
 

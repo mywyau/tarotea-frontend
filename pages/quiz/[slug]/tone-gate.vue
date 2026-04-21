@@ -528,9 +528,6 @@ onBeforeUnmount(() => {
             <p class="text-xs uppercase tracking-[0.2em] text-gray-500">
               Pronunciation Challenge
             </p>
-            <h2 class="text-2xl font-semibold text-gray-900">
-              Ready to start Echo Gecko?
-            </h2>
             <p class="text-sm text-gray-600">
               Complete {{ quizSize }} words and pass each pronunciation attempt to finish.
             </p>
@@ -545,7 +542,6 @@ onBeforeUnmount(() => {
           <section class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4 text-left">
             <h3 class="text-sm font-semibold text-gray-900">Before you start</h3>
             <ul class="mt-2 space-y-1 text-sm text-gray-700">
-              <li>• Pass a word with a score above {{ PASS_SCORE }} to count it.</li>
               <li>• Use “Next” if your latest attempt was successful.</li>
               <li>• Use “Skip” to move on without counting a pass.</li>
             </ul>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { playCorrectJingle, playGoodJingle, playToneFailJingle } from "~/utils/sounds"
+import { playCorrectJingle, playGoodJingle } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: "logged-in",
@@ -345,9 +345,6 @@ async function runToneCheck() {
   <div class="min-h-screen text-gray-900">
     <div class="mx-auto max-w-3xl px-4 py-10">
       <h1 class="text-3xl font-bold">Tone Garden</h1>
-      <!-- <p class="mt-2 text-sm text-gray-600">
-        Word ID: <span class="font-semibold">{{ wordIdFromRoute || "(missing)" }}</span>
-      </p> -->
 
       <div class="mt-6 rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm">
         <p class="text-xs uppercase tracking-wide text-gray-500">Target Chinese</p>
@@ -383,6 +380,7 @@ async function runToneCheck() {
         </div>
 
         <p v-if="referenceAudioPath" class="mt-3 text-xs text-gray-500">Reference: {{ referenceAudioPath }}</p>
+
         <p v-else class="mt-3 text-xs text-amber-700">No reference audio found for this word.</p>
 
         <p v-if="recording" class="mt-2 text-sm text-amber-700">Recording... speak now.</p>
