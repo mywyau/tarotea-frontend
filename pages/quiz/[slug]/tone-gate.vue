@@ -78,6 +78,13 @@ const currentWordAudioUrl = computed(() => {
   const id = currentWord.value?.id
   return id ? `${cdnBase}/audio/${id}.mp3` : ""
 })
+const lastToneLabel = computed(() => {
+  if (lastToneScore.value === null) return ""
+  if (lastToneScore.value <= PASS_SCORE) return "not quite"
+  if (lastToneScore.value <= 60) return "good"
+  if (lastToneScore.value <= 80) return "very good"
+  return "perfect"
+})
 
 function shuffle<T>(arr: T[]) {
   const copy = [...arr]
@@ -325,21 +332,21 @@ async function submitAttempt() {
     lastToneScore.value = result.toneScore
     feedback.value = result.feedback
 
-    if (result.toneScore > PASS_SCORE) passedCount.value += 1
+    if (result.toneScore > PASS_SCORE) {
+      passedCount.value += 1
 
-    await playCurrentWordAudio()
-
-    if (currentIndex.value >= QUIZ_SIZE - 1) {
-      finished.value = true
-      if (startedAtMs.value) {
-        elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+      if (currentIndex.value >= QUIZ_SIZE - 1) {
+        finished.value = true
+        if (startedAtMs.value) {
+          elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+        }
+        stopTimer()
+      } else {
+        currentIndex.value += 1
       }
-      stopTimer()
-    } else {
-      currentIndex.value += 1
-    }
 
-    resetRecordingState()
+      resetRecordingState()
+    }
   } catch (err) {
     console.error("[tone-gate] submit failed", err)
     errorMessage.value = "Could not score your pronunciation. Please try again."
@@ -371,7 +378,7 @@ onBeforeUnmount(() => {
           10 words, untimed. Your total time is tracked and shown at the end.
         </p>
         <p class="mt-1 text-sm text-gray-600">
-          You always progress after each attempt; tone score feedback is still shown for learning.
+          You can move to the next word after a strong attempt. We show qualitative feedback labels instead of numeric scores.
         </p>
       </header>
 
@@ -423,6 +430,13 @@ onBeforeUnmount(() => {
             <p class="mt-3 text-xs uppercase tracking-wider text-gray-500">Target Jyutping</p>
             <p class="mt-1 text-xl font-semibold text-gray-900">{{ currentWord.jyutping }}</p>
             <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-600">{{ currentWord.meaning }}</p>
+            <button
+              class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="submitting || !currentWordAudioUrl"
+              @click="playCurrentWordAudio"
+            >
+              ▶ Play Chinese Audio
+            </button>
           </div>
 
           <div class="flex flex-wrap gap-3">
@@ -454,11 +468,11 @@ onBeforeUnmount(() => {
 
           <div v-if="lastToneScore !== null" class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4">
             <p class="text-sm text-gray-700">
-              Tone score:
+              Feedback:
               <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-700' : 'text-amber-700'">
-                {{ lastToneScore }}
+                {{ lastToneLabel }}
               </span>
-              <span class="text-gray-500"> (feedback only)</span>
+              <span class="text-gray-500"> (need above threshold to continue)</span>
             </p>
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
           </div>
