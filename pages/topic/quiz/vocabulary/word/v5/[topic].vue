@@ -4,7 +4,7 @@ definePageMeta({
   ssr: false,
 })
 
-import { computed, ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue';
 
 import {
   playCorrectJingle,
@@ -12,10 +12,10 @@ import {
   playQuizCompleteFailSong,
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
-} from '@/utils/sounds'
+} from '@/utils/sounds';
 
-import { brandColours } from '~/utils/branding/helpers'
 import { masteryXp } from '@/config/xp/helpers';
+import { brandColours } from '~/utils/branding/helpers';
 
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)
@@ -430,18 +430,18 @@ const completionTiles = computed(() => [
     className: 'result-1'
   },
   {
+    label: 'Time',
+    value: formattedElapsedTime.value,
+    suffix: '',
+    className: 'result-3'
+  },
+  {
     label: 'XP Earned',
     value: animatedXpEarned.value,
     suffix: 'XP',
     className: 'result-2',
     prefix: animatedXpEarned.value > 0 ? '+' : ''
   },
-  {
-    label: 'Time',
-    value: formattedElapsedTime.value,
-    suffix: '',
-    className: 'result-3'
-  }
 ])
 
 const currentWordAudioSrc = computed(() => {
@@ -794,14 +794,10 @@ onBeforeUnmount(() => {
               <p class="hero-score">
                 {{ animatedAccuracy }}%
               </p>
-
-              <div class="hero-subtext space-y-1">
-                <p>Time: {{ formattedElapsedTime }}</p>
-              </div>
             </div>
           </transition>
 
-          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
             <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
               :class="tile.className">
               <p class="stat-label">
