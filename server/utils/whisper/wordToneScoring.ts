@@ -60,11 +60,37 @@ function safeMean(values: number[]) {
   return values.reduce((sum, value) => sum + value, 0) / values.length
 }
 
+function scoreVeryShortContourForTone(tone: string, values: number[]) {
+  if (values.length < 2) return null
+
+  const start = values[0]
+  const end = values[values.length - 1]
+  const slope = clamp((end - start) / Math.max(start, 1), -0.25, 0.25)
+
+  if (tone === "2" || tone === "5") {
+    const risingBase = 52 + slope * 140
+    const downwardPenalty = slope < -0.02 ? 20 : 0
+    return clamp(risingBase - downwardPenalty, 15, 85)
+  }
+
+  if (tone === "4") {
+    return clamp(52 + (-slope) * 140 - (slope > 0.02 ? 16 : 0), 15, 85)
+  }
+
+  if (tone === "1" || tone === "3" || tone === "6") {
+    return clamp(58 - Math.abs(slope) * 180, 20, 86)
+  }
+
+  return clamp(50 - Math.abs(slope) * 120, 15, 82)
+}
+
 function scoreContourForTone(tone: string, contour: AcousticSyllableContour | undefined) {
   if (!contour?.values?.length) return null
 
   const values = contour.values.filter((v) => Number.isFinite(v) && v > 0)
-  if (values.length < 3) return null
+  if (values.length < 3) {
+    return scoreVeryShortContourForTone(tone, values)
+  }
 
   const start = values[0]
   const end = values[values.length - 1]
@@ -454,9 +480,14 @@ export function scoreWordToneAttempt(params: {
     toneScore: toneScoreRaw,
   })
 
+  const boundedToneScore =
+    toneOnly && expectedTokens.length === 1 && referenceToneScore === null
+      ? Math.min(toneScore, 96)
+      : toneScore
+
   const overallScore = toneOnly
-    ? toneScore
-    : Math.round(clamp(soundScore * 0.7 + toneScore * 0.3, 0, 100))
+    ? boundedToneScore
+    : Math.round(clamp(soundScore * 0.7 + boundedToneScore * 0.3, 0, 100))
 
   const matchType: ToneWordScore["matchType"] =
     overallScore === 100
@@ -507,7 +538,7 @@ export function scoreWordToneAttempt(params: {
     expectedTokens,
     heardTokens,
     soundScore,
-    toneScore,
+    toneScore: boundedToneScore,
     textToneScore,
     acousticToneScore,
     referenceToneScore,

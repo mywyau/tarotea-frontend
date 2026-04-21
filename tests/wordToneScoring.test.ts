@@ -24,7 +24,7 @@ describe("scoreWordToneAttempt", () => {
     expect(result.soundScore).toBe(0)
     expect(result.textToneScore).toBe(0)
     expect(result.acousticToneScore).not.toBeNull()
-    expect(result.toneScore).toBe(Math.min((result.acousticToneScore ?? 0) + 5, 100))
+    expect(result.toneScore).toBe(Math.min((result.acousticToneScore ?? 0) + 5, 96))
     expect(result.overallScore).toBe(result.toneScore)
   })
 
@@ -180,6 +180,29 @@ describe("scoreWordToneAttempt", () => {
     expect(result.acousticToneScore).not.toBeNull()
     expect(result.toneScore).toBeGreaterThan(40)
     expect(result.feedback.toLowerCase()).not.toContain("couldn’t read a stable pitch shape")
+  })
+
+  it("provides non-zero grading for very short 2-point contours", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "keoi5",
+      acousticContours: [{ values: [150, 152] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThan(15)
+    expect(result.toneScore).toBeLessThan(90)
+  })
+
+  it("avoids perfect 100 for single-syllable tone-only without reference", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "si1",
+      acousticContours: [{ values: [210, 210, 210, 210, 210, 210] }],
+      toneOnly: true,
+    })
+
+    expect(result.referenceToneScore).toBeNull()
+    expect(result.toneScore).toBeLessThanOrEqual(96)
   })
 
 })

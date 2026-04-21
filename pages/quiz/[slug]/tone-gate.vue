@@ -129,7 +129,7 @@ function estimatePitchHz(frame: Float32Array, sampleRate: number) {
   let rms = 0
   for (let i = 0; i < frame.length; i++) rms += frame[i] * frame[i]
   rms = Math.sqrt(rms / frame.length)
-  if (rms < 0.01) return 0
+  if (rms < 0.006) return 0
 
   const minHz = 75
   const maxHz = 450
