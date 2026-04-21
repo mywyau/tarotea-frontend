@@ -1,44 +1,31 @@
+import { redis } from '~/server/repositories/redis'
+
 const ONLINE_WINDOW_MS = 2 * 60 * 1000
+const ONLINE_USERS_KEY = 'online_users:sessions'
 
-type OnlineUsersState = {
-  sessions: Map<string, number>
+function getCutoffTimestampMs() {
+  return Date.now() - ONLINE_WINDOW_MS
 }
 
-function getState(): OnlineUsersState {
-  const globalKey = '__online_users_state__'
-  const globalWithState = globalThis as typeof globalThis & {
-    [globalKey]?: OnlineUsersState
-  }
-
-  if (!globalWithState[globalKey]) {
-    globalWithState[globalKey] = {
-      sessions: new Map<string, number>(),
-    }
-  }
-
-  return globalWithState[globalKey]!
+async function pruneStaleSessions() {
+  await redis.zremrangebyscore(ONLINE_USERS_KEY, 0, getCutoffTimestampMs())
 }
 
-export function touchOnlineSession(sessionId: string) {
+export async function touchOnlineSession(sessionId: string) {
   if (!sessionId) {
-    return 0
+    return countOnlineUsers()
   }
 
-  const state = getState()
-  state.sessions.set(sessionId, Date.now())
+  await redis.zadd(ONLINE_USERS_KEY, {
+    score: Date.now(),
+    member: sessionId,
+  })
 
-  return countOnlineUsers()
+  await pruneStaleSessions()
+  return redis.zcard(ONLINE_USERS_KEY)
 }
 
-export function countOnlineUsers() {
-  const state = getState()
-  const cutoff = Date.now() - ONLINE_WINDOW_MS
-
-  for (const [sessionId, lastSeen] of state.sessions.entries()) {
-    if (lastSeen < cutoff) {
-      state.sessions.delete(sessionId)
-    }
-  }
-
-  return state.sessions.size
+export async function countOnlineUsers() {
+  await pruneStaleSessions()
+  return redis.zcard(ONLINE_USERS_KEY)
 }
