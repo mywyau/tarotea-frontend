@@ -414,7 +414,7 @@ watchEffect(() => {
 }
 
 .edge-arrow:hover {
-    color: #5162ff;
+    color: #49b0ff;
     transform: scale(1.04);
 }
 </style>

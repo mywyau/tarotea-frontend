@@ -288,13 +288,14 @@ watchEffect(() => {
           <div class="space-y-3">
             <div class="flex justify-end">
               <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
-                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`" class="action-chip action-chip-sm action-chip-write"
-                  aria-label="Practice writing this sentence">
+                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
+                  class="action-chip action-chip-sm action-chip-write" aria-label="Practice writing this sentence">
                   ✏️ Write
                 </NuxtLink>
 
                 <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
-                  class="action-chip action-chip-sm action-chip-speak" aria-label="Practice pronunciation for this sentence">
+                  class="action-chip action-chip-sm action-chip-speak"
+                  aria-label="Practice pronunciation for this sentence">
                   ▶ Speak
                 </NuxtLink>
 
@@ -443,7 +444,7 @@ watchEffect(() => {
 }
 
 .edge-arrow:hover {
-  color: #5162ff;
+  color: #49b0ff;
   transform: scale(1.04);
 }
 </style>
