@@ -23,7 +23,6 @@ const levelNumber = computed(() => levelIdToNumbers(slug.value) ?? slug.value)
     ]" :keyboard-setup-tips="[
       'Set up or change to a Chinese based keyboard.',
     ]" :tips="[
-      'Use the audio button to reinforce listening + character recall together.',
       'Hints reveal Jyutping and reduce XP for that word, so use them strategically.',
       'Try to answer before checking hints to maximize XP and retention.'
     ]" />

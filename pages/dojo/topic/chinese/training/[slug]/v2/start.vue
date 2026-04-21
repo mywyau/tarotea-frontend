@@ -25,7 +25,6 @@ const topicTitle = computed(() =>
     ]" :keyboard-setup-tips="[
       'Set up or change to a Chinese based keyboard.',
     ]" :tips="[
-      'You must answer in Chinese. Make sure the keyboard board is setup appropriately.',
       'Listen to word audio whenever available to link meaning, sound, and character form.',
       'Hints can speed up a run, but they reduce XP for that answer.',
       'Aim for complete sessions to reinforce a full topic in one pass and to be awarded the xp.'
