@@ -221,4 +221,30 @@ describe("scoreWordToneAttempt", () => {
     expect(result.detectedAcousticTones[0]?.detectedTone).toBeTruthy()
   })
 
+  it("is less harsh for level-tone family contours in tone-only mode", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "dei6",
+      acousticContours: [{ values: [132, 133, 132, 131, 132] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect((result.acousticToneScore ?? 0)).toBeGreaterThanOrEqual(58)
+    expect(result.toneScore).toBeGreaterThan(40)
+  })
+
+  it("keeps mixed two-syllable tone-only attempts from collapsing too low when contours are close", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "ngo5 dei6",
+      acousticContours: [
+        { values: [144, 145, 146, 147, 148] },
+        { values: [138, 138, 137, 137, 136] },
+      ],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThan(45)
+  })
+
 })

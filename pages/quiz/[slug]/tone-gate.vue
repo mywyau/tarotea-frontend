@@ -513,6 +513,9 @@ onBeforeUnmount(() => {
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
             <div v-if="detectedToneDisplayRows.length" class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
               <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
+              <p class="mt-1 text-xs text-gray-500">
+                Detected tone is diagnostic. Final score also checks how closely your pitch shape matches the target contour.
+              </p>
               <ul class="mt-2 space-y-1 text-sm text-gray-700">
                 <li v-for="row in detectedToneDisplayRows" :key="`tone-row-${row.syllable}`">
                   <span class="font-medium">
