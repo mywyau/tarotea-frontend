@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { playCorrectJingle } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: "logged-in",
@@ -51,6 +52,8 @@ const referenceAudioPath = computed(() => {
 const referenceAudioUrl = computed(() => {
   return referenceAudioPath.value ? `${cdnBase}/${referenceAudioPath.value}` : ""
 })
+
+const NEAR_PERFECT_PASS_SCORE = 80
 
 const recording = ref(false)
 const loading = ref(false)
@@ -313,6 +316,10 @@ async function runToneCheck() {
         Authorization: `Bearer ${token}`,
       },
     })
+
+    if (result.value.toneScore >= NEAR_PERFECT_PASS_SCORE) {
+      playCorrectJingle(0.85)
+    }
   } catch (error: any) {
     console.error("[tone-word-v1] failed", error)
     errorMessage.value = error?.data?.statusMessage || error?.message || "Tone check request failed."
