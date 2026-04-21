@@ -158,7 +158,7 @@ onMounted(async () => {
                         Audio Only Sentences
                     </NuxtLink>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/tone-gate/${topic.id}` : undefined"
+                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/echo-gecko/${topic.id}` : undefined"
                         class="topic-btn topic-btn-green col-span-2"
                         :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
                         Echo Gecko
