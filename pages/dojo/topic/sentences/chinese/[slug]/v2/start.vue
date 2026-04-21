@@ -16,20 +16,17 @@ const topicTitle = computed(() =>
 </script>
 
 <template>
-  <DojoStartPage
-    :heading="`${topicTitle} · Sentence dojo`"
+  <DojoStartPage :heading="`${topicTitle} · Sentence dojo`"
     description="Train with sentence fill-in prompts in this topic to practice words in realistic context."
-    :start-to="`/dojo/topic/sentences/chinese/${slug}/v2`"
-    start-label="Start sentence exercise"
-    :xp-rules="[
+    :start-to="`/dojo/topic/sentences/chinese/${slug}/v2`" start-label="Start sentence exercise" :xp-rules="[
       { action: 'Correct answer (no hint)', xp: `+${chineseSentenceXp} XP` },
       { action: 'Correct answer (hint used)', xp: `+${chineseSentenceXpHintUsed} XP` },
       { action: 'Wrong answer', xp: '0 XP (retry until correct)' }
-    ]"
-    :tips="[
+    ]" :keyboard-setup-tips="[
+      'Set up or change to a Chinese based keyboard.',
+    ]" :tips="[
       'Use sentence context to predict likely words before typing.',
       'Hints are useful for blocked moments but reduce XP gained.',
       'Keep a steady pace — repeated sentence patterns will feel easier each run.'
-    ]"
-  />
+    ]" />
 </template>

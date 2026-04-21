@@ -16,23 +16,16 @@ const topicTitle = computed(() =>
 </script>
 
 <template>
-  <DojoStartPage
-    :heading="`${topicTitle} · Jyutping dojo`"
+  <DojoStartPage :heading="`${topicTitle} · Jyutping dojo`"
     description="Type the Jyutping for words in this topic and build instant sound-to-spelling recall."
-    :start-to="`/dojo/topic/jyutping/training/${slug}/v2`"
-    start-label="Start jyutping exercise"
-    :xp-rules="[
+    :start-to="`/dojo/topic/jyutping/training/${slug}/v2`" start-label="Start jyutping exercise" :xp-rules="[
       { action: 'Correct answer (no hint)', xp: `+${jyutpingXp} XP` },
       { action: 'Correct answer (hint used)', xp: `+${jyutpingXpHintUsed} XP` },
       { action: 'Wrong answer', xp: '0 XP (retry until correct)' }
-    ]"
-    :keyboard-setup-tips="[
-      'Keep an English keyboard active so typing tone numbers is fast and consistent.',
-      'If available, enable keyboard shortcut switching so you can quickly return to number input.'
-    ]"
-    :tips="[
+    ]" :keyboard-setup-tips="[
+      'Keep an English keyboard active.',
+    ]" :tips="[
       'Hinted answers still count but award lower XP than no-hint answers.',
-      'Use repetition: replay difficult words and target smooth, low-friction typing.'
-    ]"
-  />
+      'Practice, practice, practice, you will notice things getting easier, trust.'
+    ]" />
 </template>

@@ -13,132 +13,184 @@ const props = defineProps<{
   tips: string[]
   keyboardSetupTips?: string[]
 }>()
+
+const showAdvancedTips = ref(false)
 </script>
 
 <template>
-  <main class="dojo-start-page max-w-xl mx-auto px-4 py-14 space-y-8">
+  <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
     <BackLink />
 
-    <section class="start-card text-center space-y-4">
-      <h1 class="start-heading">{{ props.heading }}</h1>
-      <p class="start-subheading">{{ props.description }}</p>
+    <section class="quiz-card text-center space-y-6">
+      <h1 class="text-3xl font-semibold text-gray-900 level-heading">{{ props.heading }}</h1>
 
-      <NuxtLink :to="props.startTo" class="start-btn">
-        {{ props.startLabel }}
-      </NuxtLink>
-    </section>
+      <p class="text-black level-subheading">{{ props.description }}</p>
 
-    <section class="start-card text-left">
-      <details class="dropdown" open>
-        <summary class="panel-title">XP breakdown</summary>
-        <ul class="panel-list space-y-2 mt-3">
-          <li v-for="rule in props.xpRules" :key="`${rule.action}-${rule.xp}`" class="panel-item">
-            <span>{{ rule.action }}</span>
-            <strong>{{ rule.xp }}</strong>
-          </li>
-        </ul>
-      </details>
-    </section>
+      <div class="pt-6">
+        <NuxtLink :to="props.startTo" class="start-btn">
+          {{ props.startLabel }}
+        </NuxtLink>
+      </div>
 
-    <section v-if="props.keyboardSetupTips?.length" class="start-card text-left">
-      <details class="dropdown">
-        <summary class="panel-title">Keyboard setup</summary>
-        <ul class="tips-list mt-3">
-          <li v-for="tip in props.keyboardSetupTips" :key="tip">{{ tip }}</li>
-        </ul>
-      </details>
-    </section>
+      <section class="tips-panel">
+        <div class="tips-header">
+          <h2 class="tips-title">XP breakdown</h2>
+        </div>
 
-    <section class="start-card text-left space-y-4">
-      <h2 class="panel-title">Before you start</h2>
-      <ul class="tips-list">
-        <li v-for="tip in props.tips" :key="tip">{{ tip }}</li>
-      </ul>
+        <div class="tips-grid">
+          <article
+            v-for="rule in props.xpRules"
+            :key="`${rule.action}-${rule.xp}`"
+            class="tip-card"
+          >
+            <h3 class="tip-card-title">{{ rule.action }}</h3>
+            <p class="tip-card-body">{{ rule.xp }}</p>
+          </article>
+        </div>
+
+        <button class="tips-toggle" type="button" @click="showAdvancedTips = !showAdvancedTips">
+          {{ showAdvancedTips ? 'Hide extra tips' : 'See keyboard and prep tips' }}
+        </button>
+
+        <Transition name="tip-expand">
+          <div v-if="showAdvancedTips" class="more-tips space-y-4">
+            <section v-if="props.keyboardSetupTips?.length" class="text-left space-y-2">
+              <h3 class="tips-title">Keyboard setup</h3>
+              <ul class="more-tips-list">
+                <li v-for="tip in props.keyboardSetupTips" :key="tip">{{ tip }}</li>
+              </ul>
+            </section>
+
+            <section class="text-left space-y-2">
+              <h3 class="tips-title">Before you start</h3>
+              <ul class="more-tips-list">
+                <li v-for="tip in props.tips" :key="tip">{{ tip }}</li>
+              </ul>
+            </section>
+          </div>
+        </Transition>
+      </section>
     </section>
   </main>
 </template>
 
 <style scoped>
-.dojo-start-page {
-  --blue: #A8CAE0;
-  --purple: #D6A3D1;
-}
-
-.start-card {
-  border-radius: 22px;
-  padding: 1.2rem;
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05);
-}
-
-.start-heading {
-  font-size: 1.2rem;
-  font-weight: 600;
+.level-heading {
+  font-size: 1.3rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: #111827;
+  color: rgba(0, 0, 0);
 }
 
-.start-subheading {
-  font-size: 0.84rem;
-  color: rgba(17, 24, 39, 0.75);
+.level-subheading {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(17, 24, 39, 0.65);
+}
+
+.quiz-card {
+  border-radius: 26px;
+  padding: 2rem;
 }
 
 .start-btn {
   display: block;
   width: 100%;
-  border-radius: 14px;
-  padding: 0.72rem;
+  border-radius: 16px;
+  padding: 0.75rem;
   font-weight: 600;
   text-align: center;
-  background: var(--blue);
+  background: #A8CAE0;
   color: #111827;
   transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .start-btn:hover {
-  background: #94bfd9;
-  transform: translateY(-1px);
+  background: #8fbfd6;
+  transform: translateY(-2px);
 }
 
-.panel-title {
-  cursor: pointer;
-  list-style: none;
+.tips-panel {
+  margin-top: 1rem;
+  text-align: left;
+}
+
+.tips-header {
+  margin-bottom: 1rem;
+}
+
+.tips-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.tips-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tip-card {
+  border-radius: 16px;
+  background: #F6E1E1;
+  padding: 0.9rem 1rem;
+}
+
+.tip-card-title {
   font-size: 0.92rem;
   font-weight: 700;
   color: #111827;
 }
 
-.panel-title::-webkit-details-marker {
-  display: none;
+.tip-card-body {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(17, 24, 39, 0.82);
 }
 
-.panel-title::after {
-  content: '▾';
-  float: right;
-  color: rgba(17, 24, 39, 0.55);
+.tips-toggle {
+  margin-top: 1rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #111827;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 14px;
 }
 
-.dropdown[open] .panel-title::after {
-  transform: rotate(180deg);
+.tips-toggle:hover {
+  background: rgba(168, 202, 224, 0.22);
 }
 
-.panel-list,
-.tips-list {
+.more-tips {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.more-tips-list {
   margin: 0;
-  padding-left: 1rem;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+  color: rgba(17, 24, 39, 0.86);
+  font-size: 0.85rem;
+  line-height: 1.45;
 }
 
-.panel-item {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  font-size: 0.86rem;
+.tip-expand-enter-active,
+.tip-expand-leave-active {
+  transition: all 0.2s ease;
 }
 
-.tips-list li {
-  font-size: 0.84rem;
-  color: rgba(17, 24, 39, 0.8);
-  margin-bottom: 0.45rem;
+.tip-expand-enter-from,
+.tip-expand-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
 }
 </style>
