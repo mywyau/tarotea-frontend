@@ -623,7 +623,7 @@ onBeforeUnmount(() => {
               <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-700' : 'text-amber-700'">
                 {{ lastToneLabel }}
               </span>
-              <span class="text-gray-500"> (need above threshold to continue)</span>
+              <!-- <span class="text-gray-500"> (need above threshold to continue)</span> -->
             </p>
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
             <div class="mt-3">
@@ -636,10 +636,10 @@ onBeforeUnmount(() => {
             <div v-if="detectedToneDisplayRows.length"
               class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
               <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
-              <p class="mt-1 text-xs text-gray-500">
+              <!-- <p class="mt-1 text-xs text-gray-500">
                 Detected tone is diagnostic. Final score also checks how closely your pitch shape matches the target
                 contour.
-              </p>
+              </p> -->
               <ul class="mt-2 space-y-1 text-sm text-gray-700">
                 <li v-for="row in detectedToneDisplayRows" :key="`tone-row-${row.syllable}`">
                   <span class="font-medium">
@@ -648,9 +648,9 @@ onBeforeUnmount(() => {
                   <span class="text-gray-500"> (target {{ row.token }})</span>:
                   heard <span class="font-semibold">{{ row.heardJyutping }}</span>
                   — tone <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
-                  <span v-if="row.confidence !== null" class="text-gray-500">
-                    (confidence {{ row.confidence }})
-                  </span>
+                  <!-- <span v-if="row.confidence !== null" class="text-gray-500"> -->
+                    <!-- (confidence {{ row.confidence }}) -->
+                  <!-- </span> -->
                 </li>
               </ul>
             </div>
