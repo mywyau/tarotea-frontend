@@ -15,10 +15,10 @@ import {
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
 
+import { masteryXp } from '@/config/xp/helpers'
 import type { LevelData, Word } from '~/types/level/quiz/types'
 import { brandColours } from '~/utils/branding/helpers'
 import { isLevelId, levelTitles } from '~/utils/levels/levels'
-import { masteryXp } from '@/config/xp/helpers';
 
 type QuizAnswer = { wordId: string; correct: boolean }
 
@@ -200,7 +200,6 @@ function calculateQuizXpEarned() {
 
 const { data, error } = await useFetch<LevelData>(
   () =>
-    // `/api/vocab-quiz/${slug.value}`,
     `/api/vocab-quiz/v2/${slug.value}`,
   {
     key: () => `audio-quiz-${slug.value}`,
@@ -376,18 +375,18 @@ const completionTiles = computed(() => [
     className: 'result-1'
   },
   {
+    label: 'Time',
+    value: formattedElapsedTime.value,
+    suffix: '',
+    className: 'result-3'
+  },
+  {
     label: 'XP Earned',
     value: animatedXpEarned.value,
     suffix: 'XP',
     className: 'result-2',
     prefix: animatedXpEarned.value > 0 ? '+' : ''
   },
-  {
-    label: 'Time',
-    value: formattedElapsedTime.value,
-    suffix: '',
-    className: 'result-3'
-  }
 ])
 
 function runCompletionAnimations() {
@@ -408,7 +407,6 @@ async function finalizeQuiz() {
     const token = await getAccessToken()
 
     const res = await $fetch<FinalizeResponse>(
-      // '/api/quiz/grind/finalize-v4',
       '/api/quiz/grind/finalize-v5',
       {
         method: 'POST',
@@ -785,14 +783,10 @@ onBeforeUnmount(() => {
               <p class="hero-score">
                 {{ animatedAccuracy }}%
               </p>
-
-              <p class="hero-subtext">
-                Time: {{ formattedElapsedTime }}
-              </p>
             </div>
           </transition>
 
-          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
             <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
               :class="tile.className">
               <p class="stat-label">
@@ -837,12 +831,6 @@ onBeforeUnmount(() => {
               style="background-color:#A8CAE0;">
               Play Again
             </NuxtLink>
-
-            <!-- <NuxtLink :to="`/level/${slug}`"
-              class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-              style="background-color:rgba(244,205,39,0.35);">
-              Back to {{ levelTitles[slug] }}
-            </NuxtLink> -->
           </div>
         </div>
       </transition>

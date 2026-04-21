@@ -781,7 +781,7 @@ onUnmounted(() => {
                         </div>
                     </transition>
 
-                    <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                    <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
                         <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
                             :class="tile.className">
                             <p class="stat-label">
@@ -826,12 +826,6 @@ onUnmounted(() => {
                             style="background-color:#A8CAE0;">
                             Play Again
                         </NuxtLink>
-
-                        <!-- <NuxtLink :to="`/topic/words/${slug}`"
-                            class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                            style="background-color:rgba(244,205,39,0.35);">
-                            Back to Topic
-                        </NuxtLink> -->
                     </div>
                 </div>
             </transition>
