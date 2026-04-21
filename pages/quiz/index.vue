@@ -2,7 +2,6 @@
 
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { onMounted } from 'vue'
-import { canAccessLevelQuiz, isComingSoon, isFreeLevel } from '~/utils/levels/permissions'
 
 
 const {
@@ -93,7 +92,7 @@ const canEnterLevel = (level: any) => {
             Sentence Audio Only
           </NuxtLink>
 
-          <NuxtLink :to="`/quiz/${quizLevel.id}/tone-gate`" class="level-btn level-btn-green">
+          <NuxtLink :to="`/quiz/${quizLevel.id}/tone-gate`" class="level-btn level-btn-green col-span-2">
             Tone Gate
           </NuxtLink>
         </div>
