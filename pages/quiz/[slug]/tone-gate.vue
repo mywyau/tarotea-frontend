@@ -34,6 +34,7 @@ type ToneApiResponse = {
 const PASS_SCORE = 40
 const NEAR_PERFECT_PASS_SCORE = 80
 const GOOD_JINGLE_MIN_SCORE = 30
+const JINGLE_DELAY_MS = 180
 const QUIZ_SIZE = 10
 
 const route = useRoute()
@@ -331,6 +332,10 @@ function stopRecording() {
   recording.value = false
 }
 
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
+
 async function submitAttempt() {
   if (!started.value || finished.value || !currentWord.value) return
   if (!recordedBlob.value) {
@@ -365,6 +370,8 @@ async function submitAttempt() {
     lastToneScore.value = result.toneScore
     feedback.value = result.feedback
     detectedToneRows.value = result.detectedAcousticTones ?? []
+
+    await wait(JINGLE_DELAY_MS)
 
     if (result.toneScore < GOOD_JINGLE_MIN_SCORE) {
       playIncorrectJingle(0.5)

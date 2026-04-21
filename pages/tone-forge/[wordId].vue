@@ -55,6 +55,7 @@ const referenceAudioUrl = computed(() => {
 
 const NEAR_PERFECT_PASS_SCORE = 80
 const GOOD_JINGLE_MIN_SCORE = 30
+const JINGLE_DELAY_MS = 180
 
 const recording = ref(false)
 const loading = ref(false)
@@ -79,6 +80,10 @@ const extractedPitchContours = ref<PitchContour[]>([])
 const referencePitchContours = ref<PitchContour[]>([])
 
 let audioChunks: Blob[] = []
+
+function wait(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms))
+}
 
 function getSupportedMimeType() {
   const candidates = ["audio/webm;codecs=opus", "audio/webm", "audio/mp4"]
@@ -317,6 +322,8 @@ async function runToneCheck() {
         Authorization: `Bearer ${token}`,
       },
     })
+
+    await wait(JINGLE_DELAY_MS)
 
     if (result.value.toneScore < GOOD_JINGLE_MIN_SCORE) {
       playIncorrectJingle(0.5)
