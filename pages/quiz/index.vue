@@ -92,7 +92,7 @@ const canEnterLevel = (level: any) => {
             Sentence Audio Only
           </NuxtLink>
 
-          <NuxtLink :to="`/quiz/${quizLevel.id}/tone-gate`" class="level-btn level-btn-green col-span-2">
+          <NuxtLink :to="`/quiz/${quizLevel.id}/echo-gecko`" class="level-btn level-btn-green col-span-2">
             Echo Gecko
           </NuxtLink>
         </div>
