@@ -35,6 +35,7 @@ const PASS_SCORE = 40
 const NEAR_PERFECT_PASS_SCORE = 80
 const GOOD_JINGLE_MIN_SCORE = 30
 const JINGLE_DELAY_MS = 400
+const SUCCESS_MESSAGE_MS = 20000
 const QUIZ_SIZE = 10
 
 const route = useRoute()
@@ -71,6 +72,7 @@ const submitting = ref(false)
 const recording = ref(false)
 const errorMessage = ref("")
 const feedback = ref("")
+const successMessage = ref("")
 const lastToneScore = ref<number | null>(null)
 const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
 
@@ -265,6 +267,7 @@ function startQuiz() {
 
   errorMessage.value = ""
   feedback.value = ""
+  successMessage.value = ""
   lastToneScore.value = null
   detectedToneRows.value = []
   finished.value = false
@@ -294,6 +297,7 @@ async function startRecording() {
   try {
     errorMessage.value = ""
     feedback.value = ""
+    successMessage.value = ""
     lastToneScore.value = null
     detectedToneRows.value = []
     resetRecordingState()
@@ -350,6 +354,7 @@ async function submitAttempt() {
   submitting.value = true
   errorMessage.value = ""
   feedback.value = ""
+  successMessage.value = ""
 
   try {
     const expectedTokens = tokenizeJyutping(currentWord.value.jyutping)
@@ -384,6 +389,9 @@ async function submitAttempt() {
         playCorrectJingle(0.85)
       }
 
+      successMessage.value = "✅ Nice pronunciation — moving to the next word!"
+      await wait(SUCCESS_MESSAGE_MS)
+
       passedCount.value += 1
 
       if (currentIndex.value >= QUIZ_SIZE - 1) {
@@ -397,6 +405,7 @@ async function submitAttempt() {
       }
 
       resetRecordingState()
+      successMessage.value = ""
       if (!finished.value) {
         feedback.value = ""
         lastToneScore.value = null
@@ -512,6 +521,9 @@ onBeforeUnmount(() => {
           </div>
 
           <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
+          <p v-if="successMessage" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+            {{ successMessage }}
+          </p>
           <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
 
           <div v-if="lastToneScore !== null" class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4">
