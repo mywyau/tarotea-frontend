@@ -42,10 +42,10 @@ const sizeClass = computed(() => {
     case 'sm':
       return 'text-xs px-2.5 py-1.5 rounded-lg gap-1.5'
     case 'lg':
-      return 'text-base px-5 py-3 rounded-xl gap-2.5'
+      return 'text-base px-5 py-3 rounded-lg gap-2.5'
     case 'md':
     default:
-      return 'text-sm px-3.5 py-2.5 rounded-xl gap-2'
+      return 'text-sm px-3 py-2 rounded-lg gap-2'
   }
 })
 
