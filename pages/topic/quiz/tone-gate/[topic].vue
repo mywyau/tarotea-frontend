@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { playCorrectJingle, playGoodJingle, playToneFailJingle } from "~/utils/sounds"
+import { playCorrectJingle, playGoodJingle } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: ["logged-in", "topic-access-quiz"],
@@ -459,7 +459,7 @@ async function submitAttempt() {
       }
 
       if (!rapidMode.value) {
-        successMessage.value = "✅ Nice pronunciation — moving to the next word!"
+        successMessage.value = "Nice pronunciation — moving to the next word!"
         await waitForNextWord(SUCCESS_MESSAGE_MS)
         if (attemptId !== activeAttemptId.value || currentWord.value?.id !== wordIdAtSubmit) return
       }
@@ -586,7 +586,7 @@ onBeforeUnmount(() => {
             <button
               class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
-              {{ submitting ? "Scoring..." : "Check Tone" }}
+              {{ submitting ? "Scoring..." : "Submit" }}
             </button>
             <button
               class="rounded-lg bg-[#CDE8C9] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
@@ -598,14 +598,16 @@ onBeforeUnmount(() => {
               @click="skipWord">
               Skip
             </button>
-            <label class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
+            <label
+              class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
               <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-fuchsia-300 text-fuchsia-600" />
               Rapid mode (skip pause only)
             </label>
           </div>
 
           <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
-          <p v-if="successMessage && !rapidMode" class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
+          <p v-if="successMessage && !rapidMode"
+            class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
             {{ successMessage }}
             <span v-if="nextWordCountdownSeconds !== null" class="ml-1">
               (next word in {{ nextWordCountdownSeconds }}s)

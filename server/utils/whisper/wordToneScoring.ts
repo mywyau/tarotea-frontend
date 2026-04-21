@@ -597,8 +597,8 @@ export function scoreWordToneAttempt(params: {
             ? `Nice attempt — you’re close. ${toneIssueDetails.join(" ")}`
             : "Nice attempt — you’re close. Keep your pitch movement a little steadier."
           : toneIssueDetails.length
-            ? `Good effort. ${toneIssueDetails.join(" ")} Try again slowly and copy the sample rhythm.`
-            : "Good effort. Your tone shape is still off. Try again slowly and copy the sample rhythm."
+            ? `Good effort. ${toneIssueDetails.join(" ")}.`
+            : "Good effort. Your tone shape is still a little off."
     : matchType === "perfect"
       ? "Perfect — sound and tone both match."
       : soundScore === 100 && toneScore < 100

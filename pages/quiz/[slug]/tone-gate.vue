@@ -458,7 +458,7 @@ async function submitAttempt() {
       }
 
       if (!rapidMode.value) {
-        successMessage.value = "✅ Nice pronunciation — moving to the next word!"
+        successMessage.value = "Nice pronunciation — moving to the next word!"
         await waitForNextWord(SUCCESS_MESSAGE_MS)
         if (attemptId !== activeAttemptId.value || currentWord.value?.id !== wordIdAtSubmit) return
       }
@@ -584,7 +584,7 @@ onBeforeUnmount(() => {
             <button
               class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
-              {{ submitting ? "Scoring..." : "Check Tone" }}
+              {{ submitting ? "Scoring..." : "Submit" }}
             </button>
             <button
               class="rounded-lg bg-[#CDE8C9] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
