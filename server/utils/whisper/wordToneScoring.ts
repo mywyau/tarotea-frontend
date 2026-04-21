@@ -407,7 +407,7 @@ function applySingleWordToneFloor(params: {
 
   if ((tone === "2" || tone === "5") && shape && shape.direction !== "falling") {
     // Single rising tones like lei2/caang2 can be naturally subtle.
-    return Math.max(params.toneScore, 72)
+    return Math.max(params.toneScore, 74)
   }
 
   const detected = params.detectedAcousticTones?.[0]
@@ -418,12 +418,12 @@ function applySingleWordToneFloor(params: {
   const confidence = detected.confidence ?? 0
   const isLevelFamily = tone === "1" || tone === "3" || tone === "6"
 
-  if (confidence >= 14) {
-    return Math.max(params.toneScore, isLevelFamily ? 72 : 74)
+  if (confidence >= 12) {
+    return Math.max(params.toneScore, isLevelFamily ? 74 : 76)
   }
 
-  if (confidence >= 6) {
-    return Math.max(params.toneScore, isLevelFamily ? 68 : 70)
+  if (confidence >= 4) {
+    return Math.max(params.toneScore, isLevelFamily ? 70 : 72)
   }
 
   return params.toneScore
