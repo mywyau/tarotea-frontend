@@ -319,7 +319,7 @@ onMounted(() => {
 
                             <div class="space-y-2.5 sm:space-y-3">
                                 <button type="button"
-                                    class="btn-primary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
+                                    class="btn-primary w-full rounded-xl px-3 py-2 text-sm text-black font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                                     :disabled="!isReady" @click="animateCurrentCharacter">
                                     Play strokes
                                 </button>
@@ -378,130 +378,6 @@ onMounted(() => {
     </div>
 </template>
 
-<!-- <style scoped>
-.sentence-page {
-    --pink: #eab8e4;
-    --purple: #d6a3d1;
-    --blue: #a8cae0;
-    --yellow: #f4cd27;
-    --blush: #f6e1e1;
-}
-
-.header-card {
-    background: rgba(255, 255, 255, 0.58);
-    border: 1px solid rgba(17, 24, 39, 0.08);
-    backdrop-filter: blur(8px);
-}
-
-.page-card {
-    background: rgba(255, 255, 255, 0.58);
-    border: 1px solid rgba(17, 24, 39, 0.08);
-    backdrop-filter: blur(8px);
-}
-
-.content-card {
-    background: rgba(168, 202, 224, 0.22);
-    border: 1px solid rgba(17, 24, 39, 0.08);
-}
-
-.writer-card {
-    background: rgba(246, 225, 225, 0.38);
-    border: 1px dashed rgba(17, 24, 39, 0.18);
-}
-
-.side-card {
-    background: rgba(255, 255, 255, 0.62);
-    border: 1px solid rgba(17, 24, 39, 0.08);
-    backdrop-filter: blur(8px);
-}
-
-.page-eyebrow {
-    color: rgba(17, 24, 39, 0.62);
-}
-
-.page-heading {
-    color: rgba(0, 0, 0);
-}
-
-.page-subheading {
-    color: rgba(17, 24, 39, 0.72);
-}
-
-.card-label {
-    color: rgba(17, 24, 39, 0.62);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}
-
-.section-divider {
-    border-top: 1px solid rgba(17, 24, 39, 0.1);
-}
-
-.status-text {
-    color: rgba(17, 24, 39, 0.68);
-}
-
-.status-error {
-    color: rgb(185, 28, 28);
-}
-
-.status-warn {
-    color: rgb(146, 64, 14);
-}
-
-.btn-primary,
-.btn-secondary,
-.btn-tertiary {
-    border: 1px solid rgba(17, 24, 39, 0.08);
-}
-
-.btn-primary {
-    background: rgb(126, 147, 255);
-    color: white;
-    box-shadow: 0 10px 22px rgba(126, 147, 255, 0.22);
-}
-
-.btn-primary:hover:not(:disabled) {
-    filter: brightness(1.05);
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: rgba(168, 202, 224, 0.38);
-    color: rgba(17, 24, 39, 0.92);
-}
-
-.btn-secondary:hover:not(:disabled) {
-    background: rgba(214, 163, 209, 0.30);
-    transform: translateY(-1px);
-}
-
-.btn-tertiary {
-    background: rgba(246, 225, 225, 0.62);
-    color: rgba(17, 24, 39, 0.92);
-}
-
-.btn-tertiary:hover:not(:disabled) {
-    background: rgba(234, 184, 228, 0.26);
-    transform: translateY(-1px);
-}
-
-.btn-primary:disabled,
-.btn-secondary:disabled,
-.btn-tertiary:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
-}
-
-@media (max-width: 640px) {
-    .header-card,
-    .page-card,
-    .side-card {
-        backdrop-filter: blur(6px);
-    }
-}
-</style> -->
 <style scoped>
 .sentence-page {
     --pink: #eab8e4;
@@ -588,7 +464,7 @@ onMounted(() => {
 
 .btn-primary {
     background: rgb(126, 147, 255);
-    color: white;
+    /* color: white; */
     box-shadow: 0 10px 22px rgba(126, 147, 255, 0.22);
 }
 

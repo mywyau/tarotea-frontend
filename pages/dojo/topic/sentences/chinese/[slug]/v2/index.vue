@@ -637,11 +637,6 @@ onBeforeUnmount(() => {
               <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
                 {{ formattedElapsedTime }}
               </span>
-              <!-- <button
-                class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                type="button" @click="restartSession">
-                New session
-              </button> -->
 
               <AudioButton :key="current?.sentenceId" :src="`${cdnBase}/audio/${current?.sentenceId}.mp3`" />
             </div>
@@ -653,7 +648,8 @@ onBeforeUnmount(() => {
                 Sentence
               </div>
 
-              <div class="text-2xl font-medium text-gray-900 leading-relaxed">
+              <div class="text-2xl font-medium text-gray-900 leading-relaxed no-copy" @copy.prevent @cut.prevent
+                @contextmenu.prevent @dragstart.prevent @selectstart.prevent>
                 {{ current?.sentence }}
               </div>
 
@@ -973,5 +969,13 @@ onBeforeUnmount(() => {
   to {
     transform: rotate(360deg);
   }
+}
+
+.no-copy {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
 }
 </style>

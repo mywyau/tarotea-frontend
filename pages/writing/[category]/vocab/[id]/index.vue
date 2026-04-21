@@ -296,7 +296,7 @@ onMounted(() => {
 
               <div class="space-y-2.5 sm:space-y-3">
                 <button type="button"
-                  class="btn-primary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
+                  class="btn-primary w-full rounded-xl px-3 py-2 text-sm text-black font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
                   :disabled="!isReady" @click="animateCurrentCharacter">
                   Play strokes
                 </button>
@@ -464,7 +464,7 @@ onMounted(() => {
 
 .btn-primary {
   background: rgb(126, 147, 255);
-  color: white;
+  /* color: white; */
   box-shadow: 0 10px 22px rgba(126, 147, 255, 0.22);
 }
 

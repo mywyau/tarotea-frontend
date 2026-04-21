@@ -627,12 +627,6 @@ onBeforeUnmount(() => {
                 {{ formattedElapsedTime }}
               </span>
             </div>
-
-            <!-- <button
-              class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-              type="button" @click="restartSession">
-              New session
-            </button> -->
           </div>
 
           <div class="rounded-2xl bg-gray-50 p-5 space-y-5">
