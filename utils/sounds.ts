@@ -42,6 +42,33 @@ export function playCorrectJingle(volume = 0.8) {
   osc.stop(now + 0.4);
 }
 
+export function playGoodJingle(volume = 0.55) {
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(volume, now + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.65);
+  gain.connect(ctx.destination);
+
+  const notes = [
+    { t: 0.0, f: 660, d: 0.16 }, // E5
+    { t: 0.18, f: 784, d: 0.2 }, // G5
+    { t: 0.42, f: 880, d: 0.22 }, // A5
+  ];
+
+  notes.forEach(({ t, f, d }) => {
+    const osc = ctx.createOscillator();
+    osc.type = "triangle";
+    osc.frequency.setValueAtTime(f, now + t);
+
+    osc.connect(gain);
+    osc.start(now + t);
+    osc.stop(now + t + d);
+  });
+}
+
 export function playIncorrectJingle(volume = 0.5) {
   const ctx = getAudioContext();
 
@@ -62,6 +89,33 @@ export function playIncorrectJingle(volume = 0.5) {
 
   osc.start(now);
   osc.stop(now + 0.25);
+}
+
+export function playToneFailJingle(volume = 0.45) {
+  const ctx = getAudioContext();
+  const now = ctx.currentTime;
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.0001, now);
+  gain.gain.exponentialRampToValueAtTime(volume, now + 0.03);
+  gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.55);
+  gain.connect(ctx.destination);
+
+  const notes = [
+    { t: 0.0, f: 523, d: 0.2 }, // C5
+    { t: 0.2, f: 466, d: 0.2 }, // A#4
+    { t: 0.42, f: 392, d: 0.25 }, // G4
+  ];
+
+  notes.forEach(({ t, f, d }) => {
+    const osc = ctx.createOscillator();
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(f, now + t);
+
+    osc.connect(gain);
+    osc.start(now + t);
+    osc.stop(now + t + d);
+  });
 }
 
 export function playQuizCompleteFanfareSong(volume = 0.9) {
