@@ -36,7 +36,7 @@ const NEAR_PERFECT_PASS_SCORE = 60
 const GOOD_JINGLE_MIN_SCORE = 25
 const JINGLE_DELAY_MS = 400
 const SUCCESS_MESSAGE_MS = 20000
-const QUIZ_SIZE = 10
+const MAX_QUIZ_SIZE = 10
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -91,7 +91,8 @@ let currentWordAudio: HTMLAudioElement | null = null
 let nextWordCountdownInterval: ReturnType<typeof setInterval> | null = null
 
 const currentWord = computed(() => quizWords.value[currentIndex.value] ?? null)
-const progressLabel = computed(() => `${Math.min(currentIndex.value + 1, QUIZ_SIZE)} / ${QUIZ_SIZE}`)
+const quizSize = computed(() => Math.min(MAX_QUIZ_SIZE, allWords.value.length))
+const progressLabel = computed(() => `${Math.min(currentIndex.value + 1, quizSize.value)} / ${quizSize.value}`)
 const currentWordAudioUrl = computed(() => {
   const id = currentWord.value?.id
   return id ? `${cdnBase}/audio/${id}.mp3` : ""
@@ -166,7 +167,7 @@ function advanceToNextWord(options?: { countAsPass?: boolean }) {
     passedCount.value += 1
   }
 
-  if (currentIndex.value >= QUIZ_SIZE - 1) {
+  if (currentIndex.value >= quizSize.value - 1) {
     finished.value = true
     if (startedAtMs.value) {
       elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
@@ -307,8 +308,8 @@ async function playCurrentWordAudio() {
 }
 
 function startQuiz() {
-  if (allWords.value.length < QUIZ_SIZE) {
-    errorMessage.value = "Not enough words available to start this quiz."
+  if (quizSize.value <= 0) {
+    errorMessage.value = "No words available to start this quiz yet."
     return
   }
 
@@ -320,7 +321,7 @@ function startQuiz() {
   finished.value = false
   currentIndex.value = 0
   passedCount.value = 0
-  quizWords.value = shuffle(allWords.value).slice(0, QUIZ_SIZE)
+  quizWords.value = shuffle(allWords.value).slice(0, quizSize.value)
   elapsedSeconds.value = 0
   startedAtMs.value = Date.now()
   started.value = true
@@ -522,7 +523,7 @@ onBeforeUnmount(() => {
         </div>
         <div v-else-if="!started">
           <p class="text-base text-gray-600">
-            Press start to begin a {{ QUIZ_SIZE }}-word pronunciation challenge.
+            Press start to begin a {{ quizSize }}-word pronunciation challenge.
           </p>
           <button
             class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105"
@@ -536,7 +537,7 @@ onBeforeUnmount(() => {
             Quiz complete!
           </h2>
           <p class="text-sm text-gray-700">
-            Passed words: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}
+            Passed words: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ quizSize }}
           </p>
           <p class="text-sm text-gray-700">
             Total time: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span>
@@ -552,7 +553,7 @@ onBeforeUnmount(() => {
           <div
             class="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-fuchsia-100 bg-fuchsia-50/60 p-3 text-sm text-gray-700">
             <p>Progress: <span class="font-semibold text-gray-900">{{ progressLabel }}</span></p>
-            <p>Passed: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ QUIZ_SIZE }}</p>
+            <p>Passed: <span class="font-semibold text-emerald-700">{{ passedCount }}</span> / {{ quizSize }}</p>
             <p>Elapsed: <span class="font-semibold text-fuchsia-700">{{ formattedElapsedTime }}</span></p>
           </div>
 
