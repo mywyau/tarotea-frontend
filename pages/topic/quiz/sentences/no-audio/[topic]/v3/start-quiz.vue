@@ -11,7 +11,6 @@ const topicSlug = computed(() => route.params.topic as string)
 
 const {
   authReady,
-  isLoggedIn,
 } = useMeStateV2()
 
 watchEffect(() => {
@@ -49,9 +48,7 @@ const scoringTips = [
 
 const showAllTips = ref(false)
 
-const canEnterTopic = () => {
-  return isLoggedIn.value
-}
+const canEnterTopic = () => true
 </script>
 
 <template>

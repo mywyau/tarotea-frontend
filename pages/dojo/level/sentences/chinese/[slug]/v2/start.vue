@@ -1,7 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  middleware: ['logged-in'],
 })
 
 import { chineseSentenceXp, chineseSentenceXpHintUsed } from '~/config/dojo/xp_config'

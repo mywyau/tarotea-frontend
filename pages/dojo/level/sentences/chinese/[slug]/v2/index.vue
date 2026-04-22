@@ -2,7 +2,6 @@
 
 definePageMeta({
   ssr: false,
-  middleware: ['logged-in'],
 })
 
 import { computed, nextTick, ref, watch, type Ref } from 'vue'
@@ -57,6 +56,7 @@ type SentenceDojoFinalizeResponse = {
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+const { isLoggedIn } = useMeStateV2()
 
 const auth = await useAuth()
 
@@ -75,6 +75,13 @@ async function authedFetch<T>(
   })
 }
 
+function publicFetch<T>(
+  url: string,
+  options: Parameters<typeof $fetch<T>>[1] = {}
+) {
+  return $fetch<T>(url, options)
+}
+
 const {
   data,
   error,
@@ -83,7 +90,7 @@ const {
 } = await useAsyncData(
   () => `sentence-dojo-start-${slug.value}`,
   () =>
-    authedFetch<SentenceDojoStartResponse>(
+    (isLoggedIn.value ? authedFetch : publicFetch)<SentenceDojoStartResponse>(
       // '/api/typing/sentences/v2/start',
       '/api/typing/sentences/v2/start-v2',
       {
@@ -180,6 +187,7 @@ const sessionResult = ref<{
   correctCount: number
   totalSentences: number
   xpEarned: number
+  guestPreview?: boolean
 } | null>(null)
 
 const copied = ref(false)
@@ -389,6 +397,16 @@ async function restartSession() {
 
 async function finalizeBatch() {
   if (finishing.value) return
+  if (!isLoggedIn.value) {
+    sessionResult.value = {
+      correctCount: batchAttempts.value.length,
+      totalSentences: sentences.value.length,
+      xpEarned: 0,
+      guestPreview: true,
+    }
+    idx.value = sentences.value.length
+    return
+  }
   if (!activeSessionKey.value) return
 
   finishing.value = true
