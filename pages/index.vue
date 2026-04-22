@@ -57,16 +57,6 @@ onMounted(() => {
 
       <!-- <div class="grid grid-cols-1 sm:grid-cols-2 gap-5"> -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
-          <div class="text-2xl font-semibold text-gray-900">
-            {{ stats?.totalUsers ?? '—' }}
-            <!-- {{ stats?.paidUsers ?? '—' }} -->
-          </div>
-          <div class="text-sm text-gray-700 mt-1">
-            Learners
-          </div>
-        </div>
-
         <div class="rounded-lg p-6 text-center" style="background-color:#E7F3D5; border-color:#E7F3D5;">
           <div class="text-2xl font-semibold text-gray-900">
             {{ currentUsers ?? '—' }}
@@ -76,15 +66,15 @@ onMounted(() => {
           </div>
         </div>
 
-        <!-- 
         <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
           <div class="text-2xl font-semibold text-gray-900">
-            {{ stats?.paidUsers ?? '—' }}
+            {{ stats?.totalUsers ?? '—' }}
+            <!-- {{ stats?.paidUsers ?? '—' }} -->
           </div>
           <div class="text-sm text-gray-700 mt-1">
-            Active Subscribers
+            Learners
           </div>
-        </div> -->
+        </div>
       </div>
     </div>
 
