@@ -10,11 +10,11 @@ export default defineEventHandler(async (event) => {
 
   if (!sessionId) {
     return {
-      currentUsers: countOnlineUsers(),
+      currentUsers: await countOnlineUsers(),
     }
   }
 
   return {
-    currentUsers: touchOnlineSession(sessionId),
+    currentUsers: await touchOnlineSession(sessionId),
   }
 })
