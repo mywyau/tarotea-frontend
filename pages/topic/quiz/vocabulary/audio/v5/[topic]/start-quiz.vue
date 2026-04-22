@@ -14,7 +14,6 @@ const cdnBase = runtimeConfig.public.cdnBase
 
 const {
   authReady,
-  isLoggedIn,
 } = useMeStateV2()
 
 watchEffect(() => {
@@ -56,7 +55,7 @@ const scoringTips = [
 const showAllTips = ref(false)
 
 const canEnterTopic = () => {
-  return isLoggedIn.value
+  return true
 }
 
 </script>

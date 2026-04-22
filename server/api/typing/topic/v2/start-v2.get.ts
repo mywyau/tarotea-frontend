@@ -1,5 +1,5 @@
 import { getUserEntitlement } from "#imports";
-import { createError, getQuery } from "h3";
+import { createError, getHeader, getQuery, getRequestIP } from "h3";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
@@ -69,10 +69,15 @@ function resolveTitle(variant: DojoVariant, slug: string) {
 }
 
 export default defineEventHandler(async (event) => {
-  const auth = await requireUser(event);
-  const userId = auth.sub;
+  const bearerToken = getHeader(event, "authorization");
+  const hasAuthHeader =
+    typeof bearerToken === "string" && bearerToken.startsWith("Bearer ");
+  const auth = hasAuthHeader ? await requireUser(event) : null;
+  const userId = auth?.sub ?? null;
+  const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
+  const sessionOwner = userId ?? `guest:${requestIp}`;
 
-  await enforceRateLimit(`rl:start:typing-topic-sentences:${userId}`, 20, 60);
+  await enforceRateLimit(`rl:start:typing-topic-sentences:${sessionOwner}`, 20, 60);
 
   const query = getQuery(event);
   const scope = String(query.scope ?? "topic");
@@ -120,7 +125,7 @@ export default defineEventHandler(async (event) => {
     };
 
     await redis.set(
-      `dojo:typing:topic:${userId}:${sessionKey}`,
+      `dojo:typing:topic:${sessionOwner}:${sessionKey}`,
       JSON.stringify(session),
       { ex: QUIZ_SESSION_TTL_SECONDS },
     );
@@ -143,10 +148,15 @@ export default defineEventHandler(async (event) => {
   let accessibleWords = allWords;
 
   if (!freeTopics.has(slug)) {
-    const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
-    const hasFullAccess = canAccessTopicWord(true, entitlement, slug);
+    if (!userId) {
+      const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
+      const previewSet = new Set(freePreviewIds);
+      accessibleWords = allWords.filter((word) => previewSet.has(word.id));
+    } else {
+      const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
+      const hasFullAccess = canAccessTopicWord(true, entitlement, slug);
 
-    if (!hasFullAccess) {
+      if (!hasFullAccess) {
       const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
       const unlockedWordIds = await getUnlockedWordIdsForUser(userId, allWordIds);
 
@@ -158,6 +168,7 @@ export default defineEventHandler(async (event) => {
       accessibleWords = allWords.filter((word) =>
         accessibleWordIdSet.has(word.id),
       );
+      }
     }
   }
 
@@ -174,7 +185,7 @@ export default defineEventHandler(async (event) => {
     };
 
     await redis.set(
-      `dojo:typing:topic:${userId}:${sessionKey}`,
+      `dojo:typing:topic:${sessionOwner}:${sessionKey}`,
       JSON.stringify(session),
       { ex: QUIZ_SESSION_TTL_SECONDS },
     );
@@ -196,22 +207,24 @@ export default defineEventHandler(async (event) => {
     ...new Set(accessibleWords.map((w) => w.id).filter(Boolean)),
   ];
 
-  const progressRes = await db.query<{
-    word_id: string;
-    xp: number | string | null;
-  }>(
-    `
-    select word_id, xp
-    from user_word_progress
-    where user_id = $1
-      and word_id = any($2::text[])
-    `,
-    [userId, accessibleWordIds],
-  );
-
-  const xpMap = new Map<string, number>(
-    progressRes.rows.map((row) => [row.word_id, Number(row.xp ?? 0)]),
-  );
+  const xpMap = new Map<string, number>();
+  if (userId) {
+    const progressRes = await db.query<{
+      word_id: string;
+      xp: number | string | null;
+    }>(
+      `
+      select word_id, xp
+      from user_word_progress
+      where user_id = $1
+        and word_id = any($2::text[])
+      `,
+      [userId, accessibleWordIds],
+    );
+    for (const row of progressRes.rows) {
+      xpMap.set(row.word_id, Number(row.xp ?? 0));
+    }
+  }
 
   const weakestIds = [...accessibleWords]
     .map((w) => ({
@@ -246,7 +259,7 @@ export default defineEventHandler(async (event) => {
   };
 
   await redis.set(
-    `dojo:typing:topic:${userId}:${sessionKey}`,
+    `dojo:typing:topic:${sessionOwner}:${sessionKey}`,
     JSON.stringify(session),
     { ex: QUIZ_SESSION_TTL_SECONDS },
   );

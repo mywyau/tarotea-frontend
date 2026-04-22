@@ -62,6 +62,7 @@ type QuizAnswer = {
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+const { isLoggedIn } = useMeStateV2()
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -84,6 +85,13 @@ async function authedFetch<T>(
   })
 }
 
+function publicFetch<T>(
+  url: string,
+  options: Parameters<typeof $fetch<T>>[1] = {}
+) {
+  return $fetch<T>(url, options)
+}
+
 const {
   data,
   error,
@@ -92,7 +100,7 @@ const {
 } = await useAsyncData(
   () => `level-sentences-audio-start-${slug.value}`,
   () =>
-    authedFetch<SentenceQuizStartResponse>(
+    (isLoggedIn.value ? authedFetch : publicFetch)<SentenceQuizStartResponse>(
       '/api/sentences/v3/start-v2',
       {
         query: {
@@ -313,6 +321,10 @@ function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
 
 async function finalizeQuiz() {
   if (finishing.value) return
+  if (!isLoggedIn.value) {
+    totalXpEarned.value = 0
+    return
+  }
   if (!activeSessionKey.value) return
 
   finishing.value = true

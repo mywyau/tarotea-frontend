@@ -21,8 +21,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   const levelNumber: number = levelIdToNumbers(slug);
+  const isGuestPreviewRoute =
+    to.path.includes("/sentences/") ||
+    to.path.includes("/word/") ||
+    to.path.includes("/audio/");
 
   if (isLoggedOut.value) {
+    if (isGuestPreviewRoute) {
+      return;
+    }
     return navigateTo("/please-sign-in");
   }
 

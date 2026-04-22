@@ -1,5 +1,5 @@
 import { getUserEntitlement } from "#imports";
-import { createError, getQuery } from "h3";
+import { createError, getHeader, getQuery, getRequestIP } from "h3";
 import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
 import { redis } from "~/server/repositories/redis";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
@@ -44,10 +44,15 @@ async function loadCanonicalLevelWordIds(slug: string): Promise<string[]> {
 }
 
 export default defineEventHandler(async (event) => {
-  const auth = await requireUser(event);
-  const userId = auth.sub;
+  const bearerToken = getHeader(event, "authorization");
+  const hasAuthHeader =
+    typeof bearerToken === "string" && bearerToken.startsWith("Bearer ");
+  const auth = hasAuthHeader ? await requireUser(event) : null;
+  const userId = auth?.sub ?? null;
+  const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
+  const sessionOwner = userId ?? `guest:${requestIp}`;
 
-  await enforceRateLimit(`rl:start:level-sentences:${userId}`, 20, 60);
+  await enforceRateLimit(`rl:start:level-sentences:${sessionOwner}`, 20, 60);
 
   const query = getQuery(event);
 
@@ -113,7 +118,10 @@ export default defineEventHandler(async (event) => {
 
   let accessibleWordIdSet = new Set<string>(sourceWordIdsInOrder);
 
-  if (!isFreeLevel(levelNumber)) {
+  if (!userId) {
+    const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_LEVEL_WORD_LIMIT);
+    accessibleWordIdSet = new Set(freePreviewIds);
+  } else if (!isFreeLevel(levelNumber)) {
     const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
     const hasFullAccess = canAccessLevel(true, entitlement, levelNumber);
 
@@ -151,7 +159,7 @@ export default defineEventHandler(async (event) => {
     };
 
     await redis.set(
-      `quiz:sentences:${userId}:${emptySessionKey}`,
+      `quiz:sentences:${sessionOwner}:${emptySessionKey}`,
       JSON.stringify(session),
       { ex: QUIZ_SESSION_TTL_SECONDS },
     );
@@ -172,10 +180,9 @@ export default defineEventHandler(async (event) => {
   const sentenceIds = [
     ...new Set(accessibleItems.map((item) => item.sentenceId)),
   ];
-  const sentenceProgressMap = await loadSentenceProgressMap(
-    userId,
-    sentenceIds,
-  );
+  const sentenceProgressMap = userId
+    ? await loadSentenceProgressMap(userId, sentenceIds)
+    : new Map<string, number>();
 
   const byWord = new Map<string, LevelSentenceItem[]>();
 
@@ -195,7 +202,9 @@ export default defineEventHandler(async (event) => {
   const shuffledItems = shuffleFisherYates(selected);
   const questions = buildSentenceQuiz(shuffledItems).slice(0, 20);
   const wordIds = [...new Set(questions.map((q) => q.wordId))];
-  const progress = await loadWordProgressMap(userId, wordIds);
+  const progress = userId
+    ? await loadWordProgressMap(userId, wordIds)
+    : {};
 
   const sessionKey = crypto.randomUUID();
 
@@ -212,7 +221,7 @@ export default defineEventHandler(async (event) => {
   };
 
   await redis.set(
-    `quiz:sentences:${userId}:${sessionKey}`,
+    `quiz:sentences:${sessionOwner}:${sessionKey}`,
     JSON.stringify(session),
     { ex: QUIZ_SESSION_TTL_SECONDS },
   );

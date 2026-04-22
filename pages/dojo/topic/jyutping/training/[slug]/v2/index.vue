@@ -1,7 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  middleware: ['logged-in'],
 })
 
 import { computed, nextTick, ref, watch, type Ref } from 'vue'
@@ -66,6 +65,7 @@ type SylState = 'idle' | 'correct'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+const { isLoggedIn } = useMeStateV2()
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -87,6 +87,13 @@ async function authedFetch<T>(
   })
 }
 
+function publicFetch<T>(
+  url: string,
+  options: Parameters<typeof $fetch<T>>[1] = {}
+) {
+  return $fetch<T>(url, options)
+}
+
 const {
   data,
   error,
@@ -95,7 +102,7 @@ const {
 } = await useAsyncData(
   () => `topic-jyutping-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>(
+    (isLoggedIn.value ? authedFetch : publicFetch)<DojoStartResponse>(
       // '/api/typing/topic/v2/start',
       '/api/typing/topic/v2/start-v2',
       {
@@ -202,6 +209,7 @@ const sessionResult = ref<{
   correctCount: number
   totalWords: number
   xpEarned: number
+  guestPreview?: boolean
 } | null>(null)
 
 const current = computed(() => words.value[idx.value] ?? null)
@@ -382,6 +390,16 @@ async function restartSession() {
 
 async function finalizeBatch() {
   if (finishing.value) return
+  if (!isLoggedIn.value) {
+    sessionResult.value = {
+      correctCount: batchAttempts.value.length,
+      totalWords: words.value.length,
+      xpEarned: 0,
+      guestPreview: true,
+    }
+    idx.value = words.value.length
+    return
+  }
   if (!activeSessionKey.value) return
 
   finishing.value = true

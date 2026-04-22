@@ -16,7 +16,7 @@ if (!isLevelId(slug)) {
 
 const levelNumber: number = levelIdToNumbers(slug)
 
-const { authReady, isLoggedIn } = useMeStateV2()
+const { authReady } = useMeStateV2()
 
 watchEffect(() => {
   if (slug && levelNumber === null) {
@@ -53,7 +53,7 @@ const scoringTips = [
 
 const showAllTips = ref(false)
 
-const canEnterLevel = () => !!isLoggedIn.value
+const canEnterLevel = () => true
 </script>
 
 <template>

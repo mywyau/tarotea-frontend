@@ -1,4 +1,4 @@
-import { createError, getQuery } from "h3";
+import { createError, getHeader, getQuery, getRequestIP } from "h3";
 import { getUserEntitlement } from "#imports";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { redis } from "~/server/repositories/redis";
@@ -39,11 +39,16 @@ async function loadCanonicalTopicWordIds(slug: string): Promise<string[]> {
 }
 
 export default defineEventHandler(async (event) => {
-  const auth = await requireUser(event);
-  const userId = auth.sub;
+  const bearerToken = getHeader(event, "authorization");
+  const hasAuthHeader =
+    typeof bearerToken === "string" && bearerToken.startsWith("Bearer ");
+  const auth = hasAuthHeader ? await requireUser(event) : null;
+  const userId = auth?.sub ?? null;
+  const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
+  const sessionOwner = userId ?? `guest:${requestIp}`;
   const query = getQuery(event);
 
-  await enforceRateLimit(`rl:start:topic-sentences:${userId}`, 20, 60);
+  await enforceRateLimit(`rl:start:topic-sentences:${sessionOwner}`, 20, 60);
 
   const scope = String(query.scope ?? "topic");
   const slug = String(query.slug ?? "");
@@ -95,10 +100,14 @@ export default defineEventHandler(async (event) => {
   let accessibleWordIdSet = new Set<string>(sourceWordIdsInOrder);
 
   if (!freeTopics.has(slug)) {
-    const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
-    const hasFullAccess = canAccessTopicWord(true, entitlement, slug);
+    if (!userId) {
+      const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_WORD_LIMIT);
+      accessibleWordIdSet = new Set(freePreviewIds);
+    } else {
+      const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
+      const hasFullAccess = canAccessTopicWord(true, entitlement, slug);
 
-    if (!hasFullAccess) {
+      if (!hasFullAccess) {
       const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_WORD_LIMIT);
       const unlockedWordIds = await getUnlockedWordIdsForUser(
         userId,
@@ -109,6 +118,7 @@ export default defineEventHandler(async (event) => {
         ...freePreviewIds,
         ...unlockedWordIds,
       ]);
+      }
     }
   }
 
@@ -132,7 +142,7 @@ export default defineEventHandler(async (event) => {
     };
 
     await redis.set(
-      `quiz:topic-sentences:${userId}:${emptySessionKey}`,
+      `quiz:topic-sentences:${sessionOwner}:${emptySessionKey}`,
       JSON.stringify(session),
       { ex: QUIZ_SESSION_TTL_SECONDS },
     );
@@ -154,10 +164,9 @@ export default defineEventHandler(async (event) => {
     ...new Set(accessibleItems.map((item) => item.sentenceId)),
   ];
 
-  const sentenceProgressMap = await loadSentenceProgressMap(
-    userId,
-    sentenceIds,
-  );
+  const sentenceProgressMap = userId
+    ? await loadSentenceProgressMap(userId, sentenceIds)
+    : new Map<string, number>();
 
   const byWord = new Map<string, TopicSentenceItem[]>();
 
@@ -177,7 +186,9 @@ export default defineEventHandler(async (event) => {
   const shuffledItems = shuffleFisherYates(selected);
   const questions = buildSentenceQuiz(shuffledItems).slice(0, 20);
   const wordIds = [...new Set(questions.map((q) => q.wordId))];
-  const progress = await loadWordProgressMap(userId, wordIds);
+  const progress = userId
+    ? await loadWordProgressMap(userId, wordIds)
+    : {};
 
   const sessionKey = crypto.randomUUID();
 
@@ -194,7 +205,7 @@ export default defineEventHandler(async (event) => {
   };
 
   await redis.set(
-    `quiz:topic-sentences:${userId}:${sessionKey}`,
+    `quiz:topic-sentences:${sessionOwner}:${sessionKey}`,
     JSON.stringify(session),
     { ex: QUIZ_SESSION_TTL_SECONDS },
   );

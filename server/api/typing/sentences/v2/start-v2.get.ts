@@ -1,5 +1,5 @@
 import { getUserEntitlement } from "#imports";
-import { createError, getQuery } from "h3";
+import { createError, getHeader, getQuery, getRequestIP } from "h3";
 import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
@@ -356,10 +356,15 @@ export default defineEventHandler(async (event) => {
   const requestStart = nowMs();
   const timings: Record<string, number> = {};
 
-  const auth = await timedStep(timings, "authMs", async () =>
-    requireUser(event),
-  );
-  const userId = auth.sub;
+  const bearerToken = getHeader(event, "authorization");
+  const hasAuthHeader =
+    typeof bearerToken === "string" && bearerToken.startsWith("Bearer ");
+  const auth = hasAuthHeader
+    ? await timedStep(timings, "authMs", async () => requireUser(event))
+    : null;
+  const userId = auth?.sub ?? null;
+  const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
+  const sessionOwner = userId ?? `guest:${requestIp}`;
 
   const query = getQuery(event);
   const scope = resolveScope(String(query.scope ?? "level"));
@@ -400,7 +405,14 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    if (!isFreeLevel(levelNumber)) {
+    if (!userId) {
+      const freePreviewIds = allWordIds.slice(0, FREE_LEVEL_WORD_LIMIT);
+      const previewSet = new Set(freePreviewIds);
+      accessibleSentences = allSentences.filter((sentence) =>
+        previewSet.has(sentence.sourceWordId),
+      );
+      accessibleWordIds = allWordIds.filter((id) => previewSet.has(id));
+    } else if (!isFreeLevel(levelNumber)) {
       const entitlement = (await getUserEntitlement(
         userId,
       )) as Entitlement | null;
@@ -429,6 +441,14 @@ export default defineEventHandler(async (event) => {
     }
   } else {
     if (!freeTopics.has(slug)) {
+      if (!userId) {
+        const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
+        const previewSet = new Set(freePreviewIds);
+        accessibleSentences = allSentences.filter((sentence) =>
+          previewSet.has(sentence.sourceWordId),
+        );
+        accessibleWordIds = allWordIds.filter((id) => previewSet.has(id));
+      } else {
       const entitlement = (await getUserEntitlement(
         userId,
       )) as Entitlement | null;
@@ -454,6 +474,7 @@ export default defineEventHandler(async (event) => {
           accessibleWordIdSet.has(id),
         );
       }
+      }
     }
   }
 
@@ -471,7 +492,7 @@ export default defineEventHandler(async (event) => {
 
     await timedStep(timings, "sessionWriteMs", async () => {
       await redis.set(
-        getSessionRedisKey(userId, sessionKey),
+        getSessionRedisKey(sessionOwner, sessionKey),
         JSON.stringify(session),
         { ex: QUIZ_SESSION_TTL_SECONDS },
       );
@@ -519,22 +540,26 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const progressRes = await timedStep(timings, "progressQueryMs", async () => {
-    return db.query<{
-      word_id: string;
-      xp: number | string | null;
-    }>(
-      `
-      select word_id, xp
-      from user_word_progress
-      where user_id = $1
-        and word_id = any($2::text[])
-      `,
-      [userId, accessibleWordIds],
-    );
-  });
-
   const xpMap = await timedStep(timings, "xpMapBuildMs", async () => {
+    if (!userId) {
+      return new Map<string, number>();
+    }
+
+    const progressRes = await timedStep(timings, "progressQueryMs", async () => {
+      return db.query<{
+        word_id: string;
+        xp: number | string | null;
+      }>(
+        `
+        select word_id, xp
+        from user_word_progress
+        where user_id = $1
+          and word_id = any($2::text[])
+        `,
+        [userId, accessibleWordIds],
+      );
+    });
+
     return new Map<string, number>(
       progressRes.rows.map((row) => [row.word_id, Number(row.xp ?? 0)]),
     );
@@ -583,7 +608,7 @@ export default defineEventHandler(async (event) => {
 
   await timedStep(timings, "sessionWriteMs", async () => {
     await redis.set(
-      getSessionRedisKey(userId, sessionKey),
+      getSessionRedisKey(sessionOwner, sessionKey),
       JSON.stringify(session),
       { ex: QUIZ_SESSION_TTL_SECONDS },
     );
