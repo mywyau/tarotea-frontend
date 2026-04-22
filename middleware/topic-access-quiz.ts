@@ -7,10 +7,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (!topic) return;
 
   const { isLoggedIn, isLoggedOut, resolve, entitlement } = useMeStateV2();
+  const isSentenceQuizRoute = to.path.includes("/sentences/");
 
   await resolve();
 
   if (isLoggedOut.value) {
+    if (isSentenceQuizRoute) {
+      return;
+    }
     return navigateTo("/please-sign-in");
   }
 

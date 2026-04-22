@@ -21,8 +21,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   const levelNumber: number = levelIdToNumbers(slug);
+  const isSentenceQuizRoute = to.path.includes("/sentences/");
 
   if (isLoggedOut.value) {
+    if (isSentenceQuizRoute) {
+      return;
+    }
     return navigateTo("/please-sign-in");
   }
 
