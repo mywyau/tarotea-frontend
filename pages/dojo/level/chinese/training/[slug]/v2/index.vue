@@ -1,7 +1,6 @@
 <script setup lang="ts">
 definePageMeta({
   ssr: false,
-  middleware: ['logged-in'],
 })
 
 import { computed, nextTick, ref, watch, type Ref } from 'vue';
@@ -57,6 +56,7 @@ type DojoFinalizeResponse = {
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+const { isLoggedIn } = useMeStateV2()
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -78,6 +78,13 @@ async function authedFetch<T>(
   })
 }
 
+function publicFetch<T>(
+  url: string,
+  options: Parameters<typeof $fetch<T>>[1] = {}
+) {
+  return $fetch<T>(url, options)
+}
+
 const {
   data,
   error,
@@ -86,7 +93,7 @@ const {
 } = await useAsyncData(
   () => `chinese-dojo-start-${slug.value}`,
   () =>
-    authedFetch<DojoStartResponse>(
+    (isLoggedIn.value ? authedFetch : publicFetch)<DojoStartResponse>(
       // '/api/typing/levels/v2/start',
       '/api/typing/levels/v2/start-v2',
       {
@@ -185,6 +192,7 @@ const sessionResult = ref<{
   correctCount: number
   totalWords: number
   xpEarned: number
+  guestPreview?: boolean
 } | null>(null)
 
 const current = computed(() => words.value[idx.value] ?? null)
@@ -304,6 +312,8 @@ const completionTiles = computed(() => [
   }
 ])
 
+const isGuestPreview = computed(() => sessionResult.value?.guestPreview === true)
+
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -376,6 +386,17 @@ async function restartSession() {
 
 async function finalizeBatch() {
   if (finishing.value) return
+  if (!isLoggedIn.value) {
+    sessionResult.value = {
+      correctCount: batchAttempts.value.length,
+      totalWords: words.value.length,
+      xpEarned: 0,
+      guestPreview: true,
+    }
+    idx.value = words.value.length
+    return
+  }
+
   if (!activeSessionKey.value) return
 
   finishing.value = true
@@ -788,11 +809,11 @@ onBeforeUnmount(() => {
           <div v-else-if="showResults" key="results" class="space-y-6">
             <div class="stat-card hero-card" :class="resultHeroClass">
               <p class="stat-label">
-                Session Complete
+                {{ isGuestPreview ? 'Preview Complete' : 'Session Complete' }}
               </p>
 
               <h2 class="hero-title">
-                {{ resultMeta.title }}
+                {{ isGuestPreview ? 'Great preview run' : resultMeta.title }}
               </h2>
 
               <p class="hero-subtext font-bold">
@@ -812,6 +833,10 @@ onBeforeUnmount(() => {
                 </p>
               </div>
             </div>
+
+            <p v-if="isGuestPreview" class="hero-subtext text-center">
+              Sign in to save sessions, earn XP, and view full results.
+            </p>
 
             <div class="pt-2 space-y-3">
               <button

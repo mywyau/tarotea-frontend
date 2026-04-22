@@ -1,5 +1,5 @@
 import { getUserEntitlement } from "#imports";
-import { createError, getQuery } from "h3";
+import { createError, getHeader, getQuery, getRequestIP } from "h3";
 import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
@@ -167,13 +167,19 @@ export default defineEventHandler(async (event) => {
   const requestStart = nowMs();
   const timings: Record<string, number> = {};
 
-  const auth = await timedStep(timings, "authMs", async () => {
-    return requireUser(event);
-  });
+  const bearerToken = getHeader(event, "authorization");
+  const hasAuthHeader =
+    typeof bearerToken === "string" && bearerToken.startsWith("Bearer ");
 
-  const userId = auth.sub;
+  const auth = hasAuthHeader
+    ? await timedStep(timings, "authMs", async () => requireUser(event))
+    : null;
 
-  await enforceRateLimit(`rl:start:typing-level-sentences:${userId}`, 20, 60);
+  const userId = auth?.sub ?? null;
+  const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
+  const rateLimitKey = userId ?? `guest:${requestIp}`;
+
+  await enforceRateLimit(`rl:start:typing-level-sentences:${rateLimitKey}`, 20, 60);
 
   const query = getQuery(event);
   const scope = String(query.scope ?? "level");
@@ -224,7 +230,13 @@ export default defineEventHandler(async (event) => {
   let accessibleWords = allWords;
   let accessibleWordIds = allWordIds;
 
-  if (!isFreeLevel(levelNumber)) {
+  if (!userId) {
+    const freePreviewIds = allWordIds.slice(0, FREE_LEVEL_WORD_LIMIT);
+    const previewSet = new Set(freePreviewIds);
+
+    accessibleWords = allWords.filter((word) => previewSet.has(word.id));
+    accessibleWordIds = [...new Set(accessibleWords.map((w) => w.id))];
+  } else if (!isFreeLevel(levelNumber)) {
     const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
     const hasFullAccess = canAccessLevel(true, entitlement, levelNumber);
 
@@ -250,29 +262,30 @@ export default defineEventHandler(async (event) => {
 
   if (!accessibleWords.length) {
     const sessionKey = crypto.randomUUID();
+    if (userId) {
+      const session: QuizSession = {
+        version: 1,
+        mode,
+        scope: "level",
+        slug,
+        createdAt: new Date().toISOString(),
+        allowedWordIds: [],
+      };
 
-    const session: QuizSession = {
-      version: 1,
-      mode,
-      scope: "level",
-      slug,
-      createdAt: new Date().toISOString(),
-      allowedWordIds: [],
-    };
-
-    await timedStep(timings, "sessionWriteMs", async () => {
-      await redis.set(
-        getSessionCacheKey(userId, sessionKey),
-        JSON.stringify(session),
-        { ex: QUIZ_SESSION_TTL_SECONDS },
-      );
-    });
+      await timedStep(timings, "sessionWriteMs", async () => {
+        await redis.set(
+          getSessionCacheKey(userId, sessionKey),
+          JSON.stringify(session),
+          { ex: QUIZ_SESSION_TTL_SECONDS },
+        );
+      });
+    }
 
     logSummary({
       slug,
       variant,
       scope,
-      userId,
+      userId: userId ?? "guest",
       totalWordsInLevel: allWords.length,
       accessibleWords: 0,
       selectedWords: 0,
@@ -293,20 +306,22 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const progressRes = await timedStep(timings, "progressQueryMs", async () => {
-    return db.query<{
-      word_id: string;
-      xp: number | string | null;
-    }>(
-      `
+  const progressRes = userId
+    ? await timedStep(timings, "progressQueryMs", async () => {
+      return db.query<{
+        word_id: string;
+        xp: number | string | null;
+      }>(
+        `
       select word_id, xp
       from user_word_progress
       where user_id = $1
         and word_id = any($2::text[])
       `,
-      [userId, accessibleWordIds],
-    );
-  });
+        [userId, accessibleWordIds],
+      );
+    })
+    : { rows: [] };
 
   const xpMap = await timedStep(timings, "xpMapBuildMs", async () => {
     return new Map<string, number>(
@@ -345,22 +360,24 @@ export default defineEventHandler(async (event) => {
 
   const sessionKey = crypto.randomUUID();
 
-  const session: QuizSession = {
-    version: 1,
-    mode,
-    scope: "level",
-    slug,
-    createdAt: new Date().toISOString(),
-    allowedWordIds: selected.map((w) => w.id),
-  };
+  if (userId) {
+    const session: QuizSession = {
+      version: 1,
+      mode,
+      scope: "level",
+      slug,
+      createdAt: new Date().toISOString(),
+      allowedWordIds: selected.map((w) => w.id),
+    };
 
-  await timedStep(timings, "sessionWriteMs", async () => {
-    await redis.set(
-      getSessionCacheKey(userId, sessionKey),
-      JSON.stringify(session),
-      { ex: QUIZ_SESSION_TTL_SECONDS },
-    );
-  });
+    await timedStep(timings, "sessionWriteMs", async () => {
+      await redis.set(
+        getSessionCacheKey(userId, sessionKey),
+        JSON.stringify(session),
+        { ex: QUIZ_SESSION_TTL_SECONDS },
+      );
+    });
+  }
 
   const response = {
     sessionKey,
@@ -383,7 +400,7 @@ export default defineEventHandler(async (event) => {
     slug,
     variant,
     scope,
-    userId,
+    userId: userId ?? "guest",
     totalWordsInLevel: allWords.length,
     uniqueWordIds: allWordIds.length,
     accessibleWords: accessibleWords.length,

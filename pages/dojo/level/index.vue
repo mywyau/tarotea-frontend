@@ -2,7 +2,7 @@
 
 definePageMeta({
   ssr: false,
-  middleware: ['logged-in'],
+  // middleware: ['logged-in'],
 })
 
 import { jyutPingQuizSelectMetaData } from '~/utils/levels/helpers'
@@ -36,7 +36,8 @@ const canEnterLevel = (level: any) => {
   if (isComingSoon(level)) return false
   
   // 🔒 Exercises require login
-  if (isLoggedIn.value) { return true } else { return false }
+  // if (isLoggedIn.value) { return true } else { return false }
+  return true;
 }
 
 </script>
