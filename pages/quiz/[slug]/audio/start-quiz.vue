@@ -18,7 +18,6 @@ const levelNumber: number = levelIdToNumbers(slug)
 
 const {
   authReady,
-  isLoggedIn,
 } = useMeStateV2()
 
 watchEffect(() => {
@@ -60,7 +59,7 @@ const scoringTips = [
 const showAllTips = ref(false)
 
 const canEnterLevel = () => {
-  return !!isLoggedIn.value
+  return true
 }
 </script>
 
