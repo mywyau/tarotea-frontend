@@ -820,7 +820,7 @@ onUnmounted(() => {
                         </div>
                     </transition>
 
-                    <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
+                    <transition-group name="card-fade" tag="div" class="completion-tiles-grid">
                         <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
                             :class="tile.className">
                             <p class="stat-label">
@@ -909,6 +909,33 @@ onUnmounted(() => {
 .card-fade-enter-from {
     opacity: 0;
     transform: translateY(10px);
+}
+
+.completion-tiles-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+@media (min-width: 640px) {
+    .completion-tiles-grid {
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 1.25rem;
+    }
+
+    .completion-tiles-grid>*:nth-child(-n + 3) {
+        grid-column: span 2 / span 2;
+    }
+
+    .completion-tiles-grid>*:nth-child(n + 4) {
+        grid-column: span 3 / span 3;
+    }
+}
+
+@media (min-width: 1280px) {
+    .completion-tiles-grid {
+        gap: 1.5rem;
+    }
 }
 
 .stat-card {
