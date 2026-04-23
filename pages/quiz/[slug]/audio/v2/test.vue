@@ -868,7 +868,7 @@ onBeforeUnmount(() => {
             </h3>
 
             <p class="hero-subtext !mt-0">
-              You missed {{ incorrectCount }} words. Sign up to earn XP from quizzes and unlock more words.
+              Sign up to earn XP from quizzes and unlock more words.
             </p>
 
             <NuxtLink to="/please-sign-in"
