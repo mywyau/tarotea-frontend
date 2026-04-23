@@ -581,7 +581,7 @@ export function scoreWordToneAttempt(params: {
         .map((token, idx) => {
           const issue = explainToneIssue(token, (params.acousticContours ?? [])[idx])
           if (!issue) return null
-          return `Syllable ${idx + 1} (${token}): ${issue}.`
+          return `Syllable ${idx + 1} (${token}): ${issue}`
         })
         .filter((issue): issue is string => Boolean(issue))
         .slice(0, 2)
