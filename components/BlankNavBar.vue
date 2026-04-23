@@ -88,10 +88,10 @@ onBeforeUnmount(() => {
       <div class="flex items-center justify-between px-4 py-4">
         <NuxtLink to="/" class="text-lg font-semibold text-black" @click="closePanel">
         </NuxtLink>
-        <button type="button" class="rounded-md p-2 text-black/70 transition hover:bg-black/5"
+        <!-- <button type="button" class="rounded-md p-2 text-black/70 transition hover:bg-black/5"
           aria-label="Close navigation panel" @click="closePanel">
           ✕
-        </button>
+        </button> -->
       </div>
 
       <nav class="space-y-6 overflow-y-auto px-4 py-5">
