@@ -704,7 +704,7 @@ onBeforeUnmount(() => {
         {{ levelTitles[slug] ?? 'Unknown level' }}
       </h1>
 
-      <div class="flex items-center gap-3 mb-6">
+      <div v-if="showQuiz" class="flex items-center gap-3 mb-4">
         <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
           <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
             :style="{ width: progressPercent + '%' }" />
@@ -715,23 +715,23 @@ onBeforeUnmount(() => {
         </span>
       </div>
 
-      <div class="min-h-[110px] flex flex-col items-center justify-center gap-2">
-        <p v-if="currentWord" class="text-4xl font-semibold" :class="answered
-          ? 'blur-0 opacity-100'
-          : 'blur-md opacity-60 select-none'">
-          {{ currentWord.word }}
-        </p>
-
-        <p v-if="answered && currentWord?.jyutping" class="text-sm text-gray-500">
-          {{ currentWord.jyutping }}
-        </p>
-
-        <p v-if="answered && currentWord?.meaning" class="text-sm text-gray-700">
-          {{ currentWord.meaning }}
-        </p>
-      </div>
-
       <div v-if="showQuiz" class="space-y-6">
+        <div class="min-h-[110px] flex flex-col items-center justify-center gap-2">
+          <p v-if="currentWord" class="text-4xl font-semibold transition-all duration-300" :class="answered
+            ? 'blur-0 opacity-100'
+            : 'blur-md opacity-60 select-none'">
+            {{ currentWord.word }}
+          </p>
+
+          <p v-if="answered && currentWord?.jyutping" class="text-sm text-gray-500">
+            {{ currentWord.jyutping }}
+          </p>
+
+          <p v-if="answered && currentWord?.meaning" class="text-sm text-gray-700">
+            {{ currentWord.meaning }}
+          </p>
+        </div>
+
         <div v-if="question?.type === 'audio'" class="text-center">
           <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
         </div>
