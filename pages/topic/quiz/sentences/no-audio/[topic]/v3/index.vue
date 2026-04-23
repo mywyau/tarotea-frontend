@@ -708,7 +708,7 @@ onBeforeUnmount(() => {
             </div>
           </transition>
 
-            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
+            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
               <div class="stat-card hover:brightness-110 result-0">
                 <p class="stat-label">Correct</p>
                 <p class="stat-value">{{ score }}</p>
@@ -718,6 +718,13 @@ onBeforeUnmount(() => {
               <p class="stat-label">Incorrect</p>
               <p class="stat-value">{{ incorrectCount }}</p>
             </div>
+
+              <div class="stat-card hover:brightness-110 result-0">
+                <p class="stat-label">Time</p>
+                <p class="stat-value">
+                  {{ formattedElapsedTime }}
+                </p>
+              </div>
 
               <div class="stat-card hover:brightness-110 result-2">
                 <p class="stat-label">XP Earned</p>
@@ -730,13 +737,6 @@ onBeforeUnmount(() => {
                 <p class="stat-label">XP Lost</p>
                 <p class="stat-value">
                   -{{ animatedXpLost }} XP
-                </p>
-              </div>
-
-              <div class="stat-card hover:brightness-110 result-0">
-                <p class="stat-label">Time</p>
-                <p class="stat-value">
-                  {{ formattedElapsedTime }}
                 </p>
               </div>
             </transition-group>
