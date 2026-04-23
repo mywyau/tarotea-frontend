@@ -66,7 +66,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         </p>
 
         <!-- Benefits -->
-        <div class="max-w-2xl mx-auto rounded-2xl border border-gray-200 bg-white/70 p-5 md:p-6">
+        <div class="max-w-xl mx-auto rounded-2xl p-5 md:p-6">
           <ul class="list-disc pl-5 text-left text-gray-700 space-y-2 leading-relaxed">
             <li>Greater language exposure with full access to all content</li>
             <li>Unlock over 2500 word tiles</li>
