@@ -1,33 +1,57 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
+const route = useRoute()
 const { isLoggedIn, entitlement, resolve } = useMeStateV2()
 
-const menuOpen = ref(false)
-const menuRoot = ref<HTMLElement | null>(null)
+const panelOpen = ref(false)
+const panelRoot = ref<HTMLElement | null>(null)
 
-function toggleMenu() {
-  menuOpen.value = !menuOpen.value
+const primaryLinks = computed(() => [
+  ...(isLoggedIn.value ? [{ to: '/daily/vocab/v2', label: 'Daily' }] : []),
+  { to: '/dojo', label: 'Dojo' },
+  { to: '/levels', label: 'Levels' },
+  { to: '/quiz', label: 'Level Quiz' },
+  { to: '/topics', label: 'Topics' },
+  { to: '/topics/quiz', label: 'Topic Quiz' },
+])
+
+const accountLinks = computed(() => [
+  { to: '/account/v2', label: 'Account' },
+  { to: '/stats/v2', label: 'Stats' },
+])
+
+const showUpgrade = computed(() => isLoggedIn.value
+  && (entitlement.value?.plan === 'free' || entitlement.value?.subscription_status !== 'active'))
+
+function togglePanel() {
+  panelOpen.value = !panelOpen.value
 }
-function closeMenu() {
-  menuOpen.value = false
+
+function closePanel() {
+  panelOpen.value = false
 }
 
 async function handleLogout() {
   await logout()
   await resolve({ force: true })
-  closeMenu()
+  closePanel()
 }
 
 function onDocumentClick(e: MouseEvent) {
-  if (!menuOpen.value) return
+  if (!panelOpen.value) return
+
   const target = e.target as Node | null
-  if (menuRoot.value && target && !menuRoot.value.contains(target)) {
-    closeMenu()
+  if (panelRoot.value && target && !panelRoot.value.contains(target)) {
+    closePanel()
   }
 }
+
+watch(() => route.fullPath, () => {
+  closePanel()
+})
 
 onMounted(() => {
   resolve({ force: true })
@@ -40,67 +64,97 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="header-shell">
-    <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-
-      <NuxtLink to="/" class="text-2xl font-bold text-black hover:text-gray-700">
-        TaroTea
-      </NuxtLink>
-
-      <div ref="menuRoot" class="relative">
-        <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
-          :aria-expanded="menuOpen ? 'true' : 'false'">
+  <header ref="panelRoot" class="sticky top-0 z-50 backdrop-blur">
+    <div class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
+      <div class="flex items-center gap-3">
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-2xl transition"
+          aria-label="Open navigation panel" :aria-expanded="panelOpen ? 'true' : 'false'" @click.stop="togglePanel">
           ☰
         </button>
 
-        <div v-if="menuOpen" class="menu-panel">
-          <!-- Logged in -->
-          <template v-if="isLoggedIn">
-            <NuxtLink to="/account/v2"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
-              @click="closeMenu">
-              Account
+        <NuxtLink to="/" class="text-2xl font-semibold tracking-tight text-black hover:text-black/70">
+          TaroTea
+        </NuxtLink>
+      </div>
+    </div>
+
+    <transition name="fade">
+      <div v-if="panelOpen" class="fixed inset-0 z-40 bg-black/20" aria-hidden="true" @click="closePanel" />
+    </transition>
+
+    <aside
+      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-white shadow-xl transition-transform duration-200"
+      :class="panelOpen ? 'translate-x-0' : '-translate-x-full'" aria-label="Site navigation">
+      <div class="flex items-center justify-between px-4 py-4">
+        <NuxtLink to="/" class="text-lg font-semibold text-black" @click="closePanel">
+        </NuxtLink>
+        <button type="button" class="rounded-md p-2 text-black/70 transition hover:bg-black/5"
+          aria-label="Close navigation panel" @click="closePanel">
+          ✕
+        </button>
+      </div>
+
+      <nav class="space-y-6 overflow-y-auto px-4 py-5">
+        <section>
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-black/45">
+            Learn
+          </p>
+          <div class="space-y-1">
+            <NuxtLink v-for="link in primaryLinks" :key="link.to" :to="link.to"
+              class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5" @click="closePanel">
+              {{ link.label }}
             </NuxtLink>
+          </div>
+        </section>
 
-            <NuxtLink to="/stats/v2"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
-              @click="closeMenu">
-              Stats
-            </NuxtLink>
+        <section>
+          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-black/45">
+            Account
+          </p>
 
-            <NuxtLink to="/upgrade"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm font-semibold hover:bg-black hover:brightness-125 transition"
-              @click="closeMenu">
+          <div class="space-y-1">
+            <template v-if="isLoggedIn">
+              <NuxtLink v-for="link in accountLinks" :key="link.to" :to="link.to"
+                class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5" @click="closePanel">
+                {{ link.label }}
+              </NuxtLink>
 
-              <span class="bg-gradient-to-r from-[#d48fd0] via-[#b57bc3] via-[#6faed6] to-[#d48fd0] bg-clip-text text-transparent">
+              <NuxtLink v-if="showUpgrade" to="/upgrade"
+                class="block rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text px-3 py-2 text-sm font-semibold text-transparent transition hover:brightness-90"
+                @click="closePanel">
                 Upgrade
-              </span>
-            </NuxtLink>
+              </NuxtLink>
 
-            <div class="h-px my-2 bg-black/10"></div>
+              <button type="button"
+                class="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-700 transition hover:bg-red-500/10"
+                @click="handleLogout">
+                Log out
+              </button>
+            </template>
 
-            <button type="button"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-red-700 hover:bg-red-500/10 transition"
-              @click="handleLogout">
-              Log out
-            </button>
-          </template>
-
-          <!-- Logged out -->
-          <template v-else>
-            <button type="button"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-gray-900 hover:bg-black/5 transition"
+            <button v-else type="button"
+              class="block w-full rounded-lg px-3 py-2 text-left text-sm text-blue-700 transition hover:bg-blue-500/10"
               @click="login()">
               Login
             </button>
-          </template>
-        </div>
-      </div>
-    </div>
+          </div>
+        </section>
+      </nav>
+    </aside>
   </header>
 </template>
 
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 180ms ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 /* palette */
 .header-shell {
   --pink: #EAB8E4;
