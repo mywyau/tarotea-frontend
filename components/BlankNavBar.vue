@@ -83,7 +83,7 @@ onBeforeUnmount(() => {
     </transition>
 
     <aside
-      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-[#EFD6D6] shadow-xl transition-transform duration-200"
+      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-[#EAB8E4]/35 shadow-xl transition-transform duration-200"
       :class="panelOpen ? 'translate-x-0' : '-translate-x-full'" aria-label="Site navigation">
       <div class="flex items-center justify-between px-4 py-4">
         <NuxtLink to="/" class="text-lg font-semibold text-black" @click="closePanel">
