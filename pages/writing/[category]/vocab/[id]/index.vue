@@ -224,7 +224,7 @@ onMounted(() => {
       <h1 class="page-heading mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
         Learn how to write
       </h1>
-      <p class="page-subheading mt-2 max-w-3xl text-sm leading-5 sm:mt-3 sm:leading-6">
+      <p class="page-subheading mt-2 max-w-3xl text-sm leading-5 sm:mt-3 sm:leading-6 text-black">
         Grab some pen and paper and follow the brush strokes for this word and move through each character one by one.
       </p>
     </section>
@@ -250,9 +250,9 @@ onMounted(() => {
                 <p class="mt-2 text-xs leading-5 sm:text-sm">
                   {{ word.jyutping || "" }}
                 </p>
-                <!-- <p class="mt-1 text-xs leading-5 sm:text-sm">
+                <p class="mt-1 text-xs font-medium text-black leading-5 sm:text-sm">
                   {{ word.meaning || "" }}
-                </p> -->
+                </p>
               </div>
 
               <div
@@ -377,7 +377,7 @@ onMounted(() => {
 }
 
 .hero-card p {
-  color: rgba(31, 41, 55, 0.82);
+  color: rgba(0, 0, 0, 0.82);
 }
 
 .eyebrow {
