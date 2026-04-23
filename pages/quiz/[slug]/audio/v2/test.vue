@@ -704,7 +704,7 @@ onBeforeUnmount(() => {
         {{ levelTitles[slug] ?? 'Unknown level' }}
       </h1>
 
-      <div class="flex items-center gap-3 mb-6">
+      <div v-if="showQuiz" class="flex items-center gap-3 mb-4">
         <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
           <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
             :style="{ width: progressPercent + '%' }" />
