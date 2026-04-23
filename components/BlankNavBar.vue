@@ -11,16 +11,16 @@ const panelRoot = ref<HTMLElement | null>(null)
 
 const primaryLinks = computed(() => [
   ...(isLoggedIn.value ? [{ to: '/daily/vocab/v2', label: 'Daily' }] : []),
+  { to: '/dojo', label: 'Dojo' },
+  { to: '/levels', label: 'Levels' },
+  { to: '/quiz', label: 'Level Quiz' },
   { to: '/topics', label: 'Topics' },
   { to: '/topics/quiz', label: 'Topic Quiz' },
-  { to: '/levels', label: 'Levels' },
-  { to: '/dojo', label: 'Dojo' },
-  { to: '/quiz', label: 'Level Quiz' },
 ])
 
 const accountLinks = computed(() => [
-  { to: '/stats/v2', label: 'Stats' },
   { to: '/account/v2', label: 'Account' },
+  { to: '/stats/v2', label: 'Stats' },
 ])
 
 const showUpgrade = computed(() => isLoggedIn.value
@@ -64,49 +64,32 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header ref="panelRoot" class="sticky top-0 z-50 bg-white/90 backdrop-blur">
+  <header ref="panelRoot" class="sticky top-0 z-50 backdrop-blur">
     <div class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
       <div class="flex items-center gap-3">
-        <button
-          type="button"
-          class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-xl transition hover:bg-black/5"
-          aria-label="Open navigation panel"
-          :aria-expanded="panelOpen ? 'true' : 'false'"
-          @click.stop="togglePanel"
-        >
+        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-2xl transition"
+          aria-label="Open navigation panel" :aria-expanded="panelOpen ? 'true' : 'false'" @click.stop="togglePanel">
           ☰
         </button>
 
-        <NuxtLink to="/" class="text-xl font-semibold tracking-tight text-black hover:text-black/70">
+        <NuxtLink to="/" class="text-2xl font-semibold tracking-tight text-black hover:text-black/70">
           TaroTea
         </NuxtLink>
       </div>
     </div>
 
     <transition name="fade">
-      <div
-        v-if="panelOpen"
-        class="fixed inset-0 z-40 bg-black/25"
-        aria-hidden="true"
-        @click="closePanel"
-      />
+      <div v-if="panelOpen" class="fixed inset-0 z-40 bg-black/20" aria-hidden="true" @click="closePanel" />
     </transition>
 
     <aside
       class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-white shadow-xl transition-transform duration-200"
-      :class="panelOpen ? 'translate-x-0' : '-translate-x-full'"
-      aria-label="Site navigation"
-    >
+      :class="panelOpen ? 'translate-x-0' : '-translate-x-full'" aria-label="Site navigation">
       <div class="flex items-center justify-between px-4 py-4">
         <NuxtLink to="/" class="text-lg font-semibold text-black" @click="closePanel">
-          Navigation
         </NuxtLink>
-        <button
-          type="button"
-          class="rounded-md p-2 text-black/70 transition hover:bg-black/5"
-          aria-label="Close navigation panel"
-          @click="closePanel"
-        >
+        <button type="button" class="rounded-md p-2 text-black/70 transition hover:bg-black/5"
+          aria-label="Close navigation panel" @click="closePanel">
           ✕
         </button>
       </div>
@@ -117,13 +100,8 @@ onBeforeUnmount(() => {
             Learn
           </p>
           <div class="space-y-1">
-            <NuxtLink
-              v-for="link in primaryLinks"
-              :key="link.to"
-              :to="link.to"
-              class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5"
-              @click="closePanel"
-            >
+            <NuxtLink v-for="link in primaryLinks" :key="link.to" :to="link.to"
+              class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5" @click="closePanel">
               {{ link.label }}
             </NuxtLink>
           </div>
@@ -136,40 +114,27 @@ onBeforeUnmount(() => {
 
           <div class="space-y-1">
             <template v-if="isLoggedIn">
-              <NuxtLink
-                v-if="showUpgrade"
-                to="/upgrade"
-                class="block rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text px-3 py-2 text-sm font-semibold text-transparent transition hover:brightness-90"
-                @click="closePanel"
-              >
-                Upgrade
-              </NuxtLink>
-
-              <NuxtLink
-                v-for="link in accountLinks"
-                :key="link.to"
-                :to="link.to"
-                class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5"
-                @click="closePanel"
-              >
+              <NuxtLink v-for="link in accountLinks" :key="link.to" :to="link.to"
+                class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5" @click="closePanel">
                 {{ link.label }}
               </NuxtLink>
 
-              <button
-                type="button"
+              <NuxtLink v-if="showUpgrade" to="/upgrade"
+                class="block rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text px-3 py-2 text-sm font-semibold text-transparent transition hover:brightness-90"
+                @click="closePanel">
+                Upgrade
+              </NuxtLink>
+
+              <button type="button"
                 class="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-700 transition hover:bg-red-500/10"
-                @click="handleLogout"
-              >
+                @click="handleLogout">
                 Log out
               </button>
             </template>
 
-            <button
-              v-else
-              type="button"
+            <button v-else type="button"
               class="block w-full rounded-lg px-3 py-2 text-left text-sm text-blue-700 transition hover:bg-blue-500/10"
-              @click="login()"
-            >
+              @click="login()">
               Login
             </button>
           </div>
@@ -188,5 +153,99 @@ onBeforeUnmount(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+/* palette */
+.header-shell {
+  --pink: #EAB8E4;
+  --purple: #D6A3D1;
+  --blue: #A8CAE0;
+  --yellow: #F4CD27;
+  --blush: #F6E1E1;
+
+  /* let your app background show through */
+  /* background: rgba(255, 255, 255, 0.55);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(214, 163, 209, 0.35); */
+}
+
+/* hamburger button */
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  font-size: 26px;
+  /* bigger ☰ */
+  /* border-radius: 12px; */
+  /* border: 1px solid rgba(214, 163, 209, 0.55); */
+  /* background: rgba(255, 255, 255, 0.7); */
+  /* transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease; */
+}
+
+/* .menu-btn:hover {
+  background: rgba(246, 225, 225, 0.55);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+} */
+
+.menu-btn:active {
+  transform: scale(0.98);
+}
+
+/* dropdown panel */
+.menu-panel {
+  position: absolute;
+  right: 0;
+  margin-top: 10px;
+  width: 220px;
+  border-radius: 10px;
+  /* border: 1px solid rgba(214, 163, 209, 0.45); */
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+  padding: 10px;
+  z-index: 50;
+}
+
+.menu-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 10px 10px;
+  border-radius: 12px;
+  font-size: 14px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+/* .menu-item:hover {
+  background: rgba(168, 202, 224, 0.25);
+} */
+
+.menu-sep {
+  height: 1px;
+  margin: 10px 6px;
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.menu-upgrade {
+  font-weight: 700;
+  /* background: rgba(244, 205, 39, 0.35); */
+}
+
+/* .menu-upgrade:hover {
+  background: rgba(244, 205, 39, 0.5);
+} */
+
+.menu-danger {
+  color: #b91c1c;
+}
+
+.menu-danger:hover {
+  background: rgba(234, 184, 228, 0.35);
 }
 </style>
