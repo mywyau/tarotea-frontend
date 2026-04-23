@@ -103,18 +103,11 @@ const canEnterLevel = () => {
         <NuxtLink :to="`/quiz/${slug}/word/v2/test`" class="start-btn">
           Start vocabulary quiz
         </NuxtLink>
-
-        <!-- <div class="mt-6">
-          <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
-            ← Level {{ levelNumber }} Vocab
-          </NuxtLink>
-        </div> -->
       </div>
 
       <section class="tips-panel">
         <div class="tips-header">
           <h2 class="tips-title">Before you start</h2>
-          <!-- <p class="tips-subtitle">The most important rules for this quiz.</p> -->
         </div>
 
         <div class="tips-grid">
