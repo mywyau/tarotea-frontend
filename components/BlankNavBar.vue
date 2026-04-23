@@ -65,11 +65,16 @@ onBeforeUnmount(() => {
 
 <template>
   <header ref="panelRoot" class="sticky top-0 z-50 backdrop-blur">
-    <div class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
+    <div class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between border-b border-black/10 bg-white/80 px-4">
       <div class="flex items-center gap-3">
-        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-2xl transition"
-          aria-label="Open navigation panel" :aria-expanded="panelOpen ? 'true' : 'false'" @click.stop="togglePanel">
-          ☰
+        <button
+          type="button"
+          class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-2xl text-black transition"
+          :class="panelOpen ? 'bg-black text-white shadow-lg shadow-black/20' : 'hover:bg-black/5'"
+          :aria-label="panelOpen ? 'Close navigation panel' : 'Open navigation panel'"
+          :aria-expanded="panelOpen ? 'true' : 'false'"
+          @click.stop="togglePanel">
+          {{ panelOpen ? '✕' : '☰' }}
         </button>
 
         <NuxtLink to="/" class="text-2xl font-semibold tracking-tight text-black hover:text-black/70">
@@ -79,21 +84,13 @@ onBeforeUnmount(() => {
     </div>
 
     <transition name="fade">
-      <div v-if="panelOpen" class="fixed inset-0 z-40" aria-hidden="true" @click="closePanel" />
+      <div v-if="panelOpen" class="fixed inset-0 z-40 bg-black/30 backdrop-blur-[1px]" aria-hidden="true"
+        @click="closePanel" />
     </transition>
 
     <aside
-      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-[#F3E5F5]/35 shadow-xl transition-transform duration-200"
+      class="fixed left-0 top-14 z-50 h-[calc(100vh-3.5rem)] w-80 max-w-[84vw] border-r border-black/10 bg-white/95 shadow-xl transition-transform duration-200"
       :class="panelOpen ? 'translate-x-0' : '-translate-x-full'" aria-label="Site navigation">
-      <div class="flex items-center justify-between px-4 py-4">
-        <NuxtLink to="/" class="text-lg font-semibold text-black" @click="closePanel">
-        </NuxtLink>
-        <button type="button" class="rounded-md p-2 text-black/70 transition hover:bg-black/5"
-          aria-label="Close navigation panel" @click="closePanel">
-          ✕
-        </button>
-      </div>
-
       <nav class="space-y-6 overflow-y-auto px-4 py-5">
         <section>
           <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-black/45">
@@ -153,99 +150,5 @@ onBeforeUnmount(() => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-}
-
-/* palette */
-.header-shell {
-  --pink: #EAB8E4;
-  --purple: #D6A3D1;
-  --blue: #A8CAE0;
-  --yellow: #F4CD27;
-  --blush: #F6E1E1;
-
-  /* let your app background show through */
-  /* background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(214, 163, 209, 0.35); */
-}
-
-/* hamburger button */
-.menu-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 40px;
-  font-size: 26px;
-  /* bigger ☰ */
-  /* border-radius: 12px; */
-  /* border: 1px solid rgba(214, 163, 209, 0.55); */
-  /* background: rgba(255, 255, 255, 0.7); */
-  /* transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease; */
-}
-
-/* .menu-btn:hover {
-  background: rgba(246, 225, 225, 0.55);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-} */
-
-.menu-btn:active {
-  transform: scale(0.98);
-}
-
-/* dropdown panel */
-.menu-panel {
-  position: absolute;
-  right: 0;
-  margin-top: 10px;
-  width: 220px;
-  border-radius: 10px;
-  /* border: 1px solid rgba(214, 163, 209, 0.45); */
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
-  padding: 10px;
-  z-index: 50;
-}
-
-.menu-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 10px 10px;
-  border-radius: 12px;
-  font-size: 14px;
-  background: transparent;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  transition: background 120ms ease;
-}
-
-/* .menu-item:hover {
-  background: rgba(168, 202, 224, 0.25);
-} */
-
-.menu-sep {
-  height: 1px;
-  margin: 10px 6px;
-  background: rgba(0, 0, 0, 0.08);
-}
-
-.menu-upgrade {
-  font-weight: 700;
-  /* background: rgba(244, 205, 39, 0.35); */
-}
-
-/* .menu-upgrade:hover {
-  background: rgba(244, 205, 39, 0.5);
-} */
-
-.menu-danger {
-  color: #b91c1c;
-}
-
-.menu-danger:hover {
-  background: rgba(234, 184, 228, 0.35);
 }
 </style>
