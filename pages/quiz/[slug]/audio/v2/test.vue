@@ -42,6 +42,7 @@ if (!isLevelId(slug.value)) {
 }
 
 const { getAccessToken } = await useAuth()
+const { isLoggedIn } = useMeStateV2()
 const { stop } = useGlobalAudio()
 
 const runtimeConfig = useRuntimeConfig()
@@ -360,6 +361,7 @@ const showFinalizeError = computed(() => {
 const showResults = computed(() => {
   return quizFinished.value && !finishing.value && finalizeCompleted.value
 })
+const isGuestMode = computed(() => !isLoggedIn.value)
 
 const completionTiles = computed(() => [
   {
@@ -405,6 +407,18 @@ async function finalizeQuiz() {
 
   try {
     const token = await getAccessToken()
+    if (!token || isGuestMode.value) {
+      const elapsed = Date.now() - startedAt
+      const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
+
+      if (remaining > 0) {
+        await sleep(remaining)
+      }
+
+      totalXpEarned.value = 0
+      finalizeCompleted.value = true
+      return
+    }
 
     const res = await $fetch<FinalizeResponse>(
       '/api/quiz/grind/finalize-v5',
@@ -526,8 +540,17 @@ const currentWord = computed(() => {
 })
 
 onMounted(async () => {
+  if (isGuestMode.value) {
+    weakestIds.value = []
+    return
+  }
+
   try {
     const token = await getAccessToken()
+    if (!token) {
+      weakestIds.value = []
+      return
+    }
 
     const weakest = await $fetch<{ id: string }[]>(
       // '/api/word-progress/weakestV3',
@@ -555,6 +578,20 @@ watch(
     if (!qs.length) return
 
     const token = await getAccessToken()
+    if (!token || isGuestMode.value) {
+      const defaultProgress = Object.fromEntries(
+        [...new Set(qs.map(q => q.wordId))].map(wordId => [wordId, { xp: 0, streak: 0 }])
+      )
+
+      wordProgressMap.value = defaultProgress
+      initialProgressMap.value = defaultProgress
+
+      const firstId = qs[0]?.wordId
+      currentStreak.value = firstId ? (defaultProgress[firstId]?.streak ?? 0) : 0
+      currentXp.value = firstId ? (defaultProgress[firstId]?.xp ?? 0) : 0
+      startTimer()
+      return
+    }
 
     const wordIds = [...new Set(qs.map(q => q.wordId))]
 
@@ -823,6 +860,22 @@ onBeforeUnmount(() => {
                 {{ word!.word }}
               </span>
             </div>
+          </div>
+
+          <div v-if="isGuestMode" class="stat-card text-left result-2 space-y-3">
+            <h3 class="text-sm font-semibold text-gray-900">
+              Save your progress
+            </h3>
+
+            <p class="hero-subtext !mt-0">
+              You missed {{ incorrectCount }} words. Sign up to earn XP from quizzes and unlock more words.
+            </p>
+
+            <NuxtLink to="/please-sign-in"
+              class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+              style="background-color:#A8CAE0;">
+              Sign up to earn XP
+            </NuxtLink>
           </div>
 
           <div class="pt-2 space-y-3">
