@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 
 const route = useRoute()
 const { isLoggedIn, entitlement, resolve } = useMeStateV2()
 
-const panelOpen = ref(false)
-const panelRoot = ref<HTMLElement | null>(null)
+const mobileOpen = ref(false)
 
 const primaryLinks = computed(() => [
   ...(isLoggedIn.value ? [{ to: '/daily/vocab/v2', label: 'Daily' }] : []),
@@ -26,226 +25,127 @@ const accountLinks = computed(() => [
 const showUpgrade = computed(() => isLoggedIn.value
   && (entitlement.value?.plan === 'free' || entitlement.value?.subscription_status !== 'active'))
 
-function togglePanel() {
-  panelOpen.value = !panelOpen.value
+function toggleMobile() {
+  mobileOpen.value = !mobileOpen.value
 }
 
-function closePanel() {
-  panelOpen.value = false
+function closeMobile() {
+  mobileOpen.value = false
 }
 
 async function handleLogout() {
   await logout()
   await resolve({ force: true })
-  closePanel()
-}
-
-function onDocumentClick(e: MouseEvent) {
-  if (!panelOpen.value) return
-
-  const target = e.target as Node | null
-  if (panelRoot.value && target && !panelRoot.value.contains(target)) {
-    closePanel()
-  }
+  closeMobile()
 }
 
 watch(() => route.fullPath, () => {
-  closePanel()
+  closeMobile()
 })
 
 onMounted(() => {
   resolve({ force: true })
-  document.addEventListener('click', onDocumentClick)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', onDocumentClick)
 })
 </script>
 
 <template>
-  <header ref="panelRoot" class="sticky top-0 z-50 backdrop-blur">
+  <header class="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
     <div class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
-      <div class="flex items-center gap-3">
-        <button type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-2xl transition"
-          aria-label="Open navigation panel" :aria-expanded="panelOpen ? 'true' : 'false'" @click.stop="togglePanel">
-          ☰
-        </button>
+      <NuxtLink to="/" class="text-2xl font-semibold tracking-tight text-black hover:text-black/70">
+        TaroTea
+      </NuxtLink>
 
-        <NuxtLink to="/" class="text-2xl font-semibold tracking-tight text-black hover:text-black/70">
-          TaroTea
+      <nav class="hidden items-center gap-5 md:flex">
+        <NuxtLink v-for="link in primaryLinks" :key="link.to" :to="link.to" class="text-sm text-black transition hover:text-black/70">
+          {{ link.label }}
         </NuxtLink>
-      </div>
+
+        <template v-if="isLoggedIn">
+          <NuxtLink v-for="link in accountLinks" :key="link.to" :to="link.to" class="text-sm text-black transition hover:text-black/70">
+            {{ link.label }}
+          </NuxtLink>
+
+          <NuxtLink
+            v-if="showUpgrade"
+            to="/upgrade"
+            class="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-sm font-semibold text-transparent transition hover:brightness-90"
+          >
+            Upgrade
+          </NuxtLink>
+
+          <button type="button" class="text-sm text-red-700 transition hover:text-red-500" @click="handleLogout">
+            Log out
+          </button>
+        </template>
+
+        <button v-else type="button" class="text-sm text-blue-700 transition hover:text-blue-500" @click="login()">
+          Login
+        </button>
+      </nav>
+
+      <button
+        type="button"
+        class="text-2xl md:hidden"
+        aria-label="Toggle mobile menu"
+        :aria-expanded="mobileOpen ? 'true' : 'false'"
+        @click="toggleMobile"
+      >
+        ☰
+      </button>
     </div>
 
-    <transition name="fade">
-      <div v-if="panelOpen" class="fixed inset-0 z-40" aria-hidden="true" @click="closePanel" />
-    </transition>
-
-    <aside
-      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-[#F3E5F5]/35 shadow-xl transition-transform duration-200"
-      :class="panelOpen ? 'translate-x-0' : '-translate-x-full'" aria-label="Site navigation">
-      <div class="flex items-center justify-between px-4 py-4">
-        <NuxtLink to="/" class="text-lg font-semibold text-black" @click="closePanel">
+    <div v-if="mobileOpen" class="border-t bg-white px-4 py-4 md:hidden">
+      <div class="space-y-2">
+        <NuxtLink
+          v-for="link in primaryLinks"
+          :key="`mobile-${link.to}`"
+          :to="link.to"
+          class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5"
+          @click="closeMobile"
+        >
+          {{ link.label }}
         </NuxtLink>
-        <!-- <button type="button" class="rounded-md p-2 text-black/70 transition hover:bg-black/5"
-          aria-label="Close navigation panel" @click="closePanel">
-          ✕
-        </button> -->
       </div>
 
-      <nav class="space-y-6 overflow-y-auto px-4 py-5">
-        <section>
-          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-black/45">
-            Learn
-          </p>
-          <div class="space-y-1">
-            <NuxtLink v-for="link in primaryLinks" :key="link.to" :to="link.to"
-              class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5" @click="closePanel">
-              {{ link.label }}
-            </NuxtLink>
-          </div>
-        </section>
+      <div class="mt-4 border-t pt-4">
+        <template v-if="isLoggedIn">
+          <NuxtLink
+            v-for="link in accountLinks"
+            :key="`mobile-account-${link.to}`"
+            :to="link.to"
+            class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5"
+            @click="closeMobile"
+          >
+            {{ link.label }}
+          </NuxtLink>
 
-        <section>
-          <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-black/45">
-            Account
-          </p>
+          <NuxtLink
+            v-if="showUpgrade"
+            to="/upgrade"
+            class="block rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text px-3 py-2 text-sm font-semibold text-transparent transition hover:brightness-90"
+            @click="closeMobile"
+          >
+            Upgrade
+          </NuxtLink>
 
-          <div class="space-y-1">
-            <template v-if="isLoggedIn">
-              <NuxtLink v-for="link in accountLinks" :key="link.to" :to="link.to"
-                class="block rounded-lg px-3 py-2 text-sm text-black transition hover:bg-black/5" @click="closePanel">
-                {{ link.label }}
-              </NuxtLink>
+          <button
+            type="button"
+            class="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-700 transition hover:bg-red-500/10"
+            @click="handleLogout"
+          >
+            Log out
+          </button>
+        </template>
 
-              <NuxtLink v-if="showUpgrade" to="/upgrade"
-                class="block rounded-lg bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text px-3 py-2 text-sm font-semibold text-transparent transition hover:brightness-90"
-                @click="closePanel">
-                Upgrade
-              </NuxtLink>
-
-              <button type="button"
-                class="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-700 transition hover:bg-red-500/10"
-                @click="handleLogout">
-                Log out
-              </button>
-            </template>
-
-            <button v-else type="button"
-              class="block w-full rounded-lg px-3 py-2 text-left text-sm text-blue-700 transition hover:bg-blue-500/10"
-              @click="login()">
-              Login
-            </button>
-          </div>
-        </section>
-      </nav>
-    </aside>
+        <button
+          v-else
+          type="button"
+          class="block w-full rounded-lg px-3 py-2 text-left text-sm text-blue-700 transition hover:bg-blue-500/10"
+          @click="login()"
+        >
+          Login
+        </button>
+      </div>
+    </div>
   </header>
 </template>
-
-<style scoped>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 180ms ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-/* palette */
-.header-shell {
-  --pink: #EAB8E4;
-  --purple: #D6A3D1;
-  --blue: #A8CAE0;
-  --yellow: #F4CD27;
-  --blush: #F6E1E1;
-
-  /* let your app background show through */
-  /* background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(214, 163, 209, 0.35); */
-}
-
-/* hamburger button */
-.menu-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 40px;
-  font-size: 26px;
-  /* bigger ☰ */
-  /* border-radius: 12px; */
-  /* border: 1px solid rgba(214, 163, 209, 0.55); */
-  /* background: rgba(255, 255, 255, 0.7); */
-  /* transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease; */
-}
-
-/* .menu-btn:hover {
-  background: rgba(246, 225, 225, 0.55);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-} */
-
-.menu-btn:active {
-  transform: scale(0.98);
-}
-
-/* dropdown panel */
-.menu-panel {
-  position: absolute;
-  right: 0;
-  margin-top: 10px;
-  width: 220px;
-  border-radius: 10px;
-  /* border: 1px solid rgba(214, 163, 209, 0.45); */
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
-  padding: 10px;
-  z-index: 50;
-}
-
-.menu-item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 10px 10px;
-  border-radius: 12px;
-  font-size: 14px;
-  background: transparent;
-  border: none;
-  text-align: left;
-  cursor: pointer;
-  transition: background 120ms ease;
-}
-
-/* .menu-item:hover {
-  background: rgba(168, 202, 224, 0.25);
-} */
-
-.menu-sep {
-  height: 1px;
-  margin: 10px 6px;
-  background: rgba(0, 0, 0, 0.08);
-}
-
-.menu-upgrade {
-  font-weight: 700;
-  /* background: rgba(244, 205, 39, 0.35); */
-}
-
-/* .menu-upgrade:hover {
-  background: rgba(244, 205, 39, 0.5);
-} */
-
-.menu-danger {
-  color: #b91c1c;
-}
-
-.menu-danger:hover {
-  background: rgba(234, 184, 228, 0.35);
-}
-</style>
