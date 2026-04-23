@@ -367,8 +367,11 @@ function resetQuizStateFromStartPayload(payload: TopicSentenceQuizStartResponse)
 
 async function finalizeQuiz() {
   if (finishing.value) return
+  const { earned, lost } = calculateQuizXpTotals()
+  totalXpEarned.value = earned
+  totalXpLost.value = lost
+
   if (!isLoggedIn.value) {
-    totalXpEarned.value = 0
     return
   }
   if (!activeSessionKey.value) return
@@ -390,8 +393,7 @@ async function finalizeQuiz() {
       sleep(MIN_CALCULATING_MS),
     ])
 
-    const { earned, lost } = calculateQuizXpTotals()
-    totalXpEarned.value = Number.isFinite(res.quiz.xpEarned) ? res.quiz.xpEarned : earned
+    totalXpEarned.value = earned
     totalXpLost.value = lost
 
     console.info('Topic sentence audio quiz finalized', {
@@ -749,7 +751,7 @@ onBeforeUnmount(() => {
               </div>
             </transition>
 
-            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
               <div class="stat-card hover:brightness-110 result-0">
                 <p class="stat-label">Correct</p>
                 <p class="stat-value">{{ score }}</p>
@@ -771,6 +773,13 @@ onBeforeUnmount(() => {
                 <p class="stat-label">XP Lost</p>
                 <p class="stat-value">
                   -{{ animatedXpLost }} XP
+                </p>
+              </div>
+
+              <div class="stat-card hover:brightness-110 result-0">
+                <p class="stat-label">Time</p>
+                <p class="stat-value">
+                  {{ formattedElapsedTime }}
                 </p>
               </div>
             </transition-group>

@@ -365,8 +365,11 @@ function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
 
 async function finalizeQuiz() {
   if (finishing.value) return
+  const { earned, lost } = calculateQuizXpTotals()
+  totalXpEarned.value = earned
+  totalXpLost.value = lost
+
   if (!isLoggedIn.value) {
-    totalXpEarned.value = 0
     return
   }
   if (!activeSessionKey.value) return
@@ -374,7 +377,7 @@ async function finalizeQuiz() {
   finishing.value = true
 
   try {
-    const [res] = await Promise.all([
+    await Promise.all([
       authedFetch<SentenceQuizFinalizeResponse>(
         '/api/sentences/v3/finalize',
         {
@@ -387,8 +390,7 @@ async function finalizeQuiz() {
       sleep(MIN_CALCULATING_MS),
     ])
 
-    const { earned, lost } = calculateQuizXpTotals()
-    totalXpEarned.value = Number.isFinite(res.quiz.xpEarned) ? res.quiz.xpEarned : earned
+    totalXpEarned.value = earned
     totalXpLost.value = lost
   } catch (err) {
     console.error('Sentence audio quiz finalize failed', err)
@@ -740,7 +742,7 @@ onBeforeUnmount(() => {
               </div>
             </transition>
 
-            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 sm:gap-6">
               <div class="stat-card hover:brightness-110 result-0">
                 <p class="stat-label">Correct</p>
                 <p class="stat-value">{{ score }}</p>
@@ -762,6 +764,13 @@ onBeforeUnmount(() => {
                 <p class="stat-label">XP Lost</p>
                 <p class="stat-value">
                   -{{ animatedXpLost }} XP
+                </p>
+              </div>
+
+              <div class="stat-card hover:brightness-110 result-0">
+                <p class="stat-label">Time</p>
+                <p class="stat-value">
+                  {{ formattedElapsedTime }}
                 </p>
               </div>
             </transition-group>
