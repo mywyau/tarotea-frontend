@@ -31,7 +31,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
 <template>
   <main class="min-h-[70vh] px-4 pt-6 pb-6">
 
-    <div class="max-w-md mx-auto">
+    <div class="max-w-2xl mx-auto">
 
       <BackLink />
 
@@ -66,7 +66,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         </ul>
 
         <!-- Plans -->
-        <div v-if="isLoggedIn" class="space-y-3 pt-4">
+        <div v-if="isLoggedIn" class="space-y-3 pt-4 max-w-md mx-auto">
 
           <!-- Monthly (Pastel themed) -->
           <button class="block w-full rounded-xl py-3 font-medium transition shadow-sm"
