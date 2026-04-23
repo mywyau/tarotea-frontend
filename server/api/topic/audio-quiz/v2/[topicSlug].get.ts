@@ -6,8 +6,8 @@ import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
+import { getUserFromSession } from "~/server/utils/auth";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
-import { requireUser } from "~/server/utils/requireUser";
 import { Entitlement } from "~/types/auth/entitlements";
 import { shuffleFisherYates } from "~/utils/shuffle";
 import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
@@ -50,6 +50,7 @@ type TopicAudioQuizResponse = {
   questions: AudioQuizQuestion[];
   progressMap: Record<string, WordProgress>;
   wordsById: Record<string, TopicWord>;
+  guestPreview?: boolean;
 };
 
 const TOTAL_QUESTIONS = 20;
@@ -411,10 +412,14 @@ function buildTopicAudioQuiz(
 }
 
 export default defineEventHandler(async (event) => {
-  const auth = await requireUser(event);
-  const userId = auth.sub;
+  const user = await getUserFromSession(event);
+  const userId = user?.id ?? null;
 
-  await enforceRateLimit(`rl:topic-audio-quiz:${userId}`, 20, 60);
+  await enforceRateLimit(
+    userId ? `rl:topic-audio-quiz:${userId}` : "rl:topic-audio-quiz:guest",
+    20,
+    60,
+  );
 
   const topicSlug = getRouterParam(event, "topicSlug");
 
@@ -439,7 +444,9 @@ export default defineEventHandler(async (event) => {
 
   let accessibleWords = allWords;
 
-  if (!freeTopics.has(topicSlug)) {
+  if (!userId) {
+    accessibleWords = allWords.slice(0, FREE_WORD_LIMIT);
+  } else if (!freeTopics.has(topicSlug)) {
     const entitlement = (await getUserEntitlement(
       userId,
     )) as Entitlement | null;
@@ -474,7 +481,11 @@ export default defineEventHandler(async (event) => {
   }
 
   const accessibleAudioWordIds = accessibleAudioWords.map((w) => w.id);
-  const fullProgressMap = await loadProgressMap(userId, accessibleAudioWordIds);
+  const fullProgressMap = userId
+    ? await loadProgressMap(userId, accessibleAudioWordIds)
+    : Object.fromEntries(
+        accessibleAudioWordIds.map((id) => [id, { xp: 0, streak: 0 }]),
+      );
 
   const selectedWords = selectWeightedWords(
     accessibleAudioWords,
@@ -493,5 +504,6 @@ export default defineEventHandler(async (event) => {
     questions,
     progressMap: pickProgressMap(fullProgressMap, selectedWordIds),
     wordsById: buildWordsById(selectedWords),
+    guestPreview: !userId,
   };
 });

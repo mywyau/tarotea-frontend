@@ -57,6 +57,7 @@ type TopicQuizPayload = {
   questions: TopicQuizQuestion[]
   progressMap: Record<string, WordProgress>
   wordsById: Record<string, TopicQuizWord>
+  guestPreview?: boolean
 }
 
 type FinalizeResponse = {
@@ -72,6 +73,7 @@ type FinalizeResponse = {
 }
 
 const me = useMeStateV2()
+const isGuestPreview = computed(() => quizData.value?.guestPreview === true)
 
 const quizData = ref<TopicQuizPayload | null>(null)
 const quizLoading = ref(false)
@@ -274,11 +276,13 @@ async function loadQuiz() {
     const res = await $fetch<TopicQuizPayload>(
       // `/api/topic/quiz/${topicSlug.value}`,
       `/api/topic/quiz/v2/${topicSlug.value}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+      token
+        ? {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
-      }
+        : undefined
     )
 
     quizData.value = res
@@ -318,16 +322,11 @@ async function loadQuiz() {
 
 watch(
   () => [topicSlug.value, me.isLoggedIn.value],
-  ([, isLoggedIn]) => {
-    if (!isLoggedIn) return
+  () => {
     loadQuiz()
   },
   { immediate: true }
 )
-
-const showSignInPrompt = computed(() => {
-  return !me.isLoggedIn.value && !quizLoading.value
-})
 
 const questions = computed(() => quizData.value?.questions ?? [])
 const question = computed(() => questions.value[current.value] ?? null)
@@ -526,6 +525,18 @@ async function finalizeTopicQuiz() {
 
   try {
     const token = await getAccessToken()
+    if (!token || isGuestPreview.value) {
+      const elapsed = Date.now() - startedAt
+      const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
+
+      if (remaining > 0) {
+        await sleep(remaining)
+      }
+
+      totalXpEarned.value = 0
+      finalizeCompleted.value = true
+      return
+    }
 
     const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v5', {
       method: 'POST',
@@ -668,21 +679,7 @@ onBeforeUnmount(() => {
         </span>
       </div>
 
-      <div v-if="showSignInPrompt" class="stat-card hero-card result-2 space-y-4">
-        <p class="stat-label">Sign in required</p>
-        <h2 class="hero-title">Sign in to start this topic quiz</h2>
-        <p class="hero-subtext">
-          Topic vocabulary quizzes need an account so we can track XP and unlock progress.
-        </p>
-
-        <NuxtLink to="/please-sign-in"
-          class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-          style="background-color:#A8CAE0;">
-          Sign in / Create account
-        </NuxtLink>
-      </div>
-
-      <div v-else-if="quizLoading" class="stat-card hero-card result-2 space-y-4">
+      <div v-if="quizLoading" class="stat-card hero-card result-2 space-y-4">
         <div class="spinner mx-auto" />
         <p class="stat-label">Loading</p>
         <h2 class="hero-title">Preparing your quiz...</h2>
@@ -855,6 +852,12 @@ onBeforeUnmount(() => {
           </div>
 
           <div class="pt-2 space-y-3">
+            <NuxtLink v-if="isGuestPreview" to="/please-sign-in"
+              class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+              style="background-color:#F4CD27;">
+              Sign up to earn XP & unlock more words
+            </NuxtLink>
+
             <NuxtLink :to="`/topics/quiz`"
               class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
               style="background-color:#A8CAE0;">
