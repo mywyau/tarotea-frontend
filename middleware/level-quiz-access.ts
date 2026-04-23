@@ -1,9 +1,5 @@
 import { isLevelId, levelIdToNumbers } from "@/utils/levels/levels";
-import {
-  canAccessLevelQuiz,
-  isComingSoon,
-  isFreeLevel,
-} from "~/utils/levels/permissions";
+import { isComingSoon } from "~/utils/levels/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return; // middleware runs on client only
@@ -33,17 +29,9 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo("/please-sign-in");
   }
 
-  // // Free levels
-  // if (isFreeLevel(levelNumber)) return;
-
   // Coming soon
   if (isComingSoon(levelNumber)) {
     return navigateTo("/coming-soon");
-  }
-
-  // Full paid access
-  if (canAccessLevelQuiz(levelNumber, entitlement.value)) {
-    return;
   }
 
   // Final fallback
