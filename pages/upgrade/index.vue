@@ -31,12 +31,12 @@ function upgrade(plan: 'monthly' | 'yearly') {
 <template>
   <main class="min-h-[70vh] px-4 pt-6 pb-6">
 
-    <div class="max-w-2xl mx-auto">
+    <div class="max-w-3xl mx-auto">
 
       <BackLink />
 
       <!-- Card -->
-      <div class="p-10 text-center space-y-6">
+      <div class="p-6 md:p-10 text-center space-y-6">
 
         <!-- Icon -->
         <div class="flex justify-center">
@@ -50,23 +50,28 @@ function upgrade(plan: 'monthly' | 'yearly') {
           Upgrade your plan
         </h1>
 
-        <p class="text-gray-600">
+        <p class="text-gray-600 max-w-xl mx-auto">
           Unlock all content and learn Cantonese without limits.
         </p>
 
         <!-- Benefits -->
-        <ul class="list-disc pl-5 text-left text-gray-700 space-y-2 max-w-sm mx-auto leading-relaxed">
-          <li>Greater language exposure with full access to all content</li>
-          <li>Unlock over 2500 word tiles</li>
-          <li>Unlock over 10000 sentences to help with your studies</li>
-          <li>Train to improve recognition and recall with our exercises and activities</li>
-          <li>Practice your pronunciation with 3000 Echo Lab requests per month</li>
-          <li>Increase exposure to weaker words via our xp system</li>
-          <li>Access new topics, words and features added regularly</li>
-        </ul>
+        <div class="max-w-2xl mx-auto rounded-2xl border border-gray-200 bg-white/70 p-5 md:p-6">
+          <ul class="list-disc pl-5 text-left text-gray-700 space-y-2 leading-relaxed">
+            <li>Greater language exposure with full access to all content</li>
+            <li>Unlock over 2500 word tiles</li>
+            <li>Unlock over 10000 sentences to help with your studies</li>
+            <li>Train to improve recognition and recall with our exercises and activities</li>
+            <li>Practice your pronunciation with 3000 Echo Lab requests per month</li>
+            <li>Increase exposure to weaker words via our xp system</li>
+            <li>Access new topics, words and features added regularly</li>
+          </ul>
+        </div>
 
         <!-- Plans -->
         <div v-if="isLoggedIn" class="space-y-3 pt-4 max-w-md mx-auto">
+          <p class="text-sm text-gray-500">
+            Choose a plan
+          </p>
 
           <!-- Monthly (Pastel themed) -->
           <button class="block w-full rounded-xl py-3 font-medium transition shadow-sm"
