@@ -6,7 +6,6 @@ import { onMounted } from 'vue'
 
 const {
   authReady,
-  entitlement,
   resolve,
 } = useMeStateV2()
 
@@ -34,14 +33,14 @@ const canEnterLevel = (level: any) => {
 </script>
 
 <template>
-  <main class="levels-page max-w-4xl mx-auto py-10 px-2 space-y-10">
+  <main class="levels-page max-w-4xl mx-auto py-8 px-4 space-y-8">
 
-    <div class="mb-6">
+    <div class="mb-4">
       <BackLink />
     </div>
 
     <!-- Header -->
-    <header class="text-center space-y-3 max-w-2xl mx-auto">
+    <header class="text-center space-y-3 max-w-4xl mx-auto">
       <h1 class="font-semibold level-heading">
         Level Quiz
       </h1>
@@ -109,7 +108,7 @@ const canEnterLevel = (level: any) => {
   </main>
 </template>
 
-<style>
+<style scoped>
 .levels-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;
@@ -165,6 +164,7 @@ const canEnterLevel = (level: any) => {
   font-size: 0.85rem;
   border-radius: 8px;
   font-weight: 600;
+  line-height: 1.2;
   transition: all 0.15s ease;
 }
 
@@ -206,11 +206,11 @@ const canEnterLevel = (level: any) => {
 }
 
 .level-btn-green {
-  background: rgba(88, 199, 95, 0.35);
+  background: rgba(205, 232, 201, 0.7);
   color: #1f2937;
 }
 
 .level-btn-green:hover {
-  background: rgba(88, 199, 95, 0.55);
+  background: rgba(192, 223, 188, 0.85);
 }
 </style>
