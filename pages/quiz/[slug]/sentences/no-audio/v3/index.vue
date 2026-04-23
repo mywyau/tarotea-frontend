@@ -190,7 +190,10 @@ const completionAnimated = ref(false)
 const answerLog = ref<QuizAnswer[]>([])
 const finishing = ref(false)
 const totalXpEarned = ref(0)
+const totalXpLost = ref(0)
 const animatedXpEarned = ref(0)
+const animatedXpLost = ref(0)
+const initialProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
 
 const accuracy = computed(() => {
     if (!questions.value.length) return 0
@@ -237,6 +240,7 @@ function generateTileColors() {
 function resetCompletionAnimations() {
     animatedAccuracy.value = 0
     animatedXpEarned.value = 0
+    animatedXpLost.value = 0
     completionAnimated.value = false
 }
 
@@ -264,6 +268,39 @@ function animateCount(target: Ref<number>, end: number, duration: number) {
 function runCompletionAnimations() {
     animateCount(animatedAccuracy, accuracy.value, 2300)
     animateCount(animatedXpEarned, totalXpEarned.value, 1000)
+    animateCount(animatedXpLost, totalXpLost.value, 1000)
+}
+
+function calculateQuizXpTotals() {
+    const localProgress: Record<string, { xp: number; streak: number }> = Object.fromEntries(
+        Object.entries(initialProgressMap.value).map(([wordId, progress]) => [
+            wordId,
+            { ...progress }
+        ])
+    )
+
+    let earned = 0
+    let lost = 0
+
+    for (const quizAnswer of answerLog.value) {
+        const prev = localProgress[quizAnswer.wordId] ?? { xp: 0, streak: 0 }
+        const delta = deltaFor(quizAnswer.correct, prev.streak)
+        const nextXp = Math.max(0, prev.xp + delta)
+        const appliedDelta = nextXp - prev.xp
+
+        if (appliedDelta > 0) {
+            earned += appliedDelta
+        } else if (appliedDelta < 0) {
+            lost += Math.abs(appliedDelta)
+        }
+
+        localProgress[quizAnswer.wordId] = {
+            xp: nextXp,
+            streak: quizAnswer.correct ? prev.streak + 1 : 0,
+        }
+    }
+
+    return { earned, lost }
 }
 
 function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
@@ -276,6 +313,7 @@ function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
     answerLog.value = []
     finishing.value = false
     totalXpEarned.value = 0
+    totalXpLost.value = 0
     xpDelta.value = null
     elapsedMs.value = 0
     frozenElapsedMs.value = null
@@ -284,6 +322,12 @@ function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
     resetCompletionAnimations()
 
     wordProgressMap.value = { ...(payload.progress ?? {}) }
+    initialProgressMap.value = Object.fromEntries(
+        Object.entries(payload.progress ?? {}).map(([wordId, progress]) => [
+            wordId,
+            { ...progress }
+        ])
+    )
 
     const firstWordId = payload.quiz.questions[0]?.wordId
     currentXp.value = firstWordId
@@ -323,7 +367,9 @@ async function finalizeQuiz() {
             sleep(MIN_CALCULATING_MS),
         ])
 
-        totalXpEarned.value = res.quiz.xpEarned
+        const { earned, lost } = calculateQuizXpTotals()
+        totalXpEarned.value = Number.isFinite(res.quiz.xpEarned) ? res.quiz.xpEarned : earned
+        totalXpLost.value = lost
     } catch (err) {
         console.error('Sentence quiz finalize failed', err)
     } finally {
@@ -487,7 +533,9 @@ watch(
         answerLog.value = []
         finishing.value = false
         totalXpEarned.value = 0
+        totalXpLost.value = 0
         wordProgressMap.value = {}
+        initialProgressMap.value = {}
         currentXp.value = 0
         currentStreak.value = 0
         xpDelta.value = null
@@ -672,7 +720,7 @@ onBeforeUnmount(() => {
                         </transition>
 
                         <transition-group name="card-fade" tag="div"
-                            class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                            class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
                             <div class="stat-card hover:brightness-110 result-0">
                                 <p class="stat-label">Correct</p>
                                 <p class="stat-value">{{ score }}</p>
@@ -687,6 +735,13 @@ onBeforeUnmount(() => {
                                 <p class="stat-label">XP Earned</p>
                                 <p class="stat-value">
                                     {{ animatedXpEarned > 0 ? '+' : '' }}{{ animatedXpEarned }} XP
+                                </p>
+                            </div>
+
+                            <div class="stat-card hover:brightness-110 result-1">
+                                <p class="stat-label">XP Lost</p>
+                                <p class="stat-value">
+                                    -{{ animatedXpLost }} XP
                                 </p>
                             </div>
                         </transition-group>
