@@ -254,7 +254,7 @@ function calculateQuizXpEarned() {
     const nextXp = Math.max(0, prev.xp + delta)
     const appliedDelta = nextXp - prev.xp
 
-    total += appliedDelta
+    total += Math.max(0, appliedDelta)
 
     localProgress[answer.wordId] = {
       xp: nextXp,
