@@ -45,6 +45,7 @@ type TopicAudioQuizPayload = {
     questions: AudioQuizQuestion[]
     progressMap: Record<string, WordProgress>
     wordsById: Record<string, TopicWord>
+    guestPreview?: boolean
 }
 
 type QuizAnswer = {
@@ -60,6 +61,8 @@ const cdnBase = runtimeConfig.public.cdnBase
 
 const { stop } = useGlobalAudio()
 const { getAccessToken } = await useAuth()
+const me = useMeStateV2()
+const isGuestPreview = computed(() => quizData.value?.guestPreview === true)
 
 type FinalizeResponse = {
     quiz: {
@@ -273,11 +276,13 @@ async function loadQuiz() {
         const res = await $fetch<TopicAudioQuizPayload>(
             // `/api/topic/audio-quiz/${slug.value}`,
             `/api/topic/audio-quiz/v2/${slug.value}`,
-            {
-                headers: {
-                    Authorization: `Bearer ${token}`
+            token
+                ? {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
                 }
-            }
+                : undefined
         )
 
         quizData.value = res
@@ -313,7 +318,7 @@ async function loadQuiz() {
 }
 
 watch(
-    () => slug.value,
+    () => [slug.value, me.isLoggedIn.value],
     () => {
         loadQuiz()
     },
@@ -496,6 +501,20 @@ async function finalizeAudioQuiz() {
 
     try {
         const token = await getAccessToken()
+        if (!token || isGuestPreview.value) {
+            const elapsed = Date.now() - startedAt
+            const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
+
+            if (remaining > 0) {
+                await sleep(remaining)
+            }
+
+            totalXpEarned.value = 0
+            freezeTimer()
+            finalizeCompleted.value = true
+            return
+        }
+
         const attemptId = ensureFinalizeAttemptId()
 
         const res = await $fetch<FinalizeResponse>('/api/quiz/grind/finalize-v5', {
@@ -818,6 +837,12 @@ onUnmounted(() => {
                     </div>
 
                     <div class="pt-2 space-y-3">
+                        <NuxtLink v-if="isGuestPreview" to="/please-sign-in"
+                            class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+                            style="background-color:#F4CD27;">
+                            Sign up to earn XP & unlock more words
+                        </NuxtLink>
+
                         <NuxtLink :to="`/topics/quiz`"
                             class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
                             style="background-color:#A8CAE0;">
