@@ -14,6 +14,7 @@ const primaryLinks = computed(() => [
   { to: '/topics', label: 'Topics' },
   { to: '/topics/quiz', label: 'Topic Quiz' },
   { to: '/levels', label: 'Levels' },
+  { to: '/dojo', label: 'Dojo' },
   { to: '/quiz', label: 'Level Quiz' },
 ])
 
@@ -63,12 +64,12 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header ref="panelRoot" class="sticky top-0 z-50 border-b border-black/10 bg-white/90 backdrop-blur">
+  <header ref="panelRoot" class="sticky top-0 z-50 bg-white/90 backdrop-blur">
     <div class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
       <div class="flex items-center gap-3">
         <button
           type="button"
-          class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-black/10 text-xl transition hover:bg-black/5"
+          class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-xl transition hover:bg-black/5"
           aria-label="Open navigation panel"
           :aria-expanded="panelOpen ? 'true' : 'false'"
           @click.stop="togglePanel"
@@ -92,11 +93,11 @@ onBeforeUnmount(() => {
     </transition>
 
     <aside
-      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] border-r border-black/10 bg-white shadow-xl transition-transform duration-200"
+      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-white shadow-xl transition-transform duration-200"
       :class="panelOpen ? 'translate-x-0' : '-translate-x-full'"
       aria-label="Site navigation"
     >
-      <div class="flex items-center justify-between border-b border-black/10 px-4 py-4">
+      <div class="flex items-center justify-between px-4 py-4">
         <NuxtLink to="/" class="text-lg font-semibold text-black" @click="closePanel">
           Navigation
         </NuxtLink>
