@@ -1,4 +1,4 @@
-import { freeTopicsQuiz } from "~/utils/topics/permissions";
+import { canAccessTopicQuiz, freeTopicsQuiz } from "~/utils/topics/permissions";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return; // middleware runs on client only
@@ -25,12 +25,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return;
   }
 
-  return;
-
   // Full paid access
-  // if (canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic)) {
-  //   return;
-  // }
+  if (canAccessTopicQuiz(isLoggedIn.value, entitlement.value, topic)) {
+    return;
+  }
 
   return navigateTo("/upgrade");
 });

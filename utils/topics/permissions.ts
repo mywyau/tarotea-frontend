@@ -44,7 +44,7 @@ export function canAccessTopic(
   userEntitlement: Entitlement | null,
   topic: string,
 ): boolean {
-  isFreeTopic(topic);
+  if (isFreeTopic(topic)) return true;
   // Paid levels
   if (!isLoggedIn) return false;
 
