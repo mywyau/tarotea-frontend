@@ -735,10 +735,6 @@ onBeforeUnmount(() => {
                 <p class="hero-score">
                   {{ animatedAccuracy }}%
                 </p>
-
-                <p class="hero-subtext">
-                  Time: {{ formattedElapsedTime }}
-                </p>
               </div>
             </transition>
 
