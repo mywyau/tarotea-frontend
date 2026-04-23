@@ -125,11 +125,13 @@ function calculateQuizXpEarned() {
     for (const answer of answerLog.value) {
         const prev = localProgress[answer.wordId] ?? { xp: 0, streak: 0 }
         const delta = deltaFor(answer.correct, prev.streak)
+        const nextXp = Math.max(0, prev.xp + delta)
+        const appliedDelta = nextXp - prev.xp
 
-        total += delta
+        total += Math.max(0, appliedDelta)
 
         localProgress[answer.wordId] = {
-            xp: Math.max(0, prev.xp + delta),
+            xp: nextXp,
             streak: answer.correct ? prev.streak + 1 : 0
         }
     }
