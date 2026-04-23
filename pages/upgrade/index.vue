@@ -16,6 +16,11 @@ const isSubscribed = computed(() =>
   authReady.value && hasPaidAccess(entitlement.value!)
 )
 
+const monthlyPrice = 4.99
+const yearlyPrice = 49.99
+const yearlySavings = (monthlyPrice * 12 - yearlyPrice).toFixed(2)
+const yearlyMonthlyEquivalent = (yearlyPrice / 12).toFixed(2)
+
 // Already paid → manage subscription instead
 function upgrade(plan: 'monthly' | 'yearly') {
   if (isSubscribed.value) {
@@ -54,6 +59,12 @@ function upgrade(plan: 'monthly' | 'yearly') {
           Unlock all content and learn Cantonese without limits.
         </p>
 
+        <p class="text-xs text-gray-500">
+          <NuxtLink to="/refund-policy" class="hover:underline">
+            View refund policy
+          </NuxtLink>
+        </p>
+
         <!-- Benefits -->
         <div class="max-w-2xl mx-auto rounded-2xl border border-gray-200 bg-white/70 p-5 md:p-6">
           <ul class="list-disc pl-5 text-left text-gray-700 space-y-2 leading-relaxed">
@@ -78,7 +89,8 @@ function upgrade(plan: 'monthly' | 'yearly') {
             style="background-color:#A8CAE0;" :class="isSubscribed
               ? 'opacity-60 cursor-not-allowed'
               : 'hover:brightness-110 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('monthly')">
-            Monthly plan · £4.99
+            <span class="block">Monthly plan · £{{ monthlyPrice }}</span>
+            <span class="block text-xs text-gray-700 mt-0.5">Flexible month-to-month billing</span>
           </button>
 
           <!-- Yearly (KEEP BLACK) -->
@@ -86,9 +98,20 @@ function upgrade(plan: 'monthly' | 'yearly') {
             ? 'opacity-60 cursor-not-allowed'
             : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
             style="background-color:rgba(244,205,39,0.35);">
-            Yearly plan · £49.99
+            <span class="block">Yearly plan · £{{ yearlyPrice }}</span>
+            <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Save £{{ yearlySavings }} per year</span>
           </button>
 
+        </div>
+
+        <div v-else class="pt-4 max-w-md mx-auto">
+          <NuxtLink
+            to="/please-sign-in"
+            class="block w-full rounded-xl py-3 px-3 font-medium transition shadow-sm hover:brightness-110 active:scale-[0.98]"
+            style="background-color:#A8CAE0;"
+          >
+            Sign in to choose a plan
+          </NuxtLink>
         </div>
 
         <!-- Subscribed -->
