@@ -122,9 +122,11 @@ function ensureFinalizeAttemptId() {
 const answerLog = ref<QuizAnswer[]>([])
 const finishing = ref(false)
 const totalXpEarned = ref<number>(0)
+const totalXpLost = ref<number>(0)
 
 const animatedAccuracy = ref(0)
 const animatedXpEarned = ref(0)
+const animatedXpLost = ref(0)
 const completionAnimated = ref(false)
 
 const tileColors = ref<string[]>([])
@@ -144,6 +146,7 @@ const initialProgressMap = ref<Record<string, { xp: number; streak: number }>>({
 function resetCompletionAnimations() {
   animatedAccuracy.value = 0
   animatedXpEarned.value = 0
+  animatedXpLost.value = 0
   completionAnimated.value = false
 }
 
@@ -152,6 +155,7 @@ function resetFinalizeState() {
   finalizeCompleted.value = false
   finalizeError.value = null
   totalXpEarned.value = 0
+  totalXpLost.value = 0
   finishing.value = false
   completionSoundPlayed.value = false
   resetCompletionAnimations()
@@ -174,7 +178,7 @@ function resetQuizRunState() {
   stopTimer()
 }
 
-function calculateQuizXpEarned() {
+function calculateQuizXpTotals() {
   const localProgress: Record<string, { xp: number; streak: number }> = Object.fromEntries(
     Object.entries(initialProgressMap.value).map(([wordId, progress]) => [
       wordId,
@@ -182,21 +186,29 @@ function calculateQuizXpEarned() {
     ])
   )
 
-  let total = 0
+  let earned = 0
+  let lost = 0
 
   for (const answer of answerLog.value) {
     const prev = localProgress[answer.wordId] ?? { xp: 0, streak: 0 }
     const delta = deltaFor(answer.correct, prev.streak)
 
-    total += delta
+    const nextXp = Math.max(0, prev.xp + delta)
+    const appliedDelta = nextXp - prev.xp
+
+    if (appliedDelta > 0) {
+      earned += appliedDelta
+    } else if (appliedDelta < 0) {
+      lost += Math.abs(appliedDelta)
+    }
 
     localProgress[answer.wordId] = {
-      xp: Math.max(0, prev.xp + delta),
+      xp: nextXp,
       streak: answer.correct ? prev.streak + 1 : 0
     }
   }
 
-  return total
+  return { earned, lost }
 }
 
 const { data, error } = await useFetch<LevelData>(
@@ -383,11 +395,18 @@ const completionTiles = computed(() => [
     className: 'result-3'
   },
   {
-    label: 'XP Earned',
+    label: 'XP Gained',
     value: animatedXpEarned.value,
     suffix: 'XP',
     className: 'result-2',
     prefix: animatedXpEarned.value > 0 ? '+' : ''
+  },
+  {
+    label: 'XP Lost',
+    value: animatedXpLost.value,
+    suffix: 'XP',
+    className: 'result-1',
+    prefix: animatedXpLost.value > 0 ? '-' : ''
   },
 ])
 
@@ -416,6 +435,7 @@ async function finalizeQuiz() {
       }
 
       totalXpEarned.value = 0
+      totalXpLost.value = 0
       finalizeCompleted.value = true
       return
     }
@@ -441,7 +461,9 @@ async function finalizeQuiz() {
       await sleep(remaining)
     }
 
-    totalXpEarned.value = calculateQuizXpEarned()
+    const { earned, lost } = calculateQuizXpTotals()
+    totalXpEarned.value = earned
+    totalXpLost.value = lost
     finalizeCompleted.value = true
 
     console.info('Audio quiz finalized', {
@@ -494,13 +516,14 @@ async function answer(index: number) {
   const delta = deltaFor(correct, prev.streak)
   const newStreak = correct ? prev.streak + 1 : 0
   const newXp = Math.max(0, prev.xp + delta)
+  const appliedDelta = newXp - prev.xp
 
   wordProgressMap.value[wordId] = {
     xp: newXp,
     streak: newStreak
   }
 
-  xpDelta.value = delta
+  xpDelta.value = appliedDelta
   currentXp.value = newXp
   currentStreak.value = newStreak
 
@@ -634,6 +657,7 @@ watch(
       completionAnimated.value = true
       runCompletionAnimations()
       animateCount(animatedXpEarned, totalXpEarned.value, 1000)
+      animateCount(animatedXpLost, totalXpLost.value, 1000)
     }
 
     if (!completionSoundPlayed.value) {
@@ -823,7 +847,7 @@ onBeforeUnmount(() => {
             </div>
           </transition>
 
-          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-4 gap-4 sm:gap-6">
+          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
             <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
               :class="tile.className">
               <p class="stat-label">
