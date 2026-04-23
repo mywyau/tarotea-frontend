@@ -250,9 +250,9 @@ onMounted(() => {
                 <p class="mt-2 text-xs leading-5 sm:text-sm">
                   {{ word.jyutping || "" }}
                 </p>
-                <p class="mt-1 text-xs leading-5 sm:text-sm">
+                <!-- <p class="mt-1 text-xs leading-5 sm:text-sm">
                   {{ word.meaning || "" }}
-                </p>
+                </p> -->
               </div>
 
               <div
@@ -280,9 +280,9 @@ onMounted(() => {
                 <p class="mt-1 text-2xl font-bold sm:text-3xl">
                   {{ currentCharacter || "—" }}
                 </p>
-                <p class="mt-1.5 text-xs sm:mt-2 sm:text-sm panel-subtext">
+                <!-- <p class="mt-1.5 text-xs sm:mt-2 sm:text-sm panel-subtext">
                   Progress: {{ progressLabel }}
-                </p>
+                </p> -->
               </div>
 
               <div v-if="selectedCharacters.length > 1" class="mb-4 flex flex-wrap gap-2 sm:mb-5">
@@ -442,7 +442,7 @@ onMounted(() => {
 
 .char-chip-active {
   background: rgb(126, 147, 255);
-  color: white;
+  color: rgb(0, 0, 0);
   border-color: rgba(126, 147, 255, 0.9);
   box-shadow: 0 8px 18px rgba(126, 147, 255, 0.24);
 }
