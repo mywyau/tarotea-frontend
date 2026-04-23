@@ -281,7 +281,7 @@ onMounted(() => {
                                 <p class="mt-2 text-xs leading-5 text-gray-600 sm:text-sm">
                                     {{ selectedExample.jyutping || "" }}
                                 </p>
-                                <p class="mt-1 text-xs leading-5 text-gray-600 sm:text-sm">
+                                <p class="mt-1 text-xs leading-5 text-black font-medium sm:text-sm">
                                     {{ selectedExample.meaning || "" }}
                                 </p>
                             </div>
@@ -312,9 +312,9 @@ onMounted(() => {
                                 <p class="mt-1 text-2xl font-bold text-gray-900 sm:text-3xl">
                                     {{ currentCharacter || "—" }}
                                 </p>
-                                <p class="mt-1.5 text-xs text-gray-600 sm:mt-2 sm:text-sm">
+                                <!-- <p class="mt-1.5 text-xs text-gray-600 sm:mt-2 sm:text-sm">
                                     Progress: {{ progressLabel }}
-                                </p>
+                                </p> -->
                             </div>
 
                             <div class="space-y-2.5 sm:space-y-3">

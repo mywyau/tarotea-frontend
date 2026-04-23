@@ -127,12 +127,6 @@ const canEnterLevel = () => {
           </div>
         </Transition>
       </section>
-
-      <div class="mt-2">
-        <NuxtLink :to="`/level/${slug}`" class="text-sm text-black hover:underline">
-          ← Level {{ levelNumber }} vocab
-        </NuxtLink>
-      </div>
     </section>
   </main>
 </template>

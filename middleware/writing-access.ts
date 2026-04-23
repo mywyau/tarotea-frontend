@@ -2,11 +2,7 @@ import { isLevelId, levelIdToNumbers } from "@/utils/levels/levels";
 import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { isComingSoon, isFreeLevel } from "~/utils/levels/permissions";
-import { freeTopics } from "~/utils/topics/permissions";
-
-function hasPaidAccess(entitlement: { plan?: string | null } | null | undefined) {
-  return entitlement?.plan === "monthly" || entitlement?.plan === "yearly";
-}
+import { freeTopics, hasPaidAccess } from "~/utils/topics/permissions";
 
 async function getUnlockedWordIds() {
   const unlockedIds = useState<string[]>("unlocked-word-ids", () => []);

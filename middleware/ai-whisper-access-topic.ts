@@ -31,6 +31,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
   const topic = await $fetch(`/api/index/topics/${topicSlug}`);
 
   const allWords = Object.values(topic.categories).flat();
+  
   const freePreviewIds = allWords.slice(0, 10).map((w: any) => w.id);
 
   if (freePreviewIds.includes(wordIdSlug)) {
