@@ -79,11 +79,11 @@ onBeforeUnmount(() => {
     </div>
 
     <transition name="fade">
-      <div v-if="panelOpen" class="fixed inset-0 z-40 bg-black/20" aria-hidden="true" @click="closePanel" />
+      <div v-if="panelOpen" class="fixed inset-0 z-40" aria-hidden="true" @click="closePanel" />
     </transition>
 
     <aside
-      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-[#EAB8E4]/35 shadow-xl transition-transform duration-200"
+      class="fixed left-0 top-0 z-50 h-screen w-80 max-w-[84vw] bg-[#F3E5F5]/35 shadow-xl transition-transform duration-200"
       :class="panelOpen ? 'translate-x-0' : '-translate-x-full'" aria-label="Site navigation">
       <div class="flex items-center justify-between px-4 py-4">
         <NuxtLink to="/" class="text-lg font-semibold text-black" @click="closePanel">
