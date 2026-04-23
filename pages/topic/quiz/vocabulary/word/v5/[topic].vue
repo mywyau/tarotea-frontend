@@ -325,6 +325,10 @@ watch(
   { immediate: true }
 )
 
+const showSignInPrompt = computed(() => {
+  return !me.isLoggedIn.value && !quizLoading.value
+})
+
 const questions = computed(() => quizData.value?.questions ?? [])
 const question = computed(() => questions.value[current.value] ?? null)
 const wordsById = computed(() => quizData.value?.wordsById ?? {})
@@ -664,7 +668,21 @@ onBeforeUnmount(() => {
         </span>
       </div>
 
-      <div v-if="quizLoading" class="stat-card hero-card result-2 space-y-4">
+      <div v-if="showSignInPrompt" class="stat-card hero-card result-2 space-y-4">
+        <p class="stat-label">Sign in required</p>
+        <h2 class="hero-title">Sign in to start this topic quiz</h2>
+        <p class="hero-subtext">
+          Topic vocabulary quizzes need an account so we can track XP and unlock progress.
+        </p>
+
+        <NuxtLink to="/please-sign-in"
+          class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+          style="background-color:#A8CAE0;">
+          Sign in / Create account
+        </NuxtLink>
+      </div>
+
+      <div v-else-if="quizLoading" class="stat-card hero-card result-2 space-y-4">
         <div class="spinner mx-auto" />
         <p class="stat-label">Loading</p>
         <h2 class="hero-title">Preparing your quiz...</h2>
