@@ -847,7 +847,7 @@ onBeforeUnmount(() => {
             </div>
           </transition>
 
-          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-5 gap-4 sm:gap-6">
+          <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-5 xl:gap-6">
             <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
               :class="tile.className">
               <p class="stat-label">
