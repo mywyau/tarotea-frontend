@@ -35,5 +35,6 @@ export default defineNuxtRouteMiddleware(async (to) => {
   }
 
   // Final fallback
-  return navigateTo("/upgrade");
+  // return navigateTo("/upgrade");
+  return;
 });

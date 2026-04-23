@@ -1,5 +1,4 @@
 export default defineNuxtRouteMiddleware(async (to) => {
-
   if (process.server) return; // middleware runs on client only
 
   const topic = to.params.topic as string;
@@ -19,5 +18,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo("/please-sign-in");
   }
 
-  return navigateTo("/upgrade");
+  // return navigateTo("/upgrade");
+
+  return;
 });
