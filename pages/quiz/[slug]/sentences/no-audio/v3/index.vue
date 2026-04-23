@@ -722,32 +722,32 @@ onBeforeUnmount(() => {
                         </transition>
 
                         <transition-group name="card-fade" tag="div"
-                            class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-                            <div class="stat-card hover:brightness-110 result-0">
+                            class="grid grid-cols-1 sm:grid-cols-6 gap-4 sm:gap-6">
+                            <div class="stat-card hover:brightness-110 result-0 sm:col-span-2">
                                 <p class="stat-label">Correct</p>
                                 <p class="stat-value">{{ score }}</p>
                             </div>
 
-                            <div class="stat-card hover:brightness-110 result-1">
+                            <div class="stat-card hover:brightness-110 result-1 sm:col-span-2">
                                 <p class="stat-label">Incorrect</p>
                                 <p class="stat-value">{{ incorrectCount }}</p>
                             </div>
 
-                            <div class="stat-card hover:brightness-110 result-0">
+                            <div class="stat-card hover:brightness-110 result-0 sm:col-span-2">
                                 <p class="stat-label">Time</p>
                                 <p class="stat-value">
                                     {{ formattedElapsedTime }}
                                 </p>
                             </div>
 
-                            <div class="stat-card hover:brightness-110 result-2">
+                            <div class="stat-card hover:brightness-110 result-2 sm:col-span-3">
                                 <p class="stat-label">XP Earned</p>
                                 <p class="stat-value">
                                     {{ animatedXpEarned > 0 ? '+' : '' }}{{ animatedXpEarned }} XP
                                 </p>
                             </div>
 
-                            <div class="stat-card hover:brightness-110 result-1">
+                            <div class="stat-card hover:brightness-110 result-1 sm:col-span-3">
                                 <p class="stat-label">XP Lost</p>
                                 <p class="stat-value">
                                     -{{ animatedXpLost }} XP
