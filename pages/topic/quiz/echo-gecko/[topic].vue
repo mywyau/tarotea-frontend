@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { playCorrectJingle, playGoodJingle } from "~/utils/sounds"
+import { playCorrectJingle, playGoodJingle, playQuizCompleteFailSong, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: ["logged-in", "topic-access-quiz"],
@@ -78,6 +78,7 @@ const lastToneScore = ref<number | null>(null)
 const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
 const nextWordCountdownMs = ref<number | null>(null)
 const rapidMode = ref(false)
+const completionSoundPlayed = ref(false)
 
 const recordedBlob = ref<Blob | null>(null)
 const recordingUrl = ref<string | null>(null)
@@ -320,6 +321,7 @@ function startQuiz() {
   lastToneScore.value = null
   detectedToneRows.value = []
   finished.value = false
+  completionSoundPlayed.value = false
   currentIndex.value = 0
   passedCount.value = 0
   quizWords.value = shuffle(allWords.value).slice(0, quizSize.value)
@@ -492,6 +494,22 @@ const resultTitle = computed(() => {
   if (passPercentage.value >= 50) return "Nice try"
   return "Keep practicing"
 })
+
+watch(
+  () => finished.value,
+  (isFinished) => {
+    if (!isFinished || completionSoundPlayed.value) return
+    completionSoundPlayed.value = true
+
+    if (passPercentage.value >= 80) {
+      playQuizCompleteFanfareSong()
+    } else if (passPercentage.value >= 50) {
+      playQuizCompleteOkaySong()
+    } else {
+      playQuizCompleteFailSong()
+    }
+  }
+)
 
 watch(rapidMode, (enabled) => {
   if (!enabled) return
