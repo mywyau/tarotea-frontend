@@ -547,7 +547,7 @@ onBeforeUnmount(() => {
         <h1 class="text-3xl font-bold">Echo Gecko</h1>
       </header>
 
-      <section class="rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm sm:p-6">
+      <section class="rounded-2xl border border-fuchsia-100 p-5 shadow-sm sm:p-6" :class="finished ? 'bg-transparent' : 'bg-white/90'">
         <div v-if="pending || loading" class="text-sm text-gray-600">Loading quiz words…</div>
         <div v-else-if="error" class="rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
           Failed to load quiz data. Please refresh and try again.
