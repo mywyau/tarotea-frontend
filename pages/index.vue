@@ -41,11 +41,20 @@ onMounted(() => {
 <template>
   <main class="max-w-3xl mx-auto py-20 px-6 min-h-screen">
     <!-- Hero Section -->
-    <div class="text-center">
+    <div class="text-center space-y-4">
 
       <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-black">
         Learn and practice Cantonese
       </h1>
+
+      <p class="text-gray-700 max-w-2xl mx-auto">
+        TaroTea keeps things fun and friendly: bite-sized content, quick quizzes, playful exercises, and an XP
+        boost for every little win.
+      </p>
+
+      <p class="text-gray-600 max-w-2xl mx-auto">
+        Pop in for a few minutes, learn something useful, and leave with your Cantonese a tiny bit stronger 🌱
+      </p>
     </div>
 
     <!-- Stats -->
