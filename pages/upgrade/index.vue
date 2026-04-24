@@ -59,12 +59,6 @@ function upgrade(plan: 'monthly' | 'yearly') {
           Unlock all content and learn Cantonese without limits.
         </p>
 
-        <p class="text-xs text-gray-500">
-          <NuxtLink to="/refund-policy" class="hover:underline">
-            View refund policy
-          </NuxtLink>
-        </p>
-
         <!-- Benefits -->
         <div class="max-w-xl mx-auto rounded-2xl p-5 md:p-6">
           <ul class="list-disc pl-5 text-left text-gray-700 space-y-2 leading-relaxed">
@@ -99,17 +93,16 @@ function upgrade(plan: 'monthly' | 'yearly') {
             : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
             style="background-color:rgba(244,205,39,0.35);">
             <span class="block">Yearly plan · £{{ yearlyPrice }}</span>
-            <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Save £{{ yearlySavings }} per year</span>
+            <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Save £{{
+              yearlySavings }} per year</span>
           </button>
 
         </div>
 
         <div v-else class="pt-4 max-w-md mx-auto">
-          <NuxtLink
-            to="/please-sign-in"
+          <NuxtLink to="/please-sign-in"
             class="block w-full rounded-xl py-3 px-3 font-medium transition shadow-sm hover:brightness-110 active:scale-[0.98]"
-            style="background-color:#A8CAE0;"
-          >
+            style="background-color:#A8CAE0;">
             Sign in to choose a plan
           </NuxtLink>
         </div>
@@ -126,6 +119,12 @@ function upgrade(plan: 'monthly' | 'yearly') {
         <p v-if="!isSubscribed" class="text-sm text-gray-500">
           <NuxtLink to="/levels" class="hover:underline">
             ← Continue learning without upgrading
+          </NuxtLink>
+        </p>
+
+        <p class="text-sm text-gray-500">
+          <NuxtLink to="/refund-policy" class="hover:underline">
+            View refund policy
           </NuxtLink>
         </p>
 
