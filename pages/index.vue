@@ -17,7 +17,7 @@ const learningModes = [
   },
   {
     title: 'Progress-driven',
-    description: 'See your growth and keep momentum with clear goals and repetition.',
+    description: 'See your growth and keep momentum with clear goals and repetition. Track progress via XP and unlock more words for free. Visualise which words are familiar and words that you may need to work on easily.',
     bgClass: 'brand-card-pink',
   },
   {
@@ -87,24 +87,19 @@ onMounted(() => {
         </div>
       </div>
 
-      <p class="text-base sm:text-lg text-gray-700 mt-6 max-w-2xl mx-auto">
-        Build confidence with short, quick focused practice and fun activities that help you remember what you learn.
+      <p class="text-base sm:text-lg text-gray-700 mt-10 max-w-2xl mx-auto">
+        Build confidence with quick, focused and fun activities that help you remember what you learn.
+        Practice at you own pace, no daily streaks or annoying birds. Grind whatever and whenever you want.
       </p>
-
-      <!-- <ul class="mt-8 space-y-3 text-left max-w-2xl mx-auto">
-        <li v-for="benefit in benefits" :key="benefit"
-          class="rounded-xl px-4 py-3 brand-card-lilac shadow-sm text-gray-800">
-          {{ benefit }}
-        </li>
-      </ul> -->
     </section>
 
-    <section class="mt-14 rounded-2xl p-6 sm:p-8 brand-cta-bg text-gray-900 shadow-sm">
+    <section class="mt-12 rounded-2xl p-6 sm:p-8 brand-cta-bg text-gray-900 shadow-sm">
       <h2 class="text-2xl font-semibold tracking-tight">
         Start learning Cantonese today
       </h2>
       <p class="text-sm sm:text-base text-gray-800 mt-2 max-w-2xl">
-        Play through different modes and build real vocabulary you can use in everyday conversations.
+        Explore our library or play through different modes and build real vocabulary you can use in everyday
+        conversations.
       </p>
       <div class="mt-5 flex flex-wrap gap-3">
         <NuxtLink to="/topics"
