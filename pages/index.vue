@@ -4,12 +4,6 @@ const { data: stats } = await useFetch('/api/total-users-stats', {
   lazy: true,
 })
 
-const benefits = [
-  'Build practical Cantonese vocabulary in just 15 minutes a day.',
-  'Play multiple activity modes to learn words, pronunciation, and listening.',
-  'Track your progress with bite-sized sessions you can keep up with.',
-]
-
 const learningModes = [
   {
     title: 'Daily practice',
@@ -18,13 +12,18 @@ const learningModes = [
   },
   {
     title: 'Multiple activities',
-    description: 'Switch between vocabulary, audio only, or sentence quiz, and pronunciation-focused learning modes.',
+    description: 'Switch between vocabulary, audio only, or sentence quizzes, and pronunciation-focused learning modes.',
     bgClass: 'brand-card-blue',
   },
   {
     title: 'Progress-driven',
     description: 'See your growth and keep momentum with clear goals and repetition.',
     bgClass: 'brand-card-pink',
+  },
+  {
+    title: 'Learn how to write',
+    description: 'Grab your pen and paper! Watch and learn how to write traditional chinese characters by following the Hanzi Writer.',
+    bgClass: 'brand-card-green',
   },
 ]
 
@@ -117,7 +116,7 @@ onMounted(() => {
           Try quizzes
         </NuxtLink>
 
-        
+
       </div>
     </section>
 
@@ -126,7 +125,7 @@ onMounted(() => {
         How you learn
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <article v-for="mode in learningModes" :key="mode.title" :class="mode.bgClass" class="rounded-xl p-5 shadow-sm">
           <h3 class="font-semibold text-gray-900">
             {{ mode.title }}
