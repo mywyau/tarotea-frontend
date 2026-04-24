@@ -20,10 +20,10 @@ const primaryTips = [
 ]
 
 const scoringTips = [
-  "This quiz contains 20 questions every day.",
   "Streaks are tracked per word.",
   "Lower XP words are prioritized more often.",
   "Base correct-answer XP starts at 5.",
+  "You do not lose any xp for incorrect answers.",
   "Streaks increase XP for repeated correct answers.",
   "Streak XP: 5 → 7 → 9 → 13 → 15.",
   "Questions are randomized each session.",
