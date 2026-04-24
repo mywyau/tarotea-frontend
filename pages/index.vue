@@ -18,7 +18,7 @@ const learningModes = [
   },
   {
     title: 'Multiple activities',
-    description: 'Switch between vocabulary, quiz, and pronunciation-focused learning modes.',
+    description: 'Switch between vocabulary, audio only, or sentence quiz, and pronunciation-focused learning modes.',
     bgClass: 'brand-card-blue',
   },
   {
@@ -65,7 +65,7 @@ onMounted(() => {
   <main class="max-w-4xl mx-auto py-16 sm:py-20 px-6 min-h-screen">
     <section class="text-center">
       <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
-        Learn and improve your Cantonese vocabulary in just 15 minutes a day
+        Learn and improve your Cantonese in just 15 minutes a day
       </h1>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
@@ -89,40 +89,15 @@ onMounted(() => {
       </div>
 
       <p class="text-base sm:text-lg text-gray-700 mt-6 max-w-2xl mx-auto">
-        Build confidence with short, focused practice and fun activities that help you remember what you learn.
+        Build confidence with short, quick focused practice and fun activities that help you remember what you learn.
       </p>
 
-      <ul class="mt-8 space-y-3 text-left max-w-2xl mx-auto">
-        <li
-          v-for="benefit in benefits"
-          :key="benefit"
-          class="rounded-xl px-4 py-3 brand-card-lilac shadow-sm text-gray-800"
-        >
+      <!-- <ul class="mt-8 space-y-3 text-left max-w-2xl mx-auto">
+        <li v-for="benefit in benefits" :key="benefit"
+          class="rounded-xl px-4 py-3 brand-card-lilac shadow-sm text-gray-800">
           {{ benefit }}
         </li>
-      </ul>
-    </section>
-
-    <section class="mt-14">
-      <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
-        How you learn
-      </h2>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <article
-          v-for="mode in learningModes"
-          :key="mode.title"
-          :class="mode.bgClass"
-          class="rounded-xl p-5 shadow-sm"
-        >
-          <h3 class="font-semibold text-gray-900">
-            {{ mode.title }}
-          </h3>
-          <p class="text-sm text-gray-800 mt-2">
-            {{ mode.description }}
-          </p>
-        </article>
-      </div>
+      </ul> -->
     </section>
 
     <section class="mt-14 rounded-2xl p-6 sm:p-8 brand-cta-bg text-gray-900 shadow-sm">
@@ -133,18 +108,33 @@ onMounted(() => {
         Play through different modes and build real vocabulary you can use in everyday conversations.
       </p>
       <div class="mt-5 flex flex-wrap gap-3">
-        <NuxtLink
-          to="/topics"
-          class="inline-flex items-center justify-center rounded-md bg-gray-900 text-white font-medium px-4 py-2 hover:bg-gray-800 transition"
-        >
+        <NuxtLink to="/topics"
+          class="inline-flex items-center justify-center rounded-md bg-gray-900 text-white font-medium px-4 py-2 hover:bg-gray-800 transition">
           Explore topics
         </NuxtLink>
-        <NuxtLink
-          to="/quiz"
-          class="inline-flex items-center justify-center rounded-md border border-gray-700 text-gray-900 font-medium px-4 py-2 hover:bg-white/60 transition"
-        >
+        <NuxtLink to="/quiz"
+          class="inline-flex items-center justify-center rounded-md border border-gray-700 text-gray-900 font-medium px-4 py-2 hover:bg-white/60 transition">
           Try quizzes
         </NuxtLink>
+
+        
+      </div>
+    </section>
+
+    <section class="mt-14">
+      <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
+        How you learn
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <article v-for="mode in learningModes" :key="mode.title" :class="mode.bgClass" class="rounded-xl p-5 shadow-sm">
+          <h3 class="font-semibold text-gray-900">
+            {{ mode.title }}
+          </h3>
+          <p class="text-sm text-gray-800 mt-2">
+            {{ mode.description }}
+          </p>
+        </article>
       </div>
     </section>
   </main>
