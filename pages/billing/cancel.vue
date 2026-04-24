@@ -6,16 +6,22 @@ import { useUpgrade } from '@/composables/useUpgrade';
 import { hasPaidAccess } from '~/utils/levels/permissions';
 
 const {
+  authReady,
   isLoggedIn,
   entitlement,
 } = useMeStateV2();
+
+const monthlyPrice = 4.99
+const yearlyPrice = 49.99
+const yearlySavings = (monthlyPrice * 12 - yearlyPrice).toFixed(2)
+const yearlyMonthlyEquivalent = (yearlyPrice / 12).toFixed(2)
 
 function upgrade(billing: 'monthly' | 'yearly') {
   useUpgrade(billing)
 }
 
 const isSubscribed = computed(() =>
-  isLoggedIn && hasPaidAccess(entitlement.value!)
+  authReady.value && hasPaidAccess(entitlement.value!)
 )
 
 </script>
@@ -41,12 +47,17 @@ const isSubscribed = computed(() =>
           </p>
 
           <div v-if="isLoggedIn" class="space-y-3 pt-4">
+            <p class="text-sm text-gray-500">
+              Choose a plan
+            </p>
+
             <!-- Monthly (Pastel themed) -->
             <button class="block w-full rounded-xl py-3 font-medium transition shadow-sm"
               style="background-color:#A8CAE0;" :class="isSubscribed
                 ? 'opacity-60 cursor-not-allowed'
                 : 'hover:brightness-110 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('monthly')">
-              Monthly plan · £4.99
+              <span class="block">Monthly plan · £{{ monthlyPrice }}</span>
+              <span class="block text-xs text-gray-700 mt-0.5">Flexible month-to-month billing</span>
             </button>
 
             <!-- Yearly (KEEP BLACK) -->
@@ -54,7 +65,8 @@ const isSubscribed = computed(() =>
               ? 'opacity-60 cursor-not-allowed'
               : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
               style="background-color:rgba(244,205,39,0.35);">
-              Yearly plan · £49.99
+              <span class="block">Yearly plan · £{{ yearlyPrice }}</span>
+              <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Save £{{ yearlySavings }} per year</span>
             </button>
           </div>
 
