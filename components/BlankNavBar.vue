@@ -56,6 +56,7 @@ function onDocumentClick(e: MouseEvent) {
 function onDocumentKeydown(e: KeyboardEvent) {
   if (e.key !== 'Escape') return
   closeMenu()
+  closeNav()
 }
 
 onMounted(() => {
