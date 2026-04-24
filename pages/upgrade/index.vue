@@ -117,7 +117,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         <!-- Subscribed -->
         <p v-if="isSubscribed" class="text-sm text-gray-600">
           You’re already subscribed.
-          <NuxtLink to="/account" class="text-purple-500 hover:underline">
+          <NuxtLink to="/account/v2" class="text-purple-500 hover:underline">
             Manage your plan
           </NuxtLink>
         </p>
