@@ -14,7 +14,7 @@ const isTriggerHidden = ref(false)
 const navLinks = computed(() => {
   const links = [
     { to: '/', label: 'Home', requiresAuth: false },
-    { to: '/daily/vocab/v2', label: 'Daily Quiz', requiresAuth: true },
+    { to: '/daily/vocab/v2/start-quiz', label: 'Daily Quiz', requiresAuth: true },
     { to: '/daily/jyutping/v2', label: 'Daily Jyutping Quiz', requiresAuth: true },
     { to: '/levels', label: 'Levels', requiresAuth: false },
     { to: '/quiz', label: 'Level Quiz', requiresAuth: false },

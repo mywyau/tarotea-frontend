@@ -213,4 +213,5 @@ const canEnterLevel = (level: any) => {
 .level-btn-green:hover {
   background: rgba(192, 223, 188, 0.85);
 }
+
 </style>
