@@ -112,6 +112,8 @@ onBeforeUnmount(() => {
       <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
     </button>
 
+    <div v-if="!navOpen" class="nav-drawer-peek" aria-hidden="true" />
+
     <transition name="fade">
       <div v-if="navOpen" class="drawer-overlay" />
     </transition>
@@ -190,6 +192,17 @@ onBeforeUnmount(() => {
 .side-rail-trigger:hover {
   width: 0.95rem;
   background: rgba(105, 199, 112, 0.62);
+}
+
+.nav-drawer-peek {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 55;
+  height: 100vh;
+  width: 0.3rem;
+  background: rgba(111, 92, 202, 0.45);
+  pointer-events: none;
 }
 
 .menu-panel {
