@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
       :aria-expanded="navOpen ? 'true' : 'false'"
     >
-      <span>{{ navOpen ? "Close" : "Navigate" }}</span>
+      <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
     </button>
 
     <transition name="fade">
@@ -168,37 +168,30 @@ onBeforeUnmount(() => {
   top: 50%;
   transform: translateY(-50%);
   z-index: 70;
-  min-height: 7rem;
-  width: 1.1rem;
+  min-height: 6rem;
+  width: 0.7rem;
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
-  background: #D6A3D1;
+  background: #C78CC3;
   color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.22);
-  transition: width 140ms ease, background 140ms ease, left 180ms ease;
+  transition: width 140ms ease, background 140ms ease, left 180ms ease, opacity 140ms ease;
 }
 
-.side-rail-trigger span {
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
-  font-weight: 700;
-}
 
 
 .side-rail-trigger.is-open {
-  width: 1.5rem;
+  width: 0.95rem;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
 .side-rail-trigger:hover {
-  width: 1.5rem;
-  background: #B57BC3;
+  width: 0.95rem;
+  background: #B06CAB;
 }
 
 .menu-panel {
@@ -218,7 +211,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .nav-drawer {
@@ -228,9 +221,9 @@ onBeforeUnmount(() => {
   z-index: 60;
   height: 100vh;
   width: min(20rem, 88vw);
-  background: rgba(246, 225, 225, 0.3);
+  background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(8px);
-  box-shadow: 10px 0 30px rgba(0, 0, 0, 0.18);
+  box-shadow: none;
 }
 
 .drawer-link {
