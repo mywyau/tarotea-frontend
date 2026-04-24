@@ -118,22 +118,21 @@ onBeforeUnmount(() => {
     </button>
 
     <transition name="fade">
-      <div v-if="navOpen" class="drawer-overlay" @click="closeNav" />
+      <div v-if="navOpen" class="drawer-overlay" />
     </transition>
 
     <transition name="slide-left">
       <aside v-if="navOpen" class="nav-drawer" aria-label="Main navigation panel">
-        <div class="flex items-center justify-between px-4 py-4 border-b border-black/10">
-          <span class="font-semibold">Navigate</span>
-          <button type="button" class="text-xl" aria-label="Close navigation panel" @click="closeNav">×</button>
+        <div class="px-4 py-4 border-b border-black/20">
+          <span class="font-semibold text-white">Navigate</span>
         </div>
 
         <nav class="px-3 py-4 space-y-1">
-          <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="drawer-link" @click="closeNav">Daily</NuxtLink>
-          <NuxtLink to="/topics" class="drawer-link" @click="closeNav">Topics</NuxtLink>
-          <NuxtLink to="/topics/quiz" class="drawer-link" @click="closeNav">Topic Quiz</NuxtLink>
-          <NuxtLink to="/levels" class="drawer-link" @click="closeNav">Levels</NuxtLink>
-          <NuxtLink to="/quiz" class="drawer-link" @click="closeNav">Level Quiz</NuxtLink>
+          <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="drawer-link">Daily</NuxtLink>
+          <NuxtLink to="/topics" class="drawer-link">Topics</NuxtLink>
+          <NuxtLink to="/topics/quiz" class="drawer-link">Topic Quiz</NuxtLink>
+          <NuxtLink to="/levels" class="drawer-link">Levels</NuxtLink>
+          <NuxtLink to="/quiz" class="drawer-link">Level Quiz</NuxtLink>
         </nav>
       </aside>
     </transition>
@@ -219,7 +218,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(55, 16, 64, 0.2);
 }
 
 .nav-drawer {
@@ -229,7 +228,7 @@ onBeforeUnmount(() => {
   z-index: 60;
   height: 100vh;
   width: min(20rem, 88vw);
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(214, 163, 209, 0.97);
   backdrop-filter: blur(8px);
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.18);
 }
@@ -239,12 +238,12 @@ onBeforeUnmount(() => {
   border-radius: 0.75rem;
   padding: 0.65rem 0.75rem;
   font-size: 0.95rem;
-  color: #111827;
+  color: #2b1630;
   transition: background 120ms ease;
 }
 
 .drawer-link:hover {
-  background: rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .fade-enter-active,
