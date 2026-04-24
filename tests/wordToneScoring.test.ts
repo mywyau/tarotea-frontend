@@ -247,4 +247,49 @@ describe("scoreWordToneAttempt", () => {
     expect(result.toneScore).toBeGreaterThan(45)
   })
 
+  it("keeps single tone-3 attempts more stable when contour is almost level", () => {
+    const mildDrift = scoreWordToneAttempt({
+      expectedJyutping: "aa3",
+      acousticContours: [{ values: [10.1, 10.0, 10.2, 10.1, 10.0, 10.1] }],
+      toneOnly: true,
+    })
+
+    const flatter = scoreWordToneAttempt({
+      expectedJyutping: "aa3",
+      acousticContours: [{ values: [10.0, 10.0, 10.1, 10.0, 10.0, 10.0] }],
+      toneOnly: true,
+    })
+
+    expect(mildDrift.acousticToneScore).not.toBeNull()
+    expect(flatter.acousticToneScore).not.toBeNull()
+    expect(Math.abs((mildDrift.acousticToneScore ?? 0) - (flatter.acousticToneScore ?? 0))).toBeLessThanOrEqual(6)
+  })
+
+  it("uses more reference influence for single-syllable tone-only words", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "aa3",
+      acousticContours: [{ values: [10.4, 10.3, 10.4, 10.3, 10.3, 10.4] }],
+      referenceContours: [{ values: [10.2, 10.2, 10.2, 10.2, 10.2, 10.2] }],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.referenceToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThanOrEqual(70)
+  })
+
+  it("is less harsh for fluent multi-syllable keoi5 dei6 contours", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "keoi5 dei6",
+      acousticContours: [
+        { values: [9.6, 9.7, 9.85, 10.0, 10.15] },
+        { values: [8.9, 8.9, 8.85, 8.8, 8.8] },
+      ],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThanOrEqual(62)
+  })
+
 })

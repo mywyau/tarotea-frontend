@@ -6,6 +6,13 @@ definePageMeta({
 })
 
 type PitchContour = { values: number[] }
+type PitchExtractionQuality = {
+  canScore: boolean
+  shouldWarn: boolean
+  totalPoints: number
+  avgStepDelta: number
+  message: string
+}
 type WordMeta = {
   id?: string
   word?: string
@@ -153,6 +160,66 @@ function smoothPitches(values: number[]) {
   return smoothed
 }
 
+function hzToSemitone(hz: number) {
+  return 12 * Math.log2(Math.max(hz, 1) / 55)
+}
+
+function evaluateContourQuality(contours: PitchContour[], expectedTokenCount: number): PitchExtractionQuality {
+  const merged = contours
+    .flatMap((contour) => contour.values)
+    .filter((value) => Number.isFinite(value))
+
+  const minPoints = Math.max(6, expectedTokenCount * 5)
+
+  if (merged.length < minPoints) {
+    return {
+      canScore: false,
+      shouldWarn: false,
+      totalPoints: merged.length,
+      avgStepDelta: Number.POSITIVE_INFINITY,
+      message: "I couldn't capture enough steady pitch yet. Try again and hold each syllable a little longer.",
+    }
+  }
+
+  const deltas: number[] = []
+
+  for (let i = 1; i < merged.length; i++) {
+    deltas.push(Math.abs(merged[i] - merged[i - 1]))
+  }
+
+  const avgStepDelta = deltas.length
+    ? deltas.reduce((sum, value) => sum + value, 0) / deltas.length
+    : 0
+  const deltaLimit = expectedTokenCount > 1 ? 2.2 : 1.55
+  const shouldWarn = avgStepDelta > deltaLimit
+
+  return {
+    canScore: true,
+    shouldWarn,
+    totalPoints: merged.length,
+    avgStepDelta,
+    message: shouldWarn
+      ? "This recording is a bit noisy, so your score may vary. Try again in a quieter place for a steadier result."
+      : "",
+  }
+}
+
+function resampleContour(values: number[], targetLength = 8) {
+  if (values.length < 2 || values.length >= targetLength) return values
+
+  const output: number[] = []
+
+  for (let i = 0; i < targetLength; i++) {
+    const t = (i * (values.length - 1)) / Math.max(targetLength - 1, 1)
+    const left = Math.floor(t)
+    const right = Math.min(values.length - 1, left + 1)
+    const alpha = t - left
+    output.push(values[left] * (1 - alpha) + values[right] * alpha)
+  }
+
+  return output
+}
+
 async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, expectedTokenCount: number): Promise<PitchContour[]> {
   if (!expectedTokenCount) return []
 
@@ -170,7 +237,7 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
       const frame = channel.slice(offset, offset + frameSize)
       const pitch = estimatePitchHz(frame, audioBuffer.sampleRate)
 
-      if (pitch > 0) rawPitches.push(Math.round(pitch))
+      if (pitch > 0) rawPitches.push(hzToSemitone(pitch))
     }
 
     if (!rawPitches.length) return []
@@ -186,7 +253,18 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
     for (let i = 0; i < expectedTokenCount; i++) {
       const start = i * bucketSize
       const end = i === expectedTokenCount - 1 ? trimmed.length : (i + 1) * bucketSize
-      contours.push({ values: trimmed.slice(start, end).slice(0, 32) })
+      const bucket = trimmed.slice(start, end)
+      const edgeTrim = bucket.length >= 10 ? Math.floor(bucket.length * 0.12) : 0
+      const core =
+        edgeTrim > 0 && bucket.length - edgeTrim * 2 >= 3
+          ? bucket.slice(edgeTrim, bucket.length - edgeTrim)
+          : bucket
+      const normalized = resampleContour(core, 8)
+      contours.push({
+        values: normalized
+          .slice(0, 32)
+          .map((value) => Number(value.toFixed(2))),
+      })
     }
 
     return contours
@@ -303,6 +381,16 @@ async function runToneCheck() {
     const expectedTokens = tokenizeJyutping(expectedJyutping.value)
     const contours = await extractPitchContours(recordedBlob.value, expectedTokens.length)
     extractedPitchContours.value = contours
+    const quality = evaluateContourQuality(contours, expectedTokens.length)
+
+    if (!quality.canScore) {
+      errorMessage.value = quality.message
+      return
+    }
+
+    if (quality.shouldWarn) {
+      errorMessage.value = quality.message
+    }
 
     const referenceContours = await fetchReferenceContours(expectedTokens.length)
     referencePitchContours.value = referenceContours
