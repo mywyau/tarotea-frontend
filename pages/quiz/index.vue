@@ -49,6 +49,22 @@ const canEnterLevel = (level: any) => {
       </p>
     </header>
 
+    <!-- Daily quiz card -->
+    <section class="daily-quiz-card">
+      <div class="space-y-2">
+        <h2 class="text-lg font-semibold text-gray-900">
+          Daily 20 Questions
+        </h2>
+        <p class="text-sm text-gray-600 leading-relaxed">
+          Take the daily vocabulary challenge with 20 questions based on your review words.
+        </p>
+      </div>
+
+      <NuxtLink to="/daily/vocab/v2" class="level-btn level-btn-orange mt-4 sm:mt-0">
+        Start Daily Vocab Quiz
+      </NuxtLink>
+    </section>
+
     <!-- Grid -->
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
@@ -153,6 +169,26 @@ const canEnterLevel = (level: any) => {
   opacity: 0.6;
 }
 
+.daily-quiz-card {
+  border-radius: 20px;
+  padding: 1.25rem;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(8px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .daily-quiz-card {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
 /* Buttons */
 .level-btn {
   display: flex;
@@ -212,5 +248,14 @@ const canEnterLevel = (level: any) => {
 
 .level-btn-green:hover {
   background: rgba(192, 223, 188, 0.85);
+}
+
+.level-btn-orange {
+  background: rgba(251, 191, 36, 0.35);
+  color: #1f2937;
+}
+
+.level-btn-orange:hover {
+  background: rgba(251, 191, 36, 0.55);
 }
 </style>
