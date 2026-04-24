@@ -44,7 +44,7 @@ onMounted(() => {
     <div class="text-center">
 
       <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-black">
-        Learn and practice Cantonese
+        Learn and improve your Cantonese
       </h1>
     </div>
 
