@@ -147,7 +147,7 @@ onBeforeUnmount(() => {
 
     <button
       type="button"
-      class="trigger-visibility-btn md:hidden"
+      class="trigger-visibility-btn"
       :aria-label="isTriggerHidden ? 'Show Warp trigger' : 'Hide Warp trigger'"
       @click="toggleTriggerVisibility"
     >
@@ -241,7 +241,7 @@ onBeforeUnmount(() => {
   left: 0;
   z-index: 55;
   height: 100vh;
-  width: 0.75rem;
+  width: 1rem;
   background: rgba(111, 92, 202, 0.45);
   pointer-events: none;
 }
@@ -251,7 +251,7 @@ onBeforeUnmount(() => {
   left: 0.75rem;
   bottom: 0.75rem;
   z-index: 75;
-  border-radius: 999px;
+  border-radius: 0.6rem;
   background: rgba(17, 24, 39, 0.82);
   color: #fff;
   font-size: 0.75rem;
