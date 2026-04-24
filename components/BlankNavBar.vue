@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const { isLoggedIn, resolve } = useMeStateV2()
 const route = useRoute()
@@ -9,7 +9,6 @@ const route = useRoute()
 const menuOpen = ref(false)
 const navOpen = ref(false)
 const menuRoot = ref<HTMLElement | null>(null)
-const navRoot = ref<HTMLElement | null>(null)
 
 const navLinks = computed(() => {
   const links = [
@@ -52,15 +51,11 @@ function onDocumentClick(e: MouseEvent) {
   if (menuOpen.value && menuRoot.value && target && !menuRoot.value.contains(target)) {
     closeMenu()
   }
-  if (navOpen.value && navRoot.value && target && !navRoot.value.contains(target)) {
-    closeNav()
-  }
 }
 
 function onDocumentKeydown(e: KeyboardEvent) {
   if (e.key !== 'Escape') return
   closeMenu()
-  closeNav()
 }
 
 onMounted(() => {
@@ -74,10 +69,6 @@ onBeforeUnmount(() => {
   document.removeEventListener('keydown', onDocumentKeydown)
 })
 
-watch(() => route.fullPath, () => {
-  closeMenu()
-  closeNav()
-})
 </script>
 
 <template>
@@ -148,11 +139,11 @@ watch(() => route.fullPath, () => {
     <div v-if="!navOpen" class="nav-drawer-peek" aria-hidden="true" />
 
     <transition name="fade">
-      <button v-if="navOpen" type="button" class="drawer-overlay" aria-label="Close navigation panel" @click="closeNav" />
+      <div v-if="navOpen" class="drawer-overlay" />
     </transition>
 
     <transition name="slide-left">
-      <aside v-if="navOpen" id="warp-navigation-panel" ref="navRoot" class="nav-drawer" aria-label="Main navigation panel">
+      <aside v-if="navOpen" id="warp-navigation-panel" class="nav-drawer" aria-label="Main navigation panel">
         <div class="px-4 py-4 border-b border-black/20">
           <span class="font-semibold text-black">Warp</span>
         </div>
@@ -165,7 +156,6 @@ watch(() => route.fullPath, () => {
             class="drawer-link font-medium"
             :class="{ 'drawer-link-active': route.path === link.to }"
             :aria-current="route.path === link.to ? 'page' : undefined"
-            @click="closeNav"
           >
             {{ link.label }}
           </NuxtLink>
@@ -257,11 +247,8 @@ watch(() => route.fullPath, () => {
   position: fixed;
   inset: 0;
   z-index: 50;
-  pointer-events: auto;
+  pointer-events: none;
   background: rgba(246, 225, 225, 0.22);
-  border: 0;
-  padding: 0;
-  cursor: default;
 }
 
 .nav-drawer {
