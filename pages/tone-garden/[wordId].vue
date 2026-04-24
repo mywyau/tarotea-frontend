@@ -204,6 +204,22 @@ function evaluateContourQuality(contours: PitchContour[], expectedTokenCount: nu
   }
 }
 
+function resampleContour(values: number[], targetLength = 8) {
+  if (values.length < 2 || values.length >= targetLength) return values
+
+  const output: number[] = []
+
+  for (let i = 0; i < targetLength; i++) {
+    const t = (i * (values.length - 1)) / Math.max(targetLength - 1, 1)
+    const left = Math.floor(t)
+    const right = Math.min(values.length - 1, left + 1)
+    const alpha = t - left
+    output.push(values[left] * (1 - alpha) + values[right] * alpha)
+  }
+
+  return output
+}
+
 async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, expectedTokenCount: number): Promise<PitchContour[]> {
   if (!expectedTokenCount) return []
 
@@ -243,8 +259,9 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
         edgeTrim > 0 && bucket.length - edgeTrim * 2 >= 3
           ? bucket.slice(edgeTrim, bucket.length - edgeTrim)
           : bucket
+      const normalized = resampleContour(core, 8)
       contours.push({
-        values: core
+        values: normalized
           .slice(0, 32)
           .map((value) => Number(value.toFixed(2))),
       })
