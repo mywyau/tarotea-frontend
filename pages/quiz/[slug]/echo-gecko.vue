@@ -545,7 +545,7 @@ onBeforeUnmount(() => {
           </div>
 
           <button
-            class="w-full rounded-xl bg-[#A8CAE0] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
+            class="w-full rounded-xl bg-[#BFEA83] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
             @click="startQuiz">
             Start pronunciation quiz
           </button>
@@ -583,7 +583,7 @@ onBeforeUnmount(() => {
           </div>
 
           <button
-            class="w-full rounded-xl bg-[#A8CAE0] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
+            class="w-full rounded-xl bg-[#BFEA83] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
             @click="startQuiz">
             Play again
           </button>
@@ -600,11 +600,11 @@ onBeforeUnmount(() => {
           <div class="rounded-xl border border-fuchsia-100 bg-white p-4">
             <p class="text-xs uppercase tracking-wider text-gray-500">Target Chinese</p>
             <p class="mt-1 text-3xl font-bold text-gray-900">{{ currentWord.word }}</p>
-            <p class="mt-3 text-xs uppercase tracking-wider text-gray-500">Target Jyutping</p>
-            <p class="mt-1 text-xl font-semibold text-gray-900">{{ currentWord.jyutping }}</p>
+            <!-- <p class="mt-3 text-xs uppercase tracking-wider text-gray-500">Target Jyutping</p>
+            <p class="mt-1 text-xl font-semibold text-gray-900">{{ currentWord.jyutping }}</p> -->
             <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-600">{{ currentWord.meaning }}</p>
             <button
-              class="mt-4 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="mt-4 rounded-lg bg-[#F7D774] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="submitting || !currentWordAudioUrl" @click="playCurrentWordAudio">
               ▶ Play Chinese Audio
             </button>
@@ -612,33 +612,33 @@ onBeforeUnmount(() => {
 
           <div class="flex flex-wrap gap-3">
             <button
-              class="rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="rounded-lg bg-[#BFEA83] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="recording || submitting" @click="startRecording">
               Start Recording
             </button>
             <button
-              class="rounded-lg bg-[#F4C2D7] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="rounded-lg bg-[#FDBA74] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="!recording || submitting" @click="stopRecording">
               Stop Recording
             </button>
             <button
-              class="rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="rounded-lg bg-[#FCD34D] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
               {{ submitting ? "Scoring..." : "Submit" }}
             </button>
             <button
-              class="rounded-lg bg-[#CDE8C9] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="rounded-lg bg-[#86EFAC] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               @click="goToNextWord">
               Next
             </button>
             <button
-              class="rounded-lg bg-[#F6D8B8] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="rounded-lg bg-[#FB923C] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               @click="skipWord">
               Skip
             </button>
             <label
-              class="inline-flex items-center gap-2 rounded-lg border border-fuchsia-200 bg-fuchsia-50 px-3 py-2 text-xs text-gray-700">
-              <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-fuchsia-300 text-fuchsia-600" />
+              class="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-gray-700">
+              <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-amber-400 text-amber-600" />
               Rapid mode (skip pause only)
             </label>
           </div>
@@ -659,12 +659,11 @@ onBeforeUnmount(() => {
               <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-700' : 'text-amber-700'">
                 {{ lastToneLabel }}
               </span>
-              <!-- <span class="text-gray-500"> (need above threshold to continue)</span> -->
             </p>
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
             <div class="mt-3">
               <button
-                class="rounded-lg bg-[#CDE8C9] px-3 py-2 text-xs font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                class="rounded-lg bg-[#86EFAC] px-3 py-2 text-xs font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
                 @click="goToNextWord">
                 Next Word
               </button>
@@ -672,21 +671,16 @@ onBeforeUnmount(() => {
             <div v-if="detectedToneDisplayRows.length"
               class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
               <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
-              <!-- <p class="mt-1 text-xs text-gray-500">
-                Detected tone is diagnostic. Final score also checks how closely your pitch shape matches the target
-                contour.
-              </p> -->
+
               <ul class="mt-2 space-y-1 text-sm text-gray-700">
                 <li v-for="row in detectedToneDisplayRows" :key="`tone-row-${row.syllable}`">
                   <span class="font-medium">
-                    {{ row.character ? `Character ${row.character}` : `Syllable ${row.syllable}` }}
+                    {{ row.character ? `Character: ${row.character}` : `Syllable ${row.syllable}` }}
                   </span>
-                  <span class="text-gray-500"> (target {{ row.token }})</span>:
-                  heard <span class="font-semibold">{{ row.heardJyutping }}</span>
+                  <span class="text-gray-500"> (target <span class="text-black font-medium">{{ row.token
+                      }})</span></span>,
+                  I heard <span class="font-semibold">{{ row.heardJyutping }}</span>
                   — tone <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
-                  <!-- <span v-if="row.confidence !== null" class="text-gray-500"> -->
-                  <!-- (confidence {{ row.confidence }}) -->
-                  <!-- </span> -->
                 </li>
               </ul>
             </div>
