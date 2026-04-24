@@ -203,6 +203,38 @@ const lockedWordCount = computed(() => {
   }, 0)
 })
 
+const accessibleWords = computed(() => {
+  return gatedCategories.value.flatMap((category) =>
+    category.words.filter((word) => !word.locked)
+  )
+})
+
+const masteredAccessibleWordCount = computed(() => {
+  return accessibleWords.value.filter((word) => isMastered(word.id)).length
+})
+
+const progressPercent = computed(() => {
+  if (!accessibleWordCount.value) return 0
+  return Math.round((masteredAccessibleWordCount.value / accessibleWordCount.value) * 100)
+})
+
+const nextRecommendedWord = computed(() => {
+  return accessibleWords.value.find((word) => !isMastered(word.id)) ?? accessibleWords.value[0] ?? null
+})
+
+function categoryProgress(words: Array<{ id: string; locked?: boolean }>) {
+  const unlockedWords = words.filter((word) => !word.locked)
+  const masteredWords = unlockedWords.filter((word) => isMastered(word.id))
+
+  return {
+    unlocked: unlockedWords.length,
+    mastered: masteredWords.length,
+    percent: unlockedWords.length
+      ? Math.round((masteredWords.length / unlockedWords.length) * 100)
+      : 0
+  }
+}
+
 onMounted(async () => {
   await Promise.all([
     loadProgress(),
@@ -222,6 +254,23 @@ onMounted(async () => {
     <header class="rounded-lg header-card">
       <h1 class="level-heading">{{ levelCdnData.title }}</h1>
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
+
+      <div class="journey-card mt-5">
+        <div class="journey-copy">
+          <p class="journey-label">Journey progress</p>
+          <p class="journey-value">{{ masteredAccessibleWordCount }} / {{ accessibleWordCount }} mastered</p>
+        </div>
+        <NuxtLink
+          v-if="nextRecommendedWord"
+          :to="`/level/${slug}/word/${nextRecommendedWord.id}`"
+          class="continue-btn"
+        >
+          Continue
+        </NuxtLink>
+      </div>
+      <div class="progress-track mt-3" aria-hidden="true">
+        <div class="progress-fill" :style="{ width: `${progressPercent}%` }" />
+      </div>
     </header>
 
     <section class="stats-grid">
@@ -250,12 +299,15 @@ onMounted(async () => {
       TaroKeys: <span class="font-bold">{{ unlockSummary.creditsAvailable }}</span>
     </div> -->
 
-    <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
+    <section v-for="category in gatedCategories" :key="category.key" class="space-y-6 category-section">
 
       <div class="flex items-baseline justify-between gap-4">
         <h2 class="category-heading">
-          {{ category.title }}
+          {{ category.title }} ✨
         </h2>
+        <p class="category-progress">
+          {{ categoryProgress(category.words).mastered }}/{{ categoryProgress(category.words).unlocked }} complete
+        </p>
       </div>
 
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
@@ -309,12 +361,75 @@ onMounted(async () => {
   backdrop-filter: blur(6px);
 }
 
+.journey-card {
+  border-radius: 14px;
+  padding: 0.9rem 1rem;
+  background: rgba(255, 255, 255, 0.68);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.journey-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: rgba(17, 24, 39, 0.62);
+}
+
+.journey-value {
+  margin-top: 0.2rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.continue-btn {
+  border-radius: 999px;
+  background: #58c75f;
+  color: #07220b;
+  font-weight: 700;
+  font-size: 0.75rem;
+  padding: 0.55rem 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  box-shadow: 0 6px 18px rgba(88, 199, 95, 0.35);
+}
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.55);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #58c75f 0%, #f4cd27 60%, #eab8e4 100%);
+  transition: width 220ms ease;
+}
+
 .category-card {
   backdrop-filter: blur(6px);
 }
 
 .category-card:hover {
   border-color: rgba(214, 163, 209, 0.55);
+}
+
+.category-section {
+  border-radius: 16px;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.category-progress {
+  font-size: 0.67rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(17, 24, 39, 0.62);
 }
 
 
