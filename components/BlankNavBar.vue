@@ -161,7 +161,7 @@ onBeforeUnmount(() => {
     <transition name="slide-left">
       <aside v-if="navOpen" id="warp-navigation-panel" class="nav-drawer" aria-label="Main navigation panel">
         <div class="px-4 py-4 border-b border-black/20">
-          <span class="font-semibold text-black">Warp</span>
+          <span class="text-xl font-semibold text-black">Warp</span>
         </div>
 
         <nav class="px-3 py-4 space-y-1">
