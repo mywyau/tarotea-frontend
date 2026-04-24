@@ -106,7 +106,7 @@ onBeforeUnmount(() => {
 
 
     <button type="button" class="side-rail-trigger" @click="toggleNav" :class="{ 'is-open': navOpen }"
-      :style="{ left: navOpen ? 'min(20rem, 88vw)' : '0.6rem' }"
+      :style="{ left: navOpen ? 'min(20rem, 88vw)' : '1.0rem' }"
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
       :aria-expanded="navOpen ? 'true' : 'false'">
       <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
@@ -125,6 +125,7 @@ onBeforeUnmount(() => {
         </div>
 
         <nav class="px-3 py-4 space-y-1">
+          <NuxtLink to="/" class="drawer-link font-medium">Home</NuxtLink>
           <NuxtLink v-if="isLoggedIn" to="/daily/vocab/v2" class="drawer-link font-medium">Daily Quiz</NuxtLink>
           <NuxtLink v-if="isLoggedIn" to="/daily/jyutping/v2" class="drawer-link font-medium">Daily Jyutping Quiz
           </NuxtLink>
@@ -200,7 +201,7 @@ onBeforeUnmount(() => {
   left: 0;
   z-index: 55;
   height: 100vh;
-  width: 0.6rem;
+  width: 1.0rem;
   background: rgba(111, 92, 202, 0.45);
   pointer-events: none;
 }

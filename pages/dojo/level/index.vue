@@ -57,7 +57,7 @@ const canEnterLevel = (level: any) => {
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="text-3xl font-semibold level-heading">
+      <h1 class="text-xl font-semibold level-heading">
         Level Dojo
       </h1>
       <p class="level-subheading">
