@@ -9,6 +9,7 @@ const route = useRoute()
 const menuOpen = ref(false)
 const navOpen = ref(false)
 const menuRoot = ref<HTMLElement | null>(null)
+const isTriggerHidden = ref(false)
 
 const navLinks = computed(() => {
   const links = [
@@ -38,6 +39,10 @@ function toggleNav() {
 }
 function closeNav() {
   navOpen.value = false
+}
+function toggleTriggerVisibility() {
+  isTriggerHidden.value = !isTriggerHidden.value
+  if (isTriggerHidden.value) closeNav()
 }
 
 async function handleLogout() {
@@ -130,14 +135,24 @@ onBeforeUnmount(() => {
     </div>
 
 
-    <button type="button" class="side-rail-trigger" @click.stop="toggleNav" :class="{ 'is-open': navOpen }"
+    <button v-if="!isTriggerHidden" type="button" class="side-rail-trigger" @click.stop="toggleNav"
+      :class="{ 'is-open': navOpen }"
       :style="{ left: navOpen ? 'min(20rem, 88vw)' : '1.0rem' }"
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
       :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel">
       <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
     </button>
 
-    <div v-if="!navOpen" class="nav-drawer-peek" aria-hidden="true" />
+    <div v-if="!navOpen && !isTriggerHidden" class="nav-drawer-peek" aria-hidden="true" />
+
+    <button
+      type="button"
+      class="trigger-visibility-btn md:hidden"
+      :aria-label="isTriggerHidden ? 'Show Warp trigger' : 'Hide Warp trigger'"
+      @click="toggleTriggerVisibility"
+    >
+      {{ isTriggerHidden ? 'Show Warp' : 'Hide Warp' }}
+    </button>
 
     <transition name="fade">
       <div v-if="navOpen" class="drawer-overlay" />
@@ -191,12 +206,12 @@ onBeforeUnmount(() => {
 
 .side-rail-trigger {
   position: fixed;
-  left: 0;
+  left: 0.2rem;
   top: 50%;
   transform: translateY(-50%);
   z-index: 70;
-  min-height: 10rem;
-  width: 0.9rem;
+  min-height: 7.5rem;
+  width: 0.7rem;
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   background: rgba(88, 199, 95, 0.45);
@@ -210,13 +225,13 @@ onBeforeUnmount(() => {
 
 
 .side-rail-trigger.is-open {
-  width: 0.95rem;
+  width: 0.75rem;
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
 }
 
 .side-rail-trigger:hover {
-  width: 0.95rem;
+  width: 0.75rem;
   background: rgba(105, 199, 112, 0.62);
 }
 
@@ -226,9 +241,41 @@ onBeforeUnmount(() => {
   left: 0;
   z-index: 55;
   height: 100vh;
-  width: 1.0rem;
+  width: 0.75rem;
   background: rgba(111, 92, 202, 0.45);
   pointer-events: none;
+}
+
+.trigger-visibility-btn {
+  position: fixed;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 75;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.82);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.55rem 0.7rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+@media (min-width: 768px) {
+  .side-rail-trigger {
+    left: 0;
+    min-height: 10rem;
+    width: 0.9rem;
+  }
+
+  .side-rail-trigger.is-open,
+  .side-rail-trigger:hover {
+    width: 0.95rem;
+  }
+
+  .nav-drawer-peek {
+    width: 1rem;
+  }
 }
 
 .menu-panel {
