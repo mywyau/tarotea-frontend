@@ -41,20 +41,11 @@ onMounted(() => {
 <template>
   <main class="max-w-3xl mx-auto py-20 px-6 min-h-screen">
     <!-- Hero Section -->
-    <div class="text-center space-y-4">
+    <div class="text-center">
 
       <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-black">
         Learn and practice Cantonese
       </h1>
-
-      <p class="text-gray-700 max-w-2xl mx-auto">
-        TaroTea keeps things fun and friendly: bite-sized content, quick quizzes, playful exercises, and an XP
-        boost for every little win.
-      </p>
-
-      <p class="text-gray-600 max-w-2xl mx-auto">
-        Pop in for a few minutes, learn something useful, and leave with your Cantonese a tiny bit stronger 🌱
-      </p>
     </div>
 
     <!-- Stats -->
@@ -85,6 +76,16 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
+      <section class="mt-8 rounded-xl p-6 sm:p-7" style="background-color:#FFF8E8; border: 1px solid #F2E4BD;">
+        <p class="text-gray-900 font-medium">
+          TaroTea is your cozy Cantonese training dashboard:
+        </p>
+        <p class="text-gray-700 mt-2">
+          fresh content drops, quick quiz rounds, and short daily exercises that fit into real life.
+          Stack XP as you go, and let the app keep surfacing the words that need a little extra love.
+        </p>
+      </section>
     </div>
   </main>
 </template>
