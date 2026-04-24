@@ -66,7 +66,7 @@ const isSubscribed = computed(() =>
               : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
               style="background-color:rgba(244,205,39,0.35);">
               <span class="block">Yearly plan · £{{ yearlyPrice }}</span>
-              <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Save £{{ yearlySavings }} per year</span>
+              <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Get 2 months free</span>
             </button>
           </div>
 
