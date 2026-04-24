@@ -105,15 +105,10 @@ onBeforeUnmount(() => {
     </div>
 
 
-    <button
-      type="button"
-      class="side-rail-trigger"
-      @click="toggleNav"
-      :class="{ 'is-open': navOpen }"
+    <button type="button" class="side-rail-trigger" @click="toggleNav" :class="{ 'is-open': navOpen }"
       :style="{ left: navOpen ? 'min(20rem, 88vw)' : '0px' }"
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
-      :aria-expanded="navOpen ? 'true' : 'false'"
-    >
+      :aria-expanded="navOpen ? 'true' : 'false'">
       <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
     </button>
 
@@ -124,15 +119,18 @@ onBeforeUnmount(() => {
     <transition name="slide-left">
       <aside v-if="navOpen" class="nav-drawer" aria-label="Main navigation panel">
         <div class="px-4 py-4 border-b border-black/20">
-          <span class="font-semibold text-black">Navigate</span>
+          <span class="font-semibold text-black">Warp</span>
         </div>
 
         <nav class="px-3 py-4 space-y-1">
-          <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="drawer-link">Daily</NuxtLink>
-          <NuxtLink to="/topics" class="drawer-link">Topics</NuxtLink>
-          <NuxtLink to="/topics/quiz" class="drawer-link">Topic Quiz</NuxtLink>
+          <NuxtLink v-if="isLoggedIn" to="/daily/vocab/v2" class="drawer-link">Daily Quiz</NuxtLink>
+          <NuxtLink v-if="isLoggedIn" to="/daily/jyutping/v2" class="drawer-link">Daily Jyutping Quiz</NuxtLink>
           <NuxtLink to="/levels" class="drawer-link">Levels</NuxtLink>
           <NuxtLink to="/quiz" class="drawer-link">Level Quiz</NuxtLink>
+          <NuxtLink to="/dojo/level" class="drawer-link">Level Dojo</NuxtLink>
+          <NuxtLink to="/topics" class="drawer-link">Topics</NuxtLink>
+          <NuxtLink to="/topics/quiz" class="drawer-link">Topic Quiz</NuxtLink>
+          <NuxtLink to="/dojo/topic" class="drawer-link">Topic Dojo</NuxtLink>
         </nav>
       </aside>
     </transition>
