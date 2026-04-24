@@ -1,13 +1,31 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const { isLoggedIn, resolve } = useMeStateV2()
+const route = useRoute()
 
 const menuOpen = ref(false)
 const navOpen = ref(false)
 const menuRoot = ref<HTMLElement | null>(null)
+const isTriggerHidden = ref(false)
+
+const navLinks = computed(() => {
+  const links = [
+    { to: '/', label: 'Home', requiresAuth: false },
+    { to: '/daily/vocab/v2', label: 'Daily Quiz', requiresAuth: true },
+    { to: '/daily/jyutping/v2', label: 'Daily Jyutping Quiz', requiresAuth: true },
+    { to: '/levels', label: 'Levels', requiresAuth: false },
+    { to: '/quiz', label: 'Level Quiz', requiresAuth: false },
+    { to: '/dojo/level', label: 'Level Dojo', requiresAuth: false },
+    { to: '/topics', label: 'Topics', requiresAuth: false },
+    { to: '/topics/quiz', label: 'Topic Quiz', requiresAuth: false },
+    { to: '/dojo/topic', label: 'Topic Dojo', requiresAuth: false },
+  ]
+
+  return links.filter(link => !link.requiresAuth || isLoggedIn.value)
+})
 
 function toggleMenu() {
   menuOpen.value = !menuOpen.value
@@ -22,6 +40,10 @@ function toggleNav() {
 function closeNav() {
   navOpen.value = false
 }
+function toggleTriggerVisibility() {
+  isTriggerHidden.value = !isTriggerHidden.value
+  if (isTriggerHidden.value) closeNav()
+}
 
 async function handleLogout() {
   await logout()
@@ -30,21 +52,29 @@ async function handleLogout() {
 }
 
 function onDocumentClick(e: MouseEvent) {
-  if (!menuOpen.value) return
   const target = e.target as Node | null
-  if (menuRoot.value && target && !menuRoot.value.contains(target)) {
+  if (menuOpen.value && menuRoot.value && target && !menuRoot.value.contains(target)) {
     closeMenu()
   }
+}
+
+function onDocumentKeydown(e: KeyboardEvent) {
+  if (e.key !== 'Escape') return
+  closeMenu()
+  closeNav()
 }
 
 onMounted(() => {
   resolve({ force: true })
   document.addEventListener('click', onDocumentClick)
+  document.addEventListener('keydown', onDocumentKeydown)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocumentClick)
+  document.removeEventListener('keydown', onDocumentKeydown)
 })
+
 </script>
 
 <template>
@@ -105,36 +135,46 @@ onBeforeUnmount(() => {
     </div>
 
 
-    <button type="button" class="side-rail-trigger" @click="toggleNav" :class="{ 'is-open': navOpen }"
+    <button v-if="!isTriggerHidden" type="button" class="side-rail-trigger" @click.stop="toggleNav"
+      :class="{ 'is-open': navOpen }"
       :style="{ left: navOpen ? 'min(20rem, 88vw)' : '1.0rem' }"
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
-      :aria-expanded="navOpen ? 'true' : 'false'">
+      :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel">
       <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
     </button>
 
-    <div v-if="!navOpen" class="nav-drawer-peek" aria-hidden="true" />
+    <div v-if="!navOpen && !isTriggerHidden" class="nav-drawer-peek" aria-hidden="true" />
+
+    <button
+      type="button"
+      class="trigger-visibility-btn"
+      :aria-label="isTriggerHidden ? 'Show Warp trigger' : 'Hide Warp trigger'"
+      @click="toggleTriggerVisibility"
+    >
+      {{ isTriggerHidden ? 'Show Warp' : 'Hide Warp' }}
+    </button>
 
     <transition name="fade">
       <div v-if="navOpen" class="drawer-overlay" />
     </transition>
 
     <transition name="slide-left">
-      <aside v-if="navOpen" class="nav-drawer" aria-label="Main navigation panel">
+      <aside v-if="navOpen" id="warp-navigation-panel" class="nav-drawer" aria-label="Main navigation panel">
         <div class="px-4 py-4 border-b border-black/20">
           <span class="font-semibold text-black">Warp</span>
         </div>
 
         <nav class="px-3 py-4 space-y-1">
-          <NuxtLink to="/" class="drawer-link font-medium">Home</NuxtLink>
-          <NuxtLink v-if="isLoggedIn" to="/daily/vocab/v2" class="drawer-link font-medium">Daily Quiz</NuxtLink>
-          <NuxtLink v-if="isLoggedIn" to="/daily/jyutping/v2" class="drawer-link font-medium">Daily Jyutping Quiz
+          <NuxtLink
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="drawer-link font-medium"
+            :class="{ 'drawer-link-active': route.path === link.to }"
+            :aria-current="route.path === link.to ? 'page' : undefined"
+          >
+            {{ link.label }}
           </NuxtLink>
-          <NuxtLink to="/levels" class="drawer-link font-medium">Levels</NuxtLink>
-          <NuxtLink to="/quiz" class="drawer-link font-medium">Level Quiz</NuxtLink>
-          <NuxtLink to="/dojo/level" class="drawer-link font-medium">Level Dojo</NuxtLink>
-          <NuxtLink to="/topics" class="drawer-link font-medium">Topics</NuxtLink>
-          <NuxtLink to="/topics/quiz" class="drawer-link font-medium">Topic Quiz</NuxtLink>
-          <NuxtLink to="/dojo/topic" class="drawer-link font-medium">Topic Dojo</NuxtLink>
         </nav>
       </aside>
     </transition>
@@ -166,12 +206,12 @@ onBeforeUnmount(() => {
 
 .side-rail-trigger {
   position: fixed;
-  left: 0;
+  left: 0.2rem;
   top: 50%;
   transform: translateY(-50%);
   z-index: 70;
-  min-height: 10rem;
-  width: 0.9rem;
+  min-height: 7.5rem;
+  width: 0.7rem;
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   background: rgba(88, 199, 95, 0.45);
@@ -185,13 +225,13 @@ onBeforeUnmount(() => {
 
 
 .side-rail-trigger.is-open {
-  width: 0.95rem;
+  width: 0.75rem;
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
 }
 
 .side-rail-trigger:hover {
-  width: 0.95rem;
+  width: 0.75rem;
   background: rgba(105, 199, 112, 0.62);
 }
 
@@ -201,9 +241,41 @@ onBeforeUnmount(() => {
   left: 0;
   z-index: 55;
   height: 100vh;
-  width: 1.0rem;
+  width: 1rem;
   background: rgba(111, 92, 202, 0.45);
   pointer-events: none;
+}
+
+.trigger-visibility-btn {
+  position: fixed;
+  left: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 75;
+  border-radius: 0.6rem;
+  background: rgba(17, 24, 39, 0.82);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.55rem 0.7rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+}
+
+@media (min-width: 768px) {
+  .side-rail-trigger {
+    left: 0;
+    min-height: 10rem;
+    width: 0.9rem;
+  }
+
+  .side-rail-trigger.is-open,
+  .side-rail-trigger:hover {
+    width: 0.95rem;
+  }
+
+  .nav-drawer-peek {
+    width: 1rem;
+  }
 }
 
 .menu-panel {
@@ -250,6 +322,10 @@ onBeforeUnmount(() => {
 
 .drawer-link:hover {
   background: rgba(0, 0, 0, 0.06);
+}
+
+.drawer-link-active {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .fade-enter-active,
