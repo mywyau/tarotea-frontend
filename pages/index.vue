@@ -14,14 +14,17 @@ const learningModes = [
   {
     title: 'Daily practice',
     description: 'Short sessions designed for consistency, even with a busy schedule.',
+    bgClass: 'brand-card-yellow',
   },
   {
     title: 'Multiple activities',
     description: 'Switch between vocabulary, quiz, and pronunciation-focused learning modes.',
+    bgClass: 'brand-card-blue',
   },
   {
     title: 'Progress-driven',
     description: 'See your growth and keep momentum with clear goals and repetition.',
+    bgClass: 'brand-card-pink',
   },
 ]
 
@@ -56,82 +59,17 @@ onMounted(() => {
     clearInterval(interval)
   })
 })
-
 </script>
 
 <template>
-  <main class="max-w-3xl mx-auto py-20 px-6 min-h-screen">
+  <main class="max-w-4xl mx-auto py-16 sm:py-20 px-6 min-h-screen">
     <section class="text-center">
-      <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-black">
+      <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
         Learn and improve your Cantonese vocabulary in just 15 minutes a day
       </h1>
 
-      <p class="text-base sm:text-lg text-gray-700 mt-4 max-w-2xl mx-auto">
-        Build confidence with short, focused practice and fun activities that help you remember what you learn.
-      </p>
-
-      <ul class="mt-8 space-y-3 text-left max-w-2xl mx-auto">
-        <li
-          v-for="benefit in benefits"
-          :key="benefit"
-          class="rounded-lg px-4 py-3 bg-white border border-gray-100 shadow-sm text-gray-700"
-        >
-          {{ benefit }}
-        </li>
-      </ul>
-    </section>
-
-    <section class="mt-12">
-      <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
-        How you learn
-      </h2>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <article
-          v-for="mode in learningModes"
-          :key="mode.title"
-          class="rounded-lg border border-gray-100 bg-white p-5 shadow-sm"
-        >
-          <h3 class="font-semibold text-gray-900">
-            {{ mode.title }}
-          </h3>
-          <p class="text-sm text-gray-700 mt-2">
-            {{ mode.description }}
-          </p>
-        </article>
-      </div>
-    </section>
-
-    <section class="mt-10 rounded-xl p-6 sm:p-8 bg-slate-900 text-white">
-      <h2 class="text-2xl font-semibold tracking-tight">
-        Start learning Cantonese today
-      </h2>
-      <p class="text-sm sm:text-base text-slate-200 mt-2">
-        Play through different modes and build real vocabulary you can use in everyday conversations.
-      </p>
-      <div class="mt-5 flex flex-wrap gap-3">
-        <NuxtLink
-          to="/topics"
-          class="inline-flex items-center justify-center rounded-md bg-white text-slate-900 font-medium px-4 py-2 hover:bg-slate-100 transition"
-        >
-          Explore topics
-        </NuxtLink>
-        <NuxtLink
-          to="/quiz"
-          class="inline-flex items-center justify-center rounded-md border border-slate-300 text-white font-medium px-4 py-2 hover:bg-slate-800 transition"
-        >
-          Try quizzes
-        </NuxtLink>
-      </div>
-    </section>
-
-    <section class="mt-12">
-      <h2 class="text-sm uppercase tracking-wide text-gray-500 mt-6 mb-4">
-        Community stats
-      </h2>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-        <div class="rounded-lg p-6 text-center" style="background-color:#E7F3D5; border-color:#E7F3D5;">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
+        <div class="rounded-xl p-5 text-center brand-card-green shadow-sm">
           <div class="text-2xl font-semibold text-gray-900">
             {{ currentUsers ?? '—' }}
           </div>
@@ -140,7 +78,7 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="rounded-lg p-6 text-center" style="background-color:#F6E1E1; border-color:#F6E1E1;">
+        <div class="rounded-xl p-5 text-center brand-card-pink shadow-sm">
           <div class="text-2xl font-semibold text-gray-900">
             {{ stats?.totalUsers ?? '—' }}
           </div>
@@ -149,16 +87,91 @@ onMounted(() => {
           </div>
         </div>
       </div>
+
+      <p class="text-base sm:text-lg text-gray-700 mt-6 max-w-2xl mx-auto">
+        Build confidence with short, focused practice and fun activities that help you remember what you learn.
+      </p>
+
+      <ul class="mt-8 space-y-3 text-left max-w-2xl mx-auto">
+        <li
+          v-for="benefit in benefits"
+          :key="benefit"
+          class="rounded-xl px-4 py-3 brand-card-lilac shadow-sm text-gray-800"
+        >
+          {{ benefit }}
+        </li>
+      </ul>
+    </section>
+
+    <section class="mt-14">
+      <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
+        How you learn
+      </h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <article
+          v-for="mode in learningModes"
+          :key="mode.title"
+          :class="mode.bgClass"
+          class="rounded-xl p-5 shadow-sm"
+        >
+          <h3 class="font-semibold text-gray-900">
+            {{ mode.title }}
+          </h3>
+          <p class="text-sm text-gray-800 mt-2">
+            {{ mode.description }}
+          </p>
+        </article>
+      </div>
+    </section>
+
+    <section class="mt-14 rounded-2xl p-6 sm:p-8 brand-cta-bg text-gray-900 shadow-sm">
+      <h2 class="text-2xl font-semibold tracking-tight">
+        Start learning Cantonese today
+      </h2>
+      <p class="text-sm sm:text-base text-gray-800 mt-2 max-w-2xl">
+        Play through different modes and build real vocabulary you can use in everyday conversations.
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <NuxtLink
+          to="/topics"
+          class="inline-flex items-center justify-center rounded-md bg-gray-900 text-white font-medium px-4 py-2 hover:bg-gray-800 transition"
+        >
+          Explore topics
+        </NuxtLink>
+        <NuxtLink
+          to="/quiz"
+          class="inline-flex items-center justify-center rounded-md border border-gray-700 text-gray-900 font-medium px-4 py-2 hover:bg-white/60 transition"
+        >
+          Try quizzes
+        </NuxtLink>
+      </div>
     </section>
   </main>
 </template>
 
 <style scoped>
-.topic-btn-blush {
-  background: rgb(249, 166, 166);
+.brand-card-green {
+  background-color: #E7F3D5;
 }
 
-.topic-btn-blush:hover {
-  background: rgb(204, 136, 136);
+.brand-card-pink {
+  background-color: #F6E1E1;
+}
+
+.brand-card-lilac {
+  background-color: #EAB8E4;
+}
+
+.brand-card-blue {
+  background-color: #A8CAE0;
+}
+
+.brand-card-yellow {
+  background-color: rgba(244, 205, 39, 0.35);
+}
+
+.brand-cta-bg {
+  background: linear-gradient(135deg, #F6E1E1 0%, #EAB8E4 50%, #A8CAE0 100%);
 }
 </style>
