@@ -62,6 +62,10 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
+function deadbandAbs(value: number, deadband: number) {
+  return Math.max(0, Math.abs(value) - deadband)
+}
+
 function safeMean(values: number[]) {
   if (!values.length) return 0
   return values.reduce((sum, value) => sum + value, 0) / values.length
@@ -110,13 +114,15 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
 
   const boundedSlope = clamp(slope, -0.4, 0.4)
   const boundedRange = clamp(range, 0, 0.6)
+  const levelSlopePenalty = deadbandAbs(boundedSlope, 0.04)
+  const levelRangePenalty = Math.max(0, boundedRange - 0.22)
 
-  if (tone === "1") return clamp(97 - Math.abs(boundedSlope) * 150 - boundedRange * 40, 0, 100)
+  if (tone === "1") return clamp(97 - levelSlopePenalty * 130 - levelRangePenalty * 90, 0, 100)
   if (tone === "2") return clamp(62 + boundedSlope * 175 - Math.abs(boundedRange - 0.14) * 45, 0, 100)
-  if (tone === "3") return clamp(94 - Math.abs(boundedSlope) * 145 - boundedRange * 35, 0, 100)
+  if (tone === "3") return clamp(95 - levelSlopePenalty * 120 - levelRangePenalty * 85, 0, 100)
   if (tone === "4") return clamp(56 + (-boundedSlope) * 180 - Math.abs(boundedRange - 0.18) * 55, 0, 100)
   if (tone === "5") return clamp(60 + boundedSlope * 165 - Math.abs(boundedRange - 0.1) * 55, 0, 100)
-  if (tone === "6") return clamp(92 - Math.abs(boundedSlope) * 150 - boundedRange * 35, 0, 100)
+  if (tone === "6") return clamp(93 - levelSlopePenalty * 125 - levelRangePenalty * 88, 0, 100)
 
   return null
 }
@@ -517,7 +523,9 @@ export function scoreWordToneAttempt(params: {
       ? acousticToneScore
       : acousticToneScore === null
         ? referenceToneScore
-        : Math.round((acousticToneScore * 0.75) + (referenceToneScore * 0.25))
+        : expectedTokens.length === 1
+          ? Math.round((acousticToneScore * 0.6) + (referenceToneScore * 0.4))
+          : Math.round((acousticToneScore * 0.75) + (referenceToneScore * 0.25))
 
   const toneScoreBase = toneOnly
     ? fusedAcoustic ?? 0

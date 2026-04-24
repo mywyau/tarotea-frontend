@@ -6,6 +6,11 @@ definePageMeta({
 })
 
 type PitchContour = { values: number[] }
+type PitchExtractionQuality = {
+  stable: boolean
+  totalPoints: number
+  avgStepDelta: number
+}
 type WordMeta = {
   id?: string
   word?: string
@@ -153,6 +158,41 @@ function smoothPitches(values: number[]) {
   return smoothed
 }
 
+function hzToSemitone(hz: number) {
+  return 12 * Math.log2(Math.max(hz, 1) / 55)
+}
+
+function evaluateContourQuality(contours: PitchContour[]): PitchExtractionQuality {
+  const merged = contours
+    .flatMap((contour) => contour.values)
+    .filter((value) => Number.isFinite(value))
+
+  if (merged.length < 6) {
+    return {
+      stable: false,
+      totalPoints: merged.length,
+      avgStepDelta: Number.POSITIVE_INFINITY,
+    }
+  }
+
+  const deltas: number[] = []
+
+  for (let i = 1; i < merged.length; i++) {
+    deltas.push(Math.abs(merged[i] - merged[i - 1]))
+  }
+
+  const avgStepDelta = deltas.length
+    ? deltas.reduce((sum, value) => sum + value, 0) / deltas.length
+    : 0
+  const stable = merged.length >= 12 && avgStepDelta <= 1.35
+
+  return {
+    stable,
+    totalPoints: merged.length,
+    avgStepDelta,
+  }
+}
+
 async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, expectedTokenCount: number): Promise<PitchContour[]> {
   if (!expectedTokenCount) return []
 
@@ -170,7 +210,7 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
       const frame = channel.slice(offset, offset + frameSize)
       const pitch = estimatePitchHz(frame, audioBuffer.sampleRate)
 
-      if (pitch > 0) rawPitches.push(Math.round(pitch))
+      if (pitch > 0) rawPitches.push(hzToSemitone(pitch))
     }
 
     if (!rawPitches.length) return []
@@ -186,7 +226,12 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
     for (let i = 0; i < expectedTokenCount; i++) {
       const start = i * bucketSize
       const end = i === expectedTokenCount - 1 ? trimmed.length : (i + 1) * bucketSize
-      contours.push({ values: trimmed.slice(start, end).slice(0, 32) })
+      contours.push({
+        values: trimmed
+          .slice(start, end)
+          .slice(0, 32)
+          .map((value) => Number(value.toFixed(2))),
+      })
     }
 
     return contours
@@ -303,6 +348,13 @@ async function runToneCheck() {
     const expectedTokens = tokenizeJyutping(expectedJyutping.value)
     const contours = await extractPitchContours(recordedBlob.value, expectedTokens.length)
     extractedPitchContours.value = contours
+    const quality = evaluateContourQuality(contours)
+
+    if (!quality.stable) {
+      errorMessage.value =
+        "This recording was too unstable to score reliably. Try again in a quieter place and hold the vowel a little longer."
+      return
+    }
 
     const referenceContours = await fetchReferenceContours(expectedTokens.length)
     referencePitchContours.value = referenceContours
