@@ -165,6 +165,6 @@ onMounted(() => {
 }
 
 .brand-text-purple {
-  color: #D6A3D1;
+  color: #6F5CCA;
 }
 </style>
