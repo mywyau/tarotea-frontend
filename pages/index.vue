@@ -64,7 +64,7 @@ onMounted(() => {
   <main class="max-w-4xl mx-auto py-16 sm:py-20 px-6 min-h-screen">
     <section class="text-center">
       <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
-        Learn and improve your Cantonese in just <span class="text-emerald-600">15 minutes</span> a day
+        Learn and improve your Cantonese in just <span class="brand-text-purple">15 minutes</span> a day
       </h1>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
@@ -162,5 +162,9 @@ onMounted(() => {
 
 .brand-cta-bg {
   background: linear-gradient(135deg, #F6E1E1 0%, #EAB8E4 50%, #A8CAE0 100%);
+}
+
+.brand-text-purple {
+  color: #D6A3D1;
 }
 </style>
