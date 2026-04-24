@@ -160,8 +160,8 @@ onBeforeUnmount(() => {
 
     <transition name="slide-left">
       <aside v-if="navOpen" id="warp-navigation-panel" class="nav-drawer" aria-label="Main navigation panel">
-        <div class="px-4 py-4 border-b border-black/20">
-          <span class="text-xl font-semibold text-black">Warp</span>
+        <div class="warp-heading-wrap px-4 py-4 border-b border-black/20">
+          <span class="warp-heading text-xl font-semibold">Warp</span>
         </div>
 
         <nav class="px-3 py-4 space-y-1">
@@ -311,21 +311,66 @@ onBeforeUnmount(() => {
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
 }
 
+.warp-heading-wrap {
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.28), rgba(168, 202, 224, 0.2));
+}
+
+.warp-heading {
+  display: inline-block;
+  background: linear-gradient(100deg, #f4cd27 0%, #eab8e4 45%, #a8cae0 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  letter-spacing: 0.01em;
+  text-shadow: 0 6px 18px rgba(17, 24, 39, 0.16);
+}
+
 .drawer-link {
   display: flex;
+  align-items: center;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   border-radius: 0.75rem;
   padding: 0.65rem 0.75rem;
   font-size: 0.95rem;
   color: #111827;
-  transition: background 120ms ease;
+  transition: color 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+}
+
+.drawer-link::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  z-index: -1;
+  opacity: 0;
+  transform: scale(0.98);
+  transition: opacity 140ms ease, transform 140ms ease;
+  background: linear-gradient(120deg, rgba(244, 205, 39, 0.35), rgba(234, 184, 228, 0.35), rgba(168, 202, 224, 0.35));
 }
 
 .drawer-link:hover {
-  background: rgba(0, 0, 0, 0.06);
+  color: #090f1d;
+  transform: translateX(1px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.32);
+}
+
+.drawer-link:hover::before,
+.drawer-link:focus-visible::before {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .drawer-link-active {
-  background: rgba(255, 255, 255, 0.5);
+  color: #05070d;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.drawer-link-active::before {
+  opacity: 1;
+  transform: scale(1);
+  background: linear-gradient(120deg, rgba(244, 205, 39, 0.42), rgba(234, 184, 228, 0.42), rgba(168, 202, 224, 0.42));
 }
 
 .fade-enter-active,
