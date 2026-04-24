@@ -211,6 +211,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 50;
+  pointer-events: none;
   background: rgba(246, 225, 225, 0.22);
 }
 
