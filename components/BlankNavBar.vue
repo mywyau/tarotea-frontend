@@ -3,9 +3,10 @@ import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 
-const { isLoggedIn, entitlement, resolve } = useMeStateV2()
+const { isLoggedIn, resolve } = useMeStateV2()
 
 const menuOpen = ref(false)
+const navOpen = ref(false)
 const menuRoot = ref<HTMLElement | null>(null)
 
 function toggleMenu() {
@@ -13,6 +14,13 @@ function toggleMenu() {
 }
 function closeMenu() {
   menuOpen.value = false
+}
+
+function toggleNav() {
+  navOpen.value = !navOpen.value
+}
+function closeNav() {
+  navOpen.value = false
 }
 
 async function handleLogout() {
@@ -40,9 +48,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <header class="header-shell">
+  <header class="header-shell sticky top-0 z-40">
     <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-
       <NuxtLink to="/" class="text-2xl font-bold text-black hover:text-gray-700">
         TaroTea
       </NuxtLink>
@@ -54,7 +61,6 @@ onBeforeUnmount(() => {
         </button>
 
         <div v-if="menuOpen" class="menu-panel">
-          <!-- Logged in -->
           <template v-if="isLoggedIn">
             <NuxtLink to="/account/v2"
               class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
@@ -87,7 +93,6 @@ onBeforeUnmount(() => {
             </button>
           </template>
 
-          <!-- Logged out -->
           <template v-else>
             <button type="button"
               class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-gray-900 hover:bg-black/5 transition"
@@ -98,25 +103,49 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </div>
+
+
+    <button type="button" class="side-rail-trigger" @click="toggleNav" :class="{ 'is-open': navOpen }"
+      :style="{ left: navOpen ? 'min(20rem, 88vw)' : '0px' }"
+      :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
+      :aria-expanded="navOpen ? 'true' : 'false'">
+      <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
+    </button>
+
+    <transition name="fade">
+      <div v-if="navOpen" class="drawer-overlay" />
+    </transition>
+
+    <transition name="slide-left">
+      <aside v-if="navOpen" class="nav-drawer" aria-label="Main navigation panel">
+        <div class="px-4 py-4 border-b border-black/20">
+          <span class="font-semibold text-black">Warp</span>
+        </div>
+
+        <nav class="px-3 py-4 space-y-1">
+          <NuxtLink v-if="isLoggedIn" to="/daily/vocab/v2" class="drawer-link">Daily Quiz</NuxtLink>
+          <NuxtLink v-if="isLoggedIn" to="/daily/jyutping/v2" class="drawer-link">Daily Jyutping Quiz</NuxtLink>
+          <NuxtLink to="/levels" class="drawer-link">Levels</NuxtLink>
+          <NuxtLink to="/quiz" class="drawer-link">Level Quiz</NuxtLink>
+          <NuxtLink to="/dojo/level" class="drawer-link">Level Dojo</NuxtLink>
+          <NuxtLink to="/topics" class="drawer-link">Topics</NuxtLink>
+          <NuxtLink to="/topics/quiz" class="drawer-link">Topic Quiz</NuxtLink>
+          <NuxtLink to="/dojo/topic" class="drawer-link">Topic Dojo</NuxtLink>
+        </nav>
+      </aside>
+    </transition>
   </header>
 </template>
 
 <style scoped>
-/* palette */
 .header-shell {
   --pink: #EAB8E4;
   --purple: #D6A3D1;
   --blue: #A8CAE0;
   --yellow: #F4CD27;
   --blush: #F6E1E1;
-
-  /* let your app background show through */
-  /* background: rgba(255, 255, 255, 0.55);
-  backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(214, 163, 209, 0.35); */
 }
 
-/* hamburger button */
 .menu-btn {
   display: inline-flex;
   align-items: center;
@@ -124,75 +153,108 @@ onBeforeUnmount(() => {
   width: 44px;
   height: 40px;
   font-size: 26px;
-  /* bigger ☰ */
-  /* border-radius: 12px; */
-  /* border: 1px solid rgba(214, 163, 209, 0.55); */
-  /* background: rgba(255, 255, 255, 0.7); */
-  /* transition: transform 150ms ease, box-shadow 150ms ease, background 150ms ease; */
 }
-
-/* .menu-btn:hover {
-  background: rgba(246, 225, 225, 0.55);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
-} */
 
 .menu-btn:active {
   transform: scale(0.98);
 }
 
-/* dropdown panel */
+
+.side-rail-trigger {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 70;
+  min-height: 6rem;
+  width: 0.7rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background: rgba(88, 199, 95, 0.45);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.22);
+  transition: width 140ms ease, background 140ms ease, left 180ms ease, opacity 140ms ease;
+}
+
+
+
+.side-rail-trigger.is-open {
+  width: 0.95rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+}
+
+.side-rail-trigger:hover {
+  width: 0.95rem;
+  background: rgba(88, 199, 95, 0.62);
+}
+
 .menu-panel {
   position: absolute;
   right: 0;
   margin-top: 10px;
   width: 220px;
   border-radius: 10px;
-  /* border: 1px solid rgba(214, 163, 209, 0.45); */
   background: rgba(255, 255, 255, 0.82);
   backdrop-filter: blur(10px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
   padding: 10px;
-  z-index: 50;
+  z-index: 60;
 }
 
-.menu-item {
-  width: 100%;
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  pointer-events: none;
+  background: rgba(246, 225, 225, 0.22);
+}
+
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 60;
+  height: 100vh;
+  width: min(20rem, 88vw);
+  background: rgba(111, 92, 202, 0.35);
+  backdrop-filter: blur(8px);
+  box-shadow: none;
+}
+
+.drawer-link {
   display: flex;
-  align-items: center;
-  padding: 10px 10px;
-  border-radius: 12px;
-  font-size: 14px;
-  background: transparent;
-  border: none;
-  text-align: left;
-  cursor: pointer;
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  font-size: 0.95rem;
+  color: #111827;
   transition: background 120ms ease;
 }
 
-/* .menu-item:hover {
-  background: rgba(168, 202, 224, 0.25);
-} */
-
-.menu-sep {
-  height: 1px;
-  margin: 10px 6px;
-  background: rgba(0, 0, 0, 0.08);
+.drawer-link:hover {
+  background: rgba(0, 0, 0, 0.06);
 }
 
-.menu-upgrade {
-  font-weight: 700;
-  /* background: rgba(244, 205, 39, 0.35); */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
 }
 
-/* .menu-upgrade:hover {
-  background: rgba(244, 205, 39, 0.5);
-} */
-
-.menu-danger {
-  color: #b91c1c;
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
-.menu-danger:hover {
-  background: rgba(234, 184, 228, 0.35);
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.22s ease;
+}
+
+.slide-left-enter-from,
+.slide-left-leave-to {
+  transform: translateX(-100%);
 }
 </style>
