@@ -197,7 +197,7 @@ onBeforeUnmount(() => {
 .nav-drawer-peek {
   position: fixed;
   top: 0;
-  left: 0;
+  left: 0.9rem;
   z-index: 55;
   height: 100vh;
   width: 0.3rem;
