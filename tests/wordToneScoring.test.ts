@@ -278,4 +278,18 @@ describe("scoreWordToneAttempt", () => {
     expect(result.toneScore).toBeGreaterThanOrEqual(70)
   })
 
+  it("is less harsh for fluent multi-syllable keoi5 dei6 contours", () => {
+    const result = scoreWordToneAttempt({
+      expectedJyutping: "keoi5 dei6",
+      acousticContours: [
+        { values: [9.6, 9.7, 9.85, 10.0, 10.15] },
+        { values: [8.9, 8.9, 8.85, 8.8, 8.8] },
+      ],
+      toneOnly: true,
+    })
+
+    expect(result.acousticToneScore).not.toBeNull()
+    expect(result.toneScore).toBeGreaterThanOrEqual(62)
+  })
+
 })

@@ -7,9 +7,11 @@ definePageMeta({
 
 type PitchContour = { values: number[] }
 type PitchExtractionQuality = {
-  stable: boolean
+  canScore: boolean
+  shouldWarn: boolean
   totalPoints: number
   avgStepDelta: number
+  message: string
 }
 type WordMeta = {
   id?: string
@@ -162,16 +164,20 @@ function hzToSemitone(hz: number) {
   return 12 * Math.log2(Math.max(hz, 1) / 55)
 }
 
-function evaluateContourQuality(contours: PitchContour[]): PitchExtractionQuality {
+function evaluateContourQuality(contours: PitchContour[], expectedTokenCount: number): PitchExtractionQuality {
   const merged = contours
     .flatMap((contour) => contour.values)
     .filter((value) => Number.isFinite(value))
 
-  if (merged.length < 6) {
+  const minPoints = Math.max(6, expectedTokenCount * 5)
+
+  if (merged.length < minPoints) {
     return {
-      stable: false,
+      canScore: false,
+      shouldWarn: false,
       totalPoints: merged.length,
       avgStepDelta: Number.POSITIVE_INFINITY,
+      message: "I couldn't capture enough steady pitch yet. Try again and hold each syllable a little longer.",
     }
   }
 
@@ -184,12 +190,17 @@ function evaluateContourQuality(contours: PitchContour[]): PitchExtractionQualit
   const avgStepDelta = deltas.length
     ? deltas.reduce((sum, value) => sum + value, 0) / deltas.length
     : 0
-  const stable = merged.length >= 12 && avgStepDelta <= 1.35
+  const deltaLimit = expectedTokenCount > 1 ? 2.2 : 1.55
+  const shouldWarn = avgStepDelta > deltaLimit
 
   return {
-    stable,
+    canScore: true,
+    shouldWarn,
     totalPoints: merged.length,
     avgStepDelta,
+    message: shouldWarn
+      ? "This recording is a bit noisy, so your score may vary. Try again in a quieter place for a steadier result."
+      : "",
   }
 }
 
@@ -226,9 +237,14 @@ async function extractPitchContoursFromArrayBuffer(arrayBuffer: ArrayBuffer, exp
     for (let i = 0; i < expectedTokenCount; i++) {
       const start = i * bucketSize
       const end = i === expectedTokenCount - 1 ? trimmed.length : (i + 1) * bucketSize
+      const bucket = trimmed.slice(start, end)
+      const edgeTrim = bucket.length >= 10 ? Math.floor(bucket.length * 0.12) : 0
+      const core =
+        edgeTrim > 0 && bucket.length - edgeTrim * 2 >= 3
+          ? bucket.slice(edgeTrim, bucket.length - edgeTrim)
+          : bucket
       contours.push({
-        values: trimmed
-          .slice(start, end)
+        values: core
           .slice(0, 32)
           .map((value) => Number(value.toFixed(2))),
       })
@@ -348,12 +364,15 @@ async function runToneCheck() {
     const expectedTokens = tokenizeJyutping(expectedJyutping.value)
     const contours = await extractPitchContours(recordedBlob.value, expectedTokens.length)
     extractedPitchContours.value = contours
-    const quality = evaluateContourQuality(contours)
+    const quality = evaluateContourQuality(contours, expectedTokens.length)
 
-    if (!quality.stable) {
-      errorMessage.value =
-        "This recording was too unstable to score reliably. Try again in a quieter place and hold the vowel a little longer."
+    if (!quality.canScore) {
+      errorMessage.value = quality.message
       return
+    }
+
+    if (quality.shouldWarn) {
+      errorMessage.value = quality.message
     }
 
     const referenceContours = await fetchReferenceContours(expectedTokens.length)

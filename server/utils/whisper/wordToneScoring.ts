@@ -159,6 +159,7 @@ function scoreAcousticTones(expectedTokens: string[], contours: AcousticSyllable
   if (!contours.length || !expectedTokens.length) return null
 
   const syllableScores: number[] = []
+  const isMultiSyllable = expectedTokens.length > 1
 
   for (let i = 0; i < expectedTokens.length; i++) {
     const tone = getTone(expectedTokens[i])
@@ -177,17 +178,17 @@ function scoreAcousticTones(expectedTokens: string[], contours: AcousticSyllable
 
       // If contour is ambiguous (small confidence gap), reduce harsh penalties.
       if (detected.detectedTone !== tone && detected.confidence !== null && detected.confidence <= 8) {
-        calibrated += 8
+        calibrated += isMultiSyllable ? 10 : 8
       }
 
       // Treat rising tones as a family for leniency on subtle rises (common in fluent speech).
       if ((tone === "2" || tone === "5") && (detected.detectedTone === "2" || detected.detectedTone === "5")) {
-        calibrated = Math.max(calibrated, 62)
+        calibrated = Math.max(calibrated, isMultiSyllable ? 68 : 62)
       }
 
       // Treat level tones as a family (1/3/6) where absolute register can vary by speaker.
       if ((tone === "1" || tone === "3" || tone === "6") && (detected.detectedTone === "1" || detected.detectedTone === "3" || detected.detectedTone === "6")) {
-        calibrated = Math.max(calibrated, 58)
+        calibrated = Math.max(calibrated, isMultiSyllable ? 62 : 58)
       }
 
       syllableScores.push(clamp(Math.round(calibrated), 0, 100))
