@@ -53,12 +53,12 @@ onBeforeUnmount(() => {
       <div class="flex items-center gap-3">
         <button
           type="button"
-          class="menu-btn"
+          class="nav-trigger"
           @click="toggleNav"
           aria-label="Open navigation panel"
           :aria-expanded="navOpen ? 'true' : 'false'"
         >
-          ☰
+          Navigate
         </button>
 
         <NuxtLink to="/" class="text-2xl font-bold text-black hover:text-gray-700">
@@ -159,6 +159,28 @@ onBeforeUnmount(() => {
 
 .menu-btn:active {
   transform: scale(0.98);
+}
+
+
+.nav-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(0, 0, 0, 0.18);
+  padding: 0.35rem 0.8rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #111827;
+  background: rgba(255, 255, 255, 0.78);
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.nav-trigger:hover {
+  background: rgba(255, 255, 255, 0.98);
+  border-color: rgba(0, 0, 0, 0.28);
 }
 
 .menu-panel {
