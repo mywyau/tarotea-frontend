@@ -123,14 +123,15 @@ onBeforeUnmount(() => {
         </div>
 
         <nav class="px-3 py-4 space-y-1">
-          <NuxtLink v-if="isLoggedIn" to="/daily/vocab/v2" class="drawer-link">Daily Quiz</NuxtLink>
-          <NuxtLink v-if="isLoggedIn" to="/daily/jyutping/v2" class="drawer-link">Daily Jyutping Quiz</NuxtLink>
-          <NuxtLink to="/levels" class="drawer-link">Levels</NuxtLink>
-          <NuxtLink to="/quiz" class="drawer-link">Level Quiz</NuxtLink>
-          <NuxtLink to="/dojo/level" class="drawer-link">Level Dojo</NuxtLink>
-          <NuxtLink to="/topics" class="drawer-link">Topics</NuxtLink>
-          <NuxtLink to="/topics/quiz" class="drawer-link">Topic Quiz</NuxtLink>
-          <NuxtLink to="/dojo/topic" class="drawer-link">Topic Dojo</NuxtLink>
+          <NuxtLink v-if="isLoggedIn" to="/daily/vocab/v2" class="drawer-link font-medium">Daily Quiz</NuxtLink>
+          <NuxtLink v-if="isLoggedIn" to="/daily/jyutping/v2" class="drawer-link font-medium">Daily Jyutping Quiz
+          </NuxtLink>
+          <NuxtLink to="/levels" class="drawer-link font-medium">Levels</NuxtLink>
+          <NuxtLink to="/quiz" class="drawer-link font-medium">Level Quiz</NuxtLink>
+          <NuxtLink to="/dojo/level" class="drawer-link font-medium">Level Dojo</NuxtLink>
+          <NuxtLink to="/topics" class="drawer-link font-medium">Topics</NuxtLink>
+          <NuxtLink to="/topics/quiz" class="drawer-link font-medium">Topic Quiz</NuxtLink>
+          <NuxtLink to="/dojo/topic" class="drawer-link font-medium">Topic Dojo</NuxtLink>
         </nav>
       </aside>
     </transition>
@@ -166,8 +167,8 @@ onBeforeUnmount(() => {
   top: 50%;
   transform: translateY(-50%);
   z-index: 70;
-  min-height: 6rem;
-  width: 0.7rem;
+  min-height: 10rem;
+  width: 0.9rem;
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
   background: rgba(88, 199, 95, 0.45);
@@ -180,7 +181,6 @@ onBeforeUnmount(() => {
 }
 
 
-
 .side-rail-trigger.is-open {
   width: 0.95rem;
   border-top-right-radius: 0.5rem;
@@ -189,7 +189,7 @@ onBeforeUnmount(() => {
 
 .side-rail-trigger:hover {
   width: 0.95rem;
-  background: rgba(88, 199, 95, 0.62);
+  background: rgba(105, 199, 112, 0.62);
 }
 
 .menu-panel {
@@ -222,7 +222,7 @@ onBeforeUnmount(() => {
   width: min(20rem, 88vw);
   background: rgba(111, 92, 202, 0.35);
   backdrop-filter: blur(8px);
-  box-shadow: none;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
 }
 
 .drawer-link {
