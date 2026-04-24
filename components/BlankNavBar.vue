@@ -172,7 +172,7 @@ onBeforeUnmount(() => {
   width: 0.7rem;
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
-  background: #C78CC3;
+  background: rgba(88, 199, 95, 0.45);
   color: #ffffff;
   display: inline-flex;
   align-items: center;
@@ -191,7 +191,7 @@ onBeforeUnmount(() => {
 
 .side-rail-trigger:hover {
   width: 0.95rem;
-  background: #B06CAB;
+  background: rgba(88, 199, 95, 0.62);
 }
 
 .menu-panel {
