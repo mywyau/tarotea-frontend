@@ -109,10 +109,12 @@ onBeforeUnmount(() => {
       type="button"
       class="side-rail-trigger"
       @click="toggleNav"
-      aria-label="Open navigation panel"
+      :class="{ 'is-open': navOpen }"
+      :style="{ left: navOpen ? 'min(20rem, 88vw)' : '0px' }"
+      :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
       :aria-expanded="navOpen ? 'true' : 'false'"
     >
-      <span>Navigate</span>
+      <span>{{ navOpen ? "Close" : "Navigate" }}</span>
     </button>
 
     <transition name="fade">
@@ -166,18 +168,18 @@ onBeforeUnmount(() => {
   left: 0;
   top: 50%;
   transform: translateY(-50%);
-  z-index: 55;
+  z-index: 70;
   min-height: 7rem;
   width: 1.1rem;
   border-top-right-radius: 0.5rem;
   border-bottom-right-radius: 0.5rem;
-  background: rgba(17, 24, 39, 0.82);
+  background: #D6A3D1;
   color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-shadow: 4px 0 16px rgba(0, 0, 0, 0.22);
-  transition: width 140ms ease, background 140ms ease;
+  transition: width 140ms ease, background 140ms ease, left 180ms ease;
 }
 
 .side-rail-trigger span {
@@ -188,9 +190,16 @@ onBeforeUnmount(() => {
   font-weight: 700;
 }
 
+
+.side-rail-trigger.is-open {
+  width: 1.5rem;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
 .side-rail-trigger:hover {
   width: 1.5rem;
-  background: rgba(17, 24, 39, 0.95);
+  background: #B57BC3;
 }
 
 .menu-panel {
