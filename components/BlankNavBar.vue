@@ -222,7 +222,7 @@ onBeforeUnmount(() => {
   z-index: 60;
   height: 100vh;
   width: min(20rem, 88vw);
-  background: rgba(246, 225, 225, 0.92);
+  background: rgba(111, 92, 202, 0.35);
   backdrop-filter: blur(8px);
   box-shadow: none;
 }
