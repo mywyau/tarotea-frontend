@@ -432,6 +432,10 @@ async function runToneCheck() {
 <template>
   <div class="min-h-screen text-gray-900">
     <div class="mx-auto max-w-3xl px-4 py-10">
+      <div class="mb-4">
+        <BackLink />
+      </div>
+
       <h1 class="text-3xl font-bold">Tone Garden</h1>
 
       <div class="mt-6 rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm">
