@@ -1,13 +1,31 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const { isLoggedIn, resolve } = useMeStateV2()
+const route = useRoute()
 
 const menuOpen = ref(false)
 const navOpen = ref(false)
 const menuRoot = ref<HTMLElement | null>(null)
+const navRoot = ref<HTMLElement | null>(null)
+
+const navLinks = computed(() => {
+  const links = [
+    { to: '/', label: 'Home', requiresAuth: false },
+    { to: '/daily/vocab/v2', label: 'Daily Quiz', requiresAuth: true },
+    { to: '/daily/jyutping/v2', label: 'Daily Jyutping Quiz', requiresAuth: true },
+    { to: '/levels', label: 'Levels', requiresAuth: false },
+    { to: '/quiz', label: 'Level Quiz', requiresAuth: false },
+    { to: '/dojo/level', label: 'Level Dojo', requiresAuth: false },
+    { to: '/topics', label: 'Topics', requiresAuth: false },
+    { to: '/topics/quiz', label: 'Topic Quiz', requiresAuth: false },
+    { to: '/dojo/topic', label: 'Topic Dojo', requiresAuth: false },
+  ]
+
+  return links.filter(link => !link.requiresAuth || isLoggedIn.value)
+})
 
 function toggleMenu() {
   menuOpen.value = !menuOpen.value
@@ -30,20 +48,35 @@ async function handleLogout() {
 }
 
 function onDocumentClick(e: MouseEvent) {
-  if (!menuOpen.value) return
   const target = e.target as Node | null
-  if (menuRoot.value && target && !menuRoot.value.contains(target)) {
+  if (menuOpen.value && menuRoot.value && target && !menuRoot.value.contains(target)) {
     closeMenu()
   }
+  if (navOpen.value && navRoot.value && target && !navRoot.value.contains(target)) {
+    closeNav()
+  }
+}
+
+function onDocumentKeydown(e: KeyboardEvent) {
+  if (e.key !== 'Escape') return
+  closeMenu()
+  closeNav()
 }
 
 onMounted(() => {
   resolve({ force: true })
   document.addEventListener('click', onDocumentClick)
+  document.addEventListener('keydown', onDocumentKeydown)
 })
 
 onBeforeUnmount(() => {
   document.removeEventListener('click', onDocumentClick)
+  document.removeEventListener('keydown', onDocumentKeydown)
+})
+
+watch(() => route.fullPath, () => {
+  closeMenu()
+  closeNav()
 })
 </script>
 
@@ -108,33 +141,34 @@ onBeforeUnmount(() => {
     <button type="button" class="side-rail-trigger" @click="toggleNav" :class="{ 'is-open': navOpen }"
       :style="{ left: navOpen ? 'min(20rem, 88vw)' : '1.0rem' }"
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
-      :aria-expanded="navOpen ? 'true' : 'false'">
+      :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel">
       <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
     </button>
 
     <div v-if="!navOpen" class="nav-drawer-peek" aria-hidden="true" />
 
     <transition name="fade">
-      <div v-if="navOpen" class="drawer-overlay" />
+      <button v-if="navOpen" type="button" class="drawer-overlay" aria-label="Close navigation panel" @click="closeNav" />
     </transition>
 
     <transition name="slide-left">
-      <aside v-if="navOpen" class="nav-drawer" aria-label="Main navigation panel">
+      <aside v-if="navOpen" id="warp-navigation-panel" ref="navRoot" class="nav-drawer" aria-label="Main navigation panel">
         <div class="px-4 py-4 border-b border-black/20">
           <span class="font-semibold text-black">Warp</span>
         </div>
 
         <nav class="px-3 py-4 space-y-1">
-          <NuxtLink to="/" class="drawer-link font-medium">Home</NuxtLink>
-          <NuxtLink v-if="isLoggedIn" to="/daily/vocab/v2" class="drawer-link font-medium">Daily Quiz</NuxtLink>
-          <NuxtLink v-if="isLoggedIn" to="/daily/jyutping/v2" class="drawer-link font-medium">Daily Jyutping Quiz
+          <NuxtLink
+            v-for="link in navLinks"
+            :key="link.to"
+            :to="link.to"
+            class="drawer-link font-medium"
+            :class="{ 'drawer-link-active': route.path === link.to }"
+            :aria-current="route.path === link.to ? 'page' : undefined"
+            @click="closeNav"
+          >
+            {{ link.label }}
           </NuxtLink>
-          <NuxtLink to="/levels" class="drawer-link font-medium">Levels</NuxtLink>
-          <NuxtLink to="/quiz" class="drawer-link font-medium">Level Quiz</NuxtLink>
-          <NuxtLink to="/dojo/level" class="drawer-link font-medium">Level Dojo</NuxtLink>
-          <NuxtLink to="/topics" class="drawer-link font-medium">Topics</NuxtLink>
-          <NuxtLink to="/topics/quiz" class="drawer-link font-medium">Topic Quiz</NuxtLink>
-          <NuxtLink to="/dojo/topic" class="drawer-link font-medium">Topic Dojo</NuxtLink>
         </nav>
       </aside>
     </transition>
@@ -223,8 +257,11 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 50;
-  pointer-events: none;
+  pointer-events: auto;
   background: rgba(246, 225, 225, 0.22);
+  border: 0;
+  padding: 0;
+  cursor: default;
 }
 
 .nav-drawer {
@@ -250,6 +287,10 @@ onBeforeUnmount(() => {
 
 .drawer-link:hover {
   background: rgba(0, 0, 0, 0.06);
+}
+
+.drawer-link-active {
+  background: rgba(255, 255, 255, 0.5);
 }
 
 .fade-enter-active,
