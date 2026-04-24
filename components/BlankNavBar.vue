@@ -138,7 +138,7 @@ watch(() => route.fullPath, () => {
     </div>
 
 
-    <button type="button" class="side-rail-trigger" @click="toggleNav" :class="{ 'is-open': navOpen }"
+    <button type="button" class="side-rail-trigger" @click.stop="toggleNav" :class="{ 'is-open': navOpen }"
       :style="{ left: navOpen ? 'min(20rem, 88vw)' : '1.0rem' }"
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
       :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel">
