@@ -124,7 +124,7 @@ onBeforeUnmount(() => {
     <transition name="slide-left">
       <aside v-if="navOpen" class="nav-drawer" aria-label="Main navigation panel">
         <div class="px-4 py-4 border-b border-black/20">
-          <span class="font-semibold text-white">Navigate</span>
+          <span class="font-semibold text-black">Navigate</span>
         </div>
 
         <nav class="px-3 py-4 space-y-1">
@@ -218,7 +218,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(55, 16, 64, 0.2);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .nav-drawer {
@@ -228,7 +228,7 @@ onBeforeUnmount(() => {
   z-index: 60;
   height: 100vh;
   width: min(20rem, 88vw);
-  background: rgba(214, 163, 209, 0.97);
+  background: rgba(246, 225, 225, 0.3);
   backdrop-filter: blur(8px);
   box-shadow: 10px 0 30px rgba(0, 0, 0, 0.18);
 }
@@ -238,12 +238,12 @@ onBeforeUnmount(() => {
   border-radius: 0.75rem;
   padding: 0.65rem 0.75rem;
   font-size: 0.95rem;
-  color: #2b1630;
+  color: #111827;
   transition: background 120ms ease;
 }
 
 .drawer-link:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(0, 0, 0, 0.06);
 }
 
 .fade-enter-active,
