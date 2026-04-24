@@ -114,7 +114,7 @@ onMounted(async () => {
 
 
 <template>
-  <main class="topics-page max-w-3xl mx-auto py-12 px-4 space-y-10">
+  <main class="topics-page max-w-4xl mx-auto py-12 px-4 space-y-10">
 
     <NuxtLink :to="`/`" class="text-sm text-black hover:underline">
       ← Back
