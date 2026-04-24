@@ -50,21 +50,9 @@ onBeforeUnmount(() => {
 <template>
   <header class="header-shell sticky top-0 z-40">
     <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-      <div class="flex items-center gap-3">
-        <button
-          type="button"
-          class="nav-trigger"
-          @click="toggleNav"
-          aria-label="Open navigation panel"
-          :aria-expanded="navOpen ? 'true' : 'false'"
-        >
-          Navigate
-        </button>
-
-        <NuxtLink to="/" class="text-2xl font-bold text-black hover:text-gray-700">
-          TaroTea
-        </NuxtLink>
-      </div>
+      <NuxtLink to="/" class="text-2xl font-bold text-black hover:text-gray-700">
+        TaroTea
+      </NuxtLink>
 
       <div ref="menuRoot" class="relative">
         <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
@@ -116,6 +104,17 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
+
+    <button
+      type="button"
+      class="side-rail-trigger"
+      @click="toggleNav"
+      aria-label="Open navigation panel"
+      :aria-expanded="navOpen ? 'true' : 'false'"
+    >
+      <span>Navigate</span>
+    </button>
+
     <transition name="fade">
       <div v-if="navOpen" class="drawer-overlay" @click="closeNav" />
     </transition>
@@ -162,25 +161,36 @@ onBeforeUnmount(() => {
 }
 
 
-.nav-trigger {
+.side-rail-trigger {
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 55;
+  min-height: 7rem;
+  width: 1.1rem;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
+  background: rgba(17, 24, 39, 0.82);
+  color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 2.25rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(0, 0, 0, 0.18);
-  padding: 0.35rem 0.8rem;
-  font-size: 0.82rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  color: #111827;
-  background: rgba(255, 255, 255, 0.78);
-  transition: background 120ms ease, border-color 120ms ease;
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.22);
+  transition: width 140ms ease, background 140ms ease;
 }
 
-.nav-trigger:hover {
-  background: rgba(255, 255, 255, 0.98);
-  border-color: rgba(0, 0, 0, 0.28);
+.side-rail-trigger span {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+.side-rail-trigger:hover {
+  width: 1.5rem;
+  background: rgba(17, 24, 39, 0.95);
 }
 
 .menu-panel {
