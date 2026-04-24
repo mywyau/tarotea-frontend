@@ -185,8 +185,8 @@ onBeforeUnmount(() => {
 
 .side-rail-trigger.is-open {
   width: 0.95rem;
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
+  border-top-right-radius: 0.5rem;
+  border-bottom-right-radius: 0.5rem;
 }
 
 .side-rail-trigger:hover {
@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
   position: fixed;
   inset: 0;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(246, 225, 225, 0.22);
 }
 
 .nav-drawer {
@@ -221,7 +221,7 @@ onBeforeUnmount(() => {
   z-index: 60;
   height: 100vh;
   width: min(20rem, 88vw);
-  background: rgba(255, 255, 255, 0.86);
+  background: rgba(246, 225, 225, 0.92);
   backdrop-filter: blur(8px);
   box-shadow: none;
 }
