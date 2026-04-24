@@ -106,7 +106,7 @@ onBeforeUnmount(() => {
 
 
     <button type="button" class="side-rail-trigger" @click="toggleNav" :class="{ 'is-open': navOpen }"
-      :style="{ left: navOpen ? 'min(20rem, 88vw)' : '0px' }"
+      :style="{ left: navOpen ? 'min(20rem, 88vw)' : '0.6rem' }"
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
       :aria-expanded="navOpen ? 'true' : 'false'">
       <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
@@ -197,10 +197,10 @@ onBeforeUnmount(() => {
 .nav-drawer-peek {
   position: fixed;
   top: 0;
-  left: 0.9rem;
+  left: 0;
   z-index: 55;
   height: 100vh;
-  width: 0.3rem;
+  width: 0.6rem;
   background: rgba(111, 92, 202, 0.45);
   pointer-events: none;
 }
