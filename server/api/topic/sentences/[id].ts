@@ -10,9 +10,12 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
 
   try {
-    console.log(id)
     return await $fetch(`${cdnBase}/topic-sentences/${id}.json`);
-  } catch {
+  } catch (error) {
+    console.error("[topic/sentences] Failed to load sentence set", {
+      id,
+      error,
+    });
     throw createError({
       statusCode: 404,
       statusMessage: "sentence set not found",

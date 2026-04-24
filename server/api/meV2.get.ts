@@ -27,10 +27,9 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
 
   await enforceRateLimit(`rl:me:${userId}`, 120, 60);
 
-  console.log(
+  console.info(
     JSON.stringify({
-      event: "[meV2.get.ts][defineEventHandler] - meV2_endpoint_called",
-      userId,
+      event: "me_endpoint_called",
       timestamp: new Date().toISOString(),
     }),
   );
@@ -59,7 +58,7 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
     console.error(
       JSON.stringify({
         event: "me_user_not_found",
-        userId,
+        hasAuthenticatedUser: Boolean(userId),
       }),
     );
     throw createError({ statusCode: 404, statusMessage: "User not found" });

@@ -39,13 +39,6 @@ async function getManagementToken(): Promise<string> {
   const auth0MgmtAudience =
     process.env.AUTH0_MGMT_AUDIENCE || `https://${auth0Domain}/api/v2/`;
 
-  console.log("Auth0 management config", {
-    domain: auth0Domain,
-    audience: auth0MgmtAudience,
-    hasMgmtClientId: Boolean(process.env.AUTH0_MGMT_CLIENT_ID),
-    hasMgmtClientSecret: Boolean(process.env.AUTH0_MGMT_CLIENT_SECRET),
-  });
-
   const res = await fetch(`https://${auth0Domain}/oauth/token`, {
     method: "POST",
     headers: {

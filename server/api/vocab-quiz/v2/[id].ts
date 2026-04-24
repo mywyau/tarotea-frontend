@@ -93,8 +93,6 @@ export default defineEventHandler(async (event) => {
     const user = await requireUser(event);
     userId = user.sub ?? null;
 
-    console.log("userid: ", userId);
-
     const entitlement = await getUserEntitlement(userId);
     entitlementValue = entitlement;
   } catch {
