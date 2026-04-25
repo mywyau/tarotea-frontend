@@ -285,16 +285,20 @@ watchEffect(() => {
                         </div>
 
                         <!-- sentence on its own line -->
-                        <div class="example-scroll-line text-lg leading-relaxed text-gray-900">
-                            {{ example.sentence }}
-                        </div>
+                        <div class="example-scroll-block">
+                            <div class="example-scroll-content">
+                                <div class="text-lg leading-relaxed text-gray-900 whitespace-nowrap">
+                                    {{ example.sentence }}
+                                </div>
 
-                        <div class="example-scroll-line text-sm text-gray-500">
-                            {{ example.jyutping }}
-                        </div>
+                                <div class="mt-2 text-sm text-gray-500 whitespace-nowrap">
+                                    {{ example.jyutping }}
+                                </div>
 
-                        <div class="example-scroll-line text-sm text-gray-700">
-                            {{ example.meaning }}
+                                <div class="mt-2 text-sm text-gray-700 whitespace-nowrap">
+                                    {{ example.meaning }}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </li>
@@ -340,11 +344,15 @@ watchEffect(() => {
     border-left: 4px solid rgba(168, 202, 224, 0.70);
 }
 
-.example-scroll-line {
+.example-scroll-block {
     overflow-x: auto;
-    white-space: nowrap;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 0.15rem;
+}
+
+.example-scroll-content {
+    width: max-content;
+    min-width: 100%;
 }
 
 /* Progress bar */
