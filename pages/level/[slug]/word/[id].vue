@@ -300,7 +300,7 @@ watchEffect(() => {
                 <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
                   class="action-chip action-chip-sm action-chip-speak example-action-btn"
                   aria-label="Practice pronunciation for this sentence">
-                  <span aria-hidden="true" class="mobile-action-icon">▶</span>
+                  <span aria-hidden="true" class="mobile-action-icon">🎤</span>
                   <span class="mobile-action-label">Speak</span>
                 </NuxtLink>
 
@@ -425,21 +425,21 @@ watchEffect(() => {
 
 .action-chip-write {
   border-color: transparent;
-  background: #A8CAE0;
+  background: #F6E1E1;
 }
 
 .action-chip-write:hover {
-  background: #b7d4e7;
+  background: #f2d8d8;
   border-color: transparent;
 }
 
 .action-chip-speak {
   border-color: transparent;
-  background: #F4C2D7;
+  background: #A8CAE0;
 }
 
 .action-chip-speak:hover {
-  background: #f6cde0;
+  background: #b7d4e7;
   border-color: transparent;
 }
 
