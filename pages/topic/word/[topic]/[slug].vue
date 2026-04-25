@@ -284,16 +284,16 @@ watchEffect(() => {
                             </div>
                         </div>
 
-                        <div class="example-text-scroll">
-                            <div class="text-lg leading-relaxed text-gray-900 whitespace-nowrap">
+                        <div class="example-text-group">
+                            <div class="example-scroll-line text-lg leading-relaxed text-gray-900">
                                 {{ example.sentence }}
                             </div>
 
-                            <div class="text-sm text-gray-500 whitespace-nowrap">
+                            <div class="example-scroll-line text-sm text-gray-500">
                                 {{ example.jyutping }}
                             </div>
 
-                            <div class="text-sm text-gray-700 whitespace-nowrap">
+                            <div class="example-scroll-line text-sm text-gray-700">
                                 {{ example.meaning }}
                             </div>
                         </div>
@@ -342,17 +342,31 @@ watchEffect(() => {
 }
 
 
-.example-text-scroll {
+.example-text-group {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.example-scroll-line {
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
-  padding-bottom: 0.15rem;
-}
-
-.example-text-scroll > div {
+  white-space: nowrap;
   width: max-content;
   min-width: 100%;
+  padding-bottom: 0.15rem;
+  scrollbar-width: thin;
 }
+
+.example-scroll-line::-webkit-scrollbar {
+  height: 6px;
+}
+
+.example-scroll-line::-webkit-scrollbar-thumb {
+  background: rgba(107, 114, 128, 0.45);
+  border-radius: 9999px;
+}
+
 /* Progress bar */
 .progress-bar {
     background: linear-gradient(90deg,
@@ -491,13 +505,22 @@ watchEffect(() => {
     }
 
     .example-actions-row {
-        flex-wrap: nowrap;
+        flex-wrap: wrap;
+        justify-content: flex-end;
         gap: 0.35rem;
     }
 
     .example-action-btn {
         min-height: 1.9rem;
         padding: 0.25rem 0.45rem;
+    }
+
+    .example-text-group {
+      gap: 0.55rem;
+    }
+
+    .example-scroll-line {
+      padding-bottom: 0.2rem;
     }
 
     .mobile-action-label {
