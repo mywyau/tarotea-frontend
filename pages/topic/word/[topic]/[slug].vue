@@ -284,17 +284,30 @@ watchEffect(() => {
                             </div>
                         </div>
 
-                        <div class="example-text-group">
-                            <div class="example-scroll-line text-lg leading-relaxed text-gray-900">
+                        <div class="example-text-scroll">
+                            <div class="text-lg leading-relaxed text-gray-900 whitespace-nowrap">
                                 {{ example.sentence }}
                             </div>
 
-                            <div class="example-scroll-line text-sm text-gray-500">
+                            <div class="text-sm text-gray-500 whitespace-nowrap">
                                 {{ example.jyutping }}
                             </div>
 
-                            <div class="example-scroll-line text-sm text-gray-700">
+                            <div class="text-sm text-gray-700 whitespace-nowrap">
                                 {{ example.meaning }}
+                            </div>
+.example-text-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.15rem;
+}
+
+.example-text-scroll > div {
+  width: max-content;
+  min-width: 100%;
+}
+
                             </div>
                         </div>
                     </div>
