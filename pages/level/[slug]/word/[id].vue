@@ -220,17 +220,17 @@ watchEffect(() => {
         </NuxtLink>
       </div>
 
-      <div class="flex items-center justify-center gap-3 pt-1">
+      <div class="main-actions-row">
 
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
-          size="md" class="tone-gate-play-btn" />
+          size="md" class="tone-gate-play-btn main-action-btn" />
 
-        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write"
+        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write main-action-btn"
           aria-label="Practice writing this word">
           ✏️ Write
         </NuxtLink>
 
-        <NuxtLink :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge"
+        <NuxtLink :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
           aria-label="Open tone checker for this word">
           Tone Garden
         </NuxtLink>
@@ -386,6 +386,20 @@ watchEffect(() => {
   transition: all 0.2s ease;
 }
 
+.main-actions-row {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.main-action-btn {
+  min-height: 2.5rem;
+}
+
 .action-chip:hover {
   border-color: #9ca3af;
   background: #f9fafb;
@@ -427,6 +441,7 @@ watchEffect(() => {
 }
 
 :deep(.tone-gate-play-btn) {
+  min-height: 2.5rem;
   border-color: transparent !important;
   background: #D6A3D1 !important;
 }
@@ -446,5 +461,18 @@ watchEffect(() => {
 .edge-arrow:hover {
   color: #49b0ff;
   transform: scale(1.04);
+}
+
+@media (max-width: 640px) {
+  .main-actions-row {
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
+  .main-action-btn,
+  :deep(.tone-gate-play-btn) {
+    width: 100%;
+    max-width: 16rem;
+  }
 }
 </style>
