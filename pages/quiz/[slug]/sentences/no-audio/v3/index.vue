@@ -57,6 +57,10 @@ type QuizAnswer = {
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 const { isLoggedIn } = useMeStateV2()
+const runtimeConfig = useRuntimeConfig()
+const cdnBase = runtimeConfig.public.cdnBase
+const { volume } = useAudioVolume()
+const { stop, play } = useGlobalAudio()
 
 const auth = await useAuth()
 
@@ -395,6 +399,15 @@ const resultMeta = computed(() => {
 
 const tileColors = ref<string[]>([])
 
+function playSentenceAudioAfterAnswer(sentenceId: string) {
+    if (!process.client || !sentenceId) return
+
+    const audio = new Audio(`${cdnBase}/audio/${sentenceId}.mp3`)
+    audio.volume = volume.value
+    audio.currentTime = 0
+    play(audio)
+}
+
 async function answer(index: number) {
     if (answered.value) return
     if (!question.value) return
@@ -416,6 +429,10 @@ async function answer(index: number) {
     } else {
         playIncorrectJingle()
     }
+
+    setTimeout(() => {
+        playSentenceAudioAfterAnswer(question.value?.sentenceId ?? '')
+    }, 220)
 
     const wordId = question.value.wordId
     const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
@@ -488,6 +505,8 @@ watch(
     (visible) => {
         if (!visible) return
 
+        stop()
+
         if (!completionAnimated.value) {
             completionAnimated.value = true
             runCompletionAnimations()
@@ -526,6 +545,7 @@ watch(
 watch(
     () => slug.value,
     () => {
+        stop()
         current.value = 0
         score.value = 0
         answered.value = false
@@ -550,6 +570,7 @@ watch(
 )
 
 onBeforeUnmount(() => {
+    stop()
     stopTimer()
 })
 
