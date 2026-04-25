@@ -289,21 +289,24 @@ watchEffect(() => {
         <li v-for="(example, index) in word.examples" :key="example.sentence" class="example-card rounded-lg p-4">
           <div class="space-y-3">
             <div class="flex justify-end">
-              <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+              <div class="example-actions-row">
                 <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
-                  class="action-chip action-chip-sm action-chip-write" aria-label="Practice writing this sentence">
-                  ✏️ Write
+                  class="action-chip action-chip-sm action-chip-write example-action-btn"
+                  aria-label="Practice writing this sentence">
+                  <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+                  <span class="mobile-action-label">Write</span>
                 </NuxtLink>
 
                 <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
-                  class="action-chip action-chip-sm action-chip-speak"
+                  class="action-chip action-chip-sm action-chip-speak example-action-btn"
                   aria-label="Practice pronunciation for this sentence">
-                  ▶ Speak
+                  <span aria-hidden="true" class="mobile-action-icon">▶</span>
+                  <span class="mobile-action-label">Speak</span>
                 </NuxtLink>
 
                 <AudioButton v-if="word.audio?.examples?.[index]"
                   :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm"
-                  class="tone-gate-play-btn" />
+                  class="tone-gate-play-btn example-action-btn" />
               </div>
             </div>
 
@@ -403,6 +406,18 @@ watchEffect(() => {
   gap: 0.35rem;
 }
 
+.example-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.example-action-btn {
+  min-height: 2rem;
+}
+
 .action-chip:hover {
   border-color: #9ca3af;
   background: #f9fafb;
@@ -490,6 +505,16 @@ watchEffect(() => {
 
   :deep(.main-actions-row .tone-gate-play-btn span:last-child) {
     display: none;
+  }
+
+  .example-actions-row {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .example-action-btn {
+    min-height: 1.9rem;
+    padding: 0.25rem 0.45rem;
   }
 
   .mobile-action-label {
