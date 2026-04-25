@@ -227,12 +227,14 @@ watchEffect(() => {
 
         <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write main-action-btn"
           aria-label="Practice writing this word">
-          ✏️ Write
+          <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+          <span class="mobile-action-label">Write</span>
         </NuxtLink>
 
         <NuxtLink :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
           aria-label="Open tone checker for this word">
-          Tone Garden
+          <span aria-hidden="true" class="mobile-action-icon">🌿</span>
+          <span class="mobile-action-label">Tone Garden</span>
         </NuxtLink>
       </div>
 
@@ -398,6 +400,7 @@ watchEffect(() => {
 
 .main-action-btn {
   min-height: 2.5rem;
+  gap: 0.35rem;
 }
 
 .action-chip:hover {
@@ -487,6 +490,15 @@ watchEffect(() => {
 
   :deep(.main-actions-row .tone-gate-play-btn span:last-child) {
     display: none;
+  }
+
+  .mobile-action-label {
+    display: none;
+  }
+
+  .mobile-action-icon {
+    font-size: 0.95rem;
+    line-height: 1;
   }
 }
 </style>
