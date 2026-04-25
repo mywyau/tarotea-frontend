@@ -190,8 +190,12 @@ function evaluateContourQuality(contours: PitchContour[], expectedTokenCount: nu
   const avgStepDelta = deltas.length
     ? deltas.reduce((sum, value) => sum + value, 0) / deltas.length
     : 0
-  const deltaLimit = expectedTokenCount > 1 ? 2.2 : 1.55
-  const shouldWarn = avgStepDelta > deltaLimit
+  // Single-syllable words (e.g. 企 / kei5) naturally have steeper local movement.
+  // Use a softer jitter threshold to avoid over-flagging clean recordings as "noisy".
+  const deltaLimit = expectedTokenCount > 1 ? 2.2 : 2.55
+  const shouldWarn =
+    avgStepDelta > deltaLimit &&
+    (expectedTokenCount > 1 || merged.length >= 10)
 
   return {
     canScore: true,
