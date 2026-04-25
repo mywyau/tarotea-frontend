@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { xpNeededForOneTaroKey } from '~/config/unlock/unlock-config'
+import { login, useAuth } from '~/composables/useAuth'
 
 definePageMeta({
   ssr: true,
-  middleware: ['logged-in'],
 })
 
 const route = useRoute()
@@ -15,6 +15,7 @@ const wordId = route.params.wordId as string
 const loading = ref(false)
 const errorMessage = ref('')
 const hasLoaded = ref(false)
+const isGuestMode = ref(false)
 
 const unlockSummary = ref({
   totalXp: 0,
@@ -65,8 +66,17 @@ const wordPagePath = `/topic/word/${slug}/${wordId}`
 
 async function loadData() {
   try {
-    const { getAccessToken } = await useAuth()
-    const token = await getAccessToken()
+    const auth = await useAuth()
+    if (!auth.isAuthenticated) {
+      isGuestMode.value = true
+      return
+    }
+
+    const token = await auth.getAccessToken()
+    if (!token) {
+      isGuestMode.value = true
+      return
+    }
 
     const unlocks = await $fetch<{
       totalXp: number
@@ -119,6 +129,14 @@ async function unlockWord() {
   }
 }
 
+async function startLogin() {
+  try {
+    await login()
+  } catch {
+    errorMessage.value = 'Unable to start login. Please try again.'
+  }
+}
+
 const xpTowardsNextKey = computed(() => {
   return unlockSummary.value.totalXp % xpNeededForOneTaroKey
 })
@@ -142,7 +160,27 @@ onMounted(loadData)
       </p>
     </header>
 
-    <template v-if="hasLoaded && word">
+    <template v-if="hasLoaded && isGuestMode">
+      <section class="rounded-lg border p-6 space-y-4"
+        style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);">
+        <h2 class="text-lg font-semibold text-gray-900">Log in to unlock this tile</h2>
+        <p class="text-sm text-gray-700">
+          Guest mode lets you preview content, but your progress is not saved.
+        </p>
+        <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
+          <li>Gain XP from quizzes and practice.</li>
+          <li>Earn TaroKeys from your XP progress.</li>
+          <li>Use TaroKeys to unlock this tile permanently.</li>
+        </ul>
+        <button type="button"
+          class="w-full rounded-lg py-3 font-semibold border border-black/10 text-gray-900 bg-white/70 backdrop-blur hover:bg-white transition"
+          @click="startLogin">
+          Log in to continue
+        </button>
+      </section>
+    </template>
+
+    <template v-else-if="hasLoaded && word">
       <section class="rounded-lg text-center">
         <p class="word-label">Tile</p>
         <h2 class="word-text mt-2">{{ word.word }}</h2>
