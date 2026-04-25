@@ -469,6 +469,10 @@ watchEffect(() => {
   border-color: transparent !important;
 }
 
+:deep(.example-actions-row .tone-gate-play-btn) {
+  min-height: 2rem;
+}
+
 .edge-arrow {
   font-size: 4rem;
   line-height: 1;
