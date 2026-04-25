@@ -111,6 +111,9 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
 
   const slope = (end - start) / Math.max(start, 1)
   const range = (max - min) / Math.max(mean, 1)
+  const minIndex = values.indexOf(min)
+  const tailRise = (end - min) / Math.max(mean, 1)
+  const earlyDip = minIndex > 0 ? (start - min) / Math.max(mean, 1) : 0
 
   const boundedSlope = clamp(slope, -0.4, 0.4)
   const boundedRange = clamp(range, 0, 0.6)
@@ -121,7 +124,18 @@ function scoreContourForTone(tone: string, contour: AcousticSyllableContour | un
   if (tone === "2") return clamp(62 + boundedSlope * 175 - Math.abs(boundedRange - 0.14) * 45, 0, 100)
   if (tone === "3") return clamp(95 - levelSlopePenalty * 120 - levelRangePenalty * 85, 0, 100)
   if (tone === "4") return clamp(56 + (-boundedSlope) * 180 - Math.abs(boundedRange - 0.18) * 55, 0, 100)
-  if (tone === "5") return clamp(60 + boundedSlope * 165 - Math.abs(boundedRange - 0.1) * 55, 0, 100)
+  if (tone === "5") {
+    // Tone 5 (low rising) often has a dip before the rise.
+    // Reward end-from-min rise so slight start-to-end falls don't collapse the score.
+    const riseReward = clamp(tailRise, 0, 0.36) * 140
+    const dipAllowance = clamp(earlyDip, 0, 0.2) * 28
+    const directionalPenalty = boundedSlope < -0.08 && tailRise < 0.06 ? 16 : 0
+    return clamp(
+      56 + boundedSlope * 95 + riseReward + dipAllowance - Math.abs(boundedRange - 0.12) * 45 - directionalPenalty,
+      0,
+      100,
+    )
+  }
   if (tone === "6") return clamp(93 - levelSlopePenalty * 125 - levelRangePenalty * 88, 0, 100)
 
   return null
