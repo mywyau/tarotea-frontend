@@ -220,19 +220,21 @@ watchEffect(() => {
         </NuxtLink>
       </div>
 
-      <div class="flex items-center justify-center gap-3 pt-1">
+      <div class="main-actions-row">
 
         <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
-          size="md" class="tone-gate-play-btn" />
+          size="md" class="tone-gate-play-btn main-action-btn" />
 
-        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write"
+        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write main-action-btn"
           aria-label="Practice writing this word">
-          ✏️ Write
+          <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+          <span class="mobile-action-label">Write</span>
         </NuxtLink>
 
-        <NuxtLink :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge"
+        <NuxtLink :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
           aria-label="Open tone checker for this word">
-          Tone Garden
+          <span aria-hidden="true" class="mobile-action-icon">🌿</span>
+          <span class="mobile-action-label">Tone Garden</span>
         </NuxtLink>
       </div>
 
@@ -287,21 +289,24 @@ watchEffect(() => {
         <li v-for="(example, index) in word.examples" :key="example.sentence" class="example-card rounded-lg p-4">
           <div class="space-y-3">
             <div class="flex justify-end">
-              <div class="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+              <div class="example-actions-row">
                 <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
-                  class="action-chip action-chip-sm action-chip-write" aria-label="Practice writing this sentence">
-                  ✏️ Write
+                  class="action-chip action-chip-sm action-chip-write example-action-btn"
+                  aria-label="Practice writing this sentence">
+                  <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+                  <span class="mobile-action-label">Write</span>
                 </NuxtLink>
 
                 <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
-                  class="action-chip action-chip-sm action-chip-speak"
+                  class="action-chip action-chip-sm action-chip-speak example-action-btn"
                   aria-label="Practice pronunciation for this sentence">
-                  ▶ Speak
+                  <span aria-hidden="true" class="mobile-action-icon">🎤</span>
+                  <span class="mobile-action-label">Speak</span>
                 </NuxtLink>
 
                 <AudioButton v-if="word.audio?.examples?.[index]"
                   :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm"
-                  class="tone-gate-play-btn" />
+                  class="tone-gate-play-btn example-action-btn" />
               </div>
             </div>
 
@@ -386,6 +391,33 @@ watchEffect(() => {
   transition: all 0.2s ease;
 }
 
+.main-actions-row {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  align-items: stretch;
+  gap: 0.5rem;
+  padding-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.main-action-btn {
+  min-height: 2.5rem;
+  gap: 0.35rem;
+}
+
+.example-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.example-action-btn {
+  min-height: 2rem;
+}
+
 .action-chip:hover {
   border-color: #9ca3af;
   background: #f9fafb;
@@ -393,21 +425,21 @@ watchEffect(() => {
 
 .action-chip-write {
   border-color: transparent;
-  background: #A8CAE0;
+  background: #F6E1E1;
 }
 
 .action-chip-write:hover {
-  background: #b7d4e7;
+  background: #f2d8d8;
   border-color: transparent;
 }
 
 .action-chip-speak {
   border-color: transparent;
-  background: #F4C2D7;
+  background: #A8CAE0;
 }
 
 .action-chip-speak:hover {
-  background: #f6cde0;
+  background: #b7d4e7;
   border-color: transparent;
 }
 
@@ -427,6 +459,7 @@ watchEffect(() => {
 }
 
 :deep(.tone-gate-play-btn) {
+  min-height: 2.5rem;
   border-color: transparent !important;
   background: #D6A3D1 !important;
 }
@@ -434,6 +467,10 @@ watchEffect(() => {
 :deep(.tone-gate-play-btn:hover) {
   background: #deafda !important;
   border-color: transparent !important;
+}
+
+:deep(.example-actions-row .tone-gate-play-btn) {
+  min-height: 2rem;
 }
 
 .edge-arrow {
@@ -446,5 +483,51 @@ watchEffect(() => {
 .edge-arrow:hover {
   color: #49b0ff;
   transform: scale(1.04);
+}
+
+@media (max-width: 640px) {
+  .main-actions-row {
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .main-action-btn {
+    min-height: 2rem;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  :deep(.main-actions-row .tone-gate-play-btn) {
+    min-height: 2rem;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    gap: 0.2rem !important;
+  }
+
+  :deep(.main-actions-row .tone-gate-play-btn span:last-child) {
+    display: none;
+  }
+
+  .example-actions-row {
+    flex-wrap: nowrap;
+    gap: 0.35rem;
+  }
+
+  .example-action-btn {
+    min-height: 1.9rem;
+    padding: 0.25rem 0.45rem;
+  }
+
+  .mobile-action-label {
+    display: none;
+  }
+
+  .mobile-action-icon {
+    font-size: 0.95rem;
+    line-height: 1;
+  }
 }
 </style>
