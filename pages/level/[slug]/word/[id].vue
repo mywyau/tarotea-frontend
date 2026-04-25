@@ -465,14 +465,28 @@ watchEffect(() => {
 
 @media (max-width: 640px) {
   .main-actions-row {
-    align-items: stretch;
-    justify-content: stretch;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.35rem;
   }
 
-  .main-action-btn,
-  :deep(.tone-gate-play-btn) {
-    width: 100%;
-    max-width: 16rem;
+  .main-action-btn {
+    min-height: 2rem;
+    padding: 0.3rem 0.55rem;
+    font-size: 0.75rem;
+    white-space: nowrap;
+  }
+
+  :deep(.main-actions-row .tone-gate-play-btn) {
+    min-height: 2rem;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.75rem !important;
+    gap: 0.2rem !important;
+  }
+
+  :deep(.main-actions-row .tone-gate-play-btn span:last-child) {
+    display: none;
   }
 }
 </style>
