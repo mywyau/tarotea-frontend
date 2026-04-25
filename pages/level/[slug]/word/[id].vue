@@ -310,16 +310,20 @@ watchEffect(() => {
               </div>
             </div>
 
-            <div class="text-lg leading-relaxed text-gray-900 break-words">
-              {{ example.sentence }}
-            </div>
+            <div class="example-scroll-block">
+              <div class="example-scroll-content">
+                <div class="text-lg leading-relaxed text-gray-900 whitespace-nowrap">
+                  {{ example.sentence }}
+                </div>
 
-            <div class="text-sm text-gray-500 break-words">
-              {{ example.jyutping }}
-            </div>
+                <div class="mt-2 text-sm text-gray-500 whitespace-nowrap">
+                  {{ example.jyutping }}
+                </div>
 
-            <div class="text-sm text-gray-700 break-words">
-              {{ example.meaning }}
+                <div class="mt-2 text-sm text-gray-700 whitespace-nowrap">
+                  {{ example.meaning }}
+                </div>
+              </div>
             </div>
           </div>
         </li>
@@ -368,6 +372,17 @@ watchEffect(() => {
 .example-card {
   background: rgba(168, 202, 224, 0.20);
   border-left: 4px solid rgba(168, 202, 224, 0.70);
+}
+
+.example-scroll-block {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.15rem;
+}
+
+.example-scroll-content {
+  width: max-content;
+  min-width: 100%;
 }
 
 /* Progress bar */
