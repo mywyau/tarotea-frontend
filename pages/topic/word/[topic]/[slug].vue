@@ -285,15 +285,15 @@ watchEffect(() => {
                         </div>
 
                         <!-- sentence on its own line -->
-                        <div class="text-lg leading-relaxed text-gray-900 break-words">
+                        <div class="example-scroll-line text-lg leading-relaxed text-gray-900">
                             {{ example.sentence }}
                         </div>
 
-                        <div class="text-sm text-gray-500 break-words">
+                        <div class="example-scroll-line text-sm text-gray-500">
                             {{ example.jyutping }}
                         </div>
 
-                        <div class="text-sm text-gray-700 break-words">
+                        <div class="example-scroll-line text-sm text-gray-700">
                             {{ example.meaning }}
                         </div>
                     </div>
@@ -338,6 +338,13 @@ watchEffect(() => {
 .example-card {
     background: rgba(168, 202, 224, 0.20);
     border-left: 4px solid rgba(168, 202, 224, 0.70);
+}
+
+.example-scroll-line {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.15rem;
 }
 
 /* Progress bar */
