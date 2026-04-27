@@ -445,6 +445,7 @@ watchEffect(() => {
 
 :deep(.tone-gate-play-btn) {
     min-height: 2.5rem;
+    padding: 0.45rem 0.75rem !important;
     border-color: transparent !important;
     background: #D6A3D1 !important;
 }
