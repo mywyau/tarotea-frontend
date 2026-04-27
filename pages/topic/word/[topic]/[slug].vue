@@ -445,7 +445,6 @@ watchEffect(() => {
 
 :deep(.tone-gate-play-btn) {
     min-height: 2.5rem;
-    padding: 0.45rem 0.75rem !important;
     border-color: transparent !important;
     background: #D6A3D1 !important;
 }
@@ -453,6 +452,14 @@ watchEffect(() => {
 :deep(.tone-gate-play-btn:hover) {
     background: #deafda !important;
     border-color: transparent !important;
+}
+
+:deep(.main-actions-row .tone-gate-play-btn) {
+    padding: 0.45rem 0.75rem !important;
+}
+
+:deep(.example-actions-row .tone-gate-play-btn) {
+    padding: 0.3rem 0.55rem !important;
 }
 
 .edge-arrow {
