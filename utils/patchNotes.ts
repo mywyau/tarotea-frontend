@@ -6,12 +6,22 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
-    date: "March 2026",
+    date: "May 2026",
     title: "Upcoming",
     items: [
       "Expanding content",
       "Content review to fix dodgy/missing translations, jyutping, chinese characters and audio",
       "Fix and improve UX across site",
+    ],
+  },
+  {
+    date: "28 April 2026",
+    title: "General sweep up",
+    items: [
+      "General styling changes",
+      "Updated homepage",
+      "Change navigation to new side panel and with hide function",
+      "Add quiz cycling to help declutter quiz pages",
     ],
   },
   {
@@ -21,7 +31,7 @@ export const patchNotes: PatchNote[] = [
       "Improve site stability and add unlock xp mechanism",
       "Swap to all content free via xp system, you can know unlock words using TaroKeys",
       "Improve styling and consistency in branding in some areas of the app",
-      "Add word counts to topic and level pages and next and previous arrows to indiviual word pages"
+      "Add word counts to topic and level pages and next and previous arrows to indiviual word pages",
     ],
   },
   {
