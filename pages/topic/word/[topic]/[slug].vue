@@ -193,8 +193,6 @@ watchEffect(() => {
             </div>
 
             <div class="main-actions-row">
-                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`"
-                    :playback-rate="playbackRate" size="md" class="tone-gate-play-btn main-action-btn" />
 
                 <NuxtLink :to="`/writing/${topic}/vocab/${word.id}`"
                     class="action-chip action-chip-write main-action-btn" aria-label="Practice writing this word">
@@ -202,11 +200,15 @@ watchEffect(() => {
                     <span class="mobile-action-label">Write</span>
                 </NuxtLink>
 
-                <NuxtLink :to="`/tone-garden/${word.id}`"
-                    class="action-chip action-chip-tone-forge main-action-btn" aria-label="Open tone checker for this word">
-                    <span aria-hidden="true" class="mobile-action-icon">🌿</span>
+                <NuxtLink :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
+                    aria-label="Open tone checker for this word">
+                    <span aria-hidden="true" class="mobile-action-icon">🎤</span>
                     <span class="mobile-action-label">Tone Garden</span>
                 </NuxtLink>
+
+                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`"
+                    :playback-rate="playbackRate" size="md" class="tone-gate-play-btn main-action-btn" />
+
             </div>
 
         </section>
@@ -280,7 +282,8 @@ watchEffect(() => {
 
                                 <AudioButton v-if="word.audio?.examples?.[index]"
                                     :src="`${cdnBase}/audio/${word.audio.examples[index]}`"
-                                    :playback-rate="playbackRate" size="sm" class="tone-gate-play-btn example-action-btn" />
+                                    :playback-rate="playbackRate" size="sm"
+                                    class="tone-gate-play-btn example-action-btn" />
                             </div>
                         </div>
 
@@ -420,7 +423,7 @@ watchEffect(() => {
 
 .action-chip-speak {
     border-color: transparent;
-    background: #A8CAE0;
+    background: #CDE8C9;
 }
 
 .action-chip-speak:hover {
@@ -444,9 +447,9 @@ watchEffect(() => {
 }
 
 :deep(.tone-gate-play-btn) {
-    min-height: 2.5rem;
+    min-height: 2.0rem;
     border-color: transparent !important;
-    background: #D6A3D1 !important;
+    background: #a3c0d6 !important;
 }
 
 :deep(.tone-gate-play-btn:hover) {
