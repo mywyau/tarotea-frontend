@@ -253,8 +253,8 @@ const canEnterTopic = () => {
 
 .more-tips-list {
   list-style: none;
-  padding: 0;
   margin: 0;
+  padding: 0;
   display: grid;
   gap: 0.65rem;
 }
