@@ -201,14 +201,16 @@ const gatedCategories = computed(() => {
   })
 })
 
+const isMobileStatsExpanded = ref(true)
+
 onMounted(async () => {
+  isMobileStatsExpanded.value = !window.matchMedia('(max-width: 767px)').matches
+
   await Promise.all([
     loadProgress(),
     loadUnlocks(),
   ])
 })
-
-const isMobileStatsExpanded = ref(false)
 </script>
 
 <template>
@@ -223,11 +225,11 @@ const isMobileStatsExpanded = ref(false)
       <p class="topic-subheading mt-2">{{ topic.description }}</p>
     </header>
 
-    <a href="#" class="mobile-stats-toggle md:hidden" @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded">
-      {{ isMobileStatsExpanded ? 'Hide more info' : 'Show more info' }}
+    <a href="#" class="mobile-stats-toggle" @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded">
+      {{ isMobileStatsExpanded ? 'Hide stats' : 'Show stats' }}
     </a>
 
-    <section class="stats-grid" :class="{ 'stats-grid-collapsed-mobile': !isMobileStatsExpanded }">
+    <section class="stats-grid" :class="{ 'stats-grid-collapsed': !isMobileStatsExpanded }">
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
         <div class="stat-card page-card rounded-xl stat-0">
           <p class="stat-label">Total words</p>
@@ -333,9 +335,7 @@ const isMobileStatsExpanded = ref(false)
 }
 
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
+  display: block;
 }
 
 .mobile-stats-toggle {
@@ -384,13 +384,7 @@ const isMobileStatsExpanded = ref(false)
   background: rgba(111, 92, 202, 0.35);
 }
 
-@media (max-width: 640px) {
-  .stats-grid-collapsed-mobile {
-    display: none;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
+.stats-grid-collapsed {
+  display: none;
 }
 </style>
