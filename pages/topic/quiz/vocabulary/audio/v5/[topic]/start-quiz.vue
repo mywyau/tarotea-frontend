@@ -92,12 +92,12 @@ const canEnterTopic = () => {
       </h1>
 
       <p class="text-black level-subheading">
-        Practice and test your listening skills with the words from this topic.
+        Audio Quiz
       </p>
 
       <div class="pt-6">
         <NuxtLink :to="`/topic/quiz/vocabulary/audio/v5/${topicSlug}`" class="start-btn">
-          Start topic audio quiz
+          Start
         </NuxtLink>
       </div>
 

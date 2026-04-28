@@ -86,12 +86,12 @@ const canEnterLevel = () => true
       </h1>
 
       <p class="text-black level-subheading">
-        Sentence audio quiz rules and scoring before you begin.
+        Sentence Audio Quiz
       </p>
 
       <div class="pt-6">
         <NuxtLink :to="`/quiz/${slug}/sentences/audio/v3`" class="start-btn">
-          Start sentence audio quiz
+          Start
         </NuxtLink>
       </div>
 
@@ -168,20 +168,86 @@ const canEnterLevel = () => true
   color: #111827;
 }
 
-.tips-panel { margin-top: 1rem; text-align: left; }
-.tips-header { margin-bottom: 1rem; }
-.tips-title { font-size: 0.95rem; font-weight: 700; color: #111827; }
-.tips-grid { display: grid; gap: 0.75rem; }
-.tip-card { border-radius: 16px; background: #F6E1E1; padding: 0.9rem 1rem; }
-.tip-card-title { font-size: 0.92rem; font-weight: 700; color: #111827; }
-.tip-card-body { margin-top: 0.3rem; font-size: 0.85rem; line-height: 1.5; color: rgba(17, 24, 39, 0.82); }
-.tips-toggle {
-  margin-top: 1rem; width: 100%; border: none; background: transparent; color: #111827;
-  font-size: 0.9rem; font-weight: 600; text-align: center; padding: 0.75rem; border-radius: 14px;
+.tips-panel {
+  margin-top: 1rem;
+  text-align: left;
 }
-.tips-toggle:hover { background: rgba(249, 166, 166, 0.18); }
-.more-tips { margin-top: 0.5rem; padding-top: 0.75rem; border-top: 1px solid rgba(17, 24, 39, 0.08); }
-.more-tips-list { margin: 0; padding-left: 1.1rem; display: grid; gap: 0.45rem; color: rgba(17, 24, 39, 0.86); font-size: 0.85rem; line-height: 1.45; }
-.tip-expand-enter-active,.tip-expand-leave-active { transition: all 0.2s ease; }
-.tip-expand-enter-from,.tip-expand-leave-to { opacity: 0; transform: translateY(-4px); }
+
+.tips-header {
+  margin-bottom: 1rem;
+}
+
+.tips-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.tips-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.tip-card {
+  border-radius: 16px;
+  background: #F6E1E1;
+  padding: 0.9rem 1rem;
+}
+
+.tip-card-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.tip-card-body {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: rgba(17, 24, 39, 0.82);
+}
+
+.tips-toggle {
+  margin-top: 1rem;
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: #111827;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-align: center;
+  padding: 0.75rem;
+  border-radius: 14px;
+}
+
+.tips-toggle:hover {
+  background: rgba(249, 166, 166, 0.18);
+}
+
+.more-tips {
+  margin-top: 0.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(17, 24, 39, 0.08);
+}
+
+.more-tips-list {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.45rem;
+  color: rgba(17, 24, 39, 0.86);
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.tip-expand-enter-active,
+.tip-expand-leave-active {
+  transition: all 0.2s ease;
+}
+
+.tip-expand-enter-from,
+.tip-expand-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
 </style>

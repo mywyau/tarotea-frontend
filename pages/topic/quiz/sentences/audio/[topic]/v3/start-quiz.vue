@@ -79,7 +79,7 @@ const canEnterTopic = () => true
       </h1>
 
       <p class="text-black level-subheading">
-        Topic sentence-audio quiz
+        Sentence Audio Quiz
       </p>
 
       <div class="pt-6">
