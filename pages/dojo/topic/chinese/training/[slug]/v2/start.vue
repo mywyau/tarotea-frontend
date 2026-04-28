@@ -8,6 +8,7 @@ import { sortedTopics } from '~/utils/topics/topics'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
+const { isLoggedIn } = useMeStateV2()
 
 const topicTitle = computed(() =>
   sortedTopics.find(topic => topic.id === slug.value)?.title ?? slug.value
@@ -17,7 +18,8 @@ const topicTitle = computed(() =>
 <template>
   <DojoStartPage :heading="`${topicTitle} · Chinese dojo`"
     description="Type Chinese words from this topic based on meanings to strengthen practical recall."
-    :start-to="`/dojo/topic/chinese/training/${slug}/v2`" start-label="Start chinese exercise" :xp-rules="[
+     :guest-note="isLoggedIn ? 'Signed in: XP from this run will be saved.' : 'Guest mode: XP from this run is preview only and will not be saved.'"
+    :start-to="`/dojo/topic/chinese/training/${slug}/v2`" :start-label="isLoggedIn ? 'Start chinese exercise' : 'Start chinese guest exercise'" :xp-rules="[
       { action: 'Correct answer (no hint)', xp: `+${chineseXp} XP` },
       { action: 'Correct answer (hint used)', xp: `+${chineseXpHintUsed} XP` },
       { action: 'Wrong answer', xp: '0 XP (retry until correct)' }

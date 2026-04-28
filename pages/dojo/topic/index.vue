@@ -2,7 +2,6 @@
 
 definePageMeta({
   ssr: false,
-  middleware: ['logged-in'],
 })
 
 import type { Topic } from '~/types/topic'
@@ -14,13 +13,7 @@ const {
 
 const isComingSoon = (topic: Topic) => topic.comingSoon === true
 
-const canEnterTopic = (topic: Topic) => {
-
-  if (isComingSoon(topic)) return false
-
-  // 🔒 Exercises require login
-  if (isLoggedIn.value) { return true } else { return false }
-}
+const canEnterTopic = (topic: Topic) => !isComingSoon(topic)
 
 const ITEMS_PER_PAGE = 12
 const currentPage = ref(1)
@@ -95,6 +88,11 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
       </p>
     </header>
 
+    <p class="text-xs text-center text-gray-500 -mt-6">
+      <span v-if="isLoggedIn">Signed in: XP is saved to your account.</span>
+      <span v-else>Guest mode: you can train every topic, but XP won't be saved.</span>
+    </p>
+
     <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
       <div class="pagination-row flex items-center justify-center gap-1.5 sm:gap-3 max-w-full overflow-x-auto">
         <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
@@ -158,7 +156,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
         </div>
 
         <p v-else-if="!quizTopic.comingSoon" class="text-xs text-center text-gray-500 pt-4">
-          Upgrade to unlock
+          This topic is currently unavailable
         </p>
       </li>
     </ul>

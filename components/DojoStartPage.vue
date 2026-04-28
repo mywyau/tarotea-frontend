@@ -12,6 +12,7 @@ const props = defineProps<{
   xpRules: XpRule[]
   tips: string[]
   keyboardSetupTips?: string[]
+  guestNote?: string
 }>()
 
 const showAdvancedTips = ref(false)
@@ -25,6 +26,10 @@ const showAdvancedTips = ref(false)
       <h1 class="text-3xl font-semibold text-gray-900 level-heading">{{ props.heading }}</h1>
 
       <p class="text-black level-subheading">{{ props.description }}</p>
+
+      <p v-if="props.guestNote" class="guest-note">
+        {{ props.guestNote }}
+      </p>
 
       <div class="pt-6">
         <NuxtLink :to="props.startTo" class="start-btn">
@@ -148,6 +153,12 @@ const showAdvancedTips = ref(false)
   font-size: 0.85rem;
   line-height: 1.5;
   color: rgba(17, 24, 39, 0.82);
+}
+
+.guest-note {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: rgba(17, 24, 39, 0.8);
 }
 
 .tips-toggle {
