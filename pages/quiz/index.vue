@@ -70,6 +70,10 @@ function getSelectedLevelMode(levelId: string) {
   return levelQuizModes[modeIdx]
 }
 
+function getSelectedLevelModeIndex(levelId: string) {
+  return selectedLevelQuizMode.value[levelId] ?? 0
+}
+
 function cycleLevelMode(levelId: string, direction: 1 | -1) {
   const current = selectedLevelQuizMode.value[levelId] ?? 0
   const total = levelQuizModes.length
@@ -120,19 +124,26 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
         </div>
 
         <!-- Buttons -->
-        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-[42px_1fr_42px] gap-3 pt-4">
-          <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, -1)" aria-label="Previous quiz mode">
-            ‹
-          </button>
+        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="pt-4 space-y-3">
+          <div class="grid grid-cols-[42px_1fr_42px] gap-3">
+            <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, -1)" aria-label="Previous quiz mode">
+              ‹
+            </button>
 
-          <NuxtLink :to="getSelectedLevelMode(quizLevel.id).to(quizLevel.id)" class="level-btn"
-            :class="getSelectedLevelMode(quizLevel.id).buttonClass">
-            {{ getSelectedLevelMode(quizLevel.id).label }}
-          </NuxtLink>
+            <NuxtLink :to="getSelectedLevelMode(quizLevel.id).to(quizLevel.id)" class="level-btn"
+              :class="getSelectedLevelMode(quizLevel.id).buttonClass">
+              {{ getSelectedLevelMode(quizLevel.id).label }}
+            </NuxtLink>
 
-          <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, 1)" aria-label="Next quiz mode">
-            ›
-          </button>
+            <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, 1)" aria-label="Next quiz mode">
+              ›
+            </button>
+          </div>
+
+          <div class="mode-dots" :aria-label="`Mode ${getSelectedLevelModeIndex(quizLevel.id) + 1} of ${levelQuizModes.length}`">
+            <span v-for="(mode, modeIndex) in levelQuizModes" :key="`${quizLevel.id}-${mode.id}`" class="mode-dot"
+              :class="{ 'is-active': modeIndex === getSelectedLevelModeIndex(quizLevel.id) }" />
+          </div>
         </div>
 
         <!-- Locked -->
@@ -265,6 +276,24 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 
 .level-mode-toggle:hover {
   background: rgba(31, 41, 55, 0.15);
+}
+
+.mode-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.mode-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: rgba(31, 41, 55, 0.2);
+  transition: all 0.15s ease;
+}
+
+.mode-dot.is-active {
+  background: rgba(31, 41, 55, 0.7);
 }
 
 </style>

@@ -117,6 +117,10 @@ function getSelectedTopicMode(topicId: string) {
     return topicQuizModes[modeIdx]
 }
 
+function getSelectedTopicModeIndex(topicId: string) {
+    return selectedTopicQuizMode.value[topicId] ?? 0
+}
+
 function cycleTopicMode(topicId: string, direction: 1 | -1) {
     const current = selectedTopicQuizMode.value[topicId] ?? 0
     const total = topicQuizModes.length
@@ -177,22 +181,29 @@ onMounted(async () => {
                 </div>
 
                 <!-- Buttons -->
-                <div class="grid grid-cols-[42px_1fr_42px] gap-3 pt-4">
-                    <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, -1)" aria-label="Previous quiz mode"
-                        :disabled="!canEnterTopic(topic) || topic.comingSoon">
-                        ‹
-                    </button>
+                <div class="pt-4 space-y-3">
+                    <div class="grid grid-cols-[42px_1fr_42px] gap-3">
+                        <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, -1)"
+                            aria-label="Previous quiz mode" :disabled="!canEnterTopic(topic) || topic.comingSoon">
+                            ‹
+                        </button>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
-                        class="topic-btn"
-                        :class="[getSelectedTopicMode(topic.id).buttonClass, { 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }]">
-                        {{ getSelectedTopicMode(topic.id).label }}
-                    </NuxtLink>
+                        <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
+                            class="topic-btn"
+                            :class="[getSelectedTopicMode(topic.id).buttonClass, { 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }]">
+                            {{ getSelectedTopicMode(topic.id).label }}
+                        </NuxtLink>
 
-                    <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, 1)" aria-label="Next quiz mode"
-                        :disabled="!canEnterTopic(topic) || topic.comingSoon">
-                        ›
-                    </button>
+                        <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, 1)" aria-label="Next quiz mode"
+                            :disabled="!canEnterTopic(topic) || topic.comingSoon">
+                            ›
+                        </button>
+                    </div>
+
+                    <div class="mode-dots" :aria-label="`Mode ${getSelectedTopicModeIndex(topic.id) + 1} of ${topicQuizModes.length}`">
+                        <span v-for="(mode, modeIndex) in topicQuizModes" :key="`${topic.id}-${mode.id}`" class="mode-dot"
+                            :class="{ 'is-active': modeIndex === getSelectedTopicModeIndex(topic.id) }" />
+                    </div>
                 </div>
 
                 <p v-if="!canEnterTopic(topic)" class="text-xs text-center text-gray-500 pt-3">
@@ -361,6 +372,24 @@ onMounted(async () => {
 .topic-mode-toggle:disabled {
     opacity: 0.4;
     cursor: not-allowed;
+}
+
+.mode-dots {
+    display: flex;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.mode-dot {
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: 9999px;
+    background: rgba(31, 41, 55, 0.2);
+    transition: all 0.15s ease;
+}
+
+.mode-dot.is-active {
+    background: rgba(31, 41, 55, 0.7);
 }
 
 .pagination-wrapper {
