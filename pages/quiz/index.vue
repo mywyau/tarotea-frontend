@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { levelSelectMetaData } from '@/utils/levels/helpers'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 
 
 const {
@@ -28,6 +28,52 @@ onMounted(async () => {
 const canEnterLevel = (level: any) => {
 
   return true
+}
+
+const levelQuizModes = [
+  {
+    id: 'vocab',
+    label: 'Vocabulary',
+    buttonClass: 'level-btn-blue',
+    to: (levelId: string) => `/quiz/${levelId}/word/start-quiz`,
+  },
+  {
+    id: 'audio',
+    label: 'Audio',
+    buttonClass: 'level-btn-purple',
+    to: (levelId: string) => `/quiz/${levelId}/audio/start-quiz`,
+  },
+  {
+    id: 'sentences',
+    label: 'Sentences',
+    buttonClass: 'level-btn-yellow',
+    to: (levelId: string) => `/quiz/${levelId}/sentences/no-audio/v3/start-quiz`,
+  },
+  {
+    id: 'sentence-audio',
+    label: 'Sentence Audio Only',
+    buttonClass: 'level-btn-blush',
+    to: (levelId: string) => `/quiz/${levelId}/sentences/audio/v3/start-quiz`,
+  },
+  {
+    id: 'echo-gecko',
+    label: 'Echo Gecko',
+    buttonClass: 'level-btn-green',
+    to: (levelId: string) => `/quiz/${levelId}/echo-gecko`,
+  },
+] as const
+
+const selectedLevelQuizMode = ref<Record<string, number>>({})
+
+function getSelectedLevelMode(levelId: string) {
+  const modeIdx = selectedLevelQuizMode.value[levelId] ?? 0
+  return levelQuizModes[modeIdx]
+}
+
+function cycleLevelMode(levelId: string, direction: 1 | -1) {
+  const current = selectedLevelQuizMode.value[levelId] ?? 0
+  const total = levelQuizModes.length
+  selectedLevelQuizMode.value[levelId] = (current + direction + total) % total
 }
 
 </script>
@@ -74,26 +120,19 @@ const canEnterLevel = (level: any) => {
         </div>
 
         <!-- Buttons -->
-        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`" class="level-btn level-btn-blue">
-            Vocabulary
+        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-[42px_1fr_42px] gap-3 pt-4">
+          <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, -1)" aria-label="Previous quiz mode">
+            ‹
+          </button>
+
+          <NuxtLink :to="getSelectedLevelMode(quizLevel.id).to(quizLevel.id)" class="level-btn"
+            :class="getSelectedLevelMode(quizLevel.id).buttonClass">
+            {{ getSelectedLevelMode(quizLevel.id).label }}
           </NuxtLink>
 
-          <NuxtLink :to="`/quiz/${quizLevel.id}/audio/start-quiz`" class="level-btn level-btn-purple">
-            Audio
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/no-audio/v3/start-quiz`" class="level-btn level-btn-yellow">
-            Sentences
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/audio/v3/start-quiz`" class="level-btn level-btn-blush">
-            Sentence Audio Only
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/echo-gecko`" class="level-btn level-btn-green col-span-2">
-            Echo Gecko
-          </NuxtLink>
+          <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, 1)" aria-label="Next quiz mode">
+            ›
+          </button>
         </div>
 
         <!-- Locked -->
@@ -212,6 +251,20 @@ const canEnterLevel = (level: any) => {
 
 .level-btn-green:hover {
   background: rgba(192, 223, 188, 0.85);
+}
+
+.level-mode-toggle {
+  border-radius: 8px;
+  background: rgba(31, 41, 55, 0.08);
+  color: #1f2937;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.level-mode-toggle:hover {
+  background: rgba(31, 41, 55, 0.15);
 }
 
 </style>
