@@ -203,9 +203,11 @@ const lockedWordCount = computed(() => {
   }, 0)
 })
 
-const isMobileStatsExpanded = ref(false)
+const isMobileStatsExpanded = ref(true)
 
 onMounted(async () => {
+  isMobileStatsExpanded.value = !window.matchMedia('(max-width: 767px)').matches
+
   await Promise.all([
     loadProgress(),
     loadUnlocks(),
@@ -226,11 +228,11 @@ onMounted(async () => {
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
-    <a href="#" class="mobile-stats-toggle md:hidden" @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded">
-      {{ isMobileStatsExpanded ? 'Hide more info' : 'Show more info' }}
+    <a href="#" class="mobile-stats-toggle" @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded">
+      {{ isMobileStatsExpanded ? 'Hide stats' : 'Show stats' }}
     </a>
 
-    <section class="stats-grid" :class="{ 'stats-grid-collapsed-mobile': !isMobileStatsExpanded }">
+    <section class="stats-grid" :class="{ 'stats-grid-collapsed': !isMobileStatsExpanded }">
 
       <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 
@@ -421,9 +423,7 @@ onMounted(async () => {
   background: rgba(111, 92, 202, 0.35);
 }
 
-@media (max-width: 640px) {
-  .stats-grid-collapsed-mobile {
-    display: none;
-  }
+.stats-grid-collapsed {
+  display: none;
 }
 </style>
