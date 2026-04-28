@@ -54,7 +54,7 @@ const showAdvancedTips = ref(false)
         </div>
 
         <button class="tips-toggle" type="button" @click="showAdvancedTips = !showAdvancedTips">
-          {{ showAdvancedTips ? 'Hide extra tips' : 'See keyboard and prep tips' }}
+          {{ showAdvancedTips ? 'Hide extra tips' : 'See keyboard and tips' }}
         </button>
 
         <Transition name="tip-expand">
