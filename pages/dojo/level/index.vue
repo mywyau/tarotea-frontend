@@ -292,7 +292,6 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 }
 
 .mode-dot.is-active {
-  width: 1rem;
   background: rgba(31, 41, 55, 0.7);
 }
 </style>
