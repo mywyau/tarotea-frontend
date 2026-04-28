@@ -453,7 +453,7 @@ watchEffect(() => {
 }
 
 :deep(.tone-gate-play-btn:hover) {
-    background: #deafda !important;
+    background: #aecbe3 !important;
     border-color: transparent !important;
 }
 
