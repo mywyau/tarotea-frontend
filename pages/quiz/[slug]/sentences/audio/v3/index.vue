@@ -778,11 +778,11 @@ onBeforeUnmount(() => {
                 Play Again
               </NuxtLink>
 
-              <!-- <NuxtLink :to="`/level/${slug}`"
-                class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:rgba(244,205,39,0.35);">
-                Back to level
-              </NuxtLink> -->
+              <NuxtLink to="/please-sign-in"
+                class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+                style="background-color:rgba(244,205,39,0.35)">
+                Sign up to earn XP, track progress & unlock more words
+              </NuxtLink>
             </div>
           </div>
         </transition>
