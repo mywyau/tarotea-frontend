@@ -67,7 +67,7 @@ onMounted(() => {
         Learn and improve your Cantonese in just <span class="brand-text-gradient">15 minutes</span> a day
       </h1>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
+      <div class="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
         <div class="rounded-xl p-5 text-center brand-card-green shadow-sm">
           <div class="text-2xl font-semibold text-gray-900">
             {{ currentUsers ?? '—' }}
