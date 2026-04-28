@@ -52,7 +52,11 @@ describe("useMeStateV2", () => {
     const fakeUser: MeUser = {
       id: "123",
       email: "test@example.com",
-      plan: "monthly",
+      entitlement: {
+        plan: "monthly",
+        subscription_status: "active",
+        cancel_at_period_end: false,
+      },
     };
 
     useAuthMock.mockResolvedValue({
@@ -65,9 +69,8 @@ describe("useMeStateV2", () => {
     const { state, resolve, isLoggedIn, user } = useMeStateV2();
     await resolve();
 
-    expect(fetchMock).toHaveBeenCalledWith("/api/me", {
+    expect(fetchMock).toHaveBeenCalledWith("/api/meV2", {
       headers: { Authorization: "Bearer fake-token" },
-      cache: "no-store",
     });
 
     expect(state.value.status).toBe("logged-in");

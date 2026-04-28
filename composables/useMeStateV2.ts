@@ -32,39 +32,57 @@ import type {
 //   | { status: "logged-in"; user: MeUser };
 
 export function useMeStateV2() {
-  
   const state = useState<MeState>("meStateV2", () => ({
     status: "loading",
   }));
 
   const resolved = useState<boolean>("meResolvedV2", () => false);
+  const pendingResolve = useState<Promise<void> | null>(
+    "mePendingResolveV2",
+    () => null,
+  );
 
   const resolve = async ({ force = false } = {}) => {
-    if (resolved.value && !force) return;
-
-    resolved.value = false;
-    state.value = { status: "loading" };
-
-    if (process.server) return;
-
-    const auth = await useAuth();
-
-    if (!auth.isAuthenticated) {
-      state.value = { status: "logged-out" };
-      resolved.value = true;
+    if (pendingResolve.value) {
+      await pendingResolve.value;
       return;
     }
 
+    if (resolved.value && !force) return;
+
+    const task = (async () => {
+      resolved.value = false;
+      state.value = { status: "loading" };
+
+      if (process.server) return;
+
+      const auth = await useAuth();
+
+      if (!auth.isAuthenticated) {
+        state.value = { status: "logged-out" };
+        resolved.value = true;
+        return;
+      }
+
+      try {
+        const token = await auth.getAccessToken();
+        const user = await $fetch<MeUser>("/api/meV2", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        state.value = { status: "logged-in", user };
+      } catch {
+        state.value = { status: "logged-out" };
+      } finally {
+        resolved.value = true;
+      }
+    })();
+
+    pendingResolve.value = task;
+
     try {
-      const token = await auth.getAccessToken();
-      const user = await $fetch<MeUser>("/api/meV2", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      state.value = { status: "logged-in", user };
-    } catch {
-      state.value = { status: "logged-out" };
+      await task;
     } finally {
-      resolved.value = true;
+      pendingResolve.value = null;
     }
   };
 
