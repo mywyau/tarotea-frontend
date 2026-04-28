@@ -84,12 +84,12 @@ const canEnterLevel = () => true
       </h1>
 
       <p class="text-black level-subheading">
-        Sentence quiz rules and scoring before you begin.
+        Sentence based quiz.
       </p>
 
       <div class="pt-6">
         <NuxtLink :to="`/quiz/${slug}/sentences/no-audio/v3`" class="start-btn">
-          Start sentence quiz
+          Start quiz
         </NuxtLink>
       </div>
 
