@@ -226,9 +226,9 @@ onMounted(async () => {
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
-    <button class="mobile-stats-toggle md:hidden" @click="isMobileStatsExpanded = !isMobileStatsExpanded">
+    <a href="#" class="mobile-stats-toggle md:hidden" @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded">
       {{ isMobileStatsExpanded ? 'Hide level stats' : 'Show level stats' }}
-    </button>
+    </a>
 
     <section class="stats-grid" :class="{ 'stats-grid-collapsed-mobile': !isMobileStatsExpanded }">
       <div class="stat-card page-card rounded-xl stat-0">
@@ -379,15 +379,16 @@ onMounted(async () => {
 }
 
 .mobile-stats-toggle {
-  width: 100%;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(17, 24, 39, 0.1);
-  background: rgba(255, 255, 255, 0.85);
-  padding: 0.65rem 0.9rem;
+  display: inline-block;
   font-size: 0.78rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: rgba(17, 24, 39, 0.85);
+  text-decoration: none;
+}
+
+.mobile-stats-toggle:hover {
+  text-decoration: underline;
 }
 
 .stat-card {
