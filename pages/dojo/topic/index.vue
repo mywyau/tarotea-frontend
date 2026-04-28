@@ -69,6 +69,10 @@ function getSelectedTopicMode(topicId: string) {
   return topicQuizModes[modeIdx]
 }
 
+function getSelectedTopicModeIndex(topicId: string) {
+  return selectedTopicQuizMode.value[topicId] ?? 0
+}
+
 function cycleTopicMode(topicId: string, direction: 1 | -1) {
   const current = selectedTopicQuizMode.value[topicId] ?? 0
   const total = topicQuizModes.length
@@ -130,20 +134,27 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
           </p>
         </div>
 
-        <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="grid grid-cols-[42px_1fr_42px] gap-3 pt-4">
-          <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, -1)" aria-label="Previous quiz mode">
-            ‹
-          </button>
+        <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="pt-4 space-y-3">
+          <div class="grid grid-cols-[42px_1fr_42px] gap-3">
+            <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, -1)" aria-label="Previous quiz mode">
+              ‹
+            </button>
 
-          <NuxtLink :to="getSelectedTopicMode(quizTopic.id).to(quizTopic.id)"
-            class="topic-btn"
-            :class="getSelectedTopicMode(quizTopic.id).buttonClass">
-            {{ getSelectedTopicMode(quizTopic.id).label }}
-          </NuxtLink>
+            <NuxtLink :to="getSelectedTopicMode(quizTopic.id).to(quizTopic.id)"
+              class="topic-btn"
+              :class="getSelectedTopicMode(quizTopic.id).buttonClass">
+              {{ getSelectedTopicMode(quizTopic.id).label }}
+            </NuxtLink>
 
-          <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, 1)" aria-label="Next quiz mode">
-            ›
-          </button>
+            <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, 1)" aria-label="Next quiz mode">
+              ›
+            </button>
+          </div>
+
+          <div class="mode-dots" :aria-label="`Mode ${getSelectedTopicModeIndex(quizTopic.id) + 1} of ${topicQuizModes.length}`">
+            <span v-for="(mode, modeIndex) in topicQuizModes" :key="`${quizTopic.id}-${mode.id}`" class="mode-dot"
+              :class="{ 'is-active': modeIndex === getSelectedTopicModeIndex(quizTopic.id) }" />
+          </div>
         </div>
 
         <p v-else-if="!quizTopic.comingSoon" class="text-xs text-center text-gray-500 pt-4">
@@ -263,6 +274,25 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
 
 .topic-mode-toggle:hover {
   background: rgba(31, 41, 55, 0.15);
+}
+
+.mode-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.mode-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: rgba(31, 41, 55, 0.2);
+  transition: all 0.15s ease;
+}
+
+.mode-dot.is-active {
+  width: 1rem;
+  background: rgba(31, 41, 55, 0.7);
 }
 
 .pagination-wrapper {
