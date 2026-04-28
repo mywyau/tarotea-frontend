@@ -6,13 +6,13 @@ definePageMeta({
 })
 
 import WordTile from '@/components/WordTile.vue'
+import { masteryXp } from '@/config/xp/helpers'
 import { createError } from 'nuxt/app'
 import { useRoute } from 'vue-router'
 import { FREE_LEVEL_WORD_LIMIT } from '~/config/level/levels-config'
 import { tileColours } from '~/utils/branding/helpers'
 import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
 import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
-import { masteryXp } from '@/config/xp/helpers';
 
 const route = useRoute()
 const slug = route.params.slug as string
@@ -203,6 +203,8 @@ const lockedWordCount = computed(() => {
   }, 0)
 })
 
+const isMobileStatsExpanded = ref(false)
+
 onMounted(async () => {
   await Promise.all([
     loadProgress(),
@@ -224,32 +226,35 @@ onMounted(async () => {
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
-    <section class="stats-grid">
-      <div class="stat-card page-card rounded-xl stat-0">
-        <p class="stat-label">Total words</p>
-        <p class="stat-value font-bold">{{ totalWords }}</p>
-      </div>
+    <a href="#" class="mobile-stats-toggle md:hidden" @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded">
+      {{ isMobileStatsExpanded ? 'Hide more info' : 'Show more info' }}
+    </a>
 
-      <div class="stat-card page-card rounded-xl stat-1">
-        <p class="stat-label">Accessible words</p>
-        <p class="stat-value font-bold">{{ accessibleWordCount }}</p>
-      </div>
+    <section class="stats-grid" :class="{ 'stats-grid-collapsed-mobile': !isMobileStatsExpanded }">
 
-      <div v-if="!hasPaidAccess" class="stat-card page-card rounded-xl stat-2">
-        <p class="stat-label">TaroKeys</p>
-        <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
-      </div>
+      <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
 
-      <div class="stat-card page-card rounded-xl stat-3">
-        <p class="stat-label">Locked words</p>
-        <p class="stat-value font-bold">{{ lockedWordCount }}</p>
+        <div class="stat-card page-card rounded-xl stat-0">
+          <p class="stat-label">Total words</p>
+          <p class="stat-value font-bold">{{ totalWords }}</p>
+        </div>
+
+        <div class="stat-card page-card rounded-xl stat-1">
+          <p class="stat-label">Accessible words</p>
+          <p class="stat-value font-bold">{{ accessibleWordCount }}</p>
+        </div>
+
+        <div v-if="!hasPaidAccess" class="stat-card page-card rounded-xl stat-2">
+          <p class="stat-label">TaroKeys</p>
+          <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
+        </div>
+
+        <div class="stat-card page-card rounded-xl stat-3">
+          <p class="stat-label">Locked words</p>
+          <p class="stat-value font-bold">{{ lockedWordCount }}</p>
+        </div>
       </div>
     </section>
-
-    <!-- <div v-if="!canAccessLevel(isLoggedIn, entitlement)" class="unlock-summary ">
-      TaroKeys: <span class="font-bold">{{ unlockSummary.creditsAvailable }}</span>
-    </div> -->
-
     <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
 
       <div class="flex items-baseline justify-between gap-4">
@@ -372,6 +377,19 @@ onMounted(async () => {
   gap: 0.75rem;
 }
 
+.mobile-stats-toggle {
+  display: inline-block;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(17, 24, 39, 0.85);
+  text-decoration: none;
+}
+
+.mobile-stats-toggle:hover {
+  text-decoration: underline;
+}
+
 .stat-card {
   text-align: center;
 }
@@ -406,6 +424,10 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
+  .stats-grid-collapsed-mobile {
+    display: none;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
