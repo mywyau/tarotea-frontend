@@ -1,7 +1,7 @@
 <script setup lang="ts">
 
 import { levelSelectMetaData } from '@/utils/levels/helpers'
-import { onMounted } from 'vue'
+import { onMounted, reactive } from 'vue'
 
 
 const {
@@ -28,6 +28,27 @@ onMounted(async () => {
 const canEnterLevel = (level: any) => {
 
   return true
+}
+
+const quizModes = [
+  { label: 'Vocabulary', class: 'level-btn-blue', to: (id: string) => `/quiz/${id}/word/start-quiz` },
+  { label: 'Audio', class: 'level-btn-purple', to: (id: string) => `/quiz/${id}/audio/start-quiz` },
+  { label: 'Sentences', class: 'level-btn-yellow', to: (id: string) => `/quiz/${id}/sentences/no-audio/v3/start-quiz` },
+  { label: 'Sentence Audio Only', class: 'level-btn-blush', to: (id: string) => `/quiz/${id}/sentences/audio/v3/start-quiz` },
+  { label: 'Echo Gecko', class: 'level-btn-green', to: (id: string) => `/quiz/${id}/echo-gecko` },
+]
+
+const activeQuizModeByLevel = reactive<Record<string, number>>({})
+
+const getActiveQuizMode = (levelId: string) => {
+  const idx = activeQuizModeByLevel[levelId] ?? 0
+  return quizModes[idx]
+}
+
+const cycleQuizMode = (levelId: string, direction: 'prev' | 'next') => {
+  const current = activeQuizModeByLevel[levelId] ?? 0
+  const delta = direction === 'next' ? 1 : -1
+  activeQuizModeByLevel[levelId] = (current + delta + quizModes.length) % quizModes.length
 }
 
 </script>
@@ -73,27 +94,27 @@ const canEnterLevel = (level: any) => {
           </p>
         </div>
 
-        <!-- Buttons -->
+        <!-- Quiz Mode Cycler -->
         <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/quiz/${quizLevel.id}/word/start-quiz`" class="level-btn level-btn-blue">
-            Vocabulary
+          <button class="cycle-btn" @click="cycleQuizMode(quizLevel.id, 'prev')">
+            ←
+          </button>
+
+          <button class="cycle-btn" @click="cycleQuizMode(quizLevel.id, 'next')">
+            →
+          </button>
+
+          <NuxtLink
+            :to="getActiveQuizMode(quizLevel.id).to(quizLevel.id)"
+            class="level-btn col-span-2"
+            :class="getActiveQuizMode(quizLevel.id).class"
+          >
+            {{ getActiveQuizMode(quizLevel.id).label }}
           </NuxtLink>
 
-          <NuxtLink :to="`/quiz/${quizLevel.id}/audio/start-quiz`" class="level-btn level-btn-purple">
-            Audio
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/no-audio/v3/start-quiz`" class="level-btn level-btn-yellow">
-            Sentences
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/sentences/audio/v3/start-quiz`" class="level-btn level-btn-blush">
-            Sentence Audio Only
-          </NuxtLink>
-
-          <NuxtLink :to="`/quiz/${quizLevel.id}/echo-gecko`" class="level-btn level-btn-green col-span-2">
-            Echo Gecko
-          </NuxtLink>
+          <p class="quiz-mode-indicator col-span-2">
+            {{ (activeQuizModeByLevel[quizLevel.id] ?? 0) + 1 }} / {{ quizModes.length }}
+          </p>
         </div>
 
         <!-- Locked -->
@@ -166,6 +187,28 @@ const canEnterLevel = (level: any) => {
   font-weight: 600;
   line-height: 1.2;
   transition: all 0.15s ease;
+}
+
+.cycle-btn {
+  min-height: 44px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 1rem;
+  background: rgba(17, 24, 39, 0.08);
+  color: #111827;
+  transition: background 0.15s ease;
+}
+
+.cycle-btn:hover {
+  background: rgba(17, 24, 39, 0.16);
+}
+
+.quiz-mode-indicator {
+  font-size: 0.7rem;
+  text-align: center;
+  color: rgba(17, 24, 39, 0.7);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 /* Colour variations */
