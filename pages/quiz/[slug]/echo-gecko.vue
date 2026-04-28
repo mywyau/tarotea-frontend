@@ -118,6 +118,7 @@ const detectedToneDisplayRows = computed(() => {
     }
   })
 })
+
 const lastToneLabel = computed(() => {
   if (lastToneScore.value === null) return ""
   if (lastToneScore.value <= PASS_SCORE) return "not quite"
@@ -545,10 +546,10 @@ onBeforeUnmount(() => {
 
       <header class="mb-6 mt-10">
         <h1 class="text-3xl font-bold">Echo Gecko</h1>
+        <p class="mt-1 text-sm text-gray-600">{{ data?.title ?? topicSlug }}</p>
       </header>
 
-      <section
-        class="rounded-2xl p-5 sm:p-6"
+      <section class="rounded-2xl p-5 sm:p-6"
         :class="finished ? 'bg-transparent shadow-none' : 'border border-fuchsia-100 bg-white/90 shadow-sm'">
         <div v-if="pending || loading" class="text-sm text-gray-600">Loading quiz words…</div>
         <div v-else-if="error" class="rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
@@ -698,7 +699,7 @@ onBeforeUnmount(() => {
                     {{ row.character ? `Character: ${row.character}` : `Syllable ${row.syllable}` }}
                   </span>
                   <span class="text-gray-500"> (target <span class="text-black font-medium">{{ row.token
-                      }})</span></span>,
+                  }})</span></span>,
                   I heard <span class="font-semibold">{{ row.heardJyutping }}</span>
                   — tone <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
                 </li>
