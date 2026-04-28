@@ -333,9 +333,7 @@ const isMobileStatsExpanded = ref(false)
 }
 
 .stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
+  display: block;
 }
 
 .mobile-stats-toggle {
@@ -387,10 +385,6 @@ const isMobileStatsExpanded = ref(false)
 @media (max-width: 640px) {
   .stats-grid-collapsed-mobile {
     display: none;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
   }
 }
 </style>
