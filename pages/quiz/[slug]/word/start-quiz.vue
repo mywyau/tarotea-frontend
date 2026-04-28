@@ -67,7 +67,7 @@ const canEnterLevel = () => {
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
     <!-- <NuxtLink :to="`/quiz/`" class="text-sm text-black hover:underline"> -->
-      <!-- ← Back -->
+    <!-- ← Back -->
     <!-- </NuxtLink> -->
 
     <BackLink />
@@ -118,7 +118,7 @@ const canEnterLevel = () => {
         </div>
 
         <button class="tips-toggle" type="button" @click="showAllTips = !showAllTips">
-          {{ showAllTips ? 'Hide full scoring details' : 'See full scoring details' }}
+          {{ showAllTips ? 'Hide All Tips' : 'See All Tips' }}
         </button>
 
         <Transition name="tip-expand">

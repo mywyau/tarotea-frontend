@@ -59,34 +59,20 @@ const showAllTips = ref(false)
         </div>
 
         <div class="tips-grid">
-          <article
-            v-for="tip in primaryTips"
-            :key="tip.title"
-            class="tip-card"
-          >
+          <article v-for="tip in primaryTips" :key="tip.title" class="tip-card">
             <h3 class="tip-card-title">{{ tip.title }}</h3>
             <p class="tip-card-body">{{ tip.body }}</p>
           </article>
         </div>
 
-        <button
-          class="tips-toggle"
-          type="button"
-          @click="showAllTips = !showAllTips"
-        >
-          {{ showAllTips ? "Hide full scoring details" : "See full scoring details" }}
+        <button class="tips-toggle" type="button" @click="showAllTips = !showAllTips">
+          {{ showAllTips ? "Hide All Tips" : "See All Tips" }}
         </button>
 
         <Transition name="tip-expand">
-          <div
-            v-if="showAllTips"
-            class="more-tips"
-          >
+          <div v-if="showAllTips" class="more-tips">
             <ul class="more-tips-list">
-              <li
-                v-for="tip in scoringTips"
-                :key="tip"
-              >
+              <li v-for="tip in scoringTips" :key="tip">
                 {{ tip }}
               </li>
             </ul>

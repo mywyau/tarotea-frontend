@@ -108,7 +108,7 @@ const canEnterLevel = () => true
         </div>
 
         <button class="tips-toggle" type="button" @click="showAllTips = !showAllTips">
-          {{ showAllTips ? 'Hide full scoring details' : 'See full scoring details' }}
+          {{ showAllTips ? 'Hide All Tips' : 'See All Tips' }}
         </button>
 
         <Transition name="tip-expand">
