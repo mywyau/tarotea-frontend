@@ -77,6 +77,52 @@ function canEnterTopic(topic: TopicQuiz): boolean {
     return true
 }
 
+const topicQuizModes = [
+    {
+        id: 'vocab',
+        label: 'Vocab',
+        buttonClass: 'topic-btn-blue',
+        to: (topicId: string) => `/topic/quiz/vocabulary/word/v5/start-quiz/${topicId}`,
+    },
+    {
+        id: 'audio',
+        label: 'Audio Only',
+        buttonClass: 'topic-btn-purple',
+        to: (topicId: string) => `/topic/quiz/vocabulary/audio/v5/${topicId}/start-quiz`,
+    },
+    {
+        id: 'sentences',
+        label: 'Sentences',
+        buttonClass: 'topic-btn-yellow',
+        to: (topicId: string) => `/topic/quiz/sentences/no-audio/${topicId}/v3/start-quiz`,
+    },
+    {
+        id: 'sentences-audio',
+        label: 'Audio Only Sentences',
+        buttonClass: 'topic-btn-blush',
+        to: (topicId: string) => `/topic/quiz/sentences/audio/${topicId}/v3/start-quiz`,
+    },
+    {
+        id: 'echo-gecko',
+        label: 'Echo Gecko',
+        buttonClass: 'topic-btn-green',
+        to: (topicId: string) => `/topic/quiz/echo-gecko/${topicId}`,
+    },
+] as const
+
+const selectedTopicQuizMode = ref<Record<string, number>>({})
+
+function getSelectedTopicMode(topicId: string) {
+    const modeIdx = selectedTopicQuizMode.value[topicId] ?? 0
+    return topicQuizModes[modeIdx]
+}
+
+function cycleTopicMode(topicId: string, direction: 1 | -1) {
+    const current = selectedTopicQuizMode.value[topicId] ?? 0
+    const total = topicQuizModes.length
+    selectedTopicQuizMode.value[topicId] = (current + direction + total) % total
+}
+
 
 watch(sortedTopics, () => {
     currentPage.value = 1
@@ -131,39 +177,22 @@ onMounted(async () => {
                 </div>
 
                 <!-- Buttons -->
-                <div class="grid grid-cols-2 gap-3 pt-4">
+                <div class="grid grid-cols-[42px_1fr_42px] gap-3 pt-4">
+                    <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, -1)" aria-label="Previous quiz mode"
+                        :disabled="!canEnterTopic(topic) || topic.comingSoon">
+                        ‹
+                    </button>
 
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/word/v5/start-quiz/${topic.id}` : undefined"
-                        class="topic-btn topic-btn-blue"
-                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Vocab
+                    <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
+                        class="topic-btn"
+                        :class="[getSelectedTopicMode(topic.id).buttonClass, { 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }]">
+                        {{ getSelectedTopicMode(topic.id).label }}
                     </NuxtLink>
 
-                    <NuxtLink
-                        :to="canEnterTopic(topic) ? `/topic/quiz/vocabulary/audio/v5/${topic.id}/start-quiz` : undefined"
-                        class="topic-btn topic-btn-purple"
-                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Audio Only
-                    </NuxtLink>
-
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/no-audio/${topic.id}/v3/start-quiz` : undefined"
-                        class="topic-btn topic-btn-yellow"
-                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Sentences
-                    </NuxtLink>
-
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/sentences/audio/${topic.id}/v3/start-quiz` : undefined"
-                        class="topic-btn topic-btn-blush"
-                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Audio Only Sentences
-                    </NuxtLink>
-
-                    <NuxtLink :to="canEnterTopic(topic) ? `/topic/quiz/echo-gecko/${topic.id}` : undefined"
-                        class="topic-btn topic-btn-green col-span-2"
-                        :class="{ 'pointer-events-none opacity-60': topic.comingSoon }">
-                        Echo Gecko
-                    </NuxtLink>
-
+                    <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, 1)" aria-label="Next quiz mode"
+                        :disabled="!canEnterTopic(topic) || topic.comingSoon">
+                        ›
+                    </button>
                 </div>
 
                 <p v-if="!canEnterTopic(topic)" class="text-xs text-center text-gray-500 pt-3">
@@ -313,6 +342,25 @@ onMounted(async () => {
 
 .topic-btn-green:hover {
     background: rgba(192, 223, 188, 0.85);
+}
+
+.topic-mode-toggle {
+    border-radius: 8px;
+    background: rgba(31, 41, 55, 0.08);
+    color: #1f2937;
+    font-size: 1.25rem;
+    line-height: 1;
+    font-weight: 700;
+    transition: all 0.15s ease;
+}
+
+.topic-mode-toggle:hover:not(:disabled) {
+    background: rgba(31, 41, 55, 0.15);
+}
+
+.topic-mode-toggle:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .pagination-wrapper {

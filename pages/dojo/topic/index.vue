@@ -41,6 +41,40 @@ const paginatedTopics = computed(() => {
   return sortedTopics.slice(start, end)
 })
 
+const topicQuizModes = [
+  {
+    id: 'jyutping',
+    label: 'Jyutping only',
+    buttonClass: 'topic-btn-purple',
+    to: (topicId: string) => `/dojo/topic/jyutping/training/${topicId}/v2/start`,
+  },
+  {
+    id: 'chinese',
+    label: 'Chinese only',
+    buttonClass: 'topic-btn-blue',
+    to: (topicId: string) => `/dojo/topic/chinese/training/${topicId}/v2/start`,
+  },
+  {
+    id: 'sentences',
+    label: 'Sentences Chinese Only',
+    buttonClass: 'topic-btn-blush',
+    to: (topicId: string) => `/dojo/topic/sentences/chinese/${topicId}/v2/start`,
+  },
+] as const
+
+const selectedTopicQuizMode = ref<Record<string, number>>({})
+
+function getSelectedTopicMode(topicId: string) {
+  const modeIdx = selectedTopicQuizMode.value[topicId] ?? 0
+  return topicQuizModes[modeIdx]
+}
+
+function cycleTopicMode(topicId: string, direction: 1 | -1) {
+  const current = selectedTopicQuizMode.value[topicId] ?? 0
+  const total = topicQuizModes.length
+  selectedTopicQuizMode.value[topicId] = (current + direction + total) % total
+}
+
 </script>
 
 <template>
@@ -96,19 +130,20 @@ const paginatedTopics = computed(() => {
           </p>
         </div>
 
-        <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/dojo/topic/jyutping/training/${quizTopic.id}/v2/start`" class="topic-btn topic-btn-purple">
-            Jyutping only
+        <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="grid grid-cols-[42px_1fr_42px] gap-3 pt-4">
+          <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, -1)" aria-label="Previous quiz mode">
+            ‹
+          </button>
+
+          <NuxtLink :to="getSelectedTopicMode(quizTopic.id).to(quizTopic.id)"
+            class="topic-btn"
+            :class="getSelectedTopicMode(quizTopic.id).buttonClass">
+            {{ getSelectedTopicMode(quizTopic.id).label }}
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/topic/chinese/training/${quizTopic.id}/v2/start`" class="topic-btn topic-btn-blue">
-            Chinese only
-          </NuxtLink>
-
-          <NuxtLink :to="`/dojo/topic/sentences/chinese/${quizTopic.id}/v2/start`"
-            class="topic-btn topic-btn-blush col-span-2">
-            Sentences Chinese Only
-          </NuxtLink>
+          <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, 1)" aria-label="Next quiz mode">
+            ›
+          </button>
         </div>
 
         <p v-else-if="!quizTopic.comingSoon" class="text-xs text-center text-gray-500 pt-4">
@@ -214,6 +249,20 @@ const paginatedTopics = computed(() => {
 
 .topic-btn-blush:hover {
   background: rgb(204, 136, 136);
+}
+
+.topic-mode-toggle {
+  border-radius: 8px;
+  background: rgba(31, 41, 55, 0.08);
+  color: #1f2937;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.topic-mode-toggle:hover {
+  background: rgba(31, 41, 55, 0.15);
 }
 
 .pagination-wrapper {

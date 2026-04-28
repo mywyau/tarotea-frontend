@@ -40,6 +40,40 @@ const canEnterLevel = (level: any) => {
   return true;
 }
 
+const levelQuizModes = [
+  {
+    id: 'jyutping',
+    label: 'Jyutping only',
+    buttonClass: 'level-btn-purple',
+    to: (levelId: string) => `/dojo/level/jyutping/training/${levelId}/v2/start`,
+  },
+  {
+    id: 'chinese',
+    label: 'Chinese only',
+    buttonClass: 'level-btn-blue',
+    to: (levelId: string) => `/dojo/level/chinese/training/${levelId}/v2/start`,
+  },
+  {
+    id: 'sentences',
+    label: 'Sentences Chinese Only',
+    buttonClass: 'level-btn-blush',
+    to: (levelId: string) => `/dojo/level/sentences/chinese/${levelId}/v2/start`,
+  },
+] as const
+
+const selectedLevelQuizMode = ref<Record<string, number>>({})
+
+function getSelectedLevelMode(levelId: string) {
+  const modeIdx = selectedLevelQuizMode.value[levelId] ?? 0
+  return levelQuizModes[modeIdx]
+}
+
+function cycleLevelMode(levelId: string, direction: 1 | -1) {
+  const current = selectedLevelQuizMode.value[levelId] ?? 0
+  const total = levelQuizModes.length
+  selectedLevelQuizMode.value[levelId] = (current + direction + total) % total
+}
+
 </script>
 
 <template>
@@ -103,19 +137,20 @@ const canEnterLevel = (level: any) => {
         </div>
 
         <!-- Buttons -->
-        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <NuxtLink :to="`/dojo/level/jyutping/training/${quizLevel.id}/v2/start`" class="level-btn level-btn-purple">
-            Jyutping only
+        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-[42px_1fr_42px] gap-3 pt-4">
+          <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, -1)" aria-label="Previous quiz mode">
+            ‹
+          </button>
+
+          <NuxtLink :to="getSelectedLevelMode(quizLevel.id).to(quizLevel.id)"
+            class="level-btn"
+            :class="getSelectedLevelMode(quizLevel.id).buttonClass">
+            {{ getSelectedLevelMode(quizLevel.id).label }}
           </NuxtLink>
 
-          <NuxtLink :to="`/dojo/level/chinese/training/${quizLevel.id}/v2/start`" class="level-btn level-btn-blue">
-            Chinese only
-          </NuxtLink>
-
-          <NuxtLink :to="`/dojo/level/sentences/chinese/${quizLevel.id}/v2/start`"
-            class="level-btn level-btn-blush col-span-2">
-            Sentences Chinese Only
-          </NuxtLink>
+          <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, 1)" aria-label="Next quiz mode">
+            ›
+          </button>
         </div>
 
         <!-- Locked -->
@@ -215,5 +250,19 @@ const canEnterLevel = (level: any) => {
 
 .level-btn-blush:hover {
   background: rgb(204, 136, 136);
+}
+
+.level-mode-toggle {
+  border-radius: 8px;
+  background: rgba(31, 41, 55, 0.08);
+  color: #1f2937;
+  font-size: 1.25rem;
+  line-height: 1;
+  font-weight: 700;
+  transition: all 0.15s ease;
+}
+
+.level-mode-toggle:hover {
+  background: rgba(31, 41, 55, 0.15);
 }
 </style>
