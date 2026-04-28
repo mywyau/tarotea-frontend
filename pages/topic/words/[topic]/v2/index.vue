@@ -207,6 +207,8 @@ onMounted(async () => {
     loadUnlocks(),
   ])
 })
+
+const isMobileStatsExpanded = ref(false)
 </script>
 
 <template>
@@ -221,7 +223,11 @@ onMounted(async () => {
       <p class="topic-subheading mt-2">{{ topic.description }}</p>
     </header>
 
-    <section class="stats-grid">
+    <button class="mobile-stats-toggle md:hidden" @click="isMobileStatsExpanded = !isMobileStatsExpanded">
+      {{ isMobileStatsExpanded ? 'Hide topic stats' : 'Show topic stats' }}
+    </button>
+
+    <section class="stats-grid" :class="{ 'stats-grid-collapsed-mobile': !isMobileStatsExpanded }">
       <div class="stat-card page-card rounded-xl stat-0">
         <p class="stat-label">Total words</p>
         <p class="stat-value font-bold">{{ totalWords }}</p>
@@ -330,6 +336,18 @@ onMounted(async () => {
   gap: 0.75rem;
 }
 
+.mobile-stats-toggle {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(17, 24, 39, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  padding: 0.65rem 0.9rem;
+  font-size: 0.78rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(17, 24, 39, 0.85);
+}
+
 .stat-card {
   text-align: center;
 }
@@ -364,6 +382,10 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
+  .stats-grid-collapsed-mobile {
+    display: none;
+  }
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
