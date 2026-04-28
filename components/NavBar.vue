@@ -21,7 +21,7 @@ async function handleLogout() {
 }
 
 onMounted(() => {
-  resolve({ force: true })
+  resolve()
 })
 </script>
 

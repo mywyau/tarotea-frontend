@@ -65,7 +65,7 @@ function onDocumentKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
-  resolve({ force: true })
+  resolve()
   document.addEventListener('click', onDocumentClick)
   document.addEventListener('keydown', onDocumentKeydown)
 })
