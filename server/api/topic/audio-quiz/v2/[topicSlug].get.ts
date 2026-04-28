@@ -444,28 +444,30 @@ export default defineEventHandler(async (event) => {
 
   let accessibleWords = allWords;
 
-  if (!userId) {
-    accessibleWords = allWords.slice(0, FREE_WORD_LIMIT);
-  } else if (!freeTopics.has(topicSlug)) {
-    const entitlement = (await getUserEntitlement(
-      userId,
-    )) as Entitlement | null;
-    const hasFullAccess = canAccessTopicWord(true, entitlement, topicSlug);
-
-    if (!hasFullAccess) {
-      const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
-      const unlockedWordIds = await getUnlockedWordIdsForUser(
+  if (!freeTopics.has(topicSlug)) {
+    if (!userId) {
+      accessibleWords = allWords.slice(0, FREE_WORD_LIMIT);
+    } else {
+      const entitlement = (await getUserEntitlement(
         userId,
-        allWordIds,
-      );
-      const accessibleWordIdSet = new Set([
-        ...freePreviewIds,
-        ...unlockedWordIds,
-      ]);
+      )) as Entitlement | null;
+      const hasFullAccess = canAccessTopicWord(true, entitlement, topicSlug);
 
-      accessibleWords = allWords.filter((word) =>
-        accessibleWordIdSet.has(word.id),
-      );
+      if (!hasFullAccess) {
+        const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
+        const unlockedWordIds = await getUnlockedWordIdsForUser(
+          userId,
+          allWordIds,
+        );
+        const accessibleWordIdSet = new Set([
+          ...freePreviewIds,
+          ...unlockedWordIds,
+        ]);
+
+        accessibleWords = allWords.filter((word) =>
+          accessibleWordIdSet.has(word.id),
+        );
+      }
     }
   }
 
