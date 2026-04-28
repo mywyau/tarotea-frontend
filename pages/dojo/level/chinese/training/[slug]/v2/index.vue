@@ -809,11 +809,11 @@ onBeforeUnmount(() => {
           <div v-else-if="showResults" key="results" class="space-y-6">
             <div class="stat-card hero-card" :class="resultHeroClass">
               <p class="stat-label">
-                {{ isGuestPreview ? 'Preview Complete' : 'Session Complete' }}
+                Session Complete
               </p>
 
               <h2 class="hero-title">
-                {{ isGuestPreview ? 'Great preview run' : resultMeta.title }}
+                {{ resultMeta.title }}
               </h2>
 
               <p class="hero-subtext font-bold">
