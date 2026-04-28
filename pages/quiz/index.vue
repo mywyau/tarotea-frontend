@@ -95,26 +95,33 @@ const cycleQuizMode = (levelId: string, direction: 'prev' | 'next') => {
         </div>
 
         <!-- Quiz Mode Cycler -->
-        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="grid grid-cols-2 gap-3 pt-4">
-          <button class="cycle-btn" @click="cycleQuizMode(quizLevel.id, 'prev')">
-            ←
-          </button>
+        <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="space-y-3 pt-4">
+          <div class="quiz-cycler-row">
+            <button class="cycle-btn" @click="cycleQuizMode(quizLevel.id, 'prev')">
+              &lt;
+            </button>
 
-          <button class="cycle-btn" @click="cycleQuizMode(quizLevel.id, 'next')">
-            →
-          </button>
+            <NuxtLink
+              :to="getActiveQuizMode(quizLevel.id).to(quizLevel.id)"
+              class="level-btn flex-1"
+              :class="getActiveQuizMode(quizLevel.id).class"
+            >
+              {{ getActiveQuizMode(quizLevel.id).label }}
+            </NuxtLink>
 
-          <NuxtLink
-            :to="getActiveQuizMode(quizLevel.id).to(quizLevel.id)"
-            class="level-btn col-span-2"
-            :class="getActiveQuizMode(quizLevel.id).class"
-          >
-            {{ getActiveQuizMode(quizLevel.id).label }}
-          </NuxtLink>
+            <button class="cycle-btn" @click="cycleQuizMode(quizLevel.id, 'next')">
+              &gt;
+            </button>
+          </div>
 
-          <p class="quiz-mode-indicator col-span-2">
-            {{ (activeQuizModeByLevel[quizLevel.id] ?? 0) + 1 }} / {{ quizModes.length }}
-          </p>
+          <div class="quiz-dots" aria-label="Quiz mode position">
+            <span
+              v-for="(_, dotIdx) in quizModes"
+              :key="`dot-${quizLevel.id}-${dotIdx}`"
+              class="quiz-dot"
+              :class="{ 'quiz-dot-active': (activeQuizModeByLevel[quizLevel.id] ?? 0) === dotIdx }"
+            />
+          </div>
         </div>
 
         <!-- Locked -->
@@ -189,8 +196,15 @@ const cycleQuizMode = (levelId: string, direction: 'prev' | 'next') => {
   transition: all 0.15s ease;
 }
 
+.quiz-cycler-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
 .cycle-btn {
   min-height: 44px;
+  min-width: 44px;
   border-radius: 10px;
   font-weight: 700;
   font-size: 1rem;
@@ -203,12 +217,21 @@ const cycleQuizMode = (levelId: string, direction: 'prev' | 'next') => {
   background: rgba(17, 24, 39, 0.16);
 }
 
-.quiz-mode-indicator {
-  font-size: 0.7rem;
-  text-align: center;
-  color: rgba(17, 24, 39, 0.7);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+.quiz-dots {
+  display: flex;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.quiz-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(17, 24, 39, 0.2);
+}
+
+.quiz-dot-active {
+  background: rgba(17, 24, 39, 0.7);
 }
 
 /* Colour variations */
