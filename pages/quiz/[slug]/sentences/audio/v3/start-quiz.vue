@@ -231,13 +231,26 @@ const canEnterLevel = () => true
 }
 
 .more-tips-list {
+  list-style: none;
   margin: 0;
-  padding-left: 1.1rem;
+  padding: 0;
   display: grid;
   gap: 0.45rem;
-  color: rgba(17, 24, 39, 0.86);
+}
+
+.more-tips-list li {
+  position: relative;
+  padding-left: 1rem;
   font-size: 0.85rem;
   line-height: 1.45;
+  color: rgba(17, 24, 39, 0.86);
+}
+
+.more-tips-list li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: rgba(17, 24, 39, 0.86);
 }
 
 .tip-expand-enter-active,
