@@ -252,25 +252,20 @@ const canEnterTopic = () => {
 }
 
 .more-tips-list {
-  list-style: none;
-  padding: 0;
+  list-style: disc;
   margin: 0;
+  padding-left: 1.25rem;
   display: grid;
   gap: 0.65rem;
 }
 
 .more-tips-list li {
-  position: relative;
-  padding-left: 1rem;
   font-size: 0.88rem;
   line-height: 1.5;
   color: #374151;
 }
 
-.more-tips-list li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
+.more-tips-list li::marker {
   color: #D6A3D1;
 }
 
