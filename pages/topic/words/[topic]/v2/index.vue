@@ -5,11 +5,11 @@ definePageMeta({
 })
 
 import WordTile from '@/components/WordTile.vue'
+import { masteryXp } from '@/config/xp/helpers'
 import { createError } from 'nuxt/app'
 import { FREE_WORD_LIMIT } from '~/config/topic/topics-config'
 import { tileColours } from '~/utils/branding/helpers'
 import { canAccessTopic, freeTopics } from '~/utils/topics/permissions'
-import { masteryXp } from '@/config/xp/helpers';
 
 const route = useRoute()
 const slug = route.params.topic as string
@@ -224,28 +224,30 @@ const isMobileStatsExpanded = ref(false)
     </header>
 
     <a href="#" class="mobile-stats-toggle md:hidden" @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded">
-      {{ isMobileStatsExpanded ? 'Hide topic stats' : 'Show topic stats' }}
+      {{ isMobileStatsExpanded ? 'Hide more info' : 'Show more info' }}
     </a>
 
     <section class="stats-grid" :class="{ 'stats-grid-collapsed-mobile': !isMobileStatsExpanded }">
-      <div class="stat-card page-card rounded-xl stat-0">
-        <p class="stat-label">Total words</p>
-        <p class="stat-value font-bold">{{ totalWords }}</p>
-      </div>
+      <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        <div class="stat-card page-card rounded-xl stat-0">
+          <p class="stat-label">Total words</p>
+          <p class="stat-value font-bold">{{ totalWords }}</p>
+        </div>
 
-      <div class="stat-card page-card rounded-xl stat-1">
-        <p class="stat-label">Accessible words</p>
-        <p class="stat-value font-bold">{{ accessibleWordCount }}</p>
-      </div>
+        <div class="stat-card page-card rounded-xl stat-1">
+          <p class="stat-label">Accessible words</p>
+          <p class="stat-value font-bold">{{ accessibleWordCount }}</p>
+        </div>
 
-      <div v-if="!hasPaidAccess && !isTopicFree" class="stat-card page-card rounded-xl stat-2">
-        <p class="stat-label">TaroKeys</p>
-        <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
-      </div>
+        <div v-if="!hasPaidAccess && !isTopicFree" class="stat-card page-card rounded-xl stat-2">
+          <p class="stat-label">TaroKeys</p>
+          <p class="stat-value font-bold">{{ unlockSummary.creditsAvailable }}</p>
+        </div>
 
-      <div class="stat-card page-card rounded-xl stat-3">
-        <p class="stat-label">Locked words</p>
-        <p class="stat-value font-bold">{{ lockedWordCount }}</p>
+        <div class="stat-card page-card rounded-xl stat-3">
+          <p class="stat-label">Locked words</p>
+          <p class="stat-value font-bold">{{ lockedWordCount }}</p>
+        </div>
       </div>
     </section>
 
