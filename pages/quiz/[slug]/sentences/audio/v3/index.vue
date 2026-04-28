@@ -778,6 +778,12 @@ onBeforeUnmount(() => {
                 Play Again
               </NuxtLink>
 
+              <NuxtLink to="/please-sign-in"
+                class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
+                style="background-color:#F4CD27;">
+                Sign up to earn XP & unlock more words for sentence-based quizzes
+              </NuxtLink>
+
               <!-- <NuxtLink :to="`/level/${slug}`"
                 class="block w-full rounded-xl bg-white text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
                 style="background-color:rgba(244,205,39,0.35);">
