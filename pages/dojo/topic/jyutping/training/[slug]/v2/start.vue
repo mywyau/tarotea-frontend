@@ -16,7 +16,7 @@ const topicTitle = computed(() =>
 </script>
 
 <template>
-  <DojoStartPage :heading="`${topicTitle}`"
+  <DojoStartPage theme="purple" :heading="`${topicTitle}`"
     description="Type the Jyutping for words in this topic and build typing skills and recall."
     :guest-note="isLoggedIn ? 'Signed in: XP from this run will be saved.' : 'Guest mode: XP from this run is preview only and will not be saved.'"
     :start-to="`/dojo/topic/jyutping/training/${slug}/v2`" :start-label="'Start exercise'" :xp-rules="[

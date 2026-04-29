@@ -16,7 +16,7 @@ const topicTitle = computed(() =>
 </script>
 
 <template>
-  <DojoStartPage :heading="`${topicTitle}`"
+  <DojoStartPage theme="blush" :heading="`${topicTitle}`"
     description="Practice typing out whole sentences from this topic to challenge and flex typing skills."
     :guest-note="isLoggedIn ? 'Signed in: XP from this run will be saved.' : 'Guest mode: XP from this run is preview only and will not be saved.'"
     :start-to="`/dojo/topic/sentences/chinese/${slug}/v2`" :start-label="'Start exercise'" :xp-rules="[

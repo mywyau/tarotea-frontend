@@ -13,6 +13,7 @@ const props = defineProps<{
   tips: string[]
   keyboardSetupTips?: string[]
   guestNote?: string
+  theme?: 'blue' | 'purple' | 'blush'
 }>()
 
 const showAdvancedTips = ref(false)
@@ -32,7 +33,7 @@ const showAdvancedTips = ref(false)
       </p>
 
       <div class="pt-6">
-        <NuxtLink :to="props.startTo" class="start-btn">
+        <NuxtLink :to="props.startTo" class="start-btn" :class="`theme-${props.theme ?? 'blue'}`">
           {{ props.startLabel }}
         </NuxtLink>
       </div>
@@ -46,14 +47,14 @@ const showAdvancedTips = ref(false)
           <article
             v-for="rule in props.xpRules"
             :key="`${rule.action}-${rule.xp}`"
-            class="tip-card"
+            class="tip-card" :class="`theme-${props.theme ?? 'blue'}`"
           >
             <h3 class="tip-card-title">{{ rule.action }}</h3>
             <p class="tip-card-body">{{ rule.xp }}</p>
           </article>
         </div>
 
-        <button class="tips-toggle" type="button" @click="showAdvancedTips = !showAdvancedTips">
+        <button class="tips-toggle" :class="`theme-${props.theme ?? 'blue'}`" type="button" @click="showAdvancedTips = !showAdvancedTips">
           {{ showAdvancedTips ? 'Hide extra tips' : 'See keyboard and tips' }}
         </button>
 
@@ -205,6 +206,44 @@ const showAdvancedTips = ref(false)
   position: absolute;
   left: 0;
   color: #D6A3D1;
+}
+
+
+
+.start-btn.theme-purple {
+  background: #D6A3D1;
+}
+
+.start-btn.theme-purple:hover {
+  background: #c88fc2;
+}
+
+.start-btn.theme-blush {
+  background: #F6E1E1;
+}
+
+.start-btn.theme-blush:hover {
+  background: #efd1d1;
+}
+
+.tip-card.theme-blue {
+  background: #F6E1E1;
+}
+
+.tip-card.theme-purple {
+  background: #ecd5ea;
+}
+
+.tip-card.theme-blush {
+  background: #F6E1E1;
+}
+
+.tips-toggle.theme-purple:hover {
+  background: rgba(214, 163, 209, 0.24);
+}
+
+.tips-toggle.theme-blush:hover {
+  background: rgba(246, 225, 225, 0.6);
 }
 
 .tip-expand-enter-active,

@@ -13,7 +13,7 @@ const levelNumber = computed(() => levelIdToNumbers(slug.value) ?? slug.value)
 </script>
 
 <template>
-  <DojoStartPage :heading="`Level ${levelNumber} · Sentence dojo`"
+  <DojoStartPage theme="blush" :heading="`Level ${levelNumber} · Sentence dojo`"
     description="Fill in missing Chinese words in sentence context to sharpen practical usage and recognition."
     :start-to="`/dojo/level/sentences/chinese/${slug}/v2`" start-label="Start sentence exercise" :xp-rules="[
       { action: 'Correct answer (no hint)', xp: `+${chineseSentenceXp} XP` },
