@@ -125,6 +125,26 @@ const streak = ref<number>(0)
 const isMastered = computed(() => xp.value >= masteryXp)
 
 const playbackRate = ref(1)
+const currentExampleIndex = ref(0)
+const totalExamples = computed(() => word.value?.examples?.length ?? 0)
+const currentExample = computed(() => word.value?.examples?.[currentExampleIndex.value] ?? null)
+
+const showPrevExample = () => {
+  if (!totalExamples.value) return
+  currentExampleIndex.value = (currentExampleIndex.value - 1 + totalExamples.value) % totalExamples.value
+}
+
+const showNextExample = () => {
+  if (!totalExamples.value) return
+  currentExampleIndex.value = (currentExampleIndex.value + 1) % totalExamples.value
+}
+
+watch(
+  () => word.value?.id,
+  () => {
+    currentExampleIndex.value = 0
+  }
+)
 
 onMounted(async () => {
   try {
@@ -287,26 +307,26 @@ watchEffect(() => {
       </h2>
 
       <ul class="space-y-5">
-        <li v-for="(example, index) in word.examples" :key="example.sentence" class="example-card rounded-lg p-4">
+        <li v-if="currentExample" :key="`${word.id}-${currentExampleIndex}`" class="example-card rounded-lg p-4">
           <div class="space-y-3">
             <div class="flex justify-end">
               <div class="example-actions-row">
-                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${index}`"
+                <NuxtLink :to="`/writing/${level}/sentences/${word.id}/${currentExampleIndex}`"
                   class="action-chip action-chip-sm action-chip-write example-action-btn"
                   aria-label="Practice writing this sentence">
                   <span aria-hidden="true" class="mobile-action-icon">✏️</span>
                   <span class="mobile-action-label">Write</span>
                 </NuxtLink>
 
-                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${index}`"
+                <NuxtLink :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${currentExampleIndex}`"
                   class="action-chip action-chip-sm action-chip-speak example-action-btn"
                   aria-label="Practice pronunciation for this sentence">
                   <span aria-hidden="true" class="mobile-action-icon">🎤</span>
                   <span class="mobile-action-label">Speak</span>
                 </NuxtLink>
 
-                <AudioButton v-if="word.audio?.examples?.[index]"
-                  :src="`${cdnBase}/audio/${word.audio.examples[index]}`" :playback-rate="playbackRate" size="sm"
+                <AudioButton v-if="word.audio?.examples?.[currentExampleIndex]"
+                  :src="`${cdnBase}/audio/${word.audio.examples[currentExampleIndex]}`" :playback-rate="playbackRate" size="sm"
                   class="tone-gate-play-btn example-action-btn" />
               </div>
             </div>
@@ -314,21 +334,30 @@ watchEffect(() => {
             <div class="example-scroll-block">
               <div class="example-scroll-content">
                 <div class="text-lg leading-relaxed text-gray-900 whitespace-nowrap">
-                  {{ example.sentence }}
+                  {{ currentExample.sentence }}
                 </div>
 
                 <div class="mt-2 text-sm text-gray-500 whitespace-nowrap">
-                  {{ example.jyutping }}
+                  {{ currentExample.jyutping }}
                 </div>
 
                 <div class="mt-2 text-sm text-gray-700 whitespace-nowrap">
-                  {{ example.meaning }}
+                  {{ currentExample.meaning }}
                 </div>
               </div>
             </div>
           </div>
         </li>
       </ul>
+
+      <div v-if="totalExamples > 1" class="example-pagination mt-4">
+        <button class="example-nav-arrow" type="button" aria-label="Previous example" @click="showPrevExample">‹</button>
+        <div class="example-dots" aria-label="Example position indicator">
+          <span v-for="dotIndex in totalExamples" :key="dotIndex" class="example-dot"
+            :class="{ 'example-dot-active': dotIndex - 1 === currentExampleIndex }" />
+        </div>
+        <button class="example-nav-arrow" type="button" aria-label="Next example" @click="showNextExample">›</button>
+      </div>
 
       <div class="text-center mt-10">
         <p class="text-center mt-10 text-sm"> Spot an error? Report to:
@@ -432,6 +461,39 @@ watchEffect(() => {
 
 .example-action-btn {
   min-height: 2rem;
+}
+
+.example-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.example-nav-arrow {
+  color: #6b7280;
+  font-size: 1.75rem;
+  line-height: 1;
+  border: none;
+  background: transparent;
+  padding: 0.1rem 0.3rem;
+}
+
+.example-dots {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.example-dot {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 9999px;
+  background: #d1d5db;
+}
+
+.example-dot-active {
+  background: #6b7280;
 }
 
 .action-chip:hover {
