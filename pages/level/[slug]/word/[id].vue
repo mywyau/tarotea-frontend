@@ -467,26 +467,27 @@ watchEffect(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .example-nav-arrow {
   color: #6b7280;
-  font-size: 1.25rem;
+  font-size: 1.75rem;
   line-height: 1;
   border: none;
   background: transparent;
+  padding: 0.1rem 0.3rem;
 }
 
 .example-dots {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.55rem;
 }
 
 .example-dot {
-  width: 0.45rem;
-  height: 0.45rem;
+  width: 0.62rem;
+  height: 0.62rem;
   border-radius: 9999px;
   background: #d1d5db;
 }
