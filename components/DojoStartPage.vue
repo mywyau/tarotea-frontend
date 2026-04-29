@@ -47,14 +47,14 @@ const showAdvancedTips = ref(false)
           <article
             v-for="rule in props.xpRules"
             :key="`${rule.action}-${rule.xp}`"
-            class="tip-card" :class="`theme-${props.theme ?? 'blue'}`"
+            class="tip-card"
           >
             <h3 class="tip-card-title">{{ rule.action }}</h3>
             <p class="tip-card-body">{{ rule.xp }}</p>
           </article>
         </div>
 
-        <button class="tips-toggle" :class="`theme-${props.theme ?? 'blue'}`" type="button" @click="showAdvancedTips = !showAdvancedTips">
+        <button class="tips-toggle" type="button" @click="showAdvancedTips = !showAdvancedTips">
           {{ showAdvancedTips ? 'Hide extra tips' : 'See keyboard and tips' }}
         </button>
 
@@ -219,32 +219,13 @@ const showAdvancedTips = ref(false)
 }
 
 .start-btn.theme-blush {
-  background: #F6E1E1;
+  background: rgb(249, 166, 166);
 }
 
 .start-btn.theme-blush:hover {
-  background: #efd1d1;
+  background: rgb(204, 136, 136);
 }
 
-.tip-card.theme-blue {
-  background: #F6E1E1;
-}
-
-.tip-card.theme-purple {
-  background: #ecd5ea;
-}
-
-.tip-card.theme-blush {
-  background: #F6E1E1;
-}
-
-.tips-toggle.theme-purple:hover {
-  background: rgba(214, 163, 209, 0.24);
-}
-
-.tips-toggle.theme-blush:hover {
-  background: rgba(246, 225, 225, 0.6);
-}
 
 .tip-expand-enter-active,
 .tip-expand-leave-active {
