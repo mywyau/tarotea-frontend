@@ -54,7 +54,7 @@ const showAdvancedTips = ref(false)
           </article>
         </div>
 
-        <button class="tips-toggle" type="button" @click="showAdvancedTips = !showAdvancedTips">
+        <button class="tips-toggle" :class="`theme-${props.theme ?? 'blue'}`" type="button" @click="showAdvancedTips = !showAdvancedTips">
           {{ showAdvancedTips ? 'Hide extra tips' : 'See keyboard and tips' }}
         </button>
 
@@ -175,8 +175,16 @@ const showAdvancedTips = ref(false)
   border-radius: 14px;
 }
 
-.tips-toggle:hover {
+.tips-toggle.theme-blue:hover {
   background: rgba(168, 202, 224, 0.22);
+}
+
+.tips-toggle.theme-purple:hover {
+  background: rgba(214, 163, 209, 0.22);
+}
+
+.tips-toggle.theme-blush:hover {
+  background: rgba(249, 166, 166, 0.2);
 }
 
 .more-tips {
