@@ -13,6 +13,7 @@ const props = defineProps<{
   tips: string[]
   keyboardSetupTips?: string[]
   guestNote?: string
+  theme?: 'blue' | 'purple' | 'blush'
 }>()
 
 const showAdvancedTips = ref(false)
@@ -32,7 +33,7 @@ const showAdvancedTips = ref(false)
       </p>
 
       <div class="pt-6">
-        <NuxtLink :to="props.startTo" class="start-btn">
+        <NuxtLink :to="props.startTo" class="start-btn" :class="`theme-${props.theme ?? 'blue'}`">
           {{ props.startLabel }}
         </NuxtLink>
       </div>
@@ -53,7 +54,7 @@ const showAdvancedTips = ref(false)
           </article>
         </div>
 
-        <button class="tips-toggle" type="button" @click="showAdvancedTips = !showAdvancedTips">
+        <button class="tips-toggle" :class="`theme-${props.theme ?? 'blue'}`" type="button" @click="showAdvancedTips = !showAdvancedTips">
           {{ showAdvancedTips ? 'Hide extra tips' : 'See keyboard and tips' }}
         </button>
 
@@ -174,8 +175,16 @@ const showAdvancedTips = ref(false)
   border-radius: 14px;
 }
 
-.tips-toggle:hover {
+.tips-toggle.theme-blue:hover {
   background: rgba(168, 202, 224, 0.22);
+}
+
+.tips-toggle.theme-purple:hover {
+  background: rgba(214, 163, 209, 0.22);
+}
+
+.tips-toggle.theme-blush:hover {
+  background: rgba(249, 166, 166, 0.2);
 }
 
 .more-tips {
@@ -206,6 +215,25 @@ const showAdvancedTips = ref(false)
   left: 0;
   color: #D6A3D1;
 }
+
+
+
+.start-btn.theme-purple {
+  background: #D6A3D1;
+}
+
+.start-btn.theme-purple:hover {
+  background: #c88fc2;
+}
+
+.start-btn.theme-blush {
+  background: rgb(249, 166, 166);
+}
+
+.start-btn.theme-blush:hover {
+  background: rgb(204, 136, 136);
+}
+
 
 .tip-expand-enter-active,
 .tip-expand-leave-active {
