@@ -9,7 +9,6 @@ const route = useRoute()
 const menuOpen = ref(false)
 const navOpen = ref(false)
 const menuRoot = ref<HTMLElement | null>(null)
-const isTriggerHidden = ref(false)
 
 const navLinks = computed(() => {
   const links = [
@@ -40,11 +39,6 @@ function toggleNav() {
 function closeNav() {
   navOpen.value = false
 }
-function toggleTriggerVisibility() {
-  isTriggerHidden.value = !isTriggerHidden.value
-  if (isTriggerHidden.value) closeNav()
-}
-
 async function handleLogout() {
   await logout()
   await resolve({ force: true })
@@ -134,24 +128,16 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-
-    <button v-if="!isTriggerHidden" type="button" class="side-rail-trigger" @click.stop="toggleNav"
-      :class="{ 'is-open': navOpen }"
-      :style="{ left: navOpen ? 'min(20rem, 88vw)' : '1.0rem' }"
-      :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
-      :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel">
-      <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
-    </button>
-
-    <div v-if="!navOpen && !isTriggerHidden" class="nav-drawer-peek" aria-hidden="true" />
-
     <button
       type="button"
       class="trigger-visibility-btn"
-      :aria-label="isTriggerHidden ? 'Show Warp trigger' : 'Hide Warp trigger'"
-      @click="toggleTriggerVisibility"
+      :class="{ 'is-open': navOpen }"
+      :aria-label="navOpen ? 'Close Warp panel' : 'Open Warp panel'"
+      :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel"
+      @click.stop="toggleNav"
     >
-      {{ isTriggerHidden ? 'Show Warp' : 'Hide Warp' }}
+      <span class="portal-swirl-line" aria-hidden="true"></span>
+      <span class="sr-only">{{ navOpen ? 'Close Warp panel' : 'Open Warp panel' }}</span>
     </button>
 
     <transition name="fade">
@@ -204,77 +190,56 @@ onBeforeUnmount(() => {
 }
 
 
-.side-rail-trigger {
-  position: fixed;
-  left: 0.2rem;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 70;
-  min-height: 7.5rem;
-  width: 0.7rem;
-  border-top-right-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-  background: rgba(88, 199, 95, 0.45);
-  color: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.22);
-  transition: width 140ms ease, background 140ms ease, left 180ms ease, opacity 140ms ease;
-}
 
-
-.side-rail-trigger.is-open {
-  width: 0.75rem;
-  border-top-right-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-}
-
-.side-rail-trigger:hover {
-  width: 0.75rem;
-  background: rgba(105, 199, 112, 0.62);
-}
-
-.nav-drawer-peek {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 55;
-  height: 100vh;
-  width: 1rem;
-  background: rgba(111, 92, 202, 0.45);
-  pointer-events: none;
-}
 
 .trigger-visibility-btn {
   position: fixed;
-  left: 0.75rem;
-  bottom: 0.75rem;
+  left: 0.85rem;
+  bottom: 0.85rem;
   z-index: 75;
-  border-radius: 0.6rem;
-  background: rgba(17, 24, 39, 0.82);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1;
-  padding: 0.55rem 0.7rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  height: 3.3rem;
+  width: 3.3rem;
+  border-radius: 999px;
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+  overflow: hidden;
+  isolation: isolate;
 }
 
+.portal-swirl-line {
+  position: absolute;
+  inset: 0.42rem;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10C72 10 90 28 90 50C90 72 72 90 50 90C28 90 10 72 10 50C10 33 24 20 41 20C58 20 71 33 71 50C71 63 60 74 47 74C36 74 27 65 27 54C27 45 34 38 43 38C50 38 56 44 56 51C56 57 52 61 46 61' fill='none' stroke='rgba(15,15,15,0.9)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-repeat: no-repeat;
+  animation: portalSwirl 5s linear infinite;
+  opacity: 1;
+}
+
+.portal-swirl-line::before {
+  content: '';
+  position: absolute;
+  inset: -12%;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 60%);
+  filter: blur(0.8px);
+}
+
+.trigger-visibility-btn:hover,
+.trigger-visibility-btn.is-open {
+  transform: scale(1.04);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+}
+
+
 @media (min-width: 768px) {
-  .side-rail-trigger {
-    left: 0;
-    min-height: 10rem;
-    width: 0.9rem;
-  }
-
-  .side-rail-trigger.is-open,
-  .side-rail-trigger:hover {
-    width: 0.95rem;
-  }
-
-  .nav-drawer-peek {
-    width: 1rem;
+  .trigger-visibility-btn {
+    left: 1rem;
+    bottom: 1rem;
+    height: 3.6rem;
+    width: 3.6rem;
   }
 }
 
@@ -347,4 +312,9 @@ onBeforeUnmount(() => {
 .slide-left-leave-to {
   transform: translateX(-100%);
 }
+
+@keyframes portalSwirl {
+  to { transform: rotate(360deg); }
+}
+
 </style>
