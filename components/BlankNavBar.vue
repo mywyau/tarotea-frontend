@@ -211,7 +211,7 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0.36rem;
   border-radius: inherit;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 50m0-36a36 36 0 1 1-25.5 10.5M50 50m0-27a27 27 0 1 0 19 7.9M50 50m0-18a18 18 0 1 1-12.8 5.3M50 50m0-9a9 9 0 1 0 6.4 2.6' fill='none' stroke='rgba(15,15,15,0.88)' stroke-width='2.7' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10C72 10 90 28 90 50C90 72 72 90 50 90C28 90 10 72 10 50C10 33 24 20 41 20C58 20 71 33 71 50C71 63 60 74 47 74C36 74 27 65 27 54C27 45 34 38 43 38C50 38 56 44 56 51C56 57 52 61 46 61' fill='none' stroke='rgba(15,15,15,0.9)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-size: cover;
   background-repeat: no-repeat;
   animation: portalSwirl 5s linear infinite;
