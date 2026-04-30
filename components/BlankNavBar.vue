@@ -136,9 +136,7 @@ onBeforeUnmount(() => {
       :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel"
       @click.stop="toggleNav"
     >
-      <span class="portal-ring portal-ring-outer" aria-hidden="true"></span>
-      <span class="portal-ring portal-ring-inner" aria-hidden="true"></span>
-      <span class="portal-core" aria-hidden="true"></span>
+      <span class="portal-swirl-line" aria-hidden="true"></span>
       <span class="sr-only">{{ navOpen ? 'Close Warp panel' : 'Open Warp panel' }}</span>
     </button>
 
@@ -202,63 +200,30 @@ onBeforeUnmount(() => {
   height: 2.9rem;
   width: 2.9rem;
   border-radius: 999px;
-  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.2), rgba(54, 54, 54, 0.8) 45%, rgba(10, 10, 10, 0.95) 100%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 8px 18px rgba(0, 0, 0, 0.6);
+  background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.08), rgba(16, 16, 16, 0.95) 70%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.09), 0 8px 18px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   isolation: isolate;
 }
 
-.trigger-visibility-btn::before {
+.portal-swirl-line {
+  position: absolute;
+  inset: 0.36rem;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 50m0-36a36 36 0 1 1-25.5 10.5M50 50m0-27a27 27 0 1 0 19 7.9M50 50m0-18a18 18 0 1 1-12.8 5.3M50 50m0-9a9 9 0 1 0 6.4 2.6' fill='none' stroke='rgba(255,255,255,0.85)' stroke-width='2.7' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: cover;
+  background-repeat: no-repeat;
+  animation: portalSwirl 5s linear infinite;
+  opacity: 0.9;
+}
+
+.portal-swirl-line::before {
   content: '';
   position: absolute;
-  inset: -35%;
+  inset: -12%;
   border-radius: inherit;
-  background: repeating-conic-gradient(
-    from 0deg,
-    rgba(255, 255, 255, 0.26) 0deg 14deg,
-    rgba(0, 0, 0, 0.68) 14deg 28deg,
-    rgba(0, 0, 0, 0) 28deg 44deg
-  );
-  -webkit-mask: radial-gradient(circle, transparent 0 22%, #000 24% 74%, transparent 76% 100%);
-  mask: radial-gradient(circle, transparent 0 22%, #000 24% 74%, transparent 76% 100%);
-  animation: portalSwirl 2.1s linear infinite;
-  opacity: 0.84;
-}
-
-.portal-ring {
-  position: absolute;
-  border-radius: 999px;
-  border: 1.25px solid rgba(255, 255, 255, 0.32);
-  mix-blend-mode: screen;
-}
-
-.portal-ring-outer {
-  animation: ringSpin 1.8s linear infinite;
-}
-
-.portal-ring-inner {
-  border-color: rgba(255, 255, 255, 0.2);
-  animation: ringSpinReverse 1s linear infinite;
-}
-
-.portal-core {
-  position: absolute;
-  border-radius: 999px;
-  background: radial-gradient(circle, rgba(240, 240, 240, 0.9), rgba(72, 72, 72, 0.85) 62%, rgba(12, 12, 12, 0.15));
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.18);
-  animation: pulseCore 1.5s ease-in-out infinite;
-}
-
-.trigger-visibility-btn .portal-ring-outer {
-  inset: 0.4rem;
-}
-
-.trigger-visibility-btn .portal-ring-inner {
-  inset: 0.78rem;
-}
-
-.trigger-visibility-btn .portal-core {
-  inset: 1.05rem;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 60%);
+  filter: blur(1px);
 }
 
 .trigger-visibility-btn:hover,
@@ -349,19 +314,6 @@ onBeforeUnmount(() => {
 
 @keyframes portalSwirl {
   to { transform: rotate(360deg); }
-}
-
-@keyframes ringSpin {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes ringSpinReverse {
-  to { transform: rotate(-360deg); }
-}
-
-@keyframes pulseCore {
-  0%, 100% { transform: scale(0.9); opacity: 0.78; }
-  50% { transform: scale(1.06); opacity: 1; }
 }
 
 </style>
