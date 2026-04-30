@@ -197,8 +197,8 @@ onBeforeUnmount(() => {
   left: 0.85rem;
   bottom: 0.85rem;
   z-index: 75;
-  height: 2.9rem;
-  width: 2.9rem;
+  height: 3.3rem;
+  width: 3.3rem;
   border-radius: 999px;
   background: transparent;
   backdrop-filter: none;
@@ -209,7 +209,7 @@ onBeforeUnmount(() => {
 
 .portal-swirl-line {
   position: absolute;
-  inset: 0.36rem;
+  inset: 0.42rem;
   border-radius: inherit;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10C72 10 90 28 90 50C90 72 72 90 50 90C28 90 10 72 10 50C10 33 24 20 41 20C58 20 71 33 71 50C71 63 60 74 47 74C36 74 27 65 27 54C27 45 34 38 43 38C50 38 56 44 56 51C56 57 52 61 46 61' fill='none' stroke='rgba(15,15,15,0.9)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   background-size: cover;
@@ -238,8 +238,8 @@ onBeforeUnmount(() => {
   .trigger-visibility-btn {
     left: 1rem;
     bottom: 1rem;
-    height: 3.2rem;
-    width: 3.2rem;
+    height: 3.6rem;
+    width: 3.6rem;
   }
 }
 
