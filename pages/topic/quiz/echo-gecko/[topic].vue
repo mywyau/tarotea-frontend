@@ -37,6 +37,8 @@ const GOOD_JINGLE_MIN_SCORE = 25
 const JINGLE_DELAY_MS = 400
 const SUCCESS_MESSAGE_MS = 20000
 const MAX_QUIZ_SIZE = 10
+const FINAL_SCREEN_BUFFER_MS = 250
+const FINAL_SCREEN_MAX_DELAY_MS = 4000
 
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)
@@ -91,6 +93,7 @@ const activeAttemptId = ref(0)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 let currentWordAudio: HTMLAudioElement | null = null
 let nextWordCountdownInterval: ReturnType<typeof setInterval> | null = null
+let finalizeQuizTimeout: ReturnType<typeof setTimeout> | null = null
 
 const currentWord = computed(() => quizWords.value[currentIndex.value] ?? null)
 const quizSize = computed(() => Math.min(MAX_QUIZ_SIZE, allWords.value.length))
@@ -162,6 +165,17 @@ function resetRecordingState() {
   recordingUrl.value = null
 }
 
+function getCurrentWordAudioRemainingMs() {
+  if (!currentWordAudio) return 0
+  if (currentWordAudio.paused || currentWordAudio.ended) return 0
+
+  const duration = currentWordAudio.duration
+  const currentTime = currentWordAudio.currentTime
+  if (!Number.isFinite(duration) || !Number.isFinite(currentTime)) return 0
+
+  return Math.max(0, Math.round((duration - currentTime) * 1000))
+}
+
 function advanceToNextWord(options?: { countAsPass?: boolean }) {
   if (!started.value || finished.value) return
 
@@ -169,12 +183,26 @@ function advanceToNextWord(options?: { countAsPass?: boolean }) {
     passedCount.value += 1
   }
 
-  if (currentIndex.value >= quizSize.value - 1) {
-    finished.value = true
-    if (startedAtMs.value) {
-      elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+  const isFinalWord = currentIndex.value >= quizSize.value - 1
+
+  if (isFinalWord) {
+    if (finalizeQuizTimeout) {
+      clearTimeout(finalizeQuizTimeout)
+      finalizeQuizTimeout = null
     }
-    stopTimer()
+
+    const remainingAudioMs = getCurrentWordAudioRemainingMs()
+    const finalizeDelayMs = Math.min(FINAL_SCREEN_MAX_DELAY_MS, remainingAudioMs + FINAL_SCREEN_BUFFER_MS)
+
+    finalizeQuizTimeout = setTimeout(() => {
+      if (!started.value || finished.value) return
+      finished.value = true
+      if (startedAtMs.value) {
+        elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+      }
+      stopTimer()
+      finalizeQuizTimeout = null
+    }, finalizeDelayMs)
   } else {
     currentIndex.value += 1
   }
@@ -536,6 +564,7 @@ onBeforeUnmount(() => {
   stopTracks()
   if (recordingUrl.value) URL.revokeObjectURL(recordingUrl.value)
   currentWordAudio?.pause()
+  if (finalizeQuizTimeout) clearTimeout(finalizeQuizTimeout)
 })
 </script>
 
