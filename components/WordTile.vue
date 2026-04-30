@@ -42,8 +42,8 @@ const clampProgress = (xp = 0) => Math.min((xp / masteryXp) * 100, 100)
 
       <div class="liquid-track">
         <div class="liquid-fill" :style="{ width: `${clampProgress(xp ?? 0)}%` }">
-          <div class="liquid-wave wave-a" />
-          <div class="liquid-wave wave-b" />
+          <div class="liquid-surface surface-a" />
+          <div class="liquid-surface surface-b" />
         </div>
       </div>
     </div>
@@ -81,9 +81,9 @@ const clampProgress = (xp = 0) => Math.min((xp / masteryXp) * 100, 100)
 
 .liquid-track {
   width: 100%;
-  height: 0.38rem;
+  height: 0.5rem;
   border-radius: 999px;
-  background: rgba(148, 163, 184, 0.4);
+  background: rgba(148, 163, 184, 0.3);
   overflow: hidden;
 }
 
@@ -93,38 +93,38 @@ const clampProgress = (xp = 0) => Math.min((xp / masteryXp) * 100, 100)
   position: relative;
   overflow: hidden;
   transition: width 500ms ease;
-  background: linear-gradient(180deg, #22d3ee 0%, #10b981 100%);
+  background: linear-gradient(180deg, #38bdf8 0%, #0ea5a4 100%);
 }
 
-.liquid-wave {
+.liquid-surface {
   position: absolute;
-  left: -35%;
-  width: 170%;
-  height: 150%;
-  top: -65%;
-  border-radius: 43%;
-  background: rgba(255, 255, 255, 0.4);
-  transform-origin: center;
+  left: -120%;
+  width: 240%;
+  height: 95%;
+  top: -72%;
+  border-radius: 42% 58% 46% 54% / 62% 58% 42% 38%;
+  background: rgba(255, 255, 255, 0.55);
 }
 
-.wave-a {
-  animation: swirl 3.5s linear infinite;
+.surface-a {
+  opacity: 0.85;
+  animation: flow-horizontal 4.3s linear infinite;
 }
 
-.wave-b {
-  top: -58%;
-  opacity: 0.6;
-  border-radius: 40%;
-  animation: swirl 5.5s linear reverse infinite;
+.surface-b {
+  top: -66%;
+  opacity: 0.45;
+  border-radius: 48% 52% 58% 42% / 52% 48% 52% 48%;
+  animation: flow-horizontal 6.2s linear infinite reverse;
 }
 
-@keyframes swirl {
+@keyframes flow-horizontal {
   from {
-    transform: translateX(0) rotate(0deg);
+    transform: translateX(0);
   }
 
   to {
-    transform: translateX(-8%) rotate(360deg);
+    transform: translateX(50%);
   }
 }
 </style>
