@@ -418,11 +418,13 @@ watchEffect(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: nowrap;
     gap: 1rem;
 }
 
 .top-actions-row {
   width: auto;
+  margin-left: auto;
   justify-content: flex-end;
   padding-top: 0;
 }
@@ -573,11 +575,19 @@ watchEffect(() => {
 }
 
 @media (max-width: 640px) {
+    .top-nav-row {
+        align-items: flex-start;
+    }
+
     .main-actions-row {
         flex-wrap: nowrap;
         justify-content: center;
         align-items: center;
         gap: 0.35rem;
+    }
+
+    .top-actions-row {
+        justify-content: flex-end;
     }
 
     .main-action-btn {
