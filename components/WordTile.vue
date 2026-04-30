@@ -12,6 +12,7 @@ defineProps<{
   mastered?: boolean
 }>()
 
+const clampProgress = (xp = 0) => Math.min((xp / masteryXp) * 100, 100)
 
 </script>
 
@@ -39,9 +40,11 @@ defineProps<{
         {{ xp ?? 0 }} XP
       </div>
 
-      <div class="w-full h-1 bg-gray-400 rounded">
-        <div class="h-1 bg-green-500 rounded transition-all duration-500"
-          :style="{ width: Math.min((xp ?? 0) / masteryXp * 100, 100) + '%' }" />
+      <div class="liquid-track">
+        <div class="liquid-fill" :style="{ width: `${clampProgress(xp ?? 0)}%` }">
+          <div class="liquid-wave wave-a" />
+          <div class="liquid-wave wave-b" />
+        </div>
       </div>
     </div>
   </component>
@@ -74,5 +77,54 @@ defineProps<{
 /* Active press */
 .word-tile:active {
   transform: translateY(0px) scale(0.98);
+}
+
+.liquid-track {
+  width: 100%;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.4);
+  overflow: hidden;
+}
+
+.liquid-fill {
+  height: 100%;
+  border-radius: inherit;
+  position: relative;
+  overflow: hidden;
+  transition: width 500ms ease;
+  background: linear-gradient(180deg, #22d3ee 0%, #10b981 100%);
+}
+
+.liquid-wave {
+  position: absolute;
+  left: -35%;
+  width: 170%;
+  height: 150%;
+  top: -65%;
+  border-radius: 43%;
+  background: rgba(255, 255, 255, 0.4);
+  transform-origin: center;
+}
+
+.wave-a {
+  animation: swirl 3.5s linear infinite;
+}
+
+.wave-b {
+  top: -58%;
+  opacity: 0.6;
+  border-radius: 40%;
+  animation: swirl 5.5s linear reverse infinite;
+}
+
+@keyframes swirl {
+  from {
+    transform: translateX(0) rotate(0deg);
+  }
+
+  to {
+    transform: translateX(-8%) rotate(360deg);
+  }
 }
 </style>
