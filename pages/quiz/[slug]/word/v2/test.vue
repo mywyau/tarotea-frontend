@@ -984,22 +984,31 @@ onBeforeUnmount(() => {
 }
 
 .completion-tiles-grid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
     gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
 }
 
-
-@media (max-width: 639px) {
-    .completion-tiles-grid>*:last-child:nth-child(odd) {
-        grid-column: span 2 / span 2;
-    }
+.completion-tiles-grid > * {
+    min-width: calc(50% - 0.5rem);
+    scroll-snap-align: start;
 }
 
 @media (min-width: 640px) {
     .completion-tiles-grid {
+        display: grid;
+        overflow: visible;
+        scroll-snap-type: none;
+        padding-bottom: 0;
         grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 1.25rem;
+    }
+
+    .completion-tiles-grid > * {
+        min-width: 0;
     }
 
     .completion-tiles-grid>*:nth-child(-n + 3) {
