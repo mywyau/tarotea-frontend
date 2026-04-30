@@ -621,7 +621,7 @@ onBeforeUnmount(() => {
 
         <div v-else-if="finalizing" class="space-y-6 text-center">
           <div class="stat-card hero-card result-2 space-y-4">
-            <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-fuchsia-200 border-t-fuchsia-500" />
+            <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-gray-500" />
             <p class="stat-label">Finalising</p>
             <h2 class="hero-title">Wrapping up your quiz...</h2>
             <p class="hero-subtext">Letting the final audio complete before showing your results.</p>
