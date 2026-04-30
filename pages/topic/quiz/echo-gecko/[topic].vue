@@ -81,6 +81,7 @@ const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
 const nextWordCountdownMs = ref<number | null>(null)
 const rapidMode = ref(false)
 const completionSoundPlayed = ref(false)
+const finalizing = ref(false)
 
 const recordedBlob = ref<Blob | null>(null)
 const recordingUrl = ref<string | null>(null)
@@ -177,7 +178,7 @@ function getCurrentWordAudioRemainingMs() {
 }
 
 function advanceToNextWord(options?: { countAsPass?: boolean }) {
-  if (!started.value || finished.value) return
+  if (!started.value || finished.value || finalizing.value) return
 
   if (options?.countAsPass) {
     passedCount.value += 1
@@ -191,11 +192,14 @@ function advanceToNextWord(options?: { countAsPass?: boolean }) {
       finalizeQuizTimeout = null
     }
 
+    finalizing.value = true
+
     const remainingAudioMs = getCurrentWordAudioRemainingMs()
     const finalizeDelayMs = Math.min(FINAL_SCREEN_MAX_DELAY_MS, remainingAudioMs + FINAL_SCREEN_BUFFER_MS)
 
     finalizeQuizTimeout = setTimeout(() => {
       if (!started.value || finished.value) return
+      finalizing.value = false
       finished.value = true
       if (startedAtMs.value) {
         elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
@@ -349,6 +353,7 @@ function startQuiz() {
   lastToneScore.value = null
   detectedToneRows.value = []
   finished.value = false
+  finalizing.value = false
   completionSoundPlayed.value = false
   currentIndex.value = 0
   passedCount.value = 0
@@ -565,6 +570,7 @@ onBeforeUnmount(() => {
   if (recordingUrl.value) URL.revokeObjectURL(recordingUrl.value)
   currentWordAudio?.pause()
   if (finalizeQuizTimeout) clearTimeout(finalizeQuizTimeout)
+  finalizing.value = false
 })
 </script>
 
@@ -609,6 +615,15 @@ onBeforeUnmount(() => {
               <li>• Use “Skip” if you are struggling with a word.</li>
             </ul>
           </section>
+        </div>
+
+        <div v-else-if="finalizing" class="space-y-6 text-center">
+          <div class="stat-card hero-card result-2 space-y-4">
+            <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-fuchsia-200 border-t-fuchsia-500" />
+            <p class="stat-label">Finalising</p>
+            <h2 class="hero-title">Wrapping up your quiz...</h2>
+            <p class="hero-subtext">Letting the final audio complete before showing your results.</p>
+          </div>
         </div>
 
         <div v-else-if="finished" class="space-y-6">
