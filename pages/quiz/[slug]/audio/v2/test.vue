@@ -392,13 +392,13 @@ const completionTiles = computed(() => [
     label: 'Time',
     value: formattedElapsedTime.value,
     suffix: '',
-    className: 'result-3'
+    className: 'result-2'
   },
   {
     label: 'XP Gained',
     value: animatedXpEarned.value,
     suffix: 'XP',
-    className: 'result-2',
+    className: 'result-3',
     prefix: animatedXpEarned.value > 0 ? '+' : ''
   },
   {

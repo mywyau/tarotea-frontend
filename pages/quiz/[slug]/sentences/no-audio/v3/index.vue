@@ -757,7 +757,7 @@ onBeforeUnmount(() => {
                                 </p>
                             </div>
 
-                            <div class="stat-card hover:brightness-110 result-2 sm:col-span-3">
+                            <div class="stat-card hover:brightness-110 result-3 sm:col-span-3">
                                 <p class="stat-label">XP Earned</p>
                                 <p class="stat-value">
                                     {{ animatedXpEarned > 0 ? '+' : '' }}{{ animatedXpEarned }} XP
