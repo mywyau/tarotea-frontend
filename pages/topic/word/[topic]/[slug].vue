@@ -229,6 +229,10 @@ watchEffect(() => {
                 <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`"
                     :playback-rate="playbackRate" size="md" class="tone-gate-play-btn main-action-btn" />
 
+                <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio-female/${word.audio.word}`"
+                    :playback-rate="playbackRate" size="md" class="tone-gate-play-btn main-action-btn" />
+
+
             </div>
 
         </section>
@@ -305,6 +309,12 @@ watchEffect(() => {
                                     :src="`${cdnBase}/audio/${word.audio.examples[currentExampleIndex]}`"
                                     :playback-rate="playbackRate" size="sm"
                                     class="tone-gate-play-btn example-action-btn" />
+
+
+                                <AudioButton v-if="word.audio?.examples?.[currentExampleIndex]"
+                                    :src="`${cdnBase}/audio-female/${word.audio.examples[currentExampleIndex]}`"
+                                    :playback-rate="playbackRate" size="sm"
+                                    class="tone-gate-play-btn example-action-btn" />
                             </div>
                         </div>
 
@@ -329,12 +339,14 @@ watchEffect(() => {
             </ul>
 
             <div v-if="totalExamples > 1" class="example-pagination mt-4">
-                <button class="example-nav-arrow" type="button" aria-label="Previous example" @click="showPrevExample">‹</button>
+                <button class="example-nav-arrow" type="button" aria-label="Previous example"
+                    @click="showPrevExample">‹</button>
                 <div class="example-dots" aria-label="Example position indicator">
                     <span v-for="dotIndex in totalExamples" :key="dotIndex" class="example-dot"
                         :class="{ 'example-dot-active': dotIndex - 1 === currentExampleIndex }" />
                 </div>
-                <button class="example-nav-arrow" type="button" aria-label="Next example" @click="showNextExample">›</button>
+                <button class="example-nav-arrow" type="button" aria-label="Next example"
+                    @click="showNextExample">›</button>
             </div>
 
             <div class="text-center mt-10">
