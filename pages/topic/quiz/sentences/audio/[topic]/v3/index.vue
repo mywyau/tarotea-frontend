@@ -747,7 +747,7 @@ onBeforeUnmount(() => {
               </div>
             </transition>
 
-            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-6 gap-4 sm:gap-6">
+            <transition-group name="card-fade" tag="div" class="grid grid-cols-2 sm:grid-cols-6 gap-4 sm:gap-6">
               <div class="stat-card hover:brightness-110 result-0 sm:col-span-2">
                 <p class="stat-label">Correct</p>
                 <p class="stat-value">{{ score }}</p>
@@ -772,7 +772,7 @@ onBeforeUnmount(() => {
                 </p>
               </div>
 
-              <div class="stat-card hover:brightness-110 result-1 sm:col-span-3">
+              <div class="stat-card hover:brightness-110 result-1 col-span-2 sm:col-span-3">
                 <p class="stat-label">XP Lost</p>
                 <p class="stat-value">
                   -{{ animatedXpLost }} XP
