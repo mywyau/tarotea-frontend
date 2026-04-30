@@ -928,10 +928,14 @@ onBeforeUnmount(() => {
 
 .completion-tiles-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1rem;
 }
 
+
+.completion-tiles-grid>*:last-child:nth-child(odd) {
+    grid-column: span 2 / span 2;
+}
 @media (min-width: 640px) {
   .completion-tiles-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
