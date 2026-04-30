@@ -269,11 +269,20 @@ onBeforeUnmount(() => {
   top: 0;
   left: 0;
   z-index: 60;
+  display: flex;
+  flex-direction: column;
   height: 100vh;
   width: min(20rem, 88vw);
   background: rgba(111, 92, 202, 0.35);
   backdrop-filter: blur(8px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
+}
+
+.nav-drawer nav {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .drawer-link {
