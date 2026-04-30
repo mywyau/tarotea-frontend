@@ -202,8 +202,8 @@ onBeforeUnmount(() => {
   height: 2.9rem;
   width: 2.9rem;
   border-radius: 999px;
-  background: radial-gradient(circle at 30% 30%, rgba(207, 242, 255, 0.32), rgba(13, 70, 158, 0.42) 44%, rgba(3, 22, 64, 0.58) 100%);
-  box-shadow: 0 0 0 2px rgba(152, 214, 255, 0.35), 0 6px 18px rgba(8, 20, 46, 0.52);
+  background: radial-gradient(circle at 35% 30%, rgba(255, 255, 255, 0.2), rgba(54, 54, 54, 0.8) 45%, rgba(10, 10, 10, 0.95) 100%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 8px 18px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   isolation: isolate;
 }
@@ -213,23 +213,22 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: -35%;
   border-radius: inherit;
-  background:
-    repeating-conic-gradient(
-      from 0deg,
-      rgba(30, 150, 255, 0.9) 0deg 18deg,
-      rgba(90, 210, 255, 0.9) 18deg 32deg,
-      rgba(0, 0, 0, 0) 32deg 48deg
-    );
+  background: repeating-conic-gradient(
+    from 0deg,
+    rgba(255, 255, 255, 0.26) 0deg 14deg,
+    rgba(0, 0, 0, 0.68) 14deg 28deg,
+    rgba(0, 0, 0, 0) 28deg 44deg
+  );
   -webkit-mask: radial-gradient(circle, transparent 0 22%, #000 24% 74%, transparent 76% 100%);
   mask: radial-gradient(circle, transparent 0 22%, #000 24% 74%, transparent 76% 100%);
   animation: portalSwirl 2.1s linear infinite;
-  opacity: 0.92;
+  opacity: 0.84;
 }
 
 .portal-ring {
   position: absolute;
   border-radius: 999px;
-  border: 1.25px solid rgba(155, 226, 255, 0.7);
+  border: 1.25px solid rgba(255, 255, 255, 0.32);
   mix-blend-mode: screen;
 }
 
@@ -238,15 +237,15 @@ onBeforeUnmount(() => {
 }
 
 .portal-ring-inner {
-  border-color: rgba(73, 177, 255, 0.9);
+  border-color: rgba(255, 255, 255, 0.2);
   animation: ringSpinReverse 1s linear infinite;
 }
 
 .portal-core {
   position: absolute;
   border-radius: 999px;
-  background: radial-gradient(circle, rgba(167, 238, 255, 0.95), rgba(33, 104, 218, 0.82) 65%, rgba(16, 63, 155, 0.2));
-  box-shadow: 0 0 16px rgba(123, 215, 255, 0.78);
+  background: radial-gradient(circle, rgba(240, 240, 240, 0.9), rgba(72, 72, 72, 0.85) 62%, rgba(12, 12, 12, 0.15));
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.18);
   animation: pulseCore 1.5s ease-in-out infinite;
 }
 
@@ -265,7 +264,7 @@ onBeforeUnmount(() => {
 .trigger-visibility-btn:hover,
 .trigger-visibility-btn.is-open {
   transform: scale(1.04);
-  box-shadow: 0 0 0 2px rgba(141, 212, 255, 0.55), 0 10px 24px rgba(8, 28, 74, 0.6);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.24), 0 10px 24px rgba(0, 0, 0, 0.72);
 }
 
 
