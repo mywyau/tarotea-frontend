@@ -200,9 +200,9 @@ onBeforeUnmount(() => {
   height: 2.9rem;
   width: 2.9rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(3px);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 8px 18px rgba(0, 0, 0, 0.2);
+  background: transparent;
+  backdrop-filter: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 8px 18px rgba(0, 0, 0, 0.18);
   overflow: hidden;
   isolation: isolate;
 }
