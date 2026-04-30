@@ -402,19 +402,19 @@ const completionTiles = computed(() => [
         label: 'Incorrect',
         value: incorrectCount.value,
         suffix: '',
-        className: 'result-1'
+        className: 'result-2'
     },
     {
         label: 'Time',
         value: formattedElapsedTime.value,
         suffix: '',
-        className: 'result-3'
+        className: 'result-4'
     },
     {
         label: 'XP Gained',
         value: animatedXpEarned.value,
         suffix: 'XP',
-        className: 'result-2',
+        className: 'result-3',
         prefix: animatedXpEarned.value > 0 ? '+' : ''
     },
     {
@@ -984,15 +984,31 @@ onBeforeUnmount(() => {
 }
 
 .completion-tiles-grid {
-    display: grid;
-    grid-template-columns: 1fr;
+    display: flex;
     gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 0.25rem;
+}
+
+.completion-tiles-grid > * {
+    min-width: calc(50% - 0.5rem);
+    scroll-snap-align: start;
 }
 
 @media (min-width: 640px) {
     .completion-tiles-grid {
+        display: grid;
+        overflow: visible;
+        scroll-snap-type: none;
+        padding-bottom: 0;
         grid-template-columns: repeat(6, minmax(0, 1fr));
         gap: 1.25rem;
+    }
+
+    .completion-tiles-grid > * {
+        min-width: 0;
     }
 
     .completion-tiles-grid>*:nth-child(-n + 3) {
@@ -1052,6 +1068,10 @@ onBeforeUnmount(() => {
 
 .result-3 {
     background: rgba(168, 224, 182, 0.45);
+}
+
+.result-4 {
+    background: rgba(196, 181, 253, 0.4);
 }
 
 .hero-card {

@@ -747,32 +747,32 @@ onBeforeUnmount(() => {
               </div>
             </transition>
 
-            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-6 gap-4 sm:gap-6">
-              <div class="stat-card hover:brightness-110 result-0 sm:col-span-2">
+            <transition-group name="card-fade" tag="div" class="flex gap-4 overflow-x-auto snap-x snap-mandatory sm:grid sm:grid-cols-6 sm:overflow-visible sm:snap-none sm:gap-6">
+              <div class="stat-card hover:brightness-110 result-0 min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0 sm:col-span-2">
                 <p class="stat-label">Correct</p>
                 <p class="stat-value">{{ score }}</p>
               </div>
 
-              <div class="stat-card hover:brightness-110 result-1 sm:col-span-2">
+              <div class="stat-card hover:brightness-110 result-2 min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0 sm:col-span-2">
                 <p class="stat-label">Incorrect</p>
                 <p class="stat-value">{{ incorrectCount }}</p>
               </div>
 
-              <div class="stat-card hover:brightness-110 result-0 sm:col-span-2">
+              <div class="stat-card hover:brightness-110 result-4 min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0 sm:col-span-2">
                 <p class="stat-label">Time</p>
                 <p class="stat-value">
                   {{ formattedElapsedTime }}
                 </p>
               </div>
 
-              <div class="stat-card hover:brightness-110 result-2 sm:col-span-3">
+              <div class="stat-card hover:brightness-110 result-3 min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0 sm:col-span-3">
                 <p class="stat-label">XP Earned</p>
                 <p class="stat-value">
                   {{ animatedXpEarned > 0 ? '+' : '' }}{{ animatedXpEarned }} XP
                 </p>
               </div>
 
-              <div class="stat-card hover:brightness-110 result-1 sm:col-span-3">
+              <div class="stat-card hover:brightness-110 result-1 min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0 sm:col-span-3">
                 <p class="stat-label">XP Lost</p>
                 <p class="stat-value">
                   -{{ animatedXpLost }} XP
@@ -859,6 +859,10 @@ onBeforeUnmount(() => {
 
 .result-3 {
   background: rgba(168, 224, 182, 0.45);
+}
+
+.result-4 {
+  background: rgba(196, 181, 253, 0.4);
 }
 
 .hero-card {
