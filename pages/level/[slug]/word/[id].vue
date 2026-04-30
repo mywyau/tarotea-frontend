@@ -191,9 +191,28 @@ watchEffect(() => {
 
   <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
-    <NuxtLink :to="`/level/${level}/v2#${word.id}`" class="text-sm text-black hover:underline">
-      ← Back
-    </NuxtLink>
+    <div class="top-nav-row">
+      <NuxtLink :to="`/level/${level}/v2#${word.id}`" class="text-sm text-black hover:underline">
+        ← Back
+      </NuxtLink>
+
+      <div class="main-actions-row top-actions-row">
+        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write main-action-btn"
+          aria-label="Practice writing this word">
+          <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+          <span class="mobile-action-label">Write</span>
+        </NuxtLink>
+
+        <NuxtLink :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
+          aria-label="Open tone checker for this word">
+          <span aria-hidden="true" class="mobile-action-icon">🎤</span>
+          <span class="mobile-action-label">Speak</span>
+        </NuxtLink>
+
+        <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
+          size="md" class="tone-gate-play-btn main-action-btn" />
+      </div>
+    </div>
 
 
     <!-- Word header -->
@@ -238,25 +257,6 @@ watchEffect(() => {
         <NuxtLink v-if="nextWord" :to="`/level/${level}/word/${nextWord.id}`" class="edge-arrow" aria-label="Next word">
           ›
         </NuxtLink>
-      </div>
-
-      <div class="main-actions-row">
-
-        <NuxtLink :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write main-action-btn"
-          aria-label="Practice writing this word">
-          <span aria-hidden="true" class="mobile-action-icon">✏️</span>
-          <span class="mobile-action-label">Write</span>
-        </NuxtLink>
-
-        <NuxtLink :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
-          aria-label="Open tone checker for this word">
-          <span aria-hidden="true" class="mobile-action-icon">🎤</span>
-          <span class="mobile-action-label">Speak</span>
-        </NuxtLink>
-
-        <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
-          size="md" class="tone-gate-play-btn main-action-btn" />
-
       </div>
 
     </section>
@@ -439,6 +439,19 @@ watchEffect(() => {
   background: linear-gradient(90deg,
       #D6A3D1,
       #EAB8E4);
+}
+
+.top-nav-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.top-actions-row {
+  width: auto;
+  justify-content: flex-end;
+  padding-top: 0;
 }
 
 .action-chip {
