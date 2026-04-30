@@ -969,9 +969,12 @@ onBeforeUnmount(() => {
 }
 
 
-.completion-tiles-grid>*:last-child:nth-child(odd) {
-    grid-column: span 2 / span 2;
+@media (max-width: 639px) {
+    .completion-tiles-grid>*:last-child:nth-child(odd) {
+        grid-column: span 2 / span 2;
+    }
 }
+
 @media (min-width: 640px) {
   .completion-tiles-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
