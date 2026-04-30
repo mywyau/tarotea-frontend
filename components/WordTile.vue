@@ -44,6 +44,7 @@ const clampProgress = (xp = 0) => Math.min((xp / masteryXp) * 100, 100)
         <div class="liquid-fill" :style="{ width: `${clampProgress(xp ?? 0)}%` }">
           <div class="liquid-surface surface-a" />
           <div class="liquid-surface surface-b" />
+          <div class="liquid-edge" />
         </div>
       </div>
     </div>
@@ -93,7 +94,7 @@ const clampProgress = (xp = 0) => Math.min((xp / masteryXp) * 100, 100)
   position: relative;
   overflow: hidden;
   transition: width 500ms ease;
-  background: linear-gradient(180deg, #38bdf8 0%, #0ea5a4 100%);
+  background: linear-gradient(180deg, #4ade80 0%, #22c55e 45%, #16a34a 100%);
 }
 
 .liquid-surface {
@@ -118,6 +119,20 @@ const clampProgress = (xp = 0) => Math.min((xp / masteryXp) * 100, 100)
   animation: flow-horizontal 6.2s linear infinite reverse;
 }
 
+.liquid-edge {
+  position: absolute;
+  top: -12%;
+  right: -0.35rem;
+  width: 0.9rem;
+  height: 124%;
+  border-radius: 999px;
+  background:
+    radial-gradient(100% 60% at 0% 50%, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(180deg, rgba(74, 222, 128, 0.95), rgba(22, 163, 74, 0.95));
+  box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.25);
+  animation: edge-wave 1.5s ease-in-out infinite;
+}
+
 @keyframes flow-horizontal {
   from {
     transform: translateX(0);
@@ -125,6 +140,17 @@ const clampProgress = (xp = 0) => Math.min((xp / masteryXp) * 100, 100)
 
   to {
     transform: translateX(50%);
+  }
+}
+
+@keyframes edge-wave {
+  0%,
+  100% {
+    transform: translateY(0) scaleY(0.95);
+  }
+
+  50% {
+    transform: translateY(-8%) scaleY(1.06);
   }
 }
 </style>
