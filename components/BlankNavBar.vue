@@ -151,10 +151,14 @@ onBeforeUnmount(() => {
     <button
       type="button"
       class="trigger-visibility-btn"
+      :class="{ 'is-hidden-mode': isTriggerHidden }"
       :aria-label="isTriggerHidden ? 'Show Warp trigger' : 'Hide Warp trigger'"
       @click="toggleTriggerVisibility"
     >
-      {{ isTriggerHidden ? 'Show Warp' : 'Hide Warp' }}
+      <span class="portal-ring portal-ring-outer" aria-hidden="true"></span>
+      <span class="portal-ring portal-ring-inner" aria-hidden="true"></span>
+      <span class="portal-core" aria-hidden="true"></span>
+      <span class="sr-only">{{ isTriggerHidden ? 'Show Warp' : 'Hide Warp' }}</span>
     </button>
 
     <transition name="fade">
@@ -284,18 +288,45 @@ onBeforeUnmount(() => {
 
 .trigger-visibility-btn {
   position: fixed;
-  left: 0.75rem;
-  bottom: 0.75rem;
+  left: 0.85rem;
+  bottom: 0.85rem;
   z-index: 75;
-  border-radius: 0.6rem;
-  background: rgba(17, 24, 39, 0.82);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1;
-  padding: 0.55rem 0.7rem;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  height: 2.9rem;
+  width: 2.9rem;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.45), rgba(117, 76, 196, 0.72) 42%, rgba(49, 29, 117, 0.94) 100%);
+  box-shadow: 0 0 0 2px rgba(217, 193, 255, 0.28), 0 6px 18px rgba(18, 11, 48, 0.45);
+  overflow: hidden;
+  isolation: isolate;
 }
+
+.trigger-visibility-btn::before {
+  content: '';
+  position: absolute;
+  inset: -35%;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, rgba(191, 155, 255, 0), rgba(191, 155, 255, 0.8), rgba(117, 213, 255, 0.14), rgba(191, 155, 255, 0));
+  animation: portalSwirl 2.8s linear infinite;
+  opacity: 0.8;
+}
+
+.trigger-visibility-btn .portal-ring-outer {
+  inset: 0.4rem;
+}
+
+.trigger-visibility-btn .portal-ring-inner {
+  inset: 0.78rem;
+}
+
+.trigger-visibility-btn .portal-core {
+  inset: 1.05rem;
+}
+
+.trigger-visibility-btn.is-hidden-mode {
+  opacity: 0.72;
+  filter: saturate(0.7);
+}
+
 
 @media (min-width: 768px) {
   .side-rail-trigger {
