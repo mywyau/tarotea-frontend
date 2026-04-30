@@ -263,15 +263,17 @@ watchEffect(() => {
 
     <!-- Usage -->
     <section v-if="word.usage?.length" class="section-card rounded-xl p-6">
-      <h2 class="text-lg font-semibold mb-3 text-gray-900">
-        Usage
-      </h2>
+      <details class="usage-details">
+        <summary class="usage-summary text-lg font-semibold text-gray-900">
+          Usage
+        </summary>
 
-      <ul class="pl-10 list-disc space-y-2 text-gray-700">
-        <li v-for="note in word.usage" :key="note">
-          {{ note }}
-        </li>
-      </ul>
+        <ul class="pl-10 list-disc space-y-2 text-gray-700 mt-3">
+          <li v-for="note in word.usage" :key="note">
+            {{ note }}
+          </li>
+        </ul>
+      </details>
     </section>
 
     <!-- Volume and text speed -->
@@ -396,6 +398,23 @@ watchEffect(() => {
 /* Section cards */
 .section-card {
   backdrop-filter: blur(6px);
+}
+
+.usage-details {
+  width: 100%;
+}
+
+.usage-summary {
+  width: fit-content;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+  transition: text-decoration-color 0.2s ease;
+}
+
+.usage-summary:hover {
+  text-decoration-color: currentColor;
 }
 
 /* Examples */
