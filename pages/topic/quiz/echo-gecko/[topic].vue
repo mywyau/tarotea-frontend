@@ -38,6 +38,7 @@ const JINGLE_DELAY_MS = 400
 const SUCCESS_MESSAGE_MS = 20000
 const MAX_QUIZ_SIZE = 10
 const FINAL_SCREEN_BUFFER_MS = 250
+const FINAL_SCREEN_MIN_DELAY_MS = 2200
 const FINAL_SCREEN_MAX_DELAY_MS = 4000
 
 const route = useRoute()
@@ -195,7 +196,8 @@ function advanceToNextWord(options?: { countAsPass?: boolean }) {
     finalizing.value = true
 
     const remainingAudioMs = getCurrentWordAudioRemainingMs()
-    const finalizeDelayMs = Math.min(FINAL_SCREEN_MAX_DELAY_MS, remainingAudioMs + FINAL_SCREEN_BUFFER_MS)
+    const targetDelayMs = Math.max(FINAL_SCREEN_MIN_DELAY_MS, remainingAudioMs + FINAL_SCREEN_BUFFER_MS)
+    const finalizeDelayMs = Math.min(FINAL_SCREEN_MAX_DELAY_MS, targetDelayMs)
 
     finalizeQuizTimeout = setTimeout(() => {
       if (!started.value || finished.value) return
