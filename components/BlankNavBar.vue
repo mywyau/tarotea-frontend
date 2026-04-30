@@ -200,8 +200,9 @@ onBeforeUnmount(() => {
   height: 2.9rem;
   width: 2.9rem;
   border-radius: 999px;
-  background: radial-gradient(circle at 40% 35%, rgba(255, 255, 255, 0.08), rgba(16, 16, 16, 0.95) 70%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.09), 0 8px 18px rgba(0, 0, 0, 0.6);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(3px);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1), 0 8px 18px rgba(0, 0, 0, 0.2);
   overflow: hidden;
   isolation: isolate;
 }
@@ -210,11 +211,11 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0.36rem;
   border-radius: inherit;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 50m0-36a36 36 0 1 1-25.5 10.5M50 50m0-27a27 27 0 1 0 19 7.9M50 50m0-18a18 18 0 1 1-12.8 5.3M50 50m0-9a9 9 0 1 0 6.4 2.6' fill='none' stroke='rgba(255,255,255,0.85)' stroke-width='2.7' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 50m0-36a36 36 0 1 1-25.5 10.5M50 50m0-27a27 27 0 1 0 19 7.9M50 50m0-18a18 18 0 1 1-12.8 5.3M50 50m0-9a9 9 0 1 0 6.4 2.6' fill='none' stroke='rgba(15,15,15,0.88)' stroke-width='2.7' stroke-linecap='round'/%3E%3C/svg%3E");
   background-size: cover;
   background-repeat: no-repeat;
   animation: portalSwirl 5s linear infinite;
-  opacity: 0.9;
+  opacity: 1;
 }
 
 .portal-swirl-line::before {
@@ -223,13 +224,13 @@ onBeforeUnmount(() => {
   inset: -12%;
   border-radius: inherit;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 60%);
-  filter: blur(1px);
+  filter: blur(0.8px);
 }
 
 .trigger-visibility-btn:hover,
 .trigger-visibility-btn.is-open {
   transform: scale(1.04);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.24), 0 10px 24px rgba(0, 0, 0, 0.72);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.16), 0 10px 24px rgba(0, 0, 0, 0.25);
 }
 
 
