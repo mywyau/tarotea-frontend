@@ -202,7 +202,7 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   background: transparent;
   backdrop-filter: none;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08), 0 8px 18px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
   overflow: hidden;
   isolation: isolate;
 }
@@ -230,7 +230,7 @@ onBeforeUnmount(() => {
 .trigger-visibility-btn:hover,
 .trigger-visibility-btn.is-open {
   transform: scale(1.04);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.16), 0 10px 24px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
 }
 
 
