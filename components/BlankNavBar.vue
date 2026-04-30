@@ -140,6 +140,9 @@ onBeforeUnmount(() => {
       :style="{ left: navOpen ? 'min(20rem, 88vw)' : '1.0rem' }"
       :aria-label="navOpen ? 'Close navigation panel' : 'Open navigation panel'"
       :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel">
+      <span class="portal-ring portal-ring-outer" aria-hidden="true"></span>
+      <span class="portal-ring portal-ring-inner" aria-hidden="true"></span>
+      <span class="portal-core" aria-hidden="true"></span>
       <span class="sr-only">{{ navOpen ? "Close navigation panel" : "Open navigation panel" }}</span>
     </button>
 
@@ -210,29 +213,62 @@ onBeforeUnmount(() => {
   top: 50%;
   transform: translateY(-50%);
   z-index: 70;
-  min-height: 7.5rem;
-  width: 0.7rem;
-  border-top-right-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-  background: rgba(88, 199, 95, 0.45);
+  height: 3.4rem;
+  width: 3.4rem;
+  border-radius: 999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.42), rgba(117, 76, 196, 0.68) 40%, rgba(49, 29, 117, 0.92) 100%);
   color: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.22);
-  transition: width 140ms ease, background 140ms ease, left 180ms ease, opacity 140ms ease;
+  box-shadow: 0 0 0 3px rgba(217, 193, 255, 0.28), 0 8px 24px rgba(18, 11, 48, 0.5);
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 180ms ease, box-shadow 180ms ease, left 180ms ease, opacity 140ms ease;
 }
 
+.side-rail-trigger::before {
+  content: '';
+  position: absolute;
+  inset: -35%;
+  border-radius: inherit;
+  background: conic-gradient(from 0deg, rgba(191, 155, 255, 0), rgba(191, 155, 255, 0.82), rgba(117, 213, 255, 0.15), rgba(191, 155, 255, 0));
+  animation: portalSwirl 2.8s linear infinite;
+  opacity: 0.75;
+  filter: blur(0.6px);
+}
 
+.side-rail-trigger:hover,
 .side-rail-trigger.is-open {
-  width: 0.75rem;
-  border-top-right-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
+  transform: translateY(-50%) scale(1.04);
+  box-shadow: 0 0 0 3px rgba(217, 193, 255, 0.4), 0 10px 28px rgba(24, 13, 64, 0.6);
 }
 
-.side-rail-trigger:hover {
-  width: 0.75rem;
-  background: rgba(105, 199, 112, 0.62);
+.portal-ring {
+  position: absolute;
+  border-radius: 999px;
+  border: 1.25px solid rgba(239, 229, 255, 0.65);
+  mix-blend-mode: screen;
+}
+
+.portal-ring-outer {
+  inset: 0.45rem;
+  animation: ringSpin 1.8s linear infinite;
+}
+
+.portal-ring-inner {
+  inset: 0.9rem;
+  border-color: rgba(130, 225, 255, 0.8);
+  animation: ringSpinReverse 1.15s linear infinite;
+}
+
+.portal-core {
+  position: absolute;
+  inset: 1.25rem;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(133, 245, 255, 0.95), rgba(105, 69, 204, 0.85) 70%, rgba(105, 69, 204, 0.15));
+  box-shadow: 0 0 16px rgba(133, 245, 255, 0.7);
+  animation: pulseCore 1.5s ease-in-out infinite;
 }
 
 .nav-drawer-peek {
@@ -263,14 +299,9 @@ onBeforeUnmount(() => {
 
 @media (min-width: 768px) {
   .side-rail-trigger {
-    left: 0;
-    min-height: 10rem;
-    width: 0.9rem;
-  }
-
-  .side-rail-trigger.is-open,
-  .side-rail-trigger:hover {
-    width: 0.95rem;
+    left: 0.2rem;
+    height: 3.8rem;
+    width: 3.8rem;
   }
 
   .nav-drawer-peek {
@@ -347,4 +378,22 @@ onBeforeUnmount(() => {
 .slide-left-leave-to {
   transform: translateX(-100%);
 }
+
+@keyframes portalSwirl {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ringSpinReverse {
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes pulseCore {
+  0%, 100% { transform: scale(0.9); opacity: 0.78; }
+  50% { transform: scale(1.06); opacity: 1; }
+}
+
 </style>
