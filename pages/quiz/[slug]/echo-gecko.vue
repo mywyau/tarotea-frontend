@@ -37,6 +37,9 @@ const GOOD_JINGLE_MIN_SCORE = 25
 const JINGLE_DELAY_MS = 400
 const SUCCESS_MESSAGE_MS = 20000
 const MAX_QUIZ_SIZE = 10
+const FINAL_SCREEN_BUFFER_MS = 250
+const FINAL_SCREEN_MIN_DELAY_MS = 2200
+const FINAL_SCREEN_MAX_DELAY_MS = 4000
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
@@ -78,6 +81,7 @@ const detectedToneRows = ref<ToneApiResponse["detectedAcousticTones"]>([])
 const nextWordCountdownMs = ref<number | null>(null)
 const rapidMode = ref(false)
 const completionSoundPlayed = ref(false)
+const finalizing = ref(false)
 
 const recordedBlob = ref<Blob | null>(null)
 const recordingUrl = ref<string | null>(null)
@@ -90,6 +94,7 @@ const activeAttemptId = ref(0)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 let currentWordAudio: HTMLAudioElement | null = null
 let nextWordCountdownInterval: ReturnType<typeof setInterval> | null = null
+let finalizeQuizTimeout: ReturnType<typeof setTimeout> | null = null
 
 const currentWord = computed(() => quizWords.value[currentIndex.value] ?? null)
 const quizSize = computed(() => Math.min(MAX_QUIZ_SIZE, allWords.value.length))
@@ -162,19 +167,48 @@ function resetRecordingState() {
   recordingUrl.value = null
 }
 
+function getCurrentWordAudioRemainingMs() {
+  if (!currentWordAudio) return 0
+  if (currentWordAudio.paused || currentWordAudio.ended) return 0
+
+  const duration = currentWordAudio.duration
+  const currentTime = currentWordAudio.currentTime
+  if (!Number.isFinite(duration) || !Number.isFinite(currentTime)) return 0
+
+  return Math.max(0, Math.round((duration - currentTime) * 1000))
+}
+
 function advanceToNextWord(options?: { countAsPass?: boolean }) {
-  if (!started.value || finished.value) return
+  if (!started.value || finished.value || finalizing.value) return
 
   if (options?.countAsPass) {
     passedCount.value += 1
   }
 
-  if (currentIndex.value >= quizSize.value - 1) {
-    finished.value = true
-    if (startedAtMs.value) {
-      elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+  const isFinalWord = currentIndex.value >= quizSize.value - 1
+
+  if (isFinalWord) {
+    if (finalizeQuizTimeout) {
+      clearTimeout(finalizeQuizTimeout)
+      finalizeQuizTimeout = null
     }
-    stopTimer()
+
+    finalizing.value = true
+
+    const remainingAudioMs = getCurrentWordAudioRemainingMs()
+    const targetDelayMs = Math.max(FINAL_SCREEN_MIN_DELAY_MS, remainingAudioMs + FINAL_SCREEN_BUFFER_MS)
+    const finalizeDelayMs = Math.min(FINAL_SCREEN_MAX_DELAY_MS, targetDelayMs)
+
+    finalizeQuizTimeout = setTimeout(() => {
+      if (!started.value || finished.value) return
+      finalizing.value = false
+      finished.value = true
+      if (startedAtMs.value) {
+        elapsedSeconds.value = Math.floor((Date.now() - startedAtMs.value) / 1000)
+      }
+      stopTimer()
+      finalizeQuizTimeout = null
+    }, finalizeDelayMs)
   } else {
     currentIndex.value += 1
   }
@@ -321,6 +355,7 @@ function startQuiz() {
   lastToneScore.value = null
   detectedToneRows.value = []
   finished.value = false
+  finalizing.value = false
   completionSoundPlayed.value = false
   currentIndex.value = 0
   passedCount.value = 0
@@ -536,6 +571,8 @@ onBeforeUnmount(() => {
   stopTracks()
   if (recordingUrl.value) URL.revokeObjectURL(recordingUrl.value)
   currentWordAudio?.pause()
+  if (finalizeQuizTimeout) clearTimeout(finalizeQuizTimeout)
+  finalizing.value = false
 })
 </script>
 
@@ -550,7 +587,7 @@ onBeforeUnmount(() => {
       </header>
 
       <section class="rounded-2xl p-5 sm:p-6"
-        :class="finished ? 'bg-transparent shadow-none' : 'border border-fuchsia-100 bg-white/90 shadow-sm'">
+        :class="(finished || finalizing) ? 'bg-transparent shadow-none' : 'border border-fuchsia-100 bg-white/90 shadow-sm'">
         <div v-if="pending || loading" class="text-sm text-gray-600">Loading quiz words…</div>
         <div v-else-if="error" class="rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
           Failed to load quiz data. Please refresh and try again.
@@ -579,6 +616,15 @@ onBeforeUnmount(() => {
               <li>• Use “Skip” if you are struggling with a word.</li>
             </ul>
           </section>
+        </div>
+
+        <div v-else-if="finalizing" class="space-y-6 text-center">
+          <div class="stat-card hero-card result-2 space-y-4">
+            <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-gray-300 border-t-gray-500" />
+            <p class="stat-label">Finalising</p>
+            <h2 class="hero-title">Wrapping up your quiz...</h2>
+            <p class="hero-subtext">Letting the final audio complete before showing your results.</p>
+          </div>
         </div>
 
         <div v-else-if="finished" class="space-y-6">
