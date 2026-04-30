@@ -744,12 +744,12 @@ onBeforeUnmount(() => {
                 <p class="stat-value">{{ score }}</p>
               </div>
 
-              <div class="stat-card hover:brightness-110 result-1 sm:col-span-2">
+              <div class="stat-card hover:brightness-110 result-2 sm:col-span-2">
                 <p class="stat-label">Incorrect</p>
                 <p class="stat-value">{{ incorrectCount }}</p>
               </div>
 
-              <div class="stat-card hover:brightness-110 result-0 sm:col-span-2">
+              <div class="stat-card hover:brightness-110 result-4 sm:col-span-2">
                 <p class="stat-label">Time</p>
                 <p class="stat-value">
                   {{ formattedElapsedTime }}
@@ -763,7 +763,7 @@ onBeforeUnmount(() => {
                 </p>
               </div>
 
-              <div class="stat-card hover:brightness-110 result-1 col-span-2 sm:col-span-3">
+              <div class="stat-card hover:brightness-110 result-1 sm:col-span-3">
                 <p class="stat-label">XP Lost</p>
                 <p class="stat-value">
                   -{{ animatedXpLost }} XP
@@ -858,6 +858,10 @@ onBeforeUnmount(() => {
 
 .result-3 {
   background: rgba(168, 224, 182, 0.45);
+}
+
+.result-4 {
+  background: rgba(196, 181, 253, 0.4);
 }
 
 .hero-card {

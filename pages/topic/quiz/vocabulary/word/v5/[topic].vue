@@ -441,13 +441,13 @@ const completionTiles = computed(() => [
     label: 'Incorrect',
     value: incorrectCount.value,
     suffix: '',
-    className: 'result-1'
+    className: 'result-2'
   },
   {
     label: 'Time',
     value: formattedElapsedTime.value,
     suffix: '',
-    className: 'result-2'
+    className: 'result-4'
   },
   {
     label: 'XP Gained',
@@ -1002,6 +1002,10 @@ onBeforeUnmount(() => {
 
 .result-3 {
   background: rgba(168, 224, 182, 0.45);
+}
+
+.result-4 {
+  background: rgba(196, 181, 253, 0.4);
 }
 
 .hero-card {
