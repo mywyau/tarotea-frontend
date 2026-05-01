@@ -764,16 +764,11 @@ onBeforeUnmount(() => {
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-              <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
-                {{ formattedElapsedTime }}
-              </span>
               <!-- <button
                 class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
                 type="button" @click="restartSession">
                 New session
               </button> -->
-
-              <AudioButton :key="`audio-${selectedVoice}-${current?.wordId}`" :src="currentAudioSrc" />
               <div class="inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5 text-xs">
                 <button type="button" class="rounded-full px-2 py-1 transition" :class="selectedVoice === 'male'
                   ? 'bg-blue-100 text-gray-900 shadow-sm'
@@ -786,6 +781,10 @@ onBeforeUnmount(() => {
                   Female
                 </button>
               </div>
+              <AudioButton :key="`audio-${selectedVoice}-${current?.wordId}`" :src="currentAudioSrc" />
+              <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
+                {{ formattedElapsedTime }}
+              </span>
             </div>
           </div>
 
