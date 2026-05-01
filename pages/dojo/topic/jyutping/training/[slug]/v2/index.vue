@@ -70,6 +70,20 @@ const { isLoggedIn } = useMeStateV2()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+})
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+const currentAudioSrc = computed(() => {
+  if (!current.value?.wordId) return ''
+  return `${cdnBase}/${audioDirectory.value}/${current.value.wordId}.mp3`
+})
+
+function setAudioVoice(voice: AudioVoice) {
+  selectedAudioVoice.value = voice
+}
+
 const auth = await useAuth()
 
 async function authedFetch<T>(
@@ -563,15 +577,13 @@ function advance() {
 const wordAudio = ref<HTMLAudioElement | null>(null)
 
 function playCurrentAudio() {
-  if (!current.value) return
-
-  const src = `${cdnBase}/audio/${current.value.wordId}.mp3`
+  if (!currentAudioSrc.value) return
 
   if (!wordAudio.value) {
     wordAudio.value = new Audio()
   }
 
-  wordAudio.value.src = src
+  wordAudio.value.src = currentAudioSrc.value
   wordAudio.value.currentTime = 0
   wordAudio.value.play().catch(() => { })
 }
@@ -761,7 +773,19 @@ onBeforeUnmount(() => {
                 New session
               </button> -->
 
-              <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
+              <AudioButton :key="`audio-${selectedAudioVoice}-${current?.wordId}`" :src="currentAudioSrc" />
+              <div class="inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5 text-xs">
+                <button type="button" class="rounded-full px-2 py-1 transition" :class="selectedAudioVoice === 'male'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-500 hover:text-gray-800'" @click="setAudioVoice('male')">
+                  Male
+                </button>
+                <button type="button" class="rounded-full px-2 py-1 transition" :class="selectedAudioVoice === 'female'
+                  ? 'bg-gray-900 text-white'
+                  : 'text-gray-500 hover:text-gray-800'" @click="setAudioVoice('female')">
+                  Female
+                </button>
+              </div>
             </div>
           </div>
 
