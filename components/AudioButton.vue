@@ -4,19 +4,36 @@ const props = withDefaults(defineProps<{
   autoplay?: boolean
   size?: 'sm' | 'md' | 'lg'
   playbackRate?: number
+  useVoiceAudio?: boolean
 }>(), {
   size: 'md',
   playbackRate: 1,
+  useVoiceAudio: true,
 })
 
 const { volume } = useAudioVolume()
 const { play: playGlobal } = useGlobalAudio()
+type AudioVoice = 'male' | 'female'
+const audioVoiceCookie = useCookie<AudioVoice | null>('audio-voice', {
+  default: () => null,
+  sameSite: 'lax',
+  maxAge: 60 * 60 * 24 * 180
+})
+const selectedAudioVoice = computed<AudioVoice>(() => {
+  return audioVoiceCookie.value === 'female' ? 'female' : 'male'
+})
+const transformedSrc = computed(() => {
+  if (!props.useVoiceAudio) return props.src
+  if (!props.src.includes('/audio/')) return props.src
+  return props.src.replace('/audio/', selectedAudioVoice.value === 'female' ? '/audio-female/' : '/audio-male/')
+})
 
 const audio = ref<HTMLAudioElement | null>(null)
+const hasRetriedWithOriginalSrc = ref(false)
 
 const ensureAudio = () => {
   if (!audio.value) {
-    audio.value = new Audio(props.src)
+    audio.value = new Audio(transformedSrc.value)
   }
 }
 
@@ -73,8 +90,32 @@ watch(() => props.src, (newSrc) => {
     audio.value = new Audio(newSrc)
     audio.value.volume = volume.value
     audio.value.playbackRate = props.playbackRate
+    hasRetriedWithOriginalSrc.value = false
   }
 })
+
+watch(transformedSrc, (newSrc) => {
+  if (audio.value) {
+    audio.value.pause()
+    audio.value = new Audio(newSrc)
+    audio.value.volume = volume.value
+    audio.value.playbackRate = props.playbackRate
+    hasRetriedWithOriginalSrc.value = false
+  }
+})
+
+watch(audio, (newAudio) => {
+  if (!newAudio) return
+  newAudio.onerror = () => {
+    if (hasRetriedWithOriginalSrc.value || newAudio.src === props.src) return
+    hasRetriedWithOriginalSrc.value = true
+    audio.value = new Audio(props.src)
+    if (!audio.value) return
+    audio.value.volume = volume.value
+    audio.value.playbackRate = props.playbackRate
+    playGlobal(audio.value)
+  }
+}, { immediate: true })
 
 onBeforeUnmount(() => {
   if (audio.value) {
