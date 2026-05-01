@@ -183,26 +183,6 @@ watchEffect(() => {
 <template>
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
-        <!-- <div class="page-top-row">
-            <NuxtLink :to="`/topic/words/${topic}/v2#${word.id}`" class="text-sm text-black hover:underline">
-                ← Back
-            </NuxtLink>
-
-            <div class="voice-toggle" aria-label="Audio voice">
-                <button type="button" class="voice-toggle-btn"
-                    :class="{ 'voice-toggle-btn-active': selectedAudioVoice === 'male' }"
-                    :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
-                    Male
-                </button>
-
-                <button type="button" class="voice-toggle-btn"
-                    :class="{ 'voice-toggle-btn-active': selectedAudioVoice === 'female' }"
-                    :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
-                    Female
-                </button>
-            </div>
-        </div> -->
-
         <div class="flex items-center justify-between gap-4">
             <NuxtLink :to="`/topic/words/${topic}/v2#${word.id}`" class="text-sm text-black hover:underline">
                 ← Back

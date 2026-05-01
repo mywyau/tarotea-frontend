@@ -104,7 +104,36 @@ const nextWord = computed(() => {
 
 const { volume } = useAudioVolume()
 
+type AudioVoice = 'male' | 'female'
+
+const audioVoiceCookie = useCookie<AudioVoice | null>('audio-voice', {
+  default: () => null,
+  sameSite: 'lax',
+  maxAge: 60 * 60 * 24 * 180
+})
+
+const selectedAudioVoice = ref<AudioVoice>(
+  audioVoiceCookie.value === 'female' ? 'female' : 'male'
+)
+
+const setAudioVoice = (voice: AudioVoice) => {
+  selectedAudioVoice.value = voice
+  audioVoiceCookie.value = voice
+}
+
+const audioDirectory = computed(() => {
+  return selectedAudioVoice.value === 'female'
+    ? 'audio-female'
+    : 'audio'
+})
+
+const getAudioSrc = (fileName?: string | null) => {
+  if (!fileName) return ''
+  return `${cdnBase}/${audioDirectory.value}/${fileName}`
+}
+
 const word = computed(() => data.value)
+
 const notFound = computed(() => error.value?.statusCode === 404)
 
 // Format level label (level-four → Level Four)
@@ -191,10 +220,29 @@ watchEffect(() => {
 
   <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
-    <NuxtLink :to="`/level/${level}/v2#${word.id}`" class="text-sm text-black hover:underline">
-      ← Back
-    </NuxtLink>
+    <div class="flex items-center justify-between gap-4">
+      <NuxtLink :to="`/level/${level}/v2#${word.id}`" class="text-sm text-black hover:underline">
+        ← Back
+      </NuxtLink>
 
+      <div class="inline-flex items-center rounded-full border border-gray-300 bg-white p-1" aria-label="Audio voice">
+        <button type="button" class="rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+          :class="selectedAudioVoice === 'male'
+            ? 'bg-pink-100 text-gray-900'
+            : 'bg-transparent text-gray-600 hover:bg-gray-100'
+            " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+          Male
+        </button>
+
+        <button type="button" class="rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+          :class="selectedAudioVoice === 'female'
+            ? 'bg-pink-100 text-gray-900'
+            : 'bg-transparent text-gray-600 hover:bg-gray-100'
+            " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+          Female
+        </button>
+      </div>
+    </div>
 
     <!-- Word header -->
     <section class="text-center space-y-4 sm:space-y-6 word-card rounded-xl p-6 sm:p-8">
@@ -254,13 +302,11 @@ watchEffect(() => {
           <span class="mobile-action-label">Speak</span>
         </NuxtLink>
 
-        <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" :playback-rate="playbackRate"
-          size="md" class="tone-gate-play-btn main-action-btn" />
+        <AudioButton v-if="word.audio?.word" :key="`word-audio-${selectedAudioVoice}-${word.audio.word}`"
+          :src="getAudioSrc(word.audio.word)" :playback-rate="playbackRate" size="md"
+          class="tone-gate-play-btn main-action-btn" />
 
-        <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio-female/${word.audio.word}`"
-          :playback-rate="playbackRate" size="md" class="tone-gate-play-btn main-action-btn" />
       </div>
-
     </section>
 
     <!-- Usage -->
@@ -331,13 +377,9 @@ watchEffect(() => {
                 </NuxtLink>
 
                 <AudioButton v-if="word.audio?.examples?.[currentExampleIndex]"
-                  :src="`${cdnBase}/audio/${word.audio.examples[currentExampleIndex]}`" :playback-rate="playbackRate"
-                  size="sm" class="tone-gate-play-btn example-action-btn" />
-
-
-                <AudioButton v-if="word.audio?.examples?.[currentExampleIndex]"
-                  :src="`${cdnBase}/audio-female/${word.audio.examples[currentExampleIndex]}`" :playback-rate="playbackRate"
-                  size="sm" class="tone-gate-play-btn example-action-btn" />
+                  :key="`example-audio-${selectedAudioVoice}-${word.id}-${currentExampleIndex}`"
+                  :src="getAudioSrc(word.audio.examples[currentExampleIndex])" :playback-rate="playbackRate" size="sm"
+                  class="tone-gate-play-btn example-action-btn" />
 
               </div>
             </div>
