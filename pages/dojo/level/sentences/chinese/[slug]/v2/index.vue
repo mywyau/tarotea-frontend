@@ -61,17 +61,17 @@ const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
 type AudioVoice = 'male' | 'female'
-const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+const selectedVoice = useCookie<AudioVoice>('audio-voice', {
   default: () => 'male',
 })
-const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+const audioDirectory = computed(() => selectedVoice.value === 'female' ? 'audio-female' : 'audio-male')
 const currentAudioSrc = computed(() => {
   if (!current.value?.sentenceId) return ''
   return `${cdnBase}/${audioDirectory.value}/${current.value.sentenceId}.mp3`
 })
 
-function setAudioVoice(voice: AudioVoice) {
-  selectedAudioVoice.value = voice
+function setVoice(voice: AudioVoice) {
+  selectedVoice.value = voice
 }
 
 const auth = await useAuth()
@@ -660,16 +660,16 @@ onBeforeUnmount(() => {
               <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
                 {{ formattedElapsedTime }}
               </span>
-              <AudioButton :key="`audio-${selectedAudioVoice}-${current?.sentenceId}`" :src="currentAudioSrc" />
+              <AudioButton :key="`audio-${selectedVoice}-${current?.sentenceId}`" :src="currentAudioSrc" />
               <div class="inline-flex items-center rounded-full border border-gray-200 bg-white p-0.5 text-xs">
-                <button type="button" class="rounded-full px-2 py-1 transition" :class="selectedAudioVoice === 'male'
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-500 hover:text-gray-800'" @click="setAudioVoice('male')">
+                <button type="button" class="rounded-full px-2 py-1 transition" :class="selectedVoice === 'male'
+                  ? 'bg-blue-100 text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'" @click="setVoice('male')">
                   Male
                 </button>
-                <button type="button" class="rounded-full px-2 py-1 transition" :class="selectedAudioVoice === 'female'
-                  ? 'bg-gray-900 text-white'
-                  : 'text-gray-500 hover:text-gray-800'" @click="setAudioVoice('female')">
+                <button type="button" class="rounded-full px-2 py-1 transition" :class="selectedVoice === 'female'
+                  ? 'bg-pink-100 text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'" @click="setVoice('female')">
                   Female
                 </button>
               </div>
