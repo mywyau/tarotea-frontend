@@ -100,7 +100,7 @@ const setAudioVoice = (voice: AudioVoice) => {
 const audioDirectory = computed(() => {
     return selectedAudioVoice.value === 'female'
         ? 'audio-female'
-        : 'audio'
+        : 'audio-male'
 })
 
 const getAudioSrc = (fileName?: string | null) => {

@@ -124,7 +124,7 @@ const setAudioVoice = (voice: AudioVoice) => {
 const audioDirectory = computed(() => {
   return selectedAudioVoice.value === 'female'
     ? 'audio-female'
-    : 'audio'
+    : 'audio-male'
 })
 
 const getAudioSrc = (fileName?: string | null) => {
@@ -135,13 +135,6 @@ const getAudioSrc = (fileName?: string | null) => {
 const word = computed(() => data.value)
 
 const notFound = computed(() => error.value?.statusCode === 404)
-
-// Format level label (level-four → Level Four)
-const formattedLevel = computed(() => {
-  return level.value
-    .replace(/-/g, " ")
-    .replace(/\b\w/g, c => c.toUpperCase())
-})
 
 const masteryPercent = computed(() => {
   const value = xp.value ?? 0
