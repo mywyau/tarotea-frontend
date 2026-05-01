@@ -69,6 +69,16 @@ const { isLoggedIn } = useMeStateV2()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+type AudioVoice = 'male' | 'female'
+
+const selectedVoice = useState<AudioVoice>('dojo-audio-voice', () => 'male')
+
+const audioDirectory = computed(() => {
+  return selectedVoice.value === 'female'
+    ? 'audio-female'
+    : 'audio-male'
+})
+
 const auth = await useAuth()
 
 async function authedFetch<T>(
@@ -205,6 +215,11 @@ const sessionResult = ref<{
 
 const current = computed(() => words.value[idx.value] ?? null)
 const isComplete = computed(() => idx.value >= words.value.length)
+
+const currentAudioSrc = computed(() => {
+  if (!current.value?.wordId) return ''
+  return `${cdnBase}/${audioDirectory.value}/${current.value.wordId}.mp3`
+})
 
 const normalizedInput = computed(() => normalizeJyutping(input.value))
 const normalizedAnswer = computed(() =>
@@ -555,17 +570,24 @@ function advance() {
 const wordAudio = ref<HTMLAudioElement | null>(null)
 
 function playCurrentAudio() {
-  if (!current.value) return
-
-  const src = `${cdnBase}/audio/${current.value.wordId}.mp3`
+  if (!currentAudioSrc.value) return
 
   if (!wordAudio.value) {
     wordAudio.value = new Audio()
   }
 
-  wordAudio.value.src = src
+  wordAudio.value.pause()
+  wordAudio.value.src = currentAudioSrc.value
   wordAudio.value.currentTime = 0
   wordAudio.value.play().catch(() => { })
+}
+
+function setVoice(voice: AudioVoice) {
+  selectedVoice.value = voice
+
+  setTimeout(() => {
+    playCurrentAudio()
+  }, 50)
 }
 
 watch(
@@ -747,13 +769,22 @@ onBeforeUnmount(() => {
               <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
                 {{ formattedElapsedTime }}
               </span>
-              <!-- <button
-                class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
-                type="button" @click="restartSession">
-                New session
-              </button> -->
 
-              <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
+              <div class="flex rounded-full bg-gray-100 p-1">
+                <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedVoice === 'male'
+                  ? 'bg-blue-100 text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'" @click="setVoice('male')">
+                  Male
+                </button>
+
+                <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedVoice === 'female'
+                  ? 'bg-pink-100 text-gray-900 shadow-sm'
+                  : 'text-gray-500 hover:text-gray-800'" @click="setVoice('female')">
+                  Female
+                </button>
+              </div>
+
+              <AudioButton :key="`${current?.wordId}-${selectedVoice}`" :src="currentAudioSrc" />
             </div>
           </div>
 
