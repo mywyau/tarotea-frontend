@@ -47,6 +47,9 @@ export default defineNuxtConfig({
 
   app: {
     head: {
+      htmlAttrs: {
+        lang: "en",
+      },
       titleTemplate: (titleChunk) => {
         return titleChunk
           ? `${titleChunk} · TaroTea`
@@ -57,6 +60,29 @@ export default defineNuxtConfig({
           name: "description",
           content:
             "Learn natural Cantonese with exercises, vocabulary, audio and quizzes.",
+        },
+        {
+          property: "og:site_name",
+          content: "TaroTea",
+        },
+        {
+          property: "og:type",
+          content: "website",
+        },
+        {
+          name: "twitter:card",
+          content: "summary_large_image",
+        },
+      ],
+      link: [
+        {
+          rel: "icon",
+          type: "image/png",
+          href: "/favicon-32x32.png",
+        },
+        {
+          rel: "apple-touch-icon",
+          href: "/apple-touch-icon.png",
         },
       ],
     },
