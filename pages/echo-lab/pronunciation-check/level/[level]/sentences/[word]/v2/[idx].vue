@@ -4,7 +4,7 @@ definePageMeta({
   middleware: "word-access",
 })
 
-import { MAX_AUDIO_BYTES, MAX_RECORDING_SECONDS, whisperRequestLimit, whisperRequestLimitFree } from "~/config/audio_config"
+import { MAX_AUDIO_BYTES, MAX_RECORDING_SECONDS } from "~/config/audio_config"
 
 const route = useRoute()
 const router = useRouter()
@@ -478,10 +478,14 @@ onUnmounted(() => {
         <BackLink />
 
         <div v-if="supported" class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
-          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition"
+            :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
+            :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
             Male
           </button>
-          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition"
+            :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
+            :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
             Female
           </button>
         </div>
@@ -636,10 +640,8 @@ onUnmounted(() => {
 
       <section class="mt-6 max-w-md mx-auto text-xs text-gray-500">
         <button
-          class="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-700 hover:bg-[#A8CAE0]/30 transition"
-          type="button"
-          @click="showGuidancePanel = !showGuidancePanel"
-        >
+          class="w-full rounded-md px-3 py-2 text-center hover:underline font-medium text-gray-700 hover:bg-[#A8CAE0]/30 transition"
+          type="button" @click="showGuidancePanel = !showGuidancePanel">
           {{ showGuidancePanel ? 'Hide warning and tips' : 'Show warning and tips' }}
         </button>
 
