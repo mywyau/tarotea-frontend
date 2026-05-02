@@ -435,6 +435,7 @@ const tips = [
 ]
 
 const tipIndex = ref(0)
+const showGuidancePanel = ref(false)
 
 // watch([authReady, isLoggedIn], ([ready, loggedIn]) => {
 //   if (ready && loggedIn) {
@@ -633,46 +634,71 @@ onUnmounted(() => {
         Your browser does not support microphone recording.
       </div>
 
-      <div class="text-xs text-gray-500 bg-gray-50 border border-gray-200 rounded-md p-3 max-w-md mx-auto space-y-2">
-        <p class="font-medium text-gray-600">
-          ⚠️ AI pronunciation feedback
-        </p>
+      <section class="mt-6 max-w-md mx-auto text-xs text-gray-500">
+        <button
+          class="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-700 hover:bg-gray-100 transition"
+          type="button"
+          @click="showGuidancePanel = !showGuidancePanel"
+        >
+          {{ showGuidancePanel ? 'Hide warning and tips' : 'Show warning and tips' }}
+        </button>
 
-        <p>
-          This feature uses AI speech recognition to estimate pronunciation.
-          Results may occasionally be inaccurate.
-        </p>
+        <Transition name="tip-expand">
+          <div v-if="showGuidancePanel" class="mt-3 space-y-4">
+            <div class="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
+              <p class="font-medium text-gray-600">
+                ⚠️ AI pronunciation feedback
+              </p>
 
-        <p>
-          <strong>Privacy:</strong> Your voice recording is processed securely for
-          pronunciation only and is <strong>not stored</strong>. Audio is temporary and is deleted
-          immediately after processing.
-        </p>
-      </div>
+              <p>
+                This feature uses AI speech recognition to estimate pronunciation.
+                Results may occasionally be inaccurate.
+              </p>
 
-      <div class="mt-6 text-xs text-gray-500 p-4 max-w-md mx-auto">
-        <p class="font-medium text-gray-600 mb-3">
-          Tips
-        </p>
+              <p>
+                <strong>Privacy:</strong> Your voice recording is processed securely for
+                pronunciation only and is <strong>not stored</strong>. Audio is temporary and is deleted
+                immediately after processing.
+              </p>
+            </div>
 
-        <div class="flex items-center justify-between gap-3">
-          <Transition name="tip-fade" mode="out-in">
-            <p :key="tipIndex" class="text-center flex-1 leading-relaxed">
-              {{ tips[tipIndex] }}
-            </p>
-          </Transition>
-        </div>
+            <div class="p-4">
+              <p class="font-medium text-gray-600 mb-3">
+                Tips
+              </p>
 
-        <div class="flex justify-center gap-1 mt-3">
-          <span v-for="(tip, i) in tips" :key="i" class="w-1.5 h-1.5 rounded-full"
-            :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'" />
-        </div>
-      </div>
+              <div class="flex items-center justify-between gap-3">
+                <Transition name="tip-fade" mode="out-in">
+                  <p :key="tipIndex" class="text-center flex-1 leading-relaxed">
+                    {{ tips[tipIndex] }}
+                  </p>
+                </Transition>
+              </div>
+
+              <div class="flex justify-center gap-1 mt-3">
+                <span v-for="(tip, i) in tips" :key="i" class="w-1.5 h-1.5 rounded-full"
+                  :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'" />
+              </div>
+            </div>
+          </div>
+        </Transition>
+      </section>
     </div>
   </div>
 </template>
 
 <style scoped>
+.tip-expand-enter-active,
+.tip-expand-leave-active {
+  transition: all 0.2s ease;
+}
+
+.tip-expand-enter-from,
+.tip-expand-leave-to {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
 .tip-fade-enter-active,
 .tip-fade-leave-active {
   transition: opacity 0.35s ease, transform 0.35s ease;
