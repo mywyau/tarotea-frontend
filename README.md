@@ -13,18 +13,18 @@ The goal is not academic Cantonese, but the words and phrases you actually hear 
 - 🔊 Native Cantonese audio
 - 🔐 Auth0 authentication (Google login)
 - 💳 Stripe subscriptions (Free / Pro)
-- 🗑️ Full account deletion with data + billing cleanup
+- 🗑️ Full account deletion with data and billing cleanup
 
 ---
 
 ## Tech Stack
 
-- **Frontend:** Nuxt 3 + Vue + Tailwind
+- **Frontend:** Nuxt 3 + Vue + Tailwind CSS
 - **Backend:** Nuxt server routes (Nitro)
 - **Auth:** Auth0 (JWT-based)
 - **Billing:** Stripe Checkout + Billing Portal
 - **Database:** PostgreSQL (Supabase)
-- **CDN:** JSON + audio served from CDN
+- **Content delivery:** Vocabulary JSON and audio served from CDN
 
 ---
 
@@ -52,10 +52,59 @@ If billing cancellation fails, deletion is blocked and must be retried.
 
 ---
 
-## Status
+## Local Development
 
-🚧 Actively developed  
-This project is evolving and features may change.
+### 1) Clean local build artifacts
+
+```bash
+rm -rf .nuxt node_modules .output
+```
+
+### 2) Install dependencies
+
+```bash
+npm install
+```
+
+### 3) Run development server
+
+```bash
+npm run dev
+```
+
+### 4) Build for production
+
+```bash
+npm run build
+```
+
+### 5) Preview production build
+
+```bash
+npm run preview
+```
+
+---
+
+## Data Seeding
+
+### Seed topic words
+
+```bash
+npx tsx scripts/seed-topics.ts
+```
+
+### Seed level words
+
+```bash
+npx tsx scripts/seed-levels.ts
+```
+
+---
+
+## Project Status
+
+🚧 Actively developed. This project is evolving and features may change.
 
 ---
 
@@ -63,46 +112,4 @@ This project is evolving and features may change.
 
 - Keep the app simple and calm
 - Teach natural Cantonese, not textbook grammar
-- Respect user data — no dark patterns, easy deletion
-
-
-### Clear build
-
-```
-rm -rf .nuxt
-rm -rf node_modules
-rm -rf .output
-```
-
-### Install dependencies
-```
-npm install
-```
-
-### Run dev build
-```
-npm run build
-```
-
-### Run dev build
-```
-npm run dev
-```
-
-### Run preview prod
-```
-npm run preview
-```
-
-### Seed topic words
-```
-npx tsx scripts/seed-topics.ts
-```
-
-### Seed level words
-```
-npx tsx scripts/seed-levels.ts
-```
-
-
-
+- Respect user data: no dark patterns, easy deletion
