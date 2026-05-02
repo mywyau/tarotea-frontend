@@ -207,11 +207,11 @@ watchEffect(() => {
             <div class="flex items-center gap-2">
                 <details class="group relative">
                     <summary
-                        class="list-none cursor-pointer rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50">
+                        class="list-none cursor-pointer rounded-full border border-yellow-300 bg-yellow-200 px-3 py-1.5 text-xs font-semibold text-gray-800 shadow-sm transition hover:bg-yellow-300">
                         Audio settings
                     </summary>
                     <div
-                        class="absolute left-1/2 z-20 mt-2 w-[min(16rem,calc(100vw-1rem))] -translate-x-1/2 rounded-xl border border-gray-200 bg-white p-3 shadow-lg space-y-3 sm:left-auto sm:right-0 sm:w-64 sm:translate-x-0">
+                        class="absolute left-1/2 z-20 mt-2 w-[min(16rem,calc(100vw-1rem))] -translate-x-1/2 rounded-xl border border-yellow-300 bg-yellow-100 p-3 shadow-lg space-y-3 sm:left-auto sm:right-0 sm:w-64 sm:translate-x-0">
                         <div class="space-y-1">
                             <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
                             <div class="flex items-center gap-2">
