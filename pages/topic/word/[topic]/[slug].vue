@@ -207,7 +207,7 @@ watchEffect(() => {
             <div class="flex items-center gap-2">
                 <details class="group relative">
                     <summary
-                        class="list-none cursor-pointer rounded-full border border-yellow-200 bg-yellow-50 px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-yellow-100">
+                        class="list-none cursor-pointer rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-semibold text-black shadow-sm transition hover:bg-yellow-200">
                         Audio settings
                     </summary>
                     <div
@@ -243,15 +243,15 @@ watchEffect(() => {
                 <div class="flex rounded-full bg-gray-100 p-1"
                     aria-label="Audio voice">
                     <button type="button" class="rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'male'
-                            ? 'bg-blue-100 text-gray-900 shadow-sm'
-                            : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                            ? 'bg-blue-100 text-black shadow-sm'
+                            : 'bg-transparent text-gray-700 hover:bg-gray-200'
                         " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
                         Male
                     </button>
 
                     <button type="button" class="rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'female'
-                            ? 'bg-pink-100 text-gray-900 shadow-sm'
-                            : 'bg-transparent text-gray-600 hover:bg-gray-100'
+                            ? 'bg-pink-100 text-black shadow-sm'
+                            : 'bg-transparent text-gray-700 hover:bg-gray-200'
                         " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
                         Female
                     </button>
