@@ -236,22 +236,59 @@ watchEffect(() => {
         ← Back
       </NuxtLink>
 
-      <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
-        <button type="button" class="rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
-          :class="selectedAudioVoice === 'male'
-            ? 'bg-blue-100 text-gray-900 shadow-sm'
-            : 'bg-transparent text-gray-600 hover:bg-gray-100'
-            " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
-          Male
-        </button>
+      <div class="flex items-center gap-2">
+        <details class="group relative">
+          <summary
+            class="list-none cursor-pointer rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50">
+            Audio settings
+          </summary>
+          <div
+            class="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-lg space-y-3">
+            <div class="space-y-1">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
+              <div class="flex items-center gap-2">
+                <input type="range" min="0" max="1" step="0.01" v-model="volume"
+                  class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
+                <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
+              </div>
+            </div>
+            <div class="space-y-1">
+              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
+              <div class="flex items-center justify-between gap-2">
+                <button type="button"
+                  class="h-8 w-8 rounded-full border border-gray-300 bg-white text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
+                  @click="decreasePlaybackRate">
+                  ←
+                </button>
+                <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{ speedDeltaLabel }}</span>
+                <button type="button"
+                  class="h-8 w-8 rounded-full border border-gray-300 bg-white text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
+                  @click="increasePlaybackRate">
+                  →
+                </button>
+              </div>
+            </div>
+          </div>
+        </details>
+        <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+          <button type="button" class="rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+            :class="selectedAudioVoice === 'male'
+              ? 'bg-blue-100 text-gray-900 shadow-sm'
+              : 'bg-transparent text-gray-600 hover:bg-gray-100'
+              " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+            Male
+          </button>
 
-        <button type="button" class="rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
-          :class="selectedAudioVoice === 'female'
-            ? 'bg-pink-100 text-gray-900 shadow-sm'
-            : 'bg-transparent text-gray-600 hover:bg-gray-100'
-            " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
-          Female
-        </button>
+          <button type="button" class="rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+            :class="selectedAudioVoice === 'female'
+              ? 'bg-pink-100 text-gray-900 shadow-sm'
+              : 'bg-transparent text-gray-600 hover:bg-gray-100'
+              " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+            Female
+          </button>
+        </div>
       </div>
     </div>
 
@@ -334,41 +371,6 @@ watchEffect(() => {
         </ul>
       </details>
     </section>
-
-    <!-- Volume and text speed -->
-    <!-- Volume and speed -->
-    <div
-      class="mx-auto w-full max-w-md rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 text-sm text-gray-700">
-      <span class="text-left">Volume</span>
-
-      <div class="flex items-center gap-3">
-        <input type="range" min="0" max="1" step="0.01" v-model="volume"
-          class="h-2 w-36 cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
-        <span class="w-8 tabular-nums">
-          {{ Math.round(volume * 100) }}%
-        </span>
-      </div>
-
-      <span class="text-left">Speed</span>
-
-      <div class="flex items-center gap-3">
-        <button type="button"
-          class="h-9 w-9 rounded-full border border-gray-300 bg-white text-base font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-          :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
-          @click="decreasePlaybackRate">
-          ←
-        </button>
-        <span class="w-28 text-center tabular-nums text-sm font-semibold text-gray-900">
-          {{ speedDeltaLabel }}
-        </span>
-        <button type="button"
-          class="h-9 w-9 rounded-full border border-gray-300 bg-white text-base font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
-          :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
-          @click="increasePlaybackRate">
-          →
-        </button>
-      </div>
-    </div>
 
     <!-- Examples -->
     <section v-if="word.examples?.length" class="section-card rounded-xl p-6">
