@@ -473,8 +473,17 @@ onUnmounted(() => {
         </button>
       </div> -->
 
-      <div class="w-full text-left mb-6">
+      <div class="mb-6 flex w-full items-center justify-between">
         <BackLink />
+
+        <div v-if="supported" class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+            Male
+          </button>
+          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+            Female
+          </button>
+        </div>
       </div>
 
       <h1 class="text-2xl font-bold mb-2">Echo Lab</h1>
@@ -494,16 +503,6 @@ onUnmounted(() => {
       </div>
 
       <div v-if="supported" class="space-y-8">
-        <div class="flex w-full justify-end">
-          <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
-            <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
-              Male
-            </button>
-            <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
-              Female
-            </button>
-          </div>
-        </div>
         <div v-if="practiceTarget" class="mt-4 space-y-2">
           <p class="text-3xl font-bold">{{ practiceTarget.chinese }}</p>
           <p class="text-gray-500 text-sm">{{ practiceTarget.jyutping }}</p>
