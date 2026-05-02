@@ -77,14 +77,7 @@ const { play: playGlobalAudio } = useGlobalAudio()
 function getRandomizedAudioSrc(audioKey: string) {
   const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
   const voiceDirectory = voiceDirectories[0]
-  return `${cdnBase}/${voiceDirectory}/${audioKey}`
-}
-
-function playRandomizedAnswerAudio(audioKey: string) {
-  const audio = new Audio(getRandomizedAudioSrc(audioKey))
-  audio.volume = volume.value
-  audio.currentTime = 0
-  playGlobalAudio(audio)
+  return `${cdnBase}/${voiceDirectory}/${audioKey}.mp3`
 }
 
 const { getAccessToken } = await useAuth()
@@ -477,9 +470,7 @@ async function selectAnswer(answer: string) {
   } else {
     playIncorrectJingle()
   }
-
-  playRandomizedAnswerAudio(wordId)
-
+  
   if (answerLog.value.some(entry => entry.wordId === wordId)) {
     return
   }
