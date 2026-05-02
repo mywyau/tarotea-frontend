@@ -147,6 +147,24 @@ const streak = ref<number>(0)
 const isMastered = computed(() => xp.value >= masteryXp)
 
 const playbackRate = ref(1)
+const minPlaybackRate = 0.4
+const maxPlaybackRate = 2
+const playbackStep = 0.2
+const speedDeltaPercent = computed(() => Math.round((playbackRate.value - 1) * 100))
+const speedDeltaLabel = computed(() => {
+  if (speedDeltaPercent.value === 0) return 'Normal speed'
+  return speedDeltaPercent.value > 0
+    ? `+${speedDeltaPercent.value}% faster`
+    : `${Math.abs(speedDeltaPercent.value)}% slower`
+})
+
+const decreasePlaybackRate = () => {
+  playbackRate.value = Math.max(minPlaybackRate, Number((playbackRate.value - playbackStep).toFixed(2)))
+}
+
+const increasePlaybackRate = () => {
+  playbackRate.value = Math.min(maxPlaybackRate, Number((playbackRate.value + playbackStep).toFixed(2)))
+}
 const currentExampleIndex = ref(0)
 const totalExamples = computed(() => word.value?.examples?.length ?? 0)
 const currentExample = computed(() => word.value?.examples?.[currentExampleIndex.value] ?? null)
@@ -319,11 +337,13 @@ watchEffect(() => {
 
     <!-- Volume and text speed -->
     <!-- Volume and speed -->
-    <div class="mx-auto grid w-fit grid-cols-[auto_auto] items-center gap-x-4 gap-y-3 text-sm text-gray-600">
+    <div
+      class="mx-auto w-full max-w-md rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-sm grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-3 text-sm text-gray-700">
       <span class="text-left">Volume</span>
 
       <div class="flex items-center gap-3">
-        <input type="range" min="0" max="1" step="0.01" v-model="volume" class="w-32 accent-black" />
+        <input type="range" min="0" max="1" step="0.01" v-model="volume"
+          class="h-2 w-36 cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
         <span class="w-8 tabular-nums">
           {{ Math.round(volume * 100) }}%
         </span>
@@ -331,14 +351,22 @@ watchEffect(() => {
 
       <span class="text-left">Speed</span>
 
-      <div class="flex items-center">
-        <select v-model.number="playbackRate" class="rounded border px-2 py-1">
-          <option :value="1.4">1.4x</option>
-          <option :value="1.2">1.2x</option>
-          <option :value="1">1.0x</option>
-          <option :value="0.80">0.8x</option>
-          <option :value="0.6">0.6x</option>
-        </select>
+      <div class="flex items-center gap-3">
+        <button type="button"
+          class="h-9 w-9 rounded-full border border-gray-300 bg-white text-base font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
+          @click="decreasePlaybackRate">
+          ←
+        </button>
+        <span class="w-28 text-center tabular-nums text-sm font-semibold text-gray-900">
+          {{ speedDeltaLabel }}
+        </span>
+        <button type="button"
+          class="h-9 w-9 rounded-full border border-gray-300 bg-white text-base font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+          :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
+          @click="increasePlaybackRate">
+          →
+        </button>
       </div>
     </div>
 
