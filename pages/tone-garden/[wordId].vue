@@ -26,6 +26,17 @@ const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 const route = useRoute()
 
+
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+  sameSite: 'lax',
+})
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+const setAudioVoice = (voice: AudioVoice) => {
+  selectedAudioVoice.value = voice
+}
+
 const wordIdFromRoute = computed(() => {
   const fromParam = route.params.wordId
 
@@ -54,7 +65,7 @@ const expectedChinese = computed(() => selectedWord.value?.word ?? "")
 const expectedJyutping = computed(() => selectedWord.value?.jyutping ?? "")
 const referenceAudioPath = computed(() => {
   const filename = selectedWord.value?.audio?.word
-  return filename ? `audio/${filename}` : ""
+  return filename ? `${audioDirectory.value}/${filename}` : ""
 })
 const referenceAudioUrl = computed(() => {
   return referenceAudioPath.value ? `${cdnBase}/${referenceAudioPath.value}` : ""
@@ -449,7 +460,16 @@ async function runToneCheck() {
         <p class="mt-3 text-xs uppercase tracking-wide text-gray-500">Target Jyutping</p>
         <p class="text-xl">{{ expectedJyutping || "—" }}</p>
 
-        <div class="mt-4 flex flex-wrap gap-3">
+        <div class="mt-4 flex flex-wrap items-center gap-3">
+          <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+            <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+              Male
+            </button>
+            <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+              Female
+            </button>
+          </div>
+
           <button
             class="rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
             :disabled="!referenceAudioUrl" @click="playReferenceAudio">
