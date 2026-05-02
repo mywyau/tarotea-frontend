@@ -1,4 +1,10 @@
 <script setup lang="ts">
+useSeoMeta({
+    title: 'Cantonese Topic Quizzes',
+    description: 'Practice Cantonese topic quizzes with vocabulary, audio-only, and sentence modes.',
+    ogTitle: 'Cantonese Topic Quizzes | TaroTea',
+    ogDescription: 'Train Cantonese by topic with multiple quiz modes and adaptive repetition.',
+})
 
 import { computed, onMounted, ref, watch } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'

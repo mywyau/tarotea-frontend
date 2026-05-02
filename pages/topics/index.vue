@@ -1,4 +1,10 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Cantonese Topics',
+  description: 'Browse Cantonese vocabulary and sentence topics grouped by everyday themes.',
+  ogTitle: 'Cantonese Topics | TaroTea',
+  ogDescription: 'Explore themed Cantonese topic lists with vocabulary and sentence practice.',
+})
 
 import type { Topic } from '@/types/topic'
 import { brandColours } from '@/utils/branding/helpers'
