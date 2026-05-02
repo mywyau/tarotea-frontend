@@ -11,6 +11,16 @@ const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+  sameSite: 'lax',
+})
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+const setAudioVoice = (voice: AudioVoice) => {
+  selectedAudioVoice.value = voice
+}
+
 const wordSlug = computed(() => decodeURIComponent(route.params.word as string))
 const topicSlug = computed(() => String(route.params.topic ?? ""))
 
@@ -64,7 +74,7 @@ const practiceTarget = computed(() => {
 
 const phraseAudioSrc = computed(() => {
   const filename = word.value?.audio?.examples?.[idx.value]
-  return filename ? `${cdnBase}/audio/${filename}` : null
+  return filename ? `${cdnBase}/${audioDirectory.value}/${filename}` : null
 })
 
 const supported = ref(false)
@@ -488,6 +498,16 @@ onUnmounted(() => {
       </div>
 
       <div v-if="supported" class="space-y-8">
+        <div class="flex w-full justify-end">
+          <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+            <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+              Male
+            </button>
+            <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+              Female
+            </button>
+          </div>
+        </div>
         <div v-if="practiceTarget" class="mt-4 space-y-2">
           <p class="text-3xl font-bold">{{ practiceTarget.chinese }}</p>
           <p class="text-gray-500 text-sm">{{ practiceTarget.jyutping }}</p>
