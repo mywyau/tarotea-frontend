@@ -642,7 +642,7 @@ onUnmounted(() => {
 
       <section class="mt-6 max-w-md mx-auto text-xs text-gray-500">
         <button
-          class="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-700 hover:bg-gray-100 transition"
+          class="w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-left font-medium text-gray-700 hover:bg-[#A8CAE0]/30 transition"
           type="button"
           @click="showGuidancePanel = !showGuidancePanel"
         >
