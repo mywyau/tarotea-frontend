@@ -95,6 +95,7 @@ const backgroundStatus = ref<"idle" | "processing" | "completed">("idle")
 
 const questions = ref<DailyQuestion[]>([])
 const currentIndex = ref(0)
+const currentQuestionAudioSrc = ref("")
 
 const answeredCount = ref(0)
 const correctCount = ref(0)
@@ -382,6 +383,9 @@ async function loadDailySession() {
     backgroundStatus.value = session.backgroundStatus
 
     questions.value = session.questions ?? []
+    currentQuestionAudioSrc.value = questions.value[0]
+      ? getRandomizedAudioSrc(questions.value[0].id)
+      : ""
     applyDailySummary(session.daily)
 
     if (!totalQuestions.value) {
@@ -519,6 +523,9 @@ watch(
 watch(
   () => currentQuestion.value?.id,
   () => {
+    currentQuestionAudioSrc.value = currentQuestion.value
+      ? getRandomizedAudioSrc(currentQuestion.value.id)
+      : ""
     syncQuestionProgressFromServer()
     generateTileColors()
   }
@@ -638,7 +645,7 @@ onUnmounted(() => {
 
               <div class="text-center">
                 <!-- <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay /> -->
-                <AudioButton :key="currentQuestion.id" :src="getRandomizedAudioSrc(currentQuestion.id)" autoplay />
+                <AudioButton :key="currentQuestion.id" :src="currentQuestionAudioSrc" autoplay />
               </div>
             </div>
 
