@@ -71,8 +71,6 @@ const DAILY_MODE = "daily_meaning_quiz"
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
-const { volume } = useAudioVolume()
-const { play: playGlobalAudio } = useGlobalAudio()
 
 function getRandomizedAudioSrc(audioKey: string) {
   const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
@@ -470,7 +468,7 @@ async function selectAnswer(answer: string) {
   } else {
     playIncorrectJingle()
   }
-  
+
   if (answerLog.value.some(entry => entry.wordId === wordId)) {
     return
   }
