@@ -72,6 +72,12 @@ const DAILY_MODE = "daily_meaning_quiz"
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+function getRandomizedAudioSrc(audioKey: string) {
+  const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
+  const voiceDirectory = voiceDirectories[0]
+  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+}
+
 const { getAccessToken } = await useAuth()
 const { timeRemaining } = useCountdownToUtcMidnight()
 const { xpDelta, mergingXp, readyForNext, triggerXp } = useXpAnimation()
@@ -627,7 +633,8 @@ onUnmounted(() => {
               </div>
 
               <div class="text-center">
-                <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay />
+                <!-- <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay /> -->
+                <AudioButton :key="currentQuestion.id" :src="getRandomizedAudioSrc(currentQuestion.id)" autoplay />
               </div>
             </div>
 
@@ -672,7 +679,7 @@ onUnmounted(() => {
         </div>
 
         <transition name="fade-scale" mode="out-in">
-          
+
           <div v-if="showCalculating" key="calculating" class="stat-card hero-card result-2 space-y-4">
             <div class="spinner mx-auto"></div>
 

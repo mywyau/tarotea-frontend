@@ -68,6 +68,12 @@ const { isLoggedIn } = useMeStateV2()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+function getRandomizedAudioSrc(audioKey: string) {
+  const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
+  const voiceDirectory = voiceDirectories[0]
+  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+}
+
 const auth = await useAuth()
 const { stop } = useGlobalAudio()
 
@@ -595,7 +601,7 @@ onBeforeUnmount(() => {
           </span>
 
           <div class="flex items-center justify-center min-h-[56px]">
-            <AudioButton v-if="question" :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`"
+            <AudioButton v-if="question" :key="question.audioKey" :src="getRandomizedAudioSrc(question.audioKey)"
               autoplay />
           </div>
         </div>

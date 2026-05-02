@@ -22,6 +22,12 @@ const topicSlug = computed(() => route.params.topic as string)
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
+
+function getRandomizedAudioSrc(audioKey: string) {
+  const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
+  const voiceDirectory = voiceDirectories[0]
+  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+}
 const playbackRate = ref(1)
 
 const { getAccessToken } = await useAuth()
@@ -468,7 +474,7 @@ const completionTiles = computed(() => [
 const currentWordAudioSrc = computed(() => {
   const wordId = question.value?.wordId
   if (!wordId) return null
-  return `${cdnBase}/audio/${wordId}.mp3`
+  return getRandomizedAudioSrc(`${wordId}.mp3`)
 })
 
 let currentWordAudio: HTMLAudioElement | null = null

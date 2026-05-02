@@ -48,7 +48,6 @@ const { stop } = useGlobalAudio()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-
 function getRandomizedAudioSrc(audioKey: string) {
   const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
   const voiceDirectory = voiceDirectories[0]

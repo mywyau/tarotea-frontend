@@ -59,6 +59,12 @@ const slug = computed(() => route.params.topic as string)
 const { isLoggedIn } = useMeStateV2()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
+
+function getRandomizedAudioSrc(audioKey: string) {
+  const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
+  const voiceDirectory = voiceDirectories[0]
+  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+}
 const { volume } = useAudioVolume()
 const { stop, play } = useGlobalAudio()
 
@@ -249,7 +255,7 @@ const tileColors = ref<string[]>([])
 function playSentenceAudioAfterAnswer(sentenceId: string) {
   if (!process.client || !sentenceId) return
 
-  const audio = new Audio(`${cdnBase}/audio/${sentenceId}.mp3`)
+  const audio = new Audio(getRandomizedAudioSrc(`${sentenceId}.mp3`))
   audio.volume = volume.value
   audio.currentTime = 0
   play(audio)
