@@ -48,6 +48,13 @@ const { stop } = useGlobalAudio()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+
+function getRandomizedAudioSrc(audioKey: string) {
+  const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
+  const voiceDirectory = voiceDirectories[0]
+  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+}
+
 const finalizeAttemptId = ref<string | null>(null)
 const finalizeCompleted = ref(false)
 const finalizeError = ref<string | null>(null)
@@ -733,7 +740,7 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="question?.type === 'audio'" class="text-center">
-          <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
+          <AudioButton :key="question.audioKey" :src="getRandomizedAudioSrc(question.audioKey)" autoplay />
         </div>
 
         <div class="min-h-[50px] space-y-3">
@@ -971,7 +978,7 @@ onBeforeUnmount(() => {
   padding-bottom: 0.25rem;
 }
 
-.completion-tiles-grid > * {
+.completion-tiles-grid>* {
   min-width: calc(50% - 0.5rem);
   scroll-snap-align: start;
 }
@@ -986,7 +993,7 @@ onBeforeUnmount(() => {
     gap: 1.25rem;
   }
 
-  .completion-tiles-grid > * {
+  .completion-tiles-grid>* {
     min-width: 0;
   }
 

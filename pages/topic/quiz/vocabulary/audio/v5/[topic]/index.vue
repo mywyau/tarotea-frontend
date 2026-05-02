@@ -59,6 +59,12 @@ const slug = computed(() => route.params.topic as string)
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+function getRandomizedAudioSrc(audioKey: string) {
+    const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
+    const voiceDirectory = voiceDirectories[0]
+    return `${cdnBase}/${voiceDirectory}/${audioKey}`
+}
+
 const { stop } = useGlobalAudio()
 const { getAccessToken } = await useAuth()
 const me = useMeStateV2()
@@ -705,7 +711,7 @@ onUnmounted(() => {
 
 
                 <div v-if="question?.type === 'audio'" class="text-center">
-                    <AudioButton :key="question.audioKey" :src="`${cdnBase}/audio/${question.audioKey}`" autoplay />
+                    <AudioButton :key="question.audioKey" :src="getRandomizedAudioSrc(question.audioKey)" autoplay />
                 </div>
 
                 <div class="min-h-[50px] space-y-3">
@@ -920,7 +926,7 @@ onUnmounted(() => {
     padding-bottom: 0.25rem;
 }
 
-.completion-tiles-grid > * {
+.completion-tiles-grid>* {
     min-width: calc(50% - 0.5rem);
     scroll-snap-align: start;
 }
@@ -935,7 +941,7 @@ onUnmounted(() => {
         gap: 1.25rem;
     }
 
-    .completion-tiles-grid > * {
+    .completion-tiles-grid>* {
         min-width: 0;
     }
 
