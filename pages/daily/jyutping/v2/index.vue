@@ -77,6 +77,14 @@ const frozenElapsedMs = ref<number | null>(null)
 let timerInterval: ReturnType<typeof setInterval> | null = null
 
 const audio = ref<HTMLAudioElement | null>(null)
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+})
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+function setAudioVoice(voice: AudioVoice) {
+  selectedAudioVoice.value = voice
+}
 
 const canPlayQuiz = computed(() => seenWords.value >= MIN_WORDS_REQUIRED)
 
@@ -517,10 +525,11 @@ async function startChallenge() {
 }
 
 function playAudio() {
-  if (!challenge.value?.audioUrl) return
+  if (!challenge.value) return
+  const audioSrc = challenge.value.audioUrl || `${runtimeConfig.public.cdnBase}/${audioDirectory.value}/${challenge.value.wordId}.mp3`
 
-  if (!audio.value || audio.value.src !== challenge.value.audioUrl) {
-    audio.value = new Audio(challenge.value.audioUrl)
+  if (!audio.value || audio.value.src !== audioSrc) {
+    audio.value = new Audio(audioSrc)
   }
 
   audio.value.currentTime = 0
@@ -828,7 +837,15 @@ watch(
           </div>
 
           <div class="flex flex-col items-end gap-2">
-            <button v-if="challenge.audioUrl"
+            <div v-if="challenge" class="inline-flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+              <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+                Male
+              </button>
+              <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+                Female
+              </button>
+            </div>
+            <button v-if="challenge"
               class="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
               @click="playAudio" type="button">
               Play audio

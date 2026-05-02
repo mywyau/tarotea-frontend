@@ -48,10 +48,16 @@ const { stop } = useGlobalAudio()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-function getRandomizedAudioSrc(audioKey: string) {
-  const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
-  const voiceDirectory = voiceDirectories[0]
-  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+})
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+function setAudioVoice(voice: AudioVoice) {
+  selectedAudioVoice.value = voice
+}
+function getAudioSrc(audioKey: string) {
+  return `${cdnBase}/${audioDirectory.value}/${audioKey}`
 }
 
 const finalizeAttemptId = ref<string | null>(null)
@@ -739,7 +745,15 @@ onBeforeUnmount(() => {
         </div>
 
         <div v-if="question?.type === 'audio'" class="text-center">
-          <AudioButton :key="question.audioKey" :src="getRandomizedAudioSrc(question.audioKey)" autoplay />
+          <div class="mb-2 inline-flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+            <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+              Male
+            </button>
+            <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+              Female
+            </button>
+          </div>
+          <AudioButton :key="`${question.audioKey}-${selectedAudioVoice}`" :src="getAudioSrc(question.audioKey)" autoplay />
         </div>
 
         <div class="min-h-[50px] space-y-3">

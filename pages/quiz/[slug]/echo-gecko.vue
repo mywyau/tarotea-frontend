@@ -46,6 +46,14 @@ const slug = computed(() => route.params.slug as string)
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+})
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+function setAudioVoice(voice: AudioVoice) {
+  selectedAudioVoice.value = voice
+}
 
 const { getAccessToken } = await useAuth()
 const token = await getAccessToken()
@@ -101,7 +109,7 @@ const quizSize = computed(() => Math.min(MAX_QUIZ_SIZE, allWords.value.length))
 const progressLabel = computed(() => `${Math.min(currentIndex.value + 1, quizSize.value)} / ${quizSize.value}`)
 const currentWordAudioUrl = computed(() => {
   const id = currentWord.value?.id
-  return id ? `${cdnBase}/audio/${id}.mp3` : ""
+  return id ? `${cdnBase}/${audioDirectory.value}/${id}.mp3` : ""
 })
 
 function stripToneDigit(token: string) {
@@ -670,6 +678,14 @@ onBeforeUnmount(() => {
             <!-- <p class="mt-3 text-xs uppercase tracking-wider text-gray-500">Target Jyutping</p>
             <p class="mt-1 text-xl font-semibold text-gray-900">{{ currentWord.jyutping }}</p> -->
             <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-600">{{ currentWord.meaning }}</p>
+            <div class="mt-3 inline-flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+              <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+                Male
+              </button>
+              <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+                Female
+              </button>
+            </div>
             <button
               class="mt-4 rounded-lg bg-[#F7D774] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="submitting || !currentWordAudioUrl" @click="playCurrentWordAudio">

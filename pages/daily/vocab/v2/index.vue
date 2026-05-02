@@ -72,10 +72,16 @@ const DAILY_MODE = "daily_meaning_quiz"
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
-function getRandomizedAudioSrc(audioKey: string) {
-  const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
-  const voiceDirectory = voiceDirectories[0]
-  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+})
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+function setAudioVoice(voice: AudioVoice) {
+  selectedAudioVoice.value = voice
+}
+function getAudioSrc(audioKey: string) {
+  return `${cdnBase}/${audioDirectory.value}/${audioKey}`
 }
 
 const { getAccessToken } = await useAuth()
@@ -633,8 +639,15 @@ onUnmounted(() => {
               </div>
 
               <div class="text-center">
-                <!-- <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay /> -->
-                <AudioButton :key="currentQuestion.id" :src="getRandomizedAudioSrc(currentQuestion.id)" autoplay />
+                <div class="mb-2 inline-flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+                  <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+                    Male
+                  </button>
+                  <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+                    Female
+                  </button>
+                </div>
+                <AudioButton :key="`${currentQuestion.id}-${selectedAudioVoice}`" :src="getAudioSrc(currentQuestion.id)" autoplay />
               </div>
             </div>
 
