@@ -81,6 +81,7 @@ function getRandomizedAudioSrc(audioKey: string) {
 const { getAccessToken } = await useAuth()
 const { timeRemaining } = useCountdownToUtcMidnight()
 const { xpDelta, mergingXp, readyForNext, triggerXp } = useXpAnimation()
+const { stop: stopGlobalAudio } = useGlobalAudio()
 
 const loading = ref(true)
 const submitting = ref(false)
@@ -94,6 +95,7 @@ const backgroundStatus = ref<"idle" | "processing" | "completed">("idle")
 
 const questions = ref<DailyQuestion[]>([])
 const currentIndex = ref(0)
+const currentQuestionAudioSrc = ref("")
 
 const answeredCount = ref(0)
 const correctCount = ref(0)
@@ -381,6 +383,9 @@ async function loadDailySession() {
     backgroundStatus.value = session.backgroundStatus
 
     questions.value = session.questions ?? []
+    currentQuestionAudioSrc.value = questions.value[0]
+      ? getRandomizedAudioSrc(questions.value[0].id)
+      : ""
     applyDailySummary(session.daily)
 
     if (!totalQuestions.value) {
@@ -457,6 +462,9 @@ async function submitAnswers() {
 async function selectAnswer(answer: string) {
   if (!currentQuestion.value || showResult.value || submitting.value) return
 
+  // Stop the prompt audio so feedback starts cleanly and the next question can autoplay cleanly.
+  stopGlobalAudio()
+
   selected.value = answer
   showResult.value = true
 
@@ -515,6 +523,9 @@ watch(
 watch(
   () => currentQuestion.value?.id,
   () => {
+    currentQuestionAudioSrc.value = currentQuestion.value
+      ? getRandomizedAudioSrc(currentQuestion.value.id)
+      : ""
     syncQuestionProgressFromServer()
     generateTileColors()
   }
@@ -634,7 +645,7 @@ onUnmounted(() => {
 
               <div class="text-center">
                 <!-- <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay /> -->
-                <AudioButton :key="currentQuestion.id" :src="getRandomizedAudioSrc(currentQuestion.id)" autoplay />
+                <AudioButton :key="currentQuestion.id" :src="currentQuestionAudioSrc" autoplay />
               </div>
             </div>
 
@@ -710,14 +721,10 @@ onUnmounted(() => {
                 <p class="hero-score">
                   {{ animatedAccuracy }}%
                 </p>
-
-                <p class="hero-subtext">
-                  {{ correctCount }} / {{ totalQuestions }} correct
-                </p>
               </div>
             </transition>
 
-            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <transition-group name="card-fade" tag="div" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
               <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
                 :class="tile.className">
                 <p class="stat-label">
