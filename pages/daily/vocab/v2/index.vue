@@ -81,6 +81,7 @@ function getRandomizedAudioSrc(audioKey: string) {
 const { getAccessToken } = await useAuth()
 const { timeRemaining } = useCountdownToUtcMidnight()
 const { xpDelta, mergingXp, readyForNext, triggerXp } = useXpAnimation()
+const { stop: stopGlobalAudio } = useGlobalAudio()
 
 const loading = ref(true)
 const submitting = ref(false)
@@ -456,6 +457,9 @@ async function submitAnswers() {
 
 async function selectAnswer(answer: string) {
   if (!currentQuestion.value || showResult.value || submitting.value) return
+
+  // Stop the prompt audio so feedback starts cleanly and the next question can autoplay cleanly.
+  stopGlobalAudio()
 
   selected.value = answer
   showResult.value = true
