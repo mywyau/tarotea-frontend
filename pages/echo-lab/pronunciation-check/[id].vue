@@ -21,6 +21,9 @@ const setAudioVoice = (voice: AudioVoice) => {
   selectedAudioVoice.value = voice
 }
 
+const wordAudioFilename = computed(() => word.value?.audio?.word || `${id.value}.mp3`)
+const exampleAudioFilename = computed(() => word.value?.audio?.examples?.[0] || wordAudioFilename.value)
+
 const {
   authReady,
   isLoggedIn,
@@ -411,7 +414,7 @@ watchEffect(() => {
           <p class="text-gray-500 text-lg">{{ word.examples[0].sentence }}</p>
         </div>
 
-        <div class="flex items-center justify-center gap-3 pt-4">
+        <div class="flex justify-center pt-2">
           <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
             <button type="button" class="rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'bg-transparent text-gray-600 hover:bg-gray-100'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
               Male
@@ -420,12 +423,14 @@ watchEffect(() => {
               Female
             </button>
           </div>
-
-          <AudioButton v-if="word.audio?.word" :key="`word-audio-${selectedAudioVoice}-${word.audio.word}`" :src="`${cdnBase}/${audioDirectory}/${word.audio.word}`" size="lg" />
         </div>
 
         <div class="flex justify-center pt-4">
-          <AudioButton v-if="word.audio?.word" :key="`example-audio-${selectedAudioVoice}-${word.audio.examples[0]}`" :src="`${cdnBase}/${audioDirectory}/${word.audio.examples[0]}`" size="lg" />
+          <AudioButton :key="`word-audio-${selectedAudioVoice}-${wordAudioFilename}`" :src="`${cdnBase}/${audioDirectory}/${wordAudioFilename}`" size="lg" />
+        </div>
+
+        <div class="flex justify-center pt-4">
+          <AudioButton :key="`example-audio-${selectedAudioVoice}-${exampleAudioFilename}`" :src="`${cdnBase}/${audioDirectory}/${exampleAudioFilename}`" size="lg" />
         </div>
 
         <div class="mt-4 mb-4 text-sm text-gray-500 space-y-1">

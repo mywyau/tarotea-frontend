@@ -454,13 +454,7 @@ async function runToneCheck() {
       <h1 class="text-3xl font-bold">Tone Garden</h1>
 
       <div class="mt-6 rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm">
-        <p class="text-xs uppercase tracking-wide text-gray-500">Target Chinese</p>
-        <p class="text-3xl font-semibold">{{ expectedChinese || "—" }}</p>
-
-        <p class="mt-3 text-xs uppercase tracking-wide text-gray-500">Target Jyutping</p>
-        <p class="text-xl">{{ expectedJyutping || "—" }}</p>
-
-        <div class="mt-4 flex flex-wrap items-center gap-3">
+        <div class="flex justify-end">
           <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
             <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
               Male
@@ -469,7 +463,15 @@ async function runToneCheck() {
               Female
             </button>
           </div>
+        </div>
 
+        <p class="mt-3 text-xs uppercase tracking-wide text-gray-500">Target Chinese</p>
+        <p class="text-3xl font-semibold">{{ expectedChinese || "—" }}</p>
+
+        <p class="mt-3 text-xs uppercase tracking-wide text-gray-500">Target Jyutping</p>
+        <p class="text-xl">{{ expectedJyutping || "—" }}</p>
+
+        <div class="mt-4 flex flex-wrap items-center gap-3">
           <button
             class="rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
             :disabled="!referenceAudioUrl" @click="playReferenceAudio">
