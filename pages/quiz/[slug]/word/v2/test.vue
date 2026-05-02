@@ -8,8 +8,6 @@ definePageMeta({
 import { computed, onMounted, ref, watch } from 'vue'
 import { generateQuiz } from '~/utils/quiz/generateQuiz'
 
-import { onBeforeUnmount } from 'vue'
-
 import {
     playQuizCompleteFailSong,
     playQuizCompleteFanfareSong,
@@ -38,55 +36,13 @@ type FinalizeResponse = {
     status?: string
 }
 
-const quizStartedAt = ref<number | null>(null)
-const elapsedMs = ref(0)
-const frozenElapsedMs = ref<number | null>(null)
-
-let timerInterval: ReturnType<typeof setInterval> | null = null
-
-function stopTimer() {
-    if (timerInterval) {
-        clearInterval(timerInterval)
-        timerInterval = null
-    }
-}
-
-function startTimer() {
-    stopTimer()
-    quizStartedAt.value = Date.now()
-    elapsedMs.value = 0
-    frozenElapsedMs.value = null
-
-    timerInterval = setInterval(() => {
-        if (quizStartedAt.value !== null) {
-            elapsedMs.value = Date.now() - quizStartedAt.value
-        }
-    }, 250)
-}
-
-function freezeTimer() {
-    if (quizStartedAt.value === null) return
-
-    const finalMs = Date.now() - quizStartedAt.value
-    elapsedMs.value = finalMs
-    frozenElapsedMs.value = finalMs
-    stopTimer()
-}
-
-function formatDuration(ms: number) {
-    const totalSeconds = Math.max(0, Math.floor(ms / 1000))
-    const minutes = Math.floor(totalSeconds / 60)
-    const seconds = totalSeconds % 60
-    return `${minutes}:${seconds.toString().padStart(2, '0')}`
-}
-
-const displayedElapsedMs = computed(() => {
-    return frozenElapsedMs.value ?? elapsedMs.value
-})
-
-const formattedElapsedTime = computed(() => {
-    return formatDuration(displayedElapsedMs.value)
-})
+const {
+    elapsedMs,
+    formattedElapsedTime,
+    startTimer,
+    resetTimer,
+    freezeTimer
+} = useQuizTimer()
 
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
@@ -156,10 +112,7 @@ function resetQuizRunState() {
     currentStreak.value = null
     initialProgressMap.value = {}
     wordProgressMap.value = {}
-    elapsedMs.value = 0
-    frozenElapsedMs.value = null
-    quizStartedAt.value = null
-    stopTimer()
+    resetTimer()
 }
 
 function calculateQuizXpTotals() {
