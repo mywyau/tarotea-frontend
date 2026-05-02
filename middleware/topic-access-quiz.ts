@@ -1,3 +1,5 @@
+import { isGuestPreviewRoute } from "~/utils/quiz/access";
+
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return; // middleware runs on client only
 
@@ -5,20 +7,14 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (!topic) return;
 
   const { isLoggedOut, resolve } = useMeStateV2();
-
-  const isGuestPreviewRoute =
-    to.path.includes("/sentences/") || to.path.includes("/vocabulary/");
-
   await resolve();
 
-  if (isLoggedOut.value) {
-    if (isGuestPreviewRoute) {
-      return;
-    }
+  const allowGuestPreview = isGuestPreviewRoute({
+    path: to.path,
+    previewRouteMarkers: ["/sentences/", "/vocabulary/"],
+  });
+
+  if (isLoggedOut.value && !allowGuestPreview) {
     return navigateTo("/please-sign-in");
   }
-
-  // return navigateTo("/upgrade");
-
-  return;
 });
