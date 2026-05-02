@@ -243,7 +243,7 @@ watchEffect(() => {
             Audio settings
           </summary>
           <div
-            class="absolute right-0 z-20 mt-2 w-64 rounded-xl border border-gray-200 bg-white p-3 shadow-lg space-y-3">
+            class="absolute left-1/2 z-20 mt-2 w-[min(16rem,calc(100vw-1rem))] -translate-x-1/2 rounded-xl border border-gray-200 bg-white p-3 shadow-lg space-y-3 sm:left-auto sm:right-0 sm:w-64 sm:translate-x-0">
             <div class="space-y-1">
               <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
               <div class="flex items-center gap-2">
