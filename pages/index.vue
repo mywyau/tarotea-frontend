@@ -1,4 +1,11 @@
 <script setup lang="ts">
+useSeoMeta({
+  title: 'Learn Cantonese in 15 minutes a day',
+  description: 'Learn natural Cantonese with vocabulary, sentence quizzes, audio-only drills, and writing practice.',
+  ogTitle: 'Learn Cantonese in 15 minutes a day | TaroTea',
+  ogDescription: 'Build everyday Cantonese with short, focused practice sessions.',
+})
+
 const { data: stats } = await useFetch('/api/total-users-stats', {
   server: true,
   lazy: true,
