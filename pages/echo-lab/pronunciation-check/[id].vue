@@ -10,6 +10,17 @@ const id = computed(() => decodeURIComponent(route.params.id as string))
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+  sameSite: 'lax',
+})
+
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+const setAudioVoice = (voice: AudioVoice) => {
+  selectedAudioVoice.value = voice
+}
+
 const {
   authReady,
   isLoggedIn,
@@ -400,12 +411,21 @@ watchEffect(() => {
           <p class="text-gray-500 text-lg">{{ word.examples[0].sentence }}</p>
         </div>
 
-        <div class="flex justify-center pt-4">
-          <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.word}`" size="lg" />
+        <div class="flex items-center justify-center gap-3 pt-4">
+          <div class="inline-flex items-center rounded-full border border-gray-300 bg-white p-1" aria-label="Audio voice">
+            <button type="button" class="rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-blue-800' : 'bg-transparent text-gray-600 hover:bg-gray-100'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+              Male
+            </button>
+            <button type="button" class="rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-pink-800' : 'bg-transparent text-gray-600 hover:bg-gray-100'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+              Female
+            </button>
+          </div>
+
+          <AudioButton v-if="word.audio?.word" :key="`word-audio-${selectedAudioVoice}-${word.audio.word}`" :src="`${cdnBase}/${audioDirectory}/${word.audio.word}`" size="lg" />
         </div>
 
         <div class="flex justify-center pt-4">
-          <AudioButton v-if="word.audio?.word" :src="`${cdnBase}/audio/${word.audio.examples[0]}`" size="lg" />
+          <AudioButton v-if="word.audio?.word" :key="`example-audio-${selectedAudioVoice}-${word.audio.examples[0]}`" :src="`${cdnBase}/${audioDirectory}/${word.audio.examples[0]}`" size="lg" />
         </div>
 
         <div class="mt-4 mb-4 text-sm text-gray-500 space-y-1">
