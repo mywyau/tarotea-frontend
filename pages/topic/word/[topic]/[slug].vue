@@ -188,17 +188,17 @@ watchEffect(() => {
                 ← Back
             </NuxtLink>
 
-            <div class="inline-flex items-center rounded-full border border-gray-300 bg-white p-1"
+            <div class="flex rounded-full bg-gray-100 p-1"
                 aria-label="Audio voice">
                 <button type="button" class="rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'male'
-                        ? 'bg-pink-100 text-gray-900'
+                        ? 'bg-blue-100 text-gray-900 shadow-sm'
                         : 'bg-transparent text-gray-600 hover:bg-gray-100'
                     " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
                     Male
                 </button>
 
                 <button type="button" class="rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'female'
-                        ? 'bg-pink-100 text-gray-900'
+                        ? 'bg-pink-100 text-gray-900 shadow-sm'
                         : 'bg-transparent text-gray-600 hover:bg-gray-100'
                     " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
                     Female

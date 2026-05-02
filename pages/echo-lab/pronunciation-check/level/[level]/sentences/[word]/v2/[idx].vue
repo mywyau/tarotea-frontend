@@ -11,6 +11,16 @@ const router = useRouter()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 
+type AudioVoice = 'male' | 'female'
+const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
+  default: () => 'male',
+  sameSite: 'lax',
+})
+const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
+const setAudioVoice = (voice: AudioVoice) => {
+  selectedAudioVoice.value = voice
+}
+
 const wordSlug = computed(() => decodeURIComponent(route.params.word as string))
 const levelSlug = computed(() => String(route.params.level ?? ""))
 
@@ -64,7 +74,7 @@ const practiceTarget = computed(() => {
 
 const phraseAudioSrc = computed(() => {
   const filename = word.value?.audio?.examples?.[idx.value]
-  return filename ? `${cdnBase}/audio/${filename}` : null
+  return filename ? `${cdnBase}/${audioDirectory.value}/${filename}` : null
 })
 
 const supported = ref(false)
@@ -463,8 +473,17 @@ onUnmounted(() => {
         </button>
       </div> -->
 
-      <div class="w-full text-left mb-6">
+      <div class="mb-6 flex w-full items-center justify-between">
         <BackLink />
+
+        <div v-if="supported" class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+            Male
+          </button>
+          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition" :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'" :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+            Female
+          </button>
+        </div>
       </div>
 
       <h1 class="text-2xl font-bold mb-2">Echo Lab</h1>
