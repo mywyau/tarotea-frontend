@@ -346,15 +346,11 @@ onMounted(() => {
 } */
 
 .brand-text-gradient {
-  background: linear-gradient(
-    90deg,
-    #6F5CCA 0%,
-     #E07ABF 50%,
-      #5EA6D6 100%
-      );
+  background: linear-gradient(90deg,
+      #725ce0 0%,
+      #f757c5 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-
 </style>
