@@ -75,9 +75,15 @@ onMounted(() => {
 <template>
   <main class="max-w-4xl mx-auto py-16 sm:py-20 px-6 min-h-screen">
     <section class="text-center">
+
       <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
         Learn and improve your Cantonese in just <span class="brand-text-gradient">15 minutes</span> a day
       </h1>
+
+      <!-- <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
+        Learn and improve your Cantonese in just <span class="text-indigo-500">15 minutes</span> a day
+      </h1> -->
+
 
       <div class="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
         <div class="rounded-xl p-5 text-center brand-card-green shadow-sm">
@@ -105,18 +111,15 @@ onMounted(() => {
       </p>
     </section>
 
-    <section class="mt-12 start-learning-flip" aria-label="Start learning Cantonese today">
-      <div
-        class="start-learning-scene"
-        :class="{ 'is-flipped': isStartPanelFlipped }"
-        @click="flipStartPanel"
-      >
-        <article class="start-learning-face start-learning-face-front rounded-2xl p-6 sm:p-8 brand-cta-topic-bg text-gray-900 shadow-sm">
+    <section class="mt-12 start-learning-flip hover:brightness-105" aria-label="Start learning Cantonese today">
+      <div class="start-learning-scene" :class="{ 'is-flipped': isStartPanelFlipped }" @click="flipStartPanel">
+        <article
+          class="start-learning-face start-learning-face-front rounded-2xl p-6 sm:p-8 brand-cta-topic-bg text-gray-900 shadow-sm">
           <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.28em] text-gray-700">
+              <!-- <p class="text-xs font-semibold uppercase tracking-[0.28em] text-gray-700">
                 Topic path
-              </p>
+              </p> -->
               <h2 class="mt-2 text-2xl font-semibold tracking-tight">
                 Start learning Cantonese today
               </h2>
@@ -125,40 +128,37 @@ onMounted(() => {
                 everyday conversations.
               </p>
             </div>
-            <button
+            <!-- <button
               type="button"
               class="flip-hint rounded-full bg-white/50 px-3 py-1 text-xs font-medium text-gray-800 transition hover:bg-white/70 focus:outline-none focus:ring-2 focus:ring-gray-900/40"
               aria-label="Show levels and level quizzes"
               @click.stop="flipStartPanel"
             >
               Click panel to flip
-            </button>
+            </button> -->
           </div>
 
           <div class="mt-5 flex flex-wrap gap-3">
-            <NuxtLink
-              to="/topics"
+            <NuxtLink to="/topics"
               class="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-800"
-              @click.stop
-            >
+              @click.stop>
               Explore Topics
             </NuxtLink>
-            <NuxtLink
-              to="/topics/quiz"
+            <NuxtLink to="/topics/quiz"
               class="inline-flex items-center justify-center rounded-md border border-gray-700 px-4 py-2 font-medium text-gray-900 transition hover:bg-white/60"
-              @click.stop
-            >
+              @click.stop>
               Topic quizzes
             </NuxtLink>
           </div>
         </article>
 
-        <article class="start-learning-face start-learning-face-back rounded-2xl p-6 sm:p-8 brand-cta-level-bg text-gray-900 shadow-sm">
+        <article
+          class="start-learning-face start-learning-face-back rounded-2xl p-6 sm:p-8 brand-cta-level-bg text-gray-900 shadow-sm">
           <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.28em] text-gray-700">
+              <!-- <p class="text-xs font-semibold uppercase tracking-[0.28em] text-gray-700">
                 Level path
-              </p>
+              </p> -->
               <h2 class="mt-2 text-2xl font-semibold tracking-tight">
                 Start learning Cantonese today
               </h2>
@@ -167,29 +167,25 @@ onMounted(() => {
                 confidence step by step.
               </p>
             </div>
-            <button
+            <!-- <button
               type="button"
               class="flip-hint rounded-full bg-white/50 px-3 py-1 text-xs font-medium text-gray-800 transition hover:bg-white/70 focus:outline-none focus:ring-2 focus:ring-gray-900/40"
               aria-label="Show topics and topic quizzes"
               @click.stop="flipStartPanel"
             >
               Click panel to flip back
-            </button>
+            </button> -->
           </div>
 
           <div class="mt-5 flex flex-wrap gap-3">
-            <NuxtLink
-              to="/levels"
+            <NuxtLink to="/levels"
               class="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-800"
-              @click.stop
-            >
+              @click.stop>
               Explore Levels
             </NuxtLink>
-            <NuxtLink
-              to="/quiz"
+            <NuxtLink to="/quiz"
               class="inline-flex items-center justify-center rounded-md border border-gray-700 px-4 py-2 font-medium text-gray-900 transition hover:bg-white/60"
-              @click.stop
-            >
+              @click.stop>
               Level quizzes
             </NuxtLink>
           </div>
@@ -287,25 +283,25 @@ onMounted(() => {
   transition: opacity 220ms ease;
 }
 
-.start-learning-face > * {
+.start-learning-face>* {
   position: relative;
   z-index: 1;
 }
 
-.start-learning-scene:hover .start-learning-face {
+/* .start-learning-scene:hover .start-learning-face {
   box-shadow: 0 24px 60px rgba(94, 166, 214, 0.34), 0 0 0 1px rgba(255, 255, 255, 0.72) inset;
-  filter: saturate(1.08) brightness(1.04);
-}
+  filter: saturate(1.10) brightness(1.04);
+} */
 
-.start-learning-scene:hover .start-learning-face::before {
+/* .start-learning-scene:hover .start-learning-face::before {
   opacity: 1;
-}
+} */
 
-.start-learning-scene:hover .flip-hint {
+/* .start-learning-scene:hover .flip-hint {
   background-color: rgba(255, 255, 255, 0.78);
   box-shadow: 0 8px 24px rgba(255, 255, 255, 0.36);
   transform: translateZ(1px) scale(1.03);
-}
+} */
 
 .start-learning-face-back {
   pointer-events: none;
@@ -329,6 +325,7 @@ onMounted(() => {
 }
 
 @media (max-width: 640px) {
+
   .start-learning-scene,
   .start-learning-face {
     min-height: 22rem;
@@ -341,10 +338,23 @@ onMounted(() => {
   }
 }
 
-.brand-text-gradient {
+/* .brand-text-gradient {
   background: linear-gradient(90deg, #6F5CCA 0%, #E07ABF 50%, #5EA6D6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+} */
+
+.brand-text-gradient {
+  background: linear-gradient(
+    90deg,
+    #6F5CCA 0%,
+     #E07ABF 50%,
+      #5EA6D6 100%
+      );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
+
 </style>
