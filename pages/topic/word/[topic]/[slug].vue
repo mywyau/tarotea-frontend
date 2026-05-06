@@ -224,17 +224,17 @@ watchEffect(() => {
                             <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
                             <div class="flex items-center justify-between gap-2">
                                 <button type="button"
-                                    class="h-8 w-8 rounded-full border border-gray-300 bg-white text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                    class="px-1 text-2xl font-semibold leading-none text-gray-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
                                     :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
                                     @click="decreasePlaybackRate">
-                                    ←
+                                    ‹
                                 </button>
                                 <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{ speedDeltaLabel }}</span>
                                 <button type="button"
-                                    class="h-8 w-8 rounded-full border border-gray-300 bg-white text-sm font-semibold text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-40"
+                                    class="px-1 text-2xl font-semibold leading-none text-gray-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
                                     :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
                                     @click="increasePlaybackRate">
-                                    →
+                                    ›
                                 </button>
                             </div>
                         </div>
