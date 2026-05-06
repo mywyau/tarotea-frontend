@@ -105,7 +105,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <p class="text-base sm:text-lg text-gray-700 mt-10 max-w-2xl mx-auto">
+      <p class="text-base sm:text-lg text-gray-800 mt-10 max-w-2xl mx-auto">
         Build confidence with quick, focused and fun activities that help you remember what you learn.
         Practice at you own pace, no daily streaks or annoying birds. Grind whatever, whenever you want.
       </p>
