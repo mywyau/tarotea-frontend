@@ -111,7 +111,7 @@ onMounted(() => {
         :class="{ 'is-flipped': isStartPanelFlipped }"
         @click="flipStartPanel"
       >
-        <article class="start-learning-face start-learning-face-front rounded-2xl p-6 sm:p-8 brand-cta-bg text-gray-900 shadow-sm">
+        <article class="start-learning-face start-learning-face-front rounded-2xl p-6 sm:p-8 brand-cta-topic-bg text-gray-900 shadow-sm">
           <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p class="text-xs font-semibold uppercase tracking-[0.28em] text-gray-700">
@@ -153,7 +153,7 @@ onMounted(() => {
           </div>
         </article>
 
-        <article class="start-learning-face start-learning-face-back rounded-2xl p-6 sm:p-8 brand-cta-bg text-gray-900 shadow-sm">
+        <article class="start-learning-face start-learning-face-back rounded-2xl p-6 sm:p-8 brand-cta-level-bg text-gray-900 shadow-sm">
           <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <p class="text-xs font-semibold uppercase tracking-[0.28em] text-gray-700">
@@ -237,10 +237,14 @@ onMounted(() => {
   background-color: rgba(244, 205, 39, 0.35);
 }
 
-.brand-cta-bg {
+.brand-cta-bg,
+.brand-cta-level-bg {
   background: linear-gradient(135deg, #F6E1E1 0%, #EAB8E4 50%, #A8CAE0 100%);
 }
 
+.brand-cta-topic-bg {
+  background: linear-gradient(135deg, #E7F3D5 0%, #C8E9E1 48%, #A8CAE0 100%);
+}
 
 .start-learning-flip {
   perspective: 1200px;
@@ -266,9 +270,41 @@ onMounted(() => {
   flex-direction: column;
   justify-content: space-between;
   min-height: 18rem;
+  overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform-style: preserve-3d;
+  transition: box-shadow 220ms ease, filter 220ms ease;
+}
+
+.start-learning-face::before {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.72), transparent 34%), rgba(255, 255, 255, 0.12);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 220ms ease;
+}
+
+.start-learning-face > * {
+  position: relative;
+  z-index: 1;
+}
+
+.start-learning-scene:hover .start-learning-face {
+  box-shadow: 0 24px 60px rgba(94, 166, 214, 0.34), 0 0 0 1px rgba(255, 255, 255, 0.72) inset;
+  filter: saturate(1.08) brightness(1.04);
+}
+
+.start-learning-scene:hover .start-learning-face::before {
+  opacity: 1;
+}
+
+.start-learning-scene:hover .flip-hint {
+  background-color: rgba(255, 255, 255, 0.78);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.36);
+  transform: translateZ(1px) scale(1.03);
 }
 
 .start-learning-face-back {
