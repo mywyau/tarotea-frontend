@@ -4,6 +4,19 @@ import { Analytics } from '@vercel/analytics/vue';
 const runtimeConfig = useRuntimeConfig()
 
 const baseUrl = (runtimeConfig.public.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
+const route = useRoute()
+
+const showQuizJingleMuteButton = computed(() => {
+  const path = route.path
+
+  return (
+    path === '/quiz' ||
+    path.startsWith('/quiz/') ||
+    path.startsWith('/topic/quiz/') ||
+    path.startsWith('/daily/') ||
+    (path.startsWith('/dojo/') && path.includes('/training/'))
+  )
+})
 
 useHead({
   link: [
@@ -33,6 +46,9 @@ useSeoMeta({
         <Analytics />
       </ClientOnly>
       <NuxtPage />
+      <ClientOnly>
+        <QuizJingleMuteButton v-if="showQuizJingleMuteButton" />
+      </ClientOnly>
     </main>
 
     <AppFooter />

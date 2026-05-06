@@ -10,6 +10,30 @@ export function playUISound(
 }
 
 let audioCtx: AudioContext | null = null;
+const activeJingleSources = new Set<AudioScheduledSourceNode>();
+const JINGLE_MUTE_KEY = 'quiz-jingles-muted';
+
+function areJinglesMuted() {
+  return typeof window !== 'undefined' && localStorage.getItem(JINGLE_MUTE_KEY) === 'true';
+}
+
+function trackJingleSource(source: AudioScheduledSourceNode) {
+  activeJingleSources.add(source);
+  source.addEventListener('ended', () => {
+    activeJingleSources.delete(source);
+  }, { once: true });
+}
+
+export function stopActiveJingles() {
+  activeJingleSources.forEach((source) => {
+    try {
+      source.stop();
+    } catch {
+      // Source may have already stopped; keep muting best-effort.
+    }
+  });
+  activeJingleSources.clear();
+}
 
 function getAudioContext(): AudioContext {
   if (!audioCtx) {
@@ -19,6 +43,8 @@ function getAudioContext(): AudioContext {
 }
 
 export function playCorrectJingle(volume = 0.8) {
+  if (areJinglesMuted()) return;
+
   const ctx = getAudioContext();
 
   const now = ctx.currentTime;
@@ -38,11 +64,14 @@ export function playCorrectJingle(volume = 0.8) {
   osc.connect(gain);
   gain.connect(ctx.destination);
 
+  trackJingleSource(osc);
   osc.start(now);
   osc.stop(now + 0.4);
 }
 
 export function playGoodJingle(volume = 0.55) {
+  if (areJinglesMuted()) return;
+
   const ctx = getAudioContext();
   const now = ctx.currentTime;
 
@@ -64,12 +93,15 @@ export function playGoodJingle(volume = 0.55) {
     osc.frequency.setValueAtTime(f, now + t);
 
     osc.connect(gain);
+    trackJingleSource(osc);
     osc.start(now + t);
     osc.stop(now + t + d);
   });
 }
 
 export function playIncorrectJingle(volume = 0.5) {
+  if (areJinglesMuted()) return;
+
   const ctx = getAudioContext();
 
   const now = ctx.currentTime;
@@ -87,11 +119,14 @@ export function playIncorrectJingle(volume = 0.5) {
   osc.connect(gain);
   gain.connect(ctx.destination);
 
+  trackJingleSource(osc);
   osc.start(now);
   osc.stop(now + 0.25);
 }
 
 export function playToneFailJingle(volume = 0.45) {
+  if (areJinglesMuted()) return;
+
   const ctx = getAudioContext();
   const now = ctx.currentTime;
 
@@ -113,12 +148,15 @@ export function playToneFailJingle(volume = 0.45) {
     osc.frequency.setValueAtTime(f, now + t);
 
     osc.connect(gain);
+    trackJingleSource(osc);
     osc.start(now + t);
     osc.stop(now + t + d);
   });
 }
 
 export function playQuizCompleteFanfareSong(volume = 0.9) {
+  if (areJinglesMuted()) return;
+
   const ctx = getAudioContext();
 
   const now = ctx.currentTime;
@@ -145,12 +183,15 @@ export function playQuizCompleteFanfareSong(volume = 0.9) {
     osc.frequency.setValueAtTime(f, now + t);
 
     osc.connect(gain);
+    trackJingleSource(osc);
     osc.start(now + t);
     osc.stop(now + t + d);
   });
 }
 
 export function playQuizCompleteOkaySong(volume = 0.12) {
+  if (areJinglesMuted()) return;
+
   const ctx = getAudioContext();
   const now = ctx.currentTime;
 
@@ -177,12 +218,15 @@ export function playQuizCompleteOkaySong(volume = 0.12) {
     osc.frequency.setValueAtTime(f, now + t);
 
     osc.connect(gain);
+    trackJingleSource(osc);
     osc.start(now + t);
     osc.stop(now + t + d);
   });
 }
 
 export function playQuizCompleteFailSong(volume = 0.55) {
+  if (areJinglesMuted()) return;
+
   const ctx = getAudioContext();
 
   const now = ctx.currentTime;
@@ -214,6 +258,7 @@ export function playQuizCompleteFailSong(volume = 0.55) {
     osc.frequency.setValueAtTime(f, now + t);
 
     osc.connect(gain);
+    trackJingleSource(osc);
     osc.start(now + t);
     osc.stop(now + t + d);
   });
@@ -221,6 +266,8 @@ export function playQuizCompleteFailSong(volume = 0.55) {
 
 
 export function playWordUnlockFanfare(volume = 3.0) {
+  if (areJinglesMuted()) return;
+
   const ctx = getAudioContext();
 
   if (ctx.state === "suspended") {
@@ -257,6 +304,7 @@ export function playWordUnlockFanfare(volume = 3.0) {
     osc.connect(gain);
     gain.connect(master);
 
+    trackJingleSource(osc);
     osc.start(now + t);
     osc.stop(now + t + d);
   });
@@ -274,6 +322,7 @@ export function playWordUnlockFanfare(volume = 3.0) {
   sparkle.connect(sparkleGain);
   sparkleGain.connect(master);
 
+  trackJingleSource(sparkle);
   sparkle.start(now + 0.40);
   sparkle.stop(now + 0.72);
 }
