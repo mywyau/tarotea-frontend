@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
+import { Menu, Orbit, X } from '@lucide/vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
-import { Menu, X } from '@lucide/vue'
 
 const { isLoggedIn, resolve } = useMeStateV2()
 const route = useRoute()
@@ -139,7 +139,7 @@ onBeforeUnmount(() => {
     <button type="button" class="trigger-visibility-btn" :class="{ 'is-open': navOpen }"
       :aria-label="navOpen ? 'Close Warp panel' : 'Open Warp panel'" :aria-expanded="navOpen ? 'true' : 'false'"
       aria-controls="warp-navigation-panel" @click.stop="toggleNav">
-      <span class="portal-swirl-line" aria-hidden="true"></span>
+      <Orbit class="portal-icon" aria-hidden="true" />
       <span class="sr-only">{{ navOpen ? 'Close Warp panel' : 'Open Warp panel' }}</span>
     </button>
 
@@ -205,7 +205,7 @@ onBeforeUnmount(() => {
   isolation: isolate;
 }
 
-.portal-swirl-line {
+/* .portal-swirl-line {
   position: absolute;
   inset: 0.42rem;
   border-radius: inherit;
@@ -223,6 +223,37 @@ onBeforeUnmount(() => {
   border-radius: inherit;
   background: radial-gradient(circle, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 60%);
   filter: blur(0.8px);
+} */
+
+.portal-icon {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1.75rem;
+  height: 1.75rem;
+  color: rgba(15, 15, 15, 0.9);
+  stroke-width: 2.4;
+  transform-origin: center;
+  animation: portalOrbit 6s linear infinite;
+}
+
+.trigger-visibility-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0.45rem;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.12) 62%, transparent 70%);
+  z-index: -1;
+}
+
+.trigger-visibility-btn::after {
+  content: '';
+  position: absolute;
+  inset: 0.3rem;
+  border-radius: inherit;
+  border: 1px solid rgba(15, 15, 15, 0.14);
+  z-index: -1;
 }
 
 .trigger-visibility-btn:hover,
@@ -320,7 +351,13 @@ onBeforeUnmount(() => {
   transform: translateX(-100%);
 }
 
-@keyframes portalSwirl {
+/* @keyframes portalSwirl {
+  to {
+    transform: rotate(360deg);
+  }
+} */
+
+@keyframes portalOrbit {
   to {
     transform: rotate(360deg);
   }
@@ -379,6 +416,7 @@ onBeforeUnmount(() => {
 }
 
 @keyframes hamburgerWiggle {
+
   0%,
   100% {
     transform: rotate(0deg);
@@ -406,7 +444,9 @@ onBeforeUnmount(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .menu-btn:hover {
+
+  .menu-btn:hover,
+  .portal-icon {
     animation: none;
   }
 }
