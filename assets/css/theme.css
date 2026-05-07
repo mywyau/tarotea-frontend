@@ -3,64 +3,499 @@
   --tt-surface: rgba(255, 255, 255, 0.82);
   --tt-surface-solid: #ffffff;
   --tt-surface-muted: rgba(255, 255, 255, 0.58);
+  --tt-card: rgba(255, 255, 255, 0.72);
   --tt-text: #111827;
   --tt-text-muted: #4b5563;
+  --tt-text-soft: #6b7280;
   --tt-border: rgba(17, 24, 39, 0.12);
   --tt-hover: rgba(17, 24, 39, 0.06);
   --tt-shadow: rgba(0, 0, 0, 0.12);
+  --tt-blue: #A8CAE0;
+  --tt-purple: #D6A3D1;
+  --tt-pink: #EAB8E4;
+  --tt-blush: #F6E1E1;
+  --tt-yellow: #F4CD27;
+  --tt-green: #A8E0B6;
+  --tt-danger-bg: rgba(254, 226, 226, 0.85);
+  --tt-danger-text: #991b1b;
+  --tt-warning-bg: rgba(254, 243, 199, 0.85);
+  --tt-warning-text: #92400e;
+  --tt-success-bg: rgba(220, 252, 231, 0.85);
+  --tt-success-text: #166534;
 }
 
 .dark {
-  --tt-bg: #120f1f;
-  --tt-surface: rgba(30, 26, 48, 0.88);
-  --tt-surface-solid: #1e1a30;
-  --tt-surface-muted: rgba(45, 39, 69, 0.72);
+  --tt-bg: radial-gradient(circle at top left, rgba(76, 50, 92, 0.34), transparent 34%), #0b0814;
+  --tt-surface: rgba(24, 20, 38, 0.92);
+  --tt-surface-solid: #181426;
+  --tt-surface-muted: rgba(35, 29, 53, 0.84);
+  --tt-card: rgba(30, 25, 46, 0.9);
   --tt-text: #f8fafc;
   --tt-text-muted: #cbd5e1;
+  --tt-text-soft: #94a3b8;
   --tt-border: rgba(226, 232, 240, 0.16);
   --tt-hover: rgba(226, 232, 240, 0.1);
-  --tt-shadow: rgba(0, 0, 0, 0.35);
+  --tt-shadow: rgba(0, 0, 0, 0.42);
+  --tt-blue: #23465e;
+  --tt-purple: #4f315d;
+  --tt-pink: #5a2f54;
+  --tt-blush: #3a2534;
+  --tt-yellow: #5f4c16;
+  --tt-green: #1f4d39;
+  --tt-danger-bg: rgba(69, 20, 32, 0.9);
+  --tt-danger-text: #fca5a5;
+  --tt-warning-bg: rgba(68, 48, 18, 0.9);
+  --tt-warning-text: #fcd34d;
+  --tt-success-bg: rgba(19, 56, 39, 0.9);
+  --tt-success-text: #86efac;
 }
 
-html {
-  background: var(--tt-bg);
-}
-
-body {
-  background: var(--tt-bg);
-  color: var(--tt-text);
-  transition: background-color 180ms ease, color 180ms ease;
-}
-
+html,
+body,
 .tarotea-app-shell {
+  min-height: 100%;
   background: var(--tt-bg);
   color: var(--tt-text);
   transition: background-color 180ms ease, color 180ms ease;
 }
 
+.dark body,
+.dark .tarotea-app-shell {
+  background-attachment: fixed;
+}
+
+/* App-wide utility darkening for existing Tailwind-heavy pages. */
 .dark [class~='bg-white'],
-.dark [class~='bg-gray-50'] {
+.dark [class~='bg-gray-50'],
+.dark [class~='bg-gray-100'],
+.dark [class~='bg-slate-50'],
+.dark [class~='bg-slate-100'],
+.dark [class~='bg-zinc-50'],
+.dark [class~='bg-neutral-50'],
+.dark [class~='bg-stone-50'] {
   background-color: var(--tt-surface-solid) !important;
 }
 
+.dark [class~='bg-gray-200'],
+.dark [class~='bg-gray-300'],
+.dark [class~='bg-slate-200'],
+.dark [class~='bg-zinc-200'],
+.dark [class~='bg-neutral-200'] {
+  background-color: var(--tt-surface-muted) !important;
+}
+
+.dark [class*='bg-[#F6E1E1'],
+.dark [class*='bg-[#f6e1e1'],
+.dark [class*='bg-[#EAB8E4'],
+.dark [class*='bg-[#eab8e4'],
+.dark [class*='bg-[#D6A3D1'],
+.dark [class*='bg-[#d6a3d1'] {
+  background-color: var(--tt-blush) !important;
+}
+
+.dark [class*='bg-[#A8CAE0'],
+.dark [class*='bg-[#a8cae0'] {
+  background-color: var(--tt-blue) !important;
+}
+
+.dark [class*='bg-[#F4CD27'],
+.dark [class*='bg-[#f4cd27'] {
+  background-color: var(--tt-yellow) !important;
+}
+
+.dark [class*='bg-white/'] {
+  background-color: rgba(248, 250, 252, 0.12) !important;
+}
+
 .dark [class~='text-black'],
+.dark [class~='text-gray-950'],
 .dark [class~='text-gray-900'],
 .dark [class~='text-gray-800'],
-.dark [class~='text-gray-700'] {
+.dark [class~='text-gray-700'],
+.dark [class~='text-slate-950'],
+.dark [class~='text-slate-900'],
+.dark [class~='text-slate-800'],
+.dark [class~='text-zinc-900'],
+.dark [class~='text-neutral-900'] {
   color: var(--tt-text) !important;
 }
 
 .dark [class~='text-gray-600'],
 .dark [class~='text-gray-500'],
-.dark [class~='text-gray-400'] {
+.dark [class~='text-gray-400'],
+.dark [class~='text-slate-600'],
+.dark [class~='text-slate-500'],
+.dark [class~='text-zinc-600'],
+.dark [class~='text-neutral-600'] {
   color: var(--tt-text-muted) !important;
 }
 
+.dark [class~='border-gray-300'],
 .dark [class~='border-gray-200'],
-.dark [class~='border-gray-100'] {
+.dark [class~='border-gray-100'],
+.dark [class~='border-slate-200'],
+.dark [class~='border-zinc-200'],
+.dark [class~='border-neutral-200'],
+.dark [class~='border-black/20'] {
   border-color: var(--tt-border) !important;
 }
 
-.dark [class*='hover:bg-black/5']:hover {
+.dark [class*='hover:bg-black/5']:hover,
+.dark [class*='hover:bg-gray-']:hover,
+.dark [class*='hover:bg-white/']:hover {
   background-color: var(--tt-hover) !important;
+}
+
+.dark [class~='shadow-sm'],
+.dark [class~='shadow'],
+.dark [class~='shadow-md'],
+.dark [class~='shadow-lg'] {
+  box-shadow: 0 12px 30px var(--tt-shadow) !important;
+}
+
+/* Semantic feedback colors stay recognizable but no longer use bright light panels. */
+.dark [class~='bg-red-50'],
+.dark [class~='bg-red-100'] {
+  background-color: var(--tt-danger-bg) !important;
+}
+
+.dark [class~='text-red-800'],
+.dark [class~='text-red-700'],
+.dark [class~='text-red-600'],
+.dark [class~='text-red-500'] {
+  color: var(--tt-danger-text) !important;
+}
+
+.dark [class~='border-red-300'],
+.dark [class~='border-red-200'] {
+  border-color: rgba(252, 165, 165, 0.35) !important;
+}
+
+.dark [class~='bg-yellow-50'],
+.dark [class~='bg-yellow-100'],
+.dark [class~='bg-amber-50'],
+.dark [class~='bg-amber-100'] {
+  background-color: var(--tt-warning-bg) !important;
+}
+
+.dark [class~='text-yellow-800'],
+.dark [class~='text-yellow-700'],
+.dark [class~='text-amber-900'],
+.dark [class~='text-amber-800'],
+.dark [class~='text-amber-700'] {
+  color: var(--tt-warning-text) !important;
+}
+
+.dark [class~='border-yellow-200'],
+.dark [class~='border-amber-200'] {
+  border-color: rgba(252, 211, 77, 0.35) !important;
+}
+
+.dark [class~='bg-green-50'],
+.dark [class~='bg-green-100'],
+.dark [class*='bg-[#86EFAC'],
+.dark [class*='bg-[#86efac'] {
+  background-color: var(--tt-success-bg) !important;
+}
+
+.dark [class~='text-green-800'],
+.dark [class~='text-green-700'],
+.dark [class~='text-green-600'] {
+  color: var(--tt-success-text) !important;
+}
+
+.dark [class~='border-green-200'] {
+  border-color: rgba(134, 239, 172, 0.35) !important;
+}
+
+.dark [class~='bg-blue-50'],
+.dark [class~='bg-blue-100'],
+.dark [class~='bg-pink-50'],
+.dark [class~='bg-pink-100'],
+.dark [class~='bg-purple-50'],
+.dark [class~='bg-purple-100'] {
+  background-color: var(--tt-surface-muted) !important;
+}
+
+/* Brand cards and repeated custom component classes. */
+.dark .brand-card-green,
+.dark .brand-card-pink,
+.dark .brand-card-lilac,
+.dark .brand-card-blue,
+.dark .brand-card-yellow,
+.dark .brand-cta-bg,
+.dark .brand-cta-level-bg,
+.dark .brand-cta-topic-bg,
+.dark .header-card,
+.dark .hero-card,
+.dark .page-card,
+.dark .practice-card,
+.dark .quiz-card,
+.dark .word-card,
+.dark .section-card,
+.dark .example-card,
+.dark .content-card,
+.dark .writer-card,
+.dark .writer-shell,
+.dark .control-panel,
+.dark .side-card,
+.dark .tips-panel,
+.dark .tip-card,
+.dark .stat-card,
+.dark .topic-card,
+.dark .level-card,
+.dark .menu-panel {
+  background: var(--tt-card) !important;
+  border-color: var(--tt-border) !important;
+  box-shadow: 0 14px 34px var(--tt-shadow) !important;
+  color: var(--tt-text) !important;
+}
+
+.dark .brand-card-blue,
+.dark .stat-0,
+.dark .result-2,
+.dark .theme-blue {
+  background: rgba(35, 70, 94, 0.76) !important;
+}
+
+.dark .brand-card-pink,
+.dark .brand-card-lilac,
+.dark .stat-1,
+.dark .result-1,
+.dark .theme-purple {
+  background: rgba(79, 49, 93, 0.76) !important;
+}
+
+.dark .brand-card-green,
+.dark .stat-3,
+.dark .result-3 {
+  background: rgba(31, 77, 57, 0.76) !important;
+}
+
+.dark .brand-card-yellow,
+.dark .stat-2,
+.dark .result-4,
+.dark .theme-blush {
+  background: rgba(95, 76, 22, 0.72) !important;
+}
+
+.dark .brand-text-gradient {
+  background-image: linear-gradient(90deg, #f0abfc, #93c5fd, #fde68a) !important;
+}
+
+.dark .level-heading,
+.dark .page-heading,
+.dark .tips-title,
+.dark .tip-card-title,
+.dark .card-label,
+.dark .panel-title,
+.dark .stat-value,
+.dark .word-title {
+  color: var(--tt-text) !important;
+}
+
+.dark .level-subheading,
+.dark .page-subheading,
+.dark .tip-card-body,
+.dark .guest-note,
+.dark .more-tips-list li,
+.dark .panel-subtext,
+.dark .card-subtext,
+.dark .stat-label {
+  color: var(--tt-text-muted) !important;
+}
+
+.dark .tips-toggle,
+.dark .pill,
+.dark .back-link,
+.dark .drawer-link {
+  color: var(--tt-text) !important;
+}
+
+.dark .more-tips,
+.dark .divider,
+.dark .border-divider {
+  border-color: var(--tt-border) !important;
+}
+
+.dark .start-btn,
+.dark .primary-action,
+.dark .cta-button {
+  background: var(--tt-blue) !important;
+  color: var(--tt-text) !important;
+  border-color: rgba(147, 197, 253, 0.28) !important;
+}
+
+.dark .start-btn:hover,
+.dark .primary-action:hover,
+.dark .cta-button:hover {
+  background: #2d5b79 !important;
+}
+
+/* Inline styles appear on account/settings cards; override only in dark mode. */
+.dark [style*='#A8CAE0'],
+.dark [style*='#a8cae0'],
+.dark [style*='168,202,224'],
+.dark [style*='168, 202, 224'] {
+  background: var(--tt-blue) !important;
+  color: var(--tt-text) !important;
+}
+
+.dark [style*='#F6E1E1'],
+.dark [style*='#f6e1e1'],
+.dark [style*='246,225,225'],
+.dark [style*='246, 225, 225'],
+.dark [style*='#EAB8E4'],
+.dark [style*='#eab8e4'],
+.dark [style*='234,184,228'],
+.dark [style*='234, 184, 228'],
+.dark [style*='#D6A3D1'],
+.dark [style*='#d6a3d1'],
+.dark [style*='214,163,209'],
+.dark [style*='214, 163, 209'] {
+  background: var(--tt-blush) !important;
+  color: var(--tt-text) !important;
+}
+
+.dark [style*='#F4CD27'],
+.dark [style*='#f4cd27'],
+.dark [style*='244,205,39'],
+.dark [style*='244, 205, 39'] {
+  background: var(--tt-yellow) !important;
+  color: var(--tt-text) !important;
+}
+
+.dark input,
+.dark textarea,
+.dark select {
+  background-color: var(--tt-surface-solid);
+  border-color: var(--tt-border);
+  color: var(--tt-text);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: var(--tt-text-soft);
+}
+
+/* Additional custom page patterns used by quizzes, dojo, stats, writing, and unlock flows. */
+.dark .featured-stat-card,
+.dark .compact-stat-card,
+.dark .action-card,
+.dark .progress-card,
+.dark .error-card,
+.dark .locked-tile,
+.dark .unlock-summary,
+.dark .usage-details,
+.dark .usage-summary,
+.dark .example-scroll-block,
+.dark .voice-toggle,
+.dark .countdown-pill,
+.dark .pagination-page,
+.dark .pagination-jump,
+.dark .mode-dot,
+.dark .mobile-stats-toggle {
+  background: var(--tt-card) !important;
+  border-color: var(--tt-border) !important;
+  box-shadow: 0 12px 30px var(--tt-shadow) !important;
+  color: var(--tt-text) !important;
+}
+
+.dark .progress-track,
+.dark .shimmer-layer {
+  background: var(--tt-surface-muted) !important;
+}
+
+.dark .progress-bar,
+.dark .progress-fill,
+.dark .featured-stat-icon,
+.dark .mode-dot.is-active,
+.dark .pagination-page.is-active {
+  background: var(--tt-blue) !important;
+  color: var(--tt-text) !important;
+}
+
+.dark .btn-primary,
+.dark .btn-secondary,
+.dark .btn-tertiary,
+.dark .btn-soft,
+.dark .upgrade-btn,
+.dark .next-btn-blue,
+.dark .unlock-button,
+.dark .confirm-btn-blush,
+.dark .main-action-btn,
+.dark .example-action-btn,
+.dark .action-chip,
+.dark .voice-toggle-btn {
+  background: var(--tt-surface-muted) !important;
+  border-color: var(--tt-border) !important;
+  color: var(--tt-text) !important;
+  box-shadow: 0 10px 24px var(--tt-shadow) !important;
+}
+
+.dark .btn-primary,
+.dark .next-btn-blue,
+.dark .unlock-button,
+.dark .main-action-btn,
+.dark .voice-toggle-btn-active,
+.dark .action-chip-write,
+.dark .action-chip-speak {
+  background: var(--tt-blue) !important;
+}
+
+.dark .btn-secondary,
+.dark .confirm-btn-blush,
+.dark .upgrade-btn {
+  background: var(--tt-purple) !important;
+}
+
+.dark .btn-tertiary,
+.dark .btn-soft,
+.dark .char-chip-inactive {
+  background: var(--tt-blush) !important;
+}
+
+.dark .btn-primary:hover:not(:disabled),
+.dark .btn-secondary:hover:not(:disabled),
+.dark .btn-tertiary:hover:not(:disabled),
+.dark .btn-soft:hover:not(:disabled),
+.dark .upgrade-btn:hover,
+.dark .next-btn-blue:hover,
+.dark .unlock-button:hover:not(:disabled),
+.dark .main-action-btn:hover,
+.dark .example-action-btn:hover,
+.dark .action-chip:hover,
+.dark .voice-toggle-btn:hover {
+  filter: brightness(1.14);
+}
+
+.dark .char-chip,
+.dark .char-chip-active {
+  background: var(--tt-blue) !important;
+  border-color: rgba(147, 197, 253, 0.28) !important;
+  color: var(--tt-text) !important;
+}
+
+.dark .category-heading,
+.dark .your-stat-heading,
+.dark .featured-stat-value,
+.dark .compact-stat-value,
+.dark .word-label,
+.dark .word-text,
+.dark .word-jyutping,
+.dark .word-meaning,
+.dark .action-text,
+.dark .countdown-text,
+.dark .eyebrow {
+  color: var(--tt-text) !important;
+}
+
+.dark .helper-text,
+.dark .usage-summary,
+.dark .compact-stat-top {
+  color: var(--tt-text-muted) !important;
+}
+
+.dark .section-divider {
+  border-color: var(--tt-border) !important;
 }
