@@ -100,8 +100,7 @@ onMounted(() => {
 
       <div class="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
         <div class="relative rounded-xl p-5 pr-14 text-center brand-card-green shadow-sm">
-          <div
-            class="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-xl bg-white/55 text-gray-900 shadow-sm">
+          <div class="absolute right-4 top-4 inline-flex size-9 items-center justify-center text-gray-900">
             <UsersRound class="size-5" :stroke-width="2.2" />
           </div>
           <div class="text-2xl font-semibold text-gray-900">
@@ -114,18 +113,17 @@ onMounted(() => {
 
         <div class="relative rounded-xl p-5 pr-14 text-center brand-card-pink shadow-sm">
 
-        <div
-          class="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-xl bg-white/55 text-gray-900 shadow-sm">
-          <GraduationCap class="size-5" :stroke-width="2.2" />
-        </div>
+          <div class="absolute right-4 top-4 inline-flex size-9 items-center justify-center text-gray-900">
+            <GraduationCap class="size-5" :stroke-width="2.2" />
+          </div>
 
-        <div class="text-2xl font-semibold text-gray-900">
-          {{ stats?.totalUsers ?? '—' }}
+          <div class="text-2xl font-semibold text-gray-900">
+            {{ stats?.totalUsers ?? '—' }}
+          </div>
+          <div class="text-sm text-gray-700 mt-1">
+            Learners
+          </div>
         </div>
-        <div class="text-sm text-gray-700 mt-1">
-          Learners
-        </div>
-      </div>
       </div>
 
       <p class="text-base sm:text-lg text-gray-800 mt-10 max-w-2xl mx-auto">
@@ -203,8 +201,7 @@ onMounted(() => {
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <article v-for="mode in learningModes" :key="mode.title" :class="mode.bgClass"
           class="relative rounded-xl p-5 pr-16 shadow-sm">
-          <div
-            class="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-xl bg-white/55 text-gray-900 shadow-sm">
+          <div class="absolute right-4 top-4 inline-flex size-9 items-center justify-center text-gray-900">
             <component :is="mode.icon" class="size-5" :stroke-width="2.2" />
           </div>
 

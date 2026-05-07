@@ -6,11 +6,9 @@ useSeoMeta({
   ogDescription: 'Explore themed Cantonese topic lists with vocabulary and sentence practice.',
 })
 
-import type { Component } from 'vue'
 import type { Topic } from '@/types/topic'
 import { brandColours } from '@/utils/branding/helpers'
 import { sortedTopics } from '@/utils/topics/topics'
-import { computed, markRaw, onMounted, ref } from 'vue'
 import {
   Apple,
   BookOpen,
@@ -36,7 +34,6 @@ import {
   HeartPulse,
   House,
   Landmark,
-  MessageCircle,
   Mountain,
   Music,
   Newspaper,
@@ -45,15 +42,18 @@ import {
   Ruler,
   ShieldPlus,
   Shirt,
+  Smartphone,
   Smile,
   Sofa,
   Soup,
   Sprout,
-  Smartphone,
+  Users,
   Utensils,
   Volume2,
-  Zap,
+  Zap
 } from '@lucide/vue'
+import type { Component } from 'vue'
+import { computed, markRaw, onMounted, ref } from 'vue'
 
 const {
   authReady,
@@ -167,7 +167,7 @@ const topicIcons: Record<string, Component> = {
   math: markRaw(Calculator),
   'measure-quantities': markRaw(Ruler),
   'time-dates': markRaw(Clock),
-  'family-members': markRaw(MessageCircle),
+  'family-members': markRaw(Users),
   countries: markRaw(Globe2),
   emotions: markRaw(Smile),
   furniture: markRaw(Sofa),
@@ -223,8 +223,8 @@ onMounted(async () => {
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
 
-      <li v-for="(topic, index) in paginatedTopics" :key="topic.id" class="topic-card hover:brightness-110 rounded-lg p-4 space-y-3 transition"
-        :class="[
+      <li v-for="(topic, index) in paginatedTopics" :key="topic.id"
+        class="topic-card hover:brightness-110 rounded-lg p-4 space-y-3 transition" :class="[
           topic.comingSoon
             ? 'is-disabled'
             : 'is-active'
@@ -263,11 +263,13 @@ onMounted(async () => {
     <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
 
       <div class="flex justify-center items-center gap-1.5 sm:gap-3">
-        <button @click="goToPage(1)" :disabled="currentPage === 1" class="pagination-jump" v-if="showFirstButton" aria-label="First page">
+        <button @click="goToPage(1)" :disabled="currentPage === 1" class="pagination-jump" v-if="showFirstButton"
+          aria-label="First page">
           <ChevronsLeft class="h-4 w-4" aria-hidden="true" />
         </button>
 
-        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow" aria-label="Previous page">
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow"
+          aria-label="Previous page">
           <ChevronLeft class="h-4 w-4" aria-hidden="true" />
         </button>
 
@@ -276,7 +278,8 @@ onMounted(async () => {
           {{ page }}
         </button>
 
-        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow" aria-label="Next page">
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow"
+          aria-label="Next page">
           <ChevronRight class="h-4 w-4" aria-hidden="true" />
         </button>
 
@@ -349,9 +352,9 @@ onMounted(async () => {
   width: 2rem;
   height: 2rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.42);
+  /* background: rgba(255, 255, 255, 0.42); */
   color: rgba(17, 24, 39, 0.82);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
+  /* box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35); */
 }
 
 .topic-card.is-active:hover {
