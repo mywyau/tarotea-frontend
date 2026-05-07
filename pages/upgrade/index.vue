@@ -46,7 +46,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         <!-- Icon -->
         <div class="flex justify-center">
           <div class="w-20 h-20 flex items-center justify-center rounded-full" style="background-color:#EAB8E4;">
-            <span class="text-4xl">🍵</span>
+            <AppIcon icon="tea" size="h-10 w-10" />
           </div>
         </div>
 

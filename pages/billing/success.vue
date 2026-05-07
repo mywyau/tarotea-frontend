@@ -175,7 +175,9 @@ onBeforeUnmount(() => {
       </template>
 
       <template v-else-if="status === 'active'">
-        <div class="text-5xl">🎉</div>
+        <div class="flex justify-center text-[#D6A3D1]">
+          <AppIcon icon="celebration" size="h-14 w-14" />
+        </div>
 
         <h1 class="text-2xl font-semibold">
           Payment successful
@@ -207,7 +209,9 @@ onBeforeUnmount(() => {
       </template>
 
       <template v-else>
-        <div class="text-5xl">⚠️</div>
+        <div class="flex justify-center text-amber-500">
+          <AppIcon icon="warning" size="h-14 w-14" />
+        </div>
 
         <h1 class="text-2xl font-semibold">
           We couldn't confirm your subscription yet

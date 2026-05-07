@@ -13,7 +13,7 @@
           :aria-expanded="panelOpen ? 'true' : 'false'"
           @click.stop="togglePanel"
         >
-          ☰
+          <AppIcon icon="menu" size="h-6 w-6" />
         </button>
 
         <transition name="fade">

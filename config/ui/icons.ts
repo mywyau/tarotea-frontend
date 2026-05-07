@@ -36,6 +36,11 @@ export const appIcons = {
   warning: 'lucide:triangle-alert',
   error: 'lucide:circle-x',
   info: 'lucide:info',
+  smile: 'lucide:smile',
+  celebration: 'lucide:party-popper',
+  construction: 'lucide:construction',
+  tea: 'lucide:coffee',
+  copy: 'lucide:copy',
 } as const
 
 export type AppIconName = keyof typeof appIcons

@@ -32,7 +32,9 @@ const isSubscribed = computed(() =>
       <div class="p-10 text-center space-y-6">
         <div class="max-w-md w-full text-center space-y-6">
 
-          <div class="text-5xl">😌</div>
+          <div class="flex justify-center text-[#D6A3D1]">
+            <AppIcon icon="smile" size="h-14 w-14" />
+          </div>
 
           <h1 class="text-2xl font-semibold">
             Payment cancelled

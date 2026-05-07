@@ -349,8 +349,9 @@ watchEffect(() => {
 
                 <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
                     <span>{{ xp }} / {{ masteryXp }} XP</span>
-                    <span v-if="isMastered" class="font-semibold text-green-600">
-                        ✓ Maxed
+                    <span v-if="isMastered" class="inline-flex items-center gap-1 font-semibold text-green-600">
+                        <AppIcon icon="success" size="h-4 w-4" />
+                        Maxed
                     </span>
                 </div>
 
@@ -379,14 +380,14 @@ watchEffect(() => {
 
                 <NuxtLink v-if="showPracticeButtons" :to="`/writing/${topic}/vocab/${word.id}`"
                     class="action-chip action-chip-write main-action-btn" aria-label="Practice writing this word">
-                    <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+                    <AppIcon icon="writing" size="mobile-action-icon" />
                     <span class="mobile-action-label">Write</span>
                 </NuxtLink>
 
                 <NuxtLink v-if="showPracticeButtons" :to="`/tone-garden/${word.id}`"
                     class="action-chip action-chip-tone-forge main-action-btn"
                     aria-label="Open tone checker for this word">
-                    <span aria-hidden="true" class="mobile-action-icon">🎤</span>
+                    <AppIcon icon="speaking" size="mobile-action-icon" />
                     <span class="mobile-action-label">Speak</span>
                 </NuxtLink>
 
@@ -431,7 +432,7 @@ watchEffect(() => {
                                     :to="`/writing/${topic}/sentences/${word.id}/${currentExampleIndex}`"
                                     class="action-chip action-chip-sm action-chip-write example-action-btn"
                                     aria-label="Practice writing this sentence">
-                                    <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+                                    <AppIcon icon="writing" size="mobile-action-icon" />
                                     <span class="mobile-action-label">Write</span>
                                 </NuxtLink>
 
@@ -439,7 +440,7 @@ watchEffect(() => {
                                     :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/v2/${currentExampleIndex}`"
                                     class="action-chip action-chip-sm action-chip-speak example-action-btn"
                                     aria-label="Practice pronunciation for this sentence">
-                                    <span aria-hidden="true" class="mobile-action-icon">🎤</span>
+                                    <AppIcon icon="speaking" size="mobile-action-icon" />
                                     <span class="mobile-action-label">Speak</span>
                                 </NuxtLink>
 

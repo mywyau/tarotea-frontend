@@ -30,8 +30,9 @@ definePageMeta({
       <BackLink />
     </div>
 
-    <h1 class="text-3xl text-black font-semibold">
-      🚧 Coming soon
+    <h1 class="flex items-center justify-center gap-3 text-3xl text-black font-semibold">
+      <AppIcon icon="construction" size="h-8 w-8" />
+      <span>Coming soon</span>
     </h1>
 
     <p class="text-gray-800">

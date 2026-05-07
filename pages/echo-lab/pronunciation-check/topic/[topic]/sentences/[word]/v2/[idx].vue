@@ -653,8 +653,9 @@ onUnmounted(() => {
         <Transition name="tip-expand">
           <div v-if="showGuidancePanel" class="mt-3 space-y-4">
             <div class="bg-gray-50 border border-gray-200 rounded-md p-3 space-y-2">
-              <p class="font-medium text-gray-600">
-                ⚠️ AI pronunciation feedback
+              <p class="flex items-center gap-2 font-medium text-gray-600">
+                <AppIcon icon="warning" size="h-4 w-4" />
+                AI pronunciation feedback
               </p>
 
               <p>

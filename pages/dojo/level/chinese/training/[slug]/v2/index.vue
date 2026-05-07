@@ -737,8 +737,10 @@ onBeforeUnmount(() => {
                   {{ fullJyutping }}
 
                   <button type="button" @click="copyJyutping"
-                    class="bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
-                    {{ copied ? '✓' : 'copy' }}
+                    class="inline-flex items-center gap-1 bg-white text-xs px-2 py-1 rounded-md border border-gray-300 hover:bg-gray-100 transition">
+                    <AppIcon v-if="copied" icon="success" size="h-3 w-3" />
+                    <AppIcon v-else icon="copy" size="h-3 w-3" />
+                    <span>{{ copied ? 'copied' : 'copy' }}</span>
                   </button>
                 </div>
               </transition>

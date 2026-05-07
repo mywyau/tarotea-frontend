@@ -82,7 +82,7 @@ onMounted(() => {
       <!-- Mobile Hamburger -->
       <button type="button" class="md:hidden text-2xl relative z-50 shrink-0" @click="toggleMobile"
         aria-label="Toggle menu">
-        ☰
+        <AppIcon icon="menu" size="h-6 w-6" />
       </button>
 
     </div>

@@ -92,7 +92,7 @@ onBeforeUnmount(() => {
 
         <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
           :aria-expanded="menuOpen ? 'true' : 'false'">
-          ☰
+          <AppIcon icon="menu" size="h-6 w-6" />
         </button>
 
         <div v-if="menuOpen" class="menu-panel">

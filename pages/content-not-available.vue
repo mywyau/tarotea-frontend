@@ -11,7 +11,10 @@ definePageMeta({
       <BackLink />
     </div>
 
-    <h1 class="text-3xl font-semibold">Content Not Available 🚧</h1>
+    <h1 class="flex items-center justify-center gap-3 text-3xl font-semibold">
+      Content Not Available
+      <AppIcon icon="construction" size="h-8 w-8" />
+    </h1>
     <p class="text-gray-600">
       This content isn’t available yet.
     </p>

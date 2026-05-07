@@ -16,7 +16,10 @@ definePageMeta({
 
     <!-- Title -->
     <div class="space-y-8">
-      <h1 class="text-3xl font-semibold">Please sign in 🚧</h1>
+      <h1 class="flex items-center justify-center gap-3 text-3xl font-semibold">
+        Please sign in
+        <AppIcon icon="construction" size="h-8 w-8" />
+      </h1>
 
       <p class="text-gray-600 text-sm max-w-md mx-auto">
         Sign in to view this content and continue your journey.
