@@ -74,7 +74,12 @@ onBeforeUnmount(() => {
 <template>
   <header class="header-shell sticky top-0 z-40">
     <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-      <NuxtLink to="/" class="text-2xl font-bold text-black hover:text-gray-700">
+      <!-- <NuxtLink to="/"
+        class="inline-block text-2xl font-bold text-black transition hover:text-gray-700 motion-safe:hover:animate-bounce animate-ease-linear">
+        TaroTea
+      </NuxtLink> -->
+
+      <NuxtLink to="/" class="brand-logo text-2xl font-bold text-black hover:text-gray-700">
         TaroTea
       </NuxtLink>
 
@@ -128,14 +133,9 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
-    <button
-      type="button"
-      class="trigger-visibility-btn"
-      :class="{ 'is-open': navOpen }"
-      :aria-label="navOpen ? 'Close Warp panel' : 'Open Warp panel'"
-      :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel"
-      @click.stop="toggleNav"
-    >
+    <button type="button" class="trigger-visibility-btn" :class="{ 'is-open': navOpen }"
+      :aria-label="navOpen ? 'Close Warp panel' : 'Open Warp panel'" :aria-expanded="navOpen ? 'true' : 'false'"
+      aria-controls="warp-navigation-panel" @click.stop="toggleNav">
       <span class="portal-swirl-line" aria-hidden="true"></span>
       <span class="sr-only">{{ navOpen ? 'Close Warp panel' : 'Open Warp panel' }}</span>
     </button>
@@ -151,14 +151,9 @@ onBeforeUnmount(() => {
         </div>
 
         <nav class="px-3 py-4 space-y-1">
-          <NuxtLink
-            v-for="link in navLinks"
-            :key="link.to"
-            :to="link.to"
-            class="drawer-link font-medium"
+          <NuxtLink v-for="link in navLinks" :key="link.to" :to="link.to" class="drawer-link font-medium"
             :class="{ 'drawer-link-active': route.path === link.to }"
-            :aria-current="route.path === link.to ? 'page' : undefined"
-          >
+            :aria-current="route.path === link.to ? 'page' : undefined">
             {{ link.label }}
           </NuxtLink>
         </nav>
@@ -323,7 +318,41 @@ onBeforeUnmount(() => {
 }
 
 @keyframes portalSwirl {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
+.brand-logo {
+  display: inline-block;
+  transform-origin: center bottom;
+  transition:
+    color 160ms ease,
+    transform 160ms ease;
+  will-change: transform;
+}
+
+.brand-logo:hover {
+  animation: softBrandBounce 0.85s ease-in-out infinite;
+}
+
+@keyframes softBrandBounce {
+
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+
+  30% {
+    transform: translateY(-4px) scale(1.025);
+  }
+
+  55% {
+    transform: translateY(1px) scale(0.995);
+  }
+
+  75% {
+    transform: translateY(-2px) scale(1.01);
+  }
+}
 </style>
