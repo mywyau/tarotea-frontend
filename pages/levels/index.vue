@@ -5,6 +5,7 @@ definePageMeta({
   ssr: true,
 })
 
+import { Tally1, Tally2, Tally3, Tally4, Tally5 } from '@lucide/vue'
 import { brandColours } from '@/utils/branding/helpers'
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { onMounted } from 'vue'
@@ -17,6 +18,30 @@ const {
 
 function getLevelColor(index: number) {
   return brandColours[index % brandColours.length]
+}
+
+const tallyIcons = {
+  1: Tally1,
+  2: Tally2,
+  3: Tally3,
+  4: Tally4,
+  5: Tally5,
+} as const
+
+type TallyCount = keyof typeof tallyIcons
+
+function getTallyIcon(tallyGroup: TallyCount) {
+  return tallyIcons[tallyGroup]
+}
+
+function getLevelTallyGroups(levelNumber: number): TallyCount[] {
+  const fullGroups = Math.floor(levelNumber / 5)
+  const remainder = levelNumber % 5
+
+  return [
+    ...Array.from({ length: fullGroups }, () => 5 as TallyCount),
+    ...(remainder > 0 ? [remainder as TallyCount] : []),
+  ]
 }
 
 // --- helpers ---
@@ -55,9 +80,21 @@ onMounted(async () => {
         <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="block space-y-3">
 
           <div class="flex items-start justify-between gap-4">
-            <div>
-              <div class="text-lg font-semibold text-gray-900">
-                {{ level.title }}
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="text-lg font-semibold text-gray-900">
+                  {{ level.title }}
+                </div>
+
+                <div class="tally-icons" role="img" :aria-label="`${level.title} tally marks`">
+                  <component
+                    :is="getTallyIcon(tallyGroup)"
+                    v-for="(tallyGroup, tallyIndex) in getLevelTallyGroups(level.number)"
+                    :key="`${level.id}-tally-${tallyIndex}`"
+                    class="tally-icon"
+                    aria-hidden="true"
+                  />
+                </div>
               </div>
 
               <div class="text-sm text-gray-700 mt-1">
@@ -75,9 +112,21 @@ onMounted(async () => {
         <!-- Locked level (kept for later when you re-enable gating) -->
         <div v-else class="space-y-3 cursor-not-allowed">
           <div class="flex items-start justify-between gap-4">
-            <div>
-              <div class="text-lg font-semibold text-gray-900">
-                {{ level.title }}
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="text-lg font-semibold text-gray-900">
+                  {{ level.title }}
+                </div>
+
+                <div class="tally-icons" role="img" :aria-label="`${level.title} tally marks`">
+                  <component
+                    :is="getTallyIcon(tallyGroup)"
+                    v-for="(tallyGroup, tallyIndex) in getLevelTallyGroups(level.number)"
+                    :key="`${level.id}-tally-${tallyIndex}`"
+                    class="tally-icon"
+                    aria-hidden="true"
+                  />
+                </div>
               </div>
 
               <div class="text-sm text-gray-700 mt-1">
@@ -169,6 +218,19 @@ onMounted(async () => {
   opacity: 0.85;
   border-color: rgba(244, 205, 39, 0.30);
   /* subtle yellow border hint */
+}
+
+.tally-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  color: rgba(17, 24, 39, 0.68);
+}
+
+.tally-icon {
+  width: 1.1rem;
+  height: 1.1rem;
+  stroke-width: 2.25;
 }
 
 /* Pills */
