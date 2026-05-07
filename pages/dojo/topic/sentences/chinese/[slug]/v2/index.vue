@@ -294,34 +294,6 @@ const resultMeta = computed(() => {
   return { title: 'Keep practicing' }
 })
 
-const completionTiles = computed(() => [
-  {
-    label: 'Hint-Free',
-    value: hintFreeCount.value,
-    suffix: '',
-    className: 'result-3',
-  },
-  {
-    label: 'Hints Used',
-    value: hintsUsedCount.value,
-    suffix: '',
-    className: 'result-1',
-  },
-  {
-    label: 'Time',
-    value: formattedElapsedTime.value,
-    suffix: '',
-    className: 'result-0',
-  },
-  {
-    label: 'XP Earned',
-    value: animatedXpEarned.value,
-    suffix: ' XP',
-    className: 'result-2',
-    prefix: animatedXpEarned.value > 0 ? '+' : '',
-  },
-])
-
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -820,18 +792,14 @@ onBeforeUnmount(() => {
               </p>
             </div>
 
-            <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1">
-              <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110 min-w-[calc(50%-0.5rem)] snap-start"
-                :class="tile.className">
-                <p class="stat-label">
-                  {{ tile.label }}
-                </p>
-
-                <p class="stat-value">
-                  {{ tile.prefix ?? '' }}{{ tile.value }}<span v-if="tile.suffix"> {{ tile.suffix }}</span>
-                </p>
-              </div>
-            </div>
+            <QuizCompletionFlipStats
+              correct-label="Hint-Free"
+              incorrect-label="Hints Used"
+              :correct="hintFreeCount"
+              :incorrect="hintsUsedCount"
+              :time="formattedElapsedTime"
+              :xp-earned="animatedXpEarned"
+            />
 
             <div class="pt-2 space-y-3">
               <button
