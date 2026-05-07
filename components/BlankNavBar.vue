@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { Menu, Orbit, X } from '@lucide/vue'
+import { Menu, Moon, Orbit, Sun, X } from '@lucide/vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const { isLoggedIn, resolve } = useMeStateV2()
 const route = useRoute()
+const { isDark, toggleTheme, initialiseTheme } = useThemeMode()
 
 const menuOpen = ref(false)
 const navOpen = ref(false)
@@ -60,6 +61,7 @@ function onDocumentKeydown(e: KeyboardEvent) {
 }
 
 onMounted(() => {
+  initialiseTheme()
   resolve()
   document.addEventListener('click', onDocumentClick)
   document.addEventListener('keydown', onDocumentKeydown)
@@ -84,15 +86,22 @@ onBeforeUnmount(() => {
         TaroTea
       </NuxtLink>
 
-      <div ref="menuRoot" class="relative">
+      <div class="flex items-center gap-2">
+        <button type="button" class="theme-toggle-btn" :aria-label="isDark ? 'Switch to light mode' : 'Switch to dark mode'"
+          :title="isDark ? 'Switch to light mode' : 'Switch to dark mode'" @click="toggleTheme">
+          <Sun v-if="isDark" class="h-5 w-5" aria-hidden="true" />
+          <Moon v-else class="h-5 w-5" aria-hidden="true" />
+          <span class="sr-only">{{ isDark ? 'Switch to light mode' : 'Switch to dark mode' }}</span>
+        </button>
 
-        <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
+        <div ref="menuRoot" class="relative">
+          <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
           :aria-expanded="menuOpen ? 'true' : 'false'">
           <X v-if="menuOpen" class="h-5 w-5" aria-hidden="true" />
           <Menu v-else class="h-5 w-5" aria-hidden="true" />
         </button>
 
-        <div v-if="menuOpen" class="menu-panel">
+          <div v-if="menuOpen" class="menu-panel">
           <template v-if="isLoggedIn">
             <NuxtLink to="/account/v2"
               class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
@@ -132,6 +141,7 @@ onBeforeUnmount(() => {
               Login
             </button>
           </template>
+          </div>
         </div>
       </div>
     </div>
@@ -172,6 +182,66 @@ onBeforeUnmount(() => {
   --blue: #A8CAE0;
   --yellow: #F4CD27;
   --blush: #F6E1E1;
+}
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  color: var(--tt-text);
+  background: var(--tt-surface-muted);
+  border: 1px solid var(--tt-border);
+  box-shadow: 0 8px 18px var(--tt-shadow);
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.theme-toggle-btn:hover {
+  transform: translateY(-1px);
+  background: var(--tt-hover);
+  box-shadow: 0 10px 22px var(--tt-shadow);
+}
+
+:global(.dark) .header-shell {
+  color: var(--tt-text);
+}
+
+:global(.dark) .brand-logo,
+:global(.dark) .menu-btn,
+:global(.dark) .portal-icon,
+:global(.dark) .nav-drawer .text-black {
+  color: var(--tt-text) !important;
+}
+
+:global(.dark) .menu-panel {
+  background: var(--tt-surface);
+  border: 1px solid var(--tt-border);
+  box-shadow: 0 18px 40px var(--tt-shadow);
+}
+
+:global(.dark) .drawer-overlay {
+  background: rgba(10, 8, 18, 0.44);
+}
+
+:global(.dark) .nav-drawer {
+  background: rgba(30, 26, 48, 0.82);
+  border-right: 1px solid var(--tt-border);
+  box-shadow: 0 18px 40px var(--tt-shadow);
+}
+
+:global(.dark) .drawer-link {
+  color: var(--tt-text);
+}
+
+:global(.dark) .drawer-link:hover,
+:global(.dark) .drawer-link-active {
+  background: var(--tt-hover);
 }
 
 .menu-btn {

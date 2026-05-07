@@ -1,0 +1,66 @@
+:root {
+  --tt-bg: rgba(246, 225, 225, 0.3);
+  --tt-surface: rgba(255, 255, 255, 0.82);
+  --tt-surface-solid: #ffffff;
+  --tt-surface-muted: rgba(255, 255, 255, 0.58);
+  --tt-text: #111827;
+  --tt-text-muted: #4b5563;
+  --tt-border: rgba(17, 24, 39, 0.12);
+  --tt-hover: rgba(17, 24, 39, 0.06);
+  --tt-shadow: rgba(0, 0, 0, 0.12);
+}
+
+.dark {
+  --tt-bg: #120f1f;
+  --tt-surface: rgba(30, 26, 48, 0.88);
+  --tt-surface-solid: #1e1a30;
+  --tt-surface-muted: rgba(45, 39, 69, 0.72);
+  --tt-text: #f8fafc;
+  --tt-text-muted: #cbd5e1;
+  --tt-border: rgba(226, 232, 240, 0.16);
+  --tt-hover: rgba(226, 232, 240, 0.1);
+  --tt-shadow: rgba(0, 0, 0, 0.35);
+}
+
+html {
+  background: var(--tt-bg);
+}
+
+body {
+  background: var(--tt-bg);
+  color: var(--tt-text);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.tarotea-app-shell {
+  background: var(--tt-bg);
+  color: var(--tt-text);
+  transition: background-color 180ms ease, color 180ms ease;
+}
+
+.dark [class~='bg-white'],
+.dark [class~='bg-gray-50'] {
+  background-color: var(--tt-surface-solid) !important;
+}
+
+.dark [class~='text-black'],
+.dark [class~='text-gray-900'],
+.dark [class~='text-gray-800'],
+.dark [class~='text-gray-700'] {
+  color: var(--tt-text) !important;
+}
+
+.dark [class~='text-gray-600'],
+.dark [class~='text-gray-500'],
+.dark [class~='text-gray-400'] {
+  color: var(--tt-text-muted) !important;
+}
+
+.dark [class~='border-gray-200'],
+.dark [class~='border-gray-100'] {
+  border-color: var(--tt-border) !important;
+}
+
+.dark [class*='hover:bg-black/5']:hover {
+  background-color: var(--tt-hover) !important;
+}

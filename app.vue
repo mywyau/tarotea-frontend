@@ -2,6 +2,11 @@
 import { Analytics } from '@vercel/analytics/vue';
 
 const runtimeConfig = useRuntimeConfig()
+const { initialiseTheme } = useThemeMode()
+
+if (import.meta.client) {
+  initialiseTheme()
+}
 
 const baseUrl = (runtimeConfig.public.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
 
@@ -25,7 +30,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col overflow-x-hidden bg-[#F6E1E1]/30">
+  <div class="tarotea-app-shell min-h-screen flex flex-col overflow-x-hidden">
     <BlankNavBar />
 
     <main class="flex-1">

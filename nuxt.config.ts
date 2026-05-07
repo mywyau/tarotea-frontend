@@ -2,6 +2,7 @@
 
 export default defineNuxtConfig({
   modules: ["@nuxtjs/tailwindcss"],
+  css: ["~/assets/css/theme.css"],
 
   // image: false, // ⛔ force-disable Nuxt Image
 
