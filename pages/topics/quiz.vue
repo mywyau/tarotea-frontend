@@ -6,8 +6,8 @@ useSeoMeta({
     ogDescription: 'Train Cantonese by topic with multiple quiz modes and adaptive repetition.',
 })
 
+import { BookOpen, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Headphones, MessageSquareText, Mic2, Volume2 } from '@lucide/vue'
 import { computed, onMounted, ref, watch } from 'vue'
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 import type { TopicQuiz } from '~/types/topic'
 import { sortedTopics } from '~/utils/topics/topics'
@@ -88,31 +88,41 @@ const topicQuizModes = [
     {
         id: 'vocab',
         label: 'Vocab',
+        icon: markRaw(BookOpen),
         buttonClass: 'topic-btn-blue',
+        dotClass: 'dot-blue',
         to: (topicId: string) => `/topic/quiz/vocabulary/word/v5/start-quiz/${topicId}`,
     },
     {
         id: 'audio',
         label: 'Audio Only',
+        icon: markRaw(Headphones),
         buttonClass: 'topic-btn-purple',
+        dotClass: 'dot-purple',
         to: (topicId: string) => `/topic/quiz/vocabulary/audio/v5/${topicId}/start-quiz`,
     },
     {
         id: 'sentences',
         label: 'Sentences',
+        icon: markRaw(MessageSquareText),
         buttonClass: 'topic-btn-yellow',
+        dotClass: 'dot-yellow',
         to: (topicId: string) => `/topic/quiz/sentences/no-audio/${topicId}/v3/start-quiz`,
     },
     {
         id: 'sentences-audio',
-        label: 'Audio Only Sentences',
+        label: 'Audio Sentences',
+        icon: markRaw(Volume2),
         buttonClass: 'topic-btn-blush',
+        dotClass: 'dot-blush',
         to: (topicId: string) => `/topic/quiz/sentences/audio/${topicId}/v3/start-quiz`,
     },
     {
         id: 'echo-gecko',
         label: 'Echo Gecko',
+        icon: markRaw(Mic2),
         buttonClass: 'topic-btn-green',
+        dotClass: 'dot-green',
         to: (topicId: string) => `/topic/quiz/echo-gecko/${topicId}`,
     },
 ] as const
@@ -195,20 +205,35 @@ onMounted(async () => {
                             <ChevronLeft class="h-5 w-5" aria-hidden="true" />
                         </button>
 
-                        <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
+                        <!-- <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
                             class="topic-btn"
                             :class="[getSelectedTopicMode(topic.id).buttonClass, { 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }]">
                             {{ getSelectedTopicMode(topic.id).label }}
+                        </NuxtLink> -->
+
+                        <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
+                            class="topic-btn" :class="[
+                                getSelectedTopicMode(topic.id).buttonClass,
+                                { 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }
+                            ]">
+                            <component :is="getSelectedTopicMode(topic.id).icon" class="h-4 w-4 shrink-0"
+                                aria-hidden="true" />
+
+                            <span>
+                                {{ getSelectedTopicMode(topic.id).label }}
+                            </span>
                         </NuxtLink>
 
-                        <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, 1)" aria-label="Next quiz mode"
-                            :disabled="!canEnterTopic(topic) || topic.comingSoon">
+                        <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, 1)"
+                            aria-label="Next quiz mode" :disabled="!canEnterTopic(topic) || topic.comingSoon">
                             <ChevronRight class="h-5 w-5" aria-hidden="true" />
                         </button>
                     </div>
 
-                    <div class="mode-dots" :aria-label="`Mode ${getSelectedTopicModeIndex(topic.id) + 1} of ${topicQuizModes.length}`">
-                        <span v-for="(mode, modeIndex) in topicQuizModes" :key="`${topic.id}-${mode.id}`" class="mode-dot"
+                    <div class="mode-dots"
+                        :aria-label="`Mode ${getSelectedTopicModeIndex(topic.id) + 1} of ${topicQuizModes.length}`">
+                        <span v-for="(mode, modeIndex) in topicQuizModes" :key="`${topic.id}-${mode.id}`"
+                            class="mode-dot"
                             :class="{ 'is-active': modeIndex === getSelectedTopicModeIndex(topic.id) }" />
                     </div>
                 </div>
@@ -301,7 +326,7 @@ onMounted(async () => {
 }
 
 /* Buttons */
-.topic-btn {
+/* .topic-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -313,6 +338,28 @@ onMounted(async () => {
     font-weight: 600;
     line-height: 1.2;
     transition: all 0.15s ease;
+} */
+
+.topic-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+    text-align: center;
+    min-height: 52px;
+    padding: 0.65rem 0.85rem;
+    font-size: 0.85rem;
+    border-radius: 14px;
+    font-weight: 700;
+    line-height: 1.2;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
+}
+
+.topic-btn:hover {
+    transform: translateY(-2px);
 }
 
 /* Colour variations */
@@ -343,14 +390,15 @@ onMounted(async () => {
     background: rgba(244, 205, 39, 0.65);
 }
 
-
 .topic-btn-blush {
-    background: rgb(249, 166, 166);
+    background: rgba(246, 180, 180, 0.42);
     color: #1f2937;
+    box-shadow: 0 8px 18px rgba(246, 180, 180, 0.18);
 }
 
 .topic-btn-blush:hover {
-    background: rgb(204, 136, 136);
+    background: rgba(246, 180, 180, 0.62);
+    box-shadow: 0 12px 24px rgba(246, 180, 180, 0.26);
 }
 
 .topic-btn-green {
