@@ -6,6 +6,15 @@ useSeoMeta({
   ogDescription: 'Build everyday Cantonese with short, focused practice sessions.',
 })
 
+import {
+  CalendarCheck,
+  GraduationCap,
+  Layers,
+  PenLine,
+  TrendingUp,
+  UsersRound,
+} from '@lucide/vue'
+
 const { data: stats } = await useFetch('/api/total-users-stats', {
   server: true,
   lazy: true,
@@ -16,21 +25,25 @@ const learningModes = [
     title: 'Daily practice',
     description: 'Short sessions designed for consistency, even with a busy schedule. Run a short quiz whenever you want',
     bgClass: 'brand-card-yellow',
+    icon: CalendarCheck,
   },
   {
     title: 'Multiple activities',
     description: 'Switch between multiple quiz types, practice pronunciation and typing skills with various activities.',
     bgClass: 'brand-card-blue',
+    icon: Layers,
   },
   {
     title: 'Progress-driven',
     description: 'See your growth and keep momentum with clear goals and repetition. Track progress via XP and unlock more words for free. Visualise which words are familiar and words that you may need to work on easily.',
     bgClass: 'brand-card-pink',
+    icon: TrendingUp,
   },
   {
     title: 'Learn how to write',
     description: 'Grab your pen and paper! Watch and learn how to write traditional chinese characters by following the Hanzi Writer strokes.',
     bgClass: 'brand-card-green',
+    icon: PenLine,
   },
 ]
 
@@ -86,7 +99,11 @@ onMounted(() => {
 
 
       <div class="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
-        <div class="rounded-xl p-5 text-center brand-card-green shadow-sm">
+        <div class="relative rounded-xl p-5 pr-14 text-center brand-card-green shadow-sm">
+          <div
+            class="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-xl bg-white/55 text-gray-900 shadow-sm">
+            <UsersRound class="size-5" :stroke-width="2.2" />
+          </div>
           <div class="text-2xl font-semibold text-gray-900">
             {{ currentUsers ?? '—' }}
           </div>
@@ -95,14 +112,20 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="rounded-xl p-5 text-center brand-card-pink shadow-sm">
-          <div class="text-2xl font-semibold text-gray-900">
-            {{ stats?.totalUsers ?? '—' }}
-          </div>
-          <div class="text-sm text-gray-700 mt-1">
-            Learners
-          </div>
+        <div class="relative rounded-xl p-5 pr-14 text-center brand-card-pink shadow-sm">
+
+        <div
+          class="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-xl bg-white/55 text-gray-900 shadow-sm">
+          <GraduationCap class="size-5" :stroke-width="2.2" />
         </div>
+
+        <div class="text-2xl font-semibold text-gray-900">
+          {{ stats?.totalUsers ?? '—' }}
+        </div>
+        <div class="text-sm text-gray-700 mt-1">
+          Learners
+        </div>
+      </div>
       </div>
 
       <p class="text-base sm:text-lg text-gray-800 mt-10 max-w-2xl mx-auto">
@@ -111,7 +134,8 @@ onMounted(() => {
       </p>
     </section>
 
-    <section class="mt-10 sm:mt-12 start-learning-flip hover:brightness-105" aria-label="Start learning Cantonese today">
+    <section class="mt-10 sm:mt-12 start-learning-flip hover:brightness-105"
+      aria-label="Start learning Cantonese today">
       <div class="start-learning-scene" :class="{ 'is-flipped': isStartPanelFlipped }" @click="flipStartPanel">
         <article
           class="start-learning-face start-learning-face-front rounded-2xl p-5 sm:p-8 brand-cta-topic-bg text-gray-900 shadow-sm">
@@ -177,10 +201,17 @@ onMounted(() => {
       </h2>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <article v-for="mode in learningModes" :key="mode.title" :class="mode.bgClass" class="rounded-xl p-5 shadow-sm">
+        <article v-for="mode in learningModes" :key="mode.title" :class="mode.bgClass"
+          class="relative rounded-xl p-5 pr-16 shadow-sm">
+          <div
+            class="absolute right-4 top-4 inline-flex size-9 items-center justify-center rounded-xl bg-white/55 text-gray-900 shadow-sm">
+            <component :is="mode.icon" class="size-5" :stroke-width="2.2" />
+          </div>
+
           <h3 class="font-semibold text-gray-900">
             {{ mode.title }}
           </h3>
+
           <p class="text-sm text-gray-800 mt-2">
             {{ mode.description }}
           </p>
