@@ -731,10 +731,13 @@ onBeforeUnmount(() => {
                 Word {{ idx + 1 }} / {{ words.length }}
               </div>
 
-              <div class="mt-2 h-1.5 w-full min-w-[180px] overflow-hidden rounded-full bg-gray-200/80">
-                <div class="dojo-mini-progress h-full rounded-full transition-all duration-300"
-                  :style="{ width: `${exerciseProgressPercent}%` }" />
-              </div>
+              <AppProgressBar
+                class="mt-2 w-full min-w-[180px]"
+                size="sm"
+                tone="dojo"
+                :value="exerciseProgressPercent"
+                label="Training progress"
+              />
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
@@ -804,10 +807,13 @@ onBeforeUnmount(() => {
 
             <div class="flex items-center max-w-xs mt-2">
               <div class="w-28 mr-2">
-                <div class="h-[3px] bg-gray-200 rounded">
-                  <div class="h-[3px] bg-green-500 rounded transition-all duration-500"
-                    :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
-                </div>
+                <AppProgressBar
+                  size="xs"
+                  tone="success"
+                  :value="currentXp ?? 0"
+                  :max="masteryXp"
+                  label="Current item XP"
+                />
               </div>
 
               <div class="relative flex items-center">
@@ -1064,10 +1070,6 @@ onBeforeUnmount(() => {
   margin-top: 0.65rem;
   font-size: 0.95rem;
   color: rgba(17, 24, 39, 0.68);
-}
-
-.dojo-mini-progress {
-  background: linear-gradient(90deg, #f5b7b1 0%, #f8d58f 45%, #9fd6bf 100%);
 }
 
 .fade-scale-enter-active,

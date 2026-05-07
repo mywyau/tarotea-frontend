@@ -386,9 +386,13 @@ watchEffect(() => {
         </div>
 
         <!-- Progress bar -->
-        <div class="w-full max-w-xs mx-auto h-2 rounded-full overflow-hidden bg-gray-300">
-          <div class="h-2 bg-green-500 transition-all duration-700 ease-out" :style="{ width: masteryPercent + '%' }" />
-        </div>
+        <AppProgressBar
+          class="w-full max-w-xs mx-auto"
+          size="sm"
+          tone="success"
+          :value="masteryPercent"
+          label="Word mastery progress"
+        />
       </div>
 
       <div class="flex items-center justify-between w-full pt-1">
@@ -579,13 +583,6 @@ watchEffect(() => {
 .example-scroll-content {
   width: max-content;
   min-width: 100%;
-}
-
-/* Progress bar */
-.progress-bar {
-  background: linear-gradient(90deg,
-      #D6A3D1,
-      #EAB8E4);
 }
 
 .action-chip {

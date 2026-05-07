@@ -155,11 +155,11 @@ watch(
 
       <div class="flex items-center gap-3">
 
-        <div class="flex-1 bg-gray-200 rounded-full h-3">
-          <div class="bg-purple-300 h-3 rounded-full transition-all duration-300" :style="{
-            width: ((currentIndex + 1) / props.sentences.length) * 100 + '%'
-          }" />
-        </div>
+        <AppProgressBar
+          class="flex-1"
+          :value="((currentIndex + 1) / props.sentences.length) * 100"
+          label="Sentence quiz progress"
+        />
 
         <span class="text-sm text-gray-500 whitespace-nowrap">
           {{ progressText }}

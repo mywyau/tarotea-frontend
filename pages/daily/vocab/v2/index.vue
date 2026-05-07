@@ -568,14 +568,11 @@ onUnmounted(() => {
       <div v-else class="min-h-[700px]">
         <div v-if="showQuizView">
           <div class="flex items-center gap-3 mb-6">
-            <div class="flex-1 bg-gray-200 rounded-lg h-3 relative overflow-hidden">
-              <div :class="[
-                'h-3 rounded-lg transition-[width] duration-500 ease-out relative',
-                progressPercent > 80
-                  ? 'bg-purple-400 animate-pulse shadow-[0_0_20px_rgba(168,85,247,0.9)]'
-                  : 'bg-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.6)]'
-              ]" :style="{ width: `${progressPercent}%` }" />
-            </div>
+            <AppProgressBar
+              class="flex-1"
+              :value="progressPercent"
+              label="Daily vocabulary progress"
+            />
 
             <span class="text-sm text-gray-500 whitespace-nowrap">
               {{ answeredCount }} / {{ totalQuestions }}
@@ -588,12 +585,14 @@ onUnmounted(() => {
             </p>
 
             <div class="flex flex-col items-center gap-2 mb-6">
-              <div class="w-40 h-2 bg-gray-200 rounded">
-                <div :class="[
-                  'h-2 bg-green-500 rounded transition-[width] duration-500 ease-out',
-                  mergingXp ? 'ring-2 ring-green-300' : ''
-                ]" :style="{ width: `${Math.min((currentXp / 1000) * 100, 100)}%` }" />
-              </div>
+              <AppProgressBar
+                class="w-40"
+                size="sm"
+                tone="success"
+                :value="currentXp"
+                :max="1000"
+                label="Current word XP"
+              />
 
               <div class="relative text-sm text-gray-500">
                 {{ currentXp }} XP

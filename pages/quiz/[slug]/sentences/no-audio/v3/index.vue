@@ -604,10 +604,12 @@ onBeforeUnmount(() => {
 
             <template v-else>
                 <div class="flex items-center gap-3 mb-6">
-                    <div v-if="(current + 1) <= questions.length" class="flex-1 bg-gray-200 rounded-full h-3">
-                        <div class="bg-purple-300 h-3 rounded-full transition-all duration-300"
-                            :style="{ width: progressPercent + '%' }" />
-                    </div>
+                    <AppProgressBar
+                        v-if="(current + 1) <= questions.length"
+                        class="flex-1"
+                        :value="progressPercent"
+                        label="Sentence quiz progress"
+                    />
 
                     <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
                         {{ current + 1 }} / {{ questions.length }}
@@ -644,10 +646,14 @@ onBeforeUnmount(() => {
                                 <div class="min-h-[50px] space-y-3 transition-all duration-300"
                                     :class="!answered && 'blur-md opacity-70 select-none'">
                                     <div class="flex items-center justify-center gap-3">
-                                        <div class="w-32 h-1 bg-gray-200 rounded">
-                                            <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                                                :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
-                                        </div>
+                                        <AppProgressBar
+                                            class="w-32"
+                                            size="xs"
+                                            tone="success"
+                                            :value="currentXp ?? 0"
+                                            :max="masteryXp"
+                                            label="Current word XP"
+                                        />
 
                                         <div class="relative flex items-center">
                                             <span class="text-sm text-gray-500 whitespace-nowrap">

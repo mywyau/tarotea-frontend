@@ -666,10 +666,14 @@ onBeforeUnmount(() => {
 
                     <div class="min-h-[50px] space-y-3">
                         <div class="flex items-center justify-center gap-3">
-                            <div class="w-32 h-1 bg-gray-200 rounded">
-                                <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                                    :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
-                            </div>
+                            <AppProgressBar
+                                class="w-32"
+                                size="xs"
+                                tone="success"
+                                :value="currentXp ?? 0"
+                                :max="masteryXp"
+                                label="Current word XP"
+                            />
 
                             <div class="relative flex items-center">
                                 <span class="text-sm text-gray-500 whitespace-nowrap">

@@ -40,21 +40,18 @@ defineProps<{
         {{ xp ?? 0 }} XP
       </div>
 
-      <div class="w-full h-1 bg-gray-400 rounded">
-        <div class="h-1 bg-green-500 rounded transition-all duration-500"
-          :style="{ width: Math.min((xp ?? 0) / masteryXp * 100, 100) + '%' }" />
-      </div>
+      <AppProgressBar
+        size="xs"
+        tone="success"
+        :value="xp ?? 0"
+        :max="masteryXp"
+        :label="`XP progress for ${word}`"
+      />
     </div>
   </component>
 </template>
 
 <style scoped>
-.progress-bar {
-  background: linear-gradient(90deg,
-      #D6A3D1,
-      #EAB8E4);
-}
-
 .word-tile {
   border-radius: 14px;
   padding: 1.2rem;

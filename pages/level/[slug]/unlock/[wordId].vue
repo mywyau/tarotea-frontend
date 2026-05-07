@@ -246,9 +246,12 @@ onMounted(loadData)
             </p>
           </div>
 
-          <div class="progress-track">
-            <div class="progress-fill" :style="{ width: `${xpProgressPercent}%` }" />
-          </div>
+          <AppProgressBar
+            size="md"
+            tone="dojo"
+            :value="xpProgressPercent"
+            label="Progress toward next TaroKey"
+          />
 
           <p class="text-sm text-gray-600">
             <span class="font-semibold">{{ xpUntilNextKey }} xp</span>
@@ -490,18 +493,4 @@ onMounted(loadData)
   backdrop-filter: blur(6px);
 }
 
-.progress-track {
-  width: 100%;
-  height: 0.8rem;
-  border-radius: 999px;
-  background: rgba(17, 24, 39, 0.08);
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  border-radius: 999px;
-  background: rgba(168, 202, 224, 0.95);
-  transition: width 0.25s ease;
-}
 </style>
