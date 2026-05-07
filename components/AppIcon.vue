@@ -1,4 +1,4 @@
-<!-- components/ui/AppIcon.vue -->
+<!-- components/AppIcon.vue -->
 <script setup lang="ts">
 import { computed } from 'vue'
 import { appIcons, type AppIconName } from '@/config/ui/icons'
@@ -53,8 +53,10 @@ const iconMarkup = computed(() => lucidePaths[appIcons[props.icon]] ?? lucidePat
 
 <template>
   <svg
-    :class="props.size"
+    :class="['inline-block shrink-0', props.size]"
     xmlns="http://www.w3.org/2000/svg"
+    width="1em"
+    height="1em"
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
