@@ -1,5 +1,15 @@
 <script setup lang="ts">
 import { masteryXp } from '@/config/xp/helpers';
+import {
+  ArrowLeft,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Mic,
+  PencilLine,
+  Settings,
+  X,
+} from '@lucide/vue';
 import { useAudioVolume } from '~/composables/useAudioVolume';
 import { useAuth } from '~/composables/useAuth';
 
@@ -185,6 +195,12 @@ const currentExampleIndex = ref(0)
 const totalExamples = computed(() => word.value?.examples?.length ?? 0)
 const currentExample = computed(() => word.value?.examples?.[currentExampleIndex.value] ?? null)
 
+const settingsDetails = ref<HTMLDetailsElement | null>(null)
+
+const closeSettings = () => {
+  settingsDetails.value?.removeAttribute('open')
+}
+
 const showPrevExample = () => {
   if (!totalExamples.value) return
   currentExampleIndex.value = (currentExampleIndex.value - 1 + totalExamples.value) % totalExamples.value
@@ -248,78 +264,95 @@ watchEffect(() => {
   <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
     <div class="flex items-center justify-between gap-4">
-      <NuxtLink :to="`/level/${level}/v2#${word.id}`" class="text-sm text-black hover:underline">
-        ← Back
+      <NuxtLink :to="`/level/${level}/v2#${word.id}`" class="inline-flex items-center gap-1.5 text-sm text-black hover:underline">
+        <ArrowLeft class="h-4 w-4" />
+        <span>Back</span>
       </NuxtLink>
 
       <div class="flex items-center gap-2">
-        <details class="group relative">
+        <details ref="settingsDetails" class="group relative">
           <summary
-            class="list-none cursor-pointer rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-semibold text-black shadow-sm transition hover:bg-yellow-200">
-            Settings
+            class="inline-flex list-none cursor-pointer items-center gap-1.5 rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-semibold text-black shadow-sm transition hover:bg-yellow-200">
+            <Settings class="h-3.5 w-3.5" />
+            <span>Settings</span>
           </summary>
           <div
-            class="absolute left-1/2 z-20 mt-2 w-[min(18rem,calc(100vw-1rem))] -translate-x-1/2 rounded-xl border border-yellow-200 bg-yellow-50 p-3 shadow-lg space-y-4 sm:left-auto sm:right-0 sm:w-72 sm:translate-x-0">
-            <div class="space-y-1">
-              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
-              <div class="flex items-center gap-2">
-                <input type="range" min="0" max="1" step="0.01" v-model="volume"
-                  class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
-                <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
-              </div>
+            class="fixed left-1/2 top-24 z-50 max-h-[calc(100vh-7rem)] w-[calc(100vw-1.5rem)] max-w-sm -translate-x-1/2 overflow-y-auto rounded-xl border border-yellow-200 bg-yellow-50 p-3 shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:max-h-none sm:w-72 sm:translate-x-0 sm:overflow-visible">
+            <div class="mb-3 flex items-center justify-between">
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                Settings
+              </p>
+              <button type="button"
+                class="flex h-7 w-7 items-center justify-center rounded-full text-gray-900 transition hover:bg-black/5"
+                aria-label="Close settings" @click="closeSettings">
+                <X class="h-4 w-4" />
+              </button>
             </div>
-            <div class="space-y-1">
-              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
-              <div class="flex items-center justify-between gap-2">
-                <button type="button"
-                  class="px-1 text-2xl font-semibold leading-none text-gray-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
-                  @click="decreasePlaybackRate">
-                  ‹
-                </button>
-                <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{ speedDeltaLabel }}</span>
-                <button type="button"
-                  class="px-1 text-2xl font-semibold leading-none text-gray-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
-                  @click="increasePlaybackRate">
-                  ›
-                </button>
+            <div class="space-y-4">
+              <div class="space-y-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
+                <div class="flex items-center gap-2">
+                  <input type="range" min="0" max="1" step="0.01" v-model="volume"
+                    class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
+                  <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
+                </div>
               </div>
-            </div>
-            <div class="space-y-2">
-              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Voice</p>
-              <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
-                <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
-                  :class="selectedAudioVoice === 'male'
-                    ? 'bg-blue-100 text-black shadow-sm'
-                    : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                    " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
-                  Male
-                </button>
 
-                <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
-                  :class="selectedAudioVoice === 'female'
-                    ? 'bg-pink-100 text-black shadow-sm'
-                    : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                    " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
-                  Female
-                </button>
+              <div class="space-y-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
+                <div class="flex items-center justify-between gap-2">
+                  <button type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
+                    @click="decreasePlaybackRate">
+                    <ChevronLeft class="h-4 w-4" />
+                  </button>
+                  <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{ speedDeltaLabel }}</span>
+                  <button type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
+                    @click="increasePlaybackRate">
+                    <ChevronRight class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div class="space-y-2 border-t border-yellow-200 pt-3">
-              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Page display</p>
-              <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                <span>Show XP bar</span>
-                <input v-model="showXpBar" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-              </label>
-              <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                <span>Show practice buttons</span>
-                <input v-model="showPracticeButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-              </label>
-              <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                <span>Show audio buttons</span>
-                <input v-model="showAudioButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-              </label>
+
+              <div class="space-y-2">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Voice</p>
+                <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+                  <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+                    :class="selectedAudioVoice === 'male'
+                      ? 'bg-blue-100 text-black shadow-sm'
+                      : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                      " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+                    Male
+                  </button>
+
+                  <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+                    :class="selectedAudioVoice === 'female'
+                      ? 'bg-pink-100 text-black shadow-sm'
+                      : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                      " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+                    Female
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-2 border-t border-yellow-200 pt-3">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Page display</p>
+                <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                  <span>Show XP bar</span>
+                  <input v-model="showXpBar" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                </label>
+                <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                  <span>Show practice buttons</span>
+                  <input v-model="showPracticeButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                </label>
+                <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                  <span>Show audio buttons</span>
+                  <input v-model="showAudioButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                </label>
+              </div>
             </div>
           </div>
         </details>
@@ -346,8 +379,9 @@ watchEffect(() => {
 
         <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
           <span>{{ xp }} / {{ masteryXp }} XP</span>
-          <span v-if="isMastered" class="font-semibold text-green-600">
-            ✓ Maxed
+          <span v-if="isMastered" class="inline-flex items-center gap-1 font-semibold text-green-600">
+            <CheckCircle2 class="h-4 w-4" />
+            <span>Maxed</span>
           </span>
         </div>
 
@@ -360,13 +394,13 @@ watchEffect(() => {
       <div class="flex items-center justify-between w-full pt-1">
         <NuxtLink v-if="prevWord" :to="`/level/${level}/word/${prevWord.id}`" class="edge-arrow"
           aria-label="Previous word">
-          ‹
+          <ChevronLeft class="h-12 w-12" />
         </NuxtLink>
 
         <div v-else class="w-10" />
 
         <NuxtLink v-if="nextWord" :to="`/level/${level}/word/${nextWord.id}`" class="edge-arrow" aria-label="Next word">
-          ›
+          <ChevronRight class="h-12 w-12" />
         </NuxtLink>
       </div>
 
@@ -374,13 +408,13 @@ watchEffect(() => {
 
         <NuxtLink v-if="showPracticeButtons" :to="`/writing/${level}/vocab/${word.id}`" class="action-chip action-chip-write main-action-btn"
           aria-label="Practice writing this word">
-          <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+          <PencilLine class="mobile-action-icon h-4 w-4" />
           <span class="mobile-action-label">Write</span>
         </NuxtLink>
 
         <NuxtLink v-if="showPracticeButtons" :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
           aria-label="Open tone checker for this word">
-          <span aria-hidden="true" class="mobile-action-icon">🎤</span>
+          <Mic class="mobile-action-icon h-4 w-4" />
           <span class="mobile-action-label">Speak</span>
         </NuxtLink>
 
@@ -421,7 +455,7 @@ watchEffect(() => {
                 <NuxtLink v-if="showPracticeButtons" :to="`/writing/${level}/sentences/${word.id}/${currentExampleIndex}`"
                   class="action-chip action-chip-sm action-chip-write example-action-btn"
                   aria-label="Practice writing this sentence">
-                  <span aria-hidden="true" class="mobile-action-icon">✏️</span>
+                  <PencilLine class="mobile-action-icon h-3.5 w-3.5" />
                   <span class="mobile-action-label">Write</span>
                 </NuxtLink>
 
@@ -429,7 +463,7 @@ watchEffect(() => {
                   :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${currentExampleIndex}`"
                   class="action-chip action-chip-sm action-chip-speak example-action-btn"
                   aria-label="Practice pronunciation for this sentence">
-                  <span aria-hidden="true" class="mobile-action-icon">🎤</span>
+                  <Mic class="mobile-action-icon h-3.5 w-3.5" />
                   <span class="mobile-action-label">Speak</span>
                 </NuxtLink>
 
@@ -462,12 +496,16 @@ watchEffect(() => {
 
       <div v-if="totalExamples > 1" class="example-pagination mt-4">
         <button class="example-nav-arrow" type="button" aria-label="Previous example"
-          @click="showPrevExample">‹</button>
+          @click="showPrevExample">
+          <ChevronLeft class="h-7 w-7" />
+        </button>
         <div class="example-dots" aria-label="Example position indicator">
           <span v-for="dotIndex in totalExamples" :key="dotIndex" class="example-dot"
             :class="{ 'example-dot-active': dotIndex - 1 === currentExampleIndex }" />
         </div>
-        <button class="example-nav-arrow" type="button" aria-label="Next example" @click="showNextExample">›</button>
+        <button class="example-nav-arrow" type="button" aria-label="Next example" @click="showNextExample">
+          <ChevronRight class="h-7 w-7" />
+        </button>
       </div>
 
       <div class="text-center mt-10">

@@ -33,11 +33,7 @@ onMounted(async () => {
 <template>
   <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-10">
 
-    <!-- <BackLink /> -->
-
-    <NuxtLink :to="`/`" class="text-sm text-black hover:underline">
-      ← Back
-    </NuxtLink>
+    <BackLink to="/" />
 
     <header class="rounded-lg header-card">
       <h1 class="level-heading">Levels</h1>

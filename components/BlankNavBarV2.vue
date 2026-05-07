@@ -1,3 +1,7 @@
+<script setup lang="ts">
+import { Menu } from '@lucide/vue'
+</script>
+
 <template>
   <header ref="panelRoot" class="header-shell sticky top-0 z-50">
     <div class="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4">
@@ -13,7 +17,7 @@
           :aria-expanded="panelOpen ? 'true' : 'false'"
           @click.stop="togglePanel"
         >
-          ☰
+          <Menu class="h-5 w-5" aria-hidden="true" />
         </button>
 
         <transition name="fade">

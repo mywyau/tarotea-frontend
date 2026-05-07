@@ -4,6 +4,7 @@ definePageMeta({
   ssr: false,
 })
 
+import { ChevronLeft, ChevronRight } from '@lucide/vue'
 import type { Topic } from '~/types/topic'
 import { sortedTopics } from '~/utils/topics/topics'
 
@@ -91,7 +92,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
     <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
       <div class="pagination-row flex items-center justify-center gap-1.5 sm:gap-3 max-w-full overflow-x-auto">
         <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
-          ←
+          <ChevronLeft class="h-4 w-4" aria-hidden="true" />
         </button>
 
         <button v-for="page in totalPages" :key="page" @click="goToPage(page)" class="pagination-page"
@@ -100,7 +101,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
         </button>
 
         <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
-          →
+          <ChevronRight class="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
@@ -130,7 +131,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
         <div v-if="canEnterTopic(quizTopic) && !quizTopic.comingSoon" class="pt-4 space-y-3">
           <div class="grid grid-cols-[42px_1fr_42px] gap-3">
             <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, -1)" aria-label="Previous quiz mode">
-              ‹
+              <ChevronLeft class="h-5 w-5" aria-hidden="true" />
             </button>
 
             <NuxtLink :to="getSelectedTopicMode(quizTopic.id).to(quizTopic.id)"
@@ -140,7 +141,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
             </NuxtLink>
 
             <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, 1)" aria-label="Next quiz mode">
-              ›
+              <ChevronRight class="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
 
