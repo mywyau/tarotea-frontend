@@ -37,7 +37,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Contact" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Who we are</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Contact">Who we are</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         TaroTea is operated as a Cantonese learning web application.
@@ -53,7 +53,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Database" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">What data we collect</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Database">What data we collect</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         We collect different types of information depending on how you use TaroTea.
@@ -101,7 +101,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="ShieldCheck" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">How we use your data</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="ShieldCheck">How we use your data</FooterPageSectionHeading>
 
       <ul class="list-disc pl-6 space-y-2 text-gray-700">
         <li>To create and manage your account</li>
@@ -117,7 +117,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Scale" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Legal basis for processing</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Scale">Legal basis for processing</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         Under UK GDPR, we rely on the following legal bases:
@@ -148,7 +148,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Handshake" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Third-party services</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Handshake">Third-party services</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         We use trusted third-party providers to operate TaroTea. These providers only
@@ -183,7 +183,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="FileText" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Cookies and similar technologies</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="FileText">Cookies and similar technologies</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         TaroTea uses cookies and similar technologies to operate the app, keep users
@@ -259,7 +259,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="CalendarClock" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Data retention</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="CalendarClock">Data retention</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         We keep personal data only for as long as needed for the purposes described in
@@ -295,7 +295,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Mail" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Your rights</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Mail">Your rights</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         Under UK GDPR, you may have the right to:
@@ -321,7 +321,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Trash2" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Account deletion</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Trash2">Account deletion</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         You may request deletion of your TaroTea account at any time. When an account is
@@ -332,7 +332,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="LockKeyhole" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Security</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="LockKeyhole">Security</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         We use reasonable technical and organisational measures to protect your personal
@@ -343,7 +343,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Baby" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Children</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Baby">Children</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         TaroTea is not intended for children under 13. If you believe a child has provided
@@ -353,7 +353,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Scale" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Complaints</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Scale">Complaints</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         If you have concerns about how we handle your data, please contact us first so we
@@ -363,7 +363,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="RotateCw" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Changes to this notice</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="RotateCw">Changes to this notice</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         We may update this Privacy Notice from time to time. Any significant changes will
@@ -373,7 +373,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Mail" color-class="bg-emerald-50 text-emerald-600 ring-emerald-100">Contact</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Mail">Contact</FooterPageSectionHeading>
 
       <p class="text-gray-700">
         If you have any questions about this Privacy Notice, please contact:
