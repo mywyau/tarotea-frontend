@@ -951,29 +951,6 @@ onBeforeUnmount(() => {
     scroll-snap-align: start;
 }
 
-@media (min-width: 640px) {
-    .completion-tiles-grid {
-        display: grid;
-        overflow: visible;
-        scroll-snap-type: none;
-        padding-bottom: 0;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 1.25rem;
-    }
-
-    .completion-tiles-grid > * {
-        min-width: 0;
-    }
-
-    .completion-tiles-grid>*:nth-child(-n + 3) {
-        grid-column: span 2 / span 2;
-    }
-
-    .completion-tiles-grid>*:nth-child(n + 4) {
-        grid-column: span 3 / span 3;
-    }
-}
-
 @media (min-width: 1280px) {
     .completion-tiles-grid {
         gap: 1.5rem;
