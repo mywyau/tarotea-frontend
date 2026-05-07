@@ -75,10 +75,6 @@ onBeforeUnmount(() => {
 <template>
   <header class="header-shell sticky top-0 z-40">
     <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-      <!-- <NuxtLink to="/"
-        class="inline-block text-2xl font-bold text-black transition hover:text-gray-700 motion-safe:hover:animate-bounce animate-ease-linear">
-        TaroTea
-      </NuxtLink> -->
 
       <NuxtLink to="/" class="brand-logo text-2xl font-bold text-black hover:text-gray-700">
         TaroTea
@@ -187,9 +183,6 @@ onBeforeUnmount(() => {
   transform: scale(0.98);
 }
 
-
-
-
 .trigger-visibility-btn {
   position: fixed;
   left: 0.85rem;
@@ -200,37 +193,17 @@ onBeforeUnmount(() => {
   border-radius: 999px;
   background: transparent;
   backdrop-filter: none;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+  /* box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16); */
   overflow: hidden;
   isolation: isolate;
 }
-
-/* .portal-swirl-line {
-  position: absolute;
-  inset: 0.42rem;
-  border-radius: inherit;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpath d='M50 10C72 10 90 28 90 50C90 72 72 90 50 90C28 90 10 72 10 50C10 33 24 20 41 20C58 20 71 33 71 50C71 63 60 74 47 74C36 74 27 65 27 54C27 45 34 38 43 38C50 38 56 44 56 51C56 57 52 61 46 61' fill='none' stroke='rgba(15,15,15,0.9)' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-size: cover;
-  background-repeat: no-repeat;
-  animation: portalSwirl 5s linear infinite;
-  opacity: 1;
-}
-
-.portal-swirl-line::before {
-  content: '';
-  position: absolute;
-  inset: -12%;
-  border-radius: inherit;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0) 60%);
-  filter: blur(0.8px);
-} */
 
 .portal-icon {
   position: absolute;
   inset: 0;
   margin: auto;
-  width: 1.75rem;
-  height: 1.75rem;
+  width: 2.00rem;
+  height: 2.00rem;
   color: rgba(15, 15, 15, 0.9);
   stroke-width: 2.4;
   transform-origin: center;
@@ -251,15 +224,15 @@ onBeforeUnmount(() => {
   content: '';
   position: absolute;
   inset: 0.3rem;
-  border-radius: inherit;
-  border: 1px solid rgba(15, 15, 15, 0.14);
+  /* border-radius: inherit; */
+  /* border: 1px solid rgba(15, 15, 15, 0.14); */
   z-index: -1;
 }
 
 .trigger-visibility-btn:hover,
 .trigger-visibility-btn.is-open {
-  transform: scale(1.04);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  transform: scale(1.20);
+  /* box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22); */
 }
 
 
