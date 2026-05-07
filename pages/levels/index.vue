@@ -70,7 +70,7 @@ onMounted(async () => {
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
 
       <li v-for="(level, index) in levelSelectMetaData" :key="level.id"
-        class="rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :style="{
+        class="relative rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :style="{
           backgroundColor: level.comingSoon
             ? 'rgba(0,0,0,0.03)'
             : getLevelColor(index)
@@ -79,22 +79,20 @@ onMounted(async () => {
         <!-- Accessible level -->
         <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="block space-y-3">
 
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0">
-              <div class="flex flex-wrap items-center gap-2">
-                <div class="text-lg font-semibold text-gray-900">
-                  {{ level.title }}
-                </div>
+          <div class="tally-icons tally-icons-corner" role="img" :aria-label="`${level.title} tally marks`">
+            <component
+              :is="getTallyIcon(tallyGroup)"
+              v-for="(tallyGroup, tallyIndex) in getLevelTallyGroups(level.number)"
+              :key="`${level.id}-tally-${tallyIndex}`"
+              class="tally-icon"
+              aria-hidden="true"
+            />
+          </div>
 
-                <div class="tally-icons" role="img" :aria-label="`${level.title} tally marks`">
-                  <component
-                    :is="getTallyIcon(tallyGroup)"
-                    v-for="(tallyGroup, tallyIndex) in getLevelTallyGroups(level.number)"
-                    :key="`${level.id}-tally-${tallyIndex}`"
-                    class="tally-icon"
-                    aria-hidden="true"
-                  />
-                </div>
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0 pr-14">
+              <div class="text-lg font-semibold text-gray-900">
+                {{ level.title }}
               </div>
 
               <div class="text-sm text-gray-700 mt-1">
@@ -102,7 +100,7 @@ onMounted(async () => {
               </div>
             </div>
 
-            <div class="shrink-0">
+            <div class="shrink-0 pt-6">
               <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
             </div>
           </div>
@@ -111,22 +109,20 @@ onMounted(async () => {
 
         <!-- Locked level (kept for later when you re-enable gating) -->
         <div v-else class="space-y-3 cursor-not-allowed">
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0">
-              <div class="flex flex-wrap items-center gap-2">
-                <div class="text-lg font-semibold text-gray-900">
-                  {{ level.title }}
-                </div>
+          <div class="tally-icons tally-icons-corner" role="img" :aria-label="`${level.title} tally marks`">
+            <component
+              :is="getTallyIcon(tallyGroup)"
+              v-for="(tallyGroup, tallyIndex) in getLevelTallyGroups(level.number)"
+              :key="`${level.id}-tally-${tallyIndex}`"
+              class="tally-icon"
+              aria-hidden="true"
+            />
+          </div>
 
-                <div class="tally-icons" role="img" :aria-label="`${level.title} tally marks`">
-                  <component
-                    :is="getTallyIcon(tallyGroup)"
-                    v-for="(tallyGroup, tallyIndex) in getLevelTallyGroups(level.number)"
-                    :key="`${level.id}-tally-${tallyIndex}`"
-                    class="tally-icon"
-                    aria-hidden="true"
-                  />
-                </div>
+          <div class="flex items-start justify-between gap-4">
+            <div class="min-w-0 pr-14">
+              <div class="text-lg font-semibold text-gray-900">
+                {{ level.title }}
               </div>
 
               <div class="text-sm text-gray-700 mt-1">
@@ -134,7 +130,7 @@ onMounted(async () => {
               </div>
             </div>
 
-            <div class="shrink-0">
+            <div class="shrink-0 pt-6">
               <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
               <span v-else class="pill pill-locked">Locked</span>
             </div>
@@ -225,6 +221,12 @@ onMounted(async () => {
   align-items: center;
   gap: 0.1rem;
   color: rgba(17, 24, 39, 0.68);
+}
+
+.tally-icons-corner {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
 }
 
 .tally-icon {
