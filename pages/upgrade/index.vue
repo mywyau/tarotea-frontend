@@ -2,6 +2,8 @@
 
 definePageMeta({ layout: 'default' })
 
+import { BookOpen, Mic, Sparkles, Tags, Target, UnlockKeyhole } from '@lucide/vue';
+import { markRaw } from 'vue';
 import { useUpgrade } from '@/composables/useUpgrade';
 import { useMeStateV2 } from '~/composables/useMeStateV2';
 import { hasPaidAccess } from '~/utils/levels/permissions';
@@ -20,6 +22,16 @@ const monthlyPrice = 4.99
 const yearlyPrice = 49.99
 const yearlySavings = (monthlyPrice * 12 - yearlyPrice).toFixed(2)
 const yearlyMonthlyEquivalent = (yearlyPrice / 12).toFixed(2)
+
+const benefits = [
+  { icon: markRaw(Sparkles), text: 'Greater language exposure with full access to all content' },
+  { icon: markRaw(UnlockKeyhole), text: 'Unlock over 2500 word tiles' },
+  { icon: markRaw(BookOpen), text: 'Unlock over 10000 sentences to help with your studies' },
+  { icon: markRaw(Target), text: 'Train to improve recognition and recall with our exercises and activities' },
+  { icon: markRaw(Mic), text: 'Practice your pronunciation with 3000 Echo Lab requests per month' },
+  { icon: markRaw(Sparkles), text: 'Increase exposure to weaker words via our xp system' },
+  { icon: markRaw(Tags), text: 'Access new topics, words and features added regularly' },
+]
 
 // Already paid → manage subscription instead
 function upgrade(plan: 'monthly' | 'yearly') {
@@ -45,8 +57,8 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
         <!-- Icon -->
         <div class="flex justify-center">
-          <div class="w-20 h-20 flex items-center justify-center rounded-full" style="background-color:#EAB8E4;">
-            <span class="text-4xl">🍵</span>
+          <div class="w-20 h-20 flex items-center justify-center rounded-full text-[#7A6FCB]" style="background-color:#EAB8E4;">
+            <Sparkles class="h-10 w-10" aria-hidden="true" />
           </div>
         </div>
 
@@ -61,14 +73,11 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
         <!-- Benefits -->
         <div class="max-w-xl mx-auto rounded-2xl p-5 md:p-6">
-          <ul class="list-disc pl-5 text-left text-gray-700 space-y-2 leading-relaxed">
-            <li>Greater language exposure with full access to all content</li>
-            <li>Unlock over 2500 word tiles</li>
-            <li>Unlock over 10000 sentences to help with your studies</li>
-            <li>Train to improve recognition and recall with our exercises and activities</li>
-            <li>Practice your pronunciation with 3000 Echo Lab requests per month</li>
-            <li>Increase exposure to weaker words via our xp system</li>
-            <li>Access new topics, words and features added regularly</li>
+          <ul class="space-y-3 text-left text-gray-700 leading-relaxed">
+            <li v-for="benefit in benefits" :key="benefit.text" class="flex items-start gap-3">
+              <component :is="benefit.icon" class="mt-0.5 h-4 w-4 shrink-0 text-[#7A6FCB]" aria-hidden="true" />
+              <span>{{ benefit.text }}</span>
+            </li>
           </ul>
         </div>
 
@@ -118,7 +127,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         <!-- Continue without upgrading -->
         <p v-if="!isSubscribed" class="text-sm text-gray-500">
           <NuxtLink to="/levels" class="hover:underline">
-            ← Continue learning without upgrading
+            Continue learning without upgrading
           </NuxtLink>
         </p>
 

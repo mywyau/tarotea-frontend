@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/vue'
 import { patchNotes } from '@/utils/patchNotes'
 import { computed, watchEffect } from 'vue'
 
@@ -127,12 +128,12 @@ watchEffect(() => {
     <nav v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8"
       aria-label="Patch notes pagination">
       <div class="flex justify-center items-center gap-1.5 sm:gap-3">
-        <button v-if="showFirstButton" @click="goToPage(1)" :disabled="currentPage === 1" class="pagination-jump">
-          «
+        <button v-if="showFirstButton" @click="goToPage(1)" :disabled="currentPage === 1" class="pagination-jump" aria-label="First page">
+          <ChevronsLeft class="h-4 w-4" aria-hidden="true" />
         </button>
 
-        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
-          ←
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow" aria-label="Previous page">
+          <ChevronLeft class="h-4 w-4" aria-hidden="true" />
         </button>
 
         <button v-for="page in visiblePages" :key="page" @click="goToPage(page)" class="pagination-page"
@@ -140,13 +141,13 @@ watchEffect(() => {
           {{ page }}
         </button>
 
-        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
-          →
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow" aria-label="Next page">
+          <ChevronRight class="h-4 w-4" aria-hidden="true" />
         </button>
 
         <button v-if="showLastButton" @click="goToPage(totalPages)" :disabled="currentPage === totalPages"
-          class="pagination-jump">
-          »
+          class="pagination-jump" aria-label="Last page">
+          <ChevronsRight class="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 
@@ -184,6 +185,9 @@ watchEffect(() => {
 }
 
 .pagination-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 32px;
   height: 32px;
   border-radius: 10px;
@@ -204,6 +208,9 @@ watchEffect(() => {
 }
 
 .pagination-jump {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 48px;
   height: 32px;
   padding: 0 10px;

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CircleCheck, Eye, Sparkles, TrendingUp, Trophy, UnlockKeyhole } from '@lucide/vue'
+import { markRaw, type Component } from 'vue'
 definePageMeta({
   ssr: false
 })
@@ -16,6 +18,7 @@ type UserStats = {
 type StatCard = {
   label: string
   value: number
+  icon: Component
   suffix?: string
   signed?: boolean
 }
@@ -37,29 +40,35 @@ const stats = computed<StatCard[]>(() => {
     {
       label: 'Total XP',
       value: toNumber(statsData.value.total_xp),
+      icon: markRaw(Sparkles),
       suffix: 'xp'
     },
     {
       label: 'XP Last 7 Days',
       value: toNumber(statsData.value.xp_this_week),
+      icon: markRaw(TrendingUp),
       suffix: 'xp',
       signed: true
     },
     {
       label: 'Words Unlocked',
-      value: toNumber(statsData.value.words_unlocked)
+      value: toNumber(statsData.value.words_unlocked),
+      icon: markRaw(UnlockKeyhole)
     },
     {
       label: 'Words Maxed',
-      value: toNumber(statsData.value.words_maxed)
+      value: toNumber(statsData.value.words_maxed),
+      icon: markRaw(Trophy)
     },
     {
       label: 'Words Seen',
-      value: toNumber(statsData.value.words_seen)
+      value: toNumber(statsData.value.words_seen),
+      icon: markRaw(Eye)
     },
     {
       label: 'Correct Answers',
-      value: toNumber(statsData.value.total_correct)
+      value: toNumber(statsData.value.total_correct),
+      icon: markRaw(CircleCheck)
     },
 
   ]
@@ -159,6 +168,10 @@ onMounted(async () => {
         class="mt-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-4 sm:gap-6">
         <div v-for="(stat, index) in stats" :key="stat.label" class="stat-card hover:brightness-110"
           :class="`stat-${index}`">
+          <div class="stat-icon" aria-hidden="true">
+            <component :is="stat.icon" class="h-5 w-5" />
+          </div>
+
           <p class="stat-label">
             {{ stat.label }}
           </p>
@@ -198,6 +211,18 @@ main {
 .stat-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.9rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.5);
+  color: rgba(17, 24, 39, 0.72);
 }
 
 .stat-label {

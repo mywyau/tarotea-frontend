@@ -12,6 +12,7 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong,
 } from '@/utils/sounds'
+import { Volume2 } from '@lucide/vue'
 import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useCountdownToUtcMidnight } from '~/composables/daily/useCountdownToUtcMidnight'
 import { shuffleFisherYates } from '~/utils/shuffle'
@@ -796,9 +797,10 @@ watch(
 
           <div class="flex flex-col items-end gap-2">
             <button v-if="challenge.audioUrl"
-              class="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
+              class="inline-flex items-center gap-2 rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
               @click="playAudio" type="button">
-              Play audio
+              <Volume2 class="h-4 w-4" aria-hidden="true" />
+              <span>Play audio</span>
             </button>
 
             <div class="text-xs text-gray-800">
