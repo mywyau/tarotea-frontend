@@ -634,16 +634,16 @@ onBeforeUnmount(() => {
             <p class="hero-score">{{ passPercentage }}%</p>
           </div>
 
-          <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-6">
-            <div class="stat-card result-3 text-center">
+          <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 sm:grid sm:grid-cols-3 sm:overflow-visible sm:snap-none sm:gap-6 sm:pb-0">
+            <div class="stat-card result-3 text-center min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0">
               <p class="stat-label">Passed Words</p>
               <p class="stat-value">{{ passedCount }}</p>
             </div>
-            <div class="stat-card result-1 text-center">
+            <div class="stat-card result-1 text-center min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0">
               <p class="stat-label">Skipped Words</p>
               <p class="stat-value">{{ missedCount }}</p>
             </div>
-            <div class="stat-card result-2 text-center">
+            <div class="stat-card result-2 text-center min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0">
               <p class="stat-label">Total Time</p>
               <p class="stat-value">{{ formattedElapsedTime }}</p>
             </div>
