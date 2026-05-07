@@ -160,6 +160,12 @@ const showNextExample = () => {
     currentExampleIndex.value = (currentExampleIndex.value + 1) % totalExamples.value
 }
 
+const settingsDetails = ref<HTMLDetailsElement | null>(null)
+
+const closeSettings = () => {
+    settingsDetails.value?.removeAttribute('open')
+}
+
 watch(
     () => word.value?.id,
     () => {
@@ -221,71 +227,101 @@ watchEffect(() => {
             </NuxtLink>
 
             <div class="flex items-center gap-2">
-                <details class="group relative">
+                <details ref="settingsDetails" class="group relative">
                     <summary
                         class="list-none cursor-pointer rounded-full bg-yellow-100 px-3 py-1.5 text-xs font-semibold text-black shadow-sm transition hover:bg-yellow-200">
                         Settings
                     </summary>
-                    <div
-                        class="absolute left-1/2 z-20 mt-2 w-[min(18rem,calc(100vw-1rem))] -translate-x-1/2 rounded-xl border border-yellow-200 bg-yellow-50 p-3 shadow-lg space-y-4 sm:left-auto sm:right-0 sm:w-72 sm:translate-x-0">
-                        <div class="space-y-1">
-                            <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
-                            <div class="flex items-center gap-2">
-                                <input type="range" min="0" max="1" step="0.01" v-model="volume"
-                                    class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
-                                <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
-                            </div>
-                        </div>
-                        <div class="space-y-1">
-                            <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
-                            <div class="flex items-center justify-between gap-2">
-                                <button type="button"
-                                    class="px-1 text-2xl font-semibold leading-none text-gray-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
-                                    :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
-                                    @click="decreasePlaybackRate">
-                                    ‹
-                                </button>
-                                <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{ speedDeltaLabel }}</span>
-                                <button type="button"
-                                    class="px-1 text-2xl font-semibold leading-none text-gray-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
-                                    :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
-                                    @click="increasePlaybackRate">
-                                    ›
-                                </button>
-                            </div>
-                        </div>
-                        <div class="space-y-2">
-                            <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Voice</p>
-                            <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
-                                <button type="button" class="flex-1 rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'male'
-                                        ? 'bg-blue-100 text-black shadow-sm'
-                                        : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                                    " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
-                                    Male
-                                </button>
 
-                                <button type="button" class="flex-1 rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'female'
-                                        ? 'bg-pink-100 text-black shadow-sm'
-                                        : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                                    " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
-                                    Female
-                                </button>
-                            </div>
+                    <div
+                        class="fixed left-1/2 top-24 z-50 max-h-[calc(100vh-7rem)] w-[calc(100vw-1.5rem)] max-w-sm -translate-x-1/2 overflow-y-auto rounded-xl border border-yellow-200 bg-yellow-50 p-3 shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:max-h-none sm:w-72 sm:translate-x-0 sm:overflow-visible">
+
+                        <div class="mb-3 flex items-center justify-between">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                                Settings
+                            </p>
+
+                            <button type="button"
+                                class="flex h-7 w-7 items-center justify-center text-lg leading-none text-gray-900 transition hover:brightness-110"
+                                aria-label="Close settings" @click="closeSettings">
+                                ×
+                            </button>
                         </div>
-                        <div class="space-y-2 border-t border-yellow-200 pt-3">
-                            <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Page display</p>
-                            <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                                <span>Show XP bar</span>
-                                <input v-model="showXpBar" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-                            </label>
-                            <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                                <span>Show practice buttons</span>
-                                <input v-model="showPracticeButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-                            </label>
-                            <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                                <span>Show audio buttons</span>
-                                <input v-model="showAudioButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-                            </label>
+
+                        <div class="space-y-4">
+                            <!-- your existing settings content goes here -->
+
+                            <div class="space-y-1">
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
+                                <div class="flex items-center gap-2">
+                                    <input type="range" min="0" max="1" step="0.01" v-model="volume"
+                                        class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
+                                    <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100)
+                                        }}%</span>
+                                </div>
+                            </div>
+                            <div class="space-y-1">
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
+                                <div class="flex items-center justify-between gap-2">
+                                    <button type="button"
+                                        class="px-1 text-2xl font-semibold leading-none text-gray-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+                                        :disabled="playbackRate <= minPlaybackRate"
+                                        aria-label="Reduce playback speed by 20%" @click="decreasePlaybackRate">
+                                        ‹
+                                    </button>
+                                    <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{
+                                        speedDeltaLabel }}</span>
+                                    <button type="button"
+                                        class="px-1 text-2xl font-semibold leading-none text-gray-600 transition hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+                                        :disabled="playbackRate >= maxPlaybackRate"
+                                        aria-label="Increase playback speed by 20%" @click="increasePlaybackRate">
+                                        ›
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Voice</p>
+                                <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+                                    <button type="button"
+                                        class="flex-1 rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'male'
+                                            ? 'bg-blue-100 text-black shadow-sm'
+                                            : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                                            " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+                                        Male
+                                    </button>
+
+                                    <button type="button"
+                                        class="flex-1 rounded-full px-3 py-1 text-xs font-semibold transition" :class="selectedAudioVoice === 'female'
+                                            ? 'bg-pink-100 text-black shadow-sm'
+                                            : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                                            " :aria-pressed="selectedAudioVoice === 'female'"
+                                        @click="setAudioVoice('female')">
+                                        Female
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="space-y-2 border-t border-yellow-200 pt-3">
+                                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Page display
+                                </p>
+                                <label
+                                    class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                                    <span>Show XP bar</span>
+                                    <input v-model="showXpBar" type="checkbox"
+                                        class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                                </label>
+                                <label
+                                    class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                                    <span>Show practice buttons</span>
+                                    <input v-model="showPracticeButtons" type="checkbox"
+                                        class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                                </label>
+                                <label
+                                    class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                                    <span>Show audio buttons</span>
+                                    <input v-model="showAudioButtons" type="checkbox"
+                                        class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </details>
@@ -346,15 +382,16 @@ watchEffect(() => {
                     <span class="mobile-action-label">Write</span>
                 </NuxtLink>
 
-                <NuxtLink v-if="showPracticeButtons" :to="`/tone-garden/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
+                <NuxtLink v-if="showPracticeButtons" :to="`/tone-garden/${word.id}`"
+                    class="action-chip action-chip-tone-forge main-action-btn"
                     aria-label="Open tone checker for this word">
                     <span aria-hidden="true" class="mobile-action-icon">🎤</span>
                     <span class="mobile-action-label">Speak</span>
                 </NuxtLink>
 
-                <AudioButton v-if="showAudioButtons && word.audio?.word" :key="`word-audio-${selectedAudioVoice}-${word.audio.word}`"
-                    :src="getAudioSrc(word.audio.word)" :playback-rate="playbackRate" size="md"
-                    class="tone-gate-play-btn main-action-btn" />
+                <AudioButton v-if="showAudioButtons && word.audio?.word"
+                    :key="`word-audio-${selectedAudioVoice}-${word.audio.word}`" :src="getAudioSrc(word.audio.word)"
+                    :playback-rate="playbackRate" size="md" class="tone-gate-play-btn main-action-btn" />
 
             </div>
 
@@ -389,7 +426,8 @@ watchEffect(() => {
                         <!-- buttons aligned right -->
                         <div v-if="showPracticeButtons || showAudioButtons" class="flex justify-end">
                             <div class="example-actions-row">
-                                <NuxtLink v-if="showPracticeButtons" :to="`/writing/${topic}/sentences/${word.id}/${currentExampleIndex}`"
+                                <NuxtLink v-if="showPracticeButtons"
+                                    :to="`/writing/${topic}/sentences/${word.id}/${currentExampleIndex}`"
                                     class="action-chip action-chip-sm action-chip-write example-action-btn"
                                     aria-label="Practice writing this sentence">
                                     <span aria-hidden="true" class="mobile-action-icon">✏️</span>
