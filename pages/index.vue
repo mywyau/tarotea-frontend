@@ -111,30 +111,30 @@ onMounted(() => {
       </p>
     </section>
 
-    <section class="mt-12 start-learning-flip hover:brightness-105" aria-label="Start learning Cantonese today">
+    <section class="mt-10 sm:mt-12 start-learning-flip hover:brightness-105" aria-label="Start learning Cantonese today">
       <div class="start-learning-scene" :class="{ 'is-flipped': isStartPanelFlipped }" @click="flipStartPanel">
         <article
-          class="start-learning-face start-learning-face-front rounded-2xl p-6 sm:p-8 brand-cta-topic-bg text-gray-900 shadow-sm">
+          class="start-learning-face start-learning-face-front rounded-2xl p-5 sm:p-8 brand-cta-topic-bg text-gray-900 shadow-sm">
           <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 class="mt-2 text-2xl font-semibold tracking-tight">
+              <h2 class="text-xl sm:mt-2 sm:text-2xl font-semibold tracking-tight">
                 Start learning Cantonese today
               </h2>
-              <p class="text-sm sm:text-base text-gray-800 mt-2 max-w-2xl">
+              <p class="start-learning-copy text-sm sm:text-base text-gray-800 mt-2 max-w-2xl">
                 Explore themed word collections, then reinforce what you discover with topic quizzes built around
                 everyday conversations.
               </p>
             </div>
           </div>
 
-          <div class="mt-5 flex flex-wrap gap-3">
+          <div class="start-learning-actions mt-4 sm:mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <NuxtLink to="/topics"
-              class="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-800"
+              class="inline-flex min-h-11 items-center justify-center rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-800 sm:min-h-0 sm:px-4 sm:text-base"
               @click.stop>
               Explore Topics
             </NuxtLink>
             <NuxtLink to="/topics/quiz"
-              class="inline-flex items-center justify-center rounded-md border border-gray-700 px-4 py-2 font-medium text-gray-900 transition hover:bg-white/60"
+              class="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-700 px-3 py-2 text-sm font-medium text-gray-900 transition hover:bg-white/60 sm:min-h-0 sm:px-4 sm:text-base"
               @click.stop>
               Topic quizzes
             </NuxtLink>
@@ -142,27 +142,27 @@ onMounted(() => {
         </article>
 
         <article
-          class="start-learning-face start-learning-face-back rounded-2xl p-6 sm:p-8 brand-cta-level-bg text-gray-900 shadow-sm">
+          class="start-learning-face start-learning-face-back rounded-2xl p-5 sm:p-8 brand-cta-level-bg text-gray-900 shadow-sm">
           <div class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h2 class="mt-2 text-2xl font-semibold tracking-tight">
+              <h2 class="text-xl sm:mt-2 sm:text-2xl font-semibold tracking-tight">
                 Start learning Cantonese today
               </h2>
-              <p class="text-sm sm:text-base text-gray-800 mt-2 max-w-2xl">
+              <p class="start-learning-copy text-sm sm:text-base text-gray-800 mt-2 max-w-2xl">
                 Work through structured levels at your own pace, then test your progress with level quizzes that build
                 confidence step by step.
               </p>
             </div>
           </div>
 
-          <div class="mt-5 flex flex-wrap gap-3">
+          <div class="start-learning-actions mt-4 sm:mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <NuxtLink to="/levels"
-              class="inline-flex items-center justify-center rounded-md bg-gray-900 px-4 py-2 font-medium text-white transition hover:bg-gray-800"
+              class="inline-flex min-h-11 items-center justify-center rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-800 sm:min-h-0 sm:px-4 sm:text-base"
               @click.stop>
               Explore Levels
             </NuxtLink>
             <NuxtLink to="/quiz"
-              class="inline-flex items-center justify-center rounded-md border border-gray-700 px-4 py-2 font-medium text-gray-900 transition hover:bg-white/60"
+              class="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-700 px-3 py-2 text-sm font-medium text-gray-900 transition hover:bg-white/60 sm:min-h-0 sm:px-4 sm:text-base"
               @click.stop>
               Level quizzes
             </NuxtLink>
@@ -226,7 +226,7 @@ onMounted(() => {
 
 .start-learning-scene {
   position: relative;
-  min-height: 18rem;
+  min-height: clamp(15.75rem, 30vw, 18rem);
   cursor: pointer;
   outline: none;
   transform-style: preserve-3d;
@@ -243,7 +243,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  min-height: 18rem;
+  min-height: clamp(15.75rem, 30vw, 18rem);
   overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
@@ -302,11 +302,31 @@ onMounted(() => {
   align-self: flex-start;
 }
 
+.start-learning-copy {
+  text-wrap: pretty;
+}
+
 @media (max-width: 640px) {
 
   .start-learning-scene,
   .start-learning-face {
-    min-height: 22rem;
+    min-height: 16.5rem;
+  }
+
+  .start-learning-face {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 360px) {
+
+  .start-learning-scene,
+  .start-learning-face {
+    min-height: 18.5rem;
+  }
+
+  .start-learning-actions {
+    grid-template-columns: 1fr;
   }
 }
 
