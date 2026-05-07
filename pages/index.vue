@@ -19,7 +19,7 @@ const learningModes = [
   },
   {
     title: 'Multiple activities',
-    description: 'Switch between multiple quiz types, practice pronunciation with our echo labs and echo gecko learning modes. You can also practice your typing skills at the TaroTea dojo',
+    description: 'Switch between multiple quiz types, practice pronunciation and typing skills with various activities.',
     bgClass: 'brand-card-blue',
   },
   {
@@ -29,7 +29,7 @@ const learningModes = [
   },
   {
     title: 'Learn how to write',
-    description: 'Grab your pen and paper! Watch and learn how to write traditional chinese characters by following the Hanzi Writer.',
+    description: 'Grab your pen and paper! Watch and learn how to write traditional chinese characters by following the Hanzi Writer strokes.',
     bgClass: 'brand-card-green',
   },
 ]
