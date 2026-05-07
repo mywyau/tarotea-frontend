@@ -84,6 +84,12 @@ onBeforeUnmount(() => {
       </NuxtLink>
 
       <div ref="menuRoot" class="relative">
+
+        <!-- <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
+          :aria-expanded="menuOpen ? 'true' : 'false'">
+          ☰
+        </button> -->
+
         <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
           :aria-expanded="menuOpen ? 'true' : 'false'">
           ☰
@@ -333,7 +339,7 @@ onBeforeUnmount(() => {
 }
 
 .brand-logo:hover {
-  animation: softBrandBounce 0.85s ease-in-out infinite;
+  animation: softBrandBounce 1.0s ease-in-out infinite;
 }
 
 @keyframes softBrandBounce {
@@ -353,6 +359,58 @@ onBeforeUnmount(() => {
 
   75% {
     transform: translateY(-2px) scale(1.01);
+  }
+}
+
+.menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 40px;
+  font-size: 26px;
+  transform-origin: center;
+  transition: transform 160ms ease;
+}
+
+.menu-btn:hover {
+  animation: hamburgerWiggle 1.2s ease-in-out infinite;
+}
+
+.menu-btn:active {
+  transform: scale(0.98);
+}
+
+@keyframes hamburgerWiggle {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  15% {
+    transform: rotate(-10deg);
+  }
+
+  30% {
+    transform: rotate(8deg);
+  }
+
+  45% {
+    transform: rotate(-6deg);
+  }
+
+  60% {
+    transform: rotate(4deg);
+  }
+
+  75% {
+    transform: rotate(-2deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-btn:hover {
+    animation: none;
   }
 }
 </style>
