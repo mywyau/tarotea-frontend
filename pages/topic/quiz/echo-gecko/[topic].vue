@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Ear, Mic, SkipForward } from '@lucide/vue'
 import { playCorrectJingle, playGoodJingle, playQuizCompleteFailSong, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
@@ -611,10 +612,19 @@ onBeforeUnmount(() => {
 
           <section class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4 text-left">
             <h3 class="text-sm font-semibold text-gray-900">Before you start</h3>
-            <ul class="mt-2 space-y-1 text-sm text-gray-700">
-              <li>• Make sure you are in a quiet area and can speak clearly.</li>
-              <li>• Make sure there are no microphone obstructions.</li>
-              <li>• Use “Skip” if you are struggling with a word.</li>
+            <ul class="mt-3 space-y-2 text-sm text-gray-700">
+              <li class="flex items-start gap-2">
+                <Ear class="mt-0.5 h-4 w-4 shrink-0 text-fuchsia-700" aria-hidden="true" />
+                <span>Make sure you are in a quiet area and can speak clearly.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <Mic class="mt-0.5 h-4 w-4 shrink-0 text-fuchsia-700" aria-hidden="true" />
+                <span>Make sure there are no microphone obstructions.</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <SkipForward class="mt-0.5 h-4 w-4 shrink-0 text-fuchsia-700" aria-hidden="true" />
+                <span>Use “Skip” if you are struggling with a word.</span>
+              </li>
             </ul>
           </section>
         </div>
