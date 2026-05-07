@@ -47,13 +47,11 @@ const formattedXpLost = computed(() => {
         <span class="completion-flip-face result-0">
           <span class="stat-label">{{ correctLabel }}</span>
           <span class="stat-value">{{ correct }}</span>
-          <span class="flip-hint">Tap to flip</span>
         </span>
 
         <span class="completion-flip-face completion-flip-face-back result-2">
           <span class="stat-label">{{ incorrectLabel }}</span>
           <span class="stat-value">{{ incorrect }}</span>
-          <span class="flip-hint">Tap to flip</span>
         </span>
       </span>
     </button>
@@ -75,13 +73,11 @@ const formattedXpLost = computed(() => {
         <span class="completion-flip-face result-3">
           <span class="stat-label">XP Earned</span>
           <span class="stat-value">{{ formattedXpEarned }}</span>
-          <span class="flip-hint">Tap to flip</span>
         </span>
 
         <span class="completion-flip-face completion-flip-face-back result-1">
           <span class="stat-label">XP Lost</span>
           <span class="stat-value">{{ formattedXpLost }}</span>
-          <span class="flip-hint">Tap to flip</span>
         </span>
       </span>
     </button>

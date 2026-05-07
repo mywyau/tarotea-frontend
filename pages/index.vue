@@ -166,7 +166,7 @@ onMounted(() => {
                 Start learning Cantonese today
               </h2>
               <p class="start-learning-copy text-sm sm:text-base text-gray-800 mt-2 max-w-2xl">
-                Work through structured levels at your own pace, then test your progress with level quizzes that build
+                Work through content in structured levels at your own pace, then practice and train with activities that build
                 confidence step by step.
               </p>
             </div>
