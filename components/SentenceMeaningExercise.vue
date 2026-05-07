@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import { computed, ref } from 'vue';
+import { ArrowRight } from '@lucide/vue';
 
 interface Sentence {
   id: string
@@ -192,9 +193,10 @@ watch(
 
       <!-- Next -->
       <div class="min-h-[3.0rem]">
-        <button v-if="showResult && currentIndex < props.sentences.length" class="w-full rounded-lg bg-black text-white py-3
+        <button v-if="showResult && currentIndex < props.sentences.length" class="inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-black text-white py-3
                  font-medium transition hover:bg-gray-800" @click="next">
-          Next →
+          <span>Next</span>
+          <ArrowRight class="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 

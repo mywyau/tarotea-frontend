@@ -2,6 +2,7 @@
 
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { onMounted, ref } from 'vue'
+import { ChevronLeft, ChevronRight } from '@lucide/vue'
 
 
 const {
@@ -127,7 +128,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
         <div v-if="canEnterLevel(quizLevel) && !quizLevel.comingSoon" class="pt-4 space-y-3">
           <div class="grid grid-cols-[42px_1fr_42px] gap-3">
             <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, -1)" aria-label="Previous quiz mode">
-              ‹
+              <ChevronLeft class="h-5 w-5" aria-hidden="true" />
             </button>
 
             <NuxtLink :to="getSelectedLevelMode(quizLevel.id).to(quizLevel.id)" class="level-btn"
@@ -136,7 +137,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
             </NuxtLink>
 
             <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, 1)" aria-label="Next quiz mode">
-              ›
+              <ChevronRight class="h-5 w-5" aria-hidden="true" />
             </button>
           </div>
 

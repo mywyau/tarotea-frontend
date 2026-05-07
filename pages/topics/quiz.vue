@@ -7,6 +7,7 @@ useSeoMeta({
 })
 
 import { computed, onMounted, ref, watch } from 'vue'
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 import type { TopicQuiz } from '~/types/topic'
 import { sortedTopics } from '~/utils/topics/topics'
@@ -191,7 +192,7 @@ onMounted(async () => {
                     <div class="grid grid-cols-[42px_1fr_42px] gap-3">
                         <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, -1)"
                             aria-label="Previous quiz mode" :disabled="!canEnterTopic(topic) || topic.comingSoon">
-                            ‹
+                            <ChevronLeft class="h-5 w-5" aria-hidden="true" />
                         </button>
 
                         <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
@@ -202,7 +203,7 @@ onMounted(async () => {
 
                         <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, 1)" aria-label="Next quiz mode"
                             :disabled="!canEnterTopic(topic) || topic.comingSoon">
-                            ›
+                            <ChevronRight class="h-5 w-5" aria-hidden="true" />
                         </button>
                     </div>
 
@@ -224,11 +225,11 @@ onMounted(async () => {
             <div class="pagination-row flex items-center justify-center gap-1.5 sm:gap-3 max-w-full overflow-x-auto">
                 <button v-if="showFirstButton" @click="goToPage(1)" :disabled="currentPage === 1"
                     class="pagination-jump">
-                    «
+                    <ChevronsLeft class="h-4 w-4" aria-hidden="true" />
                 </button>
 
                 <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
-                    ←
+                    <ChevronLeft class="h-4 w-4" aria-hidden="true" />
                 </button>
 
                 <button v-for="page in visiblePages" :key="page" @click="goToPage(page)" class="pagination-page"
@@ -238,12 +239,12 @@ onMounted(async () => {
 
                 <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages"
                     class="pagination-arrow">
-                    →
+                    <ChevronRight class="h-4 w-4" aria-hidden="true" />
                 </button>
 
                 <button v-if="showLastButton" @click="goToPage(totalPages)" :disabled="currentPage === totalPages"
                     class="pagination-jump">
-                    »
+                    <ChevronsRight class="h-4 w-4" aria-hidden="true" />
                 </button>
             </div>
 

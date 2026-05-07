@@ -2,6 +2,7 @@
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { Menu, X } from '@lucide/vue'
 
 const { isLoggedIn, resolve } = useMeStateV2()
 const route = useRoute()
@@ -85,14 +86,10 @@ onBeforeUnmount(() => {
 
       <div ref="menuRoot" class="relative">
 
-        <!-- <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
-          :aria-expanded="menuOpen ? 'true' : 'false'">
-          ☰
-        </button> -->
-
         <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
           :aria-expanded="menuOpen ? 'true' : 'false'">
-          ☰
+          <X v-if="menuOpen" class="h-5 w-5" aria-hidden="true" />
+          <Menu v-else class="h-5 w-5" aria-hidden="true" />
         </button>
 
         <div v-if="menuOpen" class="menu-panel">

@@ -289,67 +289,70 @@ watchEffect(() => {
               </button>
             </div>
             <div class="space-y-4">
-            <div class="space-y-1">
-              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
-              <div class="flex items-center gap-2">
-                <input type="range" min="0" max="1" step="0.01" v-model="volume"
-                  class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
-                <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
+              <div class="space-y-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
+                <div class="flex items-center gap-2">
+                  <input type="range" min="0" max="1" step="0.01" v-model="volume"
+                    class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
+                  <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
+                </div>
               </div>
-            </div>
-            <div class="space-y-1">
-              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
-              <div class="flex items-center justify-between gap-2">
-                <button type="button"
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
-                  @click="decreasePlaybackRate">
-                  <ChevronLeft class="h-4 w-4" />
-                </button>
-                <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{ speedDeltaLabel }}</span>
-                <button type="button"
-                  class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
-                  :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
-                  @click="increasePlaybackRate">
-                  <ChevronRight class="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-            <div class="space-y-2">
-              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Voice</p>
-              <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
-                <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
-                  :class="selectedAudioVoice === 'male'
-                    ? 'bg-blue-100 text-black shadow-sm'
-                    : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                    " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
-                  Male
-                </button>
 
-                <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
-                  :class="selectedAudioVoice === 'female'
-                    ? 'bg-pink-100 text-black shadow-sm'
-                    : 'bg-transparent text-gray-700 hover:bg-gray-200'
-                    " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
-                  Female
-                </button>
+              <div class="space-y-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
+                <div class="flex items-center justify-between gap-2">
+                  <button type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
+                    @click="decreasePlaybackRate">
+                    <ChevronLeft class="h-4 w-4" />
+                  </button>
+                  <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{ speedDeltaLabel }}</span>
+                  <button type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
+                    @click="increasePlaybackRate">
+                    <ChevronRight class="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            </div>
-            <div class="space-y-2 border-t border-yellow-200 pt-3">
-              <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Page display</p>
-              <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                <span>Show XP bar</span>
-                <input v-model="showXpBar" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-              </label>
-              <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                <span>Show practice buttons</span>
-                <input v-model="showPracticeButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-              </label>
-              <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
-                <span>Show audio buttons</span>
-                <input v-model="showAudioButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
-              </label>
-            </div>
+
+              <div class="space-y-2">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Voice</p>
+                <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+                  <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+                    :class="selectedAudioVoice === 'male'
+                      ? 'bg-blue-100 text-black shadow-sm'
+                      : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                      " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+                    Male
+                  </button>
+
+                  <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+                    :class="selectedAudioVoice === 'female'
+                      ? 'bg-pink-100 text-black shadow-sm'
+                      : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                      " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+                    Female
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-2 border-t border-yellow-200 pt-3">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Page display</p>
+                <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                  <span>Show XP bar</span>
+                  <input v-model="showXpBar" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                </label>
+                <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                  <span>Show practice buttons</span>
+                  <input v-model="showPracticeButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                </label>
+                <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
+                  <span>Show audio buttons</span>
+                  <input v-model="showAudioButtons" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
+                </label>
+              </div>
             </div>
           </div>
         </details>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { loginWithGoogle, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
+import { Menu, X } from '@lucide/vue'
 
 const { isLoggedIn, entitlement, resolve } = useMeStateV2()
 
@@ -80,9 +81,10 @@ onMounted(() => {
       </nav>
 
       <!-- Mobile Hamburger -->
-      <button type="button" class="md:hidden text-2xl relative z-50 shrink-0" @click="toggleMobile"
-        aria-label="Toggle menu">
-        ☰
+      <button type="button" class="md:hidden relative z-50 inline-flex h-10 w-10 shrink-0 items-center justify-center" @click="toggleMobile"
+        aria-label="Toggle menu" :aria-expanded="mobileOpen ? 'true' : 'false'">
+        <X v-if="mobileOpen" class="h-6 w-6" aria-hidden="true" />
+        <Menu v-else class="h-6 w-6" aria-hidden="true" />
       </button>
 
     </div>

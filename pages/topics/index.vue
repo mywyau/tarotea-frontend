@@ -10,6 +10,7 @@ import type { Topic } from '@/types/topic'
 import { brandColours } from '@/utils/branding/helpers'
 import { sortedTopics } from '@/utils/topics/topics'
 import { computed, onMounted, ref } from 'vue'
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/vue'
 
 const {
   authReady,
@@ -122,9 +123,7 @@ onMounted(async () => {
 <template>
   <main class="topics-page max-w-4xl mx-auto py-12 px-4 space-y-10">
 
-    <NuxtLink :to="`/`" class="text-sm text-black hover:underline">
-      ← Back
-    </NuxtLink>
+    <BackLink to="/" />
 
 
     <header class="rounded-lg header-card">
@@ -172,12 +171,12 @@ onMounted(async () => {
     <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
 
       <div class="flex justify-center items-center gap-1.5 sm:gap-3">
-        <button @click="goToPage(1)" :disabled="currentPage === 1" class="pagination-jump" v-if="showFirstButton">
-          «
+        <button @click="goToPage(1)" :disabled="currentPage === 1" class="pagination-jump" v-if="showFirstButton" aria-label="First page">
+          <ChevronsLeft class="h-4 w-4" aria-hidden="true" />
         </button>
 
-        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
-          ←
+        <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow" aria-label="Previous page">
+          <ChevronLeft class="h-4 w-4" aria-hidden="true" />
         </button>
 
         <button v-for="page in visiblePages" :key="page" @click="goToPage(page)" class="pagination-page"
@@ -185,13 +184,13 @@ onMounted(async () => {
           {{ page }}
         </button>
 
-        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow">
-          →
+        <button @click="goToPage(currentPage + 1)" :disabled="currentPage === totalPages" class="pagination-arrow" aria-label="Next page">
+          <ChevronRight class="h-4 w-4" aria-hidden="true" />
         </button>
 
         <button @click="goToPage(totalPages)" :disabled="currentPage === totalPages" class="pagination-jump"
-          v-if="showLastButton">
-          »
+          v-if="showLastButton" aria-label="Last page">
+          <ChevronsRight class="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
 

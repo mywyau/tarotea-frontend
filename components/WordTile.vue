@@ -2,6 +2,7 @@
 
 import { NuxtLink } from '#components';
 import { masteryXp } from '@/config/xp/helpers';;
+import { CheckCircle2 } from '@lucide/vue';
 
 defineProps<{
   to?: string
@@ -18,8 +19,8 @@ defineProps<{
 <template>
   <component :is="to ? NuxtLink : 'div'" :to="to" class="relative word-tile hover:brightness-110">
     <!-- Mastered badge -->
-    <div v-if="mastered" class="absolute top-2 right-2 text-[10px] px-2 py-0.5 text-emerald-600 font-medium">
-      ✓
+    <div v-if="mastered" class="absolute top-2 right-2 text-emerald-600" aria-label="Mastered">
+      <CheckCircle2 class="h-4 w-4" aria-hidden="true" />
     </div>
 
     <div class="text-xl text-center">
