@@ -254,7 +254,10 @@ onMounted(async () => {
 
         <div class="stat-card page-card rounded-xl stat-3">
           <p class="stat-label">Locked words</p>
-          <p class="stat-value font-bold">{{ lockedWordCount }}</p>
+          <p class="stat-value stat-value-with-icon font-bold">
+            <TaroLockIcon size="h-4 w-4" />
+            {{ lockedWordCount }}
+          </p>
         </div>
       </div>
     </section>

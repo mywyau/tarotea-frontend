@@ -154,7 +154,7 @@ onMounted(loadData)
     <BackLink :to="`/topic/words/${slug}/v2`" />
 
     <header class="rounded-lg header-card">
-      <h1 class="page-heading">Unlock word</h1>
+      <h1 class="page-heading inline-flex items-center gap-2"><TaroLockIcon size="h-5 w-5" /> Unlock word</h1>
       <p class="page-subheading mt-2">
         Use <span class="inline-flex items-center gap-1 font-bold"><TaroKeyIcon size="h-4 w-4" /> 1</span> TaroKey to access this Tile permanently.
       </p>
