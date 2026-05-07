@@ -56,20 +56,59 @@ defineProps<{
 }
 
 .word-tile {
+  isolation: isolate;
+  overflow: hidden;
   border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
   padding: 1.2rem;
   text-align: center;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 -18px 40px rgba(255, 255, 255, 0.14),
+    0 8px 20px rgba(0, 0, 0, 0.05);
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease;
 }
 
+.word-tile::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.55), rgba(255, 255, 255, 0.12) 46%, rgba(255, 255, 255, 0.28)),
+    radial-gradient(circle at 18% 12%, rgba(255, 255, 255, 0.72), transparent 34%);
+  pointer-events: none;
+}
+
+.word-tile > * {
+  position: relative;
+  z-index: 1;
+}
+
+.word-tile::after {
+  content: '';
+  position: absolute;
+  top: 0.45rem;
+  left: 0.55rem;
+  right: 38%;
+  height: 1px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.72);
+  pointer-events: none;
+}
+
 /* Hover lift */
 .word-tile:hover {
   transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.68),
+    inset 0 -18px 40px rgba(255, 255, 255, 0.18),
+    0 14px 28px rgba(0, 0, 0, 0.08);
 }
 
 /* Active press */
