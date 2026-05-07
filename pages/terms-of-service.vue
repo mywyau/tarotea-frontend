@@ -29,7 +29,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="BookOpen" color-class="bg-purple-50 text-purple-600 ring-purple-100">About TaroTea</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="BookOpen">About TaroTea</FooterPageSectionHeading>
       <p class="text-gray-700">
         TaroTea is a web application designed to help users learn Cantonese
         through vocabulary, audio, and exercises.
@@ -37,7 +37,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="UserRound" color-class="bg-purple-50 text-purple-600 ring-purple-100">Accounts</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="UserRound">Accounts</FooterPageSectionHeading>
       <p class="text-gray-700">
         To access certain features, you may need to create an account.
         You are responsible for keeping your account secure and for any activity
@@ -46,7 +46,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="CreditCard" color-class="bg-purple-50 text-purple-600 ring-purple-100">Subscriptions and payments</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="CreditCard">Subscriptions and payments</FooterPageSectionHeading>
       <p class="text-gray-700">
         Some features of TaroTea may require a paid subscription.
         Payments are processed by third-party providers such as Stripe.
@@ -60,7 +60,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="FileText" color-class="bg-purple-50 text-purple-600 ring-purple-100">Content and availability</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="FileText">Content and availability</FooterPageSectionHeading>
       <p class="text-gray-700">
         The content provided on TaroTea is for educational purposes only.
         We may update, modify, or remove content at any time as the app evolves.
@@ -72,7 +72,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Handshake" color-class="bg-purple-50 text-purple-600 ring-purple-100">Acceptable use</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Handshake">Acceptable use</FooterPageSectionHeading>
       <p class="text-gray-700">
         You agree not to misuse the service, including attempting to:
       </p>
@@ -85,7 +85,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Copyright" color-class="bg-purple-50 text-purple-600 ring-purple-100">Intellectual property</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Copyright">Intellectual property</FooterPageSectionHeading>
       <p class="text-gray-700">
         All content on TaroTea, including text, audio, and design, is owned by or
         licensed to TaroTea and is protected by intellectual property laws.
@@ -97,7 +97,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="CircleSlash" color-class="bg-purple-50 text-purple-600 ring-purple-100">No guarantees</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="CircleSlash">No guarantees</FooterPageSectionHeading>
       <p class="text-gray-700">
         TaroTea is provided on an “as is” basis. While we aim to provide helpful and
         accurate learning materials, we do not guarantee fluency or specific learning
@@ -106,7 +106,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="ShieldAlert" color-class="bg-purple-50 text-purple-600 ring-purple-100">Limitation of liability</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="ShieldAlert">Limitation of liability</FooterPageSectionHeading>
       <p class="text-gray-700">
         To the extent permitted by law, TaroTea will not be liable for any indirect,
         incidental, or consequential loss arising from your use of the app.
@@ -114,7 +114,7 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="WifiOff" color-class="bg-purple-50 text-purple-600 ring-purple-100">Termination</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="WifiOff">Termination</FooterPageSectionHeading>
       <p class="text-gray-700">
         We may suspend or terminate access to the service if these Terms are violated
         or if the app is discontinued.
@@ -122,14 +122,14 @@ definePageMeta({
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Scale" color-class="bg-purple-50 text-purple-600 ring-purple-100">Governing law</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Scale">Governing law</FooterPageSectionHeading>
       <p class="text-gray-700">
         These Terms are governed by the laws of the UK.
       </p>
     </section>
 
     <section class="space-y-3">
-      <FooterPageSectionHeading :icon="Mail" color-class="bg-purple-50 text-purple-600 ring-purple-100">Contact</FooterPageSectionHeading>
+      <FooterPageSectionHeading :icon="Mail">Contact</FooterPageSectionHeading>
       <p class="text-gray-700">
         If you have any questions about these Terms, please contact:
         <br />
