@@ -345,42 +345,6 @@ const showResults = computed(() => {
     return quizFinished.value && !finishing.value && finalizeCompleted.value
 })
 const isGuestMode = computed(() => !isLoggedIn.value)
-const completionTiles = computed(() => [
-    {
-        label: 'Correct',
-        value: score.value,
-        suffix: '',
-        className: 'result-0'
-    },
-    {
-        label: 'Incorrect',
-        value: incorrectCount.value,
-        suffix: '',
-        className: 'result-2'
-    },
-    {
-        label: 'Time',
-        value: formattedElapsedTime.value,
-        suffix: '',
-        className: 'result-4'
-    },
-    {
-        label: 'XP Gained',
-        value: animatedXpEarned.value,
-        suffix: 'XP',
-        className: 'result-3',
-        prefix: animatedXpEarned.value > 0 ? '+' : ''
-    },
-    {
-        label: 'XP Lost',
-        value: animatedXpLost.value,
-        suffix: 'XP',
-        className: 'result-1',
-        prefix: animatedXpLost.value > 0 ? '-' : ''
-    },
-
-])
-
 function resetCompletionAnimations() {
     animatedAccuracy.value = 0
     animatedXpEarned.value = 0
@@ -816,18 +780,15 @@ onBeforeUnmount(() => {
                         </div>
                     </transition>
 
-                    <transition-group name="card-fade" tag="div" class="completion-tiles-grid">
-                        <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110"
-                            :class="tile.className">
-                            <p class="stat-label">
-                                {{ tile.label }}
-                            </p>
-
-                            <p class="stat-value">
-                                {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
-                            </p>
-                        </div>
-                    </transition-group>
+                    <transition name="card-fade" appear>
+                        <QuizCompletionFlipStats
+                            :correct="score"
+                            :incorrect="incorrectCount"
+                            :time="formattedElapsedTime"
+                            :xp-earned="animatedXpEarned"
+                            :xp-lost="animatedXpLost"
+                        />
+                    </transition>
 
                     <div v-if="correctWords.length" class="stat-card text-left result-3">
                         <h3 class="text-sm font-semibold text-gray-900 mb-3">
@@ -935,49 +896,6 @@ onBeforeUnmount(() => {
 .card-fade-enter-from {
     opacity: 0;
     transform: translateY(10px);
-}
-
-.completion-tiles-grid {
-    display: flex;
-    gap: 1rem;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    padding-bottom: 0.25rem;
-}
-
-.completion-tiles-grid > * {
-    min-width: calc(50% - 0.5rem);
-    scroll-snap-align: start;
-}
-
-@media (min-width: 640px) {
-    .completion-tiles-grid {
-        display: grid;
-        overflow: visible;
-        scroll-snap-type: none;
-        padding-bottom: 0;
-        grid-template-columns: repeat(6, minmax(0, 1fr));
-        gap: 1.25rem;
-    }
-
-    .completion-tiles-grid > * {
-        min-width: 0;
-    }
-
-    .completion-tiles-grid>*:nth-child(-n + 3) {
-        grid-column: span 2 / span 2;
-    }
-
-    .completion-tiles-grid>*:nth-child(n + 4) {
-        grid-column: span 3 / span 3;
-    }
-}
-
-@media (min-width: 1280px) {
-    .completion-tiles-grid {
-        gap: 1.5rem;
-    }
 }
 
 .stat-card {

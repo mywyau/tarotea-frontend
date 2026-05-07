@@ -634,20 +634,14 @@ onBeforeUnmount(() => {
             <p class="hero-score">{{ passPercentage }}%</p>
           </div>
 
-          <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 sm:grid sm:grid-cols-3 sm:overflow-visible sm:snap-none sm:gap-6 sm:pb-0">
-            <div class="stat-card result-3 text-center min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0">
-              <p class="stat-label">Passed Words</p>
-              <p class="stat-value">{{ passedCount }}</p>
-            </div>
-            <div class="stat-card result-1 text-center min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0">
-              <p class="stat-label">Skipped Words</p>
-              <p class="stat-value">{{ missedCount }}</p>
-            </div>
-            <div class="stat-card result-2 text-center min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0">
-              <p class="stat-label">Total Time</p>
-              <p class="stat-value">{{ formattedElapsedTime }}</p>
-            </div>
-          </div>
+          <QuizCompletionFlipStats
+            correct-label="Passed Words"
+            incorrect-label="Skipped Words"
+            :correct="passedCount"
+            :incorrect="missedCount"
+            :time="formattedElapsedTime"
+            :show-xp="false"
+          />
 
           <button
             class="w-full rounded-xl bg-[#BFEA83] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"

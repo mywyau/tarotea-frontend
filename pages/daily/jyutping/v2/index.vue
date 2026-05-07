@@ -182,35 +182,6 @@ const formattedElapsedTime = computed(() => {
   return formatDuration(displayedElapsedMs.value)
 })
 
-const completionTiles = computed(() => [
-  {
-    label: 'Correct',
-    value: correctCount.value,
-    suffix: '',
-    className: 'result-0'
-  },
-  {
-    label: 'Incorrect',
-    value: incorrectCount.value,
-    suffix: '',
-    className: 'result-1'
-  },
-  {
-    label: 'Time',
-    value: formattedElapsedTime.value,
-    suffix: '',
-    className: 'result-3'
-  },
-  {
-    label: 'XP Earned',
-    value: animatedXpEarned.value,
-    suffix: 'XP',
-    className: 'result-2',
-    prefix: animatedXpEarned.value > 0 ? '+' : ''
-  },
-
-])
-
 const revealedLetters = computed(() => {
   if (!challenge.value) return []
 
@@ -720,18 +691,14 @@ watch(
             </div>
           </transition>
 
-          <transition-group name="card-fade" tag="div" class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible sm:snap-none sm:gap-6 sm:pb-0">
-            <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110 min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0"
-              :class="tile.className">
-              <p class="stat-label">
-                {{ tile.label }}
-              </p>
-
-              <p class="stat-value">
-                {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
-              </p>
-            </div>
-          </transition-group>
+          <transition name="card-fade" appear>
+            <QuizCompletionFlipStats
+              :correct="correctCount"
+              :incorrect="incorrectCount"
+              :time="formattedElapsedTime"
+              :xp-earned="animatedXpEarned"
+            />
+          </transition>
 
           <div class="text-center">
             <p class="stat-label">

@@ -307,34 +307,6 @@ const resultMeta = computed(() => {
   return { title: 'Keep practicing' }
 })
 
-const completionTiles = computed(() => [
-  {
-    label: 'Hint-Free',
-    value: hintFreeCount.value,
-    suffix: '',
-    className: 'result-3'
-  },
-  {
-    label: 'Hints Used',
-    value: hintsUsedCount.value,
-    suffix: '',
-    className: 'result-1'
-  },
-  {
-    label: 'Time',
-    value: formattedElapsedTime.value,
-    suffix: '',
-    className: 'result-0'
-  },
-  {
-    label: 'XP Earned',
-    value: animatedXpEarned.value,
-    suffix: 'XP',
-    className: 'result-2',
-    prefix: animatedXpEarned.value > 0 ? '+' : ''
-  }
-])
-
 const isGuestPreview = computed(() => sessionResult.value?.guestPreview === true)
 
 function sleep(ms: number) {
@@ -864,18 +836,14 @@ onBeforeUnmount(() => {
               </p>
             </div>
 
-            <div class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-1 sm:grid sm:grid-cols-4 sm:overflow-visible sm:snap-none sm:gap-6 sm:pb-0">
-              <div v-for="tile in completionTiles" :key="tile.label" class="stat-card hover:brightness-110 min-w-[calc(50%-0.5rem)] snap-start sm:min-w-0"
-                :class="tile.className">
-                <p class="stat-label">
-                  {{ tile.label }}
-                </p>
-
-                <p class="stat-value">
-                  {{ tile.prefix ?? '' }}{{ tile.value }} {{ tile.suffix }}
-                </p>
-              </div>
-            </div>
+            <QuizCompletionFlipStats
+              correct-label="Hint-Free"
+              incorrect-label="Hints Used"
+              :correct="hintFreeCount"
+              :incorrect="hintsUsedCount"
+              :time="formattedElapsedTime"
+              :xp-earned="animatedXpEarned"
+            />
 
             <p v-if="isGuestPreview" class="hero-subtext text-center">
               Sign in to save sessions, earn XP, and view full results.
