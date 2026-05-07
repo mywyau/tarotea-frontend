@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CircleCheck, Hourglass, TriangleAlert } from '@lucide/vue'
 definePageMeta({
   layout: "default",
 })
@@ -147,7 +148,11 @@ onBeforeUnmount(() => {
       </template>
 
       <template v-else-if="status === 'delayed'">
-        <div class="text-5xl">⌛</div>
+        <div class="flex justify-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F6E1E1] text-amber-600">
+            <Hourglass class="h-8 w-8" aria-hidden="true" />
+          </div>
+        </div>
 
         <h1 class="text-2xl font-semibold">
           Still confirming your subscription
@@ -175,7 +180,11 @@ onBeforeUnmount(() => {
       </template>
 
       <template v-else-if="status === 'active'">
-        <div class="text-5xl">🎉</div>
+        <div class="flex justify-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+            <CircleCheck class="h-9 w-9" aria-hidden="true" />
+          </div>
+        </div>
 
         <h1 class="text-2xl font-semibold">
           Payment successful
@@ -207,7 +216,11 @@ onBeforeUnmount(() => {
       </template>
 
       <template v-else>
-        <div class="text-5xl">⚠️</div>
+        <div class="flex justify-center">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+            <TriangleAlert class="h-8 w-8" aria-hidden="true" />
+          </div>
+        </div>
 
         <h1 class="text-2xl font-semibold">
           We couldn't confirm your subscription yet

@@ -2,6 +2,7 @@
 
 definePageMeta({ layout: 'default' })
 
+import { Info } from '@lucide/vue';
 import { useUpgrade } from '@/composables/useUpgrade';
 import { hasPaidAccess } from '~/utils/levels/permissions';
 
@@ -32,7 +33,11 @@ const isSubscribed = computed(() =>
       <div class="p-10 text-center space-y-6">
         <div class="max-w-md w-full text-center space-y-6">
 
-          <div class="text-5xl">😌</div>
+          <div class="flex justify-center">
+            <div class="flex h-16 w-16 items-center justify-center rounded-full bg-[#F6E1E1] text-[#7A6FCB]">
+              <Info class="h-8 w-8" aria-hidden="true" />
+            </div>
+          </div>
 
           <h1 class="text-2xl font-semibold">
             Payment cancelled
