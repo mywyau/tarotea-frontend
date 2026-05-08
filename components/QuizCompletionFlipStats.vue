@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { CheckCircle2, CircleX, Clock3, TrendingDown, TrendingUp } from '@lucide/vue'
+
 const props = withDefaults(defineProps<{
   correct: number | string
   incorrect: number | string
@@ -45,11 +47,17 @@ const formattedXpLost = computed(() => {
     >
       <span class="completion-flip-scene">
         <span class="completion-flip-face result-0">
+          <span class="stat-icon stat-icon-correct" aria-hidden="true">
+            <CheckCircle2 class="h-5 w-5" />
+          </span>
           <span class="stat-label">{{ correctLabel }}</span>
           <span class="stat-value">{{ correct }}</span>
         </span>
 
         <span class="completion-flip-face completion-flip-face-back result-2">
+          <span class="stat-icon stat-icon-incorrect" aria-hidden="true">
+            <CircleX class="h-5 w-5" />
+          </span>
           <span class="stat-label">{{ incorrectLabel }}</span>
           <span class="stat-value">{{ incorrect }}</span>
         </span>
@@ -57,7 +65,10 @@ const formattedXpLost = computed(() => {
     </button>
 
     <div class="stat-card hover:brightness-110 result-4">
-      <p class="stat-label">Time</p>
+      <span class="stat-icon stat-icon-time" aria-hidden="true">
+        <Clock3 class="h-5 w-5" />
+      </span>
+      <p class="stat-label">Time Taken</p>
       <p class="stat-value">{{ time }}</p>
     </div>
 
@@ -71,11 +82,17 @@ const formattedXpLost = computed(() => {
     >
       <span class="completion-flip-scene">
         <span class="completion-flip-face result-3">
+          <span class="stat-icon stat-icon-xp-earned" aria-hidden="true">
+            <TrendingUp class="h-5 w-5" />
+          </span>
           <span class="stat-label">XP Earned</span>
           <span class="stat-value">{{ formattedXpEarned }}</span>
         </span>
 
         <span class="completion-flip-face completion-flip-face-back result-1">
+          <span class="stat-icon stat-icon-xp-lost" aria-hidden="true">
+            <TrendingDown class="h-5 w-5" />
+          </span>
           <span class="stat-label">XP Lost</span>
           <span class="stat-value">{{ formattedXpLost }}</span>
         </span>
@@ -159,6 +176,38 @@ const formattedXpLost = computed(() => {
 
 .completion-flip-card:hover .completion-flip-face-back {
   transform: rotateY(180deg) translateY(-3px);
+}
+
+.stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 0.75rem;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.55);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.stat-icon-correct {
+  color: #2563eb;
+}
+
+.stat-icon-incorrect {
+  color: #b45309;
+}
+
+.stat-icon-time {
+  color: #7c3aed;
+}
+
+.stat-icon-xp-earned {
+  color: #15803d;
+}
+
+.stat-icon-xp-lost {
+  color: #be123c;
 }
 
 .stat-label {
