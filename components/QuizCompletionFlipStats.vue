@@ -182,16 +182,11 @@ const formattedXpLost = computed(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.5rem;
-  height: 2.5rem;
   margin-bottom: 0.75rem;
-  border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.55);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.55);
 }
 
 .stat-icon-correct {
-  color: #2563eb;
+  color: #15803d;
 }
 
 .stat-icon-incorrect {
@@ -236,7 +231,7 @@ const formattedXpLost = computed(() => {
 }
 
 .result-0 {
-  background: rgba(168, 202, 224, 0.45);
+  background: rgba(168, 224, 182, 0.45);
 }
 
 .result-1 {
