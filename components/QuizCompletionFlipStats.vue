@@ -40,7 +40,7 @@ const formattedXpLost = computed(() => {
   <div class="completion-flip-grid" :class="{ 'completion-flip-grid-two': !showXp }" aria-label="Quiz completion stats">
     <button
       type="button"
-      class="completion-flip-card hover:brightness-110"
+      class="completion-flip-card"
       :class="{ 'is-flipped': showOutcomeBack }"
       aria-label="Flip between correct and incorrect answers"
       @click="showOutcomeBack = !showOutcomeBack"
@@ -64,7 +64,7 @@ const formattedXpLost = computed(() => {
       </span>
     </button>
 
-    <div class="stat-card hover:brightness-110 result-4">
+    <div class="stat-card result-4">
       <span class="stat-icon stat-icon-time" aria-hidden="true">
         <Clock3 class="h-5 w-5" />
       </span>
@@ -168,8 +168,7 @@ const formattedXpLost = computed(() => {
   transform: rotateY(180deg);
 }
 
-.completion-flip-card:hover .completion-flip-face,
-.stat-card:hover {
+.completion-flip-card:hover .completion-flip-face {
   transform: translateY(-3px);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
 }
@@ -190,7 +189,7 @@ const formattedXpLost = computed(() => {
 }
 
 .stat-icon-incorrect {
-  color: #b45309;
+  color: #be123c;
 }
 
 .stat-icon-time {
@@ -239,7 +238,7 @@ const formattedXpLost = computed(() => {
 }
 
 .result-2 {
-  background: rgba(244, 205, 39, 0.35);
+  background: rgba(246, 225, 225, 0.75);
 }
 
 .result-3 {
