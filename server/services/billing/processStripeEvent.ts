@@ -18,6 +18,8 @@ type StripeEventRow = {
   payload: Stripe.Event;
 };
 
+const PROCESSING_STALE_AFTER_SECONDS = 15 * 60;
+
 async function markStripeEventProcessing(
   eventId: string,
 ): Promise<"claimed" | "already_processed" | "already_processing" | "missing"> {
@@ -26,12 +28,23 @@ async function markStripeEventProcessing(
       update stripe_events
       set
         status = 'processing',
+        processing_started_at = now(),
+        processing_attempt_count = coalesce(processing_attempt_count, 0) + 1,
         error_message = null
       where event_id = $1
-        and status in ('received', 'failed')
+        and (
+          status in ('received', 'failed')
+          or (
+            status = 'processing'
+            and (
+              processing_started_at is null
+              or processing_started_at < now() - ($2::text || ' seconds')::interval
+            )
+          )
+        )
       returning status
     `,
-    [eventId],
+    [eventId, PROCESSING_STALE_AFTER_SECONDS],
   );
 
   if (rows[0]) {
@@ -64,6 +77,7 @@ async function markStripeEventProcessed(eventId: string) {
       set
         status = 'processed',
         processed_at = now(),
+        processing_started_at = null,
         error_message = null
       where event_id = $1
     `,
@@ -77,6 +91,7 @@ async function markStripeEventFailed(eventId: string, message: string) {
       update stripe_events
       set
         status = 'failed',
+        processing_started_at = null,
         error_message = $2
       where event_id = $1
     `,

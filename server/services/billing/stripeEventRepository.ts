@@ -3,6 +3,12 @@ import { db } from "~/server/repositories/db";
 
 type InsertStripeEventResult = {
   inserted: boolean;
+  eventId: string;
+  eventType: string;
+  status: string;
+  stripeSubscriptionId: string | null;
+  stripeCustomerId: string | null;
+  userId: string | null;
 };
 
 function extractStripeSubscriptionId(stripeEvent: Stripe.Event): string | null {
@@ -67,32 +73,55 @@ export async function insertStripeEvent(
   const userId = extractUserId(stripeEvent);
   const stripeCreatedAt = new Date(stripeEvent.created * 1000).toISOString();
 
-  const result = await db.query(
+  const result = await db.query<InsertStripeEventResult>(
     `
-      insert into stripe_events (
-        event_id,
-        event_type,
-        stripe_created_at,
-        received_at,
+      with inserted as (
+        insert into stripe_events (
+          event_id,
+          event_type,
+          stripe_created_at,
+          received_at,
+          status,
+          payload,
+          stripe_subscription_id,
+          stripe_customer_id,
+          user_id
+        )
+        values (
+          $1,
+          $2,
+          $3,
+          now(),
+          'received',
+          $4::jsonb,
+          $5,
+          $6,
+          $7
+        )
+        on conflict (event_id) do nothing
+        returning
+          true as inserted,
+          event_id as "eventId",
+          event_type as "eventType",
+          status,
+          stripe_subscription_id as "stripeSubscriptionId",
+          stripe_customer_id as "stripeCustomerId",
+          user_id as "userId"
+      )
+      select * from inserted
+      union all
+      select
+        false as inserted,
+        event_id as "eventId",
+        event_type as "eventType",
         status,
-        payload,
-        stripe_subscription_id,
-        stripe_customer_id,
-        user_id
-      )
-      values (
-        $1,
-        $2,
-        $3,
-        now(),
-        'received',
-        $4::jsonb,
-        $5,
-        $6,
-        $7
-      )
-      on conflict (event_id) do nothing
-      returning event_id
+        stripe_subscription_id as "stripeSubscriptionId",
+        stripe_customer_id as "stripeCustomerId",
+        user_id as "userId"
+      from stripe_events
+      where event_id = $1
+        and not exists (select 1 from inserted)
+      limit 1
     `,
     [
       stripeEvent.id,
@@ -105,7 +134,11 @@ export async function insertStripeEvent(
     ],
   );
 
-  return {
-    inserted: result.rowCount === 1,
-  };
+  const row = result.rows[0];
+
+  if (!row) {
+    throw new Error(`Failed to insert or load Stripe event ${stripeEvent.id}`);
+  }
+
+  return row;
 }

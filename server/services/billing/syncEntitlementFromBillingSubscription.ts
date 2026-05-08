@@ -38,24 +38,33 @@ export async function syncEntitlementFromBillingSubscription(
 
   await db.query(
     `
-      update entitlements
-      set
-        plan = $1,
-        subscription_status = $2,
-        cancel_at_period_end = $3,
-        current_period_start = $4,
-        current_period_end = $5,
-        canceled_at = $6
-      where user_id = $7
+      insert into entitlements (
+        user_id,
+        plan,
+        subscription_status,
+        cancel_at_period_end,
+        current_period_start,
+        current_period_end,
+        canceled_at
+      )
+      values ($1, $2, $3, $4, $5, $6, $7)
+      on conflict (user_id)
+      do update set
+        plan = excluded.plan,
+        subscription_status = excluded.subscription_status,
+        cancel_at_period_end = excluded.cancel_at_period_end,
+        current_period_start = excluded.current_period_start,
+        current_period_end = excluded.current_period_end,
+        canceled_at = excluded.canceled_at
     `,
     [
+      billingSubscription.user_id,
       entitlementPlan,
       billingSubscription.subscription_status,
       billingSubscription.cancel_at_period_end,
       billingSubscription.current_period_start,
       billingSubscription.current_period_end,
       billingSubscription.canceled_at,
-      billingSubscription.user_id,
     ],
   );
 }

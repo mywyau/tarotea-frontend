@@ -41,6 +41,13 @@ function getPriceIdForBilling(billing: Billing): string {
   return priceId;
 }
 
+function getCheckoutIdempotencyKey(userId: string, billing: Billing): string {
+  const bucketMs = 5 * 60 * 1000;
+  const bucket = Math.floor(Date.now() / bucketMs);
+
+  return `checkout:${userId}:${billing}:${bucket}`;
+}
+
 function assertBilling(value: unknown): Billing {
   if (value === "monthly" || value === "yearly") {
     return value;
@@ -82,7 +89,7 @@ export default defineEventHandler(async (event) => {
   const priceId = getPriceIdForBilling(billing);
   const appUrl = getAppUrl();
 
-  const idempotencyKey = crypto.randomUUID();
+  const idempotencyKey = getCheckoutIdempotencyKey(userId, billing);
 
   const session = await stripe.checkout.sessions.create(
     {
