@@ -181,8 +181,11 @@ async function loadWriter(char: string) {
             padding: writerSize.value < 260 ? 12 : 20,
             showOutline: true,
             showCharacter: false,
-            // outlineColor: "#d6a3d1",
-            // strokeColor: "#7e93ff",
+
+            outlineColor: "rgba(17, 24, 39, 0.18)",
+            strokeColor: "#111827",
+            radicalColor: "#111827",
+
             strokeAnimationSpeed: 1,
             strokeHighlightSpeed: 2,
             delayBetweenStrokes: 250,

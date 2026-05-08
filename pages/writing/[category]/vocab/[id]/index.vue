@@ -137,6 +137,11 @@ async function loadWriter(char: string) {
       showCharacter: false,
       // outlineColor: "#d6a3d1",
       // strokeColor: "#7e93ff",
+
+      outlineColor: "rgba(17, 24, 39, 0.18)",
+      strokeColor: "#111827",
+      radicalColor: "#111827",
+
       strokeAnimationSpeed: 1,
       strokeHighlightSpeed: 2,
       delayBetweenStrokes: 250,
@@ -397,9 +402,53 @@ onMounted(() => {
   color: var(--ink-strong);
 }
 
-.writer-shell {
+/* .writer-shell {
   background: rgba(246, 225, 225, 0.42);
   border: 1px dashed rgba(17, 24, 39, 0.18);
+} */
+
+.writer-shell {
+  position: relative;
+  overflow: hidden;
+
+  background-color: #fffdf8;
+  background-image:
+    linear-gradient(rgba(130, 170, 210, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(130, 170, 210, 0.16) 1px, transparent 1px);
+  background-size: 32px 32px;
+
+  border: 1px solid rgba(130, 170, 210, 0.32);
+  box-shadow:
+    0 12px 28px rgba(31, 41, 55, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.writer-shell::before,
+.writer-shell::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  z-index: 0;
+  background: rgba(180, 80, 80, 0.18);
+}
+
+.writer-shell::before {
+  width: 1px;
+  height: 100%;
+  left: 50%;
+  top: 0;
+}
+
+.writer-shell::after {
+  height: 1px;
+  width: 100%;
+  left: 0;
+  top: 50%;
+}
+
+.writer-shell>div {
+  position: relative;
+  z-index: 1;
 }
 
 .control-panel {
