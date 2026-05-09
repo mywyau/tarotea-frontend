@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { Menu, Orbit, Rocket, X } from '@lucide/vue'
+import { Menu, Rocket, X } from '@lucide/vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const { isLoggedIn, resolve } = useMeStateV2()
@@ -135,7 +135,8 @@ onBeforeUnmount(() => {
     <button type="button" class="trigger-visibility-btn" :class="{ 'is-open': navOpen }"
       :aria-label="navOpen ? 'Close Warp panel' : 'Open Warp panel'" :aria-expanded="navOpen ? 'true' : 'false'"
       aria-controls="warp-navigation-panel" @click.stop="toggleNav">
-      <Orbit class="portal-icon" aria-hidden="true" />
+      <span class="rocket-burst" aria-hidden="true"></span>
+      <Rocket class="portal-icon" aria-hidden="true" />
       <span class="sr-only">{{ navOpen ? 'Close Warp panel' : 'Open Warp panel' }}</span>
     </button>
 
@@ -197,8 +198,9 @@ onBeforeUnmount(() => {
   background: transparent;
   backdrop-filter: none;
   /* box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16); */
-  overflow: hidden;
+  overflow: visible;
   isolation: isolate;
+  transition: transform 160ms ease;
 }
 
 .portal-icon {
@@ -210,7 +212,8 @@ onBeforeUnmount(() => {
   color: rgba(15, 15, 15, 0.9);
   stroke-width: 2.4;
   transform-origin: center;
-  animation: portalOrbit 6s linear infinite;
+  transition: color 160ms ease, transform 160ms ease;
+  z-index: 1;
 }
 
 .trigger-visibility-btn::before {
@@ -219,23 +222,66 @@ onBeforeUnmount(() => {
   inset: 0.45rem;
   border-radius: inherit;
   background:
-    radial-gradient(circle, rgba(255, 255, 255, 0.72), rgba(255, 255, 255, 0.12) 62%, transparent 70%);
-  z-index: -1;
+    radial-gradient(circle, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.18) 62%, transparent 70%);
+  z-index: -2;
 }
 
 .trigger-visibility-btn::after {
   content: '';
   position: absolute;
-  inset: 0.3rem;
-  /* border-radius: inherit; */
-  /* border: 1px solid rgba(15, 15, 15, 0.14); */
-  z-index: -1;
+  inset: 0.25rem;
+  border-radius: inherit;
+  background: rgba(214, 163, 209, 0.12);
+  opacity: 0;
+  transform: scale(0.52);
+  transition: opacity 160ms ease, transform 220ms ease;
+  z-index: -2;
 }
 
 .trigger-visibility-btn:hover,
 .trigger-visibility-btn.is-open {
   transform: scale(1.20);
   /* box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22); */
+}
+
+.trigger-visibility-btn:hover::after,
+.trigger-visibility-btn.is-open::after {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.trigger-visibility-btn:hover .portal-icon,
+.trigger-visibility-btn.is-open .portal-icon {
+  color: rgba(92, 54, 112, 0.95);
+  transform: translateY(-0.08rem);
+}
+
+.rocket-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.34rem;
+  height: 0.34rem;
+  border-radius: 999px;
+  background: #d6a3d1;
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.35);
+  z-index: -1;
+  box-shadow:
+    0 -1.05rem 0 0 rgba(214, 163, 209, 0.92),
+    0.78rem -0.72rem 0 -0.03rem rgba(194, 144, 207, 0.9),
+    1.08rem 0.05rem 0 -0.01rem rgba(214, 163, 209, 0.88),
+    0.66rem 0.82rem 0 -0.05rem rgba(234, 184, 228, 0.92),
+    -0.1rem 1.12rem 0 -0.02rem rgba(194, 144, 207, 0.86),
+    -0.84rem 0.72rem 0 -0.04rem rgba(214, 163, 209, 0.9),
+    -1.1rem -0.08rem 0 -0.01rem rgba(234, 184, 228, 0.9),
+    -0.72rem -0.8rem 0 -0.06rem rgba(194, 144, 207, 0.86);
+  pointer-events: none;
+}
+
+.trigger-visibility-btn:hover .rocket-burst,
+.trigger-visibility-btn.is-open .rocket-burst {
+  animation: lilacBurst 650ms ease-out both;
 }
 
 
@@ -327,15 +373,20 @@ onBeforeUnmount(() => {
   transform: translateX(-100%);
 }
 
-/* @keyframes portalSwirl {
-  to {
-    transform: rotate(360deg);
+@keyframes lilacBurst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
   }
-} */
 
-@keyframes portalOrbit {
-  to {
-    transform: rotate(360deg);
+  35% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.12);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.45);
   }
 }
 
@@ -403,7 +454,7 @@ onBeforeUnmount(() => {
 
   .brand-logo:hover,
   .menu-btn:hover,
-  .portal-icon {
+  .rocket-burst {
     animation: none;
   }
 }
