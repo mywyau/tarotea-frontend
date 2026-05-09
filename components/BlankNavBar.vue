@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { AudioLines, CalendarCheck, CircleHelp, House, Layers, Menu, Rocket, Tags, Target, X } from '@lucide/vue'
+import { AudioLines, CalendarCheck, CircleHelp, House, Keyboard, Layers, Menu, Rocket, Tags, X } from '@lucide/vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const { isLoggedIn, resolve } = useMeStateV2()
@@ -18,10 +18,10 @@ const navLinks = computed(() => {
     { to: '/daily/jyutping/v2', label: 'Daily Jyutping Quiz', requiresAuth: true, icon: AudioLines },
     { to: '/levels', label: 'Levels', requiresAuth: false, icon: Layers },
     { to: '/quiz', label: 'Level Quiz', requiresAuth: false, icon: CircleHelp },
-    { to: '/dojo/level', label: 'Level Dojo', requiresAuth: false, icon: Target },
+    { to: '/dojo/level', label: 'Level Dojo', requiresAuth: false, icon: Keyboard },
     { to: '/topics', label: 'Topics', requiresAuth: false, icon: Tags },
     { to: '/topics/quiz', label: 'Topic Quiz', requiresAuth: false, icon: CircleHelp },
-    { to: '/dojo/topic', label: 'Topic Dojo', requiresAuth: false, icon: Target },
+    { to: '/dojo/topic', label: 'Topic Dojo', requiresAuth: false, icon: Keyboard },
   ]
 
   return links.filter(link => !link.requiresAuth || isLoggedIn.value)
