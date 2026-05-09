@@ -205,10 +205,10 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   align-items: center;
   justify-content: center;
   text-align: center;
-  min-height: 56px;
-  padding: 0.6rem 0.75rem;
+  min-height: 52px;
+  padding: 0.65rem 0.85rem;
   font-size: 0.85rem;
-  border-radius: 8px;
+  border-radius: 14px;
   font-weight: 600;
   line-height: 1.2;
   transition: all 0.15s ease;
