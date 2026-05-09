@@ -1,25 +1,9 @@
 <script setup lang="ts">
 
 import { levelSelectMetaData } from '@/utils/levels/helpers'
+import { getLevelTopicIcon } from '@/utils/levels/topicIcons'
 import { markRaw, onMounted, ref } from 'vue'
-import {
-  BookOpen,
-  Brain,
-  BriefcaseBusiness,
-  CalendarDays,
-  ChevronLeft,
-  ChevronRight,
-  Drama,
-  Handshake,
-  Headphones,
-  House,
-  MessageSquareText,
-  Mic2,
-  Newspaper,
-  Quote,
-  ScrollText,
-  Volume2,
-} from '@lucide/vue'
+import { BookOpen, ChevronLeft, ChevronRight, Headphones, MessageSquareText, Mic2, Volume2 } from '@lucide/vue'
 
 
 const {
@@ -85,34 +69,6 @@ const levelQuizModes = [
     to: (levelId: string) => `/quiz/${levelId}/echo-gecko`,
   },
 ] as const
-
-
-const levelTopicIcons = {
-  'level-one': { icon: House, label: 'foundation and daily life' },
-  'level-two': { icon: CalendarDays, label: 'daily situations and feelings' },
-  'level-three': { icon: Brain, label: 'thoughts and reasoning' },
-  'level-four': { icon: MessageSquareText, label: 'opinions and experiences' },
-  'level-five': { icon: BriefcaseBusiness, label: 'work and services' },
-  'level-six': { icon: ScrollText, label: 'stories and past experiences' },
-  'level-seven': { icon: Handshake, label: 'tactful discussion and persuasion' },
-  'level-eight': { icon: Drama, label: 'reactions and subtle meanings' },
-  'level-nine': { icon: Newspaper, label: 'news and social issues' },
-  'level-ten': { icon: Quote, label: 'idioms and fixed phrases' },
-} as const
-
-type LevelTopicIconKey = keyof typeof levelTopicIcons
-
-const defaultLevelTopicIcon = levelTopicIcons['level-one']
-
-function isLevelTopicIconKey(levelId: string): levelId is LevelTopicIconKey {
-  return levelId in levelTopicIcons
-}
-
-function getLevelTopicIcon(levelId: string) {
-  return isLevelTopicIconKey(levelId)
-    ? levelTopicIcons[levelId]
-    : defaultLevelTopicIcon
-}
 
 const selectedLevelQuizMode = ref<Record<string, number>>({})
 
@@ -302,8 +258,8 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 
 .topic-icon-wrap {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
+  top: 0.75rem;
+  right: 0.75rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
