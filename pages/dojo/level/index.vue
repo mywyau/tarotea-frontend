@@ -270,7 +270,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   justify-content: center;
   min-height: 56px;
   border-radius: 8px;
-  background: rgba(31, 41, 55, 0.08);
+  background: transparent;
   color: #1f2937;
   font-size: 1.25rem;
   line-height: 1;
@@ -283,7 +283,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 }
 
 .level-mode-toggle:hover {
-  background: rgba(31, 41, 55, 0.15);
+  background: transparent;
 }
 
 .mode-dots {
