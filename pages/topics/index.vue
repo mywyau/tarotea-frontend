@@ -251,8 +251,24 @@ onMounted(async () => {
 /* Topic cards */
 .topic-card {
   position: relative;
+  isolation: isolate;
+  overflow: hidden;
   backdrop-filter: blur(6px);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+}
+
+.topic-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.32) 0%, rgba(0, 0, 0, 0.18) 48%, rgba(0, 0, 0, 0.06) 100%);
+}
+
+.topic-card > * {
+  position: relative;
+  z-index: 1;
 }
 
 .topic-icon {
@@ -265,9 +281,10 @@ onMounted(async () => {
   width: 2rem;
   height: 2rem;
   border-radius: 999px;
-  /* background: rgba(255, 255, 255, 0.42); */
-  color: rgba(17, 24, 39, 0.82);
-  /* box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35); */
+  z-index: 2;
+  background: rgba(0, 0, 0, 0.28);
+  color: rgba(255, 255, 255, 0.96);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
 .topic-card.is-active:hover {

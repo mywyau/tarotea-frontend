@@ -212,6 +212,15 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   transform-origin: center;
 }
 
+.topic-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.15) 50%, rgba(0, 0, 0, 0.04) 100%);
+}
+
 .topic-card > * {
   position: relative;
   z-index: 1;

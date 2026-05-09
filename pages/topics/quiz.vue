@@ -339,6 +339,15 @@ onMounted(async () => {
     transform-origin: center;
 }
 
+.topic-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.28) 0%, rgba(0, 0, 0, 0.15) 50%, rgba(0, 0, 0, 0.04) 100%);
+}
+
 .topic-card > * {
     position: relative;
     z-index: 1;
@@ -371,7 +380,12 @@ onMounted(async () => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    color: rgba(31, 41, 55, 0.85);
+    width: 2rem;
+    height: 2rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.28);
+    color: rgba(255, 255, 255, 0.96);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
 .quiz-topic-icon {
