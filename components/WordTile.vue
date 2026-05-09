@@ -28,8 +28,7 @@ const playfulMotionStyle = computed<CSSProperties>(() => {
   const hash = hashString(`${props.word}-${props.jyutping}-${props.meaning}`)
   const axis = hash % 3
   const amplitude = 2 + (hash % 5)
-  const duration = 3.2 + ((hash >> 3) % 18) / 10
-  const delay = -(((hash >> 7) % 32) / 10)
+  const duration = 0.85 + ((hash >> 3) % 6) / 10
   const direction = (hash >> 5) % 2 === 0 ? 1 : -1
 
   const floatX = axis === 1
@@ -51,7 +50,6 @@ const playfulMotionStyle = computed<CSSProperties>(() => {
     '--tile-float-x-return': `${floatX * -0.45}px`,
     '--tile-float-y-return': `${floatY * 0.55}px`,
     '--tile-float-duration': `${duration}s`,
-    '--tile-float-delay': `${delay}s`,
   } as CSSProperties
 })
 
@@ -107,18 +105,21 @@ const playfulMotionStyle = computed<CSSProperties>(() => {
   --tile-hover-y: 0px;
   --tile-press-scale: 1;
 
-  animation: tile-playful-float var(--tile-float-duration, 4s) ease-in-out infinite;
-  animation-delay: var(--tile-float-delay, 0s);
+  transform: translate3d(var(--tile-hover-x), var(--tile-hover-y), 0) scale(var(--tile-press-scale));
   transform-origin: center;
-  transition: box-shadow 0.15s ease, filter 0.15s ease;
-  will-change: transform;
+  transition:
+    box-shadow 0.15s ease,
+    filter 0.15s ease,
+    transform 0.15s ease;
 }
 
 /* Hover lift */
 .word-tile:hover {
   --tile-hover-y: -2px;
 
+  animation: tile-playful-float var(--tile-float-duration, 1s) ease-in-out infinite;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+  will-change: transform;
 }
 
 /* Active press */
@@ -159,7 +160,7 @@ const playfulMotionStyle = computed<CSSProperties>(() => {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .word-tile {
+  .word-tile:hover {
     animation: none;
     will-change: auto;
   }
