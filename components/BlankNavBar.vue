@@ -240,23 +240,23 @@ onBeforeUnmount(() => {
 .rocket-burst {
   position: absolute;
   left: 50%;
-  top: 50%;
+  top: 68%;
   width: 0.28rem;
   height: 0.28rem;
   border-radius: 999px;
-  background: #9f5bb5;
+  background: transparent;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.35);
   z-index: -1;
   box-shadow:
-    -0.18rem -1.42rem 0 -0.02rem rgba(159, 91, 181, 0.95),
-    0.64rem -1.08rem 0 -0.06rem rgba(133, 78, 161, 0.9),
-    1.36rem -0.44rem 0 -0.03rem rgba(181, 123, 195, 0.95),
-    0.98rem 0.54rem 0 -0.08rem rgba(115, 65, 150, 0.86),
-    0.32rem 1.34rem 0 -0.04rem rgba(159, 91, 181, 0.92),
-    -0.64rem 1.02rem 0 -0.07rem rgba(181, 123, 195, 0.9),
-    -1.42rem 0.48rem 0 -0.04rem rgba(133, 78, 161, 0.9),
-    -1.04rem -0.62rem 0 -0.09rem rgba(159, 91, 181, 0.88);
+    -0.1rem 0.42rem 0 -0.03rem rgba(159, 91, 181, 0.95),
+    0.46rem 0.64rem 0 -0.07rem rgba(133, 78, 161, 0.9),
+    0.92rem 0.18rem 0 -0.05rem rgba(181, 123, 195, 0.92),
+    1.34rem 0.9rem 0 -0.08rem rgba(115, 65, 150, 0.86),
+    0.28rem 1.24rem 0 -0.04rem rgba(159, 91, 181, 0.92),
+    -0.56rem 0.96rem 0 -0.08rem rgba(181, 123, 195, 0.9),
+    -1.16rem 0.56rem 0 -0.05rem rgba(133, 78, 161, 0.9),
+    -0.82rem 1.42rem 0 -0.1rem rgba(159, 91, 181, 0.86);
   pointer-events: none;
 }
 
@@ -267,7 +267,7 @@ onBeforeUnmount(() => {
   left: 50%;
   top: 50%;
   border-radius: 999px;
-  background: #b57bc3;
+  background: transparent;
   transform: translate(-50%, -50%);
 }
 
@@ -275,29 +275,29 @@ onBeforeUnmount(() => {
   width: 0.2rem;
   height: 0.2rem;
   box-shadow:
-    0.22rem -1.72rem 0 -0.03rem rgba(115, 65, 150, 0.84),
-    1.58rem -0.94rem 0 -0.02rem rgba(159, 91, 181, 0.9),
-    1.68rem 0.28rem 0 -0.05rem rgba(181, 123, 195, 0.88),
-    0.74rem 1.58rem 0 -0.03rem rgba(133, 78, 161, 0.86),
-    -0.34rem 1.72rem 0 -0.05rem rgba(159, 91, 181, 0.9),
-    -1.58rem 0.88rem 0 -0.02rem rgba(115, 65, 150, 0.82),
-    -1.72rem -0.32rem 0 -0.05rem rgba(181, 123, 195, 0.88),
-    -0.88rem -1.46rem 0 -0.04rem rgba(133, 78, 161, 0.86);
+    0.12rem 0.76rem 0 -0.04rem rgba(115, 65, 150, 0.84),
+    1.18rem 0.54rem 0 -0.03rem rgba(159, 91, 181, 0.9),
+    1.62rem 1.18rem 0 -0.06rem rgba(181, 123, 195, 0.86),
+    0.64rem 1.72rem 0 -0.04rem rgba(133, 78, 161, 0.86),
+    -0.28rem 1.82rem 0 -0.06rem rgba(159, 91, 181, 0.88),
+    -1.36rem 1.04rem 0 -0.03rem rgba(115, 65, 150, 0.82),
+    -1.52rem 0.18rem 0 -0.06rem rgba(181, 123, 195, 0.86),
+    -0.72rem 0.62rem 0 -0.05rem rgba(133, 78, 161, 0.86);
 }
 
 .rocket-burst::after {
   width: 0.16rem;
   height: 0.16rem;
-  background: #734196;
+  background: transparent;
   box-shadow:
-    0.96rem -1.68rem 0 -0.02rem rgba(181, 123, 195, 0.78),
-    1.9rem -0.08rem 0 -0.03rem rgba(115, 65, 150, 0.84),
-    1.22rem 1.22rem 0 -0.02rem rgba(159, 91, 181, 0.86),
-    -0.02rem 1.98rem 0 -0.04rem rgba(181, 123, 195, 0.8),
-    -1.18rem 1.44rem 0 -0.03rem rgba(133, 78, 161, 0.84),
-    -1.92rem 0.04rem 0 -0.02rem rgba(159, 91, 181, 0.82),
-    -1.32rem -1.2rem 0 -0.03rem rgba(181, 123, 195, 0.8),
-    0.04rem -1.98rem 0 -0.04rem rgba(115, 65, 150, 0.82);
+    0.86rem 1.68rem 0 -0.03rem rgba(181, 123, 195, 0.78),
+    1.9rem 0.42rem 0 -0.04rem rgba(115, 65, 150, 0.84),
+    1.18rem 1.34rem 0 -0.03rem rgba(159, 91, 181, 0.86),
+    -0.04rem 2.06rem 0 -0.05rem rgba(181, 123, 195, 0.8),
+    -1.14rem 1.58rem 0 -0.04rem rgba(133, 78, 161, 0.84),
+    -1.88rem 0.42rem 0 -0.03rem rgba(159, 91, 181, 0.82),
+    -1.18rem 1.02rem 0 -0.04rem rgba(181, 123, 195, 0.8),
+    0.08rem 1.28rem 0 -0.05rem rgba(115, 65, 150, 0.82);
 }
 
 .trigger-visibility-btn:hover .rocket-burst,
