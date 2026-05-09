@@ -26,7 +26,7 @@ const showAdvancedTips = ref(false)
     <section class="quiz-card text-center space-y-6">
       <TypewriterHeading :text="props.heading" class="text-3xl font-semibold text-gray-900 level-heading" />
 
-      <p class="text-black level-subheading">{{ props.description }}</p>
+      <TypewriterHeading :text="props.description" tag="p" :start-delay="650" class="text-black level-subheading" />
 
       <p v-if="props.guestNote" class="guest-note">
         {{ props.guestNote }}

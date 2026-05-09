@@ -78,7 +78,7 @@ onBeforeUnmount(clearTimers)
 </script>
 
 <template>
-  <component :is="props.tag" class="typewriter-heading" :aria-label="props.text">
+  <component :is="props.tag" class="typewriter-heading">
     <span aria-hidden="true">{{ displayText }}</span>
     <span class="typewriter-cursor" :class="{ 'is-typing': isTyping }" aria-hidden="true" />
     <span class="sr-only">{{ props.text }}</span>

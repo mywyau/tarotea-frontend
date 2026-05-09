@@ -15,9 +15,12 @@ definePageMeta({
     <div class="text-center space-y-4">
       <TypewriterHeading text="Jyutping Dojo" class="text-3xl sm:text-4xl font-semibold text-black dojo-heading" />
 
-      <p class="text-gray-700 max-w-lg mx-auto dojo-subheading">
-        Strengthen your Cantonese phonetic skills with some training.
-      </p>
+      <TypewriterHeading
+        text="Strengthen your Cantonese phonetic skills with some training."
+        tag="p"
+        :start-delay="850"
+        class="text-gray-700 max-w-lg mx-auto dojo-subheading"
+      />
     </div>
 
     <!-- Training Options -->

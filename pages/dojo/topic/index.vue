@@ -82,9 +82,12 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
       <TypewriterHeading text="Topic Dojo" class="font-semibold topics-heading" />
-      <p class="topics-subheading">
-        Strengthen your phonetic and typing proficiency with our exercises.
-      </p>
+      <TypewriterHeading
+        text="Strengthen your phonetic and typing proficiency with our exercises."
+        tag="p"
+        :start-delay="650"
+        class="topics-subheading"
+      />
     </header>
 
     <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
