@@ -13,13 +13,11 @@ definePageMeta({
 
     <!-- Header -->
     <div class="text-center space-y-4">
-      <TypewriterHeading text="Jyutping Dojo" class="text-3xl sm:text-4xl font-semibold text-black dojo-heading" />
-
-      <TypewriterHeading
-        text="Strengthen your Cantonese phonetic skills with some training."
-        tag="p"
-        :start-delay="850"
-        class="text-gray-700 max-w-lg mx-auto dojo-subheading"
+      <TypewriterTitleBlock
+        heading-text="Jyutping Dojo"
+        subheading-text="Strengthen your Cantonese phonetic skills with some training."
+        heading-class="text-3xl sm:text-4xl font-semibold text-black dojo-heading"
+        subheading-class="text-gray-700 max-w-lg mx-auto dojo-subheading"
       />
     </div>
 

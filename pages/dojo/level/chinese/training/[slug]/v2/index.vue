@@ -634,13 +634,11 @@ onBeforeUnmount(() => {
     </div>
 
     <header class="dojo-training-header space-y-4">
-      <TypewriterHeading :text="title || `Chinese Dojo - ${levelTitles[slug]}`" class="text-2xl font-semibold tracking-tight text-gray-900" />
-
-      <TypewriterHeading
-        text="Type the Chinese characters for each word"
-        tag="p"
-        :start-delay="850"
-        class="text-sm text-gray-600"
+      <TypewriterTitleBlock
+        :heading-text="title || `Chinese Dojo - ${levelTitles[slug]}`"
+        subheading-text="Type the Chinese characters for each word"
+        heading-class="text-2xl font-semibold tracking-tight text-gray-900"
+        subheading-class="text-sm text-gray-600"
       />
     </header>
 

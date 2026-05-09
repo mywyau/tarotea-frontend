@@ -691,13 +691,11 @@ onBeforeUnmount(() => {
     </div>
 
     <header class="dojo-training-header space-y-4">
-      <TypewriterHeading :text="title || `Jyutping Dojo - ${topicTitle}`" class="text-2xl font-semibold tracking-tight text-gray-900" />
-
-      <TypewriterHeading
-        text="Type the jyutping for each word shown"
-        tag="p"
-        :start-delay="850"
-        class="text-sm text-gray-600"
+      <TypewriterTitleBlock
+        :heading-text="title || `Jyutping Dojo - ${topicTitle}`"
+        subheading-text="Type the jyutping for each word shown"
+        heading-class="text-2xl font-semibold tracking-tight text-gray-900"
+        subheading-class="text-sm text-gray-600"
       />
     </header>
 

@@ -593,13 +593,11 @@ onBeforeUnmount(() => {
     </div>
 
     <header class="dojo-training-header space-y-4">
-      <TypewriterHeading :text="title || `Sentence Dojo - ${fallbackTopicTitle}`" class="text-2xl font-semibold tracking-tight text-gray-900" />
-
-      <TypewriterHeading
-        text="Read the Chinese and type the full sentence in Chinese."
-        tag="p"
-        :start-delay="850"
-        class="text-sm text-gray-600"
+      <TypewriterTitleBlock
+        :heading-text="title || `Sentence Dojo - ${fallbackTopicTitle}`"
+        subheading-text="Read the Chinese and type the full sentence in Chinese."
+        heading-class="text-2xl font-semibold tracking-tight text-gray-900"
+        subheading-class="text-sm text-gray-600"
       />
     </header>
 

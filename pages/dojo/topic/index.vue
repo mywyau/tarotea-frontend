@@ -81,12 +81,12 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
     <BackLink />
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <TypewriterHeading text="Topic Dojo" class="font-semibold topics-heading" />
-      <TypewriterHeading
-        text="Strengthen your phonetic and typing proficiency with our exercises."
-        tag="p"
-        :start-delay="650"
-        class="topics-subheading"
+      <TypewriterTitleBlock
+        heading-text="Topic Dojo"
+        subheading-text="Strengthen your phonetic and typing proficiency with our exercises."
+        heading-class="font-semibold topics-heading"
+        subheading-class="topics-subheading"
+        gap="0.75rem"
       />
     </header>
 
