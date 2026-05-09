@@ -13,11 +13,37 @@ defineProps<{
   mastered?: boolean
 }>()
 
+function resetTileMovement(event: Event) {
+  const tile = event.currentTarget as HTMLElement
+
+  tile.style.setProperty('--tile-x', '0px')
+  tile.style.setProperty('--tile-y', '0px')
+  tile.style.setProperty('--tile-rotate-x', '0deg')
+  tile.style.setProperty('--tile-rotate-y', '0deg')
+}
+
+function moveTileWithPointer(event: PointerEvent) {
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+
+  const tile = event.currentTarget as HTMLElement
+  const rect = tile.getBoundingClientRect()
+  const pointerX = (event.clientX - rect.left) / rect.width - 0.5
+  const pointerY = (event.clientY - rect.top) / rect.height - 0.5
+  const maxShift = 7
+  const maxRotate = 4
+
+  tile.style.setProperty('--tile-x', `${pointerX * maxShift}px`)
+  tile.style.setProperty('--tile-y', `${pointerY * maxShift}px`)
+  tile.style.setProperty('--tile-rotate-x', `${pointerY * -maxRotate}deg`)
+  tile.style.setProperty('--tile-rotate-y', `${pointerX * maxRotate}deg`)
+}
 
 </script>
 
 <template>
-  <component :is="to ? NuxtLink : 'div'" :to="to" class="relative word-tile hover:brightness-110">
+  <component :is="to ? NuxtLink : 'div'" :to="to" class="relative word-tile hover:brightness-110"
+    @pointermove="moveTileWithPointer" @pointerleave="resetTileMovement" @pointercancel="resetTileMovement"
+    @blur="resetTileMovement">
     <!-- Mastered badge -->
     <div v-if="mastered" class="absolute top-2 right-2 text-emerald-600" aria-label="Mastered">
       <CheckCircle2 class="h-4 w-4" aria-hidden="true" />
@@ -61,19 +87,46 @@ defineProps<{
   text-align: center;
   backdrop-filter: blur(6px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+  --tile-x: 0px;
+  --tile-y: 0px;
+  --tile-rotate-x: 0deg;
+  --tile-rotate-y: 0deg;
+
+  transform:
+    perspective(700px)
+    translate3d(var(--tile-x), var(--tile-y), 0)
+    rotateX(var(--tile-rotate-x))
+    rotateY(var(--tile-rotate-y));
+  transform-style: preserve-3d;
+  will-change: transform;
   transition:
-    transform 0.15s ease,
-    box-shadow 0.15s ease;
+    transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.25s ease,
+    filter 0.25s ease;
 }
+
 
 /* Hover lift */
 .word-tile:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.1);
 }
 
 /* Active press */
 .word-tile:active {
-  transform: translateY(0px) scale(0.98);
+  transform:
+    perspective(700px)
+    translate3d(var(--tile-x), var(--tile-y), 0)
+    rotateX(var(--tile-rotate-x))
+    rotateY(var(--tile-rotate-y))
+    scale(0.98);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .word-tile {
+    transform: none;
+    transition:
+      box-shadow 0.2s ease,
+      filter 0.2s ease;
+  }
 }
 </style>
