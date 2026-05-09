@@ -94,7 +94,7 @@ onMounted(async () => {
         <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="block space-y-3">
 
           <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1">
+            <div class="min-w-0 flex-1 level-card-copy">
               <div class="level-card-header">
                 <div class="text-lg font-semibold text-gray-900">
                   {{ level.title }}
@@ -124,7 +124,7 @@ onMounted(async () => {
         <!-- Locked level (kept for later when you re-enable gating) -->
         <div v-else class="space-y-3 cursor-not-allowed">
           <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1">
+            <div class="min-w-0 flex-1 level-card-copy">
               <div class="level-card-header">
                 <div class="text-lg font-semibold text-gray-900">
                   {{ level.title }}
@@ -237,22 +237,22 @@ onMounted(async () => {
   gap: 1rem;
 }
 
+.level-card-copy {
+  padding-right: 2.25rem;
+}
+
 .topic-icon-wrap {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-  color: rgba(17, 24, 39, 0.72);
-  background: rgba(255, 255, 255, 0.36);
-  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
 }
 
 .topic-icon {
-  width: 1.1rem;
-  height: 1.1rem;
+  width: 1.25rem;
+  height: 1.25rem;
   stroke-width: 2.25;
 }
 
