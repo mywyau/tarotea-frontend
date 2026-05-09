@@ -5,20 +5,9 @@ definePageMeta({
   ssr: true,
 })
 
-import {
-  Brain,
-  BriefcaseBusiness,
-  CalendarDays,
-  Drama,
-  Handshake,
-  House,
-  MessageSquareText,
-  Newspaper,
-  Quote,
-  ScrollText,
-} from '@lucide/vue'
 import { brandColours } from '@/utils/branding/helpers'
 import { levelSelectMetaData } from '@/utils/levels/helpers'
+import { getLevelTopicIcon } from '@/utils/levels/topicIcons'
 import { onMounted } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 
@@ -29,33 +18,6 @@ const {
 
 function getLevelColor(index: number) {
   return brandColours[index % brandColours.length]
-}
-
-const levelTopicIcons = {
-  'level-one': { icon: House, label: 'foundation and daily life' },
-  'level-two': { icon: CalendarDays, label: 'daily situations and feelings' },
-  'level-three': { icon: Brain, label: 'thoughts and reasoning' },
-  'level-four': { icon: MessageSquareText, label: 'opinions and experiences' },
-  'level-five': { icon: BriefcaseBusiness, label: 'work and services' },
-  'level-six': { icon: ScrollText, label: 'stories and past experiences' },
-  'level-seven': { icon: Handshake, label: 'tactful discussion and persuasion' },
-  'level-eight': { icon: Drama, label: 'reactions and subtle meanings' },
-  'level-nine': { icon: Newspaper, label: 'news and social issues' },
-  'level-ten': { icon: Quote, label: 'idioms and fixed phrases' },
-} as const
-
-type LevelTopicIconKey = keyof typeof levelTopicIcons
-
-const defaultLevelTopicIcon = levelTopicIcons['level-one']
-
-function isLevelTopicIconKey(levelId: string): levelId is LevelTopicIconKey {
-  return levelId in levelTopicIcons
-}
-
-function getLevelTopicIcon(levelId: string) {
-  return isLevelTopicIconKey(levelId)
-    ? levelTopicIcons[levelId]
-    : defaultLevelTopicIcon
 }
 
 // --- helpers ---

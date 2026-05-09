@@ -1,6 +1,7 @@
 <script setup lang="ts">
 
 import { levelSelectMetaData } from '@/utils/levels/helpers'
+import { getLevelTopicIcon } from '@/utils/levels/topicIcons'
 import { markRaw, onMounted, ref } from 'vue'
 import { BookOpen, ChevronLeft, ChevronRight, Headphones, MessageSquareText, Mic2, Volume2 } from '@lucide/vue'
 
@@ -115,10 +116,20 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
       ]">
 
         <!-- Title -->
-        <div class="space-y-2">
-          <h2 class="text-lg font-semibold text-gray-900">
-            {{ quizLevel.title }}
-          </h2>
+        <div class="space-y-2 level-card-copy">
+          <div class="level-card-header">
+            <h2 class="text-lg font-semibold text-gray-900">
+              {{ quizLevel.title }}
+            </h2>
+
+            <div class="topic-icon-wrap" role="img" :aria-label="`${quizLevel.title}: ${getLevelTopicIcon(quizLevel.id).label}`">
+              <component
+                :is="getLevelTopicIcon(quizLevel.id).icon"
+                class="topic-icon"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
 
           <p class="text-sm text-gray-600 leading-relaxed">
             {{ quizLevel.description }}
@@ -232,6 +243,33 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 
 .level-locked {
   opacity: 0.6;
+}
+
+.level-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.level-card-copy {
+  padding-right: 2.25rem;
+}
+
+.topic-icon-wrap {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(31, 41, 55, 0.85);
+}
+
+.topic-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke-width: 2.25;
 }
 
 /* Buttons */

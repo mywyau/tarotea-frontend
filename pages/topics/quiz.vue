@@ -7,9 +7,10 @@ useSeoMeta({
 })
 
 import { BookOpen, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Headphones, MessageSquareText, Mic2, Volume2 } from '@lucide/vue'
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, markRaw, onMounted, ref, watch } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 import type { TopicQuiz } from '~/types/topic'
+import { getTopicIcon } from '~/utils/topics/icons'
 import { sortedTopics } from '~/utils/topics/topics'
 
 const {
@@ -183,10 +184,16 @@ onMounted(async () => {
             ]">
 
                 <!-- Header -->
-                <div class="space-y-2">
-                    <h2 class="text-lg font-semibold text-gray-900">
-                        {{ topic.title }}
-                    </h2>
+                <div class="space-y-2 topic-card-copy">
+                    <div class="topic-card-header">
+                        <h2 class="text-lg font-semibold text-gray-900">
+                            {{ topic.title }}
+                        </h2>
+
+                        <span class="quiz-topic-icon-wrap" role="img" :aria-label="`${topic.title} topic`">
+                            <component :is="getTopicIcon(topic.id)" class="quiz-topic-icon" aria-hidden="true" />
+                        </span>
+                    </div>
 
                     <p class="text-sm text-gray-600 leading-relaxed">
                         {{ topic.description }}
@@ -344,6 +351,33 @@ onMounted(async () => {
 
 .topic-locked {
     opacity: 0.6;
+}
+
+.topic-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.topic-card-copy {
+    padding-right: 2.25rem;
+}
+
+.quiz-topic-icon-wrap {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(31, 41, 55, 0.85);
+}
+
+.quiz-topic-icon {
+    width: 1.25rem;
+    height: 1.25rem;
+    stroke-width: 2.25;
 }
 
 /* Buttons */
