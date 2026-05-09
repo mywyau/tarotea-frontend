@@ -100,21 +100,18 @@ const getScoringTipIcon = (index: number) => scoringTipIcons[index % scoringTipI
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.72);
-  color: #111827;
-  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.06);
+  color: #8f4f88;
 }
 
 .tip-icon-badge {
-  width: 2rem;
-  height: 2rem;
-  margin-top: 0.1rem;
+  width: 1.35rem;
+  height: 1.35rem;
+  margin-top: 0.05rem;
 }
 
 .tip-icon {
-  width: 1rem;
-  height: 1rem;
+  width: 1.15rem;
+  height: 1.15rem;
 }
 
 .tip-card-title {
@@ -171,16 +168,14 @@ const getScoringTipIcon = (index: number) => scoringTipIcons[index % scoringTipI
 }
 
 .more-tip-icon-badge {
-  width: 1.45rem;
-  height: 1.45rem;
-  margin-top: 0.05rem;
-  background: rgba(214, 163, 209, 0.18);
-  color: #8f4f88;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.15rem;
 }
 
 .more-tip-icon {
-  width: 0.85rem;
-  height: 0.85rem;
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .tip-expand-enter-active,
