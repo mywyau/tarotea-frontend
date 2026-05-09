@@ -634,9 +634,7 @@ onBeforeUnmount(() => {
     </div>
 
     <header class="dojo-training-header space-y-4">
-      <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
-        {{ title || `Chinese Dojo - ${levelTitles[slug]}` }}
-      </h1>
+      <TypewriterHeading :text="title || `Chinese Dojo - ${levelTitles[slug]}`" class="text-2xl font-semibold tracking-tight text-gray-900" />
 
       <p class="text-sm text-gray-600">
         Type the Chinese characters for each word

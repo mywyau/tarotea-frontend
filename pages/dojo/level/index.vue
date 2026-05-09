@@ -96,9 +96,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="text-xl font-semibold level-heading">
-        Level Dojo
-      </h1>
+      <TypewriterHeading text="Level Dojo" class="text-xl font-semibold level-heading" />
       <p class="level-subheading">
         Strenghten your phonetic and typing proficiency with our exercises
       </p>

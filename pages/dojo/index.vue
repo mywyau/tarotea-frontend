@@ -13,9 +13,7 @@ definePageMeta({
 
     <!-- Header -->
     <div class="text-center space-y-4">
-      <h1 class="text-3xl sm:text-4xl font-semibold text-black dojo-heading">
-        Jyutping Dojo
-      </h1>
+      <TypewriterHeading text="Jyutping Dojo" class="text-3xl sm:text-4xl font-semibold text-black dojo-heading" />
 
       <p class="text-gray-700 max-w-lg mx-auto dojo-subheading">
         Strengthen your Cantonese phonetic skills with some training.

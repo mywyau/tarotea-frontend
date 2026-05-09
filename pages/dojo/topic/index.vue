@@ -81,9 +81,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
     <BackLink />
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="font-semibold topics-heading">
-        Topic Dojo
-      </h1>
+      <TypewriterHeading text="Topic Dojo" class="font-semibold topics-heading" />
       <p class="topics-subheading">
         Strengthen your phonetic and typing proficiency with our exercises.
       </p>

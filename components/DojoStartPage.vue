@@ -24,7 +24,7 @@ const showAdvancedTips = ref(false)
     <BackLink />
 
     <section class="quiz-card text-center space-y-6">
-      <h1 class="text-3xl font-semibold text-gray-900 level-heading">{{ props.heading }}</h1>
+      <TypewriterHeading :text="props.heading" class="text-3xl font-semibold text-gray-900 level-heading" />
 
       <p class="text-black level-subheading">{{ props.description }}</p>
 
