@@ -2,7 +2,24 @@
 
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { markRaw, onMounted, ref } from 'vue'
-import { BookOpen, ChevronLeft, ChevronRight, Headphones, MessageSquareText, Mic2, Volume2 } from '@lucide/vue'
+import {
+  BookOpen,
+  Brain,
+  BriefcaseBusiness,
+  CalendarDays,
+  ChevronLeft,
+  ChevronRight,
+  Drama,
+  Handshake,
+  Headphones,
+  House,
+  MessageSquareText,
+  Mic2,
+  Newspaper,
+  Quote,
+  ScrollText,
+  Volume2,
+} from '@lucide/vue'
 
 
 const {
@@ -69,6 +86,34 @@ const levelQuizModes = [
   },
 ] as const
 
+
+const levelTopicIcons = {
+  'level-one': { icon: House, label: 'foundation and daily life' },
+  'level-two': { icon: CalendarDays, label: 'daily situations and feelings' },
+  'level-three': { icon: Brain, label: 'thoughts and reasoning' },
+  'level-four': { icon: MessageSquareText, label: 'opinions and experiences' },
+  'level-five': { icon: BriefcaseBusiness, label: 'work and services' },
+  'level-six': { icon: ScrollText, label: 'stories and past experiences' },
+  'level-seven': { icon: Handshake, label: 'tactful discussion and persuasion' },
+  'level-eight': { icon: Drama, label: 'reactions and subtle meanings' },
+  'level-nine': { icon: Newspaper, label: 'news and social issues' },
+  'level-ten': { icon: Quote, label: 'idioms and fixed phrases' },
+} as const
+
+type LevelTopicIconKey = keyof typeof levelTopicIcons
+
+const defaultLevelTopicIcon = levelTopicIcons['level-one']
+
+function isLevelTopicIconKey(levelId: string): levelId is LevelTopicIconKey {
+  return levelId in levelTopicIcons
+}
+
+function getLevelTopicIcon(levelId: string) {
+  return isLevelTopicIconKey(levelId)
+    ? levelTopicIcons[levelId]
+    : defaultLevelTopicIcon
+}
+
 const selectedLevelQuizMode = ref<Record<string, number>>({})
 
 function getSelectedLevelMode(levelId: string) {
@@ -115,10 +160,20 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
       ]">
 
         <!-- Title -->
-        <div class="space-y-2">
-          <h2 class="text-lg font-semibold text-gray-900">
-            {{ quizLevel.title }}
-          </h2>
+        <div class="space-y-2 level-card-copy">
+          <div class="level-card-header">
+            <h2 class="text-lg font-semibold text-gray-900">
+              {{ quizLevel.title }}
+            </h2>
+
+            <div class="topic-icon-wrap" role="img" :aria-label="`${quizLevel.title}: ${getLevelTopicIcon(quizLevel.id).label}`">
+              <component
+                :is="getLevelTopicIcon(quizLevel.id).icon"
+                class="topic-icon"
+                aria-hidden="true"
+              />
+            </div>
+          </div>
 
           <p class="text-sm text-gray-600 leading-relaxed">
             {{ quizLevel.description }}
@@ -232,6 +287,33 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 
 .level-locked {
   opacity: 0.6;
+}
+
+.level-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.level-card-copy {
+  padding-right: 2.25rem;
+}
+
+.topic-icon-wrap {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(31, 41, 55, 0.85);
+}
+
+.topic-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke-width: 2.25;
 }
 
 /* Buttons */
