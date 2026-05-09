@@ -5,7 +5,7 @@ definePageMeta({
   ssr: true,
 })
 
-import { CircleCheck, Library } from '@lucide/vue'
+import { CircleCheck, Eye, EyeOff, Library } from '@lucide/vue'
 import WordTile from '@/components/WordTile.vue'
 import { masteryXp } from '@/config/xp/helpers'
 import { createError } from 'nuxt/app'
@@ -227,8 +227,15 @@ onMounted(async () => {
       <p class="level-subheading mt-2">{{ levelCdnData.description }}</p>
     </header>
 
-    <a href="#" class="mobile-stats-toggle" @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded">
-      {{ isMobileStatsExpanded ? 'Hide stats' : 'Show stats' }}
+    <a
+      href="#"
+      class="mobile-stats-toggle"
+      :aria-label="isMobileStatsExpanded ? 'Hide stats' : 'Show stats'"
+      @click.prevent="isMobileStatsExpanded = !isMobileStatsExpanded"
+    >
+      <EyeOff v-if="isMobileStatsExpanded" class="h-4 w-4" aria-hidden="true" />
+      <Eye v-else class="h-4 w-4" aria-hidden="true" />
+      <span>{{ isMobileStatsExpanded ? 'Hide stats' : 'Show stats' }}</span>
     </a>
 
     <section class="stats-grid" :class="{ 'stats-grid-collapsed': !isMobileStatsExpanded }">
@@ -389,7 +396,9 @@ onMounted(async () => {
 }
 
 .mobile-stats-toggle {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
   font-size: 0.78rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
