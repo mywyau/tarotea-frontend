@@ -6,40 +6,9 @@ definePageMeta({
 })
 
 import { ChevronLeft, ChevronRight } from '@lucide/vue'
-import { jyutPingQuizSelectMetaData } from '~/utils/levels/helpers'
-import { canAccessLevel, isFreeLevel } from '~/utils/levels/permissions'
+import { jyutPingQuizSelectMetaData, type LevelSelectMeta } from '~/utils/levels/helpers'
 
-const {
-  isLoggedIn,
-  isLoggedOut,
-  entitlement,
-} = useMeStateV2()
-
-const isComingSoon = (level: any) => level.comingSoon === true
-
-// const canEnterLevel = (level: any) => {
-
-//   if (isLoggedOut.value) return false
-
-//   if (isComingSoon(level)) return false
-
-//   if (isFreeLevel(level.number)) return true
-
-//   // 🔒 Paid levels require login
-//   if (!isLoggedIn.value) return false
-
-//   return canAccessLevel(isLoggedIn.value, entitlement.value!)
-// }
-
-
-const canEnterLevel = (level: any) => {
-
-  if (isComingSoon(level)) return false
-  
-  // 🔒 Exercises require login
-  // if (isLoggedIn.value) { return true } else { return false }
-  return true;
-}
+const canEnterLevel = (level: LevelSelectMeta) => !level.comingSoon
 
 const levelQuizModes = [
   {

@@ -1,16 +1,8 @@
 import { FREE_LEVELS } from "~/config/level/levels-config";
+import { hasPaidAccess } from "~/utils/paidAccess";
 import type { Entitlement } from "~/types/auth/entitlements";
 
-export function hasPaidAccess(entitlement: Entitlement | null): boolean {
-  if (!entitlement) {
-    return false;
-  }
-
-  return (
-    entitlement.plan !== "free" &&
-    ["active", "trialing", "past_due"].includes(entitlement.subscription_status)
-  );
-}
+export { hasPaidAccess };
 
 export function isFreeLevel(level: number) {
   return level <= FREE_LEVELS;
