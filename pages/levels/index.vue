@@ -5,7 +5,18 @@ definePageMeta({
   ssr: true,
 })
 
-import { Tally1, Tally2, Tally3, Tally4, Tally5 } from '@lucide/vue'
+import {
+  Brain,
+  BriefcaseBusiness,
+  CalendarDays,
+  Drama,
+  Handshake,
+  House,
+  MessageSquareText,
+  Newspaper,
+  Quote,
+  ScrollText,
+} from '@lucide/vue'
 import { brandColours } from '@/utils/branding/helpers'
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { onMounted } from 'vue'
@@ -20,28 +31,31 @@ function getLevelColor(index: number) {
   return brandColours[index % brandColours.length]
 }
 
-const tallyIcons = {
-  1: Tally1,
-  2: Tally2,
-  3: Tally3,
-  4: Tally4,
-  5: Tally5,
+const levelTopicIcons = {
+  'level-one': { icon: House, label: 'foundation and daily life' },
+  'level-two': { icon: CalendarDays, label: 'daily situations and feelings' },
+  'level-three': { icon: Brain, label: 'thoughts and reasoning' },
+  'level-four': { icon: MessageSquareText, label: 'opinions and experiences' },
+  'level-five': { icon: BriefcaseBusiness, label: 'work and services' },
+  'level-six': { icon: ScrollText, label: 'stories and past experiences' },
+  'level-seven': { icon: Handshake, label: 'tactful discussion and persuasion' },
+  'level-eight': { icon: Drama, label: 'reactions and subtle meanings' },
+  'level-nine': { icon: Newspaper, label: 'news and social issues' },
+  'level-ten': { icon: Quote, label: 'idioms and fixed phrases' },
 } as const
 
-type TallyCount = keyof typeof tallyIcons
+type LevelTopicIconKey = keyof typeof levelTopicIcons
 
-function getTallyIcon(tallyGroup: TallyCount) {
-  return tallyIcons[tallyGroup]
+const defaultLevelTopicIcon = levelTopicIcons['level-one']
+
+function isLevelTopicIconKey(levelId: string): levelId is LevelTopicIconKey {
+  return levelId in levelTopicIcons
 }
 
-function getLevelTallyGroups(levelNumber: number): TallyCount[] {
-  const fullGroups = Math.floor(levelNumber / 5)
-  const remainder = levelNumber % 5
-
-  return [
-    ...Array.from({ length: fullGroups }, () => 5 as TallyCount),
-    ...(remainder > 0 ? [remainder as TallyCount] : []),
-  ]
+function getLevelTopicIcon(levelId: string) {
+  return isLevelTopicIconKey(levelId)
+    ? levelTopicIcons[levelId]
+    : defaultLevelTopicIcon
 }
 
 // --- helpers ---
@@ -86,12 +100,10 @@ onMounted(async () => {
                   {{ level.title }}
                 </div>
 
-                <div class="tally-icons" role="img" :aria-label="`${level.title} tally marks`">
+                <div class="topic-icon-wrap" role="img" :aria-label="`${level.title}: ${getLevelTopicIcon(level.id).label}`">
                   <component
-                    :is="getTallyIcon(tallyGroup)"
-                    v-for="(tallyGroup, tallyIndex) in getLevelTallyGroups(level.number)"
-                    :key="`${level.id}-tally-${tallyIndex}`"
-                    class="tally-icon"
+                    :is="getLevelTopicIcon(level.id).icon"
+                    class="topic-icon"
                     aria-hidden="true"
                   />
                 </div>
@@ -118,12 +130,10 @@ onMounted(async () => {
                   {{ level.title }}
                 </div>
 
-                <div class="tally-icons" role="img" :aria-label="`${level.title} tally marks`">
+                <div class="topic-icon-wrap" role="img" :aria-label="`${level.title}: ${getLevelTopicIcon(level.id).label}`">
                   <component
-                    :is="getTallyIcon(tallyGroup)"
-                    v-for="(tallyGroup, tallyIndex) in getLevelTallyGroups(level.number)"
-                    :key="`${level.id}-tally-${tallyIndex}`"
-                    class="tally-icon"
+                    :is="getLevelTopicIcon(level.id).icon"
+                    class="topic-icon"
                     aria-hidden="true"
                   />
                 </div>
@@ -227,16 +237,20 @@ onMounted(async () => {
   gap: 1rem;
 }
 
-.tally-icons {
+.topic-icon-wrap {
   display: inline-flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   flex-shrink: 0;
-  gap: 0.1rem;
-  color: rgba(17, 24, 39, 0.68);
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  color: rgba(17, 24, 39, 0.72);
+  background: rgba(255, 255, 255, 0.36);
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
 }
 
-.tally-icon {
+.topic-icon {
   width: 1.1rem;
   height: 1.1rem;
   stroke-width: 2.25;
