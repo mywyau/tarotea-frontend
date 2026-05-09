@@ -260,6 +260,16 @@ export async function processStripeEvent(
         extractSubscriptionIdFromCheckoutSession(session);
 
       if (!stripeSubscriptionId) {
+        if (session.mode !== "subscription") {
+          await markStripeEventProcessed(eventId);
+
+          return {
+            ok: true,
+            processed: true,
+            eventType,
+          };
+        }
+
         throw new Error(
           `Could not extract subscription id from checkout session event ${eventId}`,
         );

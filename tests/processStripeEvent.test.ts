@@ -115,6 +115,46 @@ describe("processStripeEvent", () => {
     );
   });
 
+  it("ignores non-subscription checkout sessions", async () => {
+    dbQueryMock
+      .mockResolvedValueOnce({ rows: [{ status: "processing" }] })
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            event_id: "evt_checkout_payment",
+            event_type: "checkout.session.completed",
+            status: "processing",
+            payload: {
+              id: "evt_checkout_payment",
+              type: "checkout.session.completed",
+              data: {
+                object: {
+                  id: "cs_test_payment",
+                  object: "checkout.session",
+                  mode: "payment",
+                  subscription: null,
+                },
+              },
+            },
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await processStripeEvent("evt_checkout_payment");
+
+    expect(result).toEqual({
+      ok: true,
+      processed: true,
+      eventType: "checkout.session.completed",
+    });
+    expect(stripeSubscriptionRetrieveMock).not.toHaveBeenCalled();
+    expect(dbQueryMock).toHaveBeenLastCalledWith(
+      expect.stringContaining("status = 'processed'"),
+      ["evt_checkout_payment"],
+    );
+  });
+
   it("marks checkout sessions without a subscription as failed", async () => {
     dbQueryMock
       .mockResolvedValueOnce({ rows: [{ status: "processing" }] })
@@ -131,6 +171,7 @@ describe("processStripeEvent", () => {
                 object: {
                   id: "cs_test_missing_subscription",
                   object: "checkout.session",
+                  mode: "subscription",
                   subscription: null,
                 },
               },
