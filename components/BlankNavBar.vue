@@ -275,7 +275,12 @@ onBeforeUnmount(() => {
   flex-direction: column;
   height: 100vh;
   width: min(20rem, 88vw);
-  background: rgba(111, 92, 202, 0.35);
+  background-color: rgba(236, 224, 248, 0.86);
+  background-image:
+    linear-gradient(rgba(154, 124, 184, 0.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(154, 124, 184, 0.16) 1px, transparent 1px),
+    linear-gradient(rgba(255, 255, 255, 0.45), rgba(255, 255, 255, 0.45));
+  background-size: 24px 24px, 24px 24px, auto;
   backdrop-filter: blur(8px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
 }
