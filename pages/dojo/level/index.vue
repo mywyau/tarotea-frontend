@@ -233,12 +233,12 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 }
 
 .level-btn-blush {
-  background: rgb(249, 166, 166);
+  background: rgba(246, 180, 180, 0.42);
   color: #1f2937;
 }
 
 .level-btn-blush:hover {
-  background: rgb(204, 136, 136);
+  background: rgba(246, 180, 180, 0.62);
 }
 
 .level-mode-toggle {

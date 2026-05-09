@@ -270,12 +270,12 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
 }
 
 .topic-btn-blush {
-  background: rgb(249, 166, 166);
+  background: rgba(246, 180, 180, 0.42);
   color: #1f2937;
 }
 
 .topic-btn-blush:hover {
-  background: rgb(204, 136, 136);
+  background: rgba(246, 180, 180, 0.62);
 }
 
 .topic-mode-toggle {
