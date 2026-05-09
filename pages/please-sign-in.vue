@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, LogIn } from '@lucide/vue'
+import { ArrowRight, LogIn } from '@lucide/vue';
 
 definePageMeta({
   title: 'Please sign in · TaroTea'
