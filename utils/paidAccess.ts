@@ -1,12 +1,15 @@
-// import type { Entitlement } from "~/types/auth/entitlements";
+import type { Entitlement } from "~/types/auth/entitlements";
 
-// export function hasPaidAccess(entitlement: Entitlement | null): boolean {
-//   if (!entitlement) {
-//     return false;
-//   }
+const PAID_SUBSCRIPTION_STATUSES = new Set([
+  "active",
+  "trialing",
+  "past_due",
+]);
 
-//   return (
-//     entitlement.plan !== "free" &&
-//     ["active", "trialing", "past_due"].includes(entitlement.subscription_status)
-//   );
-// }
+export function hasPaidAccess(entitlement: Entitlement | null): boolean {
+  return Boolean(
+    entitlement &&
+      entitlement.plan !== "free" &&
+      PAID_SUBSCRIPTION_STATUSES.has(entitlement.subscription_status),
+  );
+}
