@@ -20,6 +20,56 @@ const { data: stats } = await useFetch('/api/total-users-stats', {
   lazy: true,
 })
 
+type HeadingLetter = {
+  letter: string
+  gradient: boolean
+  index: number
+}
+
+type HeadingWord = {
+  letters: HeadingLetter[]
+  trailingSpace: boolean
+}
+
+const headingSegments = [
+  { text: 'Learn and improve your Cantonese in just ', gradient: false },
+  { text: '15 minutes', gradient: true },
+  { text: ' a day', gradient: false },
+]
+
+const headingLetters = headingSegments.flatMap((segment) =>
+  Array.from(segment.text).map((letter) => ({
+    letter,
+    gradient: segment.gradient,
+  })),
+)
+
+const headingWords = headingLetters.reduce<HeadingWord[]>((words, item, index) => {
+  if (item.letter === ' ') {
+    const currentWord = words.at(-1)
+
+    if (currentWord) {
+      currentWord.trailingSpace = true
+    }
+
+    return words
+  }
+
+  if (index === 0 || headingLetters[index - 1]?.letter === ' ') {
+    words.push({ letters: [], trailingSpace: false })
+  }
+
+  words.at(-1)?.letters.push({
+    letter: item.letter,
+    gradient: item.gradient,
+    index,
+  })
+
+  return words
+}, [])
+
+const headingText = headingSegments.map((segment) => segment.text).join('')
+
 const learningModes = [
   {
     title: 'Daily practice',
@@ -89,8 +139,24 @@ onMounted(() => {
   <main class="max-w-4xl mx-auto py-16 sm:py-20 px-6 min-h-screen">
     <section class="text-center">
 
-      <h1 class="text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900">
-        Learn and improve your Cantonese in just <span class="brand-text-gradient">15 minutes</span> a day
+      <h1
+        class="heading-fly-in text-3xl sm:text-4xl font-semibold tracking-tight text-gray-900"
+        :aria-label="headingText"
+      >
+        <span
+          v-for="(word, wordIndex) in headingWords"
+          :key="`heading-word-${wordIndex}`"
+          aria-hidden="true"
+          class="heading-fly-in-word"
+        >
+          <span
+            v-for="item in word.letters"
+            :key="`${item.letter}-${item.index}`"
+            class="heading-fly-in-letter"
+            :class="{ 'brand-text-gradient': item.gradient }"
+            :style="{ animationDelay: `${item.index * 32}ms` }"
+          >{{ item.letter }}</span><span v-if="word.trailingSpace">&nbsp;</span>
+        </span>
       </h1>
 
       <div class="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
@@ -323,6 +389,63 @@ onMounted(() => {
   text-wrap: pretty;
 }
 
+.heading-fly-in {
+  text-wrap: balance;
+}
+
+.heading-fly-in-letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translate3d(var(--letter-start-x, 0), var(--letter-start-y, 0), 0) rotate(var(--letter-start-rotate, 0deg)) scale(0.72);
+  animation: heading-letter-fly-in 720ms cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards;
+  will-change: transform, opacity;
+}
+
+.heading-fly-in-letter:nth-child(4n + 1) {
+  --letter-start-x: -1.8rem;
+  --letter-start-y: -2.1rem;
+  --letter-start-rotate: -18deg;
+}
+
+.heading-fly-in-letter:nth-child(4n + 2) {
+  --letter-start-x: 1.6rem;
+  --letter-start-y: -1.5rem;
+  --letter-start-rotate: 16deg;
+}
+
+.heading-fly-in-letter:nth-child(4n + 3) {
+  --letter-start-x: -1.2rem;
+  --letter-start-y: 2rem;
+  --letter-start-rotate: 12deg;
+}
+
+.heading-fly-in-letter:nth-child(4n) {
+  --letter-start-x: 1.8rem;
+  --letter-start-y: 1.4rem;
+  --letter-start-rotate: -14deg;
+}
+
+.heading-fly-in-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+@keyframes heading-letter-fly-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(var(--letter-start-x, 0), var(--letter-start-y, 0), 0) rotate(var(--letter-start-rotate, 0deg)) scale(0.72);
+  }
+
+  70% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
 @media (max-width: 640px) {
 
   .start-learning-scene,
@@ -350,6 +473,12 @@ onMounted(() => {
 @media (prefers-reduced-motion: reduce) {
   .start-learning-scene {
     transition-duration: 1ms;
+  }
+
+  .heading-fly-in-letter {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 
