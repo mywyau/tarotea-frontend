@@ -212,7 +212,7 @@ onBeforeUnmount(() => {
   color: rgba(15, 15, 15, 0.9);
   stroke-width: 2.4;
   transform-origin: center;
-  transition: color 160ms ease, transform 160ms ease;
+  transition: transform 160ms ease;
   z-index: 1;
 }
 
@@ -234,7 +234,6 @@ onBeforeUnmount(() => {
 
 .trigger-visibility-btn:hover .portal-icon,
 .trigger-visibility-btn.is-open .portal-icon {
-  color: rgba(92, 54, 112, 0.95);
   transform: translateY(-0.08rem);
 }
 
