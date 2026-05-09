@@ -84,8 +84,8 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
       <TypewriterTitleBlock
         heading-text="Topic Dojo"
         subheading-text="Strengthen your phonetic and typing proficiency with our exercises."
-        heading-class="text-xl font-semibold topics-heading"
-        subheading-class="topics-subheading"
+        heading-class="text-xl font-semibold dojo-page-heading"
+        subheading-class="dojo-page-subheading"
         gap="0.75rem"
       />
     </header>
@@ -170,13 +170,13 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   min-height: 65vh;
 }
 
-.topics-heading {
+.dojo-page-heading {
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: rgba(0, 0, 0);
+  color: rgba(17, 24, 39);
 }
 
-.topics-subheading {
+.dojo-page-subheading {
   font-size: 0.8rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
