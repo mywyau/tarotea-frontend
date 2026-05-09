@@ -168,6 +168,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   --yellow: #F4CD27;
   --blush: #F6E1E1;
   min-height: 65vh;
+  --dojo-panel-pattern: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22220%22%20height%3D%22120%22%20viewBox%3D%220%200%20220%20120%22%3E%0A%20%20%3Cg%20fill%3D%22%231f2937%22%20opacity%3D%22.055%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%3E%0A%20%20%20%20%3Ctext%20x%3D%2212%22%20y%3D%2234%22%20font-size%3D%2218%22%3Eaa1%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%2274%22%20y%3D%2226%22%20font-size%3D%2214%22%3Ejyut6%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22145%22%20y%3D%2238%22%20font-size%3D%2222%22%3E%E7%B2%B5%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22178%22%20y%3D%2228%22%20font-size%3D%2214%22%3E%E2%8C%98%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%2222%22%20y%3D%2276%22%20font-size%3D%2215%22%3Engo5%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%2286%22%20y%3D%2272%22%20font-size%3D%2224%22%3E%E6%89%93%E5%AD%97%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22163%22%20y%3D%2282%22%20font-size%3D%2215%22%3Etype%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%2242%22%20y%3D%22110%22%20font-size%3D%2217%22%3Ezik1%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22124%22%20y%3D%22108%22%20font-size%3D%2214%22%3Espace%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22184%22%20y%3D%22112%22%20font-size%3D%2218%22%3E%E2%86%B5%3C/text%3E%0A%20%20%3C/g%3E%0A%3C/svg%3E");
 }
 
 .dojo-page-heading {
@@ -205,9 +206,9 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   inset: -45%;
   z-index: 0;
   pointer-events: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='172' height='92' viewBox='0 0 172 92'%3E%3Cg fill='%231f2937' opacity='.11' font-family='Arial,sans-serif' font-weight='700'%3E%3Ctext x='8' y='34' font-size='30'%3E%3F%3C/text%3E%3Ctext x='48' y='22' font-size='16'%3E%E2%9C%A6%3C/text%3E%3Ctext x='88' y='39' font-size='26'%3E%3F%3C/text%3E%3Ctext x='133' y='24' font-size='18'%3E%E2%97%87%3C/text%3E%3Ctext x='24' y='78' font-size='17'%3E%E2%9C%93%3C/text%3E%3Ctext x='68' y='70' font-size='28'%3E%3F%3C/text%3E%3Ctext x='121' y='81' font-size='17'%3E%E2%98%85%3C/text%3E%3C/g%3E%3C/svg%3E");
-  background-size: 172px 92px;
-  opacity: 0.55;
+  background-image: var(--dojo-panel-pattern);
+  background-size: 220px 120px;
+  opacity: 0.75;
   transform: rotate(-18deg);
   transform-origin: center;
 }

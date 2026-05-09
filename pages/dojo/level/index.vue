@@ -108,22 +108,9 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
     <!-- Grid -->
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-      <li v-for="quizLevel in jyutPingQuizSelectMetaData" :key="quizLevel.id" class="
-          rounded-2xl
-          p-6
-          bg-white/75
-          backdrop-blur-md
-          shadow-md
-          transition-all
-          duration-150
-          flex
-          flex-col
-          justify-between
-          hover:-translate-y-1
-          hover:shadow-[0_18px_40px_rgba(0,0,0,0.08)]
-        " :class="[
+      <li v-for="quizLevel in jyutPingQuizSelectMetaData" :key="quizLevel.id" class="dojo-level-card" :class="[
           (!canEnterLevel(quizLevel) || quizLevel.comingSoon)
-            ? 'opacity-60'
+            ? 'level-locked'
             : ''
         ]">
 
@@ -178,13 +165,14 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   </main>
 </template>
 
-<style>
+<style scoped>
 .levels-page {
   --pink: #EAB8E4;
   --purple: #D6A3D1;
   --blue: #A8CAE0;
   --yellow: #ffec95;
   --blush: #F6E1E1;
+  --dojo-panel-pattern: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%22220%22%20height%3D%22120%22%20viewBox%3D%220%200%20220%20120%22%3E%0A%20%20%3Cg%20fill%3D%22%231f2937%22%20opacity%3D%22.055%22%20font-family%3D%22Arial%2C%20sans-serif%22%20font-weight%3D%22700%22%3E%0A%20%20%20%20%3Ctext%20x%3D%2212%22%20y%3D%2234%22%20font-size%3D%2218%22%3Eaa1%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%2274%22%20y%3D%2226%22%20font-size%3D%2214%22%3Ejyut6%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22145%22%20y%3D%2238%22%20font-size%3D%2222%22%3E%E7%B2%B5%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22178%22%20y%3D%2228%22%20font-size%3D%2214%22%3E%E2%8C%98%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%2222%22%20y%3D%2276%22%20font-size%3D%2215%22%3Engo5%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%2286%22%20y%3D%2272%22%20font-size%3D%2224%22%3E%E6%89%93%E5%AD%97%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22163%22%20y%3D%2282%22%20font-size%3D%2215%22%3Etype%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%2242%22%20y%3D%22110%22%20font-size%3D%2217%22%3Ezik1%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22124%22%20y%3D%22108%22%20font-size%3D%2214%22%3Espace%3C/text%3E%0A%20%20%20%20%3Ctext%20x%3D%22184%22%20y%3D%22112%22%20font-size%3D%2218%22%3E%E2%86%B5%3C/text%3E%0A%20%20%3C/g%3E%0A%3C/svg%3E");
 }
 
 .dojo-page-heading {
@@ -201,7 +189,10 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 }
 
 /* Card */
-.level-card {
+.dojo-level-card {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   border-radius: 20px;
   padding: 1.5rem;
   background: rgba(255, 255, 255, 0.75);
@@ -213,9 +204,25 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   justify-content: space-between;
 }
 
+.dojo-level-card::before {
+  content: '';
+  position: absolute;
+  inset: -45%;
+  z-index: 0;
+  pointer-events: none;
+  background-image: var(--dojo-panel-pattern);
+  background-size: 220px 120px;
+  opacity: 0.75;
+  transform: rotate(-18deg);
+  transform-origin: center;
+}
 
+.dojo-level-card > * {
+  position: relative;
+  z-index: 1;
+}
 
-.level-card:hover {
+.dojo-level-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
 }
