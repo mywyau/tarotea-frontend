@@ -94,26 +94,20 @@ onMounted(() => {
       </h1>
 
       <div class="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
-        <div class="relative rounded-xl p-5 pr-14 text-center brand-card-green ">
-          <div class="absolute right-4 top-4 inline-flex size-9 items-center justify-center text-gray-900">
-            <UsersRound class="size-5" :stroke-width="2.2" />
-          </div>
-          <div class="text-2xl font-semibold text-gray-900">
-            {{ currentUsers ?? '—' }}
+        <div class="relative rounded-xl p-5 text-center brand-card-green ">
+          <div class="inline-flex items-center justify-center gap-2 text-2xl font-semibold text-gray-900">
+            <span>{{ currentUsers ?? '—' }}</span>
+            <UsersRound class="size-[1em]" :stroke-width="2.2" />
           </div>
           <div class="text-sm text-gray-700 mt-1">
             Current users online
           </div>
         </div>
 
-        <div class="relative rounded-xl p-5 pr-14 text-center brand-card-pink">
-
-          <div class="absolute right-4 top-4 inline-flex size-9 items-center justify-center text-gray-900">
-            <GraduationCap class="size-5" :stroke-width="2.2" />
-          </div>
-
-          <div class="text-2xl font-semibold text-gray-900">
-            {{ stats?.totalUsers ?? '—' }}
+        <div class="relative rounded-xl p-5 text-center brand-card-pink">
+          <div class="inline-flex items-center justify-center gap-2 text-2xl font-semibold text-gray-900">
+            <span>{{ stats?.totalUsers ?? '—' }}</span>
+            <GraduationCap class="size-[1em]" :stroke-width="2.2" />
           </div>
           <div class="text-sm text-gray-700 mt-1">
             Learners
