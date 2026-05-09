@@ -226,28 +226,10 @@ onBeforeUnmount(() => {
   z-index: -2;
 }
 
-.trigger-visibility-btn::after {
-  content: '';
-  position: absolute;
-  inset: 0.25rem;
-  border-radius: inherit;
-  background: rgba(214, 163, 209, 0.12);
-  opacity: 0;
-  transform: scale(0.52);
-  transition: opacity 160ms ease, transform 220ms ease;
-  z-index: -2;
-}
-
 .trigger-visibility-btn:hover,
 .trigger-visibility-btn.is-open {
   transform: scale(1.20);
   /* box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22); */
-}
-
-.trigger-visibility-btn:hover::after,
-.trigger-visibility-btn.is-open::after {
-  opacity: 1;
-  transform: scale(1);
 }
 
 .trigger-visibility-btn:hover .portal-icon,
@@ -260,23 +242,63 @@ onBeforeUnmount(() => {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 0.34rem;
-  height: 0.34rem;
+  width: 0.28rem;
+  height: 0.28rem;
   border-radius: 999px;
-  background: #d6a3d1;
+  background: #9f5bb5;
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.35);
   z-index: -1;
   box-shadow:
-    0 -1.05rem 0 0 rgba(214, 163, 209, 0.92),
-    0.78rem -0.72rem 0 -0.03rem rgba(194, 144, 207, 0.9),
-    1.08rem 0.05rem 0 -0.01rem rgba(214, 163, 209, 0.88),
-    0.66rem 0.82rem 0 -0.05rem rgba(234, 184, 228, 0.92),
-    -0.1rem 1.12rem 0 -0.02rem rgba(194, 144, 207, 0.86),
-    -0.84rem 0.72rem 0 -0.04rem rgba(214, 163, 209, 0.9),
-    -1.1rem -0.08rem 0 -0.01rem rgba(234, 184, 228, 0.9),
-    -0.72rem -0.8rem 0 -0.06rem rgba(194, 144, 207, 0.86);
+    -0.18rem -1.42rem 0 -0.02rem rgba(159, 91, 181, 0.95),
+    0.64rem -1.08rem 0 -0.06rem rgba(133, 78, 161, 0.9),
+    1.36rem -0.44rem 0 -0.03rem rgba(181, 123, 195, 0.95),
+    0.98rem 0.54rem 0 -0.08rem rgba(115, 65, 150, 0.86),
+    0.32rem 1.34rem 0 -0.04rem rgba(159, 91, 181, 0.92),
+    -0.64rem 1.02rem 0 -0.07rem rgba(181, 123, 195, 0.9),
+    -1.42rem 0.48rem 0 -0.04rem rgba(133, 78, 161, 0.9),
+    -1.04rem -0.62rem 0 -0.09rem rgba(159, 91, 181, 0.88);
   pointer-events: none;
+}
+
+.rocket-burst::before,
+.rocket-burst::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 999px;
+  background: #b57bc3;
+  transform: translate(-50%, -50%);
+}
+
+.rocket-burst::before {
+  width: 0.2rem;
+  height: 0.2rem;
+  box-shadow:
+    0.22rem -1.72rem 0 -0.03rem rgba(115, 65, 150, 0.84),
+    1.58rem -0.94rem 0 -0.02rem rgba(159, 91, 181, 0.9),
+    1.68rem 0.28rem 0 -0.05rem rgba(181, 123, 195, 0.88),
+    0.74rem 1.58rem 0 -0.03rem rgba(133, 78, 161, 0.86),
+    -0.34rem 1.72rem 0 -0.05rem rgba(159, 91, 181, 0.9),
+    -1.58rem 0.88rem 0 -0.02rem rgba(115, 65, 150, 0.82),
+    -1.72rem -0.32rem 0 -0.05rem rgba(181, 123, 195, 0.88),
+    -0.88rem -1.46rem 0 -0.04rem rgba(133, 78, 161, 0.86);
+}
+
+.rocket-burst::after {
+  width: 0.16rem;
+  height: 0.16rem;
+  background: #734196;
+  box-shadow:
+    0.96rem -1.68rem 0 -0.02rem rgba(181, 123, 195, 0.78),
+    1.9rem -0.08rem 0 -0.03rem rgba(115, 65, 150, 0.84),
+    1.22rem 1.22rem 0 -0.02rem rgba(159, 91, 181, 0.86),
+    -0.02rem 1.98rem 0 -0.04rem rgba(181, 123, 195, 0.8),
+    -1.18rem 1.44rem 0 -0.03rem rgba(133, 78, 161, 0.84),
+    -1.92rem 0.04rem 0 -0.02rem rgba(159, 91, 181, 0.82),
+    -1.32rem -1.2rem 0 -0.03rem rgba(181, 123, 195, 0.8),
+    0.04rem -1.98rem 0 -0.04rem rgba(115, 65, 150, 0.82);
 }
 
 .trigger-visibility-btn:hover .rocket-burst,
