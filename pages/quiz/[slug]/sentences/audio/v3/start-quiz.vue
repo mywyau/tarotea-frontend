@@ -255,6 +255,38 @@ const canEnterLevel = () => true
   color: #D6A3D1;
 }
 
+.more-tips-list li:nth-child(2)::before {
+  content: "↻";
+}
+
+.more-tips-list li:nth-child(3)::before {
+  content: "+";
+}
+
+.more-tips-list li:nth-child(4)::before {
+  content: "↗";
+}
+
+.more-tips-list li:nth-child(5)::before {
+  content: "★";
+}
+
+.more-tips-list li:nth-child(6)::before {
+  content: "⚡";
+}
+
+.more-tips-list li:nth-child(7)::before {
+  content: "⇄";
+}
+
+.more-tips-list li:nth-child(8)::before {
+  content: "◎";
+}
+
+.more-tips-list li:nth-child(9)::before {
+  content: "▶";
+}
+
 .tip-expand-enter-active,
 .tip-expand-leave-active {
   transition: all 0.2s ease;
