@@ -425,15 +425,15 @@ onBeforeUnmount(() => {
 .brand-logo {
   display: inline-block;
   transform-origin: center bottom;
-  transition:
+  /* transition:
     color 160ms ease,
     transform 160ms ease;
-  will-change: transform;
+  will-change: transform; */
 }
 
-.brand-logo:hover {
+/* .brand-logo:hover {
   animation: hamburgerWiggle 1.2s ease-in-out infinite;
-}
+} */
 
 .menu-btn {
   display: inline-flex;
