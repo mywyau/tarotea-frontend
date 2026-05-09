@@ -33,8 +33,8 @@ import { Sparkles, Trophy, UnlockKeyhole } from '@lucide/vue'
 
 <style scoped>
 .guest-quiz-guidance {
-  border: 1px solid rgba(168, 202, 224, 0.6);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(168, 202, 224, 0.22));
+  border: 0;
+  background: rgba(255, 255, 255, 0.82);
   box-shadow: 0 16px 36px rgba(31, 41, 55, 0.08);
 }
 
@@ -46,8 +46,8 @@ import { Sparkles, Trophy, UnlockKeyhole } from '@lucide/vue'
   align-items: center;
   justify-content: center;
   border-radius: 9999px;
-  color: #7c3aed;
-  background: rgba(244, 194, 215, 0.45);
+  color: #3b82f6;
+  background: transparent;
 }
 
 .guest-quiz-guidance__item {
