@@ -51,7 +51,6 @@ const scoringTips = [
   'This mode emphasizes listening + sentence meaning recognition.',
 ]
 
-const showAllTips = ref(false)
 
 const canEnterLevel = () => true
 </script>
@@ -95,30 +94,7 @@ const canEnterLevel = () => true
         </NuxtLink>
       </div>
 
-      <section class="tips-panel">
-        <div class="tips-header">
-          <h2 class="tips-title">Before you start</h2>
-        </div>
-
-        <div class="tips-grid">
-          <article v-for="tip in primaryTips" :key="tip.title" class="tip-card">
-            <h3 class="tip-card-title">{{ tip.title }}</h3>
-            <p class="tip-card-body">{{ tip.body }}</p>
-          </article>
-        </div>
-
-        <button class="tips-toggle" type="button" @click="showAllTips = !showAllTips">
-          {{ showAllTips ? 'Hide All Tips' : 'See All Tips' }}
-        </button>
-
-        <Transition name="tip-expand">
-          <div v-if="showAllTips" class="more-tips">
-            <ul class="more-tips-list">
-              <li v-for="tip in scoringTips" :key="tip">{{ tip }}</li>
-            </ul>
-          </div>
-        </Transition>
-      </section>
+      <QuizStartTips :primary-tips="primaryTips" :scoring-tips="scoringTips" />
     </section>
   </main>
 </template>
@@ -168,99 +144,5 @@ const canEnterLevel = () => true
   color: #111827;
 }
 
-.tips-panel {
-  margin-top: 1rem;
-  text-align: left;
-}
 
-.tips-header {
-  margin-bottom: 1rem;
-}
-
-.tips-title {
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.tips-grid {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.tip-card {
-  border-radius: 16px;
-  background: #F6E1E1;
-  padding: 0.9rem 1rem;
-}
-
-.tip-card-title {
-  font-size: 0.92rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.tip-card-body {
-  margin-top: 0.3rem;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  color: rgba(17, 24, 39, 0.82);
-}
-
-.tips-toggle {
-  margin-top: 1rem;
-  width: 100%;
-  border: none;
-  background: transparent;
-  color: #111827;
-  font-size: 0.9rem;
-  font-weight: 600;
-  text-align: center;
-  padding: 0.75rem;
-  border-radius: 14px;
-}
-
-.tips-toggle:hover {
-  background: rgba(249, 166, 166, 0.18);
-}
-
-.more-tips {
-  margin-top: 0.5rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid rgba(17, 24, 39, 0.08);
-}
-
-.more-tips-list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.65rem;
-}
-
-.more-tips-list li {
-  position: relative;
-  padding-left: 1rem;
-  font-size: 0.88rem;
-  line-height: 1.5;
-  color: #374151;
-}
-
-.more-tips-list li::before {
-  content: "•";
-  position: absolute;
-  left: 0;
-  color: #D6A3D1;
-}
-
-.tip-expand-enter-active,
-.tip-expand-leave-active {
-  transition: all 0.2s ease;
-}
-
-.tip-expand-enter-from,
-.tip-expand-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
 </style>
