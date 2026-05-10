@@ -629,9 +629,7 @@ onBeforeUnmount(() => {
 <template>
   <main class="dojo-training-page mx-auto max-w-2xl px-6 py-12">
 
-    <div class="mb-6">
-      <BackLink />
-    </div>
+    <BackLink />
 
     <header class="dojo-training-header space-y-4">
       <TypewriterTitleBlock

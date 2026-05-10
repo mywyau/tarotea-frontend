@@ -625,9 +625,7 @@ watch(
 <template>
   <main class="mx-auto max-w-2xl px-6 py-12">
 
-    <div class="mb-6">
-      <BackLink />
-    </div>
+    <BackLink />
 
     <header v-if="state !== 'complete' && state !== 'loading' && state !== 'locked' && state !== 'finalizing'"
       class="space-y-3">

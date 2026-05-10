@@ -160,9 +160,7 @@ onMounted(async () => {
 <template>
     <main class="topics-page max-w-4xl mx-auto py-10 px-4 space-y-8">
 
-        <div class="mb-6">
-            <BackLink />
-        </div>
+        <BackLink />
 
         <!-- Intro -->
         <header class="text-center space-y-3 max-w-4xl mx-auto">
