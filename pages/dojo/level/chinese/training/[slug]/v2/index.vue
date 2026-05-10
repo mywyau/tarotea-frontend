@@ -639,7 +639,7 @@ onBeforeUnmount(() => {
       'mt-8',
       showCalculating || showResults || showFinalizeError
         ? 'bg-transparent shadow-none p-0'
-        : 'rounded-2xl bg-white p-5 shadow-sm'
+        : 'dojo-activity-panel rounded-2xl bg-white p-5 shadow-sm'
     ]">
       <div v-if="pending" class="text-sm text-gray-600">
         Loading training words…
