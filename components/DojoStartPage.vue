@@ -22,8 +22,6 @@ const showAdvancedTips = ref(false)
 <template>
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
-    <!-- <!-- <BackLink /> --> -->
-
     <section class="quiz-card text-center space-y-6">
       <TypewriterTitleBlock :heading-text="props.heading" :subheading-text="props.description"
         heading-class="text-3xl font-semibold text-gray-900 level-heading"
