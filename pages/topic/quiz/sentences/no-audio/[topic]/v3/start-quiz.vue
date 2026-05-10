@@ -233,7 +233,7 @@ const canEnterTopic = () => true
 
 .more-tips-list li {
   position: relative;
-  padding-left: 1rem;
+  padding-left: 1.35rem;
   font-size: 0.88rem;
   line-height: 1.5;
   color: #374151;
@@ -243,9 +243,12 @@ const canEnterTopic = () => true
   content: "✓";
   position: absolute;
   left: 0;
-  font-size: 0.78rem;
+  width: 1rem;
+  color: #B56CAD;
+  font-size: 0.95rem;
   font-weight: 700;
-  color: #D6A3D1;
+  line-height: 1.4;
+  text-align: center;
 }
 
 .more-tips-list li:nth-child(2)::before {
