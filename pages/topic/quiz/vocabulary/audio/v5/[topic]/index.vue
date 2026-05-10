@@ -637,10 +637,6 @@ onUnmounted(() => {
                 <span v-if="(current + 1) <= questions.length" class="text-sm text-gray-500 whitespace-nowrap">
                     {{ current + 1 }} / {{ questions.length }}
                 </span>
-
-                <div v-if="question?.type === 'audio'" class="text-center">
-                    <AudioButton :key="question.audioKey" :src="getRandomizedAudioSrc(question.audioKey)" autoplay />
-                </div>
             </div>
 
             <div v-if="quizLoading" class="stat-card hero-card result-2 space-y-4">
@@ -661,53 +657,59 @@ onUnmounted(() => {
 
             <div v-else-if="showQuiz" class="space-y-6">
 
-                <div class="min-h-[110px] flex flex-col items-center justify-center gap-2">
-                    <p v-if="currentWord" class="text-4xl font-semibold" :class="answered
-                        ? 'blur-0 opacity-100'
-                        : 'blur-md opacity-60 select-none'">
-                        {{ currentWord.word }}
-                    </p>
-
-                    <p v-if="answered && currentWord?.jyutping" class="text-sm text-gray-500">
-                        {{ currentWord.jyutping }}
-                    </p>
-
-                    <p v-if="answered && currentWord?.meaning" class="text-sm text-gray-700">
-                        {{ currentWord.meaning }}
-                    </p>
-                </div>
-
-
-                <!-- <div v-if="question?.type === 'audio'" class="text-center">
-                    <AudioButton :key="question.audioKey" :src="getRandomizedAudioSrc(question.audioKey)" autoplay />
-                </div> -->
-
-                <div class="min-h-[50px] space-y-3">
-                    <div class="flex items-center justify-center gap-3">
-                        <div class="w-32 h-1 bg-gray-200 rounded">
-                            <div class="h-1 bg-green-500 rounded transition-all duration-500"
-                                :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
+                <div class="min-h-[150px] rounded-2xl bg-white/75 p-4 shadow-sm ring-1 ring-gray-100">
+                    <div class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:text-left">
+                        <div v-if="question?.type === 'audio'" class="shrink-0">
+                            <AudioButton :key="question.audioKey" :src="getRandomizedAudioSrc(question.audioKey)" autoplay
+                                size="lg" />
                         </div>
 
-                        <div class="relative flex items-center">
-                            <span class="text-sm text-gray-500 whitespace-nowrap">
-                                {{ currentXp ?? 0 }} / {{ masteryXp }} XP
-                            </span>
+                        <div class="flex min-w-0 flex-1 flex-col items-center gap-3 sm:items-start">
+                            <div class="space-y-1 text-center sm:text-left">
+                                <p v-if="currentWord" class="text-4xl font-semibold" :class="answered
+                                    ? 'blur-0 opacity-100'
+                                    : 'blur-md opacity-60 select-none'">
+                                    {{ currentWord.word }}
+                                </p>
 
-                            <transition name="xp-fall">
-                                <span v-if="xpDelta !== null"
-                                    class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
-                                    :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
-                                    {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
-                                </span>
-                            </transition>
+                                <p v-if="answered && currentWord?.jyutping" class="text-sm text-gray-500">
+                                    {{ currentWord.jyutping }}
+                                </p>
+
+                                <p v-if="answered && currentWord?.meaning" class="text-sm text-gray-700">
+                                    {{ currentWord.meaning }}
+                                </p>
+                            </div>
+
+                            <div class="w-full space-y-2">
+                                <div class="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+                                    <div class="h-1 w-32 rounded bg-gray-200 sm:w-40">
+                                        <div class="h-1 rounded bg-green-500 transition-all duration-500"
+                                            :style="{ width: Math.min((currentXp ?? 0) / masteryXp * 100, 100) + '%' }" />
+                                    </div>
+
+                                    <div class="relative flex items-center">
+                                        <span class="text-sm text-gray-500 whitespace-nowrap">
+                                            {{ currentXp ?? 0 }} / {{ masteryXp }} XP
+                                        </span>
+
+                                        <transition name="xp-fall">
+                                            <span v-if="xpDelta !== null"
+                                                class="absolute left-full ml-2 text-sm font-semibold pointer-events-none"
+                                                :class="xpDelta > 0 ? 'text-green-600' : 'text-red-600'">
+                                                {{ xpDelta > 0 ? '+' + xpDelta : xpDelta }}
+                                            </span>
+                                        </transition>
+                                    </div>
+                                </div>
+
+                                <div class="h-5 flex items-center justify-center sm:justify-start">
+                                    <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
+                                        {{ currentStreak }} streak
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="h-5 flex items-center justify-center">
-                        <span v-if="currentStreak && currentStreak > 0" class="text-xs text-orange-500">
-                            {{ currentStreak }} streak
-                        </span>
                     </div>
                 </div>
 
