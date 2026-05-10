@@ -1,21 +1,24 @@
 <script setup lang="ts">
 import {
   AudioLines,
+  ChevronLeft,
+  ChevronRight,
   CircleCheck,
   Languages,
   LoaderCircle,
   Mic,
   Play,
+  Settings,
   Sparkles,
   Sprout,
   Square,
   Trophy,
   TriangleAlert,
-  User,
-  UserRound,
   Volume2,
+  X,
 } from "@lucide/vue"
 import { playCorrectJingle, playGoodJingle, playIncorrectJingle } from "~/utils/sounds"
+import { useAudioVolume } from "~/composables/useAudioVolume"
 definePageMeta({
   ssr: false,
   middleware: "logged-in",
@@ -41,16 +44,43 @@ type WordMeta = {
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
 const route = useRoute()
-
+const { volume } = useAudioVolume()
 
 type AudioVoice = 'male' | 'female'
 const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
   default: () => 'male',
   sameSite: 'lax',
+  maxAge: 60 * 60 * 24 * 180,
 })
 const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
 const setAudioVoice = (voice: AudioVoice) => {
   selectedAudioVoice.value = voice
+}
+
+const playbackRate = ref(1)
+const minPlaybackRate = 0.4
+const maxPlaybackRate = 2
+const playbackStep = 0.2
+const speedDeltaPercent = computed(() => Math.round((playbackRate.value - 1) * 100))
+const speedDeltaLabel = computed(() => {
+  if (speedDeltaPercent.value === 0) return "Normal speed"
+  return speedDeltaPercent.value > 0
+    ? `+${speedDeltaPercent.value}% faster`
+    : `${Math.abs(speedDeltaPercent.value)}% slower`
+})
+
+const decreasePlaybackRate = () => {
+  playbackRate.value = Math.max(minPlaybackRate, Number((playbackRate.value - playbackStep).toFixed(2)))
+}
+
+const increasePlaybackRate = () => {
+  playbackRate.value = Math.min(maxPlaybackRate, Number((playbackRate.value + playbackStep).toFixed(2)))
+}
+
+const settingsDetails = ref<HTMLDetailsElement | null>(null)
+
+const closeSettings = () => {
+  settingsDetails.value?.removeAttribute("open")
 }
 
 const wordIdFromRoute = computed(() => {
@@ -331,6 +361,8 @@ async function fetchReferenceContours(expectedTokenCount: number): Promise<Pitch
 function playReferenceAudio() {
   if (!referenceAudioUrl.value) return
   const audio = new Audio(referenceAudioUrl.value)
+  audio.volume = volume.value
+  audio.playbackRate = playbackRate.value
   audio.play().catch(() => {
     errorMessage.value = "Unable to play reference audio."
   })
@@ -466,36 +498,93 @@ async function runToneCheck() {
 
     <div class="mx-auto max-w-4xl px-4 py-10">
 
-      <div class="flex items-center gap-3">
-        <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#CDE8C9] text-gray-900 shadow-sm" aria-hidden="true">
-          <Sprout class="h-6 w-6" />
-        </span>
-        <div>
-          <h1 class="text-3xl font-bold">Tone Garden</h1>
-          <p class="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
-            <AudioLines class="h-4 w-4 text-gray-500" aria-hidden="true" />
-            Listen, record, then check your Cantonese tone shape.
-          </p>
+      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="flex items-center gap-3">
+          <span class="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#CDE8C9] text-gray-900 shadow-sm" aria-hidden="true">
+            <Sprout class="h-6 w-6" />
+          </span>
+          <div>
+            <h1 class="text-3xl font-bold">Tone Garden</h1>
+            <p class="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
+              <AudioLines class="h-4 w-4 text-gray-500" aria-hidden="true" />
+              Listen, record, then check your Cantonese tone shape.
+            </p>
+          </div>
         </div>
+
+        <details ref="settingsDetails" class="group relative self-end sm:self-auto">
+          <summary
+            class="inline-flex list-none cursor-pointer items-center gap-1.5 rounded-lg bg-yellow-200 px-3 py-1.5 text-xs font-semibold text-black shadow-sm transition hover:bg-yellow-100">
+            <Settings class="h-3.5 w-3.5" />
+            <span>Settings</span>
+          </summary>
+          <div
+            class="fixed left-1/2 top-24 z-50 max-h-[calc(100vh-7rem)] w-[calc(100vw-1.5rem)] max-w-sm -translate-x-1/2 overflow-y-auto rounded-xl bg-yellow-100 p-3 shadow-lg sm:absolute sm:left-auto sm:right-0 sm:top-auto sm:mt-2 sm:max-h-none sm:w-72 sm:translate-x-0 sm:overflow-visible">
+            <div class="mb-3 flex items-center justify-between">
+              <p class="text-xs font-semibold uppercase tracking-wide text-gray-800">
+                Settings
+              </p>
+              <button type="button"
+                class="flex h-7 w-7 items-center justify-center rounded-full text-gray-900 transition hover:bg-black/5"
+                aria-label="Close settings" @click="closeSettings">
+                <X class="h-4 w-4" />
+              </button>
+            </div>
+            <div class="space-y-4">
+              <div class="space-y-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
+                <div class="flex items-center gap-2">
+                  <input v-model="volume" type="range" min="0" max="1" step="0.01"
+                    class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
+                  <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>
+                <div class="flex items-center justify-between gap-2">
+                  <button type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="playbackRate <= minPlaybackRate" aria-label="Reduce playback speed by 20%"
+                    @click="decreasePlaybackRate">
+                    <ChevronLeft class="h-4 w-4" />
+                  </button>
+                  <span class="w-28 text-center tabular-nums text-xs font-semibold text-gray-900">{{ speedDeltaLabel }}</span>
+                  <button type="button"
+                    class="inline-flex h-7 w-7 items-center justify-center rounded-full text-gray-600 transition hover:bg-black/5 hover:text-sky-500 disabled:cursor-not-allowed disabled:opacity-40"
+                    :disabled="playbackRate >= maxPlaybackRate" aria-label="Increase playback speed by 20%"
+                    @click="increasePlaybackRate">
+                    <ChevronRight class="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Voice</p>
+                <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
+                  <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+                    :class="selectedAudioVoice === 'male'
+                      ? 'bg-blue-200 text-black shadow-sm'
+                      : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                      " :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
+                    Male
+                  </button>
+
+                  <button type="button" class="flex-1 rounded-full px-2.5 py-1 text-[11px] font-semibold transition sm:px-3 sm:text-xs"
+                    :class="selectedAudioVoice === 'female'
+                      ? 'bg-pink-200 text-black shadow-sm'
+                      : 'bg-transparent text-gray-700 hover:bg-gray-200'
+                      " :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
+                    Female
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
       </div>
 
       <div class="mt-6 rounded-2xl border border-fuchsia-100 bg-white/90 p-5 shadow-sm">
-        <div class="flex justify-end">
-          <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
-            <button type="button" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition"
-              :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
-              :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
-              <User class="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Male</span>
-            </button>
-            <button type="button" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium transition"
-              :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
-              :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
-              <UserRound class="h-3.5 w-3.5" aria-hidden="true" />
-              <span>Female</span>
-            </button>
-          </div>
-        </div>
 
         <p class="mt-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
           <Languages class="h-3.5 w-3.5" aria-hidden="true" />
