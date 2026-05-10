@@ -5,7 +5,7 @@ definePageMeta({
 })
 
 import { MAX_AUDIO_BYTES, MAX_RECORDING_SECONDS } from "~/config/audio_config"
-import { Mic, Play, RotateCcw, Send, Square, XCircle } from "@lucide/vue"
+import { ChevronLeft, ChevronRight, Mic, Play, RotateCcw, Send, Square, XCircle } from "@lucide/vue"
 
 const route = useRoute()
 const router = useRouter()
@@ -117,7 +117,6 @@ const progress = computed(() => {
 })
 
 let timer: ReturnType<typeof setInterval> | null = null
-let tipTimer: ReturnType<typeof setInterval> | null = null
 let audioChunks: Blob[] = []
 
 async function fetchAIUsage() {
@@ -417,7 +416,11 @@ async function submitRecording() {
   }
 }
 
-function nextTip() {
+function showPrevTip() {
+  tipIndex.value = (tipIndex.value - 1 + tips.length) % tips.length
+}
+
+function showNextTip() {
   tipIndex.value = (tipIndex.value + 1) % tips.length
 }
 
@@ -461,14 +464,9 @@ watch([authReady, isLoggedIn], ([ready, loggedIn]) => {
 
 onMounted(() => {
   supported.value = !!(navigator.mediaDevices && window.MediaRecorder)
-
-  tipTimer = setInterval(() => {
-    nextTip()
-  }, 6000)
 })
 
 onUnmounted(() => {
-  if (tipTimer) clearInterval(tipTimer)
   resetRecording()
 })
 </script>
@@ -689,17 +687,24 @@ onUnmounted(() => {
                 Tips
               </p>
 
-              <div class="flex items-center justify-between gap-3">
+              <div class="tip-carousel" aria-live="polite">
+                <button class="tip-nav-arrow" type="button" aria-label="Previous tip" @click="showPrevTip">
+                  <ChevronLeft class="h-5 w-5" />
+                </button>
+
                 <Transition name="tip-fade" mode="out-in">
-                  <p :key="tipIndex" class="text-center flex-1 leading-relaxed">
+                  <p :key="tipIndex" class="tip-copy">
                     {{ tips[tipIndex] }}
                   </p>
                 </Transition>
+
+                <button class="tip-nav-arrow" type="button" aria-label="Next tip" @click="showNextTip">
+                  <ChevronRight class="h-5 w-5" />
+                </button>
               </div>
 
-              <div class="flex justify-center gap-1 mt-3">
-                <span v-for="(tip, i) in tips" :key="i" class="w-1.5 h-1.5 rounded-full"
-                  :class="i === tipIndex ? 'bg-gray-600' : 'bg-gray-300'" />
+              <div class="tip-dots" aria-label="Tip position indicator">
+                <span v-for="(tip, i) in tips" :key="i" class="tip-dot" :class="{ 'tip-dot-active': i === tipIndex }" />
               </div>
             </div>
           </div>
@@ -734,5 +739,57 @@ onUnmounted(() => {
 .tip-fade-leave-to {
   opacity: 0;
   transform: translateY(-6px);
+}
+
+.tip-carousel {
+  display: grid;
+  grid-template-columns: 1.75rem minmax(0, 1fr) 1.75rem;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.tip-copy {
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.625;
+}
+
+.tip-nav-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  border: none;
+  background: transparent;
+  padding: 0.1rem;
+  transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.tip-nav-arrow:hover,
+.tip-nav-arrow:focus-visible {
+  color: #374151;
+  transform: scale(1.08);
+}
+
+.tip-dots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
+
+.tip-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 9999px;
+  background: #d1d5db;
+}
+
+.tip-dot-active {
+  background: #6b7280;
 }
 </style>
