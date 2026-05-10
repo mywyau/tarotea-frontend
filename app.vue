@@ -33,7 +33,6 @@ useSeoMeta({
 
     <BackLink
       v-if="showBackLink"
-      to="/"
       class="mt-10"
     />
 
