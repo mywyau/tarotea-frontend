@@ -295,7 +295,12 @@ const canEnterLevel = () => {
 }
 
 .more-tips-list li:nth-child(6)::before {
-  content: "⚡";
+  content: "";
+  height: 0.95rem;
+  margin-top: 0.2rem;
+  background-color: #B56CAD;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2 3 14h7l-1 8 10-12h-7l1-8Z'/%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M13 2 3 14h7l-1 8 10-12h-7l1-8Z'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 
 .more-tips-list li:nth-child(7)::before {
