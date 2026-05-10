@@ -473,7 +473,7 @@ onUnmounted(() => {
         </button>
       </div> -->
 
-      <BackLink />
+      <!-- <BackLink /> -->
 
       <div v-if="supported" class="flex justify-end">
         <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">

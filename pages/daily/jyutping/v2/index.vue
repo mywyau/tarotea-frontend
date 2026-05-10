@@ -625,7 +625,7 @@ watch(
 <template>
   <main class="mx-auto max-w-2xl px-6 py-12">
 
-    <BackLink />
+    <!-- <BackLink /> -->
 
     <header v-if="state !== 'complete' && state !== 'loading' && state !== 'locked' && state !== 'finalizing'"
       class="space-y-3">
@@ -691,12 +691,8 @@ watch(
           </transition>
 
           <transition name="card-fade" appear>
-            <QuizCompletionFlipStats
-              :correct="correctCount"
-              :incorrect="incorrectCount"
-              :time="formattedElapsedTime"
-              :xp-earned="animatedXpEarned"
-            />
+            <QuizCompletionFlipStats :correct="correctCount" :incorrect="incorrectCount" :time="formattedElapsedTime"
+              :xp-earned="animatedXpEarned" />
           </transition>
 
           <div class="text-center">

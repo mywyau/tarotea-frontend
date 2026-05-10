@@ -11,7 +11,7 @@ definePageMeta({
 <template>
   <main class="max-w-xl mx-auto px-6 py-20 text-center space-y-10">
 
-    <BackLink />
+    <!-- <!-- <BackLink /> --> -->
 
     <!-- Title -->
     <div class="space-y-8">

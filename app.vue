@@ -26,7 +26,10 @@ useSeoMeta({
 
 <template>
   <div class="min-h-screen flex flex-col overflow-x-hidden bg-[#F6E1E1]/30">
+
     <BlankNavBar />
+
+    <BackLink to="/" class="mt-10" />
 
     <main class="flex-1">
       <ClientOnly>
