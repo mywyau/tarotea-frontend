@@ -4,13 +4,11 @@ definePageMeta({
   ssr: false,
 })
 
-import { ChevronLeft, ChevronRight } from '@lucide/vue'
+import { ChevronLeft, ChevronRight, Keyboard, Languages, MessageSquareText } from '@lucide/vue'
+import { markRaw } from 'vue'
 import type { Topic } from '~/types/topic'
+import { getTopicIcon } from '~/utils/topics/icons'
 import { sortedTopics } from '~/utils/topics/topics'
-
-const {
-  isLoggedIn,
-} = useMeStateV2()
 
 const isComingSoon = (topic: Topic) => topic.comingSoon === true
 
@@ -39,18 +37,21 @@ const topicQuizModes = [
   {
     id: 'jyutping',
     label: 'Jyutping only',
+    icon: markRaw(Keyboard),
     buttonClass: 'topic-btn-purple',
     to: (topicId: string) => `/dojo/topic/jyutping/training/${topicId}/v2/start`,
   },
   {
     id: 'chinese',
     label: 'Chinese only',
+    icon: markRaw(Languages),
     buttonClass: 'topic-btn-blue',
     to: (topicId: string) => `/dojo/topic/chinese/training/${topicId}/v2/start`,
   },
   {
     id: 'sentences',
     label: 'Sentences Chinese Only',
+    icon: markRaw(MessageSquareText),
     buttonClass: 'topic-btn-blush',
     to: (topicId: string) => `/dojo/topic/sentences/chinese/${topicId}/v2/start`,
   },
@@ -111,10 +112,16 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
       <li v-for="quizTopic in paginatedTopics" :key="quizTopic.id" class="topic-card" :class="[
         (!canEnterTopic(quizTopic) || quizTopic.comingSoon) ? 'topic-locked' : ''
       ]">
-        <div class="space-y-2">
-          <h2 class="text-lg font-semibold text-gray-900">
-            {{ quizTopic.title }}
-          </h2>
+        <div class="space-y-2 topic-card-copy">
+          <div class="topic-card-header">
+            <h2 class="text-lg font-semibold text-gray-900">
+              {{ quizTopic.title }}
+            </h2>
+
+            <span class="quiz-topic-icon-wrap" role="img" :aria-label="`${quizTopic.title} topic`">
+              <component :is="getTopicIcon(quizTopic.id)" class="quiz-topic-icon" aria-hidden="true" />
+            </span>
+          </div>
 
           <p class="text-sm text-gray-600 leading-relaxed">
             {{ quizTopic.description }}
@@ -133,7 +140,11 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
 
             <NuxtLink :to="getSelectedTopicMode(quizTopic.id).to(quizTopic.id)" class="topic-btn"
               :class="getSelectedTopicMode(quizTopic.id).buttonClass">
-              {{ getSelectedTopicMode(quizTopic.id).label }}
+              <component :is="getSelectedTopicMode(quizTopic.id).icon" class="dojo-mode-icon" aria-hidden="true" />
+
+              <span>
+                {{ getSelectedTopicMode(quizTopic.id).label }}
+              </span>
             </NuxtLink>
 
             <button class="topic-mode-toggle" @click="cycleTopicMode(quizTopic.id, 1)" aria-label="Next quiz mode">
@@ -223,11 +234,39 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   opacity: 0.6;
 }
 
+.topic-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.topic-card-copy {
+  padding-right: 2.25rem;
+}
+
+.quiz-topic-icon-wrap {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+}
+
+.quiz-topic-icon {
+  width: 1.65rem;
+  height: 1.65rem;
+  stroke-width: 2.35;
+}
+
 /* Buttons */
 .topic-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.45rem;
   text-align: center;
   min-height: 52px;
   padding: 0.65rem 0.85rem;
@@ -236,6 +275,14 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   font-weight: 600;
   line-height: 1.2;
   transition: all 0.15s ease;
+}
+
+.dojo-mode-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: #374151;
+  stroke-width: 2.35;
 }
 
 .topic-btn-blue {

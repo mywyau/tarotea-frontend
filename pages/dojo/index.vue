@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { Layers, Tags } from '@lucide/vue'
+
 
 definePageMeta({
   ssr: true
@@ -25,9 +27,15 @@ definePageMeta({
       <!-- Level Training -->
       <NuxtLink to="/dojo/level" class="dojo-tile dojo-tile-blue rounded-2xl p-8 shadow-sm hover:shadow-md transition
                hover:-translate-y-1 active:scale-[0.99]">
-        <div class="space-y-3">
-          <div class="text-xl font-semibold text-black">
-            Level Training
+        <div class="space-y-3 dojo-tile-copy">
+          <div class="dojo-tile-header">
+            <div class="text-xl font-semibold text-black">
+              Level Training
+            </div>
+
+            <span class="dojo-tile-icon-wrap" role="img" aria-label="Level training">
+              <Layers class="dojo-tile-icon" aria-hidden="true" />
+            </span>
           </div>
           <p class="text-sm text-gray-900/80">
             Practice by structured progression levels.
@@ -38,9 +46,15 @@ definePageMeta({
       <!-- Topic Training -->
       <NuxtLink to="/dojo/topic" class="dojo-tile dojo-tile-pink rounded-2xl p-8 shadow-sm hover:shadow-md transition
                hover:-translate-y-1 active:scale-[0.99]">
-        <div class=" space-y-3">
-          <div class="text-xl font-semibold text-black">
-            Topic Training
+        <div class="space-y-3 dojo-tile-copy">
+          <div class="dojo-tile-header">
+            <div class="text-xl font-semibold text-black">
+              Topic Training
+            </div>
+
+            <span class="dojo-tile-icon-wrap" role="img" aria-label="Topic training">
+              <Tags class="dojo-tile-icon" aria-hidden="true" />
+            </span>
           </div>
           <p class="text-sm text-gray-900/80">
             Train your phonetics by subject area.
@@ -78,8 +92,36 @@ main {
 }
 
 .dojo-tile {
+  position: relative;
   color: #111827;
   border: 1px solid rgba(255, 255, 255, 0.45);
+}
+
+.dojo-tile-copy {
+  padding-right: 2.25rem;
+}
+
+.dojo-tile-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.dojo-tile-icon-wrap {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+}
+
+.dojo-tile-icon {
+  width: 1.65rem;
+  height: 1.65rem;
+  stroke-width: 2.35;
 }
 
 .dojo-tile-blue {
