@@ -2,9 +2,11 @@
 import { masteryXp } from '@/config/xp/helpers';
 import {
   ArrowLeft,
+  BookOpenText,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Languages,
   Mic,
   PencilLine,
   Settings,
@@ -366,12 +368,16 @@ watchEffect(() => {
         {{ word.word }}
       </h1>
 
-      <div class="text-lg text-black">
-        {{ word.jyutping }}
-      </div>
+      <div class="mx-auto flex max-w-sm flex-col items-center gap-3">
+        <div class="inline-flex items-center gap-2 rounded-full bg-sky-50 px-4 py-2 text-lg text-gray-700">
+          <Languages class="h-5 w-5 text-sky-600" aria-hidden="true" />
+          <span>{{ word.jyutping }}</span>
+        </div>
 
-      <div class="text-lg text-black">
-        {{ word.meaning }}
+        <div class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-lg text-gray-800">
+          <BookOpenText class="h-5 w-5 text-emerald-600" aria-hidden="true" />
+          <span>{{ word.meaning }}</span>
+        </div>
       </div>
 
       <!-- XP block -->
