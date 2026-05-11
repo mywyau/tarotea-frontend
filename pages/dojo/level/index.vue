@@ -5,8 +5,10 @@ definePageMeta({
   // middleware: ['logged-in'],
 })
 
-import { ChevronLeft, ChevronRight } from '@lucide/vue'
+import { ChevronLeft, ChevronRight, Keyboard, Languages, MessageSquareText } from '@lucide/vue'
+import { markRaw } from 'vue'
 import { jyutPingQuizSelectMetaData, type LevelSelectMeta } from '~/utils/levels/helpers'
+import { getLevelTopicIcon } from '~/utils/levels/topicIcons'
 
 const canEnterLevel = (level: LevelSelectMeta) => !level.comingSoon
 
@@ -14,18 +16,21 @@ const levelQuizModes = [
   {
     id: 'jyutping',
     label: 'Jyutping only',
+    icon: markRaw(Keyboard),
     buttonClass: 'level-btn-purple',
     to: (levelId: string) => `/dojo/level/jyutping/training/${levelId}/v2/start`,
   },
   {
     id: 'chinese',
     label: 'Chinese only',
+    icon: markRaw(Languages),
     buttonClass: 'level-btn-blue',
     to: (levelId: string) => `/dojo/level/chinese/training/${levelId}/v2/start`,
   },
   {
     id: 'sentences',
     label: 'Sentences Chinese Only',
+    icon: markRaw(MessageSquareText),
     buttonClass: 'level-btn-blush',
     to: (levelId: string) => `/dojo/level/sentences/chinese/${levelId}/v2/start`,
   },
@@ -78,10 +83,17 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
       ]">
 
         <!-- Title -->
-        <div class="space-y-2">
-          <h2 class="text-lg font-semibold text-gray-900 ">
-            {{ quizLevel.title }}
-          </h2>
+        <div class="space-y-2 level-card-copy">
+          <div class="level-card-header">
+            <h2 class="text-lg font-semibold text-gray-900 ">
+              {{ quizLevel.title }}
+            </h2>
+
+            <div class="topic-icon-wrap" role="img"
+              :aria-label="`${quizLevel.title}: ${getLevelTopicIcon(quizLevel.id).label}`">
+              <component :is="getLevelTopicIcon(quizLevel.id).icon" class="topic-icon" aria-hidden="true" />
+            </div>
+          </div>
 
           <p class="text-sm text-gray-600 leading-relaxed">
             {{ quizLevel.description }}
@@ -101,7 +113,11 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 
             <NuxtLink :to="getSelectedLevelMode(quizLevel.id).to(quizLevel.id)" class="level-btn"
               :class="getSelectedLevelMode(quizLevel.id).buttonClass">
-              {{ getSelectedLevelMode(quizLevel.id).label }}
+              <component :is="getSelectedLevelMode(quizLevel.id).icon" class="dojo-mode-icon" aria-hidden="true" />
+
+              <span>
+                {{ getSelectedLevelMode(quizLevel.id).label }}
+              </span>
             </NuxtLink>
 
             <button class="level-mode-toggle" @click="cycleLevelMode(quizLevel.id, 1)" aria-label="Next quiz mode">
@@ -194,10 +210,38 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   opacity: 0.6;
 }
 
+.level-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.level-card-copy {
+  padding-right: 2.25rem;
+}
+
+.topic-icon-wrap {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #374151;
+}
+
+.topic-icon {
+  width: 1.65rem;
+  height: 1.65rem;
+  stroke-width: 2.35;
+}
+
 .level-btn {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.45rem;
   text-align: center;
   min-height: 52px;
   padding: 0.65rem 0.85rem;
@@ -206,6 +250,14 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   font-weight: 600;
   line-height: 1.2;
   transition: all 0.15s ease;
+}
+
+.dojo-mode-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+  color: #374151;
+  stroke-width: 2.35;
 }
 
 .level-btn-blue {
