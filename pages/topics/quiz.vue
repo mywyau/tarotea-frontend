@@ -92,7 +92,7 @@ const topicQuizModes = [
         icon: markRaw(BookOpen),
         buttonClass: 'topic-btn-blue',
         dotClass: 'dot-blue',
-        to: (topicId: string) => `/topic/quiz/vocabulary/word/v5/start-quiz/${topicId}`,
+        to: (topicId: string) => `/topic/quiz/vocabulary/word/v6/start-quiz/${topicId}`,
     },
     {
         id: 'audio',
