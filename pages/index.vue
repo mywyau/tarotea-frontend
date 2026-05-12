@@ -100,9 +100,50 @@ const learningModes = [
 
 const currentUsers = ref<number | null>(null)
 const isStartPanelFlipped = ref(false)
+const learningSection = ref<HTMLElement | null>(null)
+const learningDeckProgress = ref(0)
+const isMobileLearningDeck = ref(false)
 
 function flipStartPanel() {
   isStartPanelFlipped.value = !isStartPanelFlipped.value
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max)
+}
+
+function updateLearningDeckProgress() {
+  if (!import.meta.client || !learningSection.value) {
+    return
+  }
+
+  const section = learningSection.value
+  const rect = section.getBoundingClientRect()
+  const scrollableDistance = Math.max(section.offsetHeight - window.innerHeight, 1)
+  const scrolledThroughSection = clamp(-rect.top, 0, scrollableDistance)
+
+  learningDeckProgress.value = scrolledThroughSection / scrollableDistance
+}
+
+function getLearningCardStyle(index: number) {
+  if (!isMobileLearningDeck.value) {
+    return undefined
+  }
+
+  const activePosition = learningDeckProgress.value * (learningModes.length - 1)
+  const swipeProgress = clamp(activePosition - index, 0, 1)
+  const deckDepth = Math.max(index - activePosition, 0)
+  const visibleDepth = Math.min(deckDepth, 3)
+  const yOffset = visibleDepth * 10 - swipeProgress * 140
+  const rotation = swipeProgress * -8
+  const scale = 1 - visibleDepth * 0.035
+  const opacity = 1 - swipeProgress * 0.35
+
+  return {
+    opacity,
+    transform: `translate3d(0, ${yOffset}%, 0) rotate(${rotation}deg) scale(${scale})`,
+    zIndex: learningModes.length - index,
+  }
 }
 const sessionCookie = useCookie<string>('online_session_id', {
   maxAge: 60 * 60 * 24 * 365,
@@ -130,8 +171,22 @@ onMounted(() => {
     void refreshCurrentUsers()
   }, 30_000)
 
+  const mobileDeckQuery = window.matchMedia('(max-width: 639px)')
+  const syncMobileLearningDeck = () => {
+    isMobileLearningDeck.value = mobileDeckQuery.matches
+    updateLearningDeckProgress()
+  }
+
+  syncMobileLearningDeck()
+  window.addEventListener('scroll', updateLearningDeckProgress, { passive: true })
+  window.addEventListener('resize', syncMobileLearningDeck)
+  mobileDeckQuery.addEventListener('change', syncMobileLearningDeck)
+
   onBeforeUnmount(() => {
     clearInterval(interval)
+    window.removeEventListener('scroll', updateLearningDeckProgress)
+    window.removeEventListener('resize', syncMobileLearningDeck)
+    mobileDeckQuery.removeEventListener('change', syncMobileLearningDeck)
   })
 })
 </script>
@@ -264,14 +319,18 @@ onMounted(() => {
       </div>
     </section>
 
-    <section class="mt-14">
+    <section ref="learningSection" class="mt-14 learning-section" :style="{ '--learning-card-count': learningModes.length }">
       <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
         How you learn
       </h2>
 
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <article v-for="mode in learningModes" :key="mode.title" :class="mode.bgClass"
-          class="relative rounded-xl p-5 pr-16">
+      <p class="learning-mobile-hint text-sm text-gray-600 mb-4">
+        Keep scrolling to peel each card away and reveal the next learning mode.
+      </p>
+
+      <div class="learning-card-grid grid grid-cols-1 sm:grid-cols-2 gap-4" :class="{ 'is-mobile-deck': isMobileLearningDeck }">
+        <article v-for="(mode, index) in learningModes" :key="mode.title" :class="mode.bgClass" :style="getLearningCardStyle(index)"
+          class="learning-card relative rounded-xl p-5 pr-16">
           <div class="absolute right-4 top-4 inline-flex size-9 items-center justify-center text-gray-900">
             <component :is="mode.icon" class="size-5" :stroke-width="2.2" />
           </div>
@@ -290,6 +349,15 @@ onMounted(() => {
 </template>
 
 <style scoped>
+
+.learning-mobile-hint {
+  display: none;
+}
+
+.learning-card {
+  min-height: 100%;
+}
+
 .brand-card-green {
   background-color: #E7F3D5;
 }
@@ -477,7 +545,46 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 639px) {
+
+  .learning-section {
+    min-height: calc(100vh + ((var(--learning-card-count) - 1) * 82vh));
+  }
+
+  .learning-mobile-hint {
+    display: block;
+  }
+
+  .learning-card-grid.is-mobile-deck {
+    position: sticky;
+    top: 5rem;
+    display: block;
+    height: clamp(17rem, 58vh, 22rem);
+    perspective: 1000px;
+  }
+
+  .learning-card-grid.is-mobile-deck .learning-card {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 0;
+    overflow: hidden;
+    box-shadow: 0 20px 44px rgba(17, 24, 39, 0.14);
+    transform-origin: center 22%;
+    transition: opacity 80ms linear, transform 80ms linear;
+    will-change: opacity, transform;
+  }
+
+  .learning-card-grid.is-mobile-deck .learning-card::after {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255, 255, 255, 0.72);
+    border-radius: inherit;
+    content: '';
+    pointer-events: none;
+  }
 
   .start-learning-scene,
   .start-learning-face {
@@ -503,6 +610,10 @@ onMounted(() => {
 
 @media (prefers-reduced-motion: reduce) {
   .start-learning-scene {
+    transition-duration: 1ms;
+  }
+
+  .learning-card-grid.is-mobile-deck .learning-card {
     transition-duration: 1ms;
   }
 
