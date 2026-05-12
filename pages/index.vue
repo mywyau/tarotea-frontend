@@ -131,18 +131,27 @@ function getLearningCardStyle(index: number) {
   }
 
   const activePosition = learningDeckProgress.value * (learningModes.length - 1)
-  const swipeProgress = clamp(activePosition - index, 0, 1)
-  const deckDepth = Math.max(index - activePosition, 0)
-  const visibleDepth = Math.min(deckDepth, 3)
-  const yOffset = visibleDepth * 10 - swipeProgress * 140
-  const rotation = swipeProgress * -8
-  const scale = 1 - visibleDepth * 0.035
-  const opacity = 1 - swipeProgress * 0.35
+  const activeIndex = Math.min(Math.floor(activePosition), learningModes.length - 1)
+  const swipeProgress = clamp(activePosition - activeIndex, 0, 1)
+  const isActiveCard = index === activeIndex
+  const isNextCard = index === activeIndex + 1 && swipeProgress > 0
+
+  if (!isActiveCard && !isNextCard) {
+    return {
+      opacity: 0,
+      pointerEvents: 'none',
+      transform: 'translate3d(0, 0, 0)',
+      zIndex: 0,
+    }
+  }
 
   return {
-    opacity,
-    transform: `translate3d(0, ${yOffset}%, 0) rotate(${rotation}deg) scale(${scale})`,
-    zIndex: learningModes.length - index,
+    opacity: 1,
+    pointerEvents: isActiveCard ? 'auto' : 'none',
+    transform: isActiveCard
+      ? `translate3d(0, ${swipeProgress * -120}%, 0) rotate(${swipeProgress * -7}deg)`
+      : 'translate3d(0, 0, 0)',
+    zIndex: isActiveCard ? 2 : 1,
   }
 }
 const sessionCookie = useCookie<string>('online_session_id', {
@@ -319,7 +328,7 @@ onMounted(() => {
       </div>
     </section>
 
-    <section ref="learningSection" class="mt-14 learning-section" :style="{ '--learning-card-count': learningModes.length }">
+    <section ref="learningSection" class="mt-14 learning-section" :class="{ 'is-mobile-deck': isMobileLearningDeck }" :style="{ '--learning-card-count': learningModes.length }">
       <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
         How you learn
       </h2>
@@ -375,7 +384,7 @@ onMounted(() => {
 }
 
 .brand-card-yellow {
-  background-color: rgba(244, 205, 39, 0.35);
+  background-color: #F4CD27;
 }
 
 .brand-cta-bg,
@@ -547,8 +556,8 @@ onMounted(() => {
 
 @media (max-width: 639px) {
 
-  .learning-section {
-    min-height: calc(100vh + ((var(--learning-card-count) - 1) * 82vh));
+  .learning-section.is-mobile-deck {
+    min-height: calc(clamp(17rem, 58vh, 22rem) + ((var(--learning-card-count) - 1) * 54vh) + 7rem);
   }
 
   .learning-mobile-hint {
@@ -572,7 +581,7 @@ onMounted(() => {
     min-height: 0;
     overflow: hidden;
     box-shadow: 0 20px 44px rgba(17, 24, 39, 0.14);
-    transform-origin: center 22%;
+    transform-origin: center 18%;
     transition: opacity 80ms linear, transform 80ms linear;
     will-change: opacity, transform;
   }
