@@ -3,6 +3,7 @@
 import { NuxtLink } from '#components';
 import { masteryXp } from '@/config/xp/helpers';;
 import { CheckCircle2 } from '@lucide/vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 const props = defineProps<{
   to?: string
@@ -14,10 +15,56 @@ const props = defineProps<{
 }>()
 
 const rippleClass = 'is-ripple-neighbor'
+const tileRef = ref<HTMLElement | { $el?: HTMLElement } | null>(null)
+let tileObserver: IntersectionObserver | null = null
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
+
+function getTileElement() {
+  const tile = tileRef.value
+
+  if (tile instanceof HTMLElement) return tile
+
+  return tile?.$el instanceof HTMLElement ? tile.$el : null
+}
+
+function revealDropInTile() {
+  getTileElement()?.classList.add('word-tile-drop-in-visible')
+}
+
+onMounted(() => {
+  const tile = getTileElement()
+
+  if (!tile?.classList.contains('word-tile-drop-in')) return
+
+  if (prefersReducedMotion() || !('IntersectionObserver' in window)) {
+    revealDropInTile()
+    return
+  }
+
+  tileObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (!entry?.isIntersecting) return
+
+      revealDropInTile()
+      tileObserver?.disconnect()
+      tileObserver = null
+    },
+    {
+      rootMargin: '0px 0px -8% 0px',
+      threshold: 0.18,
+    }
+  )
+
+  tileObserver.observe(tile)
+})
+
+onBeforeUnmount(() => {
+  tileObserver?.disconnect()
+  tileObserver = null
+})
 
 function getTileHash() {
   const seed = `${props.word}-${props.jyutping}-${props.meaning}`
@@ -128,7 +175,7 @@ function moveTileWithPointer(event: PointerEvent) {
 </script>
 
 <template>
-  <component :is="to ? NuxtLink : 'div'" :to="to" class="relative word-tile hover:brightness-110"
+  <component :is="to ? NuxtLink : 'div'" ref="tileRef" :to="to" class="relative word-tile hover:brightness-110"
     @pointerenter="startTileMovement" @pointermove="moveTileWithPointer" @pointerleave="resetTileMovement"
     @pointercancel="resetTileMovement" @blur="resetTileMovement">
     <!-- Mastered badge -->
@@ -207,6 +254,17 @@ function moveTileWithPointer(event: PointerEvent) {
 
 .word-tile-drop-in {
   opacity: 0;
+  transform:
+    translate3d(
+      calc(var(--tile-ripple-x) + var(--tile-x)),
+      calc(var(--tile-drop-y, -320px) + var(--tile-ripple-y) + var(--tile-y) + var(--tile-lift)),
+      0
+    )
+    rotate(calc(var(--tile-drop-rotation, 0deg) + var(--tile-ripple-rotate) + var(--tile-rotate)))
+    scale(0.96);
+}
+
+.word-tile-drop-in.word-tile-drop-in-visible {
   animation: word-tile-drop-in var(--tile-drop-duration, 950ms) cubic-bezier(0.18, 0.9, 0.28, 1.12) var(--tile-drop-delay, 0ms) forwards;
 }
 

@@ -205,8 +205,6 @@ const gatedCategories = computed(() => {
 })
 
 
-const isWordTileAnimationReady = ref(false)
-
 function getWordTileAnimationStyle(word: { id: string; animationIndex: number }) {
   let hash = 0
 
@@ -219,7 +217,7 @@ function getWordTileAnimationStyle(word: { id: string; animationIndex: number })
   const rotation = ((hash % 11) - 5)
 
   return {
-    '--tile-drop-delay': `${word.animationIndex * 55}ms`,
+    '--tile-drop-delay': `${(word.animationIndex % 4) * 70}ms`,
     '--tile-drop-duration': `${duration}ms`,
     '--tile-drop-y': `${startY}px`,
     '--tile-drop-rotation': `${rotation}deg`,
@@ -230,7 +228,6 @@ const isMobileStatsExpanded = ref(true)
 
 onMounted(async () => {
   isMobileStatsExpanded.value = !window.matchMedia('(max-width: 767px)').matches
-  isWordTileAnimationReady.value = true
 
   await Promise.all([
     loadProgress(),
@@ -310,7 +307,7 @@ onMounted(async () => {
             : `/topic/word/${slug}/${word.id}`" :word="word.word" :jyutping="word.jyutping" :meaning="word.meaning"
             :xp="getXp(word.id)" :mastered="isMastered(word.id)" :class="[
               word.locked ? 'locked-tile' : '',
-              isWordTileAnimationReady ? 'word-tile-drop-in' : ''
+              'word-tile-drop-in'
             ]"
             :style="{ background: word.tileColor, ...getWordTileAnimationStyle(word) }" />
         </div>
