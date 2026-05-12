@@ -21,14 +21,13 @@ function getLevelColor(index: number) {
 }
 
 function getLevelStepStyle(index: number) {
+  const level = levelSelectMetaData[index]
+
   return {
-    backgroundColor: levelSelectMetaData[index]?.comingSoon
+    '--level-color': level?.comingSoon
       ? 'rgba(0,0,0,0.03)'
       : getLevelColor(index),
-    '--step-index': String(index),
-    '--step-offset': `clamp(${index * 0.65}rem, ${index * 4.2}vw, ${index * 2.6}rem)`,
-    '--step-mobile-offset': `clamp(${index * 0.25}rem, ${index * 2.8}vw, ${index * 0.8}rem)`,
-    '--step-delay': `${index * 125}ms`,
+    '--step-delay': `${index * 120}ms`,
   }
 }
 
@@ -60,17 +59,16 @@ onMounted(async () => {
 
         <!-- Accessible level -->
         <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="stair-step-link">
-          <span class="step-number" aria-hidden="true">{{ level.number }}</span>
+          <div class="tower-stack" aria-hidden="true">
+            <span v-for="floor in level.number" :key="floor" class="tower-floor" />
+          </div>
 
-          <div class="step-copy">
+          <div class="tower-label">
             <div class="level-card-header">
               <div class="min-w-0">
-                <div class="text-lg font-semibold text-gray-900">
+                <span class="step-number">Level {{ level.number }}</span>
+                <div class="text-lg font-semibold text-gray-900 mt-1">
                   {{ level.title }}
-                </div>
-
-                <div class="text-sm text-gray-700 mt-1">
-                  {{ level.description }}
                 </div>
               </div>
 
@@ -78,39 +76,46 @@ onMounted(async () => {
                 <component :is="getLevelTopicIcon(level.id).icon" class="topic-icon" aria-hidden="true" />
               </div>
             </div>
-          </div>
 
-          <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
+            <div class="text-sm text-gray-700 mt-2">
+              {{ level.description }}
+            </div>
+
+            <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
+          </div>
         </NuxtLink>
 
         <!-- Locked level (kept for later when you re-enable gating) -->
         <div v-else class="stair-step-link cursor-not-allowed">
-          <span class="step-number" aria-hidden="true">{{ level.number }}</span>
+          <div class="tower-stack" aria-hidden="true">
+            <span v-for="floor in level.number" :key="floor" class="tower-floor" />
+          </div>
 
-          <div class="step-copy">
+          <div class="tower-label">
             <div class="level-card-header">
               <div class="min-w-0">
-                <div class="text-lg font-semibold text-gray-900">
+                <span class="step-number">Level {{ level.number }}</span>
+                <div class="text-lg font-semibold text-gray-900 mt-1">
                   {{ level.title }}
                 </div>
-
-                <div class="text-sm text-gray-700 mt-1">
-                  {{ level.description }}
-                </div>
-
-                <p class="text-sm text-gray-700 mt-3">
-                  Upgrade to unlock
-                </p>
               </div>
 
               <div class="topic-icon-wrap" role="img" :aria-label="`${level.title}: ${getLevelTopicIcon(level.id).label}`">
                 <component :is="getLevelTopicIcon(level.id).icon" class="topic-icon" aria-hidden="true" />
               </div>
             </div>
-          </div>
 
-          <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
-          <span v-else class="pill pill-locked">Locked</span>
+            <div class="text-sm text-gray-700 mt-2">
+              {{ level.description }}
+            </div>
+
+            <p class="text-sm text-gray-700 mt-3">
+              Upgrade to unlock
+            </p>
+
+            <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
+            <span v-else class="pill pill-locked">Locked</span>
+          </div>
         </div>
       </li>
     </ul>
@@ -154,106 +159,127 @@ onMounted(async () => {
 }
 
 .staircase {
-  --step-depth: clamp(0.8rem, 1.7vw, 1.35rem);
+  --floor-height: clamp(1.15rem, 2.3vw, 1.65rem);
+  --tower-width: clamp(8.4rem, 16vw, 11.5rem);
   display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
+  align-items: flex-end;
+  gap: clamp(0.7rem, 1.6vw, 1.2rem);
+  min-height: 31rem;
   list-style: none;
   margin: 0;
-  padding: 0 0 1.6rem;
+  overflow-x: auto;
+  padding: 2.25rem 0.25rem 1.8rem;
+  scrollbar-width: thin;
 }
 
 .stair-step {
   position: relative;
-  width: calc(100% - var(--step-offset));
-  min-width: min(100%, 17rem);
-  margin-left: var(--step-offset);
-  border-radius: 1rem 1rem 0.45rem 0.45rem;
-  box-shadow:
-    0 var(--step-depth) 0 rgba(0, 0, 0, 0.16),
-    0 calc(var(--step-depth) + 0.65rem) 1.35rem rgba(17, 24, 39, 0.12);
-  transition: filter 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  flex: 0 0 var(--tower-width);
+  transition: filter 180ms ease, transform 180ms ease;
   isolation: isolate;
 }
 
-.stair-step::before {
-  content: "";
-  position: absolute;
-  inset: auto 0 calc(var(--step-depth) * -1) 0;
-  height: var(--step-depth);
-  border-radius: 0 0 0.55rem 0.55rem;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.24));
-  pointer-events: none;
-  z-index: -1;
-}
-
-.stair-step::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 46%, rgba(0, 0, 0, 0.06));
-  pointer-events: none;
-}
-
 .stair-step:hover {
-  filter: brightness(1.08);
-  transform: translateY(-2px);
-  box-shadow:
-    0 calc(var(--step-depth) + 0.1rem) 0 rgba(0, 0, 0, 0.14),
-    0 calc(var(--step-depth) + 0.9rem) 1.6rem rgba(17, 24, 39, 0.15);
+  filter: brightness(1.06);
+  transform: translateY(-3px);
 }
 
 .stair-step-fall-in {
   opacity: 0;
-  transform: translate3d(-1.5rem, -7rem, 0) rotate(-4deg) scale(0.96);
-  animation: stair-step-drop 780ms cubic-bezier(0.17, 0.84, 0.32, 1.18) var(--step-delay) forwards;
+  transform: translate3d(0, -7rem, 0) rotate(-3deg) scale(0.96);
+  animation: tower-block-drop 760ms cubic-bezier(0.17, 0.84, 0.32, 1.18) var(--step-delay) forwards;
   will-change: opacity, transform;
 }
 
 .stair-step-link {
   position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 1rem;
-  min-height: 7.15rem;
-  padding: 1.1rem 3.25rem 1.25rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
   color: inherit;
 }
 
-.step-number {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.3rem;
-  height: 2.3rem;
-  margin-top: 0.15rem;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.36);
-  color: rgba(17, 24, 39, 0.86);
-  font-size: 0.9rem;
-  font-weight: 800;
-  line-height: 1;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+.tower-stack {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 0.18rem;
+  filter: drop-shadow(0 1rem 1.1rem rgba(17, 24, 39, 0.15));
 }
 
-.step-copy {
-  min-width: 0;
-  padding-right: 0.35rem;
+.tower-floor {
+  position: relative;
+  display: block;
+  height: var(--floor-height);
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 0.5rem 0.5rem 0.25rem 0.25rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.42), rgba(255, 255, 255, 0) 48%, rgba(0, 0, 0, 0.07)),
+    var(--level-color);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.36),
+    0 0.28rem 0 rgba(0, 0, 0, 0.11);
+}
+
+.tower-floor::after {
+  content: "";
+  position: absolute;
+  inset: 42% 12% auto;
+  height: 1px;
+  background: rgba(17, 24, 39, 0.12);
+}
+
+.tower-floor:first-child {
+  border-radius: 0.5rem 0.5rem 0.85rem 0.85rem;
+}
+
+.tower-floor:last-child {
+  border-radius: 0.95rem 0.95rem 0.25rem 0.25rem;
+}
+
+.tower-label {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 10rem;
+  margin-top: -0.15rem;
+  padding: 1rem 2.6rem 1rem 1rem;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 0.35rem 0.35rem 1rem 1rem;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0) 52%, rgba(0, 0, 0, 0.06)),
+    var(--level-color);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.34),
+    0 0.65rem 0 rgba(0, 0, 0, 0.14),
+    0 1.35rem 1.45rem rgba(17, 24, 39, 0.12);
 }
 
 .level-card-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border-radius: 999px;
+  color: rgba(17, 24, 39, 0.72);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .topic-icon-wrap {
   position: absolute;
   top: 1rem;
-  right: 1rem;
+  right: 0.9rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -268,8 +294,8 @@ onMounted(async () => {
 
 .pill {
   display: inline-block;
-  align-self: start;
-  grid-column: 2;
+  width: fit-content;
+  margin-top: 0.7rem;
   font-size: 0.75rem;
   font-weight: 700;
   color: rgba(0, 0, 0, 0.78);
@@ -285,20 +311,20 @@ onMounted(async () => {
   cursor: not-allowed;
 }
 
-@keyframes stair-step-drop {
+@keyframes tower-block-drop {
   0% {
     opacity: 0;
-    transform: translate3d(-1.5rem, -7rem, 0) rotate(-4deg) scale(0.96);
+    transform: translate3d(0, -7rem, 0) rotate(-3deg) scale(0.96);
   }
 
   68% {
     opacity: 1;
-    transform: translate3d(0, 0.35rem, 0) rotate(1deg) scale(1.015);
+    transform: translate3d(0, 0.45rem, 0) rotate(0.8deg) scale(1.015);
   }
 
   84% {
     opacity: 1;
-    transform: translate3d(0, -0.18rem, 0) rotate(-0.35deg) scale(1);
+    transform: translate3d(0, -0.18rem, 0) rotate(-0.25deg) scale(1);
   }
 
   100% {
@@ -308,32 +334,21 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
+  .levels-page {
+    max-width: 100%;
+  }
+
   .staircase {
-    --step-depth: 0.75rem;
+    --floor-height: 1.05rem;
+    --tower-width: 8.25rem;
+    min-height: 27rem;
+    padding-bottom: 1.4rem;
   }
 
-  .stair-step {
-    width: calc(100% - var(--step-mobile-offset));
-    min-width: 0;
-    margin-left: var(--step-mobile-offset);
-    border-radius: 0.85rem 0.85rem 0.4rem 0.4rem;
-  }
 
-  .stair-step-link {
-    grid-template-columns: 1fr;
-    gap: 0.65rem;
-    min-height: 8rem;
-    padding: 1rem 2.9rem 1.1rem 1rem;
-  }
-
-  .step-number {
-    width: 2rem;
-    height: 2rem;
-    margin-top: 0;
-  }
-
-  .pill {
-    grid-column: auto;
+  .tower-label {
+    min-height: 9.75rem;
+    padding: 0.9rem 2.45rem 0.95rem 0.9rem;
   }
 }
 
