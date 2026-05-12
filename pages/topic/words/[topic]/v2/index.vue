@@ -212,12 +212,12 @@ function getWordTileAnimationStyle(word: { id: string; animationIndex: number })
     hash = (hash * 31 + word.id.charCodeAt(i)) >>> 0
   }
 
-  const duration = 850 + (hash % 360)
+  const duration = 1250 + (hash % 520)
   const startY = -260 - (hash % 180)
   const rotation = ((hash % 11) - 5)
 
   return {
-    '--tile-drop-delay': `${(word.animationIndex % 4) * 70}ms`,
+    '--tile-drop-delay': `${(word.animationIndex % 4) * 110}ms`,
     '--tile-drop-duration': `${duration}ms`,
     '--tile-drop-y': `${startY}px`,
     '--tile-drop-rotation': `${rotation}deg`,

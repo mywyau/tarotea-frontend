@@ -233,7 +233,7 @@ function moveTileWithPointer(event: PointerEvent) {
   --tile-drop-y: -320px;
   --tile-drop-rotation: 0deg;
   --tile-drop-delay: 0ms;
-  --tile-drop-duration: 950ms;
+  --tile-drop-duration: 3000ms;
 
   transform:
     translate3d(
@@ -265,7 +265,7 @@ function moveTileWithPointer(event: PointerEvent) {
 }
 
 .word-tile-drop-in.word-tile-drop-in-visible {
-  animation: word-tile-drop-in var(--tile-drop-duration, 950ms) cubic-bezier(0.18, 0.9, 0.28, 1.12) var(--tile-drop-delay, 0ms) forwards;
+  animation: word-tile-drop-in var(--tile-drop-duration, 1400ms) cubic-bezier(0.18, 0.9, 0.28, 1.12) var(--tile-drop-delay, 0ms) forwards;
 }
 
 @keyframes word-tile-drop-in {
