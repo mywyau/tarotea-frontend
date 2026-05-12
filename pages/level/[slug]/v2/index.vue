@@ -169,6 +169,7 @@ const gatedCategories = computed(() => {
 
         const unlockedByUser = !!unlockMap.value[word.id]
         const locked = paywallLocked && !unlockedByUser
+        const animationIndex = globalIndex
 
         globalIndex++
 
@@ -177,6 +178,7 @@ const gatedCategories = computed(() => {
           paywallLocked,
           unlockedByUser,
           locked,
+          animationIndex,
           tileColor: getColorFromId(word.id)
         }
       })
@@ -203,6 +205,26 @@ const lockedWordCount = computed(() => {
     return count + category.words.filter((word) => word.locked).length
   }, 0)
 })
+
+
+function getWordTileAnimationStyle(word: { id: string; animationIndex: number }) {
+  let hash = 0
+
+  for (let i = 0; i < word.id.length; i++) {
+    hash = (hash * 31 + word.id.charCodeAt(i)) >>> 0
+  }
+
+  const duration = 850 + (hash % 360)
+  const startY = -260 - (hash % 180)
+  const rotation = ((hash % 11) - 5)
+
+  return {
+    '--tile-drop-delay': `${(word.animationIndex % 4) * 70}ms`,
+    '--tile-drop-duration': `${duration}ms`,
+    '--tile-drop-y': `${startY}px`,
+    '--tile-drop-rotation': `${rotation}deg`,
+  }
+}
 
 const isMobileStatsExpanded = ref(true)
 
@@ -288,8 +310,11 @@ onMounted(async () => {
           <WordTile :id="word.id" :to="word.locked
             ? `/level/${slug}/unlock/${word.id}`
             : `/level/${slug}/word/${word.id}`" :word="word.word" :jyutping="word.jyutping" :meaning="word.meaning"
-            :xp="getXp(word.id)" :mastered="isMastered(word.id)" :class="word.locked ? 'locked-tile' : ''"
-            :style="{ background: word.tileColor }" />
+            :xp="getXp(word.id)" :mastered="isMastered(word.id)" :class="[
+              word.locked ? 'locked-tile' : '',
+              'word-tile-drop-in'
+            ]"
+            :style="{ background: word.tileColor, ...getWordTileAnimationStyle(word) }" />
         </div>
       </div>
 
