@@ -27,7 +27,8 @@ function generateLevelAnimationStyles() {
   const nextStyles: Record<string, Record<string, string>> = {}
 
   levelSelectMetaData.forEach((level, index) => {
-    const delay = Math.round(index * 105 + Math.random() * 160)
+    const reverseIndex = levelSelectMetaData.length - 1 - index
+    const delay = reverseIndex * 110
     const duration = Math.round(850 + Math.random() * 360)
     const startY = Math.round(-260 - Math.random() * 180)
     const rotation = Math.round((Math.random() - 0.5) * 10)
