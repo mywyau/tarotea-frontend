@@ -8,7 +8,7 @@ definePageMeta({
 import { brandColours } from '@/utils/branding/helpers'
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { getLevelTopicIcon } from '@/utils/levels/topicIcons'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 
 const {
@@ -20,10 +20,38 @@ function getLevelColor(index: number) {
   return brandColours[index % brandColours.length]
 }
 
+const levelAnimationStyles = ref<Record<string, Record<string, string>>>({})
+const isLevelAnimationReady = ref(false)
+
+function generateLevelAnimationStyles() {
+  const nextStyles: Record<string, Record<string, string>> = {}
+
+  levelSelectMetaData.forEach((level, index) => {
+    const delay = Math.round(index * 95 + Math.random() * 220)
+    const duration = Math.round(900 + Math.random() * 420)
+    const startX = Math.round((Math.random() - 0.5) * 180)
+    const startY = Math.round(70 + Math.random() * 130)
+    const rotation = Math.round((Math.random() - 0.5) * 12)
+
+    nextStyles[level.id] = {
+      '--level-fly-delay': `${delay}ms`,
+      '--level-fly-duration': `${duration}ms`,
+      '--level-fly-x': `${startX}px`,
+      '--level-fly-y': `${startY}px`,
+      '--level-fly-rotation': `${rotation}deg`,
+    }
+  })
+
+  levelAnimationStyles.value = nextStyles
+  isLevelAnimationReady.value = true
+}
+
 // --- helpers ---
 
 // Resolve auth once on mount (safe + idempotent)
 onMounted(async () => {
+  generateLevelAnimationStyles()
+
   if (!authReady.value) {
     await resolve()
   }
@@ -44,10 +72,14 @@ onMounted(async () => {
     <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
 
       <li v-for="(level, index) in levelSelectMetaData" :key="level.id"
-        class="relative rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :style="{
+        class="level-card relative rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :class="[
+          isLevelAnimationReady ? 'level-card-fly-in' : '',
+          level.comingSoon ? 'is-disabled' : 'is-active'
+        ]" :style="{
           backgroundColor: level.comingSoon
             ? 'rgba(0,0,0,0.03)'
-            : getLevelColor(index)
+            : getLevelColor(index),
+          ...levelAnimationStyles[level.id]
         }">
 
         <!-- Accessible level -->
@@ -164,6 +196,39 @@ onMounted(async () => {
   border-color: rgba(214, 163, 209, 0.35);
   backdrop-filter: blur(6px);
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+}
+
+.level-card-fly-in {
+  opacity: 0;
+  transform: translate(var(--level-fly-x, 0), var(--level-fly-y, 0)) rotate(var(--level-fly-rotation, 0deg)) scale(0.94);
+  animation: level-fly-in var(--level-fly-duration, 1050ms) cubic-bezier(0.16, 0.84, 0.28, 1) var(--level-fly-delay, 0ms) forwards;
+  will-change: opacity, transform;
+}
+
+@keyframes level-fly-in {
+  0% {
+    opacity: 0;
+    transform: translate(var(--level-fly-x, 0), var(--level-fly-y, 0)) rotate(var(--level-fly-rotation, 0deg)) scale(0.94);
+  }
+
+  72% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1.025);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-card-fly-in {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    will-change: auto;
+  }
 }
 
 /* Active hover */
