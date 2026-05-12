@@ -183,6 +183,10 @@ function moveTileWithPointer(event: PointerEvent) {
   --tile-ripple-y: 0px;
   --tile-ripple-rotate: 0deg;
   --tile-ripple-delay: 0ms;
+  --tile-drop-y: -320px;
+  --tile-drop-rotation: 0deg;
+  --tile-drop-delay: 0ms;
+  --tile-drop-duration: 950ms;
 
   transform:
     translate3d(
@@ -199,6 +203,60 @@ function moveTileWithPointer(event: PointerEvent) {
     box-shadow 0.24s ease,
     filter 0.24s ease;
   transition-delay: var(--tile-ripple-delay), 0ms, 0ms;
+}
+
+.word-tile-drop-in {
+  opacity: 0;
+  animation: word-tile-drop-in var(--tile-drop-duration, 950ms) cubic-bezier(0.18, 0.9, 0.28, 1.12) var(--tile-drop-delay, 0ms) forwards;
+}
+
+@keyframes word-tile-drop-in {
+  0% {
+    opacity: 0;
+    transform:
+      translate3d(
+        calc(var(--tile-ripple-x) + var(--tile-x)),
+        calc(var(--tile-drop-y, -320px) + var(--tile-ripple-y) + var(--tile-y) + var(--tile-lift)),
+        0
+      )
+      rotate(calc(var(--tile-drop-rotation, 0deg) + var(--tile-ripple-rotate) + var(--tile-rotate)))
+      scale(0.96);
+  }
+
+  66% {
+    opacity: 1;
+    transform:
+      translate3d(
+        calc(var(--tile-ripple-x) + var(--tile-x)),
+        calc(10px + var(--tile-ripple-y) + var(--tile-y) + var(--tile-lift)),
+        0
+      )
+      rotate(calc(var(--tile-ripple-rotate) + var(--tile-rotate)))
+      scale(1.015);
+  }
+
+  82% {
+    transform:
+      translate3d(
+        calc(var(--tile-ripple-x) + var(--tile-x)),
+        calc(-4px + var(--tile-ripple-y) + var(--tile-y) + var(--tile-lift)),
+        0
+      )
+      rotate(calc(var(--tile-ripple-rotate) + var(--tile-rotate)))
+      scale(1.005);
+  }
+
+  100% {
+    opacity: 1;
+    transform:
+      translate3d(
+        calc(var(--tile-ripple-x) + var(--tile-x)),
+        calc(var(--tile-ripple-y) + var(--tile-y) + var(--tile-lift)),
+        0
+      )
+      rotate(calc(var(--tile-ripple-rotate) + var(--tile-rotate)))
+      scale(var(--tile-scale));
+  }
 }
 
 .word-tile:hover {
@@ -226,6 +284,11 @@ function moveTileWithPointer(event: PointerEvent) {
     transition:
       box-shadow 0.2s ease,
       filter 0.2s ease;
+  }
+
+  .word-tile-drop-in {
+    opacity: 1;
+    animation: none;
   }
 }
 </style>
