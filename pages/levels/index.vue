@@ -20,6 +20,18 @@ function getLevelColor(index: number) {
   return brandColours[index % brandColours.length]
 }
 
+function getLevelStepStyle(index: number) {
+  return {
+    backgroundColor: levelSelectMetaData[index]?.comingSoon
+      ? 'rgba(0,0,0,0.03)'
+      : getLevelColor(index),
+    '--step-index': String(index),
+    '--step-offset': `clamp(${index * 0.65}rem, ${index * 4.2}vw, ${index * 2.6}rem)`,
+    '--step-mobile-offset': `clamp(${index * 0.25}rem, ${index * 2.8}vw, ${index * 0.8}rem)`,
+    '--step-delay': `${index * 125}ms`,
+  }
+}
+
 // --- helpers ---
 
 // Resolve auth once on mount (safe + idempotent)
@@ -41,80 +53,65 @@ onMounted(async () => {
       </p>
     </header>
 
-    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+    <ul class="staircase" aria-label="Level staircase">
 
-      <li v-for="(level, index) in levelSelectMetaData" :key="level.id"
-        class="relative rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :style="{
-          backgroundColor: level.comingSoon
-            ? 'rgba(0,0,0,0.03)'
-            : getLevelColor(index)
-        }">
+      <li v-for="(level, index) in levelSelectMetaData" :key="level.id" class="stair-step stair-step-fall-in"
+        :class="{ 'is-disabled': level.comingSoon }" :style="getLevelStepStyle(index)">
 
         <!-- Accessible level -->
-        <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="block space-y-3">
+        <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="stair-step-link">
+          <span class="step-number" aria-hidden="true">{{ level.number }}</span>
 
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1 level-card-copy">
-              <div class="level-card-header">
+          <div class="step-copy">
+            <div class="level-card-header">
+              <div class="min-w-0">
                 <div class="text-lg font-semibold text-gray-900">
                   {{ level.title }}
                 </div>
 
-                <div class="topic-icon-wrap" role="img" :aria-label="`${level.title}: ${getLevelTopicIcon(level.id).label}`">
-                  <component
-                    :is="getLevelTopicIcon(level.id).icon"
-                    class="topic-icon"
-                    aria-hidden="true"
-                  />
+                <div class="text-sm text-gray-700 mt-1">
+                  {{ level.description }}
                 </div>
               </div>
 
-              <div class="text-sm text-gray-700 mt-1">
-                {{ level.description }}
+              <div class="topic-icon-wrap" role="img" :aria-label="`${level.title}: ${getLevelTopicIcon(level.id).label}`">
+                <component :is="getLevelTopicIcon(level.id).icon" class="topic-icon" aria-hidden="true" />
               </div>
-            </div>
-
-            <div class="shrink-0 pt-6">
-              <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
             </div>
           </div>
 
+          <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
         </NuxtLink>
 
         <!-- Locked level (kept for later when you re-enable gating) -->
-        <div v-else class="space-y-3 cursor-not-allowed">
-          <div class="flex items-start justify-between gap-4">
-            <div class="min-w-0 flex-1 level-card-copy">
-              <div class="level-card-header">
+        <div v-else class="stair-step-link cursor-not-allowed">
+          <span class="step-number" aria-hidden="true">{{ level.number }}</span>
+
+          <div class="step-copy">
+            <div class="level-card-header">
+              <div class="min-w-0">
                 <div class="text-lg font-semibold text-gray-900">
                   {{ level.title }}
                 </div>
 
-                <div class="topic-icon-wrap" role="img" :aria-label="`${level.title}: ${getLevelTopicIcon(level.id).label}`">
-                  <component
-                    :is="getLevelTopicIcon(level.id).icon"
-                    class="topic-icon"
-                    aria-hidden="true"
-                  />
+                <div class="text-sm text-gray-700 mt-1">
+                  {{ level.description }}
                 </div>
+
+                <p class="text-sm text-gray-700 mt-3">
+                  Upgrade to unlock
+                </p>
               </div>
 
-              <div class="text-sm text-gray-700 mt-1">
-                {{ level.description }}
+              <div class="topic-icon-wrap" role="img" :aria-label="`${level.title}: ${getLevelTopicIcon(level.id).label}`">
+                <component :is="getLevelTopicIcon(level.id).icon" class="topic-icon" aria-hidden="true" />
               </div>
-            </div>
-
-            <div class="shrink-0 pt-6">
-              <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
-              <span v-else class="pill pill-locked">Locked</span>
             </div>
           </div>
 
-          <p class="text-sm text-gray-700">
-            Upgrade to unlock
-          </p>
+          <span v-if="level.comingSoon" class="pill pill-soon">Coming soon</span>
+          <span v-else class="pill pill-locked">Locked</span>
         </div>
-
       </li>
     </ul>
   </main>
@@ -151,43 +148,99 @@ onMounted(async () => {
   color: rgba(17, 24, 39, 0.65);
 }
 
-/* Header card */
 .header-card {
-  /* background: rgba(255, 255, 255, 0.65); */
   border-color: rgba(214, 163, 209, 0.40);
   backdrop-filter: blur(6px);
 }
 
-/* Level card base */
-.level-card {
-  background: rgba(255, 255, 255, 0.72);
-  border-color: rgba(214, 163, 209, 0.35);
-  backdrop-filter: blur(6px);
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
+.staircase {
+  --step-depth: clamp(0.8rem, 1.7vw, 1.35rem);
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  list-style: none;
+  margin: 0;
+  padding: 0 0 1.6rem;
 }
 
-/* Active hover */
-.level-card.is-active:hover {
-  transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(234, 184, 228, 0.65);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+.stair-step {
+  position: relative;
+  width: calc(100% - var(--step-offset));
+  min-width: min(100%, 17rem);
+  margin-left: var(--step-offset);
+  border-radius: 1rem 1rem 0.45rem 0.45rem;
+  box-shadow:
+    0 var(--step-depth) 0 rgba(0, 0, 0, 0.16),
+    0 calc(var(--step-depth) + 0.65rem) 1.35rem rgba(17, 24, 39, 0.12);
+  transition: filter 180ms ease, transform 180ms ease, box-shadow 180ms ease;
+  isolation: isolate;
 }
 
-/* Coming soon */
-.level-card.is-disabled {
-  opacity: 0.70;
-  cursor: not-allowed;
-  background: rgba(168, 202, 224, 0.18);
-  /* slight blue wash */
-  border-color: rgba(0, 0, 0, 0.08);
+.stair-step::before {
+  content: "";
+  position: absolute;
+  inset: auto 0 calc(var(--step-depth) * -1) 0;
+  height: var(--step-depth);
+  border-radius: 0 0 0.55rem 0.55rem;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.24));
+  pointer-events: none;
+  z-index: -1;
 }
 
-/* Locked (not coming soon) */
-.level-card.is-locked {
-  opacity: 0.85;
-  border-color: rgba(244, 205, 39, 0.30);
-  /* subtle yellow border hint */
+.stair-step::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0) 46%, rgba(0, 0, 0, 0.06));
+  pointer-events: none;
+}
+
+.stair-step:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+  box-shadow:
+    0 calc(var(--step-depth) + 0.1rem) 0 rgba(0, 0, 0, 0.14),
+    0 calc(var(--step-depth) + 0.9rem) 1.6rem rgba(17, 24, 39, 0.15);
+}
+
+.stair-step-fall-in {
+  opacity: 0;
+  transform: translate3d(-1.5rem, -7rem, 0) rotate(-4deg) scale(0.96);
+  animation: stair-step-drop 780ms cubic-bezier(0.17, 0.84, 0.32, 1.18) var(--step-delay) forwards;
+  will-change: opacity, transform;
+}
+
+.stair-step-link {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 1rem;
+  min-height: 7.15rem;
+  padding: 1.1rem 3.25rem 1.25rem 1.1rem;
+  color: inherit;
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  margin-top: 0.15rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.36);
+  color: rgba(17, 24, 39, 0.86);
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.32);
+}
+
+.step-copy {
+  min-width: 0;
+  padding-right: 0.35rem;
 }
 
 .level-card-header {
@@ -197,10 +250,6 @@ onMounted(async () => {
   gap: 1rem;
 }
 
-.level-card-copy {
-  padding-right: 2.25rem;
-}
-
 .topic-icon-wrap {
   position: absolute;
   top: 1rem;
@@ -208,6 +257,7 @@ onMounted(async () => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: rgba(17, 24, 39, 0.82);
 }
 
 .topic-icon {
@@ -216,14 +266,89 @@ onMounted(async () => {
   stroke-width: 2.25;
 }
 
-/* Pills */
 .pill {
   display: inline-block;
-  /* padding: 0.2rem 0.6rem; */
-  /* border-radius: 999px; */
+  align-self: start;
+  grid-column: 2;
   font-size: 0.75rem;
   font-weight: 700;
-  /* border: 1px solid rgba(0, 0, 0, 0.06); */
   color: rgba(0, 0, 0, 0.78);
+}
+
+.pill-locked {
+  background: rgba(244, 205, 39, 0.60);
+  color: rgba(0, 0, 0, 0.80);
+}
+
+.stair-step.is-disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+@keyframes stair-step-drop {
+  0% {
+    opacity: 0;
+    transform: translate3d(-1.5rem, -7rem, 0) rotate(-4deg) scale(0.96);
+  }
+
+  68% {
+    opacity: 1;
+    transform: translate3d(0, 0.35rem, 0) rotate(1deg) scale(1.015);
+  }
+
+  84% {
+    opacity: 1;
+    transform: translate3d(0, -0.18rem, 0) rotate(-0.35deg) scale(1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .staircase {
+    --step-depth: 0.75rem;
+  }
+
+  .stair-step {
+    width: calc(100% - var(--step-mobile-offset));
+    min-width: 0;
+    margin-left: var(--step-mobile-offset);
+    border-radius: 0.85rem 0.85rem 0.4rem 0.4rem;
+  }
+
+  .stair-step-link {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+    min-height: 8rem;
+    padding: 1rem 2.9rem 1.1rem 1rem;
+  }
+
+  .step-number {
+    width: 2rem;
+    height: 2rem;
+    margin-top: 0;
+  }
+
+  .pill {
+    grid-column: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stair-step,
+  .stair-step:hover {
+    transition: none;
+    transform: none;
+  }
+
+  .stair-step-fall-in {
+    opacity: 1;
+    transform: none;
+    animation: none;
+    will-change: auto;
+  }
 }
 </style>
