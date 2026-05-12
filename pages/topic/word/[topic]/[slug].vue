@@ -360,37 +360,37 @@ watchEffect(() => {
                 {{ word.meaning }}
             </div>
 
-            <!-- XP block -->
-            <div v-if="showXpBar" class="pt-6 space-y-3">
-
-                <div class="flex justify-between text-sm text-gray-600 max-w-xs mx-auto">
-                    <span>{{ xp }} / {{ masteryXp }} XP</span>
-                    <span v-if="isMastered" class="inline-flex items-center gap-1 font-semibold text-green-600">
-                        <CheckCircle2 class="h-4 w-4" />
-                        <span>Maxed</span>
-                    </span>
-                </div>
-
-                <div class="w-full max-w-xs mx-auto h-2 rounded-full overflow-hidden bg-gray-300">
-                    <div class="h-2 bg-green-500 transition-all duration-700 ease-out"
-                        :style="{ width: masteryPercent + '%' }" />
-                </div>
-
-            </div>
-
-            <div class="flex items-center justify-between w-full pt-1">
+            <div class="word-nav-row">
                 <NuxtLink v-if="prevWord" :to="`/topic/word/${topic}/${prevWord.id}`" class="edge-arrow"
                     aria-label="Previous word">
                     <span class="edge-arrow-burst" aria-hidden="true"></span>
                     <ChevronLeft class="h-12 w-12" />
                 </NuxtLink>
-                <div v-else class="w-10" />
+                <div v-else class="edge-arrow-placeholder" aria-hidden="true" />
+
+                <!-- XP block -->
+                <div v-if="showXpBar" class="word-nav-progress" aria-label="Word XP progress">
+                    <div class="word-nav-progress-label text-sm text-gray-600">
+                        <span>{{ xp }} / {{ masteryXp }} XP</span>
+                        <span v-if="isMastered" class="inline-flex items-center gap-1 font-semibold text-green-600">
+                            <CheckCircle2 class="h-4 w-4" />
+                            <span>Maxed</span>
+                        </span>
+                    </div>
+
+                    <div class="word-nav-progress-track">
+                        <div class="h-2 bg-green-500 transition-all duration-700 ease-out"
+                            :style="{ width: masteryPercent + '%' }" />
+                    </div>
+                </div>
+                <div v-else class="word-nav-progress-spacer" aria-hidden="true" />
 
                 <NuxtLink v-if="nextWord" :to="`/topic/word/${topic}/${nextWord.id}`" class="edge-arrow"
                     aria-label="Next word">
                     <span class="edge-arrow-burst" aria-hidden="true"></span>
                     <ChevronRight class="h-12 w-12" />
                 </NuxtLink>
+                <div v-else class="edge-arrow-placeholder" aria-hidden="true" />
             </div>
 
             <div v-if="showPracticeButtons || showAudioButtons" class="main-actions-row">
@@ -745,6 +745,50 @@ watchEffect(() => {
     padding: 0.3rem 0.55rem !important;
 }
 
+.word-nav-row {
+    display: grid;
+    grid-template-columns: 3.5rem minmax(8rem, 20rem) 3.5rem;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.75rem, 4vw, 2rem);
+    width: 100%;
+    padding-top: 0.5rem;
+}
+
+.word-nav-progress {
+    display: flex;
+    min-width: 0;
+    width: 100%;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.word-nav-progress-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    line-height: 1.2;
+}
+
+.word-nav-progress-track {
+    height: 0.5rem;
+    width: 100%;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #d1d5db;
+}
+
+.word-nav-progress-spacer {
+    min-height: 2rem;
+}
+
+.edge-arrow-placeholder {
+    width: 3.5rem;
+    height: 3.5rem;
+}
+
 .edge-arrow {
     position: relative;
     isolation: isolate;
@@ -874,6 +918,31 @@ watchEffect(() => {
 }
 
 @media (max-width: 640px) {
+    .word-nav-row {
+        grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+        gap: 0.5rem;
+        padding-top: 0.25rem;
+    }
+
+    .word-nav-progress {
+        gap: 0.35rem;
+    }
+
+    .word-nav-progress-label {
+        gap: 0.35rem;
+        font-size: 0.75rem;
+    }
+
+    .edge-arrow-placeholder {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+
+    .edge-arrow svg {
+        width: 2.75rem;
+        height: 2.75rem;
+    }
+
     .main-actions-row {
         flex-wrap: nowrap;
         justify-content: center;
