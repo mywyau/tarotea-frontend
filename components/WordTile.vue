@@ -233,7 +233,7 @@ function moveTileWithPointer(event: PointerEvent) {
   --tile-drop-y: -320px;
   --tile-drop-rotation: 0deg;
   --tile-drop-delay: 0ms;
-  --tile-drop-duration: 1400ms;
+  --tile-drop-duration: 3000ms;
 
   transform:
     translate3d(
