@@ -645,7 +645,7 @@ onBeforeUnmount(() => {
       'mt-8',
       showCalculating || showResults || showFinalizeError
         ? 'bg-transparent shadow-none p-0'
-        : 'dojo-activity-panel rounded-2xl bg-white p-5 shadow-sm'
+        : 'rounded-2xl p-5 '
     ]">
       <div v-if="pending" class="text-sm text-gray-600">
         Loading training words…
@@ -676,25 +676,18 @@ onBeforeUnmount(() => {
               </div>
             </div>
 
-            <!-- <div class="flex items-center gap-2">
-              <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
-                {{ formattedElapsedTime }}
-              </span>
-              <AudioButton :key="current?.wordId" :src="`${cdnBase}/audio/${current?.wordId}.mp3`" />
-            </div> -->
-
             <div class="flex flex-wrap items-center gap-2">
               <DojoAudioSettings :voice="selectedVoice" :playback-rate="playbackRate"
                 @update:voice="setVoice" @update:playback-rate="playbackRate = $event" />
 
               <AudioButton :key="`${current?.wordId}-${selectedVoice}`" :src="currentAudioSrc" :playback-rate="playbackRate" />
-              <span class="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-gray-700">
+              <span class="px-3 py-1 text-xs font-medium text-gray-700">
                 {{ formattedElapsedTime }}
               </span>
             </div>
           </div>
 
-          <div class="rounded-2xl bg-gray-50 p-5">
+          <div class="rounded-2xl p-5">
             <transition name="fade-word" mode="out-in">
               <div :key="current?.wordId" class="text-4xl sm:text-4xl text-center font-medium flex gap-1 no-copy"
                 @copy.prevent @cut.prevent @contextmenu.prevent @dragstart.prevent @selectstart.prevent>
