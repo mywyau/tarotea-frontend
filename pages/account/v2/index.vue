@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { CreditCard, Sparkles, Trash2, UserRound } from '@lucide/vue'
 
 definePageMeta({
     middleware: ['logged-in'],
@@ -150,22 +151,36 @@ watch(aiUsage, (val) => {
                 <div v-else-if="isLoggedIn" class="space-y-6">
                     <!-- Signed in card -->
                     <section class="rounded-lg backdrop-blur p-5" style="background-color:#A8CAE0;">
-                        <div class="text-sm text-gray-700">Signed in as</div>
-                        <div class="mt-1 font-medium text-gray-900 break-all">{{ user.email }}</div>
+                        <div class="flex items-start gap-3">
+                            <div
+                                class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/55 text-gray-900">
+                                <UserRound class="h-4 w-4" aria-hidden="true" />
+                            </div>
+                            <div class="min-w-0">
+                                <div class="text-sm text-gray-700">Signed in as</div>
+                                <div class="mt-1 font-medium text-gray-900 break-all">{{ user.email }}</div>
+                            </div>
+                        </div>
                     </section>
 
                     <!-- Plan card -->
                     <section class="rounded-lg backdrop-blur p-5 space-y-3"
                         style="background-color:rgba(244,205,39,0.35);">
                         <div class="flex items-center justify-between gap-3">
-                            <div>
-                                <div class="text-sm text-gray-700">Plan</div>
-                                <div class="mt-1 font-medium text-gray-900">
-                                    <span
-                                        v-if="entitlement?.plan === 'monthly' && entitlement?.subscription_status === 'active'">Monthly</span>
-                                    <span
-                                        v-else-if="entitlement?.plan === 'yearly' && entitlement?.subscription_status === 'active'">Yearly</span>
-                                    <span v-else>Free</span>
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/60 text-gray-900">
+                                    <CreditCard class="h-4 w-4" aria-hidden="true" />
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-700">Plan</div>
+                                    <div class="mt-1 font-medium text-gray-900">
+                                        <span
+                                            v-if="entitlement?.plan === 'monthly' && entitlement?.subscription_status === 'active'">Monthly</span>
+                                        <span
+                                            v-else-if="entitlement?.plan === 'yearly' && entitlement?.subscription_status === 'active'">Yearly</span>
+                                        <span v-else>Free</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -186,31 +201,38 @@ watch(aiUsage, (val) => {
 
                     <!-- AI Usage card -->
                     <section class="rounded-lg backdrop-blur p-5 space-y-3" style="background-color:#F6E1E1;">
-                        <div class="text-sm text-gray-700 mt-3 space-y-2 min-h-[80px]">
-                            <div class="font-medium">AI Usage</div>
+                        <div class="flex items-start gap-3 text-sm text-gray-700 min-h-[80px]">
+                            <div
+                                class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/60 text-gray-900">
+                                <Sparkles class="h-4 w-4" aria-hidden="true" />
+                            </div>
 
-                            <template v-if="aiUsageLoading">
-                                <div class="h-5 w-40 rounded bg-white/50 animate-pulse"></div>
-                                <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-                                    <div class="h-2 w-1/3 rounded bg-white/50 animate-pulse"></div>
-                                </div>
-                            </template>
+                            <div class="min-w-0 flex-1 space-y-2">
+                                <div class="font-medium">AI Usage</div>
 
-                            <template v-else-if="aiUsage">
-                                <p>{{ animatedRemaining.toLocaleString() }} requests remaining</p>
+                                <template v-if="aiUsageLoading">
+                                    <div class="h-5 w-40 rounded bg-white/50 animate-pulse"></div>
+                                    <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+                                        <div class="h-2 w-1/3 rounded bg-white/50 animate-pulse"></div>
+                                    </div>
+                                </template>
 
-                                <div class="w-2/3 h-2 bg-gray-300 rounded overflow-hidden">
-                                    <div class="h-2 bg-blue-300 transition-[width] duration-500 ease-out"
-                                        :style="{ width: animatedPercent + '%' }"></div>
-                                </div>
-                            </template>
+                                <template v-else-if="aiUsage">
+                                    <p>{{ animatedRemaining.toLocaleString() }} requests remaining</p>
 
-                            <template v-else>
-                                <p class="text-gray-600">Unable to load AI usage right now.</p>
-                                <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
-                                    <div class="h-2 w-0 bg-blue-300"></div>
-                                </div>
-                            </template>
+                                    <div class="w-2/3 h-2 bg-gray-300 rounded overflow-hidden">
+                                        <div class="h-2 bg-blue-300 transition-[width] duration-500 ease-out"
+                                            :style="{ width: animatedPercent + '%' }"></div>
+                                    </div>
+                                </template>
+
+                                <template v-else>
+                                    <p class="text-gray-600">Unable to load AI usage right now.</p>
+                                    <div class="w-full h-2 bg-gray-300 rounded overflow-hidden">
+                                        <div class="h-2 w-0 bg-blue-300"></div>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                     </section>
 
@@ -247,13 +269,19 @@ watch(aiUsage, (val) => {
                     <section class="rounded-lg border p-5 space-y-4"
                         style="background: rgba(246,225,225,0.55); border-color: rgba(185,28,28,0.25);">
                         <div class="flex items-start justify-between gap-4">
-                            <div>
-                                <h2 class="text-base font-semibold text-gray-900">Danger zone</h2>
+                            <div class="flex items-start gap-3">
+                                <div
+                                    class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/70 text-red-800">
+                                    <Trash2 class="h-4 w-4" aria-hidden="true" />
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-semibold text-gray-900">Danger zone</h2>
 
-                                <p class="mt-4 text-sm text-red-800">
-                                    Deleting your account permanently removes your account, data and subscription.
-                                    Your subscription will be canceled, and you will be signed out immediately.
-                                </p>
+                                    <p class="mt-4 text-sm text-red-800">
+                                        Deleting your account permanently removes your account, data and subscription.
+                                        Your subscription will be canceled, and you will be signed out immediately.
+                                    </p>
+                                </div>
                             </div>
 
                             <span class="text-xs font-semibold text-red-800 rounded-lg px-3 py-1"
