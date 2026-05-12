@@ -402,7 +402,7 @@ watchEffect(() => {
 
                 </NuxtLink>
 
-                <NuxtLink v-if="showPracticeButtons" :to="`/tone-garden/${word.id}`"
+                <NuxtLink v-if="showPracticeButtons" :to="`/echo-forest/${word.id}`"
                     class="action-chip action-chip-tone-forge main-action-btn"
                     aria-label="Open tone checker for this word">
                     <Mic class="mobile-action-icon h-4 w-4" />

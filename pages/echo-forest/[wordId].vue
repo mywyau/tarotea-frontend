@@ -504,7 +504,7 @@ async function runToneCheck() {
             <Sprout class="h-6 w-6" />
           </span>
           <div>
-            <h1 class="text-3xl font-bold">Tone Garden</h1>
+            <h1 class="text-3xl font-bold">Echo Forest</h1>
             <p class="mt-1 flex items-center gap-1.5 text-sm text-gray-600">
               <AudioLines class="h-4 w-4 text-gray-500" aria-hidden="true" />
               Listen, record, then check your Cantonese tone shape.
