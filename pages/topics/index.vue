@@ -69,8 +69,8 @@ function generateTopicAnimationStyles() {
   const nextStyles: Record<string, Record<string, string>> = {}
 
   paginatedTopics.value.forEach((topic) => {
-    const delay = Math.round(Math.random() * 650)
-    const duration = Math.round(620 + Math.random() * 260)
+    const delay = Math.round(Math.random() * 1100)
+    const duration = Math.round(1100 + Math.random() * 550)
     const startX = Math.round((Math.random() - 0.5) * 220)
     const startY = Math.round((Math.random() - 0.5) * 180)
     const rotation = Math.round((Math.random() - 0.5) * 18)
@@ -286,7 +286,7 @@ onMounted(async () => {
 .topic-card-fly-in {
   opacity: 0;
   transform: translate(var(--topic-fly-x, 0), var(--topic-fly-y, 0)) rotate(var(--topic-fly-rotation, 0deg)) scale(0.92);
-  animation: topic-fly-in var(--topic-fly-duration, 720ms) cubic-bezier(0.18, 0.89, 0.32, 1.16) var(--topic-fly-delay, 0ms) forwards;
+  animation: topic-fly-in var(--topic-fly-duration, 1200ms) cubic-bezier(0.16, 0.84, 0.28, 1) var(--topic-fly-delay, 0ms) forwards;
   will-change: opacity, transform;
 }
 
