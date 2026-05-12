@@ -27,18 +27,16 @@ function generateLevelAnimationStyles() {
   const nextStyles: Record<string, Record<string, string>> = {}
 
   levelSelectMetaData.forEach((level, index) => {
-    const delay = Math.round(index * 95 + Math.random() * 220)
-    const duration = Math.round(900 + Math.random() * 420)
-    const startX = Math.round((Math.random() - 0.5) * 180)
-    const startY = Math.round(70 + Math.random() * 130)
-    const rotation = Math.round((Math.random() - 0.5) * 12)
+    const delay = Math.round(index * 105 + Math.random() * 160)
+    const duration = Math.round(850 + Math.random() * 360)
+    const startY = Math.round(-260 - Math.random() * 180)
+    const rotation = Math.round((Math.random() - 0.5) * 10)
 
     nextStyles[level.id] = {
-      '--level-fly-delay': `${delay}ms`,
-      '--level-fly-duration': `${duration}ms`,
-      '--level-fly-x': `${startX}px`,
-      '--level-fly-y': `${startY}px`,
-      '--level-fly-rotation': `${rotation}deg`,
+      '--level-drop-delay': `${delay}ms`,
+      '--level-drop-duration': `${duration}ms`,
+      '--level-drop-y': `${startY}px`,
+      '--level-drop-rotation': `${rotation}deg`,
     }
   })
 
@@ -73,7 +71,7 @@ onMounted(async () => {
 
       <li v-for="(level, index) in levelSelectMetaData" :key="level.id"
         class="level-card relative rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :class="[
-          isLevelAnimationReady ? 'level-card-fly-in' : '',
+          isLevelAnimationReady ? 'level-card-drop-in' : '',
           level.comingSoon ? 'is-disabled' : 'is-active'
         ]" :style="{
           backgroundColor: level.comingSoon
@@ -198,32 +196,36 @@ onMounted(async () => {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
 }
 
-.level-card-fly-in {
+.level-card-drop-in {
   opacity: 0;
-  transform: translate(var(--level-fly-x, 0), var(--level-fly-y, 0)) rotate(var(--level-fly-rotation, 0deg)) scale(0.94);
-  animation: level-fly-in var(--level-fly-duration, 1050ms) cubic-bezier(0.16, 0.84, 0.28, 1) var(--level-fly-delay, 0ms) forwards;
+  transform: translateY(var(--level-drop-y, -320px)) rotate(var(--level-drop-rotation, 0deg)) scale(0.96);
+  animation: level-drop-in var(--level-drop-duration, 950ms) cubic-bezier(0.18, 0.9, 0.28, 1.12) var(--level-drop-delay, 0ms) forwards;
   will-change: opacity, transform;
 }
 
-@keyframes level-fly-in {
+@keyframes level-drop-in {
   0% {
     opacity: 0;
-    transform: translate(var(--level-fly-x, 0), var(--level-fly-y, 0)) rotate(var(--level-fly-rotation, 0deg)) scale(0.94);
+    transform: translateY(var(--level-drop-y, -320px)) rotate(var(--level-drop-rotation, 0deg)) scale(0.96);
   }
 
-  72% {
+  66% {
     opacity: 1;
-    transform: translate(0, 0) rotate(0deg) scale(1.025);
+    transform: translateY(10px) rotate(0deg) scale(1.015);
+  }
+
+  82% {
+    transform: translateY(-4px) rotate(0deg) scale(1.005);
   }
 
   100% {
     opacity: 1;
-    transform: translate(0, 0) rotate(0deg) scale(1);
+    transform: translateY(0) rotate(0deg) scale(1);
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .level-card-fly-in {
+  .level-card-drop-in {
     opacity: 1;
     transform: none;
     animation: none;
