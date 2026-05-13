@@ -576,12 +576,12 @@ onUnmounted(() => {
           </div>
 
           <div v-if="recordingUrl"
-            class="flex flex-col items-center gap-3 rounded-2xl border border-gray-200 bg-white/80 p-4 shadow-sm">
+            class="flex flex-col items-center gap-3 rounded-2xl p-4">
             <p class="text-sm font-medium text-gray-600">Your recording</p>
             <audio ref="recordingAudio" :src="recordingUrl" controls class="w-64" />
             <button type="button" @click="replayRecording" :disabled="loading"
-              class="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50">
-              <Play class="h-4 w-4 text-[#5aaee6]" aria-hidden="true" />
+              class="inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-gray-800 transition bg-gray-200 hover:bg-green-300 disabled:cursor-not-allowed disabled:opacity-50">
+              <Play class="h-4 w-4 text-black" aria-hidden="true" />
               Replay recording
             </button>
           </div>
@@ -602,13 +602,13 @@ onUnmounted(() => {
 
           <div v-if="recordingUrl && !recording && !feedback" class="flex items-center gap-3">
             <button @click="submitRecording" :disabled="loading || !canUseEchoLab"
-              class="inline-flex items-center gap-2 rounded-2xl bg-black px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
+              class="inline-flex items-center gap-2 rounded-xl bg-black px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50">
               <Send class="h-4 w-4 text-[#7ec6f3]" aria-hidden="true" />
               Submit Recording
             </button>
 
             <button @click="tryAgain" :disabled="loading"
-              class="inline-flex items-center gap-2 rounded-2xl bg-gray-200 px-5 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-gray-300 disabled:cursor-not-allowed disabled:opacity-50">
+              class="inline-flex items-center gap-2 rounded-2xl bg-red-200 px-5 py-3 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-red-300 disabled:cursor-not-allowed disabled:opacity-50">
               <RotateCcw class="h-4 w-4" aria-hidden="true" />
               Record Again
             </button>

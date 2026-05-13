@@ -562,7 +562,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="max-w-2xl mx-auto px-4 py-16 space-y-8">
+  <main class="max-w-3xl mx-auto px-4 py-16 space-y-8">
     
     <section class="text-center space-y-4">
 
