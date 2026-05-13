@@ -30,8 +30,18 @@ function getTileElement() {
   return tile?.$el instanceof HTMLElement ? tile.$el : null
 }
 
-function revealDropInTile() {
-  getTileElement()?.classList.add('word-tile-drop-in-visible')
+function revealDropInTile(tile = getTileElement()) {
+  tile?.classList.add('word-tile-drop-in-visible')
+}
+
+function resetDropInTile(tile = getTileElement()) {
+  tile?.classList.remove('word-tile-drop-in-visible')
+}
+
+function isTileBelowViewport(entry: IntersectionObserverEntry) {
+  const rootBottom = entry.rootBounds?.bottom ?? window.innerHeight
+
+  return entry.boundingClientRect.top >= rootBottom
 }
 
 onMounted(() => {
@@ -46,11 +56,16 @@ onMounted(() => {
 
   tileObserver = new IntersectionObserver(
     ([entry]) => {
-      if (!entry?.isIntersecting) return
+      if (!entry) return
 
-      revealDropInTile()
-      tileObserver?.disconnect()
-      tileObserver = null
+      if (entry.isIntersecting) {
+        revealDropInTile(tile)
+        return
+      }
+
+      if (isTileBelowViewport(entry)) {
+        resetDropInTile(tile)
+      }
     },
     {
       rootMargin: '0px 0px -8% 0px',
