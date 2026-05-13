@@ -590,6 +590,12 @@ onUnmounted(() => {
               <Play class="h-4 w-4 text-black" aria-hidden="true" />
               Replay recording
             </button>
+
+            <button v-if="feedback && !recording" type="button" @click="tryAgain" :disabled="loading"
+              class="inline-flex items-center gap-2 rounded-xl bg-red-200 px-4 py-2 text-sm font-semibold text-gray-800 shadow-sm transition hover:bg-red-300 disabled:cursor-not-allowed disabled:opacity-50">
+              <RotateCcw class="h-4 w-4" aria-hidden="true" />
+              Try Again
+            </button>
           </div>
 
           <div v-if="recording" class="flex items-center gap-3">
@@ -645,10 +651,6 @@ onUnmounted(() => {
           </div>
         </div>
 
-        <button v-if="transcript && !recording" @click="tryAgain"
-          class="px-4 py-2 bg-gray-300 text-black rounded hover:brightness-110 transition">
-          Try Again
-        </button>
       </div>
 
       <div v-else>
