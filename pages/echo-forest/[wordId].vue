@@ -600,28 +600,28 @@ async function runToneCheck() {
 
         <div class="mt-4 flex flex-wrap items-center gap-3">
           <button
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#D6A3D1] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#B8DFAE] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
             :disabled="!referenceAudioUrl" @click="playReferenceAudio">
             <Volume2 class="h-4 w-4" aria-hidden="true" />
             <span>Play Reference Audio</span>
           </button>
 
           <button
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#A8CAE0] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#8CCB81] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
             :disabled="recording || loading || !expectedJyutping" @click="startRecording">
             <Mic class="h-4 w-4" aria-hidden="true" />
             <span>Start Recording</span>
           </button>
 
           <button
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#F4C2D7] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#D8E8B3] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
             :disabled="!recording || loading" @click="stopRecording">
             <Square class="h-4 w-4" aria-hidden="true" />
             <span>Stop</span>
           </button>
 
           <button
-            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#EAB8E4] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
+            class="inline-flex items-center justify-center gap-2 rounded-lg bg-[#A8D76F] px-4 py-2 text-sm font-medium text-gray-900 shadow-sm transition hover:brightness-105 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
             :disabled="recording || !recordedBlob || loading || !expectedJyutping" @click="runToneCheck">
             <LoaderCircle v-if="loading" class="h-4 w-4 animate-spin" aria-hidden="true" />
             <Sparkles v-else class="h-4 w-4" aria-hidden="true" />
