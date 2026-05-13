@@ -18,9 +18,7 @@ const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
   sameSite: 'lax',
 })
 const audioDirectory = computed(() => selectedAudioVoice.value === 'female' ? 'audio-female' : 'audio-male')
-const setAudioVoice = (voice: AudioVoice) => {
-  selectedAudioVoice.value = voice
-}
+const playbackRate = ref(1)
 
 const wordSlug = computed(() => decodeURIComponent(route.params.word as string))
 const topicSlug = computed(() => String(route.params.topic ?? ""))
@@ -481,18 +479,7 @@ onUnmounted(() => {
     <div class="max-w-xl w-full text-center space-y-6">
 
       <div v-if="supported" class="flex justify-end">
-        <div class="flex rounded-full bg-gray-100 p-1" aria-label="Audio voice">
-          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition"
-            :class="selectedAudioVoice === 'male' ? 'bg-blue-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
-            :aria-pressed="selectedAudioVoice === 'male'" @click="setAudioVoice('male')">
-            Male
-          </button>
-          <button type="button" class="rounded-full px-3 py-1 text-xs font-medium transition"
-            :class="selectedAudioVoice === 'female' ? 'bg-pink-100 text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800'"
-            :aria-pressed="selectedAudioVoice === 'female'" @click="setAudioVoice('female')">
-            Female
-          </button>
-        </div>
+        <DojoAudioSettings v-model:voice="selectedAudioVoice" v-model:playback-rate="playbackRate" />
       </div>
 
       <h1 class="text-2xl font-bold mb-2">Echo Lab</h1>
@@ -519,7 +506,7 @@ onUnmounted(() => {
         </div>
 
         <div v-if="phraseAudioSrc" class="flex justify-center pt-2">
-          <AudioButton :src="phraseAudioSrc" size="lg" />
+          <AudioButton :src="phraseAudioSrc" :playback-rate="playbackRate" size="lg" />
         </div>
 
         <div class="mt-4 mb-4 text-sm text-gray-500 space-y-1">
