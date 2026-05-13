@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Ear, Mic, SkipForward } from '@lucide/vue'
+import { ArrowRight, Ear, LoaderCircle, Mic, RotateCcw, Send, SkipForward, Square, Volume2 } from '@lucide/vue'
 import { playCorrectJingle, playGoodJingle, playQuizCompleteFailSong, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
@@ -680,9 +680,10 @@ onBeforeUnmount(() => {
             :incorrect="missedCount" :time="formattedElapsedTime" :show-xp="false" />
 
           <button
-            class="w-full rounded-xl bg-[#BFEA83] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#BFEA83] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
             @click="startQuiz">
-            Play again
+            <RotateCcw class="h-5 w-5" aria-hidden="true" />
+            <span>Play again</span>
           </button>
         </div>
 
@@ -711,37 +712,44 @@ onBeforeUnmount(() => {
             <p class="mt-1 text-xl font-semibold text-gray-900">{{ currentWord.jyutping }}</p> -->
             <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-600">{{ currentWord.meaning }}</p>
             <button
-              class="mt-4 rounded-lg bg-[#F7D774] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#F7D774] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="submitting || !currentWordAudioUrl" @click="playCurrentWordAudio">
-              ▶ Play Chinese Audio
+              <Volume2 class="h-4 w-4" aria-hidden="true" />
+              <span>Play Chinese Audio</span>
             </button>
           </div>
 
           <div class="flex flex-wrap gap-3">
             <button
-              class="rounded-lg bg-[#BFEA83] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#BFEA83] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="recording || submitting" @click="startRecording">
-              Start Recording
+              <Mic class="h-4 w-4" aria-hidden="true" />
+              <span>Start Recording</span>
             </button>
             <button
-              class="rounded-lg bg-[#FDBA74] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#FDBA74] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="!recording || submitting" @click="stopRecording">
-              Stop Recording
+              <Square class="h-4 w-4" aria-hidden="true" />
+              <span>Stop Recording</span>
             </button>
             <button
-              class="rounded-lg bg-[#FCD34D] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#FCD34D] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
-              {{ submitting ? "Scoring..." : "Submit" }}
+              <LoaderCircle v-if="submitting" class="h-4 w-4 animate-spin" aria-hidden="true" />
+              <Send v-else class="h-4 w-4" aria-hidden="true" />
+              <span>{{ submitting ? "Scoring..." : "Submit" }}</span>
             </button>
             <button
-              class="rounded-lg bg-[#86EFAC] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#86EFAC] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               @click="goToNextWord">
-              Next
+              <ArrowRight class="h-4 w-4" aria-hidden="true" />
+              <span>Next</span>
             </button>
             <button
-              class="rounded-lg bg-[#FB923C] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              class="inline-flex items-center gap-2 rounded-lg bg-[#FB923C] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
               @click="skipWord">
-              Skip
+              <SkipForward class="h-4 w-4" aria-hidden="true" />
+              <span>Skip</span>
             </button>
             <label
               class="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-gray-700">
@@ -770,9 +778,10 @@ onBeforeUnmount(() => {
             <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
             <div class="mt-3">
               <button
-                class="rounded-lg bg-[#86EFAC] px-3 py-2 text-xs font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                class="inline-flex items-center gap-2 rounded-lg bg-[#86EFAC] px-3 py-2 text-xs font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
                 @click="goToNextWord">
-                Next Word
+                <ArrowRight class="h-3.5 w-3.5" aria-hidden="true" />
+                <span>Next Word</span>
               </button>
             </div>
             <div v-if="detectedToneDisplayRows.length"
