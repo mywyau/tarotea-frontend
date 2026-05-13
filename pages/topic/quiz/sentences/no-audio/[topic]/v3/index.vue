@@ -573,13 +573,11 @@ onBeforeUnmount(() => {
 <template>
   <main class="max-w-2xl mx-auto px-4 py-16 space-y-8">
 
-
-
     <section class="text-center space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3">
-        <h1 class="text-2xl font-semibold level-heading">
+        <!-- <h1 class="text-2xl font-semibold level-heading">
           {{ quizTitle }}
-        </h1>
+        </h1> -->
 
         <div v-if="showQuiz && (current + 1) <= questions.length"
           class="flex flex-wrap items-center justify-center gap-3 md:gap-4">
