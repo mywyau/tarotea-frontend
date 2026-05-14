@@ -677,8 +677,18 @@ onMounted(() => {
 @media (max-width: 640px) {
   .hidden-dojo-trigger {
     top: auto;
-    right: -5.8rem;
+    right: 1rem;
     bottom: 1.25rem;
+    padding-right: 1rem;
+    border-right: 1px solid rgba(17, 24, 39, 0.14);
+    border-radius: 999px;
+    transform: none;
+  }
+
+  .hidden-dojo-trigger:hover,
+  .hidden-dojo-trigger:focus-visible {
+    right: 1rem;
+    transform: none;
   }
 
   .dojo-entrance-header {
