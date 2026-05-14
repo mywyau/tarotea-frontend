@@ -68,10 +68,10 @@ onMounted(async () => {
       </p>
     </header>
 
-    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-4">
+    <ul class="grid grid-cols-2 gap-3 sm:gap-4">
 
       <li v-for="(level, index) in levelSelectMetaData" :key="level.id"
-        class="level-card relative rounded-xl p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :class="[
+        class="level-card relative rounded-xl p-4 sm:p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :class="[
           isLevelAnimationReady ? 'level-card-drop-in' : '',
           level.comingSoon ? 'is-disabled' : 'is-active'
         ]" :style="{
@@ -100,7 +100,7 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div class="text-sm text-gray-700 mt-1">
+              <div class="hidden sm:block text-sm text-gray-700 mt-1">
                 {{ level.description }}
               </div>
             </div>
@@ -130,7 +130,7 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div class="text-sm text-gray-700 mt-1">
+              <div class="hidden sm:block text-sm text-gray-700 mt-1">
                 {{ level.description }}
               </div>
             </div>
