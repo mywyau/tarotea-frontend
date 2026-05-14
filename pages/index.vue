@@ -17,7 +17,7 @@ import {
   TrendingUp,
   UsersRound,
   X,
-  DoorOpenIcon,
+  Swords,
 } from '@lucide/vue'
 
 const { data: stats } = await useFetch('/api/total-users-stats', {
@@ -170,15 +170,16 @@ onMounted(() => {
 
           <div class="dojo-entrance-header">
             <span class="dojo-entrance-glyph" aria-hidden="true">
-              <DoorOpen class="size-7" :stroke-width="2.2" />
+              <!-- <DoorOpen class="size-7" :stroke-width="2.2" /> -->
+              <Swords class="size-7" :stroke-width="2.2" />
             </span>
 
             <div>
               <h2 id="dojo-entrance-title" class="text-2xl font-semibold tracking-tight text-gray-900">
-                Hone your skills
+                Typing Dojo
               </h2>
               <p class="mt-2 text-sm text-gray-700">
-                Slip into focused training by level or by topic. Pick a path but keep it hush-hush.
+                Hone your typing skills. Pick a path but keep it hush-hush.
               </p>
             </div>
           </div>
@@ -188,7 +189,7 @@ onMounted(() => {
               <span class="dojo-entrance-card-icon">
                 <Layers class="size-6" :stroke-width="2.2" aria-hidden="true" />
               </span>
-              <span class="font-semibold text-gray-900">Level Dojo</span>
+              <span class="font-semibold text-gray-900">Level</span>
               <span class="text-sm text-gray-700">Train through structured progression levels.</span>
             </NuxtLink>
 
@@ -196,7 +197,7 @@ onMounted(() => {
               <span class="dojo-entrance-card-icon">
                 <Tags class="size-6" :stroke-width="2.2" aria-hidden="true" />
               </span>
-              <span class="font-semibold text-gray-900">Topic Dojo</span>
+              <span class="font-semibold text-gray-900">Topic</span>
               <span class="text-sm text-gray-700">Practice phonetics by subject area.</span>
             </NuxtLink>
           </div>
@@ -547,6 +548,7 @@ onMounted(() => {
   position: relative;
   min-height: clamp(15.75rem, 30vw, 18rem);
   cursor: pointer;
+  outline: none;
   outline: none;
   transform-style: preserve-3d;
   transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
