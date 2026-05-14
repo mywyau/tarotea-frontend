@@ -17,6 +17,7 @@ const props = defineProps<{
 const rippleClass = 'is-ripple-neighbor'
 const tileRef = ref<HTMLElement | { $el?: HTMLElement } | null>(null)
 let tileObserver: IntersectionObserver | null = null
+let observedVisibilityTarget: Element | null = null
 let hasRevealedDropIn = false
 
 function prefersReducedMotion() {
@@ -31,12 +32,20 @@ function getTileElement() {
   return tile?.$el instanceof HTMLElement ? tile.$el : null
 }
 
+function getTileVisibilityTarget(tile: HTMLElement) {
+  return tile.closest('.tile-shell') ?? tile
+}
+
 function revealDropInTile(tile = getTileElement()) {
   if (!tile || hasRevealedDropIn) return
 
   hasRevealedDropIn = true
   tile.classList.add('word-tile-drop-in-visible')
-  tileObserver?.unobserve(tile)
+
+  if (observedVisibilityTarget) {
+    tileObserver?.unobserve(observedVisibilityTarget)
+    observedVisibilityTarget = null
+  }
 }
 
 onMounted(() => {
@@ -61,12 +70,14 @@ onMounted(() => {
     }
   )
 
-  tileObserver.observe(tile)
+  observedVisibilityTarget = getTileVisibilityTarget(tile)
+  tileObserver.observe(observedVisibilityTarget)
 })
 
 onBeforeUnmount(() => {
   tileObserver?.disconnect()
   tileObserver = null
+  observedVisibilityTarget = null
 })
 
 function getTileHash() {
