@@ -767,7 +767,7 @@ onBeforeUnmount(() => {
   </main>
 
   <div v-if="showQuiz && question" class="fixed-audio-control" aria-live="polite">
-    <AudioButton :key="question.audioKey" :src="currentAudioSrc" autoplay size="lg" />
+    <AudioButton :key="question.audioKey" :src="currentAudioSrc" autoplay size="sm" />
   </div>
 </template>
 
@@ -922,9 +922,17 @@ onBeforeUnmount(() => {
 }
 
 .fixed-audio-control :deep(button) {
-  min-width: 8.5rem;
+  width: 3.1rem;
+  height: 3.1rem;
+  min-width: 0;
+  padding: 0;
   border-radius: 999px;
-  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.18);
+  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.14);
+}
+
+.fixed-audio-control :deep(svg) {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
 @media (min-width: 768px) {
