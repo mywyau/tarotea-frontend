@@ -771,7 +771,7 @@ onBeforeUnmount(() => {
 
         <div v-else-if="currentWord" class="space-y-5">
           <!-- Top status bar -->
-          <div class="rounded-2xl border border-black/5 bg-white/60 p-4 shadow-sm backdrop-blur">
+          <div class="rounded-2xl p-4">
             <div class="flex items-center justify-between gap-4">
               <div>
                 <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
@@ -804,10 +804,10 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Main word card -->
-          <section class="rounded-3xl border border-black/5 bg-white/70 p-6 text-center shadow-sm backdrop-blur">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
+          <section class="rounded-3xl p-6 text-center">
+            <!-- <p class="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
               Target Chinese
-            </p>
+            </p> -->
 
             <p class="mt-4 text-6xl font-bold text-gray-900">
               {{ currentWord.word }}
@@ -817,12 +817,12 @@ onBeforeUnmount(() => {
               {{ currentWord.meaning }}
             </p>
 
-            <button
+            <!-- <button
               class="mx-auto mt-6 inline-flex items-center justify-center gap-2 rounded-full bg-[#F7D774] px-5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm transition hover:brightness-105 disabled:opacity-50"
               :disabled="submitting || !currentWordAudioUrl" @click="playCurrentWordAudio">
               <Volume2 class="h-4 w-4" aria-hidden="true" />
               <span>Listen</span>
-            </button>
+            </button> -->
           </section>
 
           <!-- Recording preview -->
@@ -835,7 +835,7 @@ onBeforeUnmount(() => {
           </div>
 
           <!-- Primary action dock -->
-          <div class="sticky bottom-4 z-10 rounded-3xl border border-black/5 bg-white/85 p-3 shadow-lg backdrop-blur">
+          <div class="sticky bottom-4 z-10 rounded-3xl p-3">
             <div class="grid grid-cols-[1fr_auto_auto] gap-2">
               <button v-if="!recording && !recordedBlob"
                 class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#BFEA83] px-4 py-3 text-base font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
