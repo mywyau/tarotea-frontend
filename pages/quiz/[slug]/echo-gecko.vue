@@ -163,6 +163,11 @@ const nextWordCountdownSeconds = computed(() => {
   return Math.max(0, Math.ceil(nextWordCountdownMs.value / 1000))
 })
 
+const canRecordAgain = computed(() => {
+  if (!recordedBlob.value || recording.value || submitting.value) return false
+  return Boolean(errorMessage.value) || (lastToneScore.value !== null && lastToneScore.value <= PASS_SCORE)
+})
+
 function shuffle<T>(arr: T[]) {
   const copy = [...arr]
   for (let i = copy.length - 1; i > 0; i--) {
@@ -846,13 +851,23 @@ onBeforeUnmount(() => {
                 <span>Stop</span>
               </button>
 
-              <button v-else
-                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FCD34D] px-4 py-3 text-base font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-                :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
-                <LoaderCircle v-if="submitting" class="h-5 w-5 animate-spin" aria-hidden="true" />
-                <Send v-else class="h-5 w-5" aria-hidden="true" />
-                <span>{{ submitting ? "Scoring..." : "Submit" }}</span>
-              </button>
+              <div v-else class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button v-if="canRecordAgain"
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#BFEA83] px-4 py-3 text-base font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                  :disabled="submitting" @click="startRecording">
+                  <Mic class="h-5 w-5" aria-hidden="true" />
+                  <span>Record again</span>
+                </button>
+
+                <button
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FCD34D] px-4 py-3 text-base font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                  :class="canRecordAgain ? '' : 'sm:col-span-2'"
+                  :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
+                  <LoaderCircle v-if="submitting" class="h-5 w-5 animate-spin" aria-hidden="true" />
+                  <Send v-else class="h-5 w-5" aria-hidden="true" />
+                  <span>{{ submitting ? "Scoring..." : "Submit" }}</span>
+                </button>
+              </div>
 
               <button
                 class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
