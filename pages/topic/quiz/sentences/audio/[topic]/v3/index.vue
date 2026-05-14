@@ -199,6 +199,7 @@ function deltaFor(correct: boolean, streakBefore: number) {
 }
 
 const question = computed(() => questions.value[current.value])
+const currentAudioSrc = computed(() => question.value ? getRandomizedAudioSrc(question.value.audioKey) : '')
 
 const animatedAccuracy = ref(0)
 const completionAnimated = ref(false)
@@ -578,7 +579,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="max-w-2xl mx-auto px-4 py-16 space-y-8">
+  <main class="max-w-2xl mx-auto px-4 pt-16 pb-32 space-y-8">
 
     <section class="text-center space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3">
@@ -594,11 +595,6 @@ onBeforeUnmount(() => {
             <span class="text-xs text-gray-500 whitespace-nowrap">
               {{ current + 1 }} / {{ questions.length }}
             </span>
-          </div>
-
-          <div class="flex items-center justify-center min-h-[56px]">
-            <AudioButton v-if="question" :key="question.audioKey" :src="getRandomizedAudioSrc(question.audioKey)"
-              autoplay />
           </div>
 
           <div class="text-center space-y-2">
@@ -769,6 +765,10 @@ onBeforeUnmount(() => {
       </template>
     </section>
   </main>
+
+  <div v-if="showQuiz && question" class="fixed-audio-control" aria-live="polite">
+    <AudioButton :key="question.audioKey" :src="currentAudioSrc" autoplay size="lg" />
+  </div>
 </template>
 
 <style scoped>
@@ -912,5 +912,25 @@ onBeforeUnmount(() => {
 
 .next-btn-blue {
   background: rgb(126, 147, 255);
+}
+
+.fixed-audio-control {
+  position: fixed;
+  left: 50%;
+  bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
+  z-index: 70;
+  transform: translateX(-50%);
+}
+
+.fixed-audio-control :deep(button) {
+  min-width: 8.5rem;
+  border-radius: 999px;
+  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.18);
+}
+
+@media (min-width: 768px) {
+  .fixed-audio-control {
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
 }
 </style>
