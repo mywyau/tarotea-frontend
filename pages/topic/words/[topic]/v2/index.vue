@@ -359,7 +359,9 @@ onMounted(async () => {
 }
 
 .locked-tile {
-  opacity: 0.38;
+  --word-tile-resting-opacity: 0.38;
+
+  opacity: var(--word-tile-resting-opacity);
   user-select: none;
   filter: grayscale(0.15);
 }

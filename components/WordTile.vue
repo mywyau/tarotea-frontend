@@ -285,7 +285,7 @@ function moveTileWithPointer(event: PointerEvent) {
   }
 
   66% {
-    opacity: 1;
+    opacity: var(--word-tile-resting-opacity, 1);
     transform:
       translate3d(
         calc(var(--tile-ripple-x) + var(--tile-x)),
@@ -308,7 +308,7 @@ function moveTileWithPointer(event: PointerEvent) {
   }
 
   100% {
-    opacity: 1;
+    opacity: var(--word-tile-resting-opacity, 1);
     transform:
       translate3d(
         calc(var(--tile-ripple-x) + var(--tile-x)),
@@ -348,7 +348,7 @@ function moveTileWithPointer(event: PointerEvent) {
   }
 
   .word-tile-drop-in {
-    opacity: 1;
+    opacity: var(--word-tile-resting-opacity, 1);
     animation: none;
   }
 }
