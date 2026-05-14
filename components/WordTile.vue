@@ -17,6 +17,7 @@ const props = defineProps<{
 const rippleClass = 'is-ripple-neighbor'
 const tileRef = ref<HTMLElement | { $el?: HTMLElement } | null>(null)
 let tileObserver: IntersectionObserver | null = null
+let hasRevealedDropIn = false
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -31,17 +32,11 @@ function getTileElement() {
 }
 
 function revealDropInTile(tile = getTileElement()) {
-  tile?.classList.add('word-tile-drop-in-visible')
-}
+  if (!tile || hasRevealedDropIn) return
 
-function resetDropInTile(tile = getTileElement()) {
-  tile?.classList.remove('word-tile-drop-in-visible')
-}
-
-function isTileBelowViewport(entry: IntersectionObserverEntry) {
-  const rootBottom = entry.rootBounds?.bottom ?? window.innerHeight
-
-  return entry.boundingClientRect.top >= rootBottom
+  hasRevealedDropIn = true
+  tile.classList.add('word-tile-drop-in-visible')
+  tileObserver?.unobserve(tile)
 }
 
 onMounted(() => {
@@ -50,26 +45,19 @@ onMounted(() => {
   if (!tile?.classList.contains('word-tile-drop-in')) return
 
   if (prefersReducedMotion() || !('IntersectionObserver' in window)) {
-    revealDropInTile()
+    revealDropInTile(tile)
     return
   }
 
   tileObserver = new IntersectionObserver(
     ([entry]) => {
-      if (!entry) return
-
-      if (entry.isIntersecting) {
+      if (entry?.isIntersecting) {
         revealDropInTile(tile)
-        return
-      }
-
-      if (isTileBelowViewport(entry)) {
-        resetDropInTile(tile)
       }
     },
     {
-      rootMargin: '0px 0px -8% 0px',
-      threshold: 0.18,
+      rootMargin: '0px 0px -18% 0px',
+      threshold: 0.2,
     }
   )
 
