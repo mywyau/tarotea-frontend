@@ -916,10 +916,9 @@ onBeforeUnmount(() => {
 
 .fixed-audio-control {
   position: fixed;
-  left: 50%;
+  right: 0.85rem;
   bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
   z-index: 70;
-  transform: translateX(-50%);
 }
 
 .fixed-audio-control :deep(button) {
@@ -930,6 +929,7 @@ onBeforeUnmount(() => {
 
 @media (min-width: 768px) {
   .fixed-audio-control {
+    right: 1rem;
     bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   }
 }
