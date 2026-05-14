@@ -766,9 +766,7 @@ onBeforeUnmount(() => {
     </section>
   </main>
 
-  <div v-if="showQuiz && question" class="fixed-audio-control" aria-live="polite">
-    <AudioButton :key="question.audioKey" :src="currentAudioSrc" autoplay size="sm" />
-  </div>
+  <FloatingAudioButton v-if="showQuiz && question" :key="question.audioKey" :src="currentAudioSrc" />
 </template>
 
 <style scoped>
@@ -914,31 +912,4 @@ onBeforeUnmount(() => {
   background: rgb(126, 147, 255);
 }
 
-.fixed-audio-control {
-  position: fixed;
-  right: 0.85rem;
-  bottom: calc(0.85rem + env(safe-area-inset-bottom, 0px));
-  z-index: 70;
-}
-
-.fixed-audio-control :deep(button) {
-  width: 3.1rem;
-  height: 3.1rem;
-  min-width: 0;
-  padding: 0;
-  border-radius: 999px;
-  box-shadow: 0 10px 22px rgba(17, 24, 39, 0.14);
-}
-
-.fixed-audio-control :deep(svg) {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-@media (min-width: 768px) {
-  .fixed-audio-control {
-    right: 1rem;
-    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-  }
-}
 </style>
