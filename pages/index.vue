@@ -161,7 +161,7 @@ onMounted(() => {
       <span class="hidden-dojo-door" aria-hidden="true">
         <DoorOpen class="size-5" :stroke-width="2.2" />
       </span>
-      <span class="hidden-dojo-peek">psst... dojo?</span>
+      <span class="hidden-dojo-peek">Enter the dojo</span>
     </button>
 
     <Teleport to="body">
@@ -187,18 +187,18 @@ onMounted(() => {
             <X class="size-5" aria-hidden="true" />
           </button>
 
-          <div class="dojo-entrance-secret" aria-hidden="true">
+          <!-- <div class="dojo-entrance-secret" aria-hidden="true">
             hidden passage unlocked
-          </div>
+          </div> -->
 
           <div class="dojo-entrance-header">
             <span class="dojo-entrance-glyph" aria-hidden="true">道場</span>
             <div>
               <h2 id="dojo-entrance-title" class="text-2xl font-semibold tracking-tight text-gray-900">
-                You found the dojo door
+                Hone your skills
               </h2>
               <p class="mt-2 text-sm text-gray-700">
-                Slip into focused training by level or by topic. Pick a path and keep it hush-hush.
+                Slip into focused training by level or by topic. Pick a path but keep it hush-hush.
               </p>
             </div>
           </div>
