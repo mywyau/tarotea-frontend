@@ -3,7 +3,7 @@
 import { NuxtLink } from '#components';
 import { masteryXp } from '@/config/xp/helpers';;
 import { CheckCircle2 } from '@lucide/vue';
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 const props = defineProps<{
   to?: string
@@ -16,6 +16,7 @@ const props = defineProps<{
 
 const rippleClass = 'is-ripple-neighbor'
 const tileRef = ref<HTMLElement | { $el?: HTMLElement } | null>(null)
+let tileObserver: IntersectionObserver | null = null
 let hasRevealedDropIn = false
 
 function prefersReducedMotion() {
@@ -30,20 +31,12 @@ function getTileElement() {
   return tile?.$el instanceof HTMLElement ? tile.$el : null
 }
 
-function revealDropInTile(tile = getTileElement(), animate = true) {
+function revealDropInTile(tile = getTileElement()) {
   if (!tile || hasRevealedDropIn) return
 
   hasRevealedDropIn = true
-
-  if (!animate) {
-    tile.classList.add('word-tile-drop-in-no-animation')
-  }
-
   tile.classList.add('word-tile-drop-in-visible')
-}
-
-function isTileInitiallyVisible(tile: HTMLElement) {
-  return tile.getBoundingClientRect().top <= window.innerHeight
+  tileObserver?.unobserve(tile)
 }
 
 onMounted(() => {
@@ -51,7 +44,29 @@ onMounted(() => {
 
   if (!tile?.classList.contains('word-tile-drop-in')) return
 
-  revealDropInTile(tile, !prefersReducedMotion() && isTileInitiallyVisible(tile))
+  if (prefersReducedMotion() || !('IntersectionObserver' in window)) {
+    revealDropInTile(tile)
+    return
+  }
+
+  tileObserver = new IntersectionObserver(
+    ([entry]) => {
+      if (entry?.isIntersecting) {
+        revealDropInTile(tile)
+      }
+    },
+    {
+      rootMargin: '0px 0px -18% 0px',
+      threshold: 0.2,
+    }
+  )
+
+  tileObserver.observe(tile)
+})
+
+onBeforeUnmount(() => {
+  tileObserver?.disconnect()
+  tileObserver = null
 })
 
 function getTileHash() {
@@ -252,24 +267,8 @@ function moveTileWithPointer(event: PointerEvent) {
     scale(0.96);
 }
 
-.word-tile-drop-in.word-tile-drop-in-visible:not(.word-tile-drop-in-no-animation) {
+.word-tile-drop-in.word-tile-drop-in-visible {
   animation: word-tile-drop-in var(--tile-drop-duration, 1400ms) cubic-bezier(0.18, 0.9, 0.28, 1.12) var(--tile-drop-delay, 0ms) forwards;
-}
-
-.word-tile-drop-in.word-tile-drop-in-no-animation {
-  opacity: 1;
-  animation: none;
-  transition:
-    box-shadow 0.24s ease,
-    filter 0.24s ease;
-  transform:
-    translate3d(
-      calc(var(--tile-ripple-x) + var(--tile-x)),
-      calc(var(--tile-ripple-y) + var(--tile-y) + var(--tile-lift)),
-      0
-    )
-    rotate(calc(var(--tile-ripple-rotate) + var(--tile-rotate)))
-    scale(var(--tile-scale));
 }
 
 @keyframes word-tile-drop-in {
