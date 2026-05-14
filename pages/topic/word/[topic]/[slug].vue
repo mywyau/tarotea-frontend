@@ -780,6 +780,29 @@ watchEffect(() => {
     background: #d1d5db;
 }
 
+.word-nav-progress-track > div {
+    height: 100%;
+    border-radius: inherit;
+}
+
+@media (min-width: 768px) {
+    .word-nav-row {
+        grid-template-columns: 3.5rem minmax(18rem, 34rem) 3.5rem;
+    }
+
+    .word-nav-progress {
+        gap: 0.65rem;
+    }
+
+    .word-nav-progress-label {
+        font-size: 1rem;
+    }
+
+    .word-nav-progress-track {
+        height: 0.9rem;
+    }
+}
+
 .word-nav-progress-spacer {
     min-height: 2rem;
 }
