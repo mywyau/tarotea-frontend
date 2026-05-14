@@ -7,6 +7,56 @@ import {
 } from "~/server/utils/whisper/wordToneScoring"
 
 const MAX_AUDIO_SIZE = 1_000_000
+const MIN_RECORDING_DURATION_MS = 350
+const MIN_RECORDING_RMS = 0.008
+const MIN_RECORDING_PEAK = 0.035
+
+type AudioQualitySummary = {
+  durationMs: number
+  rms: number
+  peak: number
+  voicedFrameCount: number
+  totalFrameCount: number
+}
+
+function parseAudioQuality(raw: string): AudioQualitySummary | null {
+  if (!raw) return null
+
+  try {
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== "object") return null
+
+    const quality: AudioQualitySummary = {
+      durationMs: Number(parsed.durationMs),
+      rms: Number(parsed.rms),
+      peak: Number(parsed.peak),
+      voicedFrameCount: Number(parsed.voicedFrameCount),
+      totalFrameCount: Number(parsed.totalFrameCount),
+    }
+
+    if (Object.values(quality).some((value) => !Number.isFinite(value) || value < 0)) {
+      return null
+    }
+
+    return quality
+  } catch {
+    return null
+  }
+}
+
+function getAudioQualityError(quality: AudioQualitySummary, expectedTokenCount: number) {
+  const minVoicedFrames = Math.max(3, expectedTokenCount * 2)
+
+  if (quality.durationMs < MIN_RECORDING_DURATION_MS) {
+    return "Recording is too short"
+  }
+
+  if (quality.rms < MIN_RECORDING_RMS || quality.peak < MIN_RECORDING_PEAK || quality.voicedFrameCount < minVoicedFrames) {
+    return "Recording does not contain enough clear voice audio"
+  }
+
+  return ""
+}
 
 function parseAcousticContours(raw: string): AcousticSyllableContour[] {
   if (!raw) return []
@@ -48,8 +98,10 @@ export default defineEventHandler(async (event) => {
     form?.find((f) => f.name === "expectedJyutping")?.data?.toString().trim() ?? ""
   const pitchSummaryRaw = form?.find((f) => f.name === "pitchSummary")?.data?.toString() ?? ""
   const referenceSummaryRaw = form?.find((f) => f.name === "referenceSummary")?.data?.toString() ?? ""
+  const audioQualityRaw = form?.find((f) => f.name === "audioQuality")?.data?.toString() ?? ""
   const acousticContours = parseAcousticContours(pitchSummaryRaw)
   const referenceContours = parseAcousticContours(referenceSummaryRaw)
+  const audioQuality = parseAudioQuality(audioQualityRaw)
 
   if (!audioFile?.data?.length) {
     throw createError({ statusCode: 400, statusMessage: "Missing audio file" })
@@ -62,6 +114,14 @@ export default defineEventHandler(async (event) => {
 
   if (audioFile.data.length > MAX_AUDIO_SIZE) {
     throw createError({ statusCode: 400, statusMessage: "Audio file too large" })
+  }
+
+  if (audioQuality) {
+    const expectedTokenCount = expectedJyutping.toLowerCase().match(/[a-z]+[1-6]?/g)?.length ?? 0
+    const audioQualityError = getAudioQualityError(audioQuality, expectedTokenCount)
+    if (audioQualityError) {
+      throw createError({ statusCode: 422, statusMessage: audioQualityError })
+    }
   }
 
   const result = scoreWordToneAttempt({
