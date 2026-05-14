@@ -152,8 +152,8 @@ onMounted(() => {
 <template>
   <main class="relative max-w-4xl mx-auto py-16 sm:py-20 px-6 min-h-screen">
 
-    <button type="button" class="hidden-dojo-trigger" aria-haspopup="dialog" :aria-expanded="isDojoEntranceOpen"
-      aria-controls="dojo-entrance-dialog" @click="openDojoEntrance">
+    <button type="button" class="hidden-dojo-trigger" aria-label="Enter the dojo" aria-haspopup="dialog"
+      :aria-expanded="isDojoEntranceOpen" aria-controls="dojo-entrance-dialog" @click="openDojoEntrance">
       <span class="hidden-dojo-door" aria-hidden="true">
         <Sword class="size-5" :stroke-width="2.2" />
       </span>
@@ -679,7 +679,9 @@ onMounted(() => {
     top: auto;
     right: 1rem;
     bottom: 1.25rem;
-    padding-right: 1rem;
+    justify-content: center;
+    width: 3.25rem;
+    padding: 0.45rem;
     border-right: 1px solid rgba(17, 24, 39, 0.14);
     border-radius: 999px;
     transform: none;
@@ -689,6 +691,10 @@ onMounted(() => {
   .hidden-dojo-trigger:focus-visible {
     right: 1rem;
     transform: none;
+  }
+
+  .hidden-dojo-peek {
+    display: none;
   }
 
   .dojo-entrance-header {
