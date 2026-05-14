@@ -56,7 +56,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 </script>
 
 <template>
-  <main class="levels-page max-w-4xl mx-auto py-10 px-4 space-y-8">
+  <main class="levels-page max-w-xl mx-auto py-10 px-4 space-y-8">
 
     <!-- <div class="mb-6">
       <NuxtLink :to="`/dojo`" class="text-black text-sm hover:underline">
@@ -74,7 +74,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
     </header>
 
     <!-- Grid -->
-    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <ul class="grid grid-cols-1 gap-6">
 
       <li v-for="quizLevel in jyutPingQuizSelectMetaData" :key="quizLevel.id" class="dojo-level-card" :class="[
         (!canEnterLevel(quizLevel) || quizLevel.comingSoon)

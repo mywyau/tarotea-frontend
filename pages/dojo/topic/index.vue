@@ -77,7 +77,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
 </script>
 
 <template>
-  <main class="topics-page max-w-4xl mx-auto py-10 px-2 space-y-10">
+  <main class="topics-page max-w-xl mx-auto py-10 px-4 space-y-10">
 
 
 
@@ -108,7 +108,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
       </p>
     </div>
 
-    <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+    <ul class="grid grid-cols-1 gap-6">
       <li v-for="quizTopic in paginatedTopics" :key="quizTopic.id" class="topic-card" :class="[
         (!canEnterTopic(quizTopic) || quizTopic.comingSoon) ? 'topic-locked' : ''
       ]">

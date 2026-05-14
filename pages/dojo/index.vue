@@ -9,7 +9,7 @@ definePageMeta({
 </script>
 
 <template>
-  <main class="dojo-home max-w-3xl mx-auto py-20 px-6 space-y-10">
+  <main class="dojo-home max-w-xl mx-auto py-20 px-6 space-y-10">
 
 
 
@@ -22,7 +22,7 @@ definePageMeta({
     </div>
 
     <!-- Training Options -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
+    <div class="grid grid-cols-1 gap-6 pt-6">
 
       <!-- Level Training -->
       <NuxtLink to="/dojo/level" class="dojo-tile dojo-tile-blue rounded-2xl p-8 shadow-sm hover:shadow-md transition
