@@ -17,6 +17,7 @@ import {
   X,
   Rocket,
   Swords,
+  Sword,
 } from '@lucide/vue'
 
 const { data: stats } = await useFetch('/api/total-users-stats', {
@@ -155,7 +156,7 @@ onMounted(() => {
       aria-label="Enter the dojo" aria-haspopup="dialog" :aria-expanded="isDojoEntranceOpen"
       aria-controls="dojo-entrance-dialog" @click="openDojoEntrance">
       <span class="hidden-dojo-burst" aria-hidden="true"></span>
-      <Rocket class="hidden-dojo-icon" aria-hidden="true" />
+      <Sword class="hidden-dojo-icon" aria-hidden="true" />
       <span class="sr-only">Enter the dojo</span>
     </button>
 
