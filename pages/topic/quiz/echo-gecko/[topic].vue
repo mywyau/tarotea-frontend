@@ -152,6 +152,11 @@ const nextWordCountdownSeconds = computed(() => {
   return Math.max(0, Math.ceil(nextWordCountdownMs.value / 1000))
 })
 
+const canRecordAgain = computed(() => {
+  if (!recordedBlob.value || recording.value || submitting.value) return false
+  return Boolean(errorMessage.value) || (lastToneScore.value !== null && lastToneScore.value <= PASS_SCORE)
+})
+
 function shuffle<T>(arr: T[]) {
   const copy = [...arr]
   for (let i = copy.length - 1; i > 0; i--) {
@@ -623,9 +628,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="min-h-screen text-gray-900">
-    <div class="mx-auto max-w-3xl px-4 py-10">
 
+  <main class="min-h-screen text-gray-900">
+
+    <div class="mx-auto max-w-3xl px-4 py-10">
 
       <header class="mb-6 mt-10 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
@@ -636,8 +642,7 @@ onBeforeUnmount(() => {
           @update:playback-rate="playbackRate = $event" />
       </header>
 
-      <section class="rounded-2xl p-5 sm:p-6"
-        :class="(finished || finalizing) ? 'bg-transparent shadow-none' : 'border border-fuchsia-100 bg-white/90 shadow-sm'">
+      <section class="rounded-2xl p-5 sm:p-6" :class="(finished || finalizing) ? 'bg-transparent shadow-none' : ''">
         <div v-if="pending || loading" class="text-sm text-gray-600">Loading quiz words…</div>
         <div v-else-if="error" class="rounded-lg border border-rose-300 bg-rose-100 p-3 text-sm text-rose-700">
           Failed to load topic quiz data. Please refresh and try again.
@@ -658,7 +663,7 @@ onBeforeUnmount(() => {
             Start pronunciation quiz
           </button>
 
-          <section class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4 text-left">
+          <section class="rounded-xl p-4 text-left">
             <h3 class="text-sm font-semibold text-gray-900">Before you start</h3>
             <ul class="mt-3 space-y-2 text-sm text-gray-700">
               <li class="flex items-start gap-2">
@@ -697,131 +702,178 @@ onBeforeUnmount(() => {
             :incorrect="missedCount" :time="formattedElapsedTime" :show-xp="false" />
 
           <button
-            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#BFEA83] px-4 py-3 text-base font-medium text-black transition hover:brightness-110"
+            class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#BFEA83] px-4 py-3 text-base font-semibold text-gray-900 transition hover:brightness-105"
             @click="startQuiz">
             <RotateCcw class="h-5 w-5" aria-hidden="true" />
-            <span>Play Again</span>
+            <span>Play again</span>
           </button>
         </div>
 
-        <div v-else-if="currentWord" class="space-y-4">
-          <div class="grid gap-3 sm:grid-cols-3">
-            <div class="rounded-xl border border-[#BFEA83]/70 bg-[#BFEA83]/30 p-3 text-center shadow-sm">
-              <p class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-lime-800">Progress</p>
-              <p class="mt-1 text-lg font-bold text-gray-900">{{ progressLabel }}</p>
+        <div v-else-if="currentWord" class="space-y-5">
+          <!-- Top status bar -->
+          <div class="rounded-2xl p-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  Echo Gecko
+                </p>
+                <p class="mt-1 text-sm font-medium text-gray-800">
+                  Word {{ Math.min(currentIndex + 1, quizSize) }} of {{ quizSize }}
+                </p>
+              </div>
+
+              <div class="text-right">
+                <p class="text-xs text-gray-500">Passed</p>
+                <p class="text-lg font-bold text-gray-900">{{ passedCount }}/{{ quizSize }}</p>
+              </div>
             </div>
 
-            <div class="rounded-xl border border-[#FDBA74]/70 bg-[#FDBA74]/30 p-3 text-center shadow-sm">
-              <p class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-orange-800">Passed</p>
-              <p class="mt-1 text-lg font-bold text-gray-900">{{ passedCount }} / {{ quizSize }}</p>
+            <div class="mt-4 h-2 overflow-hidden rounded-full bg-gray-200">
+              <div class="h-full rounded-full bg-[#BFEA83] transition-all"
+                :style="{ width: `${((currentIndex + 1) / quizSize) * 100}%` }" />
             </div>
 
-            <div class="rounded-xl border border-[#F7D774]/80 bg-[#F7D774]/35 p-3 text-center shadow-sm">
-              <p class="text-[0.65rem] font-semibold uppercase tracking-[0.18em] text-yellow-800">Elapsed</p>
-              <p class="mt-1 text-lg font-bold text-gray-900">{{ formattedElapsedTime }}</p>
+            <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+              <span>{{ formattedElapsedTime }}</span>
+
+              <label class="inline-flex items-center gap-2">
+                <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-gray-300" />
+                Rapid mode
+              </label>
             </div>
           </div>
 
-          <div class="rounded-xl border border-fuchsia-100 bg-white p-4">
-            <p class="text-xs uppercase tracking-wider text-gray-500">Target Chinese</p>
-            <p class="mt-1 text-3xl font-bold text-gray-900">{{ currentWord.word }}</p>
-            <!-- <p class="mt-3 text-xs uppercase tracking-wider text-gray-500">Target Jyutping</p>
-            <p class="mt-1 text-xl font-semibold text-gray-900">{{ currentWord.jyutping }}</p> -->
-            <p v-if="currentWord.meaning" class="mt-2 text-sm text-gray-600">{{ currentWord.meaning }}</p>
-            <button
-              class="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#F7D774] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="submitting || !currentWordAudioUrl" @click="playCurrentWordAudio">
-              <Volume2 class="h-4 w-4" aria-hidden="true" />
-              <span>Play Chinese Audio</span>
-            </button>
-          </div>
-
-          <div class="flex flex-wrap gap-3">
-            <button
-              class="inline-flex items-center gap-2 rounded-lg bg-[#BFEA83] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="recording || submitting" @click="startRecording">
-              <Mic class="h-4 w-4" aria-hidden="true" />
-              <span>Start Recording</span>
-            </button>
-            <button
-              class="inline-flex items-center gap-2 rounded-lg bg-[#FDBA74] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="!recording || submitting" @click="stopRecording">
-              <Square class="h-4 w-4" aria-hidden="true" />
-              <span>Stop Recording</span>
-            </button>
-            <button
-              class="inline-flex items-center gap-2 rounded-lg bg-[#FCD34D] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
-              <LoaderCircle v-if="submitting" class="h-4 w-4 animate-spin" aria-hidden="true" />
-              <Send v-else class="h-4 w-4" aria-hidden="true" />
-              <span>{{ submitting ? "Scoring..." : "Submit" }}</span>
-            </button>
-            <button
-              class="inline-flex items-center gap-2 rounded-lg bg-[#86EFAC] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="submitting || ((lastToneScore === null || lastToneScore <= PASS_SCORE) && !canSkipCurrentWord)" @click="goToNextWord">
-              <ArrowRight class="h-4 w-4" aria-hidden="true" />
-              <span>Next</span>
-            </button>
-            <button
-              class="inline-flex items-center gap-2 rounded-lg bg-[#FB923C] px-4 py-2 text-sm font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-              :disabled="submitting || !canSkipCurrentWord"
-              :title="canSkipCurrentWord ? 'Skip word' : `Try ${skipAttemptsRemaining} more ${skipAttemptsRemaining === 1 ? 'time' : 'times'} to unlock skip`"
-              @click="skipWord">
-              <SkipForward class="h-4 w-4" aria-hidden="true" />
-              <span>Skip</span>
-            </button>
-            <label
-              class="inline-flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-gray-700">
-              <input v-model="rapidMode" type="checkbox" class="h-4 w-4 rounded border-amber-400 text-amber-600" />
-              Rapid mode (skip pause only)
-            </label>
-          </div>
-
-          <p v-if="!canSkipCurrentWord" class="text-xs text-gray-500">
-            Skip unlocks after {{ skipAttemptsRemaining }} more scored {{ skipAttemptsRemaining === 1 ? "attempt" : "attempts" }}.
-          </p>
-
-          <p v-if="recording" class="text-sm text-amber-700">Recording... speak now.</p>
-          <p v-if="successMessage && !rapidMode"
-            class="rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
-            {{ successMessage }}
-            <span v-if="nextWordCountdownSeconds !== null" class="ml-1">
-              (next word in {{ nextWordCountdownSeconds }}s)
-            </span>
-          </p>
-          <audio v-if="recordingUrl" class="w-full" controls :src="recordingUrl" />
-
-          <div v-if="lastToneScore !== null" class="rounded-xl border border-fuchsia-100 bg-fuchsia-50/50 p-4">
-            <p class="text-sm text-gray-700">
-              Feedback:
-              <span class="font-semibold" :class="lastToneScore > PASS_SCORE ? 'text-emerald-700' : 'text-amber-700'">
-                {{ lastToneLabel }}
-              </span>
-              <!-- <span class="text-gray-500"> (need above threshold to continue)</span> -->
+          <!-- Main word card -->
+          <section class="rounded-3xl p-6 text-center">
+            <p class="mt-4 text-6xl font-bold text-gray-900">
+              {{ currentWord.word }}
             </p>
-            <p class="mt-2 text-sm text-gray-700">{{ feedback }}</p>
-            <div class="mt-3">
+
+            <p v-if="currentWord.meaning" class="mt-3 text-base text-gray-600">
+              {{ currentWord.meaning }}
+            </p>
+          </section>
+
+          <!-- Recording preview -->
+          <div v-if="recording || recordingUrl" class="rounded-2xl border border-amber-200 bg-amber-50/70 p-4">
+            <p v-if="recording" class="text-sm font-medium text-amber-800">
+              Recording... speak now.
+            </p>
+
+            <audio v-if="recordingUrl" class="mt-2 w-full" controls :src="recordingUrl" />
+          </div>
+
+          <!-- Primary action dock -->
+          <div class="sticky bottom-4 z-10 rounded-3xl p-3">
+            <div class="grid grid-cols-[1fr_auto_auto] gap-2">
+              <button v-if="!recording && !recordedBlob"
+                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#BFEA83] px-4 py-3 text-base font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                :disabled="submitting" @click="startRecording">
+                <Mic class="h-5 w-5" aria-hidden="true" />
+                <span>Record</span>
+              </button>
+
+              <button v-else-if="recording"
+                class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FDBA74] px-4 py-3 text-base font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                :disabled="submitting" @click="stopRecording">
+                <Square class="h-5 w-5" aria-hidden="true" />
+                <span>Stop</span>
+              </button>
+
+              <div v-else class="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button v-if="canRecordAgain"
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#BFEA83] px-4 py-3 text-base font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                  :disabled="submitting" @click="startRecording">
+                  <Mic class="h-5 w-5" aria-hidden="true" />
+                  <span>Record again</span>
+                </button>
+
+                <button
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#FCD34D] px-4 py-3 text-base font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+                  :class="canRecordAgain ? '' : 'sm:col-span-2'"
+                  :disabled="recording || !recordedBlob || submitting" @click="submitAttempt">
+                  <LoaderCircle v-if="submitting" class="h-5 w-5 animate-spin" aria-hidden="true" />
+                  <Send v-else class="h-5 w-5" aria-hidden="true" />
+                  <span>{{ submitting ? "Scoring..." : "Submit" }}</span>
+                </button>
+              </div>
+
               <button
-                class="inline-flex items-center gap-2 rounded-lg bg-[#86EFAC] px-3 py-2 text-xs font-medium text-gray-900 transition hover:brightness-105 disabled:opacity-50"
-                :disabled="lastToneScore <= PASS_SCORE && !canSkipCurrentWord" @click="goToNextWord">
-                <ArrowRight class="h-3.5 w-3.5" aria-hidden="true" />
-                <span>Next Word</span>
+                class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                :disabled="submitting || !canSkipCurrentWord" @click="skipWord" aria-label="Skip word"
+                :title="canSkipCurrentWord ? 'Skip word' : `Try ${skipAttemptsRemaining} more ${skipAttemptsRemaining === 1 ? 'time' : 'times'} to unlock skip`">
+                <SkipForward class="h-5 w-5" aria-hidden="true" />
+              </button>
+
+              <button
+                class="inline-flex items-center justify-center rounded-2xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+                :disabled="submitting" @click="playCurrentWordAudio" aria-label="Replay audio">
+                <Volume2 class="h-5 w-5" aria-hidden="true" />
               </button>
             </div>
-            <div v-if="detectedToneDisplayRows.length"
-              class="mt-3 rounded-lg border border-fuchsia-100 bg-white/80 p-3">
-              <p class="text-xs uppercase tracking-wider text-gray-500">Detected tones by syllable</p>
-              <ul class="mt-2 space-y-1 text-sm text-gray-700">
+            <p v-if="!canSkipCurrentWord" class="mt-2 text-center text-xs text-gray-500">
+              Skip unlocks after {{ skipAttemptsRemaining }} more scored {{ skipAttemptsRemaining === 1 ? "attempt" : "attempts" }}.
+            </p>
+          </div>
+
+          <!-- Success message -->
+          <p v-if="successMessage && !rapidMode"
+            class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700">
+            {{ successMessage }}
+            <span v-if="nextWordCountdownSeconds !== null" class="ml-1">
+              Next word in {{ nextWordCountdownSeconds }}s
+            </span>
+          </p>
+
+          <!-- Feedback -->
+          <div v-if="lastToneScore !== null"
+            class="rounded-3xl border border-black/5 bg-white/70 p-5 shadow-sm backdrop-blur">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.18em] text-gray-500">
+                  Feedback
+                </p>
+
+                <p class="mt-2 text-xl font-bold"
+                  :class="lastToneScore > PASS_SCORE ? 'text-emerald-700' : 'text-amber-700'">
+                  {{ lastToneLabel }}
+                </p>
+              </div>
+
+              <div class="rounded-2xl bg-gray-100 px-4 py-2 text-center">
+                <p class="text-xs text-gray-500">Score</p>
+                <p class="text-lg font-bold text-gray-900">{{ lastToneScore }}</p>
+              </div>
+            </div>
+
+            <p class="mt-4 text-sm leading-6 text-gray-700">
+              {{ feedback }}
+            </p>
+
+            <button
+              class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#86EFAC] px-4 py-3 text-sm font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
+              :disabled="submitting || (lastToneScore <= PASS_SCORE && !canSkipCurrentWord)" @click="goToNextWord">
+              <ArrowRight class="h-4 w-4" aria-hidden="true" />
+              <span>Next word</span>
+            </button>
+
+            <details v-if="detectedToneDisplayRows.length" class="mt-4 rounded-2xl bg-gray-50 p-4">
+              <summary class="cursor-pointer text-sm font-semibold text-gray-700">
+                Detected tones
+              </summary>
+
+              <ul class="mt-3 space-y-2 text-sm text-gray-700">
                 <li v-for="row in detectedToneDisplayRows" :key="`tone-row-${row.syllable}`">
                   <span class="font-medium">
-                    {{ row.character ? `Character ${row.character}` : `Syllable ${row.syllable}` }}
+                    {{ row.character ? `Character: ${row.character}` : `Syllable ${row.syllable}` }}
                   </span>
-                  <span class="text-gray-500"> (target {{ row.token }})</span>:
+                  <span class="text-gray-500">
+                    target <span class="font-medium text-black">{{ row.token }}</span>,
+                  </span>
                   heard <span class="font-semibold">{{ row.heardJyutping }}</span>
-                  — tone <span class="font-semibold">{{ row.detectedTone ?? "unknown" }}</span>
                 </li>
               </ul>
-            </div>
+            </details>
           </div>
         </div>
 
@@ -830,9 +882,9 @@ onBeforeUnmount(() => {
         </p>
       </section>
     </div>
+
   </main>
 </template>
-
 
 <style scoped>
 .stat-card {
