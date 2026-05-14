@@ -161,7 +161,7 @@ onMounted(async () => {
       </p>
     </header>
 
-    <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+    <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-3">
 
       <li v-for="(topic, index) in paginatedTopics" :key="`${currentPage}-${topic.id}`"
         class="topic-card hover:brightness-110 rounded-lg p-4 space-y-3 transition" :class="[
@@ -171,32 +171,30 @@ onMounted(async () => {
             : 'is-active'
         ]" :style="{ backgroundColor: getTopicColor(topic, index), ...topicAnimationStyles[topic.id] }">
 
-        <NuxtLink :to="topicLink(topic)" class="block space-y-3 pr-12">
-          <span class="topic-icon">
-            <component :is="getTopicIcon(topic.id)" class="h-5 w-5" aria-hidden="true" />
-          </span>
-
-          <!-- Title row -->
-          <div class="flex items-start justify-between gap-3">
-            <div>
-              <h2 class="text-lg font-semibold text-gray-900 leading-snug">
+        <NuxtLink :to="topicLink(topic)" class="block space-y-3">
+          <div class="min-w-0 topic-card-copy">
+            <div class="topic-card-header">
+              <h2 class="text-base sm:text-lg font-semibold text-gray-900 leading-snug">
                 {{ topic.title }}
               </h2>
 
-              <p v-if="topic.comingSoon" class="mt-2">
-                <span class="pill text-black">Coming soon</span>
-              </p>
-
-              <p v-else-if="topic.requiresPaid && !doNotShowUpgradeMessage(topic)" class="mt-2">
-                <span class="pill pill-locked">Locked</span>
-              </p>
+              <span class="topic-icon-wrap" role="img" :aria-label="`${topic.title} topic`">
+                <component :is="getTopicIcon(topic.id)" class="topic-icon" aria-hidden="true" />
+              </span>
             </div>
-          </div>
 
-          <!-- Description -->
-          <p class="text-sm text-gray-700">
-            {{ topic.description }}
-          </p>
+            <p v-if="topic.comingSoon" class="mt-2">
+              <span class="pill text-black">Coming soon</span>
+            </p>
+
+            <p v-else-if="topic.requiresPaid && !doNotShowUpgradeMessage(topic)" class="mt-2">
+              <span class="pill pill-locked">Locked</span>
+            </p>
+
+            <p class="hidden sm:block text-sm text-gray-700 mt-2">
+              {{ topic.description }}
+            </p>
+          </div>
         </NuxtLink>
       </li>
     </ul>
@@ -283,6 +281,17 @@ onMounted(async () => {
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.03);
 }
 
+.topic-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.topic-card-copy {
+  padding-right: 2.25rem;
+}
+
 .topic-card-fly-in {
   opacity: 0;
   transform: translate(var(--topic-fly-x, 0), var(--topic-fly-y, 0)) rotate(var(--topic-fly-rotation, 0deg)) scale(0.92);
@@ -316,19 +325,20 @@ onMounted(async () => {
   }
 }
 
-.topic-icon {
+.topic-icon-wrap {
   position: absolute;
-  top: 0.9rem;
-  right: 0.9rem;
+  top: 1rem;
+  right: 1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: 999px;
-  /* background: rgba(255, 255, 255, 0.42); */
+}
+
+.topic-icon {
+  width: 1.25rem;
+  height: 1.25rem;
+  stroke-width: 2.25;
   color: rgba(17, 24, 39, 0.82);
-  /* box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35); */
 }
 
 .topic-card.is-active:hover {
