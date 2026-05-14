@@ -680,17 +680,39 @@ onMounted(() => {
     right: 1rem;
     bottom: 1.25rem;
     justify-content: center;
-    width: 3.25rem;
-    padding: 0.45rem;
-    border-right: 1px solid rgba(17, 24, 39, 0.14);
+    width: 3.3rem;
+    height: 3.3rem;
+    min-height: 3.3rem;
+    padding: 0;
+    background: transparent;
+    border: 0;
     border-radius: 999px;
+    box-shadow: none;
+    overflow: visible;
+    isolation: isolate;
     transform: none;
+  }
+
+  .hidden-dojo-trigger::before {
+    position: absolute;
+    inset: 0.45rem;
+    z-index: -1;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.18) 62%, transparent 70%);
+    border-radius: inherit;
+    content: '';
   }
 
   .hidden-dojo-trigger:hover,
   .hidden-dojo-trigger:focus-visible {
     right: 1rem;
+    box-shadow: none;
     transform: none;
+  }
+
+  .hidden-dojo-door {
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
   }
 
   .hidden-dojo-peek {
