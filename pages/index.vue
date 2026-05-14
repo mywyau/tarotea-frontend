@@ -677,8 +677,8 @@ onMounted(() => {
 @media (max-width: 640px) {
   .hidden-dojo-trigger {
     top: auto;
-    right: 1rem;
-    bottom: 1.25rem;
+    right: 0.85rem;
+    bottom: 0.85rem;
     justify-content: center;
     width: 3.3rem;
     height: 3.3rem;
@@ -704,7 +704,7 @@ onMounted(() => {
 
   .hidden-dojo-trigger:hover,
   .hidden-dojo-trigger:focus-visible {
-    right: 1rem;
+    right: 0.85rem;
     box-shadow: none;
     transform: none;
   }
@@ -713,6 +713,12 @@ onMounted(() => {
     width: 2rem;
     height: 2rem;
     background: transparent;
+  }
+
+  .hidden-dojo-door :deep(svg) {
+    width: 2rem;
+    height: 2rem;
+    stroke-width: 2.4;
   }
 
   .hidden-dojo-peek {
