@@ -8,7 +8,7 @@ useSeoMeta({
 
 import {
   CalendarCheck,
-  ClipboardList,
+  CircleHelp,
   GraduationCap,
   Layers,
   PenLine,
@@ -206,7 +206,7 @@ onMounted(() => {
             </NuxtLink>
             <NuxtLink to="/topics/quiz" class="start-learning-icon-link" aria-label="Topic quizzes"
               title="Topic quizzes" @click.stop>
-              <ClipboardList class="start-learning-action-icon" aria-hidden="true" />
+              <CircleHelp class="start-learning-action-icon" aria-hidden="true" />
               <span class="sr-only">Topic quizzes</span>
             </NuxtLink>
             <NuxtLink to="/dojo/topic" class="start-learning-icon-link" aria-label="Enter Topic Dojo"
@@ -240,7 +240,7 @@ onMounted(() => {
             </NuxtLink>
             <NuxtLink to="/quiz" class="start-learning-icon-link" aria-label="Level quizzes"
               title="Level quizzes" @click.stop>
-              <ClipboardList class="start-learning-action-icon" aria-hidden="true" />
+              <CircleHelp class="start-learning-action-icon" aria-hidden="true" />
               <span class="sr-only">Level quizzes</span>
             </NuxtLink>
             <NuxtLink to="/dojo/level" class="start-learning-icon-link" aria-label="Enter Level Dojo"
