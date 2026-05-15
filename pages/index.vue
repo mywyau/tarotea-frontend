@@ -197,7 +197,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="start-learning-actions mt-4 sm:mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+          <div class="start-learning-actions mt-4 sm:mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <NuxtLink to="/topics"
               class="inline-flex min-h-11 items-center justify-center rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-800 sm:min-h-0 sm:px-4 sm:text-base"
               @click.stop>
@@ -208,14 +208,11 @@ onMounted(() => {
               @click.stop>
               Topic quizzes
             </NuxtLink>
+            <NuxtLink to="/dojo/topic" class="start-learning-dojo-link" aria-label="Enter Topic Dojo" @click.stop>
+              <Sword class="start-learning-dojo-icon" aria-hidden="true" />
+              <span class="sr-only">Enter Topic Dojo</span>
+            </NuxtLink>
           </div>
-
-          <NuxtLink to="/dojo/topic" class="start-learning-dojo-link start-learning-dojo-link-topic"
-            aria-label="Enter Topic Dojo" @click.stop>
-            <span class="start-learning-dojo-burst" aria-hidden="true"></span>
-            <Sword class="start-learning-dojo-icon" aria-hidden="true" />
-            <span class="sr-only">Enter Topic Dojo</span>
-          </NuxtLink>
         </article>
 
         <article
@@ -233,7 +230,7 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="start-learning-actions mt-4 sm:mt-5 grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+          <div class="start-learning-actions mt-4 sm:mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 sm:flex sm:flex-wrap sm:gap-3">
             <NuxtLink to="/levels"
               class="inline-flex min-h-11 items-center justify-center rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-800 sm:min-h-0 sm:px-4 sm:text-base"
               @click.stop>
@@ -244,14 +241,11 @@ onMounted(() => {
               @click.stop>
               Level quizzes
             </NuxtLink>
+            <NuxtLink to="/dojo/level" class="start-learning-dojo-link" aria-label="Enter Level Dojo" @click.stop>
+              <Sword class="start-learning-dojo-icon" aria-hidden="true" />
+              <span class="sr-only">Enter Level Dojo</span>
+            </NuxtLink>
           </div>
-
-          <NuxtLink to="/dojo/level" class="start-learning-dojo-link start-learning-dojo-link-level"
-            aria-label="Enter Level Dojo" @click.stop>
-            <span class="start-learning-dojo-burst" aria-hidden="true"></span>
-            <Sword class="start-learning-dojo-icon" aria-hidden="true" />
-            <span class="sr-only">Enter Level Dojo</span>
-          </NuxtLink>
         </article>
       </div>
     </section>
@@ -336,8 +330,7 @@ onMounted(() => {
   flex-direction: column;
   justify-content: space-between;
   min-height: clamp(15.75rem, 30vw, 18rem);
-  overflow: visible;
-  padding-bottom: 5rem;
+  overflow: hidden;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   transform-style: preserve-3d;
@@ -386,36 +379,22 @@ onMounted(() => {
 }
 
 .start-learning-dojo-link {
-  position: absolute;
-  bottom: 1.1rem;
-  z-index: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 3.4rem;
-  height: 3.4rem;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
   color: rgba(17, 24, 39, 0.92);
-  background: rgba(255, 255, 255, 0.38);
-  border: 1px solid rgba(255, 255, 255, 0.62);
-  border-radius: 999px;
-  box-shadow: 0 16px 36px rgba(17, 24, 39, 0.12);
-  isolation: isolate;
-  transition: background 180ms ease, box-shadow 180ms ease, transform 180ms ease;
-}
-
-.start-learning-dojo-link-topic {
-  right: 1.1rem;
-}
-
-.start-learning-dojo-link-level {
-  left: 1.1rem;
+  background: rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(17, 24, 39, 0.22);
+  border-radius: 0.375rem;
+  transition: background 180ms ease, transform 180ms ease;
 }
 
 .start-learning-dojo-link:hover,
 .start-learning-dojo-link:focus-visible {
-  background: rgba(255, 255, 255, 0.74);
-  box-shadow: 0 20px 42px rgba(17, 24, 39, 0.16);
-  transform: translateY(-0.1rem) scale(1.08);
+  background: rgba(255, 255, 255, 0.64);
+  transform: translateY(-0.06rem);
 }
 
 .start-learning-dojo-link:focus-visible {
@@ -424,78 +403,17 @@ onMounted(() => {
 }
 
 .start-learning-dojo-icon {
-  width: 2rem;
-  height: 2rem;
+  width: 1.35rem;
+  height: 1.35rem;
   stroke-width: 2.35;
   transition: transform 180ms ease;
 }
 
 .start-learning-dojo-link:hover .start-learning-dojo-icon,
 .start-learning-dojo-link:focus-visible .start-learning-dojo-icon {
-  transform: translateY(-0.08rem) rotate(-8deg);
+  transform: rotate(-8deg);
 }
 
-.start-learning-dojo-link-level .start-learning-dojo-icon {
-  transform: scaleX(-1);
-}
-
-.start-learning-dojo-link-level:hover .start-learning-dojo-icon,
-.start-learning-dojo-link-level:focus-visible .start-learning-dojo-icon {
-  transform: scaleX(-1) translateY(-0.08rem) rotate(-8deg);
-}
-
-.start-learning-dojo-burst {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  z-index: -1;
-  width: 0.24rem;
-  height: 0.24rem;
-  background: transparent;
-  border-radius: 999px;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.35);
-  pointer-events: none;
-  box-shadow:
-    -0.18rem -1.18rem 0 -0.03rem rgba(159, 91, 181, 0.95),
-    0.54rem -1rem 0 -0.08rem rgba(133, 78, 161, 0.9),
-    1.15rem -0.28rem 0 -0.05rem rgba(181, 123, 195, 0.92),
-    1.02rem 0.76rem 0 -0.08rem rgba(115, 65, 150, 0.86),
-    0.18rem 1.18rem 0 -0.04rem rgba(159, 91, 181, 0.92),
-    -0.62rem 0.92rem 0 -0.08rem rgba(181, 123, 195, 0.9),
-    -1.16rem 0.34rem 0 -0.05rem rgba(133, 78, 161, 0.9),
-    -0.9rem -0.68rem 0 -0.1rem rgba(159, 91, 181, 0.86);
-}
-
-.start-learning-dojo-link:hover .start-learning-dojo-burst,
-.start-learning-dojo-link:focus-visible .start-learning-dojo-burst {
-  animation: lilacBurst 650ms ease-out both;
-}
-
-@media (min-width: 640px) {
-  .start-learning-face {
-    padding-bottom: 2rem;
-  }
-
-  .start-learning-dojo-link {
-    top: 50%;
-    bottom: auto;
-    transform: translateY(-50%);
-  }
-
-  .start-learning-dojo-link-topic {
-    right: -1.75rem;
-  }
-
-  .start-learning-dojo-link-level {
-    left: -1.75rem;
-  }
-
-  .start-learning-dojo-link:hover,
-  .start-learning-dojo-link:focus-visible {
-    transform: translateY(-50%) scale(1.08);
-  }
-}
 
 .start-learning-copy {
   text-wrap: pretty;
@@ -558,22 +476,6 @@ onMounted(() => {
   }
 }
 
-@keyframes lilacBurst {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.2);
-  }
-
-  35% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.12);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.45);
-  }
-}
 
 @media (max-width: 640px) {
   .start-learning-scene,
@@ -607,10 +509,6 @@ onMounted(() => {
     animation: none;
     opacity: 1;
     transform: none;
-  }
-
-  .start-learning-dojo-burst {
-    animation: none;
   }
 }
 
