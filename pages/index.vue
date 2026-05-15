@@ -8,6 +8,7 @@ useSeoMeta({
 
 import {
   CalendarCheck,
+  ClipboardList,
   GraduationCap,
   Layers,
   PenLine,
@@ -197,19 +198,20 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="start-learning-actions mt-4 sm:mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 sm:flex sm:flex-wrap sm:gap-3">
-            <NuxtLink to="/topics"
-              class="inline-flex min-h-11 items-center justify-center rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-800 sm:min-h-0 sm:px-4 sm:text-base"
-              @click.stop>
-              Explore Topics
+          <div class="start-learning-actions mt-4 sm:mt-5 flex flex-wrap gap-3">
+            <NuxtLink to="/topics" class="start-learning-icon-link start-learning-icon-link-primary"
+              aria-label="Explore Topics" title="Explore Topics" @click.stop>
+              <Tags class="start-learning-action-icon" aria-hidden="true" />
+              <span class="sr-only">Explore Topics</span>
             </NuxtLink>
-            <NuxtLink to="/topics/quiz"
-              class="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-700 px-3 py-2 text-sm font-medium text-gray-900 transition hover:bg-white/60 sm:min-h-0 sm:px-4 sm:text-base"
-              @click.stop>
-              Topic quizzes
+            <NuxtLink to="/topics/quiz" class="start-learning-icon-link" aria-label="Topic quizzes"
+              title="Topic quizzes" @click.stop>
+              <ClipboardList class="start-learning-action-icon" aria-hidden="true" />
+              <span class="sr-only">Topic quizzes</span>
             </NuxtLink>
-            <NuxtLink to="/dojo/topic" class="start-learning-dojo-link" aria-label="Enter Topic Dojo" @click.stop>
-              <Sword class="start-learning-dojo-icon" aria-hidden="true" />
+            <NuxtLink to="/dojo/topic" class="start-learning-icon-link" aria-label="Enter Topic Dojo"
+              title="Enter Topic Dojo" @click.stop>
+              <Sword class="start-learning-action-icon start-learning-dojo-icon" aria-hidden="true" />
               <span class="sr-only">Enter Topic Dojo</span>
             </NuxtLink>
           </div>
@@ -230,19 +232,20 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="start-learning-actions mt-4 sm:mt-5 grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-2 sm:flex sm:flex-wrap sm:gap-3">
-            <NuxtLink to="/levels"
-              class="inline-flex min-h-11 items-center justify-center rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white transition hover:bg-gray-800 sm:min-h-0 sm:px-4 sm:text-base"
-              @click.stop>
-              Explore Levels
+          <div class="start-learning-actions mt-4 sm:mt-5 flex flex-wrap gap-3">
+            <NuxtLink to="/levels" class="start-learning-icon-link start-learning-icon-link-primary"
+              aria-label="Explore Levels" title="Explore Levels" @click.stop>
+              <GraduationCap class="start-learning-action-icon" aria-hidden="true" />
+              <span class="sr-only">Explore Levels</span>
             </NuxtLink>
-            <NuxtLink to="/quiz"
-              class="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-700 px-3 py-2 text-sm font-medium text-gray-900 transition hover:bg-white/60 sm:min-h-0 sm:px-4 sm:text-base"
-              @click.stop>
-              Level quizzes
+            <NuxtLink to="/quiz" class="start-learning-icon-link" aria-label="Level quizzes"
+              title="Level quizzes" @click.stop>
+              <ClipboardList class="start-learning-action-icon" aria-hidden="true" />
+              <span class="sr-only">Level quizzes</span>
             </NuxtLink>
-            <NuxtLink to="/dojo/level" class="start-learning-dojo-link" aria-label="Enter Level Dojo" @click.stop>
-              <Sword class="start-learning-dojo-icon" aria-hidden="true" />
+            <NuxtLink to="/dojo/level" class="start-learning-icon-link" aria-label="Enter Level Dojo"
+              title="Enter Level Dojo" @click.stop>
+              <Sword class="start-learning-action-icon start-learning-dojo-icon" aria-hidden="true" />
               <span class="sr-only">Enter Level Dojo</span>
             </NuxtLink>
           </div>
@@ -378,40 +381,59 @@ onMounted(() => {
   transform: translateZ(1px);
 }
 
-.start-learning-dojo-link {
+.start-learning-icon-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.75rem;
-  min-height: 2.75rem;
+  width: 2.9rem;
+  min-width: 2.9rem;
+  height: 2.9rem;
   color: rgba(17, 24, 39, 0.92);
   background: rgba(255, 255, 255, 0.34);
   border: 1px solid rgba(17, 24, 39, 0.22);
-  border-radius: 0.375rem;
-  transition: background 180ms ease, transform 180ms ease;
+  border-radius: 9999px;
+  transition: background 180ms ease, color 180ms ease, transform 180ms ease;
 }
 
-.start-learning-dojo-link:hover,
-.start-learning-dojo-link:focus-visible {
+.start-learning-icon-link-primary {
+  color: #fff;
+  background: rgba(17, 24, 39, 0.92);
+  border-color: rgba(17, 24, 39, 0.92);
+}
+
+.start-learning-icon-link:hover,
+.start-learning-icon-link:focus-visible {
+  color: rgba(17, 24, 39, 0.96);
   background: rgba(255, 255, 255, 0.64);
   transform: translateY(-0.06rem);
 }
 
-.start-learning-dojo-link:focus-visible {
+.start-learning-icon-link-primary:hover,
+.start-learning-icon-link-primary:focus-visible {
+  color: #fff;
+  background: rgba(17, 24, 39, 0.82);
+}
+
+.start-learning-icon-link:focus-visible {
   outline: 3px solid rgba(240, 121, 202, 0.55);
   outline-offset: 3px;
 }
 
-.start-learning-dojo-icon {
+.start-learning-action-icon {
   width: 1.35rem;
   height: 1.35rem;
   stroke-width: 2.35;
   transition: transform 180ms ease;
 }
 
-.start-learning-dojo-link:hover .start-learning-dojo-icon,
-.start-learning-dojo-link:focus-visible .start-learning-dojo-icon {
-  transform: rotate(-8deg);
+.start-learning-icon-link:hover .start-learning-action-icon,
+.start-learning-icon-link:focus-visible .start-learning-action-icon {
+  transform: scale(1.06);
+}
+
+.start-learning-icon-link:hover .start-learning-dojo-icon,
+.start-learning-icon-link:focus-visible .start-learning-dojo-icon {
+  transform: rotate(-8deg) scale(1.06);
 }
 
 
