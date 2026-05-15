@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ArrowRight, Ear, LoaderCircle, Lock, Mic, RotateCcw, Send, SkipForward, Square, Volume2 } from '@lucide/vue'
-import { playCorrectJingle, playGoodJingle, playQuizCompleteFailSong, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from "~/utils/sounds"
+import { playCorrectJingle, playGoodJingle, playIncorrectJingle, playQuizCompleteFailSong, playQuizCompleteFanfareSong, playQuizCompleteOkaySong } from "~/utils/sounds"
 definePageMeta({
   ssr: false,
   middleware: ["logged-in", "topic-access-quiz"],
@@ -15,6 +15,14 @@ type QuizWord = {
 
 type PitchContour = {
   values: number[]
+}
+
+type AudioQualitySummary = {
+  durationMs: number
+  rms: number
+  peak: number
+  voicedFrameCount: number
+  totalFrameCount: number
 }
 
 type AudioVoice = 'male' | 'female'
@@ -44,6 +52,9 @@ const SKIP_UNLOCK_ATTEMPTS = 3
 const FINAL_SCREEN_BUFFER_MS = 250
 const FINAL_SCREEN_MIN_DELAY_MS = 2200
 const FINAL_SCREEN_MAX_DELAY_MS = 4000
+const MIN_RECORDING_DURATION_MS = 350
+const MIN_RECORDING_RMS = 0.008
+const MIN_RECORDING_PEAK = 0.035
 
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)
@@ -310,8 +321,15 @@ function smoothPitches(values: number[]) {
 async function extractPitchContoursFromArrayBuffer(
   arrayBuffer: ArrayBuffer,
   expectedTokenCount: number,
-): Promise<PitchContour[]> {
-  if (!expectedTokenCount) return []
+): Promise<{ contours: PitchContour[], quality: AudioQualitySummary }> {
+  const emptyQuality: AudioQualitySummary = {
+    durationMs: 0,
+    rms: 0,
+    peak: 0,
+    voicedFrameCount: 0,
+    totalFrameCount: 0,
+  }
+  if (!expectedTokenCount) return { contours: [], quality: emptyQuality }
   const audioContext = new AudioContext()
 
   try {
@@ -320,19 +338,41 @@ async function extractPitchContoursFromArrayBuffer(
     const frameSize = 2048
     const hop = 512
     const rawPitches: number[] = []
+    let sumSquares = 0
+    let peak = 0
+    let totalFrameCount = 0
+    let voicedFrameCount = 0
 
-    for (let offset = 0; offset + frameSize < channel.length; offset += hop) {
-      const frame = channel.slice(offset, offset + frameSize)
-      const pitch = estimatePitchHz(frame, audioBuffer.sampleRate)
-      if (pitch > 0) rawPitches.push(Math.round(pitch))
+    for (let i = 0; i < channel.length; i++) {
+      const sample = channel[i]
+      sumSquares += sample * sample
+      peak = Math.max(peak, Math.abs(sample))
     }
 
-    if (!rawPitches.length) return []
+    for (let offset = 0; offset + frameSize < channel.length; offset += hop) {
+      totalFrameCount += 1
+      const frame = channel.slice(offset, offset + frameSize)
+      const pitch = estimatePitchHz(frame, audioBuffer.sampleRate)
+      if (pitch > 0) {
+        voicedFrameCount += 1
+        rawPitches.push(Math.round(pitch))
+      }
+    }
+
+    const quality: AudioQualitySummary = {
+      durationMs: Math.round(audioBuffer.duration * 1000),
+      rms: channel.length ? Math.sqrt(sumSquares / channel.length) : 0,
+      peak,
+      voicedFrameCount,
+      totalFrameCount,
+    }
+
+    if (!rawPitches.length) return { contours: [], quality }
 
     const smoothed = smoothPitches(rawPitches)
     const trim = Math.floor(smoothed.length * 0.1)
     const trimmed = smoothed.slice(trim, Math.max(smoothed.length - trim, trim + 1))
-    if (!trimmed.length) return []
+    if (!trimmed.length) return { contours: [], quality }
 
     const contours: PitchContour[] = []
     const bucketSize = Math.max(1, Math.floor(trimmed.length / expectedTokenCount))
@@ -342,15 +382,29 @@ async function extractPitchContoursFromArrayBuffer(
       contours.push({ values: trimmed.slice(start, end).slice(0, 32) })
     }
 
-    return contours
+    return { contours, quality }
   } finally {
     await audioContext.close()
   }
 }
 
-async function extractPitchContours(blob: Blob, expectedTokenCount: number): Promise<PitchContour[]> {
+async function extractPitchContours(blob: Blob, expectedTokenCount: number): Promise<{ contours: PitchContour[], quality: AudioQualitySummary }> {
   const arrayBuffer = await blob.arrayBuffer()
   return extractPitchContoursFromArrayBuffer(arrayBuffer, expectedTokenCount)
+}
+
+function getAudioQualityError(quality: AudioQualitySummary, expectedTokenCount: number) {
+  const minVoicedFrames = Math.max(3, expectedTokenCount * 2)
+
+  if (quality.durationMs < MIN_RECORDING_DURATION_MS) {
+    return "That recording was too short. Please record yourself saying the whole word."
+  }
+
+  if (quality.rms < MIN_RECORDING_RMS || quality.peak < MIN_RECORDING_PEAK || quality.voicedFrameCount < minVoicedFrames) {
+    return "I couldn't hear your voice clearly. Please try again a little closer to the microphone."
+  }
+
+  return ""
 }
 
 async function playCurrentWordAudio() {
@@ -484,13 +538,19 @@ async function submitAttempt() {
 
   try {
     const expectedTokens = tokenizeJyutping(currentWord.value.jyutping)
-    const contours = await extractPitchContours(recordedBlob.value, expectedTokens.length)
+    const { contours, quality } = await extractPitchContours(recordedBlob.value, expectedTokens.length)
+    const qualityError = getAudioQualityError(quality, expectedTokens.length)
+    if (qualityError) {
+      errorMessage.value = qualityError
+      return
+    }
 
     const form = new FormData()
     const extension = recorderMimeType.value.includes("mp4") ? "m4a" : "webm"
     form.append("audio", recordedBlob.value, `tone-gate.${extension}`)
     form.append("expectedJyutping", currentWord.value.jyutping)
     form.append("pitchSummary", JSON.stringify(contours))
+    form.append("audioQuality", JSON.stringify(quality))
 
     const result = await $fetch<ToneApiResponse>("/api/pronunciation-tone-word-v1", {
       method: "POST",
