@@ -68,7 +68,6 @@ const selectedVoice = useCookie<AudioVoice>('audio-voice', {
   sameSite: 'lax',
 })
 const playbackRate = ref(1)
-const audioDirectory = computed(() => selectedVoice.value === 'female' ? 'audio-female' : 'audio-male')
 
 const { getAccessToken } = await useAuth()
 const token = await getAccessToken()
@@ -125,10 +124,15 @@ const quizSize = computed(() => Math.min(MAX_QUIZ_SIZE, allWords.value.length))
 const progressLabel = computed(() => `${Math.min(currentIndex.value + 1, quizSize.value)} / ${quizSize.value}`)
 const canSkipCurrentWord = computed(() => currentWordAttemptCount.value >= SKIP_UNLOCK_ATTEMPTS)
 const skipAttemptsRemaining = computed(() => Math.max(0, SKIP_UNLOCK_ATTEMPTS - currentWordAttemptCount.value))
-const currentWordAudioUrl = computed(() => {
-  const id = currentWord.value?.id
-  return id ? `${cdnBase}/${audioDirectory.value}/${id}.mp3` : ""
-})
+function getWordAudioUrl(id: string | undefined, voice: AudioVoice) {
+  if (!id) return ""
+  const directory = voice === 'female' ? 'audio-female' : 'audio-male'
+  return `${cdnBase}/${directory}/${id}.mp3`
+}
+
+const currentWordAudioUrl = computed(() => getWordAudioUrl(currentWord.value?.id, selectedVoice.value))
+const currentWordMaleAudioUrl = computed(() => getWordAudioUrl(currentWord.value?.id, 'male'))
+const currentWordFemaleAudioUrl = computed(() => getWordAudioUrl(currentWord.value?.id, 'female'))
 
 function stripToneDigit(token: string) {
   return token.replace(/[1-6]$/, "")
@@ -407,17 +411,25 @@ function getAudioQualityError(quality: AudioQualitySummary, expectedTokenCount: 
   return ""
 }
 
-async function playCurrentWordAudio() {
-  if (!currentWordAudioUrl.value) return
+async function playWordAudioUrl(audioUrl: string) {
+  if (!audioUrl) return
   try {
     currentWordAudio?.pause()
-    currentWordAudio = new Audio(currentWordAudioUrl.value)
+    currentWordAudio = new Audio(audioUrl)
     currentWordAudio.volume = volume.value
     currentWordAudio.playbackRate = playbackRate.value
     await currentWordAudio.play()
   } catch (err) {
     console.warn("[tone-gate] failed to play word audio", err)
   }
+}
+
+async function playCurrentWordAudio() {
+  await playWordAudioUrl(currentWordAudioUrl.value)
+}
+
+async function playCurrentWordSampleAudio(voice: AudioVoice) {
+  await playWordAudioUrl(getWordAudioUrl(currentWord.value?.id, voice))
 }
 
 function startQuiz() {
@@ -921,6 +933,31 @@ onBeforeUnmount(() => {
             <p class="mt-4 text-sm leading-6 text-gray-700">
               {{ feedback }}
             </p>
+
+            <div class="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-left">
+              <p class="text-xs font-semibold uppercase tracking-[0.16em] text-emerald-800">
+                Sample audio
+              </p>
+              <p class="mt-1 text-sm text-emerald-900/80">
+                Listen to either voice for this word before trying again or moving on.
+              </p>
+
+              <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <button
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="submitting || !currentWordMaleAudioUrl" @click="playCurrentWordSampleAudio('male')">
+                  <Volume2 class="h-4 w-4" aria-hidden="true" />
+                  <span>Play male sample</span>
+                </button>
+
+                <button
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-4 py-3 text-sm font-bold text-gray-900 shadow-sm transition hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  :disabled="submitting || !currentWordFemaleAudioUrl" @click="playCurrentWordSampleAudio('female')">
+                  <Volume2 class="h-4 w-4" aria-hidden="true" />
+                  <span>Play female sample</span>
+                </button>
+              </div>
+            </div>
 
             <button
               class="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#86EFAC] px-4 py-3 text-sm font-bold text-gray-900 transition hover:brightness-105 disabled:opacity-50"
