@@ -16,6 +16,7 @@ import {
 import { generateWeightedWords } from "~/utils/quiz/generateWeightedWords";
 import { totalQuestions, weakestWordRatio } from "~/utils/weakestWords";
 
+import { redactLogDetails } from "~/server/utils/logging/redact";
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
 const LEVEL_CONTENT_CACHE_TTL_SECONDS = 60 * 10;
 
@@ -96,7 +97,7 @@ async function timedStep<T>(
 }
 
 function logSummary(details: Record<string, unknown>) {
-  console.info("[dojo-level-start]", JSON.stringify(details));
+  console.info("[dojo-level-start]", JSON.stringify(redactLogDetails(details)));
 }
 
 function getLevelContentCacheKey(slug: string) {

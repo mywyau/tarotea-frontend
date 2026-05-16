@@ -1,5 +1,6 @@
 import { useRuntimeConfig } from "#imports";
 import { Client } from "@upstash/qstash";
+import { redactIdentifier } from "~/server/utils/logging/redact";
 import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
@@ -264,7 +265,7 @@ export default defineEventHandler(async (event) => {
         await enqueueFinalizeJob(event, { attemptId, userId });
       } catch (enqueueError) {
         console.error("VOCAB FINALIZE ENQUEUE FAILED", {
-          userId,
+          userHash: redactIdentifier(userId),
           attemptId,
           mode,
           enqueueError,
@@ -277,7 +278,7 @@ export default defineEventHandler(async (event) => {
     const totalMs = performance.now() - t0;
 
     console.log("VOCAB FINALIZE TIMING", {
-      userId,
+      userHash: redactIdentifier(userId),
       attemptId,
       mode,
       inserted,
@@ -306,7 +307,7 @@ export default defineEventHandler(async (event) => {
     const totalMs = performance.now() - t0;
 
     console.error("VOCAB FINALIZE V5 FAILED", {
-      userId,
+      userHash: redactIdentifier(userId),
       attemptId,
       mode,
       totalMs: Math.round(totalMs),

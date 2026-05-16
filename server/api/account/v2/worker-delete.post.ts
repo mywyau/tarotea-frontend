@@ -1,4 +1,5 @@
 import { Receiver } from "@upstash/qstash";
+import { redactIdentifier } from "~/server/utils/logging/redact";
 import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
 import Stripe from "stripe";
 
@@ -265,7 +266,7 @@ export default defineEventHandler(async (event) => {
 
     console.error("Account deletion job failed", {
       jobId: body.jobId,
-      userId: body.userId,
+      userHash: redactIdentifier(body.userId),
       error: err,
     });
 

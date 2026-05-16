@@ -495,7 +495,7 @@
 
 //     console.error("XP QUIZ WORKER V5 FAILED", {
 //       attemptId: job.attemptId,
-//       userId: job.userId,
+//       userHash: redactIdentifier(job.userId),
 //       qstashMessageId,
 //       qstashRetried,
 //       error,
@@ -512,6 +512,7 @@
 import { useRuntimeConfig } from "#imports";
 import { Receiver } from "@upstash/qstash";
 import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
+import { redactIdentifier } from "~/server/utils/logging/redact";
 import { db } from "~/server/repositories/db";
 import { DAILY_MODE, dailyDeltaFor } from "~/server/utils/dailyQuiz";
 import { masteryXp } from "@/config/xp/helpers";
@@ -1124,7 +1125,7 @@ export default defineEventHandler(async (event) => {
 
     console.error("XP QUIZ WORKER V5 FAILED", {
       attemptId: job.attemptId,
-      userId: job.userId,
+      userHash: redactIdentifier(job.userId),
       qstashMessageId,
       qstashRetried,
       error,

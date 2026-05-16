@@ -8,6 +8,7 @@ import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { requireUser } from "~/server/utils/requireUser";
 
+import { redactLogDetails } from "~/server/utils/logging/redact";
 type SentenceBatchAttempt = {
   sentenceId: string;
   sourceWordId: string;
@@ -85,7 +86,7 @@ async function timedStep<T>(
 }
 
 function logSummary(details: Record<string, unknown>) {
-  console.info("[dojo-sentence-finalize]", JSON.stringify(details));
+  console.info("[dojo-sentence-finalize]", JSON.stringify(redactLogDetails(details)));
 }
 
 export default defineEventHandler(async (event) => {

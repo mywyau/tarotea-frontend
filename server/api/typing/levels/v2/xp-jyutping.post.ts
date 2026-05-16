@@ -4,6 +4,7 @@ import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { masteryXp } from "@/config/xp/helpers";
 
+import { redactLogDetails } from "~/server/utils/logging/redact";
 type WorkerBody = {
   userId: string;
   sessionKey: string;
@@ -146,7 +147,7 @@ async function timedStep<T>(
 }
 
 function logSummary(details: Record<string, unknown>) {
-  console.info("[dojo-level-worker]", JSON.stringify(details));
+  console.info("[dojo-level-worker]", JSON.stringify(redactLogDetails(details)));
 }
 
 export default defineEventHandler(async (event) => {

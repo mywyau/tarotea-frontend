@@ -2,6 +2,7 @@ import { createError, getHeader, readRawBody } from "h3";
 import Stripe from "stripe";
 import { enqueueStripeEventJob } from "~/server/services/billing/stripeEnqueueHelper";
 import { insertStripeEvent } from "~/server/services/billing/stripeEventRepository";
+import { redactIdentifier } from "~/server/utils/logging/redact";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
@@ -77,9 +78,9 @@ export default defineEventHandler(async (event) => {
       requestId,
       eventId: stripeEvent.id,
       eventType: stripeEvent.type,
-      stripeSubscriptionId: result.stripeSubscriptionId,
-      stripeCustomerId: result.stripeCustomerId,
-      userId: result.userId,
+      stripeSubscriptionHash: redactIdentifier(result.stripeSubscriptionId),
+      stripeCustomerHash: redactIdentifier(result.stripeCustomerId),
+      userHash: redactIdentifier(result.userId),
     });
 
     return {

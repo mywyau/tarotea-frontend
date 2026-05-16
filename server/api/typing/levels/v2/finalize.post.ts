@@ -11,6 +11,7 @@ import { redis } from "~/server/repositories/redis";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
+import { redactLogDetails } from "~/server/utils/logging/redact";
 type BatchAttempt = {
   wordId: string;
   passed: boolean;
@@ -76,7 +77,7 @@ async function timedStep<T>(
 }
 
 function logSummary(details: Record<string, unknown>) {
-  console.info("[dojo-level-finalize]", JSON.stringify(details));
+  console.info("[dojo-level-finalize]", JSON.stringify(redactLogDetails(details)));
 }
 
 export default defineEventHandler(async (event) => {
