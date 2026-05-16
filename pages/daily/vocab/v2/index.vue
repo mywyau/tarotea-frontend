@@ -678,9 +678,9 @@ onUnmounted(() => {
             </p>
           </div>
 
-          <div v-else-if="showResults" key="results" class="space-y-6">
+          <div v-else-if="showResults" key="results" class="complete-story">
             <transition name="card-fade" appear>
-              <div class="stat-card hero-card" :class="resultHeroClass">
+              <div class="completion-hero">
                 <p class="stat-label">
                   Daily Exercise Complete
                 </p>
@@ -700,29 +700,23 @@ onUnmounted(() => {
                 :xp-earned="animatedXpEarned" />
             </transition>
 
-            <div class="text-center">
+            <div class="countdown-note">
               <p class="stat-label">
                 Next daily unlocks in
               </p>
 
-              <div class="countdown-pill mt-4">
-                <span class="countdown-text brightness-125">
-                  {{ timeRemaining }}
-                </span>
-              </div>
+              <p class="countdown-text">
+                {{ timeRemaining }}
+              </p>
             </div>
 
-            <div class="pt-2 space-y-3">
-              <NuxtLink to="/"
-                class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:#A8CAE0;">
-                Back to home
+            <div class="completion-actions">
+              <NuxtLink to="/topics/quiz" class="completion-action-primary">
+                Explore more practice
               </NuxtLink>
 
-              <NuxtLink to="/topics/quiz"
-                class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:rgba(244,205,39,0.35);">
-                Explore more practice
+              <NuxtLink to="/" class="completion-action-secondary">
+                Back to home
               </NuxtLink>
             </div>
           </div>
@@ -918,47 +912,87 @@ onUnmounted(() => {
   background: rgba(168, 224, 182, 0.45);
 }
 
+.complete-story {
+  margin-inline: auto;
+  max-width: 38rem;
+  text-align: center;
+}
+
+.complete-story > * + * {
+  margin-top: 2.4rem;
+}
+
+.completion-hero {
+  text-align: center;
+}
+
 .hero-card {
   padding: 2rem 1.5rem;
 }
 
 .hero-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-top: 0.35rem;
+  font-size: clamp(2rem, 8vw, 4.25rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin-top: 0.55rem;
   color: #111827;
 }
 
 .hero-score {
-  font-size: 3rem;
-  line-height: 1;
-  font-weight: 600;
-  margin-top: 0.9rem;
+  font-size: clamp(4.5rem, 22vw, 8rem);
+  letter-spacing: -0.08em;
+  line-height: 0.9;
+  font-weight: 800;
+  margin-top: 1.35rem;
   color: #111827;
 }
 
 .hero-subtext {
-  margin-top: 0.65rem;
-  font-size: 0.95rem;
-  color: rgba(17, 24, 39, 0.68);
+  margin-top: 1.1rem;
+  font-size: 1rem;
+  color: rgba(17, 24, 39, 0.62);
 }
 
-.countdown-pill {
-  background: #111827;
-  border-radius: 14px;
-  padding: 0.9rem 1rem;
+.countdown-note {
+  text-align: center;
 }
 
 .countdown-text {
-  font-size: 1.75rem;
+  color: #111827;
+  font-size: clamp(1.65rem, 7vw, 3rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  margin-top: 0.65rem;
+}
+
+.completion-actions {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.completion-action-primary,
+.completion-action-secondary {
+  color: #111827;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.35rem;
+  transition: opacity 0.15s ease;
+}
+
+.completion-action-secondary {
+  color: rgba(17, 24, 39, 0.56);
+  font-size: 0.95rem;
   font-weight: 600;
-  background: linear-gradient(90deg,
-      #EAB8E4 0%,
-      #A8CAE0 50%,
-      #D6A3D1 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+}
+
+.completion-action-primary:hover,
+.completion-action-secondary:hover {
+  opacity: 0.7;
 }
 
 .next-btn-blue {

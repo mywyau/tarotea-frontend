@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { CheckCircle2, CircleX, Clock3, TrendingDown, TrendingUp } from '@lucide/vue'
-
 const props = withDefaults(defineProps<{
   correct: number | string
   incorrect: number | string
@@ -18,8 +16,17 @@ const props = withDefaults(defineProps<{
   incorrectLabel: 'Incorrect',
 })
 
-const showOutcomeBack = ref(false)
-const showXpBack = ref(false)
+const showDetails = ref(false)
+
+const numericCorrect = computed(() => Number(props.correct))
+const numericIncorrect = computed(() => Number(props.incorrect))
+const totalAnswered = computed(() => numericCorrect.value + numericIncorrect.value)
+
+const accuracyLabel = computed(() => {
+  if (!Number.isFinite(totalAnswered.value) || totalAnswered.value <= 0) return '0%'
+
+  return `${Math.round((numericCorrect.value / totalAnswered.value) * 100)}%`
+})
 
 const formattedXpEarned = computed(() => {
   const value = Number(props.xpEarned)
@@ -37,232 +44,173 @@ const formattedXpLost = computed(() => {
 </script>
 
 <template>
-  <div class="completion-flip-grid" :class="{ 'completion-flip-grid-two': !showXp }" aria-label="Quiz completion stats">
-    <button
-      type="button"
-      class="completion-flip-card"
-      :class="{ 'is-flipped': showOutcomeBack }"
-      aria-label="Flip between correct and incorrect answers"
-      @click="showOutcomeBack = !showOutcomeBack"
-    >
-      <span class="completion-flip-scene">
-        <span class="completion-flip-face result-0">
-          <span class="stat-icon stat-icon-correct" aria-hidden="true">
-            <CheckCircle2 class="h-5 w-5" />
-          </span>
-          <span class="stat-label">{{ correctLabel }}</span>
-          <span class="stat-value">{{ correct }}</span>
-        </span>
+  <section class="completion-summary" aria-label="Quiz completion summary">
+    <p class="summary-kicker">
+      Today’s progress
+    </p>
 
-        <span class="completion-flip-face completion-flip-face-back result-2">
-          <span class="stat-icon stat-icon-incorrect" aria-hidden="true">
-            <CircleX class="h-5 w-5" />
-          </span>
-          <span class="stat-label">{{ incorrectLabel }}</span>
-          <span class="stat-value">{{ incorrect }}</span>
-        </span>
-      </span>
-    </button>
+    <div class="summary-line">
+      <div v-if="showXp" class="summary-item summary-item-primary">
+        <span class="summary-value">{{ formattedXpEarned }}</span>
+        <span class="summary-label">earned</span>
+      </div>
 
-    <div class="stat-card result-4">
-      <span class="stat-icon stat-icon-time" aria-hidden="true">
-        <Clock3 class="h-5 w-5" />
-      </span>
-      <p class="stat-label">Time Taken</p>
-      <p class="stat-value">{{ time }}</p>
+      <div class="summary-item">
+        <span class="summary-value">{{ accuracyLabel }}</span>
+        <span class="summary-label">accuracy</span>
+      </div>
+
+      <div class="summary-item">
+        <span class="summary-value">{{ time }}</span>
+        <span class="summary-label">time</span>
+      </div>
     </div>
 
     <button
-      v-if="showXp"
       type="button"
-      class="completion-flip-card hover:brightness-110"
-      :class="{ 'is-flipped': showXpBack }"
-      aria-label="Flip between XP earned and XP lost"
-      @click="showXpBack = !showXpBack"
+      class="details-toggle"
+      :aria-expanded="showDetails"
+      @click="showDetails = !showDetails"
     >
-      <span class="completion-flip-scene">
-        <span class="completion-flip-face result-3">
-          <span class="stat-icon stat-icon-xp-earned" aria-hidden="true">
-            <TrendingUp class="h-5 w-5" />
-          </span>
-          <span class="stat-label">XP Earned</span>
-          <span class="stat-value">{{ formattedXpEarned }}</span>
-        </span>
-
-        <span class="completion-flip-face completion-flip-face-back result-1">
-          <span class="stat-icon stat-icon-xp-lost" aria-hidden="true">
-            <TrendingDown class="h-5 w-5" />
-          </span>
-          <span class="stat-label">XP Lost</span>
-          <span class="stat-value">{{ formattedXpLost }}</span>
-        </span>
-      </span>
+      {{ showDetails ? 'Hide breakdown' : 'View breakdown' }}
     </button>
-  </div>
+
+    <transition name="details-reveal">
+      <dl v-if="showDetails" class="details-list">
+        <div class="details-row">
+          <dt>{{ correctLabel }}</dt>
+          <dd>{{ correct }}</dd>
+        </div>
+
+        <div class="details-row">
+          <dt>{{ incorrectLabel }}</dt>
+          <dd>{{ incorrect }}</dd>
+        </div>
+
+        <div v-if="showXp" class="details-row">
+          <dt>XP lost</dt>
+          <dd>{{ formattedXpLost }}</dd>
+        </div>
+      </dl>
+    </transition>
+  </section>
 </template>
 
 <style scoped>
-.completion-flip-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
-}
-
-.completion-flip-card {
-  min-height: 9.25rem;
-  border: 0;
-  border-radius: 22px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  perspective: 1200px;
-  padding: 0;
+.completion-summary {
   text-align: center;
 }
 
-.completion-flip-card:focus-visible {
-  outline: 3px solid rgba(111, 92, 202, 0.55);
-  outline-offset: 4px;
+.summary-kicker {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(17, 24, 39, 0.52);
 }
 
-.completion-flip-scene {
-  position: relative;
-  display: block;
-  min-height: 9.25rem;
-  transform-style: preserve-3d;
-  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
+.summary-line {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  margin-top: 1.4rem;
 }
 
-.completion-flip-card.is-flipped .completion-flip-scene {
-  transform: rotateY(180deg);
-}
-
-.completion-flip-face,
-.stat-card {
-  border-radius: 22px;
-  padding: 1.5rem;
-  text-align: center;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.completion-flip-face {
-  position: absolute;
-  inset: 0;
+.summary-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform-style: preserve-3d;
+  gap: 0.25rem;
 }
 
-.completion-flip-face > *,
-.stat-card > * {
-  transform: translateZ(1px);
-}
-
-.completion-flip-face-back {
-  transform: rotateY(180deg);
-}
-
-.completion-flip-card:hover .completion-flip-face {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
-}
-
-.completion-flip-card:hover .completion-flip-face-back {
-  transform: rotateY(180deg) translateY(-3px);
-}
-
-.stat-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.75rem;
-}
-
-.stat-icon-correct {
-  color: #15803d;
-}
-
-.stat-icon-incorrect {
-  color: #be123c;
-}
-
-.stat-icon-time {
-  color: #7c3aed;
-}
-
-.stat-icon-xp-earned {
-  color: #15803d;
-}
-
-.stat-icon-xp-lost {
-  color: #be123c;
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(17, 24, 39, 0.65);
-}
-
-.stat-value {
-  display: block;
-  font-size: 1.2rem;
+.summary-value {
+  font-size: clamp(1.35rem, 5vw, 2rem);
+  line-height: 1;
   font-weight: 700;
-  margin-top: 0.75rem;
   color: #111827;
 }
 
-.flip-hint {
-  margin-top: 0.75rem;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: rgba(17, 24, 39, 0.48);
+.summary-item-primary .summary-value {
+  font-size: clamp(1.7rem, 6vw, 2.5rem);
 }
 
-.result-0 {
-  background: rgba(168, 224, 182, 0.45);
+.summary-label {
+  font-size: 0.82rem;
+  color: rgba(17, 24, 39, 0.55);
 }
 
-.result-1 {
-  background: rgba(246, 225, 225, 0.75);
+.details-toggle {
+  margin-top: 1.75rem;
+  border: 0;
+  background: transparent;
+  color: #111827;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 0.5rem 0;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.35rem;
 }
 
-.result-2 {
-  background: rgba(246, 225, 225, 0.75);
+.details-toggle:focus-visible {
+  outline: 3px solid rgba(111, 92, 202, 0.35);
+  outline-offset: 5px;
 }
 
-.result-3 {
-  background: rgba(168, 224, 182, 0.45);
+.details-list {
+  display: grid;
+  gap: 0.8rem;
+  margin: 1.25rem auto 0;
+  max-width: 24rem;
+  text-align: left;
 }
 
-.result-4 {
-  background: rgba(196, 181, 253, 0.4);
+.details-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.details-row dt {
+  color: rgba(17, 24, 39, 0.56);
+  font-size: 0.92rem;
+}
+
+.details-row dd {
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.details-reveal-enter-active,
+.details-reveal-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.details-reveal-enter-from,
+.details-reveal-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
 }
 
 @media (min-width: 640px) {
-  .completion-flip-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+  .summary-line {
+    align-items: end;
+    flex-direction: row;
+    justify-content: center;
   }
 
-  .completion-flip-grid-two {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .summary-item {
+    min-width: 8rem;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .completion-flip-scene,
-  .completion-flip-face,
-  .stat-card {
+  .details-reveal-enter-active,
+  .details-reveal-leave-active {
     transition-duration: 1ms;
   }
 }
