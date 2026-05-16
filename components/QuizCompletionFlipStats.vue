@@ -40,7 +40,7 @@ const formattedXpLost = computed(() => {
   <div class="completion-flip-grid" :class="{ 'completion-flip-grid-two': !showXp }" aria-label="Quiz completion stats">
     <button
       type="button"
-      class="completion-flip-card"
+      class="completion-flip-card hover:brightness-110"
       :class="{ 'is-flipped': showOutcomeBack }"
       aria-label="Flip between correct and incorrect answers"
       @click="showOutcomeBack = !showOutcomeBack"
