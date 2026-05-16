@@ -6,12 +6,13 @@ import {
   dailyDeltaFor,
   dedupeAnswers,
   getUtcDayKey,
+  isDailyAnswerCorrect,
 } from "~/server/utils/dailyQuiz";
 import { queueXpQuizWorker } from "~/server/utils/queueXpQuizWorker";
 import { requireUser } from "~/server/utils/requireUser";
 
 type Body = {
-  answers?: Array<{ wordId: string; correct: boolean }>;
+  answers?: Array<{ wordId: string; answer: string; correct?: boolean }>;
   mode?: string;
 };
 
@@ -28,6 +29,11 @@ type DailySessionRow = {
 type StreakRow = {
   word_id: string;
   streak: number;
+};
+
+type WordAnswerRow = {
+  id: string;
+  meaning: string;
 };
 
 type EventRow = {
@@ -141,7 +147,51 @@ export default defineEventHandler(async (event) => {
       const allowed = new Set(sess.word_ids ?? []);
       const filtered = answers.filter((answer) => allowed.has(answer.wordId));
 
+      if (filtered.length !== answers.length) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: "Answers contain words outside today's session",
+        });
+      }
+
       if (filtered.length !== sess.total_questions) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: "Answers do not match today's full word list",
+        });
+      }
+
+      const submittedWordIds = new Set(filtered.map((answer) => answer.wordId));
+      if (submittedWordIds.size !== allowed.size) {
+        throw createError({
+          statusCode: 400,
+          statusMessage: "Answers do not match today's full word list",
+        });
+      }
+
+      for (const wordId of allowed) {
+        if (!submittedWordIds.has(wordId)) {
+          throw createError({
+            statusCode: 400,
+            statusMessage: "Answers do not match today's full word list",
+          });
+        }
+      }
+
+      const wordAnswerRes = await client.query<WordAnswerRow>(
+        `
+        select id, meaning
+        from words
+        where id = any($1::text[])
+        `,
+        [filtered.map((answer) => answer.wordId)],
+      );
+
+      const expectedAnswerByWordId = new Map(
+        wordAnswerRes.rows.map((row) => [row.id, row.meaning]),
+      );
+
+      if (expectedAnswerByWordId.size !== filtered.length) {
         throw createError({
           statusCode: 400,
           statusMessage: "Answers do not match today's full word list",
@@ -165,11 +215,14 @@ export default defineEventHandler(async (event) => {
 
       const payloadAnswers = filtered.map((answer) => {
         const streakBefore = streakMap.get(answer.wordId) ?? 0;
+        const expectedAnswer = expectedAnswerByWordId.get(answer.wordId) ?? "";
+        const correct = isDailyAnswerCorrect(answer.answer, expectedAnswer);
 
         return {
           wordId: answer.wordId,
-          correct: answer.correct,
-          delta: dailyDeltaFor(answer.correct, streakBefore),
+          answer: answer.answer,
+          correct,
+          delta: dailyDeltaFor(correct, streakBefore),
         };
       });
 

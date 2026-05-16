@@ -20,6 +20,7 @@ import { shuffleFisherYates } from "~/utils/shuffle"
 
 type DailyAnswer = {
   wordId: string
+  answer: string
   correct: boolean
 }
 
@@ -455,7 +456,7 @@ async function selectAnswer(answer: string) {
 
   const delta = dailyDeltaFor(correct, currentStreak.value)
 
-  answerLog.value.push({ wordId, correct })
+  answerLog.value.push({ wordId, answer, correct })
   answeredCount.value += 1
   if (correct) correctCount.value += 1
 
