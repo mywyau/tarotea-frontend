@@ -37,10 +37,9 @@ withDefaults(defineProps<{
 
 @media (min-width: 768px) {
   .floating-audio-control {
-    left: calc(50% + 2rem);
+    left: 5rem;
     right: auto;
     bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-    transform: translateX(-50%);
   }
 
   .floating-audio-control::before {
