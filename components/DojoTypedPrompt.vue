@@ -22,8 +22,8 @@ const props = withDefaults(defineProps<{
   tokens: undefined,
   containerClass: '',
   charClass: '',
-  startDelay: 120,
-  speed: 45,
+  startDelay: 180,
+  speed: 120,
   showCursor: true,
 })
 
