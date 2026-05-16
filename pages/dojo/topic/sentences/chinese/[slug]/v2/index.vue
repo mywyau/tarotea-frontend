@@ -685,7 +685,8 @@ onBeforeUnmount(() => {
               <DojoTypedPrompt
                 :key="current?.sentenceId"
                 :tokens="sentenceCharTokens"
-                container-class="flex flex-wrap text-2xl font-medium text-gray-900 leading-relaxed no-copy"
+                container-class="flex flex-wrap items-baseline text-2xl font-medium text-gray-900 leading-relaxed no-copy"
+                cursor-offset-y="0.02em"
               />
 
               <div class="text-sm text-gray-400 leading-relaxed">
