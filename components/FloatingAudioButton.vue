@@ -37,8 +37,33 @@ withDefaults(defineProps<{
 
 @media (min-width: 768px) {
   .floating-audio-control {
-    right: 1rem;
+    left: calc(50% + 2rem);
+    right: auto;
     bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    transform: translateX(-50%);
+  }
+
+  .floating-audio-control::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 7.4rem;
+    height: 4rem;
+    border: 1px solid rgba(17, 24, 39, 0.08);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.78);
+    box-shadow: 0 18px 42px rgba(17, 24, 39, 0.16);
+    transform: translate(calc(-50% - 2rem), -50%);
+    backdrop-filter: blur(14px);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .floating-audio-control :deep(button) {
+    position: relative;
+    z-index: 1;
+    box-shadow: none;
   }
 }
 </style>

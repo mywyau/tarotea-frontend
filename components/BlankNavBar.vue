@@ -309,10 +309,16 @@ onBeforeUnmount(() => {
 
 @media (min-width: 768px) {
   .trigger-visibility-btn {
-    left: 1rem;
-    bottom: 1rem;
-    height: 3.6rem;
-    width: 3.6rem;
+    left: calc(50% - 2rem);
+    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    height: 3.1rem;
+    width: 3.1rem;
+    transform: translateX(-50%);
+  }
+
+  .trigger-visibility-btn:hover,
+  .trigger-visibility-btn.is-open {
+    transform: translateX(-50%) scale(1.12);
   }
 }
 
