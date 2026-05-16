@@ -50,12 +50,12 @@ withDefaults(defineProps<{
     top: 50%;
     width: 7.4rem;
     height: 4rem;
-    border: 1px solid rgba(17, 24, 39, 0.08);
+    border: 1px solid rgba(17, 24, 39, 0.05);
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.78);
-    box-shadow: 0 18px 42px rgba(17, 24, 39, 0.16);
+    background: rgba(255, 255, 255, 0.32);
+    box-shadow: 0 14px 34px rgba(17, 24, 39, 0.08);
     transform: translate(calc(-50% - 2rem), -50%);
-    backdrop-filter: blur(14px);
+    backdrop-filter: blur(8px);
     z-index: 0;
     pointer-events: none;
   }

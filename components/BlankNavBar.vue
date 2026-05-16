@@ -168,6 +168,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .header-shell {
+  z-index: 80;
   --pink: #EAB8E4;
   --purple: #D6A3D1;
   --blue: #A8CAE0;
