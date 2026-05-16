@@ -786,29 +786,31 @@ onBeforeUnmount(() => {
                             :time="formattedElapsedTime" :xp-earned="animatedXpEarned" :xp-lost="animatedXpLost" />
                     </transition>
 
-                    <div v-if="correctWords.length" class="stat-card text-left result-3">
+                    <div v-if="correctWords.length" class="stat-card result-word-card text-left result-3">
                         <h3 class="text-sm font-semibold text-gray-900 mb-3">
                             Correct
                         </h3>
 
                         <div class="flex flex-wrap gap-2">
-                            <span v-for="word in correctWords" :key="word!.id"
-                                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
+                            <NuxtLink v-for="word in correctWords" :key="word!.id" :to="`/level/${slug}/word/${word!.id}`" target="_blank" rel="noopener noreferrer"
+                                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+                                :aria-label="`Open word page for ${word!.word} in a new tab`">
                                 {{ word!.word }}
-                            </span>
+                            </NuxtLink>
                         </div>
                     </div>
 
-                    <div v-if="missedWords.length" class="stat-card text-left result-1">
+                    <div v-if="missedWords.length" class="stat-card result-word-card text-left result-1">
                         <h3 class="text-sm font-semibold text-gray-900 mb-3">
                             Incorrect
                         </h3>
 
                         <div class="flex flex-wrap gap-2">
-                            <span v-for="word in missedWords" :key="word!.id"
-                                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
+                            <NuxtLink v-for="word in missedWords" :key="word!.id" :to="`/level/${slug}/word/${word!.id}`" target="_blank" rel="noopener noreferrer"
+                                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
+                                :aria-label="`Open word page for ${word!.word} in a new tab`">
                                 {{ word!.word }}
-                            </span>
+                            </NuxtLink>
                         </div>
                     </div>
 
@@ -890,6 +892,11 @@ onBeforeUnmount(() => {
 .stat-card:hover {
     transform: translateY(-3px);
     box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.result-word-card:hover {
+    transform: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 .stat-label {
