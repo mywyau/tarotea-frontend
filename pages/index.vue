@@ -130,7 +130,7 @@ onMounted(() => {
   void refreshCurrentUsers()
   const interval = setInterval(() => {
     void refreshCurrentUsers()
-  }, 30_000)
+  }, 60_000)
 
   onBeforeUnmount(() => {
     clearInterval(interval)
