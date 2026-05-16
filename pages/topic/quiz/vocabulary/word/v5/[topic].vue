@@ -772,10 +772,11 @@ onBeforeUnmount(() => {
             </h3>
 
             <div class="flex flex-wrap gap-2">
-              <span v-for="word in correctWords" :key="word!.id"
-                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125">
+              <NuxtLink v-for="word in correctWords" :key="word!.id" :to="`/topic/word/${topicSlug}/${word!.id}`" target="_blank" rel="noopener noreferrer"
+                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
+                :aria-label="`Open word page for ${word!.word} in a new tab`">
                 {{ word!.word }}
-              </span>
+              </NuxtLink>
             </div>
           </div>
 
@@ -785,10 +786,11 @@ onBeforeUnmount(() => {
             </h3>
 
             <div class="flex flex-wrap gap-2">
-              <span v-for="word in missedWords" :key="word!.id"
-                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125">
+              <NuxtLink v-for="word in missedWords" :key="word!.id" :to="`/topic/word/${topicSlug}/${word!.id}`" target="_blank" rel="noopener noreferrer"
+                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
+                :aria-label="`Open word page for ${word!.word} in a new tab`">
                 {{ word!.word }}
-              </span>
+              </NuxtLink>
             </div>
           </div>
 
