@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
   containerClass: '',
   charClass: '',
   startDelay: 180,
-  speed: 180,
+  speed: 120,
   showCursor: true,
   cursorHeight: '0.92em',
   cursorOffsetY: '0.08em',
