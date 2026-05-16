@@ -64,14 +64,6 @@ const formattedXpLost = computed(() => {
       </span>
     </button>
 
-    <div class="stat-card result-4">
-      <span class="stat-icon stat-icon-time" aria-hidden="true">
-        <Clock3 class="h-5 w-5" />
-      </span>
-      <p class="stat-label">Time Taken</p>
-      <p class="stat-value">{{ time }}</p>
-    </div>
-
     <button
       v-if="showXp"
       type="button"
@@ -98,6 +90,14 @@ const formattedXpLost = computed(() => {
         </span>
       </span>
     </button>
+
+    <div class="stat-card stat-card-static result-4" aria-label="Time taken">
+      <span class="stat-icon stat-icon-time" aria-hidden="true">
+        <Clock3 class="h-5 w-5" />
+      </span>
+      <p class="stat-label">Time Taken</p>
+      <p class="stat-value">{{ time }}</p>
+    </div>
   </div>
 </template>
 
@@ -144,7 +144,14 @@ const formattedXpLost = computed(() => {
   text-align: center;
   backdrop-filter: blur(6px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+}
+
+.completion-flip-face {
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.stat-card-static {
+  cursor: default;
 }
 
 .completion-flip-face {
