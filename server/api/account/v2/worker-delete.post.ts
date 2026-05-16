@@ -1,4 +1,5 @@
-import { createError, defineEventHandler, readBody } from "h3";
+import { Receiver } from "@upstash/qstash";
+import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
 import Stripe from "stripe";
 
 import { db } from "~/server/repositories/db";
@@ -22,8 +23,114 @@ type UserRow = {
   stripe_customer_id: string | null;
 };
 
+function requiredEnv(name: string): string {
+  const value = process.env[name];
+
+  if (!value) {
+    throw createError({
+      statusCode: 500,
+      statusMessage: `Missing env var: ${name}`,
+    });
+  }
+
+  return value;
+}
+
+function getReceiver() {
+  return new Receiver({
+    currentSigningKey: requiredEnv("QSTASH_CURRENT_SIGNING_KEY"),
+    nextSigningKey: requiredEnv("QSTASH_NEXT_SIGNING_KEY"),
+  });
+}
+
+function getWorkerUrl(): string {
+  return `${requiredEnv("SITE_URL").replace(/\/+$/, "")}/api/account/v2/worker-delete`;
+}
+
+async function verifyQStashRequest(
+  event: Parameters<typeof defineEventHandler>[0],
+  rawBody: string,
+): Promise<void> {
+  const signature = getHeader(event, "upstash-signature");
+  const upstashRegion = getHeader(event, "upstash-region") ?? undefined;
+
+  if (!signature) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Missing QStash signature",
+    });
+  }
+
+  const isValid = await getReceiver().verify({
+    signature,
+    body: rawBody,
+    url: getWorkerUrl(),
+    upstashRegion,
+  });
+
+  if (!isValid) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Invalid QStash signature",
+    });
+  }
+}
+
+function parseWorkerBody(rawBody: string): WorkerBody {
+  let body: unknown;
+
+  try {
+    body = JSON.parse(rawBody);
+  } catch {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Invalid JSON body",
+    });
+  }
+
+  if (!body || typeof body !== "object") {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Invalid worker payload",
+    });
+  }
+
+  const jobId = (body as { jobId?: unknown }).jobId;
+  const userId = (body as { userId?: unknown }).userId;
+
+  if (typeof jobId !== "number" || !Number.isFinite(jobId) || jobId <= 0) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing or invalid jobId",
+    });
+  }
+
+  if (typeof userId !== "string" || !userId.trim()) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing or invalid userId",
+    });
+  }
+
+  return {
+    jobId,
+    userId: userId.trim(),
+  };
+}
+
 export default defineEventHandler(async (event) => {
-  const body = await readBody<WorkerBody>(event);
+  const rawBody = await readRawBody(event, "utf8");
+
+  if (!rawBody) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: "Missing request body",
+    });
+  }
+
+  await verifyQStashRequest(event, rawBody);
+
+  const body = parseWorkerBody(rawBody);
 
   if (!body?.jobId || !body?.userId) {
     throw createError({
