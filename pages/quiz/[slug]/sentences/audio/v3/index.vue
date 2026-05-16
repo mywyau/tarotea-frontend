@@ -712,9 +712,9 @@ onBeforeUnmount(() => {
             </p>
           </div>
 
-          <div v-else-if="showResults" key="results" class="space-y-6">
+          <div v-else-if="showResults" key="results" class="complete-story">
             <transition name="card-fade" appear>
-              <div class="stat-card hero-card" :class="resultHeroClass">
+              <div class="completion-hero">
                 <p class="stat-label">
                   Sentence Audio Quiz Complete
                 </p>
@@ -739,10 +739,9 @@ onBeforeUnmount(() => {
               />
             </transition>
 
-            <div class="pt-2 space-y-3">
+            <div class="completion-actions">
               <NuxtLink :to="`/quiz`"
-                class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:#A8CAE0;">
+                class="completion-action-primary">
                 Play Again
               </NuxtLink>
 
@@ -834,25 +833,102 @@ onBeforeUnmount(() => {
   padding: 2rem 1.5rem;
 }
 
+.complete-story {
+  margin-inline: auto;
+  max-width: 38rem;
+  text-align: center;
+}
+
+.complete-story > * + * {
+  margin-top: 2.4rem;
+}
+
+.completion-hero {
+  text-align: center;
+}
+
 .hero-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-top: 0.35rem;
+  font-size: clamp(2rem, 8vw, 4.25rem);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+  margin-top: 0.55rem;
   color: #111827;
 }
 
 .hero-score {
-  font-size: 3rem;
-  line-height: 1;
-  font-weight: 600;
-  margin-top: 0.9rem;
+  font-size: clamp(4.5rem, 22vw, 8rem);
+  letter-spacing: -0.08em;
+  line-height: 0.9;
+  font-weight: 800;
+  margin-top: 1.35rem;
   color: #111827;
 }
 
 .hero-subtext {
-  margin-top: 0.65rem;
+  margin-top: 1.1rem;
+  font-size: 1rem;
+  color: rgba(17, 24, 39, 0.62);
+}
+
+.completion-actions {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.completion-action-primary,
+.completion-action-secondary {
+  color: #111827;
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.35rem;
+  transition: opacity 0.15s ease;
+}
+
+.completion-action-secondary {
+  color: rgba(17, 24, 39, 0.56);
   font-size: 0.95rem;
-  color: rgba(17, 24, 39, 0.68);
+  font-weight: 600;
+}
+
+.completion-action-primary:hover,
+.completion-action-secondary:hover {
+  opacity: 0.7;
+}
+
+.word-review-section {
+  text-align: left;
+}
+
+.word-review-section h3 {
+  color: rgba(17, 24, 39, 0.72);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin-bottom: 0.75rem;
+  text-transform: uppercase;
+}
+
+.word-review-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.85rem;
+}
+
+.word-review-list span {
+  color: #111827;
+  font-size: 1rem;
+}
+
+.word-review-list.is-correct span {
+  color: #15803d;
+}
+
+.word-review-list.is-missed span {
+  color: #be123c;
 }
 
 .fade-scale-enter-active,
