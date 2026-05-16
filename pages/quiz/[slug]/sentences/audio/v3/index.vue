@@ -745,8 +745,6 @@ onBeforeUnmount(() => {
                 style="background-color:#A8CAE0;">
                 Play Again
               </NuxtLink>
-
-              <GuestQuizGuidance v-if="!isLoggedIn" />
             </div>
           </div>
         </transition>

@@ -821,8 +821,6 @@ onUnmounted(() => {
                     </div>
 
                     <div class="pt-2 space-y-3">
-                        <GuestQuizGuidance v-if="isGuestPreview" />
-
                         <NuxtLink :to="`/topics/quiz`"
                             class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
                             style="background-color:#A8CAE0;">

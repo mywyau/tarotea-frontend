@@ -812,8 +812,6 @@ onBeforeUnmount(() => {
                         </div>
                     </div>
 
-                    <GuestQuizGuidance v-if="isGuestMode" />
-
                     <div class="pt-2 space-y-3">
                         <NuxtLink :to="`/quiz/${slug}/word/start-quiz`"
                             class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
