@@ -1,6 +1,28 @@
-export const taroKeyStartingXp = 500
-export const taroKeyMaxXp = 1000
-export const taroKeyXpCostsBeforeCap = [500, 550, 650, 800, 1000] as const
+export const taroKeyXpCostsBeforeCap = [
+  100,
+  125,
+  155,
+  190,
+  230,
+  275,
+  325,
+  380,
+  440,
+  505,
+  575,
+  650,
+  725,
+  795,
+  855,
+  905,
+  945,
+  975,
+  995,
+  1000,
+] as const
+
+export const taroKeyStartingXp = taroKeyXpCostsBeforeCap[0]
+export const taroKeyMaxXp = taroKeyXpCostsBeforeCap[taroKeyXpCostsBeforeCap.length - 1]
 
 export const taroKeyXp = taroKeyStartingXp
 export const xpNeededForOneTaroKey = taroKeyStartingXp
