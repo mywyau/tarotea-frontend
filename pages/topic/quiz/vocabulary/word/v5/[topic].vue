@@ -766,7 +766,7 @@ onBeforeUnmount(() => {
               :xp-earned="animatedXpEarned" :xp-lost="animatedXpLost" />
           </transition>
 
-          <div v-if="correctWords.length" class="stat-card text-left result-3">
+          <div v-if="correctWords.length" class="stat-card result-word-card text-left result-3">
             <h3 class="text-sm font-semibold text-gray-900 mb-3">
               Correct
             </h3>
@@ -780,7 +780,7 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div v-if="missedWords.length" class="stat-card text-left result-1">
+          <div v-if="missedWords.length" class="stat-card result-word-card text-left result-1">
             <h3 class="text-sm font-semibold text-gray-900 mb-3">
               Incorrect
             </h3>
@@ -852,6 +852,11 @@ onBeforeUnmount(() => {
 .stat-card:hover {
   transform: translateY(-3px);
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
+}
+
+.result-word-card:hover {
+  transform: none;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
 }
 
 .stat-label {
