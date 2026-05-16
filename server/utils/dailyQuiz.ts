@@ -6,7 +6,8 @@ export const STREAK_CAP = 5;
 
 export type DailyAnswer = {
   wordId: string;
-  correct: boolean;
+  answer: string;
+  correct?: boolean;
 };
 
 export type DailyQuestionOption = {
@@ -59,14 +60,22 @@ export function dedupeAnswers(raw: unknown): DailyAnswer[] {
     if (!item || typeof item !== "object") continue;
 
     const wordId = (item as DailyAnswer).wordId;
+    const answer = (item as DailyAnswer).answer;
     const correct = (item as DailyAnswer).correct;
 
     if (typeof wordId !== "string" || !wordId.trim()) continue;
-    if (typeof correct !== "boolean") continue;
-    if (seen.has(wordId)) continue;
+    if (typeof answer !== "string" || !answer.trim()) continue;
+    if (correct !== undefined && typeof correct !== "boolean") continue;
 
-    seen.add(wordId);
-    result.push({ wordId, correct });
+    const normalizedWordId = wordId.trim();
+    if (seen.has(normalizedWordId)) continue;
+
+    seen.add(normalizedWordId);
+    result.push({
+      wordId: normalizedWordId,
+      answer: answer.trim(),
+      correct,
+    });
   }
 
   return result;
@@ -76,4 +85,18 @@ export function dailyDeltaFor(correct: boolean, streakBefore: number): number {
   if (!correct) return 0;
   const effective = Math.min(streakBefore, STREAK_CAP);
   return 5 + effective * 2;
+}
+
+export function normalizeDailyAnswerText(value: string): string {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+export function isDailyAnswerCorrect(
+  submittedAnswer: string,
+  expectedAnswer: string,
+): boolean {
+  return (
+    normalizeDailyAnswerText(submittedAnswer) ===
+    normalizeDailyAnswerText(expectedAnswer)
+  );
 }
