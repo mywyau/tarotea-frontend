@@ -1,3 +1,4 @@
+import { redactIdentifier } from "~/server/utils/logging/redact";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import {
@@ -32,7 +33,7 @@ export async function deleteUserData(userId: string) {
     );
   } catch (err) {
     console.error("Failed to clear word unlock cache after user deletion", {
-      userId,
+      userHash: redactIdentifier(userId),
       error: err,
     });
   }

@@ -4,6 +4,7 @@
 // import { db } from "~/server/repositories/db";
 // import { redis } from "~/server/repositories/redis";
 
+import { redactIdentifier } from "~/server/utils/logging/redact";
 // type PayloadAnswer = {
 //   wordId: string;
 //   correct: boolean;
@@ -909,7 +910,7 @@ export default defineEventHandler(async (event) => {
         );
       } catch (error) {
         console.error("Failed to update sentence progress cache", {
-          userId,
+          userHash: redactIdentifier(userId),
           sessionKey,
           error,
         });

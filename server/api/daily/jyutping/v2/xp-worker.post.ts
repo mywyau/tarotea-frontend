@@ -1,6 +1,7 @@
 // server/api/daily/jyutping/v2/xp-worker.post.ts
 
 import { Receiver } from "@upstash/qstash";
+import { redactIdentifier } from "~/server/utils/logging/redact";
 import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
@@ -228,7 +229,7 @@ export default defineEventHandler(async (event) => {
 
   console.log("[xp-jyutping worker v2] invoked", {
     eventId,
-    userId,
+    userHash: redactIdentifier(userId),
     sessionKey: body.sessionKey ?? null,
   });
 

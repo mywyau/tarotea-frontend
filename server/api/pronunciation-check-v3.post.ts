@@ -1,6 +1,7 @@
 import { createError, readMultipartFormData } from "h3";
 import OpenAI from "openai";
 import { redis } from "~/server/repositories/redis";
+import { redactIdentifier } from "~/server/utils/logging/redact";
 // import { whisperRequestLimit, whisperRequestLimitFree } from "~/utils/whisper";
 import { whisperRequestLimit, whisperRequestLimitFree } from "~/config/audio_config"
 import { consumeWhisperAttemptMonthlyBySubject } from "../repositories/whisper/consumeWhisperAttemptMonthlyBySubject";
@@ -185,14 +186,13 @@ export default defineEventHandler(async (event) => {
     const avgLogprob = averageLogprob(transcription.logprobs);
 
     console.log("[pronunciation-check]", {
-      userId,
-      subjectKey: subject.key,
+      userHash: redactIdentifier(userId),
+      subjectKind: subject.kind,
+      subjectHash: redactIdentifier(subject.key),
       wordId,
       exampleIndex,
-      expectedChinese,
-      transcript,
-      normalizedExpected: normalizeChinese(expectedChinese),
-      normalizedHeard: normalizeChinese(transcript),
+      expectedLength: expectedChinese.length,
+      transcriptLength: transcript.length,
       similarity: similarity(
         normalizeChinese(expectedChinese),
         normalizeChinese(transcript),

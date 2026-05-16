@@ -9,6 +9,7 @@ import { Client as QStashClient } from "@upstash/qstash";
 
 import { db } from "~/server/repositories/db";
 import { getUserFromSession } from "@/server/utils/auth";
+import { redactIdentifier } from "~/server/utils/logging/redact";
 
 type DeleteBody = {
   confirm?: string;
@@ -171,7 +172,7 @@ export default defineEventHandler(async (event) => {
       });
 
       console.log("Published account deletion job", {
-        userId: user.id,
+        userHash: redactIdentifier(user.id),
         jobId,
         workerUrl,
         alreadyInProgress,
@@ -180,7 +181,7 @@ export default defineEventHandler(async (event) => {
       });
     } catch (err) {
       console.error("Failed to publish account deletion job", {
-        userId: user.id,
+        userHash: redactIdentifier(user.id),
         jobId,
         workerUrl,
         error: err,

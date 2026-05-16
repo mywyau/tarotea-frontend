@@ -1,3 +1,4 @@
+import { redactIdentifier } from "~/server/utils/logging/redact";
 // server/api/daily/jyutping/finalize.post.ts
 import { createError, readBody } from "h3";
 import {
@@ -234,7 +235,7 @@ export default defineEventHandler(async (event) => {
     } catch (error) {
       console.error("[daily-jyutping] publish failed", {
         eventId,
-        userId,
+        userHash: redactIdentifier(userId),
         sessionKey,
         error,
       });

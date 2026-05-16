@@ -1,4 +1,5 @@
 import { defineEventHandler, getHeader, getRequestURL } from "h3";
+import { classifyUserAgent, summarizeUserAgent } from "~/server/utils/logging/redact";
 
 const BOT_REGEX =
   /bot|crawler|spider|crawling|curl|wget|python|scrapy|httpclient|monitoring/i;
@@ -18,15 +19,16 @@ export default defineEventHandler((event) => {
     return;
   }
 
-  // Only log bots
+  // Only log bots, but never persist the full User-Agent string.
   if (isBot) {
     console.log(
       JSON.stringify({
         event: "bot_request",
         path: url.pathname,
-        userAgent,
+        botFamily: classifyUserAgent(userAgent),
+        userAgentSummary: summarizeUserAgent(userAgent),
         timestamp: new Date().toISOString(),
-      })
+      }),
     );
   }
 });

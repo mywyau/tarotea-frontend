@@ -1,4 +1,5 @@
 import { defineEventHandler, getHeader, getRequestURL } from "h3";
+import { redactIdentifier, summarizeUserAgent } from "~/server/utils/logging/redact";
 
 const SENSITIVE_PATH_PREFIXES = [
   "/api/auth",
@@ -60,11 +61,11 @@ export default defineEventHandler((event) => {
         requestId,
         sensitivePath,
         isSlow,
-        ip: forwardedFor,
-        referrer,
-        userAgent,
+        ipHash: redactIdentifier(forwardedFor),
+        referrerHash: redactIdentifier(referrer),
+        userAgentSummary: summarizeUserAgent(userAgent),
         timestamp: new Date().toISOString(),
-      })
+      }),
     );
   });
 });

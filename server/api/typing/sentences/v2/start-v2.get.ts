@@ -25,6 +25,7 @@ import {
   weakestWordRatio
 } from "~/utils/weakestWords";
 
+import { redactLogDetails } from "~/server/utils/logging/redact";
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
 const SENTENCE_CONTENT_CACHE_TTL_SECONDS = 60 * 10;
 const LOCAL_SENTENCE_CONTENT_CACHE_TTL_MS = 60 * 1000;
@@ -205,7 +206,7 @@ async function timedStep<T>(
 }
 
 function logSummary(details: Record<string, unknown>) {
-  console.info("[dojo-sentence-start]", JSON.stringify(details));
+  console.info("[dojo-sentence-start]", JSON.stringify(redactLogDetails(details)));
 }
 
 function getLocalSentenceContent(
@@ -657,7 +658,7 @@ export default defineEventHandler(async (event) => {
   };
 
   if (totalMs > 1000) {
-    console.warn("[dojo-sentence-start-slow]", JSON.stringify(logPayload));
+    console.warn("[dojo-sentence-start-slow]", JSON.stringify(redactLogDetails(logPayload)));
   } else {
     logSummary(logPayload);
   }
