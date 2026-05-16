@@ -673,16 +673,11 @@ onBeforeUnmount(() => {
                 Sentence
               </div>
 
-              <div class="flex flex-wrap text-2xl font-medium text-gray-900 leading-relaxed no-copy" @copy.prevent @cut.prevent
-                @contextmenu.prevent @dragstart.prevent @selectstart.prevent>
-                <span v-for="(token, i) in sentenceCharTokens" :key="`${current?.sentenceId ?? 'sentence'}-${i}`"
-                  class="transition-colors duration-200" :class="{
-                    'text-green-600 font-semibold': token.state === 'correct',
-                    'text-gray-400': token.comparable && token.state === 'idle',
-                  }">
-                  {{ token.char }}
-                </span>
-              </div>
+              <DojoTypedPrompt
+                :key="current?.sentenceId"
+                :tokens="sentenceCharTokens"
+                container-class="flex flex-wrap text-2xl font-medium text-gray-900 leading-relaxed no-copy"
+              />
 
               <div class="text-sm text-gray-400 leading-relaxed">
                 {{ current?.meaning }}

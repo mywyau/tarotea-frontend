@@ -748,14 +748,12 @@ onBeforeUnmount(() => {
 
           <div class="rounded-2xl p-5">
             <transition name="fade-word" mode="out-in">
-              <div :key="current?.wordId" class="text-4xl text-center font-medium flex gap-1 leading-none">
-                <span v-for="(char, i) in chineseChars" :key="i" class="transition-all duration-200" :class="{
-                  'text-green-600 font-semibold': charStates[i] === 'correct',
-                  'text-gray-400': charStates[i] === 'idle'
-                }">
-                  {{ char }}
-                </span>
-              </div>
+              <DojoTypedPrompt
+                :key="current?.wordId"
+                :chars="chineseChars"
+                :states="charStates"
+                container-class="text-4xl text-center font-medium flex gap-1 leading-none"
+              />
             </transition>
 
             <div v-if="current?.meaning" class="mt-2 text-lg text-gray-700">
