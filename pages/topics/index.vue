@@ -174,7 +174,7 @@ onMounted(async () => {
         <NuxtLink :to="topicLink(topic)" class="block space-y-3">
           <div class="min-w-0 topic-card-copy">
             <div class="topic-card-header">
-              <h2 class="text-base sm:text-lg font-semibold text-gray-900 leading-snug">
+              <h2 class="topic-card-title text-base sm:text-sm font-semibold text-gray-900 leading-snug">
                 {{ topic.title }}
               </h2>
 
@@ -288,6 +288,11 @@ onMounted(async () => {
   gap: 1rem;
 }
 
+.topic-card-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
 .topic-card-copy {
   padding-right: 2.25rem;
 }
@@ -339,6 +344,33 @@ onMounted(async () => {
   height: 1.25rem;
   stroke-width: 2.25;
   color: rgba(17, 24, 39, 0.82);
+}
+
+@media (max-width: 639px) {
+  .topic-card-header {
+    gap: 0.35rem;
+  }
+
+  .topic-card-title {
+    flex: 1 1 auto;
+    font-size: 0.78rem;
+    line-height: 1.15;
+  }
+
+  .topic-card-copy {
+    padding-right: 0;
+  }
+
+  .topic-icon-wrap {
+    position: static;
+    flex: 0 0 auto;
+    margin-top: 0.05rem;
+  }
+
+  .topic-icon {
+    width: 1rem;
+    height: 1rem;
+  }
 }
 
 .topic-card.is-active:hover {
