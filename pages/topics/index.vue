@@ -174,7 +174,7 @@ onMounted(async () => {
         <NuxtLink :to="topicLink(topic)" class="block space-y-3">
           <div class="min-w-0 topic-card-copy">
             <div class="topic-card-header">
-              <h2 class="text-base sm:text-lg font-semibold text-gray-900 leading-snug">
+              <h2 class="topic-card-title text-base sm:text-lg font-semibold text-gray-900 leading-snug">
                 {{ topic.title }}
               </h2>
 
@@ -286,6 +286,13 @@ onMounted(async () => {
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+}
+
+@media (max-width: 639px) {
+  .topic-card-title {
+    font-size: 0.9rem;
+    line-height: 1.2;
+  }
 }
 
 .topic-card-copy {
