@@ -290,8 +290,13 @@ onMounted(async () => {
 
 @media (max-width: 639px) {
   .topic-card-title {
-    font-size: 0.9rem;
-    line-height: 1.2;
+    font-size: 0.8rem;
+    line-height: 1.15;
+  }
+
+  .topic-icon {
+    width: 1.05rem;
+    height: 1.05rem;
   }
 }
 
