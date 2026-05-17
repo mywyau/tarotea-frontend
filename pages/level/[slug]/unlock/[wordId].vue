@@ -157,7 +157,7 @@ onMounted(loadData)
         style="background: rgba(168,202,224,0.22); border-color: rgba(17,24,39,0.12);">
         <h2 class="text-lg font-semibold text-gray-900">Log in to unlock this tile</h2>
         <p class="text-sm text-gray-700">
-          Guest mode lets you preview content, but your progress is not saved.
+          You are currently not logged in. Sign up and log in to save gain xp, save progress and unlock words.
         </p>
         <ul class="list-disc pl-5 text-sm text-gray-700 space-y-1">
           <li>Gain XP from quizzes and practice.</li>
