@@ -68,6 +68,30 @@ type CompleteUploadResponse = {
     createdAt: string;
 };
 
+type AttemptStatusResponse = {
+    attemptId: string;
+    status: string;
+    wordId: string;
+    exampleIndex: number;
+    scope: string | null;
+    slug: string | null;
+    audioObjectKey: string;
+    transcript: string | null;
+    expectedChinese: string | null;
+    expectedJyutping: string | null;
+    score: number | null;
+    matchType: string | null;
+    confidence: number | null;
+    feedback: unknown | null;
+    errorCode: string | null;
+    errorMessage: string | null;
+    createdAt: string;
+    queuedAt: string | null;
+    processingAt: string | null;
+    completedAt: string | null;
+    failedAt: string | null;
+};
+
 const route = useRoute();
 const runtimeConfig = useRuntimeConfig();
 
@@ -83,6 +107,7 @@ const audioDirectory = computed(() =>
 );
 
 const playbackRate = ref(1);
+const attemptStatusDebug = ref<AttemptStatusResponse | null>(null);
 
 const wordSlug = computed(() =>
     decodeURIComponent(String(route.params.word ?? "")),
@@ -201,6 +226,7 @@ function resetDebug() {
     attemptDebug.value = null;
     uploadDebug.value = null;
     completedUploadDebug.value = null;
+    attemptStatusDebug.value = null;
     errorMessage.value = "";
     aiState.value = "";
 }
@@ -419,8 +445,25 @@ async function submitRecording() {
             );
         }
 
+        // const completedUpload = await $fetch<CompleteUploadResponse>(
+        //     // `/api/echo-lab/attempt/${attempt.attemptId}/complete-upload`,
+        //     `/api/echo-lab/attempts/${attempt.attemptId}/complete-upload`,
+        //     {
+        //         method: "POST",
+        //         headers: {
+        //             Authorization: `Bearer ${token}`,
+        //         },
+        //     },
+        // );
+
+        // completedUploadDebug.value = completedUpload;
+
+        // console.log("[echo-lab-upload-test] completed upload", completedUpload);
+
+        // aiState.value = "success";
+
         const completedUpload = await $fetch<CompleteUploadResponse>(
-            `/api/echo-lab/attempt/${attempt.attemptId}/complete-upload`,
+            `/api/echo-lab/attempts/${attempt.attemptId}/complete-upload`,
             {
                 method: "POST",
                 headers: {
@@ -432,6 +475,20 @@ async function submitRecording() {
         completedUploadDebug.value = completedUpload;
 
         console.log("[echo-lab-upload-test] completed upload", completedUpload);
+
+        const attemptStatus = await $fetch<AttemptStatusResponse>(
+            `/api/echo-lab/attempts/${attempt.attemptId}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+
+        attemptStatusDebug.value = attemptStatus;
+
+        console.log("[echo-lab-upload-test] attempt status", attemptStatus);
 
         aiState.value = "success";
 
@@ -592,7 +649,7 @@ onUnmounted(() => {
                 Your browser does not support microphone recording.
             </section>
 
-            <section v-if="attemptDebug || uploadDebug || completedUploadDebug"
+            <section v-if="attemptDebug || uploadDebug || completedUploadDebug || attemptStatusDebug"
                 class="rounded-2xl border border-gray-200 bg-white p-5 text-left text-xs text-gray-700 shadow-sm space-y-4">
                 <h2 class="text-sm font-semibold text-gray-900">
                     Debug output
@@ -651,6 +708,23 @@ onUnmounted(() => {
                     <p>
                         <strong>Completed attempt ID:</strong>
                         {{ completedUploadDebug.attemptId }}
+                    </p>
+                </div>
+
+                <div v-if="attemptStatusDebug" class="space-y-1">
+                    <p>
+                        <strong>Fetched attempt status:</strong>
+                        {{ attemptStatusDebug.status }}
+                    </p>
+
+                    <p>
+                        <strong>Transcript:</strong>
+                        {{ attemptStatusDebug.transcript ?? "null" }}
+                    </p>
+
+                    <p>
+                        <strong>Score:</strong>
+                        {{ attemptStatusDebug.score ?? "null" }}
                     </p>
                 </div>
             </section>

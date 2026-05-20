@@ -1,15 +1,15 @@
+import { HeadObjectCommand } from "@aws-sdk/client-s3";
 import {
   createError,
   defineEventHandler,
   getRouterParam,
   type H3Event,
 } from "h3";
-import { HeadObjectCommand } from "@aws-sdk/client-s3";
 
 import { MAX_AUDIO_BYTES } from "~/config/audio_config";
 import { db } from "~/server/repositories/db";
-import { requireUser } from "~/server/utils/requireUser";
 import { r2BucketName, r2Client } from "~/server/utils/r2";
+import { requireUser } from "~/server/utils/requireUser";
 
 type EchoLabAttemptStatus =
   | "created"
