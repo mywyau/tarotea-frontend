@@ -278,13 +278,13 @@ onMounted(loadData)
                 <button type="button"
                   class="confirm-btn-blush w-full rounded-lg py-3 font-semibold hover:brightness-110 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   :disabled="loading || unlockSummary.creditsAvailable < 1" @click="unlockWord">
-                  {{ loading ? 'Unlocking…' : 'Confirm unlock' }}
+                  {{ loading ? '⏳ Unlocking…' : '✓ Confirm unlock' }}
                 </button>
 
                 <button type="button"
                   class="w-full rounded-lg py-3 font-semibold border border-gray-300 text-gray-800 bg-white/70 backdrop-blur hover:bg-white transition"
                   :disabled="loading" @click="closeUnlockPanel">
-                  Cancel
+                  ✕ Cancel
                 </button>
               </div>
             </div>
