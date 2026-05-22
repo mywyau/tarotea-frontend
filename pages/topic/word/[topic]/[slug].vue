@@ -233,9 +233,8 @@ watchEffect(() => {
 <template>
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
-        <BackLink :to="backToTopicWordsHref" />
-
         <div class="flex items-center justify-end gap-4">
+            <BackLink :to="backToTopicWordsHref" inline />
             <div class="flex items-center gap-2">
                 <details ref="settingsDetails" class="group relative">
 

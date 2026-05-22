@@ -6,18 +6,24 @@ const props = withDefaults(defineProps<{
   fallback?: string
   label?: string
   to?: string
+  inline?: boolean
 }>(), {
   fallback: '/',
   label: 'Back',
   to: undefined,
+  inline: false,
 })
 
 const goBack = useGoBack(props.fallback)
 </script>
 
 <template>
-  <nav class="back-link-row" aria-label="Page navigation">
-    <div class="back-link-row__inner">
+  <component
+    :is="props.inline ? 'div' : 'nav'"
+    :class="props.inline ? '' : 'back-link-row'"
+    :aria-label="props.inline ? undefined : 'Page navigation'"
+  >
+    <div :class="props.inline ? '' : 'back-link-row__inner'">
       <component
         :is="props.to ? NuxtLink : 'button'"
         :to="props.to"
@@ -29,7 +35,7 @@ const goBack = useGoBack(props.fallback)
         <span>{{ label }}</span>
       </component>
     </div>
-  </nav>
+  </component>
 </template>
 
 <style scoped>
@@ -41,6 +47,7 @@ const goBack = useGoBack(props.fallback)
   margin-inline: calc(50% - 50vw);
   text-align: start;
 }
+
 
 .back-link-row__inner {
   inline-size: 100%;
