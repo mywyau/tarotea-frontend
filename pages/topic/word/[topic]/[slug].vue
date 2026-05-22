@@ -557,7 +557,7 @@ watchEffect(() => {
 
 .usage-summary:hover {
     color: #6d28d9;
-    background-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.65);
 }
 
 .usage-summary::-webkit-details-marker {

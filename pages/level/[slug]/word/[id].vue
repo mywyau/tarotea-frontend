@@ -569,7 +569,7 @@ watchEffect(() => {
 
 .usage-summary:hover {
   color: #6d28d9;
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.65);
 }
 
 
@@ -579,19 +579,6 @@ watchEffect(() => {
 
 .usage-summary::marker {
   content: "";
-}
-
-.usage-summary::after {
-  content: "⌄";
-  margin-left: 0.45rem;
-  color: #7c3aed;
-  font-size: 0.95rem;
-  line-height: 1;
-  transition: transform 0.2s ease;
-}
-
-.usage-details[open] .usage-summary::after {
-  transform: rotate(180deg);
 }
 
 .usage-list {
