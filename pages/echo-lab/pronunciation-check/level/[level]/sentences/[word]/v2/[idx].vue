@@ -481,6 +481,12 @@ onUnmounted(() => {
       <p class="text-sm text-gray-500">
         Practice the phrase by listening, recording, and reviewing feedback.
       </p>
+      <div class="mx-auto max-w-md rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+        <p class="font-semibold">Beta</p>
+        <p>
+          Echo Lab is in beta. You may see occasional quality issues while we continue improving feedback.
+        </p>
+      </div>
 
       <div v-if="aiState === 'error'" class="text-red-500 text-sm space-y-6">
         <p>
