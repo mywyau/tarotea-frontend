@@ -77,10 +77,7 @@ onMounted(async () => {
       </p> -->
 
       <div class="mt-4 flex flex-col items-center gap-3">
-        <button class="text-blue-600 hover:underline" @click="tryDifferentAccount">
-          Try another account
-        </button>
-
+        
         <NuxtLink to="/" class="text-blue-600 hover:underline">
           Return to home
         </NuxtLink>
