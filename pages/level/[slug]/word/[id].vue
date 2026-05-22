@@ -434,8 +434,8 @@ watchEffect(() => {
           Usage
         </summary>
 
-        <ul class="pl-10 list-disc space-y-2 text-gray-700 mt-3">
-          <li v-for="note in word.usage" :key="note">
+        <ul class="usage-list mt-3 space-y-2 text-gray-700">
+          <li v-for="note in word.usage" :key="note" class="usage-list-item">
             {{ note }}
           </li>
         </ul>
@@ -564,6 +564,48 @@ watchEffect(() => {
 
 .usage-summary:hover {
   text-decoration-color: currentColor;
+}
+
+
+.usage-summary::-webkit-details-marker {
+  display: none;
+}
+
+.usage-summary::marker {
+  content: "";
+}
+
+.usage-summary::after {
+  content: "⌄";
+  margin-left: 0.45rem;
+  color: #7c3aed;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.usage-details[open] .usage-summary::after {
+  transform: rotate(180deg);
+}
+
+.usage-list {
+  list-style: none;
+  margin: 0;
+  padding-left: 0;
+}
+
+.usage-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.usage-list-item::before {
+  content: "✧";
+  color: #7c3aed;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  flex: 0 0 auto;
 }
 
 /* Examples */
