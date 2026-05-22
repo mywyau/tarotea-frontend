@@ -560,13 +560,16 @@ watchEffect(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  border-radius: 9999px;
+  padding: 0.35rem;
   cursor: pointer;
   color: #7c3aed;
-  transition: color 0.2s ease;
+  transition: color 0.2s ease, background-color 0.2s ease;
 }
 
 .usage-summary:hover {
   color: #6d28d9;
+  background-color: #ffffff;
 }
 
 
