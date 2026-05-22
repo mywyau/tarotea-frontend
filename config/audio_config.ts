@@ -1,4 +1,4 @@
-export const whisperRequestLimit = 3000
+export const whisperRequestLimit = 1000
 export const whisperRequestLimitFree = 10
 
 export const MAX_RECORDING_SECONDS = 15

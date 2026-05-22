@@ -28,7 +28,7 @@ const benefits = [
   { icon: markRaw(UnlockKeyhole), text: 'Unlock over 2500 word tiles' },
   { icon: markRaw(BookOpen), text: 'Unlock over 10000 sentences to help with your studies' },
   { icon: markRaw(Target), text: 'Train to improve recognition and recall with our exercises and activities' },
-  { icon: markRaw(Mic), text: 'Practice your pronunciation with 3000 Echo Lab requests per month' },
+  { icon: markRaw(Mic), text: 'Practice your pronunciation with 1000 Echo Lab requests per month' },
   { icon: markRaw(Sparkles), text: 'Increase exposure to weaker words via our xp system' },
   { icon: markRaw(Tags), text: 'Access new topics, words and features added regularly' },
 ]
