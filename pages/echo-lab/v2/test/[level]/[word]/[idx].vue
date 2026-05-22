@@ -16,6 +16,7 @@ import {
 definePageMeta({
     ssr: false,
     middleware: [
+        "coming-soon",
         "logged-in",
         "word-access"
     ],
@@ -92,6 +93,20 @@ type AttemptStatusResponse = {
     failedAt: string | null;
 };
 
+type QueueAttemptResponse = {
+    attemptId: string;
+    status: string;
+    wordId: string;
+    exampleIndex: number;
+    scope: string | null;
+    slug: string | null;
+    audioObjectKey: string;
+    expectedChinese: string | null;
+    expectedJyutping: string | null;
+    createdAt: string;
+    queuedAt: string | null;
+};
+
 const route = useRoute();
 const runtimeConfig = useRuntimeConfig();
 
@@ -105,6 +120,8 @@ const selectedAudioVoice = useCookie<AudioVoice>("audio-voice", {
 const audioDirectory = computed(() =>
     selectedAudioVoice.value === "female" ? "audio-female" : "audio-male",
 );
+
+const queuedAttemptDebug = ref<QueueAttemptResponse | null>(null);
 
 const playbackRate = ref(1);
 const attemptStatusDebug = ref<AttemptStatusResponse | null>(null);
@@ -227,6 +244,7 @@ function resetDebug() {
     uploadDebug.value = null;
     completedUploadDebug.value = null;
     attemptStatusDebug.value = null;
+    queuedAttemptDebug.value = null;
     errorMessage.value = "";
     aiState.value = "";
 }
@@ -445,23 +463,6 @@ async function submitRecording() {
             );
         }
 
-        // const completedUpload = await $fetch<CompleteUploadResponse>(
-        //     // `/api/echo-lab/attempt/${attempt.attemptId}/complete-upload`,
-        //     `/api/echo-lab/attempts/${attempt.attemptId}/complete-upload`,
-        //     {
-        //         method: "POST",
-        //         headers: {
-        //             Authorization: `Bearer ${token}`,
-        //         },
-        //     },
-        // );
-
-        // completedUploadDebug.value = completedUpload;
-
-        // console.log("[echo-lab-upload-test] completed upload", completedUpload);
-
-        // aiState.value = "success";
-
         const completedUpload = await $fetch<CompleteUploadResponse>(
             `/api/echo-lab/attempts/${attempt.attemptId}/complete-upload`,
             {
@@ -475,6 +476,40 @@ async function submitRecording() {
         completedUploadDebug.value = completedUpload;
 
         console.log("[echo-lab-upload-test] completed upload", completedUpload);
+
+        const queuedAttempt = await $fetch<QueueAttemptResponse>(
+            `/api/echo-lab/attempts/${attempt.attemptId}/queue`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+
+        queuedAttemptDebug.value = queuedAttempt;
+
+        const processedAttempt = await $fetch<{
+            attemptId: string;
+            status: string;
+            transcript: string;
+            score: number;
+            matchType: string;
+            confidence: number;
+            feedback: unknown;
+        }>(
+            `/api/echo-lab/attempts/${attempt.attemptId}/process`,
+            {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            },
+        );
+
+        console.log("[echo-lab-upload-test] processed attempt", processedAttempt);
+
+        console.log("[echo-lab-upload-test] queued attempt", queuedAttempt);
 
         const attemptStatus = await $fetch<AttemptStatusResponse>(
             `/api/echo-lab/attempts/${attempt.attemptId}`,
@@ -649,7 +684,8 @@ onUnmounted(() => {
                 Your browser does not support microphone recording.
             </section>
 
-            <section v-if="attemptDebug || uploadDebug || completedUploadDebug || attemptStatusDebug"
+            <section
+                v-if="attemptDebug || uploadDebug || completedUploadDebug || queuedAttemptDebug || attemptStatusDebug"
                 class="rounded-2xl border border-gray-200 bg-white p-5 text-left text-xs text-gray-700 shadow-sm space-y-4">
                 <h2 class="text-sm font-semibold text-gray-900">
                     Debug output
@@ -708,6 +744,18 @@ onUnmounted(() => {
                     <p>
                         <strong>Completed attempt ID:</strong>
                         {{ completedUploadDebug.attemptId }}
+                    </p>
+                </div>
+
+                <div v-if="queuedAttemptDebug" class="space-y-1">
+                    <p>
+                        <strong>Queued attempt status:</strong>
+                        {{ queuedAttemptDebug.status }}
+                    </p>
+
+                    <p>
+                        <strong>Queued at:</strong>
+                        {{ queuedAttemptDebug.queuedAt ?? "null" }}
                     </p>
                 </div>
 
