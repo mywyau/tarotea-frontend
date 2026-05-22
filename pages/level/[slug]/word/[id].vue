@@ -566,6 +566,28 @@ watchEffect(() => {
   text-decoration-color: currentColor;
 }
 
+
+.usage-summary::-webkit-details-marker {
+  display: none;
+}
+
+.usage-summary::marker {
+  content: "";
+}
+
+.usage-summary::after {
+  content: "⌄";
+  margin-left: 0.45rem;
+  color: #7c3aed;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.usage-details[open] .usage-summary::after {
+  transform: rotate(180deg);
+}
+
 .usage-list {
   list-style: none;
   margin: 0;
@@ -579,7 +601,7 @@ watchEffect(() => {
 }
 
 .usage-list-item::before {
-  content: "✦";
+  content: "✧";
   color: #7c3aed;
   font-size: 0.9rem;
   line-height: 1.45;
