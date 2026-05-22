@@ -102,9 +102,16 @@ const learningModes = [
 
 const currentUsers = ref<number | null>(null)
 const isStartPanelFlipped = ref(false)
+const generalGreeting = ref('')
+const { isLoggedIn, resolve: resolveMeState } = useMeStateV2()
 
 function flipStartPanel() {
   isStartPanelFlipped.value = !isStartPanelFlipped.value
+}
+
+function updateGeneralGreeting() {
+  const currentHour = new Date().getHours()
+  generalGreeting.value = currentHour < 12 ? 'Good morning!' : 'Good afternoon!'
 }
 const sessionCookie = useCookie<string>('online_session_id', {
   maxAge: 60 * 60 * 24 * 365,
@@ -127,6 +134,8 @@ async function refreshCurrentUsers() {
 }
 
 onMounted(() => {
+  void resolveMeState()
+  updateGeneralGreeting()
   void refreshCurrentUsers()
   const interval = setInterval(() => {
     void refreshCurrentUsers()
@@ -152,6 +161,9 @@ onMounted(() => {
               item.letter }}</span><span v-if="word.trailingSpace">&nbsp;</span>
         </span>
       </h1>
+      <p v-if="isLoggedIn && generalGreeting" class="text-base sm:text-lg text-gray-800 mt-4">
+        {{ generalGreeting }}
+      </p>
 
       <div class="grid grid-cols-2 sm:grid-cols-2 gap-4 mt-6 max-w-2xl mx-auto">
         <div class="relative rounded-xl p-5 text-center brand-card-green ">
