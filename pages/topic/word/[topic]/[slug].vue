@@ -9,7 +9,6 @@ definePageMeta({
 import { masteryXp } from '@/config/xp/helpers';
 
 import {
-    ArrowLeft,
     CheckCircle2,
     ChevronLeft,
     ChevronRight,
@@ -48,6 +47,7 @@ const { authReady } = useMeStateV2() // for now just to prevent hydration redire
 
 const slug = computed(() => decodeURIComponent(route.params.slug as string))
 const topic = computed(() => route.params.topic as string)
+const backToTopicWordsHref = computed(() => `/topic/words/${topic.value}/v2#${slug.value}`)
 
 const { data, error } = await useFetch(
     () => `/api/words/${slug.value}`,
@@ -235,11 +235,7 @@ watchEffect(() => {
 
         <div class="flex items-center justify-end gap-4">
 
-            <!-- <NuxtLink :to="`/topic/words/${topic}/v2#${word.id}`"
-                class="inline-flex items-center gap-1.5 text-sm text-black hover:underline">
-                <ArrowLeft class="h-4 w-4" />
-                <span>Back</span>
-            </NuxtLink> -->
+            <BackLink :to="backToTopicWordsHref" />
 
             <div class="flex items-center gap-2">
                 <details ref="settingsDetails" class="group relative">
