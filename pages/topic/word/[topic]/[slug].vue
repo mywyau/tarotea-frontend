@@ -47,7 +47,6 @@ const { authReady } = useMeStateV2() // for now just to prevent hydration redire
 
 const slug = computed(() => decodeURIComponent(route.params.slug as string))
 const topic = computed(() => route.params.topic as string)
-const backToTopicWordsHref = computed(() => `/topic/words/${topic.value}/v2#${slug.value}`)
 
 const { data, error } = await useFetch(
     () => `/api/words/${slug.value}`,
@@ -234,7 +233,6 @@ watchEffect(() => {
     <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
         <div class="flex items-center justify-end gap-4">
-            <BackLink :to="backToTopicWordsHref" inline />
             <div class="flex items-center gap-2">
                 <details ref="settingsDetails" class="group relative">
 
