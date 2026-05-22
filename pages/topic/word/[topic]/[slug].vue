@@ -415,7 +415,7 @@ watchEffect(() => {
             <details class="usage-details">
                 <summary class="usage-summary text-gray-900" aria-label="Usage notes" title="Usage notes">
                     <span class="sr-only">Usage</span>
-                    <Info class="h-5 w-5" />
+                    <Info class="h-10 w-10" />
                 </summary>
 
                 <ul class="usage-list space-y-2 text-gray-700">
@@ -548,8 +548,8 @@ watchEffect(() => {
 }
 
 .usage-summary:hover {
-    color: #6d28d9;
-    background-color: rgba(255, 255, 255, 0.65);
+  color: #6d28d9;
+  background-color: rgba(209, 163, 255, 0.65);
 }
 
 .usage-summary::-webkit-details-marker {
