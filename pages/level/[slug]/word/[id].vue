@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { masteryXp } from '@/config/xp/helpers';
 import {
-  ArrowLeft,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -265,10 +264,7 @@ watchEffect(() => {
 
   <main v-if="word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-4">
 
-    <NuxtLink :to="backToLevelWordsHref" class="inline-flex items-center gap-1.5 text-sm text-black hover:underline">
-      <ArrowLeft class="h-4 w-4" />
-      <span>Back</span>
-    </NuxtLink>
+    <BackLink :to="backToLevelWordsHref" />
 
     <div class="flex items-center justify-end gap-4">
       <div class="flex items-center gap-2">
