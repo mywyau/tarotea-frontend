@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Info,
   Mic,
   PencilLine,
   Settings,
@@ -430,11 +431,12 @@ watchEffect(() => {
     <!-- Usage -->
     <section v-if="word.usage?.length" class="section-card rounded-xl p-6">
       <details class="usage-details">
-        <summary class="usage-summary text-lg font-semibold text-gray-900">
-          Usage
+        <summary class="usage-summary text-gray-900" aria-label="Usage notes" title="Usage notes">
+          <span class="sr-only">Usage</span>
+          <Info class="h-5 w-5" />
         </summary>
 
-        <ul class="usage-list mt-3 space-y-2 text-gray-700">
+        <ul class="usage-list space-y-2 text-gray-700">
           <li v-for="note in word.usage" :key="note" class="usage-list-item">
             {{ note }}
           </li>
@@ -555,15 +557,16 @@ watchEffect(() => {
 
 .usage-summary {
   width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  text-decoration: underline;
-  text-decoration-color: transparent;
-  text-underline-offset: 0.2em;
-  transition: text-decoration-color 0.2s ease;
+  color: #7c3aed;
+  transition: color 0.2s ease;
 }
 
 .usage-summary:hover {
-  text-decoration-color: currentColor;
+  color: #6d28d9;
 }
 
 
@@ -590,7 +593,7 @@ watchEffect(() => {
 
 .usage-list {
   list-style: none;
-  margin: 0;
+  margin: 0.85rem 0 0;
   padding-left: 0;
 }
 
