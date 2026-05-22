@@ -4,8 +4,8 @@ definePageMeta({
   middleware: "word-access",
 })
 
-import { MAX_AUDIO_BYTES, MAX_RECORDING_SECONDS } from "~/config/audio_config"
 import { ChevronLeft, ChevronRight, Mic, Play, RotateCcw, Send, Square, XCircle } from "@lucide/vue"
+import { MAX_AUDIO_BYTES, MAX_RECORDING_SECONDS } from "~/config/audio_config"
 
 const route = useRoute()
 const router = useRouter()
@@ -471,7 +471,7 @@ onUnmounted(() => {
 
 <template>
   <div class="min-h-[70vh] flex items-center justify-center p-6">
-    <div class="max-w-xl w-full text-center space-y-6">
+    <div class="max-w-3xl w-full text-center space-y-6">
 
       <div v-if="supported" class="flex justify-end">
         <DojoAudioSettings v-model:voice="selectedAudioVoice" v-model:playback-rate="playbackRate" />
@@ -481,12 +481,6 @@ onUnmounted(() => {
       <p class="text-sm text-gray-500">
         Practice the phrase by listening, recording, and reviewing feedback.
       </p>
-      <div class="mx-auto max-w-md rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
-        <p class="font-semibold">Beta</p>
-        <p>
-          Echo Lab is in beta. You may see occasional quality issues while we continue improving feedback.
-        </p>
-      </div>
 
       <div v-if="aiState === 'error'" class="text-red-500 text-sm space-y-6">
         <p>
@@ -568,8 +562,7 @@ onUnmounted(() => {
             </div>
           </div>
 
-          <div v-if="recordingUrl"
-            class="flex flex-col items-center gap-3 rounded-2xl p-4">
+          <div v-if="recordingUrl" class="flex flex-col items-center gap-3 rounded-2xl p-4">
             <p class="text-sm font-medium text-gray-600">Your recording</p>
             <audio ref="recordingAudio" :src="recordingUrl" controls class="w-64" />
             <button type="button" @click="replayRecording" :disabled="loading"
@@ -696,6 +689,13 @@ onUnmounted(() => {
             </div>
           </div>
         </Transition>
+
+        <div class="mt-6 mx-auto max-w-md rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-900">
+          <p class="font-semibold">Beta</p>
+          <p>
+            Echo Lab is in beta. You may see occasional quality issues while we continue improving feedback.
+          </p>
+        </div>
       </section>
     </div>
   </div>
