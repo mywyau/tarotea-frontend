@@ -53,7 +53,7 @@ onMounted(async () => {
     console.error('Login callback failed:', e)
     callbackError.value = e instanceof Error ? e.message : 'Login callback failed'
   }
-  
+
 })
 </script>
 <template>
@@ -63,9 +63,14 @@ onMounted(async () => {
         Sign-in unavailable
       </h1>
 
+
       <p class="text-gray-600">
-        {{ description || 'This application is currently private.' }}
+        We were unable to sign you in
       </p>
+
+      <!-- <p class="text-gray-600">
+        {{ description || 'This application is currently private.' }}
+      </p> -->
 
       <NuxtLink to="/" class="inline-block mt-4 text-blue-600 hover:underline">
         Return to home
@@ -77,8 +82,12 @@ onMounted(async () => {
         Sign-in failed
       </h1>
 
-      <p class="text-gray-600">
+      <!-- <p class="text-gray-600">
         {{ callbackError }}
+      </p> -->
+
+      <p class="text-gray-600">
+        We were unable to sign you in
       </p>
 
       <NuxtLink to="/" class="inline-block mt-4 text-blue-600 hover:underline">
