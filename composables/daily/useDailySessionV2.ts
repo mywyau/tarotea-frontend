@@ -1,4 +1,5 @@
 import type { DailyWord } from "@/types/daily/DailyItem";
+import { shuffleFisherYates } from "@/utils/shuffle";
 
 
 type DailyStartResponse = {
