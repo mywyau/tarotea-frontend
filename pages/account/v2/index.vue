@@ -71,7 +71,7 @@ async function saveProfile() {
     const token = await auth.getAccessToken();
 
     await $fetch("/api/account/v2/profile", {
-      method: "PATCH",
+      method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: {
         firstName: normalizeProfileInput(profileFirstName.value),

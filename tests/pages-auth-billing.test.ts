@@ -52,6 +52,7 @@ describe("auth and billing page contracts", () => {
     expect(account).toContain("w-full min-w-0 rounded-lg");
     expect(account).toContain("window.location.replace(url)");
     expect(account).toContain("/api/account/v2/profile");
+    expect(account).toContain('method: "POST"');
     expect(account).toContain("First name");
     expect(account).toContain("Last name");
   });
