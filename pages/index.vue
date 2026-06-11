@@ -104,15 +104,23 @@ const currentUsers = ref<number | null>(null)
 const isStartPanelFlipped = ref(false)
 const generalGreeting = ref('')
 const momentumMessage = ref('')
-const { isLoggedIn, resolve: resolveMeState } = useMeStateV2()
+const { isLoggedIn, user, resolve: resolveMeState } = useMeStateV2()
 
 function flipStartPanel() {
   isStartPanelFlipped.value = !isStartPanelFlipped.value
 }
 
+function formatGreeting(baseGreeting: string) {
+  const firstName = user.value?.firstName?.trim()
+
+  return firstName ? `${baseGreeting}, ${firstName}!` : `${baseGreeting}!`
+}
+
 function updateGeneralGreeting() {
   const currentHour = new Date().getHours()
-  generalGreeting.value = currentHour < 12 ? 'Good morning!' : 'Good afternoon!'
+  const baseGreeting = currentHour < 12 ? 'Good morning' : 'Good afternoon'
+
+  generalGreeting.value = formatGreeting(baseGreeting)
   momentumMessage.value
     = currentHour < 12
       ? "Keep that momentum going, you're on the right track."
@@ -137,6 +145,13 @@ async function refreshCurrentUsers() {
 
   currentUsers.value = data.currentUsers
 }
+
+watch(
+  () => user.value?.firstName,
+  () => {
+    updateGeneralGreeting()
+  },
+)
 
 onMounted(() => {
   void resolveMeState()
