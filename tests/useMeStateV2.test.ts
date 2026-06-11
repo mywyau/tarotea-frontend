@@ -52,6 +52,8 @@ describe("useMeStateV2", () => {
     const fakeUser: MeUser = {
       id: "123",
       email: "test@example.com",
+      firstName: "Taro",
+      lastName: "Tea",
       entitlement: {
         plan: "monthly",
         subscription_status: "active",

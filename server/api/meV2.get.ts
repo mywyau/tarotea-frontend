@@ -16,6 +16,8 @@ interface Entitlement {
 interface MeResponse {
   id: string;
   email: string;
+  firstName: string | null;
+  lastName: string | null;
   entitlement: Entitlement;
 }
 
@@ -39,6 +41,8 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
       select
         u.id,
         u.email,
+        u.first_name,
+        u.last_name,
         e.plan,
         e.subscription_status,
         e.current_period_start,
@@ -85,6 +89,8 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
   return {
     id: row.id,
     email: row.email,
+    firstName: row.first_name,
+    lastName: row.last_name,
     entitlement,
   };
 });

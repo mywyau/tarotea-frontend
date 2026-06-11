@@ -4,7 +4,9 @@ import { useMeStateV2 } from '@/composables/useMeStateV2'
 import { AudioLines, CalendarCheck, CircleHelp, House, Keyboard, Layers, Menu, Rocket, Tags, X } from '@lucide/vue'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
-const { isLoggedIn, resolve } = useMeStateV2()
+const { isLoggedIn, user, resolve } = useMeStateV2()
+
+const accountLabel = computed(() => user.value?.firstName || 'Account')
 const route = useRoute()
 
 const menuOpen = ref(false)
@@ -93,7 +95,7 @@ onBeforeUnmount(() => {
             <NuxtLink to="/account/v2"
               class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
               @click="closeMenu">
-              Account
+              {{ accountLabel }}
             </NuxtLink>
 
             <NuxtLink to="/stats/v2"

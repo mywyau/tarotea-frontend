@@ -17,6 +17,8 @@ export interface Entitlement {
 export interface MeUser {
   id: string;
   email: string;
+  firstName: string | null;
+  lastName: string | null;
   entitlement: Entitlement;
 }
 
