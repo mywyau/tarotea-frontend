@@ -19,6 +19,11 @@ const {
 
 const deleting = ref(false);
 const deleteConfirmInput = ref("");
+const profileFirstName = ref("");
+const profileLastName = ref("");
+const profileSaving = ref(false);
+const profileSaved = ref(false);
+const profileError = ref("");
 
 const animatedRemaining = ref(0);
 const animatedPercent = ref(0);
@@ -27,6 +32,25 @@ const showDeletePanel = ref(false);
 
 const deleteError = ref("");
 
+function normalizeProfileInput(value: string) {
+  return value.trim().replace(/\s+/g, " ");
+}
+
+const fullName = computed(() =>
+  [user.value?.firstName, user.value?.lastName]
+    .filter(Boolean)
+    .join(" "),
+);
+
+const profileChanged = computed(() => {
+  if (!user.value) return false;
+
+  return (
+    normalizeProfileInput(profileFirstName.value) !== (user.value.firstName ?? "") ||
+    normalizeProfileInput(profileLastName.value) !== (user.value.lastName ?? "")
+  );
+});
+
 const aiUsage = ref<{
   attempts: number;
   remaining: number;
@@ -34,6 +58,38 @@ const aiUsage = ref<{
 } | null>(null);
 
 const aiUsageLoading = ref(true);
+
+async function saveProfile() {
+  if (!isLoggedIn.value || !profileChanged.value) return;
+
+  profileSaving.value = true;
+  profileSaved.value = false;
+  profileError.value = "";
+
+  try {
+    const auth = await useAuth();
+    const token = await auth.getAccessToken();
+
+    await $fetch("/api/account/v2/profile", {
+      method: "PATCH",
+      headers: { Authorization: `Bearer ${token}` },
+      body: {
+        firstName: normalizeProfileInput(profileFirstName.value),
+        lastName: normalizeProfileInput(profileLastName.value),
+      },
+    });
+
+    await resolve({ force: true });
+    profileSaved.value = true;
+  } catch (err: any) {
+    console.error("Profile update failed", err);
+    profileError.value =
+      err?.data?.statusMessage ??
+      "Something went wrong saving your profile. Please try again.";
+  } finally {
+    profileSaving.value = false;
+  }
+}
 
 async function deleteAccount() {
   if (!isLoggedIn.value) return;
@@ -122,6 +178,22 @@ async function openBillingPortal() {
 }
 
 watch(
+  user,
+  (value) => {
+    profileFirstName.value = value?.firstName ?? "";
+    profileLastName.value = value?.lastName ?? "";
+    profileSaved.value = false;
+    profileError.value = "";
+  },
+  { immediate: true },
+);
+
+watch([profileFirstName, profileLastName], () => {
+  profileSaved.value = false;
+  profileError.value = "";
+});
+
+watch(
   () => [authReady.value, isLoggedIn.value],
   async ([ready, loggedIn]) => {
     if (ready && loggedIn && !aiUsage.value) {
@@ -192,12 +264,94 @@ watch(aiUsage, (val) => {
               </div>
               <div class="min-w-0">
                 <div class="text-sm text-gray-700">Signed in as</div>
-                <div class="mt-1 font-medium text-gray-900 break-all">
+                <div
+                  v-if="fullName"
+                  class="mt-1 font-medium text-gray-900 break-words"
+                >
+                  {{ fullName }}
+                </div>
+                <div
+                  class="text-sm text-gray-800 break-all"
+                  :class="fullName ? 'mt-0.5' : 'mt-1 font-medium'"
+                >
                   {{ user.email }}
                 </div>
               </div>
             </div>
           </section>
+
+          <!-- Profile card -->
+          <section
+            class="w-full min-w-0 rounded-lg backdrop-blur p-5 space-y-4"
+            style="background-color: rgba(168, 202, 224, 0.45)"
+          >
+            <div class="flex min-w-0 items-start gap-3">
+              <div
+                class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/60 text-gray-900"
+              >
+                <UserRound class="h-4 w-4" aria-hidden="true" />
+              </div>
+              <div class="min-w-0 flex-1 space-y-4">
+                <div>
+                  <h2 class="font-medium text-gray-900">Profile</h2>
+                  <p class="mt-1 text-sm text-gray-700">
+                    Add your name so TaroTea can personalize your experience.
+                  </p>
+                </div>
+
+                <form class="space-y-4" @submit.prevent="saveProfile">
+                  <div class="grid gap-3 sm:grid-cols-2">
+                    <label class="block text-sm text-gray-900">
+                      First name
+                      <input
+                        v-model="profileFirstName"
+                        type="text"
+                        autocomplete="given-name"
+                        maxlength="80"
+                        placeholder="Taro"
+                        class="mt-1 w-full rounded-lg border border-gray-300/70 bg-white/80 px-4 py-2 text-sm backdrop-blur focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      />
+                    </label>
+
+                    <label class="block text-sm text-gray-900">
+                      Last name
+                      <input
+                        v-model="profileLastName"
+                        type="text"
+                        autocomplete="family-name"
+                        maxlength="80"
+                        placeholder="Tea"
+                        class="mt-1 w-full rounded-lg border border-gray-300/70 bg-white/80 px-4 py-2 text-sm backdrop-blur focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      />
+                    </label>
+                  </div>
+
+                  <div
+                    v-if="profileError"
+                    class="rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800"
+                  >
+                    {{ profileError }}
+                  </div>
+
+                  <div
+                    v-else-if="profileSaved"
+                    class="rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800"
+                  >
+                    Profile saved.
+                  </div>
+
+                  <button
+                    type="submit"
+                    class="w-full rounded-lg bg-black py-3 font-semibold text-white shadow-sm transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="profileSaving || !profileChanged"
+                  >
+                    {{ profileSaving ? "Saving profile…" : "Save profile" }}
+                  </button>
+                </form>
+              </div>
+            </div>
+          </section>
+
 
           <!-- Plan card -->
           <section

@@ -1,6 +1,6 @@
 # Database schema (current)
 
-_Last updated: 2026-02-06_
+_Last updated: 2026-06-11_
 
 ## users
 
@@ -9,6 +9,8 @@ Stores Auth0 users mirrored into the app DB.
 Columns:
 - id (text, PK) — Auth0 `sub`
 - email (text)
+- first_name (text, nullable)
+- last_name (text, nullable)
 - created_at (timestamptz)
 - stripe_customer_id (text, nullable)
 - deleting_at (timestamptz, nullable)
