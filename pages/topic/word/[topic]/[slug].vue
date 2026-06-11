@@ -12,6 +12,8 @@ import {
     CheckCircle2,
     ChevronLeft,
     ChevronRight,
+    Eye,
+    EyeOff,
     Mic,
     PencilLine,
     Settings,
@@ -413,6 +415,8 @@ watchEffect(() => {
         <section v-if="word.usage?.length" class="section-card rounded-xl p-6">
             <details class="usage-details">
                 <summary class="usage-summary text-gray-900" aria-label="Usage notes" title="Usage notes">
+                    <Eye class="usage-icon usage-icon-closed h-4 w-4" aria-hidden="true" />
+                    <EyeOff class="usage-icon usage-icon-open h-4 w-4" aria-hidden="true" />
                     <span>Usage</span>
                 </summary>
 
@@ -538,16 +542,33 @@ watchEffect(() => {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.35rem;
     cursor: pointer;
     color: #111827;
     font-size: 1.125rem;
     font-weight: 600;
     line-height: 1.75rem;
-    transition: color 0.2s ease;
+    text-decoration: underline;
+    text-decoration-color: transparent;
+    text-underline-offset: 0.2em;
+    transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .usage-summary:hover {
   color: #374151;
+  text-decoration-color: currentColor;
+}
+
+.usage-icon-open {
+    display: none;
+}
+
+.usage-details[open] .usage-icon-closed {
+    display: none;
+}
+
+.usage-details[open] .usage-icon-open {
+    display: block;
 }
 
 .usage-summary::-webkit-details-marker {
