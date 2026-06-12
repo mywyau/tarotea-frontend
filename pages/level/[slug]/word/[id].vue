@@ -427,8 +427,8 @@ watchEffect(() => {
     <section v-if="word.usage?.length" class="section-card rounded-xl p-6">
       <details class="usage-details">
         <summary class="usage-summary text-gray-900" aria-label="Usage notes" title="Usage notes">
-          <Eye class="usage-icon usage-icon-closed h-4 w-4" aria-hidden="true" />
-          <EyeOff class="usage-icon usage-icon-open h-4 w-4" aria-hidden="true" />
+          <EyeOff class="usage-icon usage-icon-closed h-4 w-4" aria-hidden="true" />
+          <Eye class="usage-icon usage-icon-open h-4 w-4" aria-hidden="true" />
           <span>Usage</span>
         </summary>
 
