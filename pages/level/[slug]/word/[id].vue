@@ -4,7 +4,8 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
-  Info,
+  Eye,
+  EyeOff,
   Mic,
   PencilLine,
   Settings,
@@ -426,8 +427,9 @@ watchEffect(() => {
     <section v-if="word.usage?.length" class="section-card rounded-xl p-6">
       <details class="usage-details">
         <summary class="usage-summary text-gray-900" aria-label="Usage notes" title="Usage notes">
-          <span class="sr-only">Usage</span>
-          <Info class="h-10 w-10" />
+          <EyeOff class="usage-icon usage-icon-closed h-4 w-4" aria-hidden="true" />
+          <Eye class="usage-icon usage-icon-open h-4 w-4" aria-hidden="true" />
+          <span>Usage</span>
         </summary>
 
         <ul class="usage-list space-y-2 text-gray-700">
@@ -554,18 +556,34 @@ watchEffect(() => {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 9999px;
-  padding: 0.35rem;
+  gap: 0.35rem;
   cursor: pointer;
-  color: #7c3aed;
-  transition: color 0.2s ease, background-color 0.2s ease;
+  color: #111827;
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.75rem;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 0.2em;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
 }
 
 .usage-summary:hover {
-  color: #6d28d9;
-  background-color: rgba(209, 163, 255, 0.65);
+  color: #374151;
+  text-decoration-color: currentColor;
 }
 
+.usage-icon-open {
+  display: none;
+}
+
+.usage-details[open] .usage-icon-closed {
+  display: none;
+}
+
+.usage-details[open] .usage-icon-open {
+  display: block;
+}
 
 .usage-summary::-webkit-details-marker {
   display: none;
@@ -576,23 +594,17 @@ watchEffect(() => {
 }
 
 .usage-list {
-  list-style: none;
+  list-style: disc;
   margin: 0.85rem 0 0;
-  padding-left: 0;
+  padding-left: 1.25rem;
 }
 
 .usage-list-item {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
+  display: list-item;
 }
 
-.usage-list-item::before {
-  content: "✧";
-  color: #7c3aed;
-  font-size: 0.9rem;
-  line-height: 1.45;
-  flex: 0 0 auto;
+.usage-list-item::marker {
+  color: #111827;
 }
 
 /* Examples */
