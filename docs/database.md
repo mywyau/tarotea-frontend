@@ -1,6 +1,9 @@
 # Database schema (current)
 
-_Last updated: 2026-06-11_
+_Last updated: 2026-08-20_
+
+To create all database tables required by the application, set `DATABASE_URL`
+and run `npm run db:migrate`. See [Database migrations](migrations/README.md).
 
 For a restorable snapshot of the complete live PostgreSQL schema, see
 [Database schema snapshots](database/README.md). Refresh and commit the snapshot

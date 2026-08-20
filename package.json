@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "seed-words": "ts-node scripts/seed-words.ts",
+    "db:migrate": "node scripts/database-migrate.mjs",
     "db:schema:dump": "node scripts/database-schema.mjs dump",
     "db:schema:restore": "node scripts/database-schema.mjs restore",
     "build": "nuxt build",
