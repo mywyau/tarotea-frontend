@@ -2,6 +2,10 @@
 
 _Last updated: 2026-06-11_
 
+For a restorable snapshot of the complete live PostgreSQL schema, see
+[Database schema snapshots](database/README.md). Refresh and commit the snapshot
+after every schema migration with `npm run db:schema:dump`.
+
 ## users
 
 Stores Auth0 users mirrored into the app DB.
