@@ -234,3 +234,4 @@ describe("UI and auth-adjacent composables", () => {
     expect(timer.frozenElapsedMs.value).toBeNull();
   });
 });
+
