@@ -288,8 +288,7 @@ watchEffect(() => {
               <div class="space-y-1">
                 <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
                 <div class="flex items-center gap-2">
-                  <input type="range" min="0" max="1" step="0.01" v-model="volume"
-                    class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
+                  <VolumeSlider v-model="volume" />
                   <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
                 </div>
               </div>
