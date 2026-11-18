@@ -1,7 +1,7 @@
 // server/api/topic/quiz/[topicSlug].get.ts
 
 import { getUserEntitlement } from "#imports";
-import { createError, getRouterParam } from "h3";
+import { createError, getRequestIP, getRouterParam } from "h3";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
@@ -364,9 +364,11 @@ function buildTopicQuiz(
 export default defineEventHandler(async (event) => {
   const user = await getUserFromSession(event);
   const userId = user?.id ?? null;
+  const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
+  const rateLimitSubject = userId ?? `guest:${requestIp}`;
 
   await enforceRateLimit(
-    userId ? `rl:topic-quiz:${userId}` : "rl:topic-quiz:guest",
+    `rl:topic-quiz:${rateLimitSubject}`,
     20,
     60,
   );
