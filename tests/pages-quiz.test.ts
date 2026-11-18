@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { readPage } from './pageTestUtils'
+import { readPage, readProjectFile } from './pageTestUtils'
 
 describe('quiz page contracts', () => {
   it('level quiz hub page keeps level mode routes and heading', () => {
@@ -52,5 +52,21 @@ describe('quiz page contracts', () => {
     expect(dailyStart).toContain('middleware: "logged-in"')
     expect(dailyStart).toContain('Daily 20 Questions')
     expect(dailyStart).toContain('NuxtLink to="/daily/vocab/v2"')
+  })
+
+  it('sends authentication when loading a level audio quiz', () => {
+    const source = readPage('quiz/[slug]/audio/v2/test.vue')
+
+    expect(source).toContain("isLoggedIn.value ? 'authed' : 'anon'")
+    expect(source).toContain('const token = await getAccessToken()')
+    expect(source).toContain('Authorization: `Bearer ${token}`')
+  })
+
+  it('gives guests full sentence quizzes for free levels', () => {
+    const source = readProjectFile('server/api/sentences/v3/start-v2.get.ts')
+
+    expect(source).toContain(
+      'if (!isFreeLevel(levelNumber)) {\n    if (!userId) {'
+    )
   })
 })

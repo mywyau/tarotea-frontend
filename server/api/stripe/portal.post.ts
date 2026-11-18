@@ -1,8 +1,11 @@
 // server/api/stripe/portal.post.ts
 
 import { createError } from "h3";
+import { db } from "~/server/repositories/db";
 import { stripe } from "~/server/services/billing/stripeClient";
-import { getAuthenticatedUserFromDB } from "~/server/utils/getAuthenticatedUserFromDB";
+import { BILLING_SESSION_RATE_LIMIT } from "~/server/utils/rate-limiting/policies";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
+import { requireUser } from "~/server/utils/requireUser";
 
 function getAppUrl(): string {
   const appUrl = process.env.SITE_URL?.trim();
@@ -18,16 +21,27 @@ function getAppUrl(): string {
 }
 
 export default defineEventHandler(async (event) => {
-  const user = await getAuthenticatedUserFromDB(event);
+  const auth = await requireUser(event);
+  const userId = auth.sub;
 
-  if (!user) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Unauthorized",
-    });
-  }
+  await enforceRateLimit(
+    `rl:billing-session:user:${userId}`,
+    BILLING_SESSION_RATE_LIMIT.limit,
+    BILLING_SESSION_RATE_LIMIT.windowSeconds,
+  );
 
-  if (!user.stripeCustomerId) {
+  const { rows } = await db.query<{ stripeCustomerId: string | null }>(
+    `
+      select stripe_customer_id as "stripeCustomerId"
+      from users
+      where id = $1
+      limit 1
+    `,
+    [userId],
+  );
+  const user = rows[0];
+
+  if (!user?.stripeCustomerId) {
     throw createError({
       statusCode: 400,
       statusMessage: "No Stripe customer found for user",

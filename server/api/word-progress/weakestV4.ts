@@ -4,7 +4,13 @@ import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { getHashFieldsAndRefreshExpiry } from "~/server/services/cache/redisHashCache";
+import { setHashFieldsWithExpiry } from "~/server/services/cache/redisHashCache";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
+import {
+  getScopeWordCacheKey,
+  SCOPE_WORD_CACHE_TTL_SECONDS,
+} from "~/server/services/cache/scopeWordCache";
 import { requireUser } from "~/server/utils/requireUser";
 import { isLevelId, levelIdToNumbers } from "~/utils/levels/levels";
 import {
@@ -92,7 +98,7 @@ async function loadCandidateWordIds(
   topicSlug?: string,
 ): Promise<string[]> {
   if (levelSlug) {
-    const cacheKey = `scope_words:level:${levelSlug}`;
+    const cacheKey = getScopeWordCacheKey("level", levelSlug);
 
     try {
       const cached = await redis.get(cacheKey);
@@ -121,7 +127,9 @@ async function loadCandidateWordIds(
     const ids = rows.map((row) => row.id as string);
 
     try {
-      await redis.set(cacheKey, JSON.stringify(ids));
+      await redis.set(cacheKey, JSON.stringify(ids), {
+        ex: SCOPE_WORD_CACHE_TTL_SECONDS,
+      });
     } catch (error) {
       console.error(
         "[word-progress/weakestV4] level scope Redis SET failed",
@@ -133,7 +141,7 @@ async function loadCandidateWordIds(
   }
 
   if (topicSlug) {
-    const cacheKey = `scope_words:topic:${topicSlug}`;
+    const cacheKey = getScopeWordCacheKey("topic", topicSlug);
 
     try {
       const cached = await redis.get(cacheKey);
@@ -162,7 +170,9 @@ async function loadCandidateWordIds(
     const ids = rows.map((row) => row.id as string);
 
     try {
-      await redis.set(cacheKey, JSON.stringify(ids));
+      await redis.set(cacheKey, JSON.stringify(ids), {
+        ex: SCOPE_WORD_CACHE_TTL_SECONDS,
+      });
     } catch (error) {
       console.error(
         "[word-progress/weakestV4] topic scope Redis SET failed",
@@ -281,7 +291,11 @@ export default defineEventHandler(async (event) => {
   let cachedById: Record<string, unknown> = {};
 
   try {
-    const result = await redis.hmget(redisKey, ...candidateWordIds);
+    const result = await getHashFieldsAndRefreshExpiry(
+      redisKey,
+      candidateWordIds,
+      WORD_PROGRESS_CACHE_TTL_SECONDS,
+    );
 
     if (Array.isArray(result)) {
       cachedById = Object.fromEntries(
@@ -291,16 +305,8 @@ export default defineEventHandler(async (event) => {
       cachedById = (result ?? {}) as Record<string, unknown>;
     }
 
-    try {
-      await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
-    } catch (error) {
-      console.error(
-        "[word-progress/weakestV4] Redis EXPIRE after HMGET failed",
-        error,
-      );
-    }
   } catch (error) {
-    console.error("[word-progress/weakestV4] Redis HMGET failed", error);
+    console.error("[word-progress/weakestV4] Redis progress cache read failed", error);
     cachedById = {};
   }
 
@@ -353,16 +359,11 @@ export default defineEventHandler(async (event) => {
 
     try {
       if (Object.keys(redisWrites).length > 0) {
-        await redis.hset(redisKey, redisWrites);
-
-        try {
-          await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
-        } catch (error) {
-          console.error(
-            "[word-progress/weakestV4] Redis EXPIRE after HSET failed",
-            error,
-          );
-        }
+        await setHashFieldsWithExpiry(
+          redisKey,
+          redisWrites,
+          WORD_PROGRESS_CACHE_TTL_SECONDS,
+        );
       }
     } catch (error) {
       console.error("[word-progress/weakestV4] Redis HSET failed", error);

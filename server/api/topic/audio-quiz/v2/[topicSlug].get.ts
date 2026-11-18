@@ -1,14 +1,20 @@
 // server/api/topic/audio-quiz/[topicSlug].get.ts
 
-import { getUserEntitlement } from "#imports";
-import { createError, getRequestIP, getRouterParam } from "h3";
+import { createError, getRouterParam } from "h3";
+import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { setHashFieldsWithExpiry } from "~/server/services/cache/redisHashCache";
+import { runSingleFlight } from "~/server/services/cache/singleFlight";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
+import {
+  getTopicContentCacheKey,
+  TOPIC_CONTENT_CACHE_TTL_SECONDS,
+} from "~/server/services/cache/topicContentCache";
 import { getUserFromSession } from "~/server/utils/auth";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
-import { Entitlement } from "~/types/auth/entitlements";
+import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { shuffleFisherYates } from "~/utils/shuffle";
 import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
 
@@ -171,8 +177,7 @@ function parseCachedTopicData(raw: unknown): TopicData | null {
 }
 
 async function loadTopicData(topicSlug: string): Promise<TopicData> {
-
-  const cacheKey = `topic_data:${topicSlug}`;
+  const cacheKey = getTopicContentCacheKey(topicSlug);
 
   try {
     const cached = await redis.get(cacheKey);
@@ -185,26 +190,30 @@ async function loadTopicData(topicSlug: string): Promise<TopicData> {
     console.error("[topic/audio-quiz] topic cache GET failed", error);
   }
 
-  const cdnBase = useRuntimeConfig().public.cdnBase;
+  return runSingleFlight(cacheKey, async () => {
+    const cdnBase = useRuntimeConfig().public.cdnBase;
 
-  let data: TopicData;
+    let data: TopicData;
 
-  try {
-    data = await $fetch<TopicData>(`${cdnBase}/topics/${topicSlug}.json`);
-  } catch {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Topic not found",
-    });
-  }
+    try {
+      data = await $fetch<TopicData>(`${cdnBase}/topics/${topicSlug}.json`);
+    } catch {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Topic not found",
+      });
+    }
 
-  try {
-    await redis.set(cacheKey, JSON.stringify(data));
-  } catch (error) {
-    console.error("[topic/audio-quiz] topic cache SET failed", error);
-  }
+    try {
+      await redis.set(cacheKey, JSON.stringify(data), {
+        ex: TOPIC_CONTENT_CACHE_TTL_SECONDS,
+      });
+    } catch (error) {
+      console.error("[topic/audio-quiz] topic cache SET failed", error);
+    }
 
-  return data;
+    return data;
+  });
 }
 
 async function loadProgressMap(
@@ -287,7 +296,11 @@ async function loadProgressMap(
 
   try {
     if (Object.keys(redisWrites).length > 0) {
-      await redis.hset(redisKey, redisWrites);
+      await setHashFieldsWithExpiry(
+        redisKey,
+        redisWrites,
+        WORD_PROGRESS_CACHE_TTL_SECONDS,
+      );
     }
   } catch (error) {
     console.error("[topic/audio-quiz] Redis HSET failed", error);
@@ -414,8 +427,7 @@ function buildTopicAudioQuiz(
 export default defineEventHandler(async (event) => {
   const user = await getUserFromSession(event);
   const userId = user?.id ?? null;
-  const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
-  const rateLimitSubject = userId ?? `guest:${requestIp}`;
+  const rateLimitSubject = getRateLimitSubject(event, userId);
 
   await enforceRateLimit(
     `rl:topic-audio-quiz:${rateLimitSubject}`,
@@ -450,10 +462,11 @@ export default defineEventHandler(async (event) => {
     if (!userId) {
       accessibleWords = allWords.slice(0, FREE_WORD_LIMIT);
     } else {
-      const entitlement = (await getUserEntitlement(
-        userId,
-      )) as Entitlement | null;
-      const hasFullAccess = canAccessTopicWord(true, entitlement, topicSlug);
+      const hasFullAccess = canAccessTopicWord(
+        true,
+        user.entitlement,
+        topicSlug,
+      );
 
       if (!hasFullAccess) {
         const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);

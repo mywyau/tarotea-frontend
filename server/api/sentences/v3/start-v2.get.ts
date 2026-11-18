@@ -12,6 +12,7 @@ import {
   QuizSession,
 } from "~/server/services/sentence-quiz/start/types";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
+import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
 import { Entitlement } from "~/types/auth/entitlements";
 import { buildSentenceQuiz } from "~/utils/quiz/buildSentenceQuiz";
@@ -51,8 +52,13 @@ export default defineEventHandler(async (event) => {
   const userId = auth?.sub ?? null;
   const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
   const sessionOwner = userId ?? `guest:${requestIp}`;
+  const rateLimitSubject = getRateLimitSubject(event, userId);
 
-  await enforceRateLimit(`rl:start:level-sentences:${sessionOwner}`, 20, 60);
+  await enforceRateLimit(
+    `rl:start:level-sentences:${rateLimitSubject}`,
+    20,
+    60,
+  );
 
   const query = getQuery(event);
 
@@ -118,24 +124,26 @@ export default defineEventHandler(async (event) => {
 
   let accessibleWordIdSet = new Set<string>(sourceWordIdsInOrder);
 
-  if (!userId) {
-    const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_LEVEL_WORD_LIMIT);
-    accessibleWordIdSet = new Set(freePreviewIds);
-  } else if (!isFreeLevel(levelNumber)) {
-    const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
-    const hasFullAccess = canAccessLevel(true, entitlement, levelNumber);
-
-    if (!hasFullAccess) {
+  if (!isFreeLevel(levelNumber)) {
+    if (!userId) {
       const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_LEVEL_WORD_LIMIT);
-      const unlockedWordIds = await getUnlockedWordIdsForUser(
-        userId,
-        sourceWordIdsInOrder,
-      );
+      accessibleWordIdSet = new Set(freePreviewIds);
+    } else {
+      const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
+      const hasFullAccess = canAccessLevel(true, entitlement, levelNumber);
 
-      accessibleWordIdSet = new Set([
-        ...freePreviewIds,
-        ...unlockedWordIds,
-      ]);
+      if (!hasFullAccess) {
+        const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_LEVEL_WORD_LIMIT);
+        const unlockedWordIds = await getUnlockedWordIdsForUser(
+          userId,
+          sourceWordIdsInOrder,
+        );
+
+        accessibleWordIdSet = new Set([
+          ...freePreviewIds,
+          ...unlockedWordIds,
+        ]);
+      }
     }
   }
 

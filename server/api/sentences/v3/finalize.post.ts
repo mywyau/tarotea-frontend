@@ -12,6 +12,7 @@ import type {
 } from "~/server/services/sentence-quiz/finalize/type";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
+import { createQstashDeduplicationId } from "~/server/utils/qstash/deduplication";
 
 type ExistingEventRow = {
   id: number | string;
@@ -48,6 +49,11 @@ async function publishSentenceWorker(args: {
       sessionKey: args.sessionKey,
     },
     retries: 3,
+    deduplicationId: createQstashDeduplicationId(
+      "sentence-level",
+      args.userId,
+      args.sessionKey,
+    ),
     flowControl: {
       key: "xp-quiz-sentences",
       parallelism: 20,
@@ -59,7 +65,7 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  await enforceRateLimit(`rl:finalize:level-sentences:${userId}`, 20, 60);
+  await enforceRateLimit(`rl:finalize:level-sentences:user:${userId}`, 20, 60);
 
   const body = (await readBody(event)) as FinalizeBody;
 

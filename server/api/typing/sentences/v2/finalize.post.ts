@@ -6,7 +6,9 @@ import {
 } from "~/config/xp/helpers";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
+import { createQstashDeduplicationId } from "~/server/utils/qstash/deduplication";
 
 import { redactLogDetails } from "~/server/utils/logging/redact";
 type SentenceBatchAttempt = {
@@ -98,6 +100,12 @@ export default defineEventHandler(async (event) => {
   );
   const userId = auth.sub;
 
+  await enforceRateLimit(
+    `rl:finalize:typing-sentences:user:${userId}`,
+    20,
+    60,
+  );
+
   const body = await timedStep(timings, "readBodyMs", async () => {
     return (await readBody(event)) as FinalizeBody;
   });
@@ -129,6 +137,11 @@ export default defineEventHandler(async (event) => {
           sessionKey,
         },
         retries: 3,
+        deduplicationId: createQstashDeduplicationId(
+          "typing-sentence",
+          userId,
+          sessionKey,
+        ),
         flowControl: {
           key: "xp-chinese-sentence-dojo",
           parallelism: 20,

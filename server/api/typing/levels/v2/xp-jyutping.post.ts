@@ -510,8 +510,12 @@ export default defineEventHandler(async (event) => {
     client.release();
   }
 
-  await redis.del(`dojo:typing:level:${userId}:${sessionKey}`).catch(() => {});
-  await redis.del(`user:stats:v2:${userId}`).catch(() => {});
+  await redis
+    .del(
+      `dojo:typing:level:${userId}:${sessionKey}`,
+      `user:stats:v2:${userId}`,
+    )
+    .catch(() => {});
 
   logSummary({
     userId,

@@ -1,6 +1,7 @@
 import { verifyAuth0Token } from "@/server/utils/auth0";
 import { H3Event, getHeader } from "h3";
 import { db } from "~/server/repositories/db";
+import type { Entitlement } from "~/types/auth/entitlements";
 
 export type SessionUser = {
   id: string; // auth0 sub
@@ -10,6 +11,7 @@ export type SessionUser = {
   subscriptionStatus?: string | null;
   deletingAt?: string | null;
   cancelAtPeriodEnd?: boolean | null;
+  entitlement: Entitlement | null;
 };
 
 export async function getUserFromSession(
@@ -46,7 +48,11 @@ export async function getUserFromSession(
       u.stripe_customer_id,
       u.deleting_at,
       e.plan,
-      e.subscription_status
+      e.subscription_status,
+      e.cancel_at_period_end,
+      e.current_period_start,
+      e.current_period_end,
+      e.canceled_at
     FROM users u
     LEFT JOIN entitlements e ON e.user_id = u.id
     WHERE u.id = $1
@@ -57,6 +63,17 @@ export async function getUserFromSession(
   const row = rows[0];
   if (!row) return null;
 
+  const entitlement: Entitlement | null = row.plan
+    ? {
+        plan: row.plan,
+        subscription_status: row.subscription_status,
+        cancel_at_period_end: Boolean(row.cancel_at_period_end),
+        current_period_start: row.current_period_start ?? undefined,
+        current_period_end: row.current_period_end ?? undefined,
+        canceled_at: row.canceled_at ?? undefined,
+      }
+    : null;
+
   return {
     id: row.id,
     email: row.email,
@@ -64,5 +81,7 @@ export async function getUserFromSession(
     plan: row.plan,
     subscriptionStatus: row.subscription_status,
     deletingAt: row.deleting_at,
+    cancelAtPeriodEnd: row.cancel_at_period_end,
+    entitlement,
   };
 }

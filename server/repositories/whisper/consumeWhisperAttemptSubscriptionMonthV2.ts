@@ -56,3 +56,22 @@ export async function consumeWhisperAttemptSubscriptionMonthV2(
     limit,
   };
 }
+
+export async function refundWhisperAttemptSubscriptionMonthV2(
+  userId: string,
+  windowStart: Date,
+  windowEnd: Date,
+): Promise<void> {
+  await db.query(
+    `
+    update ai_usage_subscription_month
+    set attempts = greatest(attempts - 1, 0),
+        updated_at = now()
+    where user_id = $1
+      and window_start = $2
+      and window_end = $3
+      and attempts > 0
+    `,
+    [userId, windowStart.toISOString(), windowEnd.toISOString()],
+  );
+}

@@ -1,4 +1,4 @@
-import { createError, readMultipartFormData } from "h3";
+import { createError, readMultipartFormData, setHeader } from "h3";
 import OpenAI from "openai";
 import {
   whisperRequestLimit,
@@ -6,8 +6,18 @@ import {
 } from "~/config/audio_config";
 import { redis } from "~/server/repositories/redis";
 import { redactIdentifier } from "~/server/utils/logging/redact";
-import { consumeWhisperAttemptMonthlyBySubject } from "../repositories/whisper/consumeWhisperAttemptMonthlyBySubject";
-import { consumeWhisperAttemptSubscriptionMonthV2 } from "../repositories/whisper/consumeWhisperAttemptSubscriptionMonthV2";
+import {
+  classifyUpstreamFailure,
+  summarizeUpstreamFailure,
+} from "~/server/utils/upstreamFailure";
+import {
+  consumeWhisperAttemptMonthlyBySubject,
+  refundWhisperAttemptMonthlyBySubject,
+} from "../repositories/whisper/consumeWhisperAttemptMonthlyBySubject";
+import {
+  consumeWhisperAttemptSubscriptionMonthV2,
+  refundWhisperAttemptSubscriptionMonthV2,
+} from "../repositories/whisper/consumeWhisperAttemptSubscriptionMonthV2";
 import { getUserEntitlement } from "../utils/getEntitlement";
 import { enforceRateLimit } from "../utils/rate-limiting/rateLimit";
 import { requireUser } from "../utils/requireUser";
@@ -23,6 +33,8 @@ import {
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 20_000,
+  maxRetries: 1,
 });
 
 export default defineEventHandler(async (event) => {
@@ -143,6 +155,7 @@ export default defineEventHandler(async (event) => {
     const expectedJyutping = example.jyutping;
 
     let remaining: number;
+    let allowanceWindow: { windowStart: Date; windowEnd: Date } | null = null;
 
     if (isPaid) {
       if (!entitlement?.current_period_start) {
@@ -155,6 +168,7 @@ export default defineEventHandler(async (event) => {
       const { windowStart, windowEnd } = getCurrentAllowanceWindow(
         entitlement.current_period_start,
       );
+      allowanceWindow = { windowStart, windowEnd };
 
       ({ remaining } = await consumeWhisperAttemptSubscriptionMonthV2(
         userId,
@@ -169,22 +183,49 @@ export default defineEventHandler(async (event) => {
       ));
     }
 
-    const transcription = await openai.audio.transcriptions.create({
-      file: new File([audioFile.data], "recording.webm", {
-        type: audioFile.type || "audio/webm",
-      }),
-      model: "gpt-4o-mini-transcribe",
-      language: "zh",
-      temperature: 0,
-      response_format: "json",
-      include: ["logprobs"],
-      prompt: `
-        Do not normalize toward any expected answer.
-        Transcribe exactly what was spoken.
-        If the speech is Mandarin, return pinyin with tone numbers.
-        If the speech is Cantonese, return Chinese characters only.
-        If the speech is English, return English.`,
-    });
+    let transcription;
+
+    try {
+      transcription = await openai.audio.transcriptions.create({
+        file: new File([audioFile.data], "recording.webm", {
+          type: audioFile.type || "audio/webm",
+        }),
+        model: "gpt-4o-mini-transcribe",
+        language: "zh",
+        temperature: 0,
+        response_format: "json",
+        include: ["logprobs"],
+        prompt: `
+          Do not normalize toward any expected answer.
+          Transcribe exactly what was spoken.
+          If the speech is Mandarin, return pinyin with tone numbers.
+          If the speech is Cantonese, return Chinese characters only.
+          If the speech is English, return English.`,
+      });
+    } catch (providerError) {
+      try {
+        if (isPaid && allowanceWindow) {
+          await refundWhisperAttemptSubscriptionMonthV2(
+            userId,
+            allowanceWindow.windowStart,
+            allowanceWindow.windowEnd,
+          );
+        } else {
+          await refundWhisperAttemptMonthlyBySubject(subject.key);
+        }
+      } catch (refundError) {
+        console.error(
+          JSON.stringify({
+            event: "pronunciation_allowance_refund_failed",
+            errorName:
+              refundError instanceof Error ? refundError.name : "unknown",
+            timestamp: new Date().toISOString(),
+          }),
+        );
+      }
+
+      throw providerError;
+    }
 
     const transcript = transcription.text ?? "";
     const avgLogprob = averageLogprob(transcription.logprobs);
@@ -223,11 +264,26 @@ export default defineEventHandler(async (event) => {
       remainingAttempts: remaining,
       limit,
     };
-  } catch (err: any) {
-    console.error("[pronunciation-check-v3]", err);
-
-    if (err?.statusCode) {
+  } catch (err: unknown) {
+    if (err && typeof err === "object" && "statusCode" in err) {
       throw err;
+    }
+
+    const failure = classifyUpstreamFailure(err);
+    console.error(
+      JSON.stringify({
+        event: "pronunciation_upstream_failure",
+        ...summarizeUpstreamFailure(err),
+        timestamp: new Date().toISOString(),
+      }),
+    );
+
+    if (failure.retryable) {
+      setHeader(event, "Retry-After", String(failure.retryAfterSeconds));
+      throw createError({
+        statusCode: 503,
+        statusMessage: "Pronunciation service temporarily unavailable",
+      });
     }
 
     throw createError({

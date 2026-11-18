@@ -1,3 +1,5 @@
+import { applyPublicContentCacheControl } from "~/server/utils/cacheControl";
+
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
 
@@ -20,6 +22,7 @@ export default defineEventHandler(async (event) => {
 
     console.log("Word served successfully", { id });
 
+    applyPublicContentCacheControl(event);
     return word;
   } catch (err) {
     console.error("Word not found", { id });

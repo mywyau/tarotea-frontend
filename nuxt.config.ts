@@ -11,7 +11,7 @@ export default defineNuxtConfig({
       // HTML pages
       "/**": {
         headers: {
-          "Cache-Control": "no-cache",
+          "Cache-Control": "private, no-cache",
         },
       },
 

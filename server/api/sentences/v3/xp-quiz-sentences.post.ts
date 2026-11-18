@@ -3,6 +3,7 @@ import { createError, getHeader, readRawBody } from "h3";
 import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { setHashFieldsWithExpiry } from "~/server/services/cache/redisHashCache";
 import { masteryXp } from "@/config/xp/helpers";
 
 import { redactIdentifier } from "~/server/utils/logging/redact";
@@ -475,9 +476,9 @@ export default defineEventHandler(async (event) => {
       const sentenceProgressKey = `sentence_progress:${userId}`;
 
       try {
-        await redis.hset(sentenceProgressKey, redisWrites);
-        await redis.expire(
+        await setHashFieldsWithExpiry(
           sentenceProgressKey,
+          redisWrites,
           SENTENCE_PROGRESS_CACHE_TTL_SECONDS,
         );
       } catch (error) {
@@ -490,8 +491,12 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  await redis.del(`quiz:sentences:${userId}:${sessionKey}`).catch(() => {});
-  await redis.del(`user:stats:v2:${userId}`).catch(() => {});
+  await redis
+    .del(
+      `quiz:sentences:${userId}:${sessionKey}`,
+      `user:stats:v2:${userId}`,
+    )
+    .catch(() => {});
 
   return {
     quiz: {

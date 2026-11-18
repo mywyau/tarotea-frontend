@@ -1,6 +1,9 @@
 import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
-import { redis } from "~/server/repositories/redis";
+import {
+  getHashFieldsAndRefreshExpiry,
+  setHashFieldsWithExpiry,
+} from "~/server/services/cache/redisHashCache";
 import {
   CachedSentenceProgress,
   SentenceProgress,
@@ -39,7 +42,11 @@ export async function loadSentenceProgressMap(
   let cachedById: Record<string, unknown> = {};
 
   try {
-    const result = await redis.hmget(redisKey, ...sentenceIds);
+    const result = await getHashFieldsAndRefreshExpiry(
+      redisKey,
+      sentenceIds,
+      SENTENCE_PROGRESS_CACHE_TTL_SECONDS,
+    );
 
     if (Array.isArray(result)) {
       cachedById = Object.fromEntries(
@@ -49,16 +56,8 @@ export async function loadSentenceProgressMap(
       cachedById = (result ?? {}) as Record<string, unknown>;
     }
 
-    try {
-      await redis.expire(redisKey, SENTENCE_PROGRESS_CACHE_TTL_SECONDS);
-    } catch (error) {
-      console.error(
-        "[quiz/sentences/start] Redis EXPIRE after HMGET failed",
-        error,
-      );
-    }
   } catch (error) {
-    console.error("[quiz/sentences/start] Redis HMGET failed", error);
+    console.error("[quiz/sentences/start] Redis progress cache read failed", error);
     cachedById = {};
   }
 
@@ -130,16 +129,11 @@ export async function loadSentenceProgressMap(
 
   try {
     if (Object.keys(redisWrites).length > 0) {
-      await redis.hset(redisKey, redisWrites);
-
-      try {
-        await redis.expire(redisKey, SENTENCE_PROGRESS_CACHE_TTL_SECONDS);
-      } catch (error) {
-        console.error(
-          "[quiz/sentences/start] Redis EXPIRE after HSET failed",
-          error,
-        );
-      }
+      await setHashFieldsWithExpiry(
+        redisKey,
+        redisWrites,
+        SENTENCE_PROGRESS_CACHE_TTL_SECONDS,
+      );
     }
   } catch (error) {
     console.error("[quiz/sentences/start] Redis HSET failed", error);

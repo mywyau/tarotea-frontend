@@ -217,11 +217,16 @@ function calculateQuizXpTotals() {
   return { earned, lost }
 }
 
+const token = await getAccessToken()
+
 const { data, error } = await useFetch<LevelData>(
   () =>
     `/api/vocab-quiz/v2/${slug.value}`,
   {
-    key: () => `audio-quiz-${slug.value}`,
+    key: () => `audio-quiz-${slug.value}-${isLoggedIn.value ? 'authed' : 'anon'}`,
+    headers: token
+      ? { Authorization: `Bearer ${token}` }
+      : undefined,
     server: false
   }
 )

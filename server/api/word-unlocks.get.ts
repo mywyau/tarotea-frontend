@@ -1,8 +1,7 @@
 import { createError, getQuery } from "h3";
-import { getTaroKeysEarned } from "~/config/unlock/unlock-config";
-import { db } from "~/server/repositories/db";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { requireUser } from "~/server/utils/requireUser";
+import { getUserUnlockBalance } from "~/server/utils/unlock/getUserUnlockBalance";
 
 function normalizeWordIds(input: unknown): string[] {
   if (typeof input !== "string") return [];
@@ -31,38 +30,13 @@ export default defineEventHandler(async (event) => {
   const query = getQuery(event);
   const wordIds = normalizeWordIds(query.wordIds);
 
-  const [statsResult, spentResult, unlockedWordIds] = await Promise.all([
-    db.query<{ total_xp: number | null }>(
-      `
-      select total_xp
-      from user_stats
-      where user_id = $1
-      limit 1
-      `,
-      [userId],
-    ),
-    db.query<{ spent: number | null }>(
-      `
-      select coalesce(sum(cost_credits), 0)::int as spent
-      from user_word_unlocks
-      where user_id = $1
-        and unlock_source = 'xp_credit'
-      `,
-      [userId],
-    ),
+  const [balance, unlockedWordIds] = await Promise.all([
+    getUserUnlockBalance(userId),
     getUnlockedWordIdsForUser(userId, wordIds),
   ]);
 
-  const totalXp = Number(statsResult.rows[0]?.total_xp ?? 0);
-  const creditsEarned = getTaroKeysEarned(totalXp);
-  const creditsSpent = Number(spentResult.rows[0]?.spent ?? 0);
-  const creditsAvailable = Math.max(0, creditsEarned - creditsSpent);
-
   return {
-    totalXp,
-    creditsEarned,
-    creditsSpent,
-    creditsAvailable,
+    ...balance,
     unlockedWordIds,
   };
 });
