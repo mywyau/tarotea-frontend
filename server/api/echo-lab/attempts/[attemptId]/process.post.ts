@@ -2,14 +2,20 @@ import {
   createError,
   defineEventHandler,
   getRouterParam,
+  setHeader,
   type H3Event,
 } from "h3";
 import { GetObjectCommand } from "@aws-sdk/client-s3";
 import OpenAI from "openai";
 
 import { db } from "~/server/repositories/db";
+import { redactIdentifier } from "~/server/utils/logging/redact";
 import { requireUser } from "~/server/utils/requireUser";
 import { r2BucketName, r2Client } from "~/server/utils/r2";
+import {
+  classifyUpstreamFailure,
+  summarizeUpstreamFailure,
+} from "~/server/utils/upstreamFailure";
 import {
   averageLogprob,
   buildResult,
@@ -17,6 +23,8 @@ import {
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
+  timeout: 20_000,
+  maxRetries: 1,
 });
 
 type EchoLabAttemptRow = {
@@ -161,6 +169,28 @@ async function markFailed(
   );
 }
 
+async function returnToQueue(
+  attemptId: string,
+  userId: string,
+  errorCode: string,
+): Promise<void> {
+  await db.query(
+    `
+      update echo_lab_attempts
+      set
+        status = 'queued',
+        processing_at = null,
+        failed_at = null,
+        error_code = $3,
+        error_message = 'Temporary provider failure; safe to retry'
+      where id = $1
+        and user_id = $2
+        and status = 'processing'
+    `,
+    [attemptId, userId, errorCode],
+  );
+}
+
 const handler = async (event: H3Event): Promise<ProcessAttemptResponse> => {
   const auth = await requireUser(event);
   const userId = auth.sub;
@@ -269,17 +299,41 @@ const handler = async (event: H3Event): Promise<ProcessAttemptResponse> => {
       confidence: result.confidence,
       feedback: result.feedback,
     };
-  } catch (err: any) {
-    console.error("[echo-lab:process]", err);
+  } catch (err: unknown) {
+    const isHttpError = err && typeof err === "object" && "statusCode" in err;
+    const failure = classifyUpstreamFailure(err);
+
+    console.error(
+      JSON.stringify({
+        event: "echo_lab_processing_failure",
+        attemptHash: redactIdentifier(attemptId),
+        retryable: !isHttpError && failure.retryable,
+        ...summarizeUpstreamFailure(err),
+        timestamp: new Date().toISOString(),
+      }),
+    );
+
+    if (!isHttpError && failure.retryable) {
+      await returnToQueue(attemptId, userId, failure.code);
+      setHeader(event, "Retry-After", String(failure.retryAfterSeconds));
+      throw createError({
+        statusCode: 503,
+        statusMessage: "Echo Lab processing temporarily unavailable",
+      });
+    }
+
+    const httpError = isHttpError
+      ? (err as { statusCode?: number; statusMessage?: string })
+      : undefined;
 
     await markFailed(
       attemptId,
       userId,
-      err?.statusCode ? "processing_error" : "unexpected_processing_error",
-      err?.statusMessage || err?.message || "Failed to process Echo Lab attempt",
+      httpError?.statusCode ? "processing_error" : "unexpected_processing_error",
+      httpError?.statusMessage || "Failed to process Echo Lab attempt",
     );
 
-    if (err?.statusCode) {
+    if (isHttpError) {
       throw err;
     }
 

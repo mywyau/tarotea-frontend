@@ -1,8 +1,10 @@
 // server/api/word-progress/v2/index.get.ts
 
 import { createError, getQuery } from "h3";
+import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { setHashFieldsWithExpiry } from "~/server/services/cache/redisHashCache";
 import { requireUser } from "~/server/utils/requireUser";
 
 type WordProgress = {
@@ -131,7 +133,11 @@ export default defineEventHandler(async (event) => {
 
   try {
     if (Object.keys(redisWrites).length > 0) {
-      await redis.hset(redisKey, redisWrites);
+      await setHashFieldsWithExpiry(
+        redisKey,
+        redisWrites,
+        WORD_PROGRESS_CACHE_TTL_SECONDS,
+      );
     }
   } catch (error) {
     console.error("[word-progress] Redis HSET failed", error);

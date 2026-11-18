@@ -7,6 +7,8 @@ import {
 } from "~/config/xp/helpers";
 import { db } from "~/server/repositories/db";
 import { queueDailyJyutpingWorker } from "~/server/utils/qstash/dailyJyutping";
+import { DAILY_FINALIZATION_RATE_LIMIT } from "~/server/utils/rate-limiting/policies";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
 type SessionAnswer = {
@@ -49,6 +51,12 @@ function deltaFor(correct: boolean): number {
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
+
+  await enforceRateLimit(
+    `rl:daily-finalize:user:${userId}`,
+    DAILY_FINALIZATION_RATE_LIMIT.limit,
+    DAILY_FINALIZATION_RATE_LIMIT.windowSeconds,
+  );
 
   const body = (await readBody(event).catch(() => null)) as {
     answers?: SessionAnswer[];

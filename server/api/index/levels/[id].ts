@@ -1,3 +1,5 @@
+import { applyPublicContentCacheControl } from "~/server/utils/cacheControl";
+
 export default defineEventHandler(async (event) => {
   
   const cdnBase = useRuntimeConfig().public.cdnBase;
@@ -12,7 +14,9 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    return await $fetch(`${cdnBase}/levels/${id}.json`);
+    const content = await $fetch(`${cdnBase}/levels/${id}.json`);
+    applyPublicContentCacheControl(event);
+    return content;
   } catch {
     throw createError({
       statusCode: 404,

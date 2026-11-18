@@ -40,8 +40,13 @@ export async function ensureWordUnlocksHydrated(userId: string) {
   )
 
   if (wordIds.length > 0) {
-    await redis.sadd(setKey, ...wordIds)
-    await redis.expire(setKey, UNLOCK_CACHE_TTL_SECONDS)
+    await redis
+      .multi()
+      .sadd(setKey, ...wordIds)
+      .expire(setKey, UNLOCK_CACHE_TTL_SECONDS)
+      .set(hydratedKey, "1", { ex: UNLOCK_CACHE_TTL_SECONDS })
+      .exec()
+    return
   }
 
   await redis.set(hydratedKey, "1", { ex: UNLOCK_CACHE_TTL_SECONDS })
@@ -54,9 +59,12 @@ export async function addWordUnlockToCache(userId: string, wordId: string) {
   const setKey = unlockSetKey(userId)
   const hydratedKey = unlockHydratedKey(userId)
 
-  await redis.sadd(setKey, trimmedWordId)
-  await redis.expire(setKey, UNLOCK_CACHE_TTL_SECONDS)
-  await redis.set(hydratedKey, "1", { ex: UNLOCK_CACHE_TTL_SECONDS })
+  await redis
+    .multi()
+    .sadd(setKey, trimmedWordId)
+    .expire(setKey, UNLOCK_CACHE_TTL_SECONDS)
+    .set(hydratedKey, "1", { ex: UNLOCK_CACHE_TTL_SECONDS })
+    .exec()
 }
 
 export async function isWordUnlockedForUser(userId: string, wordId: string) {
@@ -84,10 +92,9 @@ export async function getUnlockedWordIdsForUser(
 
   await ensureWordUnlocksHydrated(userId)
 
-  const membership = await Promise.all(
-    trimmedWordIds.map((wordId) =>
-      redis.sismember(unlockSetKey(userId), wordId)
-    )
+  const membership = await redis.smismember(
+    unlockSetKey(userId),
+    trimmedWordIds,
   )
 
   return trimmedWordIds.filter((_, index) => Boolean(membership[index]))

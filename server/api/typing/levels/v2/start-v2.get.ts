@@ -1,10 +1,11 @@
 import { getUserEntitlement } from "#imports";
-import { createError, getHeader, getQuery, getRequestIP } from "h3";
+import { createError, getHeader, getQuery } from "h3";
 import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
+import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
 import { Entitlement } from "~/types/auth/entitlements";
 import { isLevelId, levelIdToNumbers, levelTitles } from "~/utils/levels/levels";
@@ -101,7 +102,7 @@ function logSummary(details: Record<string, unknown>) {
 }
 
 function getLevelContentCacheKey(slug: string) {
-  return `dojo:typing:level:content:${slug}`;
+  return `dojo:typing:level:content:v1:${slug}`;
 }
 
 function getSessionCacheKey(userId: string, sessionKey: string) {
@@ -115,9 +116,20 @@ async function getCachedLevelContent(
 ): Promise<CachedLevelContent> {
   const cacheKey = getLevelContentCacheKey(slug);
 
-  const cached = await timedStep(timings, "contentCacheReadMs", async () => {
-    return redis.get(cacheKey);
-  });
+  let cached: string | null = null;
+  try {
+    cached = await timedStep(timings, "contentCacheReadMs", async () => {
+      return redis.get<string>(cacheKey);
+    });
+  } catch {
+    timings.contentCacheReadFailed = 1;
+    console.warn(
+      JSON.stringify({
+        event: "cache_read_failed",
+        cacheClass: "level_typing_content",
+      }),
+    );
+  }
 
   if (cached) {
     try {
@@ -154,11 +166,21 @@ async function getCachedLevelContent(
     return { words, wordIds };
   });
 
-  await timedStep(timings, "contentCacheWriteMs", async () => {
-    await redis.set(cacheKey, JSON.stringify(content), {
-      ex: LEVEL_CONTENT_CACHE_TTL_SECONDS,
+  try {
+    await timedStep(timings, "contentCacheWriteMs", async () => {
+      await redis.set(cacheKey, JSON.stringify(content), {
+        ex: LEVEL_CONTENT_CACHE_TTL_SECONDS,
+      });
     });
-  });
+  } catch {
+    timings.contentCacheWriteFailed = 1;
+    console.warn(
+      JSON.stringify({
+        event: "cache_write_failed",
+        cacheClass: "level_typing_content",
+      }),
+    );
+  }
 
   timings.contentSource = 1;
   return content;
@@ -177,10 +199,13 @@ export default defineEventHandler(async (event) => {
     : null;
 
   const userId = auth?.sub ?? null;
-  const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
-  const rateLimitKey = userId ?? `guest:${requestIp}`;
+  const rateLimitSubject = getRateLimitSubject(event, userId);
 
-  await enforceRateLimit(`rl:start:typing-level-sentences:${rateLimitKey}`, 20, 60);
+  await enforceRateLimit(
+    `rl:start:typing-level-sentences:${rateLimitSubject}`,
+    20,
+    60,
+  );
 
   const query = getQuery(event);
   const scope = String(query.scope ?? "level");

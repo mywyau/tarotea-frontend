@@ -27,7 +27,7 @@ export default defineEventHandler(async (event): Promise<MeResponse> => {
   const authUser = await requireUser(event);
   const userId = authUser.sub;
 
-  await enforceRateLimit(`rl:me:${userId}`, 1200, 60);
+  await enforceRateLimit(`rl:me:user:${userId}`, 1200, 60);
 
   console.info(
     JSON.stringify({

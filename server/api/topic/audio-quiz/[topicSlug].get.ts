@@ -1,8 +1,15 @@
 // server/api/topic/audio-quiz/[topicSlug].get.ts
 
 import { createError, getRouterParam } from "h3";
+import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { setHashFieldsWithExpiry } from "~/server/services/cache/redisHashCache";
+import { runSingleFlight } from "~/server/services/cache/singleFlight";
+import {
+  getTopicContentCacheKey,
+  TOPIC_CONTENT_CACHE_TTL_SECONDS,
+} from "~/server/services/cache/topicContentCache";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
@@ -182,7 +189,7 @@ function parseCachedTopicData(raw: unknown): TopicData | null {
 }
 
 async function loadTopicData(topicSlug: string): Promise<TopicData> {
-  const cacheKey = `topic_data:${topicSlug}`;
+  const cacheKey = getTopicContentCacheKey(topicSlug);
 
   try {
     const cached = await redis.get(cacheKey);
@@ -195,26 +202,30 @@ async function loadTopicData(topicSlug: string): Promise<TopicData> {
     console.error("[topic/audio-quiz] topic cache GET failed", error);
   }
 
-  const cdnBase = useRuntimeConfig().public.cdnBase;
+  return runSingleFlight(cacheKey, async () => {
+    const cdnBase = useRuntimeConfig().public.cdnBase;
 
-  let data: TopicData;
+    let data: TopicData;
 
-  try {
-    data = await $fetch<TopicData>(`${cdnBase}/topics/${topicSlug}.json`);
-  } catch {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Topic not found",
-    });
-  }
+    try {
+      data = await $fetch<TopicData>(`${cdnBase}/topics/${topicSlug}.json`);
+    } catch {
+      throw createError({
+        statusCode: 404,
+        statusMessage: "Topic not found",
+      });
+    }
 
-  try {
-    await redis.set(cacheKey, JSON.stringify(data));
-  } catch (error) {
-    console.error("[topic/audio-quiz] topic cache SET failed", error);
-  }
+    try {
+      await redis.set(cacheKey, JSON.stringify(data), {
+        ex: TOPIC_CONTENT_CACHE_TTL_SECONDS,
+      });
+    } catch (error) {
+      console.error("[topic/audio-quiz] topic cache SET failed", error);
+    }
 
-  return data;
+    return data;
+  });
 }
 
 async function loadProgressMap(
@@ -297,7 +308,11 @@ async function loadProgressMap(
 
   try {
     if (Object.keys(redisWrites).length > 0) {
-      await redis.hset(redisKey, redisWrites);
+      await setHashFieldsWithExpiry(
+        redisKey,
+        redisWrites,
+        WORD_PROGRESS_CACHE_TTL_SECONDS,
+      );
     }
   } catch (error) {
     console.error("[topic/audio-quiz] Redis HSET failed", error);
@@ -426,7 +441,7 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  await enforceRateLimit(`rl:topic-audio-quiz:${userId}`, 20, 60); // gentler rate limit
+  await enforceRateLimit(`rl:topic-audio-quiz:user:${userId}`, 20, 60); // gentler rate limit
   const topicSlug = getRouterParam(event, "topicSlug");
 
   if (!topicSlug) {

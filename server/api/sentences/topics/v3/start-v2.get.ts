@@ -12,6 +12,7 @@ import {
   QuizSession,
 } from "~/server/services/topic/sentence-quiz/start/types";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
+import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
 import { Entitlement } from "~/types/auth/entitlements";
 import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
@@ -46,9 +47,14 @@ export default defineEventHandler(async (event) => {
   const userId = auth?.sub ?? null;
   const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
   const sessionOwner = userId ?? `guest:${requestIp}`;
+  const rateLimitSubject = getRateLimitSubject(event, userId);
   const query = getQuery(event);
 
-  await enforceRateLimit(`rl:start:topic-sentences:${sessionOwner}`, 20, 60);
+  await enforceRateLimit(
+    `rl:start:topic-sentences:${rateLimitSubject}`,
+    20,
+    60,
+  );
 
   const scope = String(query.scope ?? "topic");
   const slug = String(query.slug ?? "");

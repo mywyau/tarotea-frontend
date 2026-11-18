@@ -16,22 +16,41 @@ export async function consumeWhisperAttemptMonthlyBySubject(
     do update
       set attempts = ai_usage_monthly_subject.attempts + 1,
           updated_at = now()
+    where ai_usage_monthly_subject.attempts < $2
     returning attempts
     `,
-    [subjectKey],
+    [subjectKey, limit],
   )
 
-  const attempts = Number(result.rows[0]?.attempts ?? 0)
+  const row = result.rows[0]
 
-  if (attempts > limit) {
+  if (!row) {
     throw createError({
       statusCode: 429,
       statusMessage: "Monthly pronunciation limit reached",
     })
   }
 
+  const attempts = Number(row.attempts)
+
   return {
     attempts,
     remaining: Math.max(limit - attempts, 0),
   }
+}
+
+export async function refundWhisperAttemptMonthlyBySubject(
+  subjectKey: string,
+): Promise<void> {
+  await db.query(
+    `
+    update ai_usage_monthly_subject
+    set attempts = greatest(attempts - 1, 0),
+        updated_at = now()
+    where subject_key = $1
+      and month = date_trunc('month', now())::date
+      and attempts > 0
+    `,
+    [subjectKey],
+  )
 }

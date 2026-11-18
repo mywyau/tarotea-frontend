@@ -10,6 +10,7 @@ import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
+import { createQstashDeduplicationId } from "~/server/utils/qstash/deduplication";
 
 import { redactLogDetails } from "~/server/utils/logging/redact";
 type BatchAttempt = {
@@ -90,7 +91,7 @@ export default defineEventHandler(async (event) => {
   const userId = auth.sub;
 
   await enforceRateLimit(
-    `rl:finalize:typing-level-sentences:${userId}`,
+    `rl:finalize:typing-level-sentences:user:${userId}`,
     20,
     60,
   );
@@ -126,6 +127,11 @@ export default defineEventHandler(async (event) => {
           sessionKey,
         },
         retries: 3,
+        deduplicationId: createQstashDeduplicationId(
+          "typing-level",
+          userId,
+          sessionKey,
+        ),
         flowControl: {
           key: "xp-typing-v2",
           parallelism: 20,

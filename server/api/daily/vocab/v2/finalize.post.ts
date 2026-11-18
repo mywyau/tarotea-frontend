@@ -9,6 +9,8 @@ import {
   isDailyAnswerCorrect,
 } from "~/server/utils/dailyQuiz";
 import { queueXpQuizWorker } from "~/server/utils/queueXpQuizWorker";
+import { DAILY_FINALIZATION_RATE_LIMIT } from "~/server/utils/rate-limiting/policies";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
 type Body = {
@@ -43,6 +45,12 @@ type EventRow = {
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
+
+  await enforceRateLimit(
+    `rl:daily-finalize:user:${userId}`,
+    DAILY_FINALIZATION_RATE_LIMIT.limit,
+    DAILY_FINALIZATION_RATE_LIMIT.windowSeconds,
+  );
   const body = (await readBody(event)) as Body;
 
   const mode = body.mode ?? DAILY_MODE;

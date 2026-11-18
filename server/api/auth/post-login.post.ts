@@ -11,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const authUser = await requireUser(event);
   const userId = authUser.sub;
 
-  await enforceRateLimit(`rl:post-login:${userId}`, 10, 60);
+  await enforceRateLimit(`rl:post-login:user:${userId}`, 10, 60);
 
   const body = await readBody<PostLoginBody>(event);
   const email = authUser.email ?? body?.email;

@@ -5,6 +5,8 @@ import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
+import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
 import { Entitlement } from "~/types/auth/entitlements";
 import {
@@ -85,7 +87,7 @@ function getSessionRedisKey(userId: string, sessionKey: string) {
 }
 
 function getContentCacheKey(scope: Scope, slug: string) {
-  return `dojo:sentence:content:${scope}:${slug}`;
+  return `dojo:sentence:content:v1:${scope}:${slug}`;
 }
 
 function getInflightKey(scope: Scope, slug: string) {
@@ -285,11 +287,21 @@ async function buildAndCacheSentenceContent(
 
   setLocalSentenceContent(scope, slug, content);
 
-  await timedStep(timings, "contentCacheWriteMs", async () => {
-    await redis.set(cacheKey, JSON.stringify(content), {
-      ex: SENTENCE_CONTENT_CACHE_TTL_SECONDS,
+  try {
+    await timedStep(timings, "contentCacheWriteMs", async () => {
+      await redis.set(cacheKey, JSON.stringify(content), {
+        ex: SENTENCE_CONTENT_CACHE_TTL_SECONDS,
+      });
     });
-  });
+  } catch {
+    timings.contentCacheWriteFailed = 1;
+    console.warn(
+      JSON.stringify({
+        event: "cache_write_failed",
+        cacheClass: "sentence_typing_content",
+      }),
+    );
+  }
 
   return content;
 }
@@ -308,9 +320,20 @@ async function getCachedSentenceContent(
 
   const cacheKey = getContentCacheKey(scope, slug);
 
-  const cached = await timedStep(timings, "contentCacheReadMs", async () => {
-    return redis.get(cacheKey);
-  });
+  let cached: string | null = null;
+  try {
+    cached = await timedStep(timings, "contentCacheReadMs", async () => {
+      return redis.get<string>(cacheKey);
+    });
+  } catch {
+    timings.contentCacheReadFailed = 1;
+    console.warn(
+      JSON.stringify({
+        event: "cache_read_failed",
+        cacheClass: "sentence_typing_content",
+      }),
+    );
+  }
 
   if (cached) {
     try {
@@ -366,6 +389,13 @@ export default defineEventHandler(async (event) => {
   const userId = auth?.sub ?? null;
   const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
   const sessionOwner = userId ?? `guest:${requestIp}`;
+  const rateLimitSubject = getRateLimitSubject(event, userId);
+
+  await enforceRateLimit(
+    `rl:start:typing-sentences:${rateLimitSubject}`,
+    20,
+    60,
+  );
 
   const query = getQuery(event);
   const scope = resolveScope(String(query.scope ?? "level"));

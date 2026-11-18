@@ -10,6 +10,7 @@ import { Client as QStashClient } from "@upstash/qstash";
 import { db } from "~/server/repositories/db";
 import { getUserFromSession } from "@/server/utils/auth";
 import { redactIdentifier } from "~/server/utils/logging/redact";
+import { ACCOUNT_DELETION_FLOW_CONTROL } from "~/server/utils/qstash/policies";
 
 type DeleteBody = {
   confirm?: string;
@@ -168,7 +169,9 @@ export default defineEventHandler(async (event) => {
           jobId,
           userId: user.id,
         },
+        retries: 3,
         deduplicationId: `account_delete_${jobId}`,
+        flowControl: ACCOUNT_DELETION_FLOW_CONTROL,
       });
 
       console.log("Published account deletion job", {

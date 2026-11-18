@@ -45,7 +45,7 @@ export default defineEventHandler(async (event): Promise<ProfileResponse> => {
   const authUser = await requireUser(event);
   const userId = authUser.sub;
 
-  await enforceRateLimit(`rl:account-profile:${userId}`, 60, 60);
+  await enforceRateLimit(`rl:account-profile:user:${userId}`, 60, 60);
 
   const body = await readBody<ProfileBody>(event);
   const firstName = normalizeName(body?.firstName, "First name");

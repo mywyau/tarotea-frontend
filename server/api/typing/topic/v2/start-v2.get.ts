@@ -5,6 +5,7 @@ import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
+import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
 import { Entitlement } from "~/types/auth/entitlements";
 import { generateWeightedWords } from "~/utils/quiz/generateWeightedWords";
@@ -76,8 +77,13 @@ export default defineEventHandler(async (event) => {
   const userId = auth?.sub ?? null;
   const requestIp = getRequestIP(event, { xForwardedFor: true }) ?? "anon";
   const sessionOwner = userId ?? `guest:${requestIp}`;
+  const rateLimitSubject = getRateLimitSubject(event, userId);
 
-  await enforceRateLimit(`rl:start:typing-topic-sentences:${sessionOwner}`, 20, 60);
+  await enforceRateLimit(
+    `rl:start:typing-topic-sentences:${rateLimitSubject}`,
+    20,
+    60,
+  );
 
   const query = getQuery(event);
   const scope = String(query.scope ?? "topic");

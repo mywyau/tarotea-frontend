@@ -1,11 +1,10 @@
 import { createError } from "h3";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
-import { db } from "~/server/repositories/db";
 import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { requireUser } from "~/server/utils/requireUser";
-import { Entitlement } from "~/types/auth/entitlements";
+import { getUserUnlockBalance } from "~/server/utils/unlock/getUserUnlockBalance";
+import type { Entitlement } from "~/types/auth/entitlements";
 import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
-import { getTaroKeysEarned } from "~/config/unlock/unlock-config";
 
 export default defineEventHandler(async (event) => {
   const slug = event.context.params?.slug as string | undefined;
@@ -76,31 +75,7 @@ export default defineEventHandler(async (event) => {
     !!userId && canAccessTopicWord(true, entitlementValue, slug);
 
   if (hasFullAccess) {
-    const [statsResult, spentResult] = await Promise.all([
-      db.query<{ total_xp: number | null }>(
-        `
-        select total_xp
-        from user_stats
-        where user_id = $1
-        limit 1
-        `,
-        [userId],
-      ),
-      db.query<{ spent: number | null }>(
-        `
-        select coalesce(sum(cost_credits), 0)::int as spent
-        from user_word_unlocks
-        where user_id = $1
-          and unlock_source = 'xp_credit'
-        `,
-        [userId],
-      ),
-    ]);
-
-    const totalXp = Number(statsResult.rows[0]?.total_xp ?? 0);
-    const creditsEarned = getTaroKeysEarned(totalXp);
-    const creditsSpent = Number(spentResult.rows[0]?.spent ?? 0);
-    const creditsAvailable = Math.max(0, creditsEarned - creditsSpent);
+    const balance = await getUserUnlockBalance(userId);
 
     return {
       slug,
@@ -109,10 +84,7 @@ export default defineEventHandler(async (event) => {
       hasFullAccess: true,
       freePreviewIds,
       unlockedWordIds: [],
-      totalXp,
-      creditsEarned,
-      creditsSpent,
-      creditsAvailable,
+      ...balance,
     };
   }
 
@@ -131,32 +103,10 @@ export default defineEventHandler(async (event) => {
     };
   }
 
-  const [statsResult, spentResult, unlockedWordIds] = await Promise.all([
-    db.query<{ total_xp: number | null }>(
-      `
-      select total_xp
-      from user_stats
-      where user_id = $1
-      limit 1
-      `,
-      [userId],
-    ),
-    db.query<{ spent: number | null }>(
-      `
-      select coalesce(sum(cost_credits), 0)::int as spent
-      from user_word_unlocks
-      where user_id = $1
-        and unlock_source = 'xp_credit'
-      `,
-      [userId],
-    ),
+  const [balance, unlockedWordIds] = await Promise.all([
+    getUserUnlockBalance(userId),
     getUnlockedWordIdsForUser(userId, allWordIds),
   ]);
-
-  const totalXp = Number(statsResult.rows[0]?.total_xp ?? 0);
-  const creditsEarned = getTaroKeysEarned(totalXp);
-  const creditsSpent = Number(spentResult.rows[0]?.spent ?? 0);
-  const creditsAvailable = Math.max(0, creditsEarned - creditsSpent);
 
   return {
     slug,
@@ -165,9 +115,6 @@ export default defineEventHandler(async (event) => {
     hasFullAccess: false,
     freePreviewIds,
     unlockedWordIds,
-    totalXp,
-    creditsEarned,
-    creditsSpent,
-    creditsAvailable,
+    ...balance,
   };
 });

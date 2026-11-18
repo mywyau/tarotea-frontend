@@ -175,7 +175,7 @@ export default defineEventHandler(async (event) => {
     const tAuth1 = performance.now();
 
     const tRate0 = performance.now();
-    await enforceRateLimit(`rl:quiz-finalize:${userId}`, 10, 60);
+    await enforceRateLimit(`rl:quiz-finalize:user:${userId}`, 10, 60);
     const tRate1 = performance.now();
 
     const tBody0 = performance.now();

@@ -4,6 +4,7 @@ import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
+import { createQstashDeduplicationId } from "~/server/utils/qstash/deduplication";
 import {
   chineseXp,
   chineseXpHintUsed,
@@ -62,7 +63,11 @@ export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  await enforceRateLimit(`rl:finalize:typing-topic-sentences:${userId}`, 20, 60);
+  await enforceRateLimit(
+    `rl:finalize:typing-topic-sentences:user:${userId}`,
+    20,
+    60,
+  );
 
   const body = (await readBody(event)) as FinalizeBody;
 
@@ -95,6 +100,11 @@ export default defineEventHandler(async (event) => {
         sessionKey,
       },
       retries: 3,
+      deduplicationId: createQstashDeduplicationId(
+        "typing-topic",
+        userId,
+        sessionKey,
+      ),
       flowControl: {
         key: "xp-typing-topic-v2",
         parallelism: 20,

@@ -1,4 +1,5 @@
 import { defineEventHandler, getHeader, getRequestURL } from "h3";
+import { getDatabasePoolStats } from "~/server/repositories/db";
 import { redactIdentifier, summarizeUserAgent } from "~/server/utils/logging/redact";
 
 const SENSITIVE_PATH_PREFIXES = [
@@ -64,6 +65,9 @@ export default defineEventHandler((event) => {
         ipHash: redactIdentifier(forwardedFor),
         referrerHash: redactIdentifier(referrer),
         userAgentSummary: summarizeUserAgent(userAgent),
+        databasePool: url.pathname.startsWith("/api/")
+          ? getDatabasePoolStats()
+          : undefined,
         timestamp: new Date().toISOString(),
       }),
     );

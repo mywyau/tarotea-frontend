@@ -1,3 +1,5 @@
+import { applyPublicContentCacheControl } from "~/server/utils/cacheControl";
+
 export default defineEventHandler(async (event) => {
   
   const id = getRouterParam(event, "id");
@@ -12,9 +14,11 @@ export default defineEventHandler(async (event) => {
   const cdnBase = useRuntimeConfig().public.cdnBase;
 
   try {
-    return await $fetch(
+    const content = await $fetch(
       `${cdnBase}/topics/${id}.json`
     );
+    applyPublicContentCacheControl(event);
+    return content;
   } catch {
     throw createError({
       statusCode: 404,

@@ -1,4 +1,5 @@
 import { Client as QStashClient } from "@upstash/qstash";
+import { createQstashDeduplicationId } from "~/server/utils/qstash/deduplication";
 
 type QueueXpQuizWorkerInput = {
   attemptId: string;
@@ -19,5 +20,16 @@ export async function queueXpQuizWorker(input: QueueXpQuizWorkerInput) {
       userId: input.userId,
     },
     retries: 3,
+    deduplicationId: createQstashDeduplicationId(
+      "daily-vocab",
+      input.userId,
+      input.attemptId,
+    ),
+    flowControl: {
+      key: "quiz-finalize-vocab",
+      parallelism: 20,
+      rate: 2000,
+      period: "1m",
+    },
   });
 }

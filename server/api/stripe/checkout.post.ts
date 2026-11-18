@@ -4,6 +4,8 @@ import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
 import { getOrCreateStripeCustomer } from "~/server/services/billing/getOrCreateStripeCustomer";
 import { stripe } from "~/server/services/billing/stripeClient";
+import { BILLING_SESSION_RATE_LIMIT } from "~/server/utils/rate-limiting/policies";
+import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { requireUser } from "~/server/utils/requireUser";
 
 type Billing = "monthly" | "yearly";
@@ -55,6 +57,12 @@ function assertBilling(value: unknown): Billing {
 export default defineEventHandler(async (event) => {
   const auth = await requireUser(event);
   const userId = auth.sub;
+
+  await enforceRateLimit(
+    `rl:billing-session:user:${userId}`,
+    BILLING_SESSION_RATE_LIMIT.limit,
+    BILLING_SESSION_RATE_LIMIT.windowSeconds,
+  );
 
   const body = (await readBody(event)) as CheckoutBody | undefined;
   const billing = assertBilling(body?.billing);

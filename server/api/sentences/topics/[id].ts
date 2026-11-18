@@ -1,3 +1,5 @@
+import { applyPublicContentCacheControl } from "~/server/utils/cacheControl";
+
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
 
@@ -10,7 +12,11 @@ export default defineEventHandler(async (event) => {
   } = useRuntimeConfig();
 
   try {
-    return await $fetch(`${cdnBase}/topic-sentences/${id}-sentences.json`);
+    const content = await $fetch(
+      `${cdnBase}/topic-sentences/${id}-sentences.json`,
+    );
+    applyPublicContentCacheControl(event);
+    return content;
   } catch (error) {
     console.error("[sentences/topics] Failed to load sentence set", {
       id,

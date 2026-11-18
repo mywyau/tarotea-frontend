@@ -425,6 +425,7 @@ import { createError, getHeader, readRawBody } from "h3";
 import { SENTENCE_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
+import { setHashFieldsWithExpiry } from "~/server/services/cache/redisHashCache";
 import { masteryXp } from "@/config/xp/helpers";
 
 type PayloadAnswer = {
@@ -903,9 +904,9 @@ export default defineEventHandler(async (event) => {
       const sentenceProgressKey = `sentence_progress:${userId}`;
 
       try {
-        await redis.hset(sentenceProgressKey, redisWrites);
-        await redis.expire(
+        await setHashFieldsWithExpiry(
           sentenceProgressKey,
+          redisWrites,
           SENTENCE_PROGRESS_CACHE_TTL_SECONDS,
         );
       } catch (error) {

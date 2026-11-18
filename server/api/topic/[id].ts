@@ -1,3 +1,5 @@
+import { applyPublicContentCacheControl } from "~/server/utils/cacheControl";
+
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
 
@@ -23,6 +25,7 @@ export default defineEventHandler(async (event) => {
 
     console.log("Topic quiz served successfully", { id });
 
+    applyPublicContentCacheControl(event);
     return quiz;
   } catch (err) {
     console.error("Topic quiz not found", { id });

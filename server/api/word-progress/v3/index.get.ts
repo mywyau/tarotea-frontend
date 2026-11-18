@@ -1,7 +1,10 @@
 import { createError, getQuery } from "h3";
 import { WORD_PROGRESS_CACHE_TTL_SECONDS } from "~/config/cache/redis";
 import { db } from "~/server/repositories/db";
-import { redis } from "~/server/repositories/redis";
+import {
+  getHashFieldsAndRefreshExpiry,
+  setHashFieldsWithExpiry,
+} from "~/server/services/cache/redisHashCache";
 import { requireUser } from "~/server/utils/requireUser";
 
 type WordProgress = {
@@ -59,7 +62,11 @@ export default defineEventHandler(async (event) => {
   let cachedById: Record<string, unknown> = {};
 
   try {
-    const result = await redis.hmget(redisKey, ...wordIds);
+    const result = await getHashFieldsAndRefreshExpiry(
+      redisKey,
+      wordIds,
+      WORD_PROGRESS_CACHE_TTL_SECONDS,
+    );
 
     if (Array.isArray(result)) {
       cachedById = Object.fromEntries(
@@ -69,16 +76,8 @@ export default defineEventHandler(async (event) => {
       cachedById = (result ?? {}) as Record<string, unknown>;
     }
 
-    try {
-      await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
-    } catch (error) {
-      console.error(
-        "[word-progress/v2] Redis EXPIRE after HMGET failed",
-        error,
-      );
-    }
   } catch (error) {
-    console.error("[word-progress/v2] Redis HMGET failed", error);
+    console.error("[word-progress/v3] Redis progress cache read failed", error);
     cachedById = {};
   }
 
@@ -136,16 +135,11 @@ export default defineEventHandler(async (event) => {
 
   try {
     if (Object.keys(redisWrites).length > 0) {
-      await redis.hset(redisKey, redisWrites);
-
-      try {
-        await redis.expire(redisKey, WORD_PROGRESS_CACHE_TTL_SECONDS);
-      } catch (error) {
-        console.error(
-          "[word-progress/v2] Redis EXPIRE after HSET failed",
-          error,
-        );
-      }
+      await setHashFieldsWithExpiry(
+        redisKey,
+        redisWrites,
+        WORD_PROGRESS_CACHE_TTL_SECONDS,
+      );
     }
   } catch (error) {
     console.error("[word-progress/v2] Redis HSET failed", error);
