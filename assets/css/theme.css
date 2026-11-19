@@ -1,0 +1,124 @@
+:root {
+    color-scheme: light;
+
+    /* Semantic colour channels support Tailwind opacity modifiers. */
+    --color-canvas: 255 250 251;
+    --color-surface: 255 255 255;
+    --color-ink: 39 33 43;
+    --color-muted: 113 104 117;
+    --color-primary: 135 85 141;
+    --color-primary-strong: 104 58 112;
+    --color-taro-pink: 234 184 228;
+    --color-taro-lilac: 214 163 209;
+    --color-taro-blue: 168 202 224;
+    --color-taro-blush: 246 225 225;
+    --color-taro-yellow: 233 189 40;
+    --color-success: 120 162 118;
+    --color-error: 184 79 104;
+    --color-error-strong: 145 47 70;
+
+    --font-brand: 'Manrope', 'Noto Sans HK', 'PingFang HK',
+      'Microsoft JhengHei', sans-serif;
+    --font-chinese: 'Noto Sans HK', 'PingFang HK', 'Microsoft JhengHei',
+      sans-serif;
+
+    --page-gutter: clamp(1rem, 4vw, 1.5rem);
+    --content-compact: 40rem;
+    --content-reading: 52rem;
+    --content-wide: 72rem;
+
+    --radius-control: 0.875rem;
+    --radius-card: 1.25rem;
+    --radius-panel: 1.75rem;
+
+    --shadow-soft: 0 1px 2px rgb(39 33 43 / 0.05),
+      0 10px 30px rgb(39 33 43 / 0.07);
+    --shadow-overlay: 0 20px 50px rgb(39 33 43 / 0.16);
+
+    --motion-fast: 120ms;
+    --motion-panel: 200ms;
+    --motion-deliberate: 300ms;
+
+    --focus-ring: 0 0 0 3px rgb(255 250 251),
+      0 0 0 6px rgb(135 85 141 / 0.8);
+}
+
+::selection {
+    color: rgb(var(--color-ink));
+    background: rgb(var(--color-taro-pink) / 0.75);
+}
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: none;
+    box-shadow: var(--focus-ring);
+}
+
+:where(button, input, select, textarea) {
+    font: inherit;
+}
+
+:where(input, select, textarea):disabled {
+    cursor: not-allowed;
+}
+
+.app-form-control {
+    width: 100%;
+    min-height: 2.75rem;
+    border: 1px solid rgb(var(--color-ink) / 0.16);
+    border-radius: var(--radius-control);
+    background: rgb(var(--color-surface));
+    color: rgb(var(--color-ink));
+    padding: 0.7rem 0.85rem;
+    transition: border-color var(--motion-fast) ease,
+      box-shadow var(--motion-fast) ease;
+}
+
+.app-form-control::placeholder {
+    color: rgb(var(--color-muted) / 0.78);
+}
+
+.app-form-control:hover:not(:disabled) {
+    border-color: rgb(var(--color-primary) / 0.5);
+}
+
+.app-form-control:focus-visible {
+    border-color: rgb(var(--color-primary));
+}
+
+.app-form-control:disabled {
+    background: rgb(var(--color-ink) / 0.04);
+    color: rgb(var(--color-muted));
+    opacity: 0.72;
+}
+
+.app-form-label {
+    display: inline-block;
+    margin-bottom: 0.4rem;
+    color: rgb(var(--color-ink));
+    font-family: var(--font-brand);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.app-form-hint {
+    margin-top: 0.4rem;
+    color: rgb(var(--color-muted));
+    font-family: var(--font-brand);
+    font-size: 0.8rem;
+    line-height: 1.5;
+}
+
+.app-form-error {
+    color: rgb(var(--color-error));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

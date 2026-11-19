@@ -1,7 +1,30 @@
 // // https://nuxt.com/docs/api/configuration/nuxt-config
 
 export default defineNuxtConfig({
-  modules: ["@nuxtjs/tailwindcss"],
+  modules: ["@nuxtjs/tailwindcss", "@nuxt/fonts"],
+
+  components: [{ path: "~/components", pathPrefix: false }],
+
+  css: ["~/assets/css/theme.css"],
+
+  fonts: {
+    provider: "google",
+    processCSSVariables: false,
+    defaults: {
+      weights: [400, 500, 600, 700],
+      styles: ["normal"],
+      preload: false,
+    },
+    families: [
+      {
+        name: "Manrope",
+        provider: "google",
+        weights: [400, 500, 600, 700],
+        preload: false,
+        global: true,
+      },
+    ],
+  },
 
   // image: false, // ⛔ force-disable Nuxt Image
 
