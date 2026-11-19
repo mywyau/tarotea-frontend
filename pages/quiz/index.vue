@@ -3,7 +3,7 @@
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { getLevelTopicIcon } from '@/utils/levels/topicIcons'
 import { markRaw, onMounted, ref } from 'vue'
-import { BookOpen, ChevronLeft, ChevronRight, Headphones, MessageSquareText, Mic2, Volume2 } from '@lucide/vue'
+import { BookOpen, ChevronLeft, ChevronRight, Headphones, MessageSquareText, Volume2 } from '@lucide/vue'
 
 
 const {
@@ -61,13 +61,6 @@ const levelQuizModes = [
     buttonClass: 'level-btn-blush',
     to: (levelId: string) => `/quiz/${levelId}/sentences/audio/v3/start-quiz`,
   },
-  {
-    id: 'echo-gecko',
-    label: 'Echo Gecko',
-    icon: markRaw(Mic2),
-    buttonClass: 'level-btn-green',
-    to: (levelId: string) => `/quiz/${levelId}/echo-gecko`,
-  },
 ] as const
 
 const selectedLevelQuizMode = ref<Record<string, number>>({})
@@ -96,12 +89,10 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-4xl mx-auto">
-      <h1 class="font-semibold level-heading">
-        Level Quiz
-      </h1>
-      <p class="text-gray-600 text-sm sm:text-base level-subheading">
-        Progress through structured and progressively trickier Cantonese content.
-      </p>
+      <nav class="quiz-scope-nav" aria-label="Quiz type">
+        <NuxtLink to="/quiz" aria-current="page">Level quizzes</NuxtLink>
+        <NuxtLink to="/topics/quiz">Topic quizzes</NuxtLink>
+      </nav>
     </header>
 
     <!-- Grid -->

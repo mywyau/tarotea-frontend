@@ -13,13 +13,12 @@ definePageMeta({
 
 
 
-    <!-- Header -->
-    <div class="text-center space-y-4">
-      <TypewriterTitleBlock heading-text="Jyutping Dojo"
-        subheading-text="Strengthen your Cantonese phonetic skills with some training."
-        heading-class="text-3xl sm:text-4xl font-semibold text-black dojo-heading"
-        subheading-class="text-gray-700 max-w-lg mx-auto dojo-subheading" />
-    </div>
+    <header class="text-center space-y-4">
+      <h1 class="text-3xl sm:text-4xl font-semibold text-black dojo-heading">Typing practice</h1>
+      <p class="text-gray-700 max-w-lg mx-auto dojo-subheading">
+        Strengthen your Cantonese phonetic skills with focused exercises.
+      </p>
+    </header>
 
     <!-- Training Options -->
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
@@ -30,10 +29,10 @@ definePageMeta({
         <div class="space-y-3 dojo-tile-copy">
           <div class="dojo-tile-header">
             <div class="text-xl font-semibold text-black">
-              Level Training
+              Levels
             </div>
 
-            <span class="dojo-tile-icon-wrap" role="img" aria-label="Level training">
+            <span class="dojo-tile-icon-wrap" role="img" aria-label="Levels">
               <Layers class="dojo-tile-icon" aria-hidden="true" />
             </span>
           </div>
@@ -49,15 +48,15 @@ definePageMeta({
         <div class="space-y-3 dojo-tile-copy">
           <div class="dojo-tile-header">
             <div class="text-xl font-semibold text-black">
-              Topic Training
+              Topics
             </div>
 
-            <span class="dojo-tile-icon-wrap" role="img" aria-label="Topic training">
+            <span class="dojo-tile-icon-wrap" role="img" aria-label="Topics">
               <Tags class="dojo-tile-icon" aria-hidden="true" />
             </span>
           </div>
           <p class="text-sm text-gray-900/80">
-            Train your phonetics by subject area.
+            Practise your phonetics by subject area.
           </p>
         </div>
       </NuxtLink>

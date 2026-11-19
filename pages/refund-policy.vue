@@ -7,7 +7,7 @@ definePageMeta({
 </script>
 
 <template>
-  <main class="max-w-3xl mx-auto px-4 py-16 space-y-10">
+  <main class="legal-page max-w-3xl mx-auto px-4 py-16 space-y-10">
 
 
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { masteryXp } from '@/config/xp/helpers';
+import { PRONUNCIATION_PRACTICE_ENABLED } from '~/config/features';
 import {
   CheckCircle2,
   ChevronLeft,
@@ -409,7 +410,7 @@ watchEffect(() => {
           <span class="mobile-action-label">Write</span>
         </NuxtLink>
 
-        <NuxtLink v-if="showPracticeButtons" :to="`/echo-forest/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
+        <NuxtLink v-if="showPracticeButtons && PRONUNCIATION_PRACTICE_ENABLED" :to="`/echo-forest/${word.id}`" class="action-chip action-chip-tone-forge main-action-btn"
           aria-label="Open tone checker for this word">
           <Mic class="mobile-action-icon h-4 w-4" />
           <span class="mobile-action-label">Speak</span>
@@ -458,7 +459,7 @@ watchEffect(() => {
                   <span class="mobile-action-label">Write</span>
                 </NuxtLink>
 
-                <NuxtLink v-if="showPracticeButtons"
+                <NuxtLink v-if="showPracticeButtons && PRONUNCIATION_PRACTICE_ENABLED"
                   :to="`/echo-lab/pronunciation-check/level/${level}/sentences/${word.id}/v2/${currentExampleIndex}`"
                   class="action-chip action-chip-sm action-chip-speak example-action-btn"
                   aria-label="Practice pronunciation for this sentence">

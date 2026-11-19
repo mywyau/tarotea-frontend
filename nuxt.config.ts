@@ -5,7 +5,7 @@ export default defineNuxtConfig({
 
   components: [{ path: "~/components", pathPrefix: false }],
 
-  css: ["~/assets/css/theme.css"],
+  css: ["~/assets/css/theme.css", "~/assets/css/product-redesign.css"],
 
   fonts: {
     provider: "google",

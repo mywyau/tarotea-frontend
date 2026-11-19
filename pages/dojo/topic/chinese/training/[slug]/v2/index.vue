@@ -129,7 +129,7 @@ const topicTitle = computed(() =>
 )
 
 const activeSessionKey = ref('')
-const title = ref('Chinese Dojo')
+const title = ref('Chinese practice')
 
 const quizStartedAt = ref<number | null>(null)
 const elapsedMs = ref(0)
@@ -370,7 +370,7 @@ function applyStartPayload(payload: DojoStartResponse) {
   stopTimer()
 
   activeSessionKey.value = payload.sessionKey
-  title.value = payload.session.title ?? `Chinese Dojo - ${topicTitle.value}`
+  title.value = (payload.session.title ?? `Chinese practice - ${topicTitle.value}`).replace(/dojo/gi, 'practice')
 
   words.value = payload.session.words ?? []
   wordProgressMap.value = payload.progress ?? {}
@@ -581,7 +581,7 @@ watch(
   () => {
     stopTimer()
     activeSessionKey.value = ''
-    title.value = 'Chinese Dojo'
+    title.value = 'Chinese practice'
     words.value = []
     wordProgressMap.value = {}
     idx.value = 0
@@ -610,7 +610,7 @@ onBeforeUnmount(() => {
   <main class="dojo-training-page mx-auto max-w-4xl px-6 pt-12 pb-28 sm:pb-12">
 
     <header class="dojo-training-header space-y-4">
-      <TypewriterTitleBlock :heading-text="title || `Chinese Dojo - ${topicTitle}`"
+      <TypewriterTitleBlock :heading-text="title || `Chinese practice - ${topicTitle}`"
         subheading-text="Type the Chinese characters for each word"
         heading-class="text-2xl font-semibold tracking-tight text-gray-900" subheading-class="text-sm text-gray-600" />
     </header>
@@ -627,7 +627,7 @@ onBeforeUnmount(() => {
 
       <div v-else-if="error" class="space-y-4">
         <p class="text-sm text-red-700">
-          Failed to load dojo session.
+          Failed to load practice session.
         </p>
 
         <button class="rounded-lg border border-gray-200 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition"
@@ -803,7 +803,7 @@ onBeforeUnmount(() => {
               <!-- <NuxtLink to="/dojo/topic/"
                 class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
                 style="background-color:rgba(244,205,39,0.35);">
-                Back to Topic Dojo
+                Back to topic practice
               </NuxtLink> -->
             </div>
           </div>

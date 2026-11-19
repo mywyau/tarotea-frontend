@@ -58,19 +58,9 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 <template>
   <main class="levels-page max-w-4xl mx-auto py-10 px-4 space-y-8">
 
-    <!-- <div class="mb-6">
-      <NuxtLink :to="`/dojo`" class="text-black text-sm hover:underline">
-        ← Dojo
-      </NuxtLink>
-    </div> -->
-
-
-
-    <!-- Header -->
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <TypewriterTitleBlock heading-text="Dojo"
-        subheading-text="Strengthen your phonetic and typing proficiency with our exercises"
-        heading-class="text-xl font-semibold dojo-page-heading" subheading-class="dojo-page-subheading" gap="0.75rem" />
+      <h1 class="text-xl font-semibold dojo-page-heading">Level practice</h1>
+      <p class="dojo-page-subheading">Strengthen your phonetic and typing skills with focused exercises.</p>
     </header>
 
     <!-- Grid -->

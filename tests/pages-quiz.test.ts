@@ -2,15 +2,16 @@ import { describe, it, expect } from 'vitest'
 import { readPage, readProjectFile } from './pageTestUtils'
 
 describe('quiz page contracts', () => {
-  it('level quiz hub page keeps level mode routes and heading', () => {
+  it('level quiz hub keeps enabled mode routes and omits paused pronunciation practice', () => {
     const source = readPage('quiz/index.vue')
 
-    expect(source).toContain('Level Quiz')
+    expect(source).not.toContain('Progress through structured and progressively trickier Cantonese content.')
     expect(source).toContain('/quiz/${levelId}/word/start-quiz')
     expect(source).toContain('/quiz/${levelId}/audio/start-quiz')
     expect(source).toContain('/quiz/${levelId}/sentences/no-audio/v3/start-quiz')
     expect(source).toContain('/quiz/${levelId}/sentences/audio/v3/start-quiz')
-    expect(source).toContain('/quiz/${levelId}/echo-gecko')
+    expect(source).not.toContain('/quiz/${levelId}/echo-gecko')
+    expect(source).toContain('to="/topics/quiz">Topic quizzes')
   })
 
   it('level quiz start pages keep middleware and start CTA routes', () => {
@@ -33,6 +34,8 @@ describe('quiz page contracts', () => {
 
   it('topic and daily quiz start pages keep key CTA routes', () => {
     const topicQuizHub = readPage('topics/quiz.vue')
+    expect(topicQuizHub).toContain('to="/topics/quiz" aria-current="page">Topic quizzes')
+    expect(topicQuizHub).not.toContain('Practice Cantonese by topic. Your weakest words appear more often as you improve.')
     const topicWordStart = readPage('topic/quiz/vocabulary/word/v5/start-quiz/[topic].vue')
     const topicSentenceStart = readPage('topic/quiz/sentences/no-audio/[topic]/v3/start-quiz.vue')
     const dailyStart = readPage('daily/vocab/v2/start-quiz.vue')

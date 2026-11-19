@@ -6,7 +6,7 @@ useSeoMeta({
     ogDescription: 'Train Cantonese by topic with multiple quiz modes and adaptive repetition.',
 })
 
-import { BookOpen, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Headphones, MessageSquareText, Mic2, Volume2 } from '@lucide/vue'
+import { BookOpen, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Headphones, MessageSquareText, Volume2 } from '@lucide/vue'
 import { computed, markRaw, onMounted, ref, watch } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 import type { TopicQuiz } from '~/types/topic'
@@ -118,14 +118,6 @@ const topicQuizModes = [
         dotClass: 'dot-blush',
         to: (topicId: string) => `/topic/quiz/sentences/audio/${topicId}/v3/start-quiz`,
     },
-    {
-        id: 'echo-gecko',
-        label: 'Echo Gecko',
-        icon: markRaw(Mic2),
-        buttonClass: 'topic-btn-green',
-        dotClass: 'dot-green',
-        to: (topicId: string) => `/topic/quiz/echo-gecko/${topicId}`,
-    },
 ] as const
 
 const selectedTopicQuizMode = ref<Record<string, number>>({})
@@ -164,12 +156,10 @@ onMounted(async () => {
 
         <!-- Intro -->
         <header class="text-center space-y-3 max-w-4xl mx-auto">
-            <h1 class="font-semibold topics-heading">
-                Topic Quiz
-            </h1>
-            <p class="text-sm sm:text-base topics-subheading">
-                Practice Cantonese by topic. Your weakest words appear more often as you improve.
-            </p>
+            <nav class="quiz-scope-nav" aria-label="Quiz type">
+                <NuxtLink to="/quiz">Level quizzes</NuxtLink>
+                <NuxtLink to="/topics/quiz" aria-current="page">Topic quizzes</NuxtLink>
+            </nav>
         </header>
 
         <!-- Grid -->

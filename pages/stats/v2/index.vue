@@ -26,7 +26,9 @@ type StatCard = {
 const statsData = ref<UserStats | null>(null)
 const loading = ref(true)
 const errorState = ref<string | null>(null)
+const signInRequired = ref(false)
 const animatedStats = ref<number[]>([])
+const { isLoggedIn, resolve: resolveMeState } = useMeStateV2()
 
 function toNumber(value: unknown): number {
   const num = Number(value)
@@ -119,6 +121,12 @@ const marqueeStats = computed(() => [...stats.value, ...stats.value])
 
 onMounted(async () => {
   try {
+    await resolveMeState()
+    if (!isLoggedIn.value) {
+      signInRequired.value = true
+      return
+    }
+
     const { getAccessToken } = await useAuth()
     const token = await getAccessToken()
 
@@ -150,14 +158,21 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main class="max-w-4xl mx-auto px-4 py-16 space-y-12">
+  <main class="stats-page max-w-4xl mx-auto px-4 py-16 space-y-12">
 
     <div v-if="loading" class="text-center text-gray-400">
       Loading stats...
     </div>
 
-    <div v-else-if="errorState" class="text-center text-red-500">
-      {{ errorState }}
+    <div v-else-if="signInRequired" class="stats-state">
+      <h1 class="your-stat-heading">Your stats</h1>
+      <p>Sign in to see your learning progress and recent activity.</p>
+      <AppButton to="/please-sign-in?redirect=/stats/v2">Sign in to view stats</AppButton>
+    </div>
+
+    <div v-else-if="errorState" class="stats-state" role="alert">
+      <h1 class="your-stat-heading">We couldn’t load your stats</h1>
+      <p>{{ errorState }} Please refresh the page and try again.</p>
     </div>
 
     <div v-else>

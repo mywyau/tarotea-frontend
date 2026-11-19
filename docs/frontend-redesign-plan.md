@@ -1,6 +1,6 @@
 # TaroTea frontend redesign plan
 
-Status: Step 0 approved; Step 1 implemented locally and awaiting preview review  
+Status: Steps 1–8 implemented locally; awaiting final preview review
 Owner: TaroTea  
 Last updated: 2026-11-19
 
@@ -148,7 +148,9 @@ Every step follows the same release path:
 8. Merge and deploy only after approval.
 9. Smoke-test production before starting the next step.
 
-Each step should be one pull request where practical. No database migration,
+The product owner approved completing Steps 2–8 as one review batch on
+2026-11-19. Future redesign work should return to one pull request per step
+where practical. No database migration,
 content rewrite, entitlement change or API behaviour change should be included
 in a visual redesign pull request.
 
@@ -184,7 +186,7 @@ Approval gate:
 
 ### Step 1 — Design tokens and primitives
 
-Status: implemented locally; awaiting preview review
+Status: approved and committed 2026-11-19
 
 Scope:
 
@@ -206,8 +208,7 @@ Rollback boundary: remove the new unused primitives and token imports.
 
 ### Step 2 — Application shell and navigation
 
-Status: partially started; mobile bottom navigation exists but has not been
-reviewed as part of the new design system
+Status: implemented locally; awaiting final preview review
 
 Scope:
 
@@ -229,7 +230,7 @@ Rollback boundary: revert shell components without touching page content.
 
 ### Step 3 — Home page and first-use hierarchy
 
-Status: not started
+Status: implemented locally; awaiting final preview review
 
 Scope:
 
@@ -250,7 +251,7 @@ Rollback boundary: home-page presentation only.
 
 ### Step 4 — Browse and selection pages
 
-Status: not started
+Status: implemented locally; awaiting final preview review
 
 Scope:
 
@@ -271,7 +272,7 @@ Rollback boundary: browse and selection routes only.
 
 ### Step 5 — Vocabulary lists and word pages
 
-Status: not started
+Status: implemented locally; awaiting final preview review
 
 Scope:
 
@@ -292,7 +293,7 @@ Rollback boundary: vocabulary components and word routes only.
 
 ### Step 6 — Quiz and practice focus mode
 
-Status: not started
+Status: implemented locally; awaiting final preview review
 
 Scope:
 
@@ -316,7 +317,7 @@ quiz logic remains unchanged.
 
 ### Step 7 — Account, stats, upgrade and system states
 
-Status: not started
+Status: implemented locally; awaiting final preview review
 
 Scope:
 
@@ -335,7 +336,7 @@ Rollback boundary: account and supporting presentation only.
 
 ### Step 8 — Consolidation and final QA
 
-Status: not started
+Status: implemented locally; final QA passed locally
 
 Scope:
 
@@ -413,17 +414,21 @@ The redesign should improve measurable usability as well as appearance:
 | Mobile bottom navigation | Approved for refinement | Review formally in Step 2 |
 | Focus mode for active quizzes | Approved | General navigation hidden or minimised during attempts |
 | Visible desktop primary navigation | Approved | Replace the hidden rocket navigation in Step 2 |
+| Practice terminology | Approved | User-facing “Dojo” renamed to “Practice”; route URLs remain compatible |
+| Back navigation treatment | Approved | Remove the global arrow-style backlink row and arrow icon from focus-mode exit |
+| Combined final review | Approved | Product owner requested Steps 2–8 together for review at the end |
+| Pronunciation capacity pause | Approved | Speaking, Echo Forest, Echo Lab and Echo Gecko entry points and APIs disabled until capacity work is complete |
 
 ## Approval record
 
 | Step | Preview | Approved by | Date | Notes |
 | --- | --- | --- | --- | --- |
 | 0 — Baseline and decisions | [baseline](./frontend-redesign-baseline/2026-11-19/README.md) | Product owner | 2026-11-19 | Approved in chat |
-| 1 — Tokens and primitives | Local implementation | — | — | Awaiting preview review |
-| 2 — Shell and navigation | — | — | — | Not started |
-| 3 — Home | — | — | — | Not started |
-| 4 — Browse and selection | — | — | — | Not started |
-| 5 — Vocabulary and words | — | — | — | Not started |
-| 6 — Quiz focus mode | — | — | — | Not started |
-| 7 — Account and supporting pages | — | — | — | Not started |
-| 8 — Consolidation and QA | — | — | — | Not started |
+| 1 — Tokens and primitives | Local implementation | Product owner | 2026-11-19 | Approved and committed as `9c42daee` |
+| 2 — Shell and navigation | Local implementation | — | — | Included in final review batch |
+| 3 — Home | Local implementation | — | — | Included in final review batch |
+| 4 — Browse and selection | Local implementation | — | — | Included in final review batch |
+| 5 — Vocabulary and words | Local implementation | — | — | Included in final review batch |
+| 6 — Quiz focus mode | Local implementation | — | — | Free-tier route regression checked logged out |
+| 7 — Account and supporting pages | Local implementation | — | — | Included in final review batch |
+| 8 — Consolidation and QA | Local implementation | — | — | Tests, build and responsive smoke pass locally |

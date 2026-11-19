@@ -1,0 +1,420 @@
+/* Route-level migration layer for Steps 3–8. New components should use the
+   semantic tokens directly; these rules keep legacy route templates visually
+   consistent while their business logic remains unchanged. */
+
+:where(
+  .levels-page,
+  .topics-page,
+  .level-page,
+  .topic-page,
+  .word-page,
+  .dojo-home,
+  .dojo-training-page,
+  .quiz-intro-page,
+  .account-page
+) {
+  color: rgb(var(--color-ink));
+  font-family: var(--font-brand);
+}
+
+:where(.levels-page, .topics-page, .level-page, .topic-page, .dojo-home) {
+  width: 100%;
+  max-width: var(--content-wide) !important;
+  margin-inline: auto;
+  padding: clamp(2.5rem, 6vw, 4.5rem) var(--page-gutter) !important;
+}
+
+:where(.level-heading, .topic-heading, .dojo-heading, .dojo-page-heading, .your-stat-heading) {
+  margin: 0 !important;
+  color: rgb(var(--color-ink)) !important;
+  font-size: clamp(2rem, 5vw, 3.25rem) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.045em !important;
+  line-height: 1.08 !important;
+  text-transform: none !important;
+}
+
+:where(.level-subheading, .topic-subheading, .dojo-subheading, .dojo-page-subheading) {
+  max-width: 42rem;
+  margin-top: 0.75rem !important;
+  color: rgb(var(--color-muted)) !important;
+  font-size: 1rem !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+  line-height: 1.65 !important;
+  text-transform: none !important;
+}
+
+:where(.levels-page, .topics-page) > header,
+:where(.level-page, .topic-page) > .header-card {
+  max-width: 46rem;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  backdrop-filter: none !important;
+  text-align: left !important;
+}
+
+:where(.level-card, .topic-card, .dojo-level-card, .dojo-tile) {
+  overflow: hidden;
+  border: 1px solid rgb(var(--color-ink) / 0.1) !important;
+  border-radius: var(--radius-card) !important;
+  background: rgb(var(--color-surface)) !important;
+  box-shadow: 0 1px 2px rgb(var(--color-ink) / 0.04) !important;
+  filter: none !important;
+  opacity: 1;
+  transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease, transform var(--motion-fast) ease !important;
+}
+
+:where(.level-card, .topic-card, .dojo-level-card, .dojo-tile):hover {
+  border-color: rgb(var(--color-primary) / 0.32) !important;
+  box-shadow: var(--shadow-soft) !important;
+  filter: none !important;
+  transform: translateY(-2px) !important;
+}
+
+:where(.level-card, .topic-card, .dojo-level-card)::before {
+  opacity: 0 !important;
+}
+
+:where(.level-card, .topic-card, .dojo-level-card)::after {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0.3rem;
+  background: rgb(var(--color-taro-lilac));
+}
+
+:where(.level-card, .topic-card, .dojo-level-card):nth-child(3n + 2)::after {
+  background: rgb(var(--color-taro-blue));
+}
+
+:where(.level-card, .topic-card, .dojo-level-card):nth-child(3n)::after {
+  background: rgb(var(--color-taro-pink));
+}
+
+:where(.level-card-drop-in, .topic-card-fly-in, .word-tile-fall-shell) {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+  will-change: auto !important;
+}
+
+:where(.level-card.is-disabled, .topic-card.is-disabled, .level-card.level-locked) {
+  background: rgb(var(--color-ink) / 0.025) !important;
+  opacity: 0.68 !important;
+}
+
+:where(.pill, .pill-locked, .pill-soon) {
+  display: inline-flex !important;
+  min-height: 1.65rem;
+  align-items: center;
+  border: 1px solid rgb(var(--color-ink) / 0.08);
+  border-radius: 999px !important;
+  padding: 0.25rem 0.6rem !important;
+  background: rgb(var(--color-ink) / 0.055) !important;
+  color: rgb(var(--color-ink)) !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+}
+
+:where(.pill-locked) {
+  background: rgb(var(--color-error) / 0.1) !important;
+  color: rgb(var(--color-error-strong)) !important;
+}
+
+:where(.pagination-page, .pagination-arrow, .pagination-jump, .level-mode-toggle, .topic-mode-toggle, .example-nav-arrow) {
+  min-width: 2.75rem !important;
+  min-height: 2.75rem !important;
+  border: 1px solid rgb(var(--color-ink) / 0.1) !important;
+  border-radius: var(--radius-control) !important;
+  background: rgb(var(--color-surface)) !important;
+  color: rgb(var(--color-ink)) !important;
+  box-shadow: none !important;
+}
+
+:where(.pagination-page.is-active) {
+  border-color: rgb(var(--color-primary) / 0.35) !important;
+  background: rgb(var(--color-taro-pink) / 0.32) !important;
+  color: rgb(var(--color-primary-strong)) !important;
+}
+
+:where(.level-btn, .topic-btn, .start-btn, .upgrade-btn, .next-btn-blue) {
+  min-height: 2.75rem !important;
+  border: 1px solid rgb(var(--color-primary) / 0.22) !important;
+  border-radius: var(--radius-control) !important;
+  background: rgb(var(--color-taro-pink) / 0.28) !important;
+  color: rgb(var(--color-primary-strong)) !important;
+  font-weight: 700 !important;
+  box-shadow: none !important;
+}
+
+:where(.mode-dot.is-active) {
+  background: rgb(var(--color-primary)) !important;
+}
+
+:where(.stat-card, .page-card, .featured-stat-card, .compact-stat-card) {
+  border: 1px solid rgb(var(--color-ink) / 0.09) !important;
+  border-radius: var(--radius-card) !important;
+  background: rgb(var(--color-surface)) !important;
+  color: rgb(var(--color-ink)) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+
+:where(.stat-label) {
+  color: rgb(var(--color-muted)) !important;
+}
+
+:where(.category-heading) {
+  color: rgb(var(--color-ink)) !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em !important;
+  text-transform: none !important;
+}
+
+:where(.mobile-stats-toggle) {
+  min-height: 2.75rem;
+  border-radius: var(--radius-control) !important;
+  color: rgb(var(--color-primary-strong)) !important;
+}
+
+/* Word detail */
+.word-page {
+  width: 100%;
+  max-width: var(--content-reading) !important;
+  margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 3rem) var(--page-gutter) !important;
+}
+
+.word-page :where(.word-card, .section-card, .example-card) {
+  border: 1px solid rgb(var(--color-ink) / 0.1) !important;
+  border-radius: var(--radius-card) !important;
+  background: rgb(var(--color-surface)) !important;
+  box-shadow: none !important;
+}
+
+.word-page .word-card {
+  padding: clamp(1.75rem, 5vw, 3rem) !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.word-page .word-card h1 {
+  font-family: var(--font-chinese);
+  font-size: clamp(3rem, 10vw, 5.5rem) !important;
+  line-height: 1.05;
+}
+
+.word-page details > summary {
+  min-height: 2.75rem;
+}
+
+.word-page details > div {
+  border: 1px solid rgb(var(--color-ink) / 0.1) !important;
+  border-radius: var(--radius-card) !important;
+  background: rgb(var(--color-surface)) !important;
+  color: rgb(var(--color-ink)) !important;
+  box-shadow: var(--shadow-overlay) !important;
+}
+
+.word-page :where(.action-chip, .tone-gate-play-btn, .edge-arrow, .example-nav-arrow) {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  border-radius: var(--radius-control) !important;
+}
+
+.word-page :where(.word-nav-progress-track, .example-dot) {
+  background: rgb(var(--color-ink) / 0.1) !important;
+}
+
+.word-page .example-dot-active {
+  background: rgb(var(--color-primary)) !important;
+}
+
+/* Quiz and focused practice */
+:where(.quiz-intro-page, .dojo-training-page) {
+  width: 100%;
+  max-width: var(--content-reading) !important;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter) !important;
+  font-family: var(--font-brand);
+}
+
+:where(.quiz-card, .hero-card) {
+  border: 1px solid rgb(var(--color-ink) / 0.1) !important;
+  border-radius: var(--radius-panel) !important;
+  background: rgb(var(--color-surface)) !important;
+  color: rgb(var(--color-ink)) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+:where(.hero-title) {
+  color: rgb(var(--color-ink)) !important;
+  font-size: clamp(1.8rem, 5vw, 3rem) !important;
+  letter-spacing: -0.04em;
+}
+
+:where(.hero-subtext) {
+  color: rgb(var(--color-muted)) !important;
+}
+
+:where(.spinner) {
+  border-color: rgb(var(--color-primary) / 0.22) !important;
+  border-top-color: rgb(var(--color-primary)) !important;
+}
+
+.quiz-scope-nav {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgb(var(--color-ink) / 0.1);
+  border-radius: var(--radius-control);
+  padding: 0.25rem;
+  background: rgb(var(--color-surface));
+}
+
+.quiz-scope-nav a {
+  display: inline-flex;
+  min-height: 2.5rem;
+  align-items: center;
+  border-radius: calc(var(--radius-control) - 0.2rem);
+  padding: 0.55rem 0.85rem;
+  color: rgb(var(--color-muted));
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.quiz-scope-nav a[aria-current='page'] {
+  background: rgb(var(--color-taro-pink) / 0.32);
+  color: rgb(var(--color-primary-strong));
+}
+
+/* Account and system pages */
+.account-page > div > div,
+.account-page > div > div > div {
+  min-width: 0;
+}
+
+.account-page :where([class*='backdrop-blur'], .rounded-lg.border) {
+  border: 1px solid rgb(var(--color-ink) / 0.1) !important;
+  border-radius: var(--radius-card) !important;
+  background: rgb(var(--color-surface)) !important;
+  color: rgb(var(--color-ink)) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+.account-page :where(input, select, textarea) {
+  border-color: rgb(var(--color-ink) / 0.16) !important;
+  border-radius: var(--radius-control) !important;
+  background: rgb(var(--color-surface)) !important;
+}
+
+.account-page :where(button[type='submit']) {
+  border-radius: var(--radius-control) !important;
+  background: rgb(var(--color-primary)) !important;
+}
+
+/* Reading and legal pages */
+:where(.legal-page, .contact-page, .stats-page, .upgrade-page) {
+  width: 100%;
+  max-width: var(--content-reading) !important;
+  margin-inline: auto;
+  padding-inline: var(--page-gutter) !important;
+  color: rgb(var(--color-ink));
+  font-family: var(--font-brand);
+}
+
+.legal-page h1,
+.upgrade-page h1 {
+  color: rgb(var(--color-ink));
+  font-size: clamp(2rem, 5vw, 3.25rem) !important;
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1.08;
+}
+
+.legal-page h2 {
+  color: rgb(var(--color-ink));
+  font-size: 1.2rem;
+  letter-spacing: -0.02em;
+}
+
+.legal-page :where(p, li, td, th) {
+  line-height: 1.7;
+}
+
+.upgrade-page {
+  padding-block: clamp(2.5rem, 6vw, 5rem) !important;
+}
+
+.upgrade-card {
+  border: 1px solid rgb(var(--color-ink) / 0.09);
+  border-radius: var(--radius-panel);
+  background: rgb(var(--color-surface));
+  box-shadow: var(--shadow-soft);
+}
+
+.upgrade-benefits {
+  border: 1px solid rgb(var(--color-ink) / 0.08);
+  background: rgb(var(--color-canvas));
+}
+
+.upgrade-plan,
+.upgrade-sign-in {
+  min-height: 3.25rem;
+  border: 1px solid rgb(var(--color-primary) / 0.2);
+  border-radius: var(--radius-control) !important;
+  box-shadow: none !important;
+}
+
+.upgrade-plan-monthly,
+.upgrade-sign-in {
+  background: rgb(var(--color-taro-blue) / 0.48);
+}
+
+.upgrade-plan-yearly {
+  background: rgb(var(--color-taro-yellow) / 0.28);
+}
+
+.stats-page {
+  min-height: 65vh;
+}
+
+.stats-state {
+  display: grid;
+  max-width: 34rem;
+  justify-items: start;
+  gap: 1rem;
+  border: 1px solid rgb(var(--color-ink) / 0.09);
+  border-radius: var(--radius-card);
+  padding: clamp(1.5rem, 5vw, 2.5rem);
+  background: rgb(var(--color-surface));
+}
+
+.stats-state p {
+  margin: 0;
+  color: rgb(var(--color-muted));
+  line-height: 1.6;
+}
+
+@media (max-width: 639px) {
+  :where(.levels-page, .topics-page) ul.grid {
+    gap: 0.75rem !important;
+  }
+
+  :where(.level-card, .topic-card) {
+    padding: 1rem !important;
+  }
+
+  .word-page .word-card {
+    padding: 1.5rem 1rem !important;
+  }
+}

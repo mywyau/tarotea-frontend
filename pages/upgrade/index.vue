@@ -2,7 +2,7 @@
 
 definePageMeta({ layout: 'default' })
 
-import { BookOpen, Mic, Sparkles, Tags, Target, UnlockKeyhole } from '@lucide/vue';
+import { BookOpen, Sparkles, Tags, Target, UnlockKeyhole } from '@lucide/vue';
 import { markRaw } from 'vue';
 import { useUpgrade } from '@/composables/useUpgrade';
 import { useMeStateV2 } from '~/composables/useMeStateV2';
@@ -28,7 +28,6 @@ const benefits = [
   { icon: markRaw(UnlockKeyhole), text: 'Unlock over 2500 word tiles' },
   { icon: markRaw(BookOpen), text: 'Unlock over 10000 sentences to help with your studies' },
   { icon: markRaw(Target), text: 'Train to improve recognition and recall with our exercises and activities' },
-  { icon: markRaw(Mic), text: 'Practice your pronunciation with 1000 Echo Lab requests per month' },
   { icon: markRaw(Sparkles), text: 'Increase exposure to weaker words via our xp system' },
   { icon: markRaw(Tags), text: 'Access new topics, words and features added regularly' },
 ]
@@ -46,14 +45,14 @@ function upgrade(plan: 'monthly' | 'yearly') {
 </script>
 
 <template>
-  <main class="min-h-[70vh] px-4 pt-6 pb-6">
+  <main class="upgrade-page min-h-[70vh] px-4 pt-6 pb-6">
 
     <div class="max-w-3xl mx-auto">
 
 
 
       <!-- Card -->
-      <div class="p-6 md:p-10 text-center space-y-6">
+      <div class="upgrade-card p-6 md:p-10 text-center space-y-6">
 
         <!-- Icon -->
         <div class="flex justify-center">
@@ -73,7 +72,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         </p>
 
         <!-- Benefits -->
-        <div class="max-w-xl mx-auto rounded-2xl p-5 md:p-6">
+        <div class="upgrade-benefits max-w-xl mx-auto rounded-2xl p-5 md:p-6">
           <ul class="space-y-3 text-left text-gray-700 leading-relaxed">
             <li v-for="benefit in benefits" :key="benefit.text" class="flex items-start gap-3">
               <component :is="benefit.icon" class="mt-0.5 h-4 w-4 shrink-0 text-[#7A6FCB]" aria-hidden="true" />
@@ -89,8 +88,8 @@ function upgrade(plan: 'monthly' | 'yearly') {
           </p>
 
           <!-- Monthly (Pastel themed) -->
-          <button class="block w-full rounded-xl py-3 font-medium transition shadow-sm"
-            style="background-color:#A8CAE0;" :class="isSubscribed
+          <button class="upgrade-plan upgrade-plan-monthly block w-full rounded-xl py-3 font-medium transition shadow-sm"
+            :class="isSubscribed
               ? 'opacity-60 cursor-not-allowed'
               : 'hover:brightness-110 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('monthly')">
             <span class="block">Monthly plan · £{{ monthlyPrice }}</span>
@@ -98,10 +97,10 @@ function upgrade(plan: 'monthly' | 'yearly') {
           </button>
 
           <!-- Yearly (KEEP BLACK) -->
-          <button class="block w-full rounded-xl text-black px-3 py-3 font-medium transition shadow-md" :class="isSubscribed
+          <button class="upgrade-plan upgrade-plan-yearly block w-full rounded-xl text-black px-3 py-3 font-medium transition shadow-md" :class="isSubscribed
             ? 'opacity-60 cursor-not-allowed'
             : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
-            style="background-color:rgba(244,205,39,0.35);">
+            >
             <span class="block">Yearly plan · £{{ yearlyPrice }}</span>
             <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Get 2 months
               free</span>
@@ -111,8 +110,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
 
         <div v-else class="pt-4 max-w-md mx-auto">
           <NuxtLink :to="{ path: '/please-sign-in', query: { redirect: '/upgrade' } }"
-            class="block w-full rounded-xl py-3 px-3 font-medium transition shadow-sm hover:brightness-110 active:scale-[0.98]"
-            style="background-color:#A8CAE0;">
+            class="upgrade-sign-in block w-full rounded-xl py-3 px-3 font-medium transition shadow-sm hover:brightness-110 active:scale-[0.98]">
             Sign in to choose a plan
           </NuxtLink>
         </div>

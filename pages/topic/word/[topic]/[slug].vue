@@ -7,6 +7,7 @@ definePageMeta({
 })
 
 import { masteryXp } from '@/config/xp/helpers';
+import { PRONUNCIATION_PRACTICE_ENABLED } from '~/config/features';
 
 import {
     CheckCircle2,
@@ -395,7 +396,7 @@ watchEffect(() => {
 
                 </NuxtLink>
 
-                <NuxtLink v-if="showPracticeButtons" :to="`/echo-forest/${word.id}`"
+                <NuxtLink v-if="showPracticeButtons && PRONUNCIATION_PRACTICE_ENABLED" :to="`/echo-forest/${word.id}`"
                     class="action-chip action-chip-tone-forge main-action-btn"
                     aria-label="Open tone checker for this word">
                     <Mic class="mobile-action-icon h-4 w-4" />
@@ -441,7 +442,7 @@ watchEffect(() => {
                         <!-- buttons aligned right -->
                         <div v-if="showPracticeButtons || showAudioButtons" class="flex justify-end">
                             <div class="example-actions-row">
-                                <NuxtLink v-if="showPracticeButtons"
+                                <NuxtLink v-if="showPracticeButtons && PRONUNCIATION_PRACTICE_ENABLED"
                                     :to="`/writing/${topic}/sentences/${word.id}/${currentExampleIndex}`"
                                     class="action-chip action-chip-sm action-chip-write example-action-btn"
                                     aria-label="Practice writing this sentence">

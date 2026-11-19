@@ -1,82 +1,143 @@
 <script setup lang="ts">
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
-import { AudioLines, CalendarCheck, CircleHelp, House, Keyboard, Layers, Menu, Rocket, Tags, X } from '@lucide/vue'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import {
+  AudioLines, BarChart3, CalendarCheck, CircleHelp, House, Keyboard,
+  Layers, LogIn, LogOut, Menu, Sparkles, Tags, UserRound, X,
+} from '@lucide/vue'
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { getFocusedLearningExitPath } from '~/utils/navigation/focusMode'
 
+const props = withDefaults(defineProps<{ focusMode?: boolean }>(), { focusMode: false })
 const { isLoggedIn, user, resolve } = useMeStateV2()
+const route = useRoute()
+const router = useRouter()
 
 const accountLabel = computed(() => user.value?.firstName || 'Account')
-const route = useRoute()
-
-const menuOpen = ref(false)
+const accountMenuOpen = ref(false)
 const navOpen = ref(false)
-const menuRoot = ref<HTMLElement | null>(null)
+const accountRoot = ref<HTMLElement | null>(null)
+const drawerRoot = ref<HTMLElement | null>(null)
+const drawerCloseButton = ref<HTMLButtonElement | null>(null)
+const lastDrawerTrigger = ref<HTMLElement | null>(null)
 
-const navLinks = computed(() => {
-  const links = [
-    { to: '/', label: 'Home', requiresAuth: false, icon: House },
-    { to: '/daily/vocab/v2/start-quiz', label: 'Daily Quiz', requiresAuth: true, icon: CalendarCheck },
-    { to: '/daily/jyutping/v2', label: 'Daily Jyutping Quiz', requiresAuth: true, icon: AudioLines },
-    { to: '/levels', label: 'Levels', requiresAuth: false, icon: Layers },
-    { to: '/quiz', label: 'Level Quiz', requiresAuth: false, icon: CircleHelp },
-    { to: '/dojo/level', label: 'Level Dojo', requiresAuth: false, icon: Keyboard },
-    { to: '/topics', label: 'Topics', requiresAuth: false, icon: Tags },
-    { to: '/topics/quiz', label: 'Topic Quiz', requiresAuth: false, icon: CircleHelp },
-    { to: '/dojo/topic', label: 'Topic Dojo', requiresAuth: false, icon: Keyboard },
-  ]
-
-  return links.filter(link => !link.requiresAuth || isLoggedIn.value)
-})
+const primaryLinks = computed(() => [
+  { to: '/levels', label: 'Levels', paths: ['/levels', '/level/'] },
+  { to: '/topics', label: 'Topics', paths: ['/topics', '/topic/'], excludes: ['/topics/quiz', '/topic/quiz/'] },
+  { to: '/quiz', label: 'Quizzes', paths: ['/quiz', '/topics/quiz', '/topic/quiz/'] },
+  { to: '/dojo', label: 'Practice', paths: ['/dojo'] },
+  ...(isLoggedIn.value ? [{ to: '/daily/vocab/v2/start-quiz', label: 'Daily', paths: ['/daily/'] }] : []),
+])
 
 const mobileNavLinks = [
   { to: '/', label: 'Home', icon: House, paths: ['/'] },
   { to: '/levels', label: 'Levels', icon: Layers, paths: ['/levels', '/level/'] },
-  { to: '/topics', label: 'Topics', icon: Tags, paths: ['/topics', '/topic/'] },
-  { to: '/quiz', label: 'Quizzes', icon: CircleHelp, paths: ['/quiz', '/topics/quiz'] },
+  { to: '/topics', label: 'Topics', icon: Tags, paths: ['/topics', '/topic/'], excludes: ['/topics/quiz', '/topic/quiz/'] },
+  { to: '/quiz', label: 'Quizzes', icon: CircleHelp, paths: ['/quiz', '/topics/quiz', '/topic/quiz/'] },
 ]
 
-function isMobileLinkActive(link: typeof mobileNavLinks[number]) {
+const navigationGroups = computed(() => [
+  {
+    label: 'Learn',
+    links: [
+      { to: '/levels', label: 'Levels', description: 'Learn in structured stages', icon: Layers, paths: ['/levels', '/level/'] },
+      { to: '/topics', label: 'Topics', description: 'Browse useful vocabulary themes', icon: Tags, paths: ['/topics', '/topic/'], excludes: ['/topics/quiz', '/topic/quiz/'] },
+    ],
+  },
+  {
+    label: 'Practice',
+    links: [
+      { to: '/quiz', label: 'Level quizzes', description: 'Review vocabulary, audio and sentences', icon: CircleHelp, paths: ['/quiz'] },
+      { to: '/topics/quiz', label: 'Topic quizzes', description: 'Practise a vocabulary theme', icon: AudioLines, paths: ['/topics/quiz', '/topic/quiz/'] },
+      { to: '/dojo/level', label: 'Level practice', description: 'Typing and recall by level', icon: Keyboard },
+      { to: '/dojo/topic', label: 'Topic practice', description: 'Train within a chosen topic', icon: Sparkles },
+      ...(isLoggedIn.value ? [
+        { to: '/daily/vocab/v2/start-quiz', label: 'Daily vocabulary', description: 'Your short daily review', icon: CalendarCheck },
+        { to: '/daily/jyutping/v2', label: 'Daily Jyutping', description: 'Daily sound and tone practice', icon: AudioLines },
+      ] : []),
+    ],
+  },
+])
+
+function isLinkActive(link: { to: string, paths?: string[], excludes?: string[] }) {
   if (link.to === '/') return route.path === '/'
-  if (link.to === '/topics' && route.path.startsWith('/topics/quiz')) return false
-
-  return link.paths.some(path => route.path === path || route.path.startsWith(path))
+  if (link.excludes?.some(path => route.path === path || route.path.startsWith(path))) return false
+  return (link.paths || [link.to]).some(path => route.path === path || route.path.startsWith(path))
 }
 
-const isMoreActive = computed(() => {
-  return navOpen.value || route.path.startsWith('/daily/') || route.path.startsWith('/dojo/')
-})
+const isMoreRouteActive = computed(() => route.path.startsWith('/daily/') || route.path.startsWith('/dojo/'))
 
-function toggleMenu() {
-  menuOpen.value = !menuOpen.value
-}
-function closeMenu() {
-  menuOpen.value = false
+function toggleAccountMenu() {
+  accountMenuOpen.value = !accountMenuOpen.value
+  if (accountMenuOpen.value) closeNav(false)
 }
 
-function toggleNav() {
-  navOpen.value = !navOpen.value
+function closeAccountMenu() {
+  accountMenuOpen.value = false
 }
-function closeNav() {
+
+function toggleNav(event: MouseEvent) {
+  lastDrawerTrigger.value = event.currentTarget as HTMLElement
+  navOpen.value ? closeNav() : openNav()
+}
+
+async function openNav() {
+  closeAccountMenu()
+  navOpen.value = true
+  await nextTick()
+  drawerCloseButton.value?.focus()
+}
+
+function closeNav(restoreFocus = true) {
+  if (!navOpen.value) return
   navOpen.value = false
+  if (restoreFocus) nextTick(() => lastDrawerTrigger.value?.focus())
 }
+
+async function handleLogin() {
+  closeAccountMenu()
+  closeNav(false)
+  await login()
+}
+
 async function handleLogout() {
   await logout()
   await resolve({ force: true })
-  closeMenu()
+  closeAccountMenu()
+  closeNav(false)
 }
 
-function onDocumentClick(e: MouseEvent) {
-  const target = e.target as Node | null
-  if (menuOpen.value && menuRoot.value && target && !menuRoot.value.contains(target)) {
-    closeMenu()
-  }
+function exitPractice() {
+  router.push(getFocusedLearningExitPath(route.path))
 }
 
-function onDocumentKeydown(e: KeyboardEvent) {
-  if (e.key !== 'Escape') return
-  closeMenu()
+function onDocumentClick(event: MouseEvent) {
+  const target = event.target as Node | null
+  if (accountMenuOpen.value && accountRoot.value && target && !accountRoot.value.contains(target)) closeAccountMenu()
+}
+
+function onDocumentKeydown(event: KeyboardEvent) {
+  if (event.key !== 'Escape') return
+  closeAccountMenu()
   closeNav()
+}
+
+function trapDrawerFocus(event: KeyboardEvent) {
+  if (event.key !== 'Tab' || !drawerRoot.value) return
+  const focusable = Array.from(drawerRoot.value.querySelectorAll<HTMLElement>(
+    'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
+  ))
+  if (!focusable.length) return
+
+  const first = focusable[0]
+  const last = focusable[focusable.length - 1]
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
 }
 
 onMounted(() => {
@@ -86,536 +147,229 @@ onMounted(() => {
 })
 
 onBeforeUnmount(() => {
+  document.body.style.overflow = ''
   document.removeEventListener('click', onDocumentClick)
   document.removeEventListener('keydown', onDocumentKeydown)
 })
 
-watch(
-  () => route.fullPath,
-  () => {
-    closeMenu()
-    closeNav()
-  },
-)
+watch(navOpen, open => {
+  if (import.meta.client) document.body.style.overflow = open ? 'hidden' : ''
+})
 
+watch(() => route.fullPath, () => {
+  closeAccountMenu()
+  closeNav(false)
+})
+
+watch(() => props.focusMode, focusMode => {
+  if (!focusMode) return
+  closeAccountMenu()
+  closeNav(false)
+})
 </script>
 
 <template>
-  <header class="header-shell sticky top-0 z-40">
-    <div class="max-w-5xl mx-auto flex items-center justify-between px-4 py-3">
-
-      <NuxtLink to="/" class="brand-logo text-2xl font-bold text-black hover:text-gray-700">
-        TaroTea
+  <header class="app-header" :class="{ 'app-header-focus': props.focusMode }">
+    <div class="app-header-inner">
+      <NuxtLink to="/" class="brand-logo" aria-label="TaroTea home">
+        <span class="brand-mark" aria-hidden="true">T</span>
+        <span>TaroTea</span>
       </NuxtLink>
 
-      <div ref="menuRoot" class="relative">
-
-        <button type="button" class="menu-btn" @click.stop="toggleMenu" aria-label="Open account menu"
-          :aria-expanded="menuOpen ? 'true' : 'false'">
-          <X v-if="menuOpen" class="h-5 w-5 hover:text-gray-700" aria-hidden="true" />
-          <Menu v-else class="h-5 w-5 hover:text-gray-700" aria-hidden="true" />
+      <template v-if="props.focusMode">
+        <span class="focus-label">Practice mode</span>
+        <button type="button" class="focus-exit" @click="exitPractice">
+          <span>Exit practice</span>
         </button>
+      </template>
 
-        <div v-if="menuOpen" class="menu-panel">
-          <template v-if="isLoggedIn">
-            <NuxtLink to="/account/v2"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
-              @click="closeMenu">
-              {{ accountLabel }}
-            </NuxtLink>
-
-            <NuxtLink to="/stats/v2"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-black hover:bg-black/5 transition"
-              @click="closeMenu">
-              Stats
-            </NuxtLink>
-
-            <NuxtLink to="/upgrade"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm font-semibold hover:bg-black hover:brightness-125 transition"
-              @click="closeMenu">
-
-              <span
-                class="bg-gradient-to-r from-[#d48fd0] via-[#b57bc3] via-[#6faed6] to-[#d48fd0] bg-clip-text text-transparent">
-                Upgrade
-              </span>
-            </NuxtLink>
-
-            <div class="h-px my-2 bg-black/10"></div>
-
-            <button type="button"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-red-700 hover:bg-red-500/10 transition"
-              @click="handleLogout">
-              Log out
-            </button>
-          </template>
-
-          <template v-else>
-            <button type="button"
-              class="w-full flex items-center rounded-xl px-3 py-2 text-sm text-gray-900 hover:bg-black/5 transition"
-              @click="login()">
-              Login
-            </button>
-          </template>
-        </div>
-      </div>
-    </div>
-
-    <button type="button" class="trigger-visibility-btn" :class="{ 'is-open': navOpen }"
-      :aria-label="navOpen ? 'Close Warp panel' : 'Open Warp panel'" :aria-expanded="navOpen ? 'true' : 'false'"
-      aria-controls="warp-navigation-panel" @click.stop="toggleNav">
-      <span class="rocket-burst" aria-hidden="true"></span>
-      <Rocket class="portal-icon" aria-hidden="true" />
-      <span class="sr-only">{{ navOpen ? 'Close Warp panel' : 'Open Warp panel' }}</span>
-    </button>
-
-    <transition name="fade">
-      <div v-if="navOpen" class="drawer-overlay" aria-hidden="true" @click="closeNav" />
-    </transition>
-
-    <transition name="slide-left">
-      <aside v-if="navOpen" id="warp-navigation-panel" class="nav-drawer" aria-label="Main navigation panel">
-        <div class="flex items-center justify-between gap-4 px-4 py-4 border-b border-black/20">
-          <span class="flex items-center gap-2 text-xl font-semibold text-black">
-            <Rocket class="h-5 w-5" aria-hidden="true" />
-            Explore
-          </span>
-          <button type="button" class="drawer-close-btn" aria-label="Close navigation" @click="closeNav">
-            <X class="h-5 w-5" aria-hidden="true" />
-          </button>
-        </div>
-
-        <nav class="px-3 py-4 space-y-1">
-          <NuxtLink v-for="link in navLinks" :key="link.to" :to="link.to" class="drawer-link font-medium"
-            :class="{ 'drawer-link-active': route.path === link.to }"
-            :aria-current="route.path === link.to ? 'page' : undefined" @click="closeNav">
-            <component :is="link.icon" class="drawer-link-icon" aria-hidden="true" />
-            <span>{{ link.label }}</span>
+      <template v-else>
+        <nav class="desktop-primary-nav" aria-label="Primary navigation">
+          <NuxtLink v-for="link in primaryLinks" :key="link.to" :to="link.to" class="desktop-nav-link"
+            :class="{ 'desktop-nav-link-active': isLinkActive(link) }"
+            :aria-current="isLinkActive(link) ? 'page' : undefined">
+            {{ link.label }}
           </NuxtLink>
         </nav>
-      </aside>
-    </transition>
 
-    <nav class="mobile-bottom-nav" aria-label="Primary navigation">
-      <NuxtLink v-for="link in mobileNavLinks" :key="link.to" :to="link.to" class="mobile-bottom-link"
-        :class="{ 'mobile-bottom-link-active': isMobileLinkActive(link) }"
-        :aria-current="isMobileLinkActive(link) ? 'page' : undefined">
-        <component :is="link.icon" class="mobile-bottom-icon" aria-hidden="true" />
-        <span>{{ link.label }}</span>
-      </NuxtLink>
+        <div class="header-actions">
+          <button type="button" class="header-action header-more-action"
+            :class="{ 'header-action-active': navOpen }" :aria-expanded="navOpen ? 'true' : 'false'"
+            aria-controls="app-navigation-drawer" @click.stop="toggleNav">
+            <Menu aria-hidden="true" />
+            <span>More</span>
+          </button>
 
-      <button type="button" class="mobile-bottom-link" :class="{ 'mobile-bottom-link-active': isMoreActive }"
-        :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel" @click.stop="toggleNav">
-        <Menu class="mobile-bottom-icon" aria-hidden="true" />
-        <span>More</span>
-      </button>
-    </nav>
+          <div ref="accountRoot" class="account-root">
+            <button type="button" class="header-action account-trigger"
+              :class="{ 'header-action-active': accountMenuOpen }" aria-controls="account-menu"
+              :aria-expanded="accountMenuOpen ? 'true' : 'false'"
+              :aria-label="isLoggedIn ? `Open ${accountLabel} account menu` : 'Open sign in menu'"
+              @click.stop="toggleAccountMenu">
+              <UserRound aria-hidden="true" />
+              <span class="account-trigger-label">{{ isLoggedIn ? accountLabel : 'Sign in' }}</span>
+            </button>
+
+            <div v-if="accountMenuOpen" id="account-menu" class="account-menu" role="menu">
+              <template v-if="isLoggedIn">
+                <div class="account-menu-heading">
+                  <span class="account-avatar" aria-hidden="true">{{ accountLabel.charAt(0).toUpperCase() }}</span>
+                  <span><strong>{{ accountLabel }}</strong><small>Your learning space</small></span>
+                </div>
+                <NuxtLink to="/account/v2" class="account-menu-link" role="menuitem" @click="closeAccountMenu">
+                  <UserRound aria-hidden="true" /> Account
+                </NuxtLink>
+                <NuxtLink to="/stats/v2" class="account-menu-link" role="menuitem" @click="closeAccountMenu">
+                  <BarChart3 aria-hidden="true" /> Stats
+                </NuxtLink>
+                <NuxtLink to="/upgrade" class="account-menu-link account-menu-upgrade" role="menuitem" @click="closeAccountMenu">
+                  <Sparkles aria-hidden="true" /> Upgrade
+                </NuxtLink>
+                <div class="account-menu-divider" />
+                <button type="button" class="account-menu-link account-menu-danger" role="menuitem" @click="handleLogout">
+                  <LogOut aria-hidden="true" /> Log out
+                </button>
+              </template>
+              <template v-else>
+                <p class="account-menu-message">Sign in to save progress, build a streak and access your daily practice.</p>
+                <button type="button" class="account-sign-in" role="menuitem" @click="handleLogin">
+                  <LogIn aria-hidden="true" /> Sign in
+                </button>
+              </template>
+            </div>
+          </div>
+        </div>
+      </template>
+    </div>
   </header>
+
+  <template v-if="!props.focusMode">
+      <transition name="nav-fade">
+        <div v-if="navOpen" class="drawer-overlay" aria-hidden="true" @click="closeNav" />
+      </transition>
+
+      <transition name="nav-slide">
+        <aside v-if="navOpen" id="app-navigation-drawer" ref="drawerRoot" class="navigation-drawer"
+          role="dialog" aria-modal="true" aria-labelledby="navigation-drawer-title" @keydown="trapDrawerFocus">
+          <div class="drawer-header">
+            <div><p class="drawer-eyebrow">TaroTea</p><h2 id="navigation-drawer-title">Explore and practise</h2></div>
+            <button ref="drawerCloseButton" type="button" class="drawer-close" aria-label="Close navigation" @click="closeNav">
+              <X aria-hidden="true" />
+            </button>
+          </div>
+
+          <nav class="drawer-navigation" aria-label="All destinations">
+            <NuxtLink to="/" class="drawer-home-link" :aria-current="route.path === '/' ? 'page' : undefined" @click="closeNav(false)">
+              <House aria-hidden="true" /> Home
+            </NuxtLink>
+
+            <section v-for="group in navigationGroups" :key="group.label" class="drawer-group">
+              <h3>{{ group.label }}</h3>
+              <NuxtLink v-for="link in group.links" :key="link.to" :to="link.to" class="drawer-link"
+                :class="{ 'drawer-link-active': isLinkActive(link) }"
+                :aria-current="isLinkActive(link) ? 'page' : undefined" @click="closeNav(false)">
+                <span class="drawer-link-icon"><component :is="link.icon" aria-hidden="true" /></span>
+                <span><strong>{{ link.label }}</strong><small>{{ link.description }}</small></span>
+              </NuxtLink>
+            </section>
+          </nav>
+
+          <div class="drawer-account">
+            <template v-if="isLoggedIn">
+              <NuxtLink to="/account/v2" @click="closeNav(false)">Account</NuxtLink>
+              <NuxtLink to="/stats/v2" @click="closeNav(false)">Stats</NuxtLink>
+              <NuxtLink to="/upgrade" @click="closeNav(false)">Upgrade</NuxtLink>
+            </template>
+            <button v-else type="button" @click="handleLogin">Sign in to save progress</button>
+          </div>
+        </aside>
+      </transition>
+
+      <nav class="mobile-bottom-nav" aria-label="Primary navigation">
+        <NuxtLink v-for="link in mobileNavLinks" :key="link.to" :to="link.to" class="mobile-bottom-link"
+          :class="{ 'mobile-bottom-link-active': isLinkActive(link) }"
+          :aria-current="isLinkActive(link) ? 'page' : undefined">
+          <component :is="link.icon" class="mobile-bottom-icon" aria-hidden="true" />
+          <span>{{ link.label }}</span>
+        </NuxtLink>
+        <button type="button" class="mobile-bottom-link" :class="{ 'mobile-bottom-link-active': navOpen || isMoreRouteActive }"
+          :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="app-navigation-drawer" @click.stop="toggleNav">
+          <Menu class="mobile-bottom-icon" aria-hidden="true" />
+          <span>More</span>
+        </button>
+      </nav>
+  </template>
 </template>
 
 <style scoped>
-.header-shell {
-  z-index: 80;
-  --pink: #EAB8E4;
-  --purple: #D6A3D1;
-  --blue: #A8CAE0;
-  --yellow: #F4CD27;
-  --blush: #F6E1E1;
-}
-
-.menu-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 40px;
-  font-size: 26px;
-}
-
-.menu-btn:active {
-  transform: scale(0.98);
-}
-
-.trigger-visibility-btn {
-  display: none;
-  position: fixed;
-  left: 0.85rem;
-  bottom: 0.85rem;
-  z-index: 75;
-  height: 3.3rem;
-  width: 3.3rem;
-  border-radius: 999px;
-  background: transparent;
-  backdrop-filter: none;
-  /* box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16); */
-  overflow: visible;
-  isolation: isolate;
-  transition: transform 160ms ease;
-}
-
-.portal-icon {
-  position: absolute;
-  inset: 0;
-  margin: auto;
-  width: 2.00rem;
-  height: 2.00rem;
-  color: rgba(15, 15, 15, 0.9);
-  stroke-width: 2.4;
-  transform-origin: center;
-  transition: transform 160ms ease;
-  z-index: 1;
-}
-
-.trigger-visibility-btn::before {
-  content: '';
-  position: absolute;
-  inset: 0.45rem;
-  border-radius: inherit;
-  background:
-    radial-gradient(circle, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.18) 62%, transparent 70%);
-  z-index: -2;
-}
-
-.trigger-visibility-btn:hover,
-.trigger-visibility-btn.is-open {
-  transform: scale(1.20);
-  /* box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22); */
-}
-
-.trigger-visibility-btn:hover .portal-icon,
-.trigger-visibility-btn.is-open .portal-icon {
-  transform: translateY(-0.08rem);
-}
-
-.rocket-burst {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 0.28rem;
-  height: 0.28rem;
-  border-radius: 999px;
-  background: transparent;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(0.35);
-  z-index: -1;
-  box-shadow:
-    -0.18rem -1.42rem 0 -0.03rem rgba(159, 91, 181, 0.95),
-    0.58rem -1.18rem 0 -0.08rem rgba(133, 78, 161, 0.9),
-    1.42rem -0.36rem 0 -0.05rem rgba(181, 123, 195, 0.92),
-    1.28rem 0.84rem 0 -0.08rem rgba(115, 65, 150, 0.86),
-    0.24rem 1.44rem 0 -0.04rem rgba(159, 91, 181, 0.92),
-    -0.72rem 1.1rem 0 -0.08rem rgba(181, 123, 195, 0.9),
-    -1.44rem 0.42rem 0 -0.05rem rgba(133, 78, 161, 0.9),
-    -1.08rem -0.82rem 0 -0.1rem rgba(159, 91, 181, 0.86);
-  pointer-events: none;
-}
-
-.rocket-burst::before,
-.rocket-burst::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  border-radius: 999px;
-  background: transparent;
-  transform: translate(-50%, -50%);
-}
-
-.rocket-burst::before {
-  width: 0.2rem;
-  height: 0.2rem;
-  box-shadow:
-    0.22rem -1.72rem 0 -0.04rem rgba(115, 65, 150, 0.84),
-    1.52rem -0.96rem 0 -0.03rem rgba(159, 91, 181, 0.9),
-    1.72rem 0.24rem 0 -0.06rem rgba(181, 123, 195, 0.86),
-    0.78rem 1.58rem 0 -0.04rem rgba(133, 78, 161, 0.86),
-    -0.32rem 1.78rem 0 -0.06rem rgba(159, 91, 181, 0.88),
-    -1.56rem 0.92rem 0 -0.03rem rgba(115, 65, 150, 0.82),
-    -1.72rem -0.28rem 0 -0.06rem rgba(181, 123, 195, 0.86),
-    -0.84rem -1.44rem 0 -0.05rem rgba(133, 78, 161, 0.86);
-}
-
-.rocket-burst::after {
-  width: 0.16rem;
-  height: 0.16rem;
-  background: transparent;
-  box-shadow:
-    0.96rem -1.68rem 0 -0.03rem rgba(181, 123, 195, 0.78),
-    1.9rem -0.08rem 0 -0.04rem rgba(115, 65, 150, 0.84),
-    1.22rem 1.22rem 0 -0.03rem rgba(159, 91, 181, 0.86),
-    -0.04rem 2.02rem 0 -0.05rem rgba(181, 123, 195, 0.8),
-    -1.18rem 1.42rem 0 -0.04rem rgba(133, 78, 161, 0.84),
-    -1.92rem 0.04rem 0 -0.03rem rgba(159, 91, 181, 0.82),
-    -1.34rem -1.16rem 0 -0.04rem rgba(181, 123, 195, 0.8),
-    0.04rem -1.98rem 0 -0.05rem rgba(115, 65, 150, 0.82);
-}
-
-.trigger-visibility-btn:hover .rocket-burst,
-.trigger-visibility-btn.is-open .rocket-burst {
-  animation: lilacBurst 650ms ease-out both;
-}
-
-
-@media (min-width: 768px) {
-  .trigger-visibility-btn {
-    display: block;
-    left: 1rem;
-    bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-    height: 3.1rem;
-    width: 3.1rem;
-  }
-
-  .trigger-visibility-btn:hover,
-  .trigger-visibility-btn.is-open {
-    transform: scale(1.12);
-  }
-}
-
-.menu-panel {
-  position: absolute;
-  right: 0;
-  margin-top: 10px;
-  width: 220px;
-  border-radius: 10px;
-  background: rgba(255, 255, 255, 0.82);
-  backdrop-filter: blur(10px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
-  padding: 10px;
-  z-index: 60;
-}
-
-.drawer-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 85;
-  pointer-events: auto;
-  background: rgba(246, 225, 225, 0.22);
-}
-
-.nav-drawer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 90;
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  width: min(20rem, 88vw);
-  background-color: rgba(236, 224, 248, 0.86);
-  backdrop-filter: blur(8px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12);
-}
-
-.nav-drawer nav {
-  flex: 1;
-  min-height: 0;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-
-.drawer-link {
-  display: flex;
-  align-items: center;
-  gap: 0.7rem;
-  border-radius: 0.75rem;
-  padding: 0.65rem 0.75rem;
-  font-size: 0.95rem;
-  color: #111827;
-  transition: background 120ms ease;
-}
-
-.drawer-link-icon {
-  width: 1.1rem;
-  height: 1.1rem;
-  flex-shrink: 0;
-  color: rgba(17, 24, 39, 0.72);
-  stroke-width: 2.15;
-}
-
-.drawer-link:hover {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-.drawer-link-active {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.drawer-close-btn {
-  display: inline-flex;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  border-radius: 999px;
-  color: #111827;
-  transition: background 120ms ease;
-}
-
-.drawer-close-btn:hover {
-  background: rgba(0, 0, 0, 0.06);
-}
-
-.mobile-bottom-nav {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 75;
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  min-height: calc(4.25rem + env(safe-area-inset-bottom, 0px));
-  padding: 0.4rem 0.35rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
-  border-top: 1px solid rgba(17, 24, 39, 0.1);
-  background: rgba(255, 250, 252, 0.94);
-  box-shadow: 0 -10px 30px rgba(17, 24, 39, 0.08);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-.mobile-bottom-link {
-  position: relative;
-  display: flex;
-  min-width: 0;
-  min-height: 3.4rem;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0.2rem;
-  border-radius: 0.85rem;
-  color: rgba(17, 24, 39, 0.68);
-  font-size: 0.68rem;
-  font-weight: 650;
-  line-height: 1;
-  transition: color 120ms ease, background 120ms ease, transform 120ms ease;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.mobile-bottom-link:active {
-  transform: scale(0.96);
-}
-
-.mobile-bottom-link-active {
-  color: #111827;
-  background: linear-gradient(135deg, rgba(234, 184, 228, 0.42), rgba(168, 202, 224, 0.46));
-}
-
-.mobile-bottom-link-active::before {
-  content: '';
-  position: absolute;
-  top: 0.18rem;
-  width: 1.3rem;
-  height: 0.16rem;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #b57bc3, #6faed6);
-}
-
-.mobile-bottom-icon {
-  width: 1.28rem;
-  height: 1.28rem;
-  stroke-width: 2.15;
-}
-
-@media (min-width: 768px) {
-  .mobile-bottom-nav {
-    display: none;
-  }
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.2s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
-
-.slide-left-enter-active,
-.slide-left-leave-active {
-  transition: transform 0.22s ease;
-}
-
-.slide-left-enter-from,
-.slide-left-leave-to {
-  transform: translateX(-100%);
-}
-
-@keyframes lilacBurst {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(0.2);
-  }
-
-  35% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1.12);
-  }
-
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -50%) scale(1.45);
-  }
-}
-
-.brand-logo {
-  display: inline-block;
-  transform-origin: center bottom;
-}
-
-.menu-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 40px;
-  font-size: 26px;
-  transform-origin: center;
-  transition: transform 160ms ease;
-}
-
-/* .menu-btn:hover {
-  animation: hamburgerWiggle 1.2s ease-in-out infinite;
-} */
-
-.menu-btn:active {
-  transform: scale(0.98);
-}
-
-@keyframes hamburgerWiggle {
-
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-
-  15% {
-    transform: rotate(-10deg);
-  }
-
-  30% {
-    transform: rotate(8deg);
-  }
-
-  45% {
-    transform: rotate(-6deg);
-  }
-
-  60% {
-    transform: rotate(4deg);
-  }
-
-  75% {
-    transform: rotate(-2deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-
-  .brand-logo:hover,
-  .menu-btn:hover,
-  .rocket-burst {
-    animation: none;
-  }
-}
+.app-header { position: sticky; top: 0; z-index: 80; border-bottom: 1px solid rgb(var(--color-ink) / 0.09); background: rgb(var(--color-canvas) / 0.92); color: rgb(var(--color-ink)); font-family: var(--font-brand); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.app-header-inner { display: flex; min-height: 4.25rem; max-width: var(--content-wide); margin-inline: auto; padding: 0.55rem var(--page-gutter); align-items: center; gap: clamp(1.25rem, 3vw, 2.5rem); }
+.brand-logo { display: inline-flex; flex: 0 0 auto; align-items: center; gap: 0.55rem; color: rgb(var(--color-ink)); font-size: 1.25rem; font-weight: 700; letter-spacing: -0.035em; text-decoration: none; }
+.brand-mark { display: inline-flex; width: 2rem; height: 2rem; align-items: center; justify-content: center; border-radius: 0.7rem 0.7rem 0.7rem 0.25rem; background: linear-gradient(145deg, rgb(var(--color-taro-pink)), rgb(var(--color-taro-blue))); color: rgb(var(--color-primary-strong)); font-size: 1rem; box-shadow: inset 0 0 0 1px rgb(var(--color-ink) / 0.08); }
+.desktop-primary-nav { display: none; min-width: 0; flex: 1 1 auto; align-items: center; justify-content: center; gap: 0.2rem; }
+.desktop-nav-link, .header-action { border-radius: var(--radius-control); color: rgb(var(--color-muted)); font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: background var(--motion-fast) ease, color var(--motion-fast) ease; }
+.desktop-nav-link { padding: 0.7rem 0.8rem; }
+.desktop-nav-link:hover, .desktop-nav-link-active { background: rgb(var(--color-taro-pink) / 0.25); color: rgb(var(--color-primary-strong)); }
+.header-actions { display: flex; margin-left: auto; align-items: center; gap: 0.35rem; }
+.header-action { display: inline-flex; min-height: 2.75rem; align-items: center; justify-content: center; gap: 0.45rem; padding: 0.55rem 0.7rem; }
+.header-action:hover, .header-action-active { background: rgb(var(--color-taro-blue) / 0.28); color: rgb(var(--color-ink)); }
+.header-action :deep(svg) { width: 1.2rem; height: 1.2rem; }
+.header-more-action { display: none; }
+.account-root { position: relative; }
+.account-trigger-label { display: none; max-width: 8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-menu { position: absolute; top: calc(100% + 0.6rem); right: 0; width: min(18rem, calc(100vw - 2rem)); border: 1px solid rgb(var(--color-ink) / 0.1); border-radius: var(--radius-card); background: rgb(var(--color-surface)); padding: 0.65rem; box-shadow: var(--shadow-overlay); }
+.account-menu-heading { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.55rem 0.8rem; }
+.account-menu-heading > span:last-child { display: flex; min-width: 0; flex-direction: column; }
+.account-menu-heading strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-menu-heading small { color: rgb(var(--color-muted)); font-size: 0.75rem; }
+.account-avatar { display: inline-flex; width: 2.4rem; height: 2.4rem; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 999px; background: rgb(var(--color-taro-lilac) / 0.4); color: rgb(var(--color-primary-strong)); font-weight: 700; }
+.account-menu-link, .account-sign-in { display: flex; width: 100%; min-height: 2.75rem; align-items: center; gap: 0.65rem; border-radius: 0.75rem; padding: 0.65rem 0.7rem; color: rgb(var(--color-ink)); font-size: 0.9rem; font-weight: 600; text-decoration: none; }
+.account-menu-link:hover { background: rgb(var(--color-ink) / 0.045); }
+.account-menu-link :deep(svg), .account-sign-in :deep(svg) { width: 1.1rem; height: 1.1rem; }
+.account-menu-upgrade { color: rgb(var(--color-primary-strong)); }
+.account-menu-danger { color: rgb(var(--color-error-strong)); }
+.account-menu-divider { height: 1px; margin: 0.45rem; background: rgb(var(--color-ink) / 0.09); }
+.account-menu-message { margin: 0; padding: 0.6rem 0.6rem 0.85rem; color: rgb(var(--color-muted)); font-size: 0.875rem; line-height: 1.55; }
+.account-sign-in { justify-content: center; background: rgb(var(--color-primary)); color: white; }
+.drawer-overlay { position: fixed; inset: 0; z-index: 85; background: rgb(var(--color-ink) / 0.26); backdrop-filter: blur(3px); }
+.navigation-drawer { position: fixed; top: 0; right: 0; z-index: 90; display: flex; width: min(26rem, 94vw); height: 100dvh; flex-direction: column; background: rgb(var(--color-canvas)); box-shadow: var(--shadow-overlay); }
+.drawer-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; border-bottom: 1px solid rgb(var(--color-ink) / 0.09); padding: 1.2rem var(--page-gutter); }
+.drawer-eyebrow, .drawer-header h2 { margin: 0; }
+.drawer-eyebrow { color: rgb(var(--color-primary-strong)); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.drawer-header h2 { margin-top: 0.25rem; font-size: 1.35rem; letter-spacing: -0.025em; }
+.drawer-close { display: inline-flex; width: 2.75rem; height: 2.75rem; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: var(--radius-control); color: rgb(var(--color-ink)); }
+.drawer-close:hover { background: rgb(var(--color-ink) / 0.05); }
+.drawer-close :deep(svg) { width: 1.25rem; height: 1.25rem; }
+.drawer-navigation { flex: 1 1 auto; overflow-y: auto; padding: 1rem var(--page-gutter) 1.5rem; overscroll-behavior: contain; }
+.drawer-home-link { display: flex; min-height: 2.75rem; align-items: center; gap: 0.65rem; border-radius: var(--radius-control); padding: 0.65rem 0.75rem; background: rgb(var(--color-surface)); color: rgb(var(--color-ink)); font-weight: 700; text-decoration: none; }
+.drawer-home-link :deep(svg) { width: 1.1rem; height: 1.1rem; }
+.drawer-group { margin-top: 1.5rem; }
+.drawer-group h3 { margin: 0 0 0.55rem; padding-inline: 0.35rem; color: rgb(var(--color-muted)); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.drawer-link { display: flex; min-height: 3.65rem; align-items: center; gap: 0.75rem; border-radius: var(--radius-control); padding: 0.55rem; color: rgb(var(--color-ink)); text-decoration: none; transition: background var(--motion-fast) ease; }
+.drawer-link:hover, .drawer-link-active { background: rgb(var(--color-taro-pink) / 0.24); }
+.drawer-link-icon { display: inline-flex; width: 2.5rem; height: 2.5rem; flex: 0 0 auto; align-items: center; justify-content: center; border-radius: 0.75rem; background: rgb(var(--color-surface)); color: rgb(var(--color-primary-strong)); box-shadow: inset 0 0 0 1px rgb(var(--color-ink) / 0.07); }
+.drawer-link-icon :deep(svg) { width: 1.15rem; height: 1.15rem; }
+.drawer-link > span:last-child { display: flex; min-width: 0; flex-direction: column; }
+.drawer-link strong { font-size: 0.9rem; }
+.drawer-link small { margin-top: 0.15rem; color: rgb(var(--color-muted)); font-size: 0.75rem; line-height: 1.35; }
+.drawer-account { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; border-top: 1px solid rgb(var(--color-ink) / 0.09); padding: 1rem var(--page-gutter) calc(1rem + env(safe-area-inset-bottom, 0px)); }
+.drawer-account a, .drawer-account button { min-height: 2.75rem; color: rgb(var(--color-primary-strong)); font-size: 0.85rem; font-weight: 700; text-decoration: none; }
+.mobile-bottom-nav { position: fixed; right: 0; bottom: 0; left: 0; z-index: 75; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); min-height: calc(4.35rem + env(safe-area-inset-bottom, 0px)); padding: 0.35rem 0.25rem calc(0.35rem + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgb(var(--color-ink) / 0.1); background: rgb(var(--color-canvas) / 0.95); box-shadow: 0 -8px 24px rgb(var(--color-ink) / 0.07); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.mobile-bottom-link { position: relative; display: flex; min-width: 0; min-height: 3.5rem; flex-direction: column; align-items: center; justify-content: center; gap: 0.25rem; border-radius: 0.8rem; color: rgb(var(--color-muted)); font-size: 0.68rem; font-weight: 600; line-height: 1; text-decoration: none; transition: background var(--motion-fast) ease, color var(--motion-fast) ease, transform var(--motion-fast) ease; -webkit-tap-highlight-color: transparent; }
+.mobile-bottom-link:active { transform: scale(0.97); }
+.mobile-bottom-link-active { background: rgb(var(--color-taro-pink) / 0.28); color: rgb(var(--color-primary-strong)); }
+.mobile-bottom-link-active::before { content: ''; position: absolute; top: 0.2rem; width: 1.25rem; height: 0.15rem; border-radius: 999px; background: rgb(var(--color-primary)); }
+.mobile-bottom-icon { width: 1.25rem; height: 1.25rem; stroke-width: 2.1; }
+.app-header-focus .app-header-inner { justify-content: space-between; }
+.focus-label { display: none; margin-inline: auto; color: rgb(var(--color-muted)); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.focus-exit { display: inline-flex; min-height: 2.75rem; align-items: center; gap: 0.4rem; border-radius: var(--radius-control); padding: 0.55rem 0.7rem; color: rgb(var(--color-primary-strong)); font-size: 0.85rem; font-weight: 700; }
+.focus-exit:hover { background: rgb(var(--color-taro-pink) / 0.25); }
+.focus-exit :deep(svg) { width: 1rem; height: 1rem; }
+.nav-fade-enter-active, .nav-fade-leave-active { transition: opacity var(--motion-panel) ease; }
+.nav-fade-enter-from, .nav-fade-leave-to { opacity: 0; }
+.nav-slide-enter-active, .nav-slide-leave-active { transition: transform var(--motion-panel) ease; }
+.nav-slide-enter-from, .nav-slide-leave-to { transform: translateX(100%); }
+@media (min-width: 640px) { .account-trigger-label, .focus-label { display: inline; } }
+@media (min-width: 768px) { .header-more-action { display: inline-flex; } .mobile-bottom-nav { display: none; } }
+@media (min-width: 960px) { .desktop-primary-nav { display: flex; } }
 </style>

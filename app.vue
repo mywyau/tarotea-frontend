@@ -1,32 +1,10 @@
 <script setup lang="ts">
 import { Analytics } from '@vercel/analytics/vue'
+import { isFocusedLearningPath } from '~/utils/navigation/focusMode'
 
 const route = useRoute()
 
-const showBackLink = computed(() => route.path !== '/')
-const appBackLinkTo = computed(() => {
-  const path = route.path
-
-  if (path.startsWith('/level/') && path.includes('/word/')) {
-    const levelSlug = route.params.slug
-    const wordId = route.params.id
-
-    if (typeof levelSlug === 'string' && typeof wordId === 'string') {
-      return `/level/${levelSlug}/v2#${decodeURIComponent(wordId)}`
-    }
-  }
-
-  if (path.startsWith('/topic/word/')) {
-    const topicSlug = route.params.topic
-    const wordSlug = route.params.slug
-
-    if (typeof topicSlug === 'string' && typeof wordSlug === 'string') {
-      return `/topic/words/${topicSlug}/v2#${decodeURIComponent(wordSlug)}`
-    }
-  }
-
-  return undefined
-})
+const focusMode = computed(() => isFocusedLearningPath(route.path))
 
 const runtimeConfig = useRuntimeConfig()
 
@@ -51,16 +29,10 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="app-shell min-h-screen flex flex-col overflow-x-hidden bg-[#F6E1E1]/30">
-    <BlankNavBar />
+  <div class="app-shell" :class="{ 'app-shell-focus': focusMode }">
+    <BlankNavBar :focus-mode="focusMode" />
 
-    <BackLink
-      v-if="showBackLink"
-      :to="appBackLinkTo"
-      class="mt-10"
-    />
-
-    <main class="flex-1">
+    <main class="app-main">
       <ClientOnly>
         <Analytics />
       </ClientOnly>
@@ -68,14 +40,29 @@ useSeoMeta({
       <NuxtPage />
     </main>
 
-    <AppFooter />
+    <AppFooter v-if="!focusMode" />
   </div>
 </template>
 
 <style>
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+  min-height: 100dvh;
+  flex-direction: column;
+  overflow-x: hidden;
+  background: rgb(var(--color-canvas));
+  color: rgb(var(--color-ink));
+}
+
+.app-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
 @media (max-width: 767px) {
-  .app-shell {
-    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  .app-shell:not(.app-shell-focus) {
+    padding-bottom: calc(4.35rem + env(safe-area-inset-bottom, 0px));
   }
 }
 </style>

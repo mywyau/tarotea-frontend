@@ -80,9 +80,8 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   <main class="topics-page max-w-4xl mx-auto py-10 px-2 space-y-10">
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <TypewriterTitleBlock heading-text="Dojo"
-        subheading-text="Strengthen your phonetic and typing proficiency with our exercises."
-        heading-class="text-xl font-semibold dojo-page-heading" subheading-class="dojo-page-subheading" gap="0.75rem" />
+      <h1 class="text-xl font-semibold dojo-page-heading">Topic practice</h1>
+      <p class="dojo-page-subheading">Strengthen your phonetic and typing skills with focused exercises.</p>
     </header>
 
     <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
