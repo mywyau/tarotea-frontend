@@ -51,7 +51,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="min-h-screen flex flex-col overflow-x-hidden bg-[#F6E1E1]/30">
+  <div class="app-shell min-h-screen flex flex-col overflow-x-hidden bg-[#F6E1E1]/30">
     <BlankNavBar />
 
     <BackLink
@@ -71,3 +71,11 @@ useSeoMeta({
     <AppFooter />
   </div>
 </template>
+
+<style>
+@media (max-width: 767px) {
+  .app-shell {
+    padding-bottom: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  }
+}
+</style>

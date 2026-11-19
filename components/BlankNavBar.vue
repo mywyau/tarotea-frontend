@@ -2,7 +2,7 @@
 import { login, logout } from '@/composables/useAuth'
 import { useMeStateV2 } from '@/composables/useMeStateV2'
 import { AudioLines, CalendarCheck, CircleHelp, House, Keyboard, Layers, Menu, Rocket, Tags, X } from '@lucide/vue'
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 
 const { isLoggedIn, user, resolve } = useMeStateV2()
 
@@ -27,6 +27,24 @@ const navLinks = computed(() => {
   ]
 
   return links.filter(link => !link.requiresAuth || isLoggedIn.value)
+})
+
+const mobileNavLinks = [
+  { to: '/', label: 'Home', icon: House, paths: ['/'] },
+  { to: '/levels', label: 'Levels', icon: Layers, paths: ['/levels', '/level/'] },
+  { to: '/topics', label: 'Topics', icon: Tags, paths: ['/topics', '/topic/'] },
+  { to: '/quiz', label: 'Quizzes', icon: CircleHelp, paths: ['/quiz', '/topics/quiz'] },
+]
+
+function isMobileLinkActive(link: typeof mobileNavLinks[number]) {
+  if (link.to === '/') return route.path === '/'
+  if (link.to === '/topics' && route.path.startsWith('/topics/quiz')) return false
+
+  return link.paths.some(path => route.path === path || route.path.startsWith(path))
+}
+
+const isMoreActive = computed(() => {
+  return navOpen.value || route.path.startsWith('/daily/') || route.path.startsWith('/dojo/')
 })
 
 function toggleMenu() {
@@ -71,6 +89,14 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', onDocumentClick)
   document.removeEventListener('keydown', onDocumentKeydown)
 })
+
+watch(
+  () => route.fullPath,
+  () => {
+    closeMenu()
+    closeNav()
+  },
+)
 
 </script>
 
@@ -143,28 +169,46 @@ onBeforeUnmount(() => {
     </button>
 
     <transition name="fade">
-      <div v-if="navOpen" class="drawer-overlay" />
+      <div v-if="navOpen" class="drawer-overlay" aria-hidden="true" @click="closeNav" />
     </transition>
 
     <transition name="slide-left">
       <aside v-if="navOpen" id="warp-navigation-panel" class="nav-drawer" aria-label="Main navigation panel">
-        <div class="px-4 py-4 border-b border-black/20">
+        <div class="flex items-center justify-between gap-4 px-4 py-4 border-b border-black/20">
           <span class="flex items-center gap-2 text-xl font-semibold text-black">
             <Rocket class="h-5 w-5" aria-hidden="true" />
-            Warp
+            Explore
           </span>
+          <button type="button" class="drawer-close-btn" aria-label="Close navigation" @click="closeNav">
+            <X class="h-5 w-5" aria-hidden="true" />
+          </button>
         </div>
 
         <nav class="px-3 py-4 space-y-1">
           <NuxtLink v-for="link in navLinks" :key="link.to" :to="link.to" class="drawer-link font-medium"
             :class="{ 'drawer-link-active': route.path === link.to }"
-            :aria-current="route.path === link.to ? 'page' : undefined">
+            :aria-current="route.path === link.to ? 'page' : undefined" @click="closeNav">
             <component :is="link.icon" class="drawer-link-icon" aria-hidden="true" />
             <span>{{ link.label }}</span>
           </NuxtLink>
         </nav>
       </aside>
     </transition>
+
+    <nav class="mobile-bottom-nav" aria-label="Primary navigation">
+      <NuxtLink v-for="link in mobileNavLinks" :key="link.to" :to="link.to" class="mobile-bottom-link"
+        :class="{ 'mobile-bottom-link-active': isMobileLinkActive(link) }"
+        :aria-current="isMobileLinkActive(link) ? 'page' : undefined">
+        <component :is="link.icon" class="mobile-bottom-icon" aria-hidden="true" />
+        <span>{{ link.label }}</span>
+      </NuxtLink>
+
+      <button type="button" class="mobile-bottom-link" :class="{ 'mobile-bottom-link-active': isMoreActive }"
+        :aria-expanded="navOpen ? 'true' : 'false'" aria-controls="warp-navigation-panel" @click.stop="toggleNav">
+        <Menu class="mobile-bottom-icon" aria-hidden="true" />
+        <span>More</span>
+      </button>
+    </nav>
   </header>
 </template>
 
@@ -192,6 +236,7 @@ onBeforeUnmount(() => {
 }
 
 .trigger-visibility-btn {
+  display: none;
   position: fixed;
   left: 0.85rem;
   bottom: 0.85rem;
@@ -312,6 +357,7 @@ onBeforeUnmount(() => {
 
 @media (min-width: 768px) {
   .trigger-visibility-btn {
+    display: block;
     left: 1rem;
     bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
     height: 3.1rem;
@@ -340,8 +386,8 @@ onBeforeUnmount(() => {
 .drawer-overlay {
   position: fixed;
   inset: 0;
-  z-index: 50;
-  pointer-events: none;
+  z-index: 85;
+  pointer-events: auto;
   background: rgba(246, 225, 225, 0.22);
 }
 
@@ -349,7 +395,7 @@ onBeforeUnmount(() => {
   position: fixed;
   top: 0;
   left: 0;
-  z-index: 60;
+  z-index: 90;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -391,6 +437,88 @@ onBeforeUnmount(() => {
 
 .drawer-link-active {
   background: rgba(255, 255, 255, 0.5);
+}
+
+.drawer-close-btn {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  color: #111827;
+  transition: background 120ms ease;
+}
+
+.drawer-close-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.mobile-bottom-nav {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 75;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: calc(4.25rem + env(safe-area-inset-bottom, 0px));
+  padding: 0.4rem 0.35rem calc(0.4rem + env(safe-area-inset-bottom, 0px));
+  border-top: 1px solid rgba(17, 24, 39, 0.1);
+  background: rgba(255, 250, 252, 0.94);
+  box-shadow: 0 -10px 30px rgba(17, 24, 39, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.mobile-bottom-link {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  min-height: 3.4rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  border-radius: 0.85rem;
+  color: rgba(17, 24, 39, 0.68);
+  font-size: 0.68rem;
+  font-weight: 650;
+  line-height: 1;
+  transition: color 120ms ease, background 120ms ease, transform 120ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobile-bottom-link:active {
+  transform: scale(0.96);
+}
+
+.mobile-bottom-link-active {
+  color: #111827;
+  background: linear-gradient(135deg, rgba(234, 184, 228, 0.42), rgba(168, 202, 224, 0.46));
+}
+
+.mobile-bottom-link-active::before {
+  content: '';
+  position: absolute;
+  top: 0.18rem;
+  width: 1.3rem;
+  height: 0.16rem;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #b57bc3, #6faed6);
+}
+
+.mobile-bottom-icon {
+  width: 1.28rem;
+  height: 1.28rem;
+  stroke-width: 2.15;
+}
+
+@media (min-width: 768px) {
+  .mobile-bottom-nav {
+    display: none;
+  }
 }
 
 .fade-enter-active,
