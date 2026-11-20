@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
+import { useStrokeWriter } from "~/composables/useStrokeWriter"
 
 definePageMeta({
   ssr: false,
@@ -12,15 +13,6 @@ type VocabWord = {
   word: string
   jyutping?: string
   meaning?: string
-}
-
-type WriterLike = {
-  animateCharacter: (options?: Record<string, unknown>) => Promise<void> | void
-  loopCharacterAnimation: () => void
-  showCharacter: (options?: Record<string, unknown>) => void
-  hideCharacter: (options?: Record<string, unknown>) => void
-  showOutline: (options?: Record<string, unknown>) => void
-  hideOutline: (options?: Record<string, unknown>) => void
 }
 
 const route = useRoute()
@@ -38,14 +30,8 @@ const {
 })
 
 const writerHost = ref<HTMLDivElement | null>(null)
-const writer = ref<WriterLike | null>(null)
 
 const currentCharIndex = ref(0)
-const isLoading = ref(false)
-const isReady = ref(false)
-const loadError = ref<string | null>(null)
-
-const unsupportedCharacter = ref<string | null>(null)
 
 async function animateCurrentCharacter() {
   if (!writer.value) return
@@ -69,7 +55,8 @@ async function animateWholeWord() {
   for (let i = 0; i < selectedCharacters.value.length; i += 1) {
     currentCharIndex.value = i
     await nextTick()
-    await new Promise((resolve) => setTimeout(resolve, 150))
+    await whenLoaded()
+    if (!writer.value || currentCharIndex.value !== i) return
     await animateCurrentCharacter()
     await new Promise((resolve) => setTimeout(resolve, 350))
   }
@@ -115,65 +102,6 @@ function nextCharacter() {
   }
 }
 
-async function loadWriter(char: string) {
-  if (!process.client || !char || !writerHost.value) return
-
-  isLoading.value = true
-  isReady.value = false
-  loadError.value = null
-  unsupportedCharacter.value = null
-
-  try {
-    writerHost.value.innerHTML = ""
-
-    const mod = await import("hanzi-writer")
-    const HanziWriter = (mod as { default?: any }).default ?? mod
-
-    writer.value = HanziWriter.create(writerHost.value, char, {
-      width: writerSize.value,
-      height: writerSize.value,
-      padding: writerSize.value < 260 ? 12 : 20,
-      showOutline: true,
-      showCharacter: false,
-      // outlineColor: "#d6a3d1",
-      // strokeColor: "#7e93ff",
-
-      outlineColor: "rgba(17, 24, 39, 0.18)",
-      strokeColor: "#111827",
-      radicalColor: "#111827",
-
-      strokeAnimationSpeed: 1,
-      strokeHighlightSpeed: 2,
-      delayBetweenStrokes: 250,
-      delayBetweenLoops: 1200,
-      drawingWidth: writerSize.value < 260 ? 14 : 18,
-      onLoadCharDataSuccess: () => {
-        isReady.value = true
-        isLoading.value = false
-        unsupportedCharacter.value = null
-        writer.value?.hideCharacter({ duration: 0 })
-        writer.value?.showOutline({ duration: 0 })
-      },
-      onLoadCharDataError: () => {
-        unsupportedCharacter.value = char
-        isReady.value = false
-        isLoading.value = false
-        loadError.value = null
-
-        if (writerHost.value) {
-          writerHost.value.innerHTML = ""
-        }
-      },
-    })
-
-  } catch (err) {
-    console.error(err)
-    unsupportedCharacter.value = null
-    loadError.value = "Failed to initialise Hanzi Writer."
-    isLoading.value = false
-  }
-}
-
 const writerSize = ref(320)
 
 function updateWriterSize() {
@@ -201,15 +129,8 @@ watch(
   },
 )
 
-watch(
-  [() => currentCharacter.value, writerHost, () => writerSize.value],
-  async ([char, host]) => {
-    if (!char || !host) return
-    await nextTick()
-    await loadWriter(char)
-  },
-  { immediate: true, flush: "post" },
-)
+const { writer, loadError, unsupportedCharacter, retry, whenLoaded } =
+  useStrokeWriter(writerHost, currentCharacter, writerSize)
 
 onMounted(() => {
   ready.value = true
@@ -218,7 +139,6 @@ onMounted(() => {
 
 <template>
   <div v-if="ready" class="writing-page mx-auto max-w-4xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
-
 
     <section class="hero-card rounded-2xl p-4 sm:p-6">
       <p class="page-eyebrow text-xs font-medium uppercase tracking-wide sm:text-sm">
@@ -262,6 +182,7 @@ onMounted(() => {
                 class="writer-shell flex min-h-[260px] items-center justify-center rounded-2xl p-3 sm:min-h-[320px] sm:p-4">
                 <div v-if="loadError" class="max-w-sm text-center text-sm status-error">
                   {{ loadError }}
+                  <button type="button" class="btn-secondary mt-2 rounded-lg px-3 py-1.5" @click="retry">Retry</button>
                 </div>
 
                 <div v-else-if="unsupportedCharacter" class="max-w-sm text-center text-sm status-warn">
@@ -273,7 +194,7 @@ onMounted(() => {
                   No Chinese character available for this word.
                 </div>
 
-                <div ref="writerHost" :style="{ width: `${writerSize}px`, height: `${writerSize}px` }" />
+                <div ref="writerHost" v-show="writer" :style="{ width: `${writerSize}px`, height: `${writerSize}px` }" />
               </div>
             </div>
 
@@ -300,19 +221,19 @@ onMounted(() => {
               <div class="space-y-2.5 sm:space-y-3">
                 <button type="button"
                   class="btn-primary w-full rounded-xl px-3 py-2 text-sm text-black font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!isReady" @click="animateCurrentCharacter">
+                  :disabled="!writer" @click="animateCurrentCharacter">
                   Play strokes
                 </button>
 
                 <button type="button"
                   class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!isReady" @click="loopAnimation">
+                  :disabled="!writer" @click="loopAnimation">
                   Loop animation
                 </button>
 
                 <button type="button"
                   class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!isReady || !selectedCharacters.length" @click="animateWholeWord">
+                  :disabled="!writer || !selectedCharacters.length" @click="animateWholeWord">
                   Play whole word
                 </button>
               </div>
@@ -339,13 +260,13 @@ onMounted(() => {
               <div class="space-y-2.5 sm:space-y-3">
                 <button type="button"
                   class="btn-soft w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!isReady" @click="showOnlyOutline">
+                  :disabled="!writer" @click="showOnlyOutline">
                   Outline only
                 </button>
 
                 <button type="button"
                   class="btn-soft w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!isReady" @click="showCharacterAndOutline">
+                  :disabled="!writer" @click="showCharacterAndOutline">
                   Show full character
                 </button>
               </div>

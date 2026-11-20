@@ -14,6 +14,17 @@ describe('pronunciation feature availability', () => {
     expect(PRONUNCIATION_PRACTICE_ENABLED).toBe(false)
   })
 
+  it.each([
+    'pages/topic/word/[topic]/[slug].vue',
+    'pages/level/[slug]/word/[id].vue',
+  ])('gates sentence speaking independently of writing on %s', (path) => {
+    const links = read(path).match(/<NuxtLink\b[^>]*>/g) ?? []
+    const speak = links.find(link => link.includes('/echo-lab/pronunciation-check/'))
+    const write = links.find(link => link.includes('/writing/') && link.includes('/sentences/'))
+    expect(speak).toContain('v-if="showPracticeButtons && PRONUNCIATION_PRACTICE_ENABLED"')
+    expect(write).toContain('v-if="showPracticeButtons"')
+  })
+
   it('recognises every public pronunciation route family', () => {
     expect(isPronunciationPracticePath('/echo-forest/word-id')).toBe(true)
     expect(isPronunciationPracticePath('/echo-lab/pronunciation-check/topic/family/sentences/word/v2/0')).toBe(true)

@@ -65,6 +65,77 @@ describe('quiz page contracts', () => {
     expect(source).toContain('Authorization: `Bearer ${token}`')
   })
 
+  it('keeps level and topic audio quizzes compact and concealed before answering', () => {
+    const levelAudio = readPage('quiz/[slug]/audio/v2/test.vue')
+    const topicAudio = readPage('topic/quiz/vocabulary/audio/v5/[topic]/index.vue')
+
+    for (const source of [levelAudio, topicAudio]) {
+      expect(source).toContain('class="audio-answer-grid grid grid-cols-2"')
+      expect(source).toContain('audio-answer-tile')
+      expect(source).not.toContain('answer-tile aspect-square')
+      expect(source).toContain('v-if="answered && currentWord"')
+      expect(source).toContain('style="filter: blur(14px); opacity: 0.42; user-select: none;"')
+    }
+  })
+
+  it('moves quiz progress into the focused header and supports automatic advance', () => {
+    const progress = readProjectFile('components/QuizHeaderProgress.vue')
+    const shell = readProjectFile('components/BlankNavBar.vue')
+
+    expect(shell).toContain('id="quiz-header-progress"')
+    expect(progress).toContain('quiz-auto-advance')
+    expect(progress).toContain('AUTO_ADVANCE_DELAY_MS = 2500')
+    expect(progress).toContain("emit('advance')")
+    expect(progress).toContain("role=\"switch\"")
+  })
+
+  it('uses a responsive, non-flipping completion summary across quiz types', () => {
+    const stats = readProjectFile('components/QuizCompletionFlipStats.vue')
+    const actions = readProjectFile('components/QuizCompletionActions.vue')
+    const completionPages = [
+      'quiz/[slug]/word/v2/test.vue',
+      'quiz/[slug]/audio/v2/test.vue',
+      'quiz/[slug]/sentences/no-audio/v3/index.vue',
+      'quiz/[slug]/sentences/audio/v3/index.vue',
+      'topic/quiz/vocabulary/word/v5/[topic].vue',
+      'topic/quiz/vocabulary/audio/v5/[topic]/index.vue',
+      'topic/quiz/sentences/no-audio/[topic]/v3/index.vue',
+      'topic/quiz/sentences/audio/[topic]/v3/index.vue',
+    ]
+
+    expect(stats).toContain('completion-stat-grid')
+    expect(stats).toContain('Quiz completion stats')
+    expect(stats).toContain('showScore: true')
+    expect(stats).toContain("scrollIntoView({ block: 'start' })")
+    expect(stats).not.toContain('is-flipped')
+    expect(actions).toContain("retryLabel: 'Try again'")
+    expect(actions).toContain("backLabel: 'Choose another quiz'")
+
+    for (const page of completionPages) {
+      const source = readPage(page)
+      expect(source).toContain('class="quiz-completion space-y-6"')
+      expect(source).toContain('<QuizCompletionActions')
+      expect(source).not.toContain('Play Again')
+    }
+
+    for (const page of completionPages.filter(page => page.includes('/word/') || page.includes('/audio/v2/') || page.includes('/audio/v5/'))) {
+      const source = readPage(page)
+      expect(source).toContain(':show-score="false"')
+      expect(source).toContain('Correct <span>{{ score }}</span>')
+      expect(source).toContain('Incorrect <span>{{ incorrectCount }}</span>')
+    }
+  })
+
+  it('shows a manual first-play prompt when browser autoplay is blocked', () => {
+    const audioButton = readProjectFile('components/AudioButton.vue')
+    const floatingAudio = readProjectFile('components/FloatingAudioButton.vue')
+
+    expect(audioButton).toContain("name === 'NotAllowedError'")
+    expect(audioButton).toContain("emit('autoplayBlocked')")
+    expect(floatingAudio).toContain('Tap to hear the first word')
+    expect(floatingAudio).toContain('@played="autoplayBlocked = false"')
+  })
+
   it('gives guests full sentence quizzes for free levels', () => {
     const source = readProjectFile('server/api/sentences/v3/start-v2.get.ts')
 

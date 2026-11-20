@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { computed, nextTick, ref, watch } from "vue";
+import { computed, createSSRApp, h, nextTick, ref, watch } from "vue";
+import { renderToString } from "vue/server-renderer";
 
 const useStateStore = new Map<string, ReturnType<typeof ref>>();
 
@@ -205,6 +206,26 @@ describe("UI and auth-adjacent composables", () => {
     expect(animation.xpDelta.value).toBeNull();
     expect(animation.mergingXp.value).toBe(false);
     expect(animation.readyForNext.value).toBe(false);
+  });
+
+  it("renders the initial quiz time without scheduling a server interval", async () => {
+    const browserWindow = window;
+    vi.stubGlobal("window", undefined);
+    const interval = vi.spyOn(globalThis, "setInterval");
+    try {
+      const html = await renderToString(createSSRApp({
+        setup() {
+          const timer = useQuizTimer();
+          timer.startTimer();
+          return () => h("span", timer.formattedElapsedTime.value);
+        },
+      }));
+      expect(html).toBe("<span>0:00</span>");
+      expect(interval).not.toHaveBeenCalled();
+    } finally {
+      interval.mockRestore();
+      vi.stubGlobal("window", browserWindow);
+    }
   });
 
   it("starts, freezes, formats, and resets quiz timer state", () => {

@@ -3,6 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "check:strokes": "node scripts/check-stroke-coverage.mjs",
     "seed-words": "ts-node scripts/seed-words.ts",
     "db:migrate": "node scripts/database-migrate.mjs",
     "db:schema:dump": "node scripts/database-schema.mjs dump",

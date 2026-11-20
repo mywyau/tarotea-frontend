@@ -178,6 +178,7 @@ watch(() => props.focusMode, focusMode => {
 
       <template v-if="props.focusMode">
         <span class="focus-label">Practice mode</span>
+        <div id="quiz-header-progress" class="quiz-header-progress-slot" />
         <button type="button" class="focus-exit" @click="exitPractice">
           <span>Exit practice</span>
         </button>
@@ -361,6 +362,8 @@ watch(() => props.focusMode, focusMode => {
 .mobile-bottom-link-active::before { content: ''; position: absolute; top: 0.2rem; width: 1.25rem; height: 0.15rem; border-radius: 999px; background: rgb(var(--color-primary)); }
 .mobile-bottom-icon { width: 1.25rem; height: 1.25rem; stroke-width: 2.1; }
 .app-header-focus .app-header-inner { justify-content: space-between; }
+.quiz-header-progress-slot { display: flex; min-width: 0; flex: 1 1 auto; justify-content: center; }
+.app-header-focus:has(.quiz-header-progress-content) .focus-label { display: none; }
 .focus-label { display: none; margin-inline: auto; color: rgb(var(--color-muted)); font-size: 0.75rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .focus-exit { display: inline-flex; min-height: 2.75rem; align-items: center; gap: 0.4rem; border-radius: var(--radius-control); padding: 0.55rem 0.7rem; color: rgb(var(--color-primary-strong)); font-size: 0.85rem; font-weight: 700; }
 .focus-exit:hover { background: rgb(var(--color-taro-pink) / 0.25); }
@@ -370,6 +373,11 @@ watch(() => props.focusMode, focusMode => {
 .nav-slide-enter-active, .nav-slide-leave-active { transition: transform var(--motion-panel) ease; }
 .nav-slide-enter-from, .nav-slide-leave-to { transform: translateX(100%); }
 @media (min-width: 640px) { .account-trigger-label, .focus-label { display: inline; } }
+@media (max-width: 479px) {
+  .app-header-focus:has(.quiz-header-progress-content) .app-header-inner { gap: 0.5rem; padding-inline: 0.75rem; }
+  .app-header-focus:has(.quiz-header-progress-content) .brand-logo > span:last-child { display: none; }
+  .app-header-focus:has(.quiz-header-progress-content) .focus-exit { padding-inline: 0.4rem; font-size: 0.75rem; white-space: nowrap; }
+}
 @media (min-width: 768px) { .header-more-action { display: inline-flex; } .mobile-bottom-nav { display: none; } }
 @media (min-width: 960px) { .desktop-primary-nav { display: flex; } }
 </style>

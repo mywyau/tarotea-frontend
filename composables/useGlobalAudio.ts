@@ -11,7 +11,7 @@ export const useGlobalAudio = () => {
     }
 
     current.value = audio
-    audio.play()
+    return audio.play()
   }
 
   const stop = () => {

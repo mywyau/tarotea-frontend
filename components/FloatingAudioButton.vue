@@ -16,12 +16,17 @@ const audioVoice = computed<AudioVoice>(() => {
 
   return props.src.toLowerCase().includes('female') ? 'female' : 'male'
 })
+
+const autoplayBlocked = ref(false)
 </script>
 
 <template>
-  <div class="floating-audio-control" :class="`is-${audioVoice}`" aria-live="polite">
+  <div class="floating-audio-control" :class="[`is-${audioVoice}`, { 'is-autoplay-blocked': autoplayBlocked }]"
+    aria-live="polite">
+    <span v-if="autoplayBlocked" class="floating-audio-hint">Tap to hear the first word</span>
     <span class="floating-audio-burst" aria-hidden="true"></span>
-    <AudioButton :src="src" :autoplay="autoplay" :playback-rate="playbackRate" size="sm" />
+    <AudioButton :src="src" :autoplay="autoplay" :playback-rate="playbackRate" size="sm"
+      @autoplay-blocked="autoplayBlocked = true" @played="autoplayBlocked = false" />
   </div>
 </template>
 
@@ -57,6 +62,24 @@ const audioVoice = computed<AudioVoice>(() => {
   background: transparent;
   color: rgba(15, 15, 15, 0.9);
   box-shadow: none;
+}
+
+.floating-audio-hint {
+  position: absolute;
+  left: 3.35rem;
+  top: 50%;
+  width: max-content;
+  max-width: min(13rem, calc(100vw - 8.5rem));
+  border: 1px solid rgb(var(--color-primary) / 0.18);
+  border-radius: 999px;
+  padding: 0.45rem 0.7rem;
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-primary-strong));
+  box-shadow: var(--shadow-soft);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.2;
+  transform: translateY(-50%);
 }
 
 .floating-audio-burst {

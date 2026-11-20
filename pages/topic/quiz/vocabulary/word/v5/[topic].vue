@@ -83,7 +83,7 @@ const me = useMeStateV2()
 const isGuestPreview = computed(() => quizData.value?.guestPreview === true)
 
 const quizData = ref<TopicQuizPayload | null>(null)
-const quizLoading = ref(false)
+const quizLoading = ref(true)
 const quizLoadError = ref<string | null>(null)
 
 const initialProgressMap = ref<Record<string, WordProgress>>({})
@@ -290,13 +290,9 @@ async function loadQuiz() {
   }
 }
 
-watch(
-  () => [topicSlug.value, me.isLoggedIn.value],
-  () => {
-    loadQuiz()
-  },
-  { immediate: true }
-)
+onMounted(() => {
+  watch([topicSlug, me.isLoggedIn], loadQuiz, { immediate: true })
+})
 
 const questions = computed(() => quizData.value?.questions ?? [])
 const question = computed(() => questions.value[current.value] ?? null)
@@ -611,22 +607,9 @@ onBeforeUnmount(() => {
 
 
     <section class="text-center space-y-4">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-center gap-3">
-        <!-- <h1 class="text-2xl font-semibold capitalize">
-          {{ pageTitle }}
-        </h1> -->
-
-        <div v-if="showQuiz && (current + 1) <= questions.length" class="flex items-center justify-center gap-3">
-          <div class="w-32 bg-gray-200 rounded-full h-2 md:w-64 md:h-3">
-            <div class="bg-purple-300 h-2 rounded-full transition-all duration-300 md:h-3"
-              :style="{ width: progressPercent + '%' }" />
-          </div>
-
-          <span class="text-xs text-gray-500 whitespace-nowrap">
-            {{ current + 1 }} / {{ questions.length }}
-          </span>
-        </div>
-      </div>
+      <QuizHeaderProgress v-if="showQuiz && (current + 1) <= questions.length"
+        :label="pageTitle" :current="current + 1" :total="questions.length"
+        :answered="answered" @advance="next" />
 
       <div v-if="quizLoading" class="stat-card hero-card result-2 space-y-4">
         <div class="spinner mx-auto" />
@@ -744,7 +727,7 @@ onBeforeUnmount(() => {
           </button>
         </div>
 
-        <div v-else-if="showResults" key="results" class="space-y-6">
+        <div v-else-if="showResults" key="results" class="quiz-completion space-y-6">
           <transition name="card-fade" appear>
             <div class="stat-card hero-card" :class="resultHeroClass">
               <p class="stat-label">
@@ -762,13 +745,13 @@ onBeforeUnmount(() => {
           </transition>
 
           <transition name="card-fade" appear>
-            <QuizCompletionFlipStats :correct="score" :incorrect="incorrectCount" :time="formattedElapsedTime"
+            <QuizCompletionFlipStats :correct="score" :incorrect="incorrectCount" :show-score="false" :time="formattedElapsedTime"
               :xp-earned="animatedXpEarned" :xp-lost="animatedXpLost" />
           </transition>
 
           <div v-if="correctWords.length" class="stat-card result-word-card text-left result-3">
             <h3 class="text-sm font-semibold text-gray-900 mb-3">
-              Correct
+              Correct <span>{{ score }}</span>
             </h3>
 
             <div class="flex flex-wrap gap-2">
@@ -782,7 +765,7 @@ onBeforeUnmount(() => {
 
           <div v-if="missedWords.length" class="stat-card result-word-card text-left result-1">
             <h3 class="text-sm font-semibold text-gray-900 mb-3">
-              Incorrect
+              Incorrect <span>{{ incorrectCount }}</span>
             </h3>
 
             <div class="flex flex-wrap gap-2">
@@ -794,13 +777,8 @@ onBeforeUnmount(() => {
             </div>
           </div>
 
-          <div class="pt-2 space-y-3">
-            <NuxtLink :to="`/topics/quiz`"
-              class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-              style="background-color:#A8CAE0;">
-              Play Again
-            </NuxtLink>
-          </div>
+          <QuizCompletionActions :retry-to="`/topic/quiz/vocabulary/word/v5/start-quiz/${slug}`"
+            back-to="/topics/quiz" />
         </div>
       </transition>
     </section>

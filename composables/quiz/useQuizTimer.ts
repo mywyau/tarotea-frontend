@@ -6,6 +6,7 @@ export function useQuizTimer() {
   const frozenElapsedMs = ref<number | null>(null)
 
   let timerInterval: ReturnType<typeof setInterval> | null = null
+  let disposed = false
 
   function stopTimer() {
     if (timerInterval) {
@@ -15,6 +16,7 @@ export function useQuizTimer() {
   }
 
   function startTimer() {
+    if (typeof window === 'undefined' || disposed) return
     stopTimer()
     quizStartedAt.value = Date.now()
     elapsedMs.value = 0
@@ -54,6 +56,7 @@ export function useQuizTimer() {
   const formattedElapsedTime = computed(() => formatDuration(displayedElapsedMs.value))
 
   onBeforeUnmount(() => {
+    disposed = true
     stopTimer()
   })
 

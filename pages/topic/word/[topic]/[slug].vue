@@ -442,7 +442,7 @@ watchEffect(() => {
                         <!-- buttons aligned right -->
                         <div v-if="showPracticeButtons || showAudioButtons" class="flex justify-end">
                             <div class="example-actions-row">
-                                <NuxtLink v-if="showPracticeButtons && PRONUNCIATION_PRACTICE_ENABLED"
+                                <NuxtLink v-if="showPracticeButtons"
                                     :to="`/writing/${topic}/sentences/${word.id}/${currentExampleIndex}`"
                                     class="action-chip action-chip-sm action-chip-write example-action-btn"
                                     aria-label="Practice writing this sentence">
@@ -450,7 +450,7 @@ watchEffect(() => {
                                     <span class="mobile-action-label">Write</span>
                                 </NuxtLink>
 
-                                <NuxtLink v-if="showPracticeButtons"
+                                <NuxtLink v-if="showPracticeButtons && PRONUNCIATION_PRACTICE_ENABLED"
                                     :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/v2/${currentExampleIndex}`"
                                     class="action-chip action-chip-sm action-chip-speak example-action-btn"
                                     aria-label="Practice pronunciation for this sentence">

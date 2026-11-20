@@ -5,6 +5,11 @@ import { isFocusedLearningPath } from '~/utils/navigation/focusMode'
 const route = useRoute()
 
 const focusMode = computed(() => isFocusedLearningPath(route.path))
+const quizFocusMode = computed(() => focusMode.value && (
+  route.path.startsWith('/quiz/')
+  || route.path.startsWith('/topic/quiz/')
+  || route.path.startsWith('/daily/')
+))
 
 const runtimeConfig = useRuntimeConfig()
 
@@ -29,7 +34,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="app-shell" :class="{ 'app-shell-focus': focusMode }">
+  <div class="app-shell" :class="{ 'app-shell-focus': focusMode, 'app-shell-quiz': quizFocusMode }">
     <BlankNavBar :focus-mode="focusMode" />
 
     <main class="app-main">

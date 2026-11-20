@@ -11,6 +11,11 @@ const props = withDefaults(defineProps<{
   playbackRate: 1,
 })
 
+const emit = defineEmits<{
+  autoplayBlocked: []
+  played: []
+}>()
+
 const { volume } = useAudioVolume()
 const { play: playGlobal } = useGlobalAudio()
 
@@ -22,7 +27,7 @@ const ensureAudio = () => {
   }
 }
 
-const play = () => {
+const play = async () => {
   ensureAudio()
 
   if (!audio.value) return
@@ -35,7 +40,18 @@ const play = () => {
     audio.value.preservesPitch = true
   }
 
-  playGlobal(audio.value)
+  try {
+    await playGlobal(audio.value)
+    emit('played')
+  } catch (error) {
+    if (error instanceof DOMException && error.name === 'NotAllowedError'
+      || (error as { name?: string } | null)?.name === 'NotAllowedError') {
+      emit('autoplayBlocked')
+      return
+    }
+
+    console.warn('Audio playback failed', error)
+  }
 }
 
 const sizeClass = computed(() => {
@@ -64,7 +80,7 @@ const iconClass = computed(() => {
 
 onMounted(() => {
   if (props.autoplay) {
-    play()
+    void play()
   }
 })
 

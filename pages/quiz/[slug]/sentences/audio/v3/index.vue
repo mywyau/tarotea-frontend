@@ -573,16 +573,8 @@ onBeforeUnmount(() => {
 
         <div v-if="showQuiz && (current + 1) <= questions.length"
           class="flex flex-wrap items-center justify-center gap-3 md:gap-4">
-          <div class="flex items-center justify-center gap-3">
-            <div class="w-32 bg-gray-200 rounded-full h-2">
-              <div class="bg-purple-300 h-2 rounded-full transition-all duration-300"
-                :style="{ width: progressPercent + '%' }" />
-            </div>
-
-            <span class="text-xs text-gray-500 whitespace-nowrap">
-              {{ current + 1 }} / {{ questions.length }}
-            </span>
-          </div>
+          <QuizHeaderProgress :label="quizTitle" :current="current + 1" :total="questions.length"
+            :answered="answered" @advance="next" />
 
           <div class="text-center space-y-2">
             <div class="space-y-0.5 text-center transition-all duration-300"
@@ -712,7 +704,7 @@ onBeforeUnmount(() => {
             </p>
           </div>
 
-          <div v-else-if="showResults" key="results" class="space-y-6">
+          <div v-else-if="showResults" key="results" class="quiz-completion space-y-6">
             <transition name="card-fade" appear>
               <div class="stat-card hero-card" :class="resultHeroClass">
                 <p class="stat-label">
@@ -739,13 +731,8 @@ onBeforeUnmount(() => {
               />
             </transition>
 
-            <div class="pt-2 space-y-3">
-              <NuxtLink :to="`/quiz`"
-                class="block w-full rounded-xl text-black py-3 text-center font-medium hover:brightness-110 transition"
-                style="background-color:#A8CAE0;">
-                Play Again
-              </NuxtLink>
-            </div>
+            <QuizCompletionActions :retry-to="`/quiz/${slug}/sentences/audio/v3/start-quiz`"
+              back-to="/quiz" />
           </div>
         </transition>
       </template>

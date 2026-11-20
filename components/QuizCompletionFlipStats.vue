@@ -9,268 +9,104 @@ const props = withDefaults(defineProps<{
   incorrectLabel?: string
   xpEarned?: number | string
   xpLost?: number | string
+  showScore?: boolean
   showXp?: boolean
 }>(), {
   xpEarned: 0,
   xpLost: 0,
+  showScore: true,
   showXp: true,
   correctLabel: 'Correct',
   incorrectLabel: 'Incorrect',
 })
 
-const showOutcomeBack = ref(false)
-const showXpBack = ref(false)
+const stats = computed(() => [
+  ...(props.showScore ? [
+    { label: props.correctLabel, value: props.correct, icon: CheckCircle2, tone: 'success' },
+    { label: props.incorrectLabel, value: props.incorrect, icon: CircleX, tone: 'error' },
+  ] : []),
+  ...(props.showXp ? [
+    { label: 'XP earned', value: `+${Number(props.xpEarned) || 0} XP`, icon: TrendingUp, tone: 'success' },
+    { label: 'XP lost', value: `-${Number(props.xpLost) || 0} XP`, icon: TrendingDown, tone: 'error' },
+  ] : []),
+  { label: 'Time', value: props.time, icon: Clock3, tone: 'neutral' },
+])
 
-const formattedXpEarned = computed(() => {
-  const value = Number(props.xpEarned)
-  const prefix = Number.isFinite(value) && value > 0 ? '+' : ''
-
-  return `${prefix}${props.xpEarned} XP`
-})
-
-const formattedXpLost = computed(() => {
-  const value = Number(props.xpLost)
-  const prefix = Number.isFinite(value) && value > 0 ? '-' : ''
-
-  return `${prefix}${props.xpLost} XP`
+onMounted(() => {
+  requestAnimationFrame(() => {
+    document.querySelector('.quiz-completion')?.scrollIntoView({ block: 'start' })
+  })
 })
 </script>
 
 <template>
-  <div class="completion-flip-grid" :class="{ 'completion-flip-grid-two': !showXp }" aria-label="Quiz completion stats">
-    <button
-      type="button"
-      class="completion-flip-card hover:brightness-110"
-      :class="{ 'is-flipped': showOutcomeBack }"
-      aria-label="Flip between correct and incorrect answers"
-      @click="showOutcomeBack = !showOutcomeBack"
-    >
-      <span class="completion-flip-scene">
-        <span class="completion-flip-face result-0">
-          <span class="stat-icon stat-icon-correct" aria-hidden="true">
-            <CheckCircle2 class="h-5 w-5" />
-          </span>
-          <span class="stat-label">{{ correctLabel }}</span>
-          <span class="stat-value">{{ correct }}</span>
-        </span>
-
-        <span class="completion-flip-face completion-flip-face-back result-2">
-          <span class="stat-icon stat-icon-incorrect" aria-hidden="true">
-            <CircleX class="h-5 w-5" />
-          </span>
-          <span class="stat-label">{{ incorrectLabel }}</span>
-          <span class="stat-value">{{ incorrect }}</span>
-        </span>
-      </span>
-    </button>
-
-    <button
-      v-if="showXp"
-      type="button"
-      class="completion-flip-card hover:brightness-110"
-      :class="{ 'is-flipped': showXpBack }"
-      aria-label="Flip between XP earned and XP lost"
-      @click="showXpBack = !showXpBack"
-    >
-      <span class="completion-flip-scene">
-        <span class="completion-flip-face result-3">
-          <span class="stat-icon stat-icon-xp-earned" aria-hidden="true">
-            <TrendingUp class="h-5 w-5" />
-          </span>
-          <span class="stat-label">XP Earned</span>
-          <span class="stat-value">{{ formattedXpEarned }}</span>
-        </span>
-
-        <span class="completion-flip-face completion-flip-face-back result-1">
-          <span class="stat-icon stat-icon-xp-lost" aria-hidden="true">
-            <TrendingDown class="h-5 w-5" />
-          </span>
-          <span class="stat-label">XP Lost</span>
-          <span class="stat-value">{{ formattedXpLost }}</span>
-        </span>
-      </span>
-    </button>
-
-    <div class="stat-card stat-card-static result-4" aria-label="Time taken">
-      <span class="stat-icon stat-icon-time" aria-hidden="true">
-        <Clock3 class="h-5 w-5" />
-      </span>
-      <p class="stat-label">Time Taken</p>
-      <p class="stat-value">{{ time }}</p>
+  <dl class="completion-stat-grid" :class="{
+    'completion-stat-grid-with-score': showScore,
+    'completion-stat-grid-compact': !showXp,
+  }"
+    aria-label="Quiz completion stats">
+    <div v-for="stat in stats" :key="stat.label" class="completion-stat" :class="`is-${stat.tone}`">
+      <dt>
+        <component :is="stat.icon" aria-hidden="true" />
+        <span>{{ stat.label }}</span>
+      </dt>
+      <dd>{{ stat.value }}</dd>
     </div>
-  </div>
+  </dl>
 </template>
 
 <style scoped>
-.completion-flip-grid {
+.completion-stat-grid {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
 }
 
-.completion-flip-card {
-  min-height: 9.25rem;
-  border: 0;
-  border-radius: 22px;
-  background: transparent;
-  color: inherit;
-  cursor: pointer;
-  perspective: 1200px;
-  padding: 0;
-  text-align: center;
+.completion-stat {
+  min-width: 0;
+  border: 1px solid rgb(var(--color-ink) / 0.08);
+  border-radius: var(--radius-card);
+  padding: 0.9rem;
+  background: rgb(var(--color-surface));
+  text-align: left;
 }
 
-.completion-flip-card:focus-visible {
-  outline: 3px solid rgba(111, 92, 202, 0.55);
-  outline-offset: 4px;
+.completion-stat:last-child:nth-child(odd) {
+  grid-column: 1 / -1;
 }
 
-.completion-flip-scene {
-  position: relative;
-  display: block;
-  min-height: 9.25rem;
-  transform-style: preserve-3d;
-  transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.completion-flip-card.is-flipped .completion-flip-scene {
-  transform: rotateY(180deg);
-}
-
-.completion-flip-face,
-.stat-card {
-  border-radius: 22px;
-  padding: 1.5rem;
-  text-align: center;
-  backdrop-filter: blur(6px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
-}
-
-.completion-flip-face {
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-.stat-card-static {
-  cursor: default;
-}
-
-.completion-flip-face {
-  position: absolute;
-  inset: 0;
+.completion-stat dt {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  transform-style: preserve-3d;
-}
-
-.completion-flip-face > *,
-.stat-card > * {
-  transform: translateZ(1px);
-}
-
-.completion-flip-face-back {
-  transform: rotateY(180deg);
-}
-
-.completion-flip-card:hover .completion-flip-face {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.08);
-}
-
-.completion-flip-card:hover .completion-flip-face-back {
-  transform: rotateY(180deg) translateY(-3px);
-}
-
-.stat-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 0.75rem;
-}
-
-.stat-icon-correct {
-  color: #15803d;
-}
-
-.stat-icon-incorrect {
-  color: #be123c;
-}
-
-.stat-icon-time {
-  color: #7c3aed;
-}
-
-.stat-icon-xp-earned {
-  color: #15803d;
-}
-
-.stat-icon-xp-lost {
-  color: #be123c;
-}
-
-.stat-label {
-  display: block;
+  gap: 0.4rem;
+  color: rgb(var(--color-muted));
   font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: rgba(17, 24, 39, 0.65);
-}
-
-.stat-value {
-  display: block;
-  font-size: 1.2rem;
   font-weight: 700;
-  margin-top: 0.75rem;
-  color: #111827;
-}
-
-.flip-hint {
-  margin-top: 0.75rem;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
-  color: rgba(17, 24, 39, 0.48);
 }
 
-.result-0 {
-  background: rgba(168, 224, 182, 0.45);
+.completion-stat svg {
+  width: 1rem;
+  height: 1rem;
 }
 
-.result-1 {
-  background: rgba(246, 225, 225, 0.75);
+.completion-stat dd {
+  margin: 0.45rem 0 0;
+  color: rgb(var(--color-ink));
+  font-size: clamp(1.15rem, 4vw, 1.45rem);
+  font-weight: 700;
+  line-height: 1;
 }
 
-.result-2 {
-  background: rgba(246, 225, 225, 0.75);
-}
-
-.result-3 {
-  background: rgba(168, 224, 182, 0.45);
-}
-
-.result-4 {
-  background: rgba(196, 181, 253, 0.4);
-}
+.completion-stat.is-success svg { color: rgb(var(--color-success)); }
+.completion-stat.is-error svg { color: rgb(var(--color-error)); }
+.completion-stat.is-neutral svg { color: rgb(var(--color-primary)); }
 
 @media (min-width: 640px) {
-  .completion-flip-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .completion-flip-grid-two {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .completion-flip-scene,
-  .completion-flip-face,
-  .stat-card {
-    transition-duration: 1ms;
-  }
+  .completion-stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .completion-stat-grid-with-score { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .completion-stat-grid-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .completion-stat:last-child:nth-child(odd) { grid-column: auto; }
 }
 </style>
