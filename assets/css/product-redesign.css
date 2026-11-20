@@ -94,6 +94,14 @@
   background: rgb(var(--color-taro-pink));
 }
 
+.catalog-card::after {
+  content: none;
+}
+
+.catalog-card:hover {
+  border-color: rgb(var(--color-ink) / 0.22) !important;
+}
+
 :where(.level-card-drop-in, .topic-card-fly-in, .word-tile-fall-shell) {
   animation: none !important;
   opacity: 1 !important;

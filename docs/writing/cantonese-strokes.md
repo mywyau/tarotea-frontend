@@ -2,9 +2,11 @@
 
 Both writing pages use Hanzi Writer. The supplemental artwork ships as versioned static files on the frontend deployment. The standard characters load from the pinned upstream data package. The shared loader and the coverage command use the same catalogue in `config/writing-strokes.json`.
 
-## Review before release
+## Review of version 1
 
-The sheet below shows the 36 brush forms rendered by the installed library. A Hong Kong handwriting reviewer should compare the shapes with the labels and play each character to check stroke order and direction. Start with 咗、佢、哋、啲、喺. Check the distinction between 搵 and 揾, the claw at the top of 爲, and the layout of 𨋢 and 𠱸. File presence and successful animation establish technical coverage. Hong Kong handwriting sign-off is pending.
+The project owner approved the appearance of the 36 brush forms on 20 November 2026. The sheet below shows them rendered by Hanzi Writer.
+
+When revising the artwork, compare 搵 with 揾, check the claw at the top of 爲, and play 𨋢 and 𠱸 to inspect stroke order and direction.
 
 ![36 supplemental characters with their labels and stroke counts](cantonese-brush-forms.png)
 

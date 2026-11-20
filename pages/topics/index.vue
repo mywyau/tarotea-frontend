@@ -7,7 +7,6 @@ useSeoMeta({
 })
 
 import type { Topic } from '@/types/topic'
-import { brandColours } from '@/utils/branding/helpers'
 import { sortedTopics } from '@/utils/topics/topics'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/vue'
 import { getTopicIcon } from '@/utils/topics/icons'
@@ -45,19 +44,6 @@ function topicLink(topic: Topic) {
   }
 }
 
-
-function getTopicColor(topic: Topic, index: number) {
-  if (topic.comingSoon) return 'rgba(246, 225, 225, 0.35)'
-
-  const seed = `${topic.id}-${index}`
-  let hash = 0
-
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0
-  }
-
-  return brandColours[hash % brandColours.length]
-}
 
 const ITEMS_PER_PAGE = 12
 const currentPage = ref(1)
@@ -180,13 +166,13 @@ await resolve()
 
     <ul class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3 xl:grid-cols-3">
 
-      <li v-for="(topic, index) in paginatedTopics" :key="`${currentPage}-${topic.id}`"
-        class="topic-card hover:brightness-110 rounded-lg p-4 space-y-3 transition" :class="[
+      <li v-for="topic in paginatedTopics" :key="`${currentPage}-${topic.id}`"
+        class="topic-card catalog-card rounded-lg p-4 space-y-3 transition" :class="[
           isTopicAnimationReady ? 'topic-card-fly-in' : '',
           topic.comingSoon
             ? 'is-disabled'
             : 'is-active'
-        ]" :style="{ backgroundColor: getTopicColor(topic, index), ...topicAnimationStyles[topic.id] }">
+        ]" :style="topicAnimationStyles[topic.id]">
 
         <NuxtLink :to="topicLink(topic)" class="block space-y-3">
           <div class="min-w-0 topic-card-copy">
@@ -398,7 +384,6 @@ await resolve()
 .topic-card.is-disabled {
   opacity: 0.65;
   cursor: not-allowed;
-  background: rgba(246, 225, 225, 0.35);
 }
 
 /* Pills (badges) */

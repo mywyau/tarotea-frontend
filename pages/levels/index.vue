@@ -5,7 +5,6 @@ definePageMeta({
   ssr: true,
 })
 
-import { brandColours } from '@/utils/branding/helpers'
 import { levelSelectMetaData } from '@/utils/levels/helpers'
 import { getLevelTopicIcon } from '@/utils/levels/topicIcons'
 import { onMounted, ref } from 'vue'
@@ -15,10 +14,6 @@ const {
   authReady,
   resolve,
 } = useMeStateV2()
-
-function getLevelColor(index: number) {
-  return brandColours[index % brandColours.length]
-}
 
 const levelAnimationStyles = ref<Record<string, Record<string, string>>>({})
 const isLevelAnimationReady = ref(false)
@@ -70,16 +65,11 @@ onMounted(async () => {
 
     <ul class="grid grid-cols-2 gap-3 sm:gap-4">
 
-      <li v-for="(level, index) in levelSelectMetaData" :key="level.id"
-        class="level-card relative rounded-xl p-4 sm:p-6 transition shadow-sm hover:shadow-md hover:brightness-110" :class="[
+      <li v-for="level in levelSelectMetaData" :key="level.id"
+        class="level-card catalog-card relative rounded-xl p-4 sm:p-6 transition shadow-sm hover:shadow-md" :class="[
           isLevelAnimationReady ? 'level-card-drop-in' : '',
           level.comingSoon ? 'is-disabled' : 'is-active'
-        ]" :style="{
-          backgroundColor: level.comingSoon
-            ? 'rgba(0,0,0,0.03)'
-            : getLevelColor(index),
-          ...levelAnimationStyles[level.id]
-        }">
+        ]" :style="levelAnimationStyles[level.id]">
 
         <!-- Accessible level -->
         <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="block space-y-3">
@@ -246,8 +236,6 @@ onMounted(async () => {
 .level-card.is-disabled {
   opacity: 0.70;
   cursor: not-allowed;
-  background: rgba(168, 202, 224, 0.18);
-  /* slight blue wash */
   border-color: rgba(0, 0, 0, 0.08);
 }
 
