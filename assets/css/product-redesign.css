@@ -78,26 +78,6 @@
   opacity: 0 !important;
 }
 
-:where(.level-card, .topic-card, .dojo-level-card)::after {
-  content: '';
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 0.3rem;
-  background: rgb(var(--color-taro-lilac));
-}
-
-:where(.level-card, .topic-card, .dojo-level-card):nth-child(3n + 2)::after {
-  background: rgb(var(--color-taro-blue));
-}
-
-:where(.level-card, .topic-card, .dojo-level-card):nth-child(3n)::after {
-  background: rgb(var(--color-taro-pink));
-}
-
-.catalog-card::after {
-  content: none;
-}
-
 .catalog-card:hover {
   border-color: rgb(var(--color-ink) / 0.22) !important;
 }
