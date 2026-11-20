@@ -10,7 +10,7 @@ import { BookOpen, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Headp
 import { computed, markRaw, onMounted, ref, watch } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
 import type { TopicQuiz } from '~/types/topic'
-import { getTopicIcon } from '~/utils/topics/icons'
+import { getTopicAppearance } from '~/utils/topics/icons'
 import { sortedTopics } from '~/utils/topics/topics'
 
 const {
@@ -156,7 +156,8 @@ onMounted(async () => {
 
         <!-- Intro -->
         <header class="text-center space-y-3 max-w-4xl mx-auto">
-            <nav class="quiz-scope-nav" aria-label="Quiz type">
+            <h1 class="sr-only">Cantonese quizzes by topic</h1>
+      <nav class="quiz-scope-nav" aria-label="Quiz type">
                 <NuxtLink to="/quiz">Level quizzes</NuxtLink>
                 <NuxtLink to="/topics/quiz" aria-current="page">Topic quizzes</NuxtLink>
             </nav>
@@ -165,11 +166,7 @@ onMounted(async () => {
         <!-- Grid -->
         <ul class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
 
-            <li v-for="topic in paginatedTopics" :key="topic.id" class="topic-card" :class="[
-                topic.comingSoon || (topic.quizRequiresPaid && !canEnterTopic(topic))
-                    ? 'topic-locked'
-                    : ''
-            ]">
+            <li v-for="topic in paginatedTopics" :key="topic.id" class="topic-card" :style="{ '--panel-background': getTopicAppearance(topic.id).background }">
 
                 <!-- Header -->
                 <div class="space-y-2 topic-card-copy">
@@ -179,7 +176,7 @@ onMounted(async () => {
                         </h2>
 
                         <span class="quiz-topic-icon-wrap" role="img" :aria-label="`${topic.title} topic`">
-                            <component :is="getTopicIcon(topic.id)" class="quiz-topic-icon" aria-hidden="true" />
+                            <component :is="getTopicAppearance(topic.id).icon" class="quiz-topic-icon" aria-hidden="true" />
                         </span>
                     </div>
 
@@ -187,7 +184,7 @@ onMounted(async () => {
                         {{ topic.description }}
                     </p>
 
-                    <p v-if="topic.comingSoon" class="text-xs text-gray-400 font-medium">
+                    <p v-if="topic.comingSoon" class="text-xs text-gray-700 font-medium">
                         Coming soon
                     </p>
                 </div>
@@ -337,9 +334,6 @@ onMounted(async () => {
     box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
 }
 
-.topic-locked {
-    opacity: 0.6;
-}
 
 .topic-card-header {
     display: flex;

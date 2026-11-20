@@ -143,7 +143,7 @@ onMounted(() => {
             </div>
           </NuxtLink>
 
-          <NuxtLink to="/dojo"
+          <NuxtLink to="/typing-practice"
             class="rounded-xl p-6 flex items-end shadow-sm hover:shadow-md transition hover:brightness-110"
             style="background-color:rgba(244,205,39,0.35);">
             <div>

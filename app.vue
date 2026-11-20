@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isUtilityPage, searchUrl } from '~/utils/seo'
 import { Analytics } from '@vercel/analytics/vue'
 import { isFocusedLearningPath } from '~/utils/navigation/focusMode'
 
@@ -11,25 +12,19 @@ const quizFocusMode = computed(() => focusMode.value && (
   || route.path.startsWith('/daily/')
 ))
 
-const runtimeConfig = useRuntimeConfig()
-
-const baseUrl = (runtimeConfig.public.siteUrl || 'http://localhost:3000').replace(/\/$/, '')
-
+const canonical = computed(() => searchUrl(route.path))
+const preview = useRuntimeConfig().public.isPreviewDeployment
 useHead({
-  link: [
-    {
-      rel: 'canonical',
-      href: `${baseUrl}/`,
-    },
-  ],
+  title: () => typeof route.meta.title === 'string' ? route.meta.title : undefined,
+  titleTemplate: title => title ? (/TaroTea$/i.test(title) ? title : `${title} · TaroTea`) : 'TaroTea · Learn Cantonese',
+  link: [{ rel: 'canonical', href: canonical }],
 })
-
 useSeoMeta({
-  ogUrl: `${baseUrl}/`,
-  ogTitle: 'TaroTea · Learn Cantonese',
-  ogDescription: 'Learn natural Cantonese with exercises, vocabulary, audio and quizzes.',
-  twitterTitle: 'TaroTea · Learn Cantonese',
-  twitterDescription: 'Learn natural Cantonese with exercises, vocabulary, audio and quizzes.',
+  ogUrl: canonical,
+  robots: () => preview || isUtilityPage(route.path) ? 'noindex, follow' : undefined,
+  ogImage: searchUrl('/android-chrome-512x512.png'),
+  ogImageAlt: 'TaroTea',
+  twitterCard: 'summary',
 })
 </script>
 

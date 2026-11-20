@@ -3,7 +3,7 @@ const learnLinks = [
   { to: '/levels', label: 'Levels' },
   { to: '/topics', label: 'Topics' },
   { to: '/quiz', label: 'Quizzes' },
-  { to: '/dojo', label: 'Practice' },
+  { to: '/typing-practice', label: 'Typing practice' },
 ]
 
 const supportLinks = [

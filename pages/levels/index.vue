@@ -1,11 +1,16 @@
 <script setup lang="ts">
+useLearningPageSeo(
+  'Cantonese vocabulary by level',
+  'Explore ten Cantonese vocabulary levels, from everyday greetings to idioms. Study words with Jyutping, audio and example sentences.',
+)
+
 
 definePageMeta({
   // middleware: ['coming-soon'],
   ssr: true,
 })
 
-import { levelSelectMetaData } from '@/utils/levels/helpers'
+import { getLevelPanelStyle, levelSelectMetaData } from '@/utils/levels/helpers'
 import { getLevelTopicIcon } from '@/utils/levels/topicIcons'
 import { onMounted, ref } from 'vue'
 import { useMeStateV2 } from '~/composables/useMeStateV2'
@@ -17,11 +22,6 @@ const {
 
 const levelAnimationStyles = ref<Record<string, Record<string, string>>>({})
 const isLevelAnimationReady = ref(false)
-
-const levelPanelColours = [
-  '#f7edf6', '#efdaeb', '#e6c7e2', '#dab2d6', '#cb9dc7',
-  '#ba85b6', '#965e94', '#865386', '#704372', '#5b355f',
-]
 
 function generateLevelAnimationStyles() {
   const nextStyles: Record<string, Record<string, string>> = {}
@@ -59,7 +59,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main v-if="authReady" class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-10">
+  <main class="levels-page max-w-3xl mx-auto py-12 px-4 space-y-10">
 
     <header class="rounded-lg header-card">
       <h1 class="level-heading">Levels</h1>
@@ -74,10 +74,7 @@ onMounted(async () => {
         class="level-card catalog-card relative rounded-xl p-4 sm:p-6 transition shadow-sm hover:shadow-md" :class="[
           isLevelAnimationReady ? 'level-card-drop-in' : '',
           level.comingSoon ? 'is-disabled' : 'is-active'
-        ]" :style="[levelAnimationStyles[level.id], {
-          '--level-surface': levelPanelColours[level.number - 1],
-          '--level-text': level.number >= 7 ? 'white' : 'rgb(var(--color-ink))',
-        }]">
+        ]" :style="[levelAnimationStyles[level.id], getLevelPanelStyle(level.number)]">
 
         <!-- Accessible level -->
         <NuxtLink v-if="true" :to="`/level/${level.id}`" class="block space-y-3">
@@ -148,9 +145,6 @@ onMounted(async () => {
     </ul>
   </main>
 
-  <div v-else class="py-20 text-center text-gray-500">
-    Loading levels...
-  </div>
 </template>
 
 <style scoped>
@@ -233,11 +227,6 @@ onMounted(async () => {
 }
 
 /* Active hover */
-.level-card.is-active {
-  background-color: var(--level-surface, rgb(var(--color-surface))) !important;
-  color: var(--level-text);
-}
-
 .level-card.is-active:hover {
   transform: translateY(-1px);
   border-color: rgba(234, 184, 228, 0.65);

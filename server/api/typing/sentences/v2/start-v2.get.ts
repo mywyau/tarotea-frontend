@@ -122,11 +122,11 @@ function resolveMode(scope: Scope, variant: Variant): DojoMode {
 
 function resolveTitle(scope: Scope, slug: string) {
   if (scope === "level") {
-    return `Sentence Dojo - ${levelTitles[slug] ?? slug}`;
+    return `Sentence typing practice - ${levelTitles[slug] ?? slug}`;
   }
 
   const topicTitle = topics.find((topic) => topic.id === slug)?.title ?? slug;
-  return `Sentence Dojo - ${topicTitle}`;
+  return `Sentence typing practice - ${topicTitle}`;
 }
 
 function pickWeightedSentences(

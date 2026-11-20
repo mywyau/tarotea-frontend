@@ -74,9 +74,9 @@ function resolveTitle(variant: DojoVariant, slug: string) {
 
   switch (variant) {
     case "jyutping":
-      return `Jyutping Dojo - ${levelTitle}`;
+      return `Jyutping typing practice - ${levelTitle}`;
     case "chinese":
-      return `Chinese Dojo - ${levelTitle}`;
+      return `Chinese typing practice - ${levelTitle}`;
   }
 }
 

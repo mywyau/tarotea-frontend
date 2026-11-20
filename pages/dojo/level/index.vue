@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useLearningPageSeo(
+  'Cantonese typing practice by level',
+  'Choose a Cantonese level to practise typing Jyutping, Chinese words or complete sentences.',
+)
+
 
 definePageMeta({
   ssr: false,
@@ -7,7 +12,7 @@ definePageMeta({
 
 import { ChevronLeft, ChevronRight, Keyboard, Languages, MessageSquareText } from '@lucide/vue'
 import { markRaw } from 'vue'
-import { jyutPingQuizSelectMetaData, type LevelSelectMeta } from '~/utils/levels/helpers'
+import { getLevelPanelStyle, jyutPingQuizSelectMetaData, type LevelSelectMeta } from '~/utils/levels/helpers'
 import { getLevelTopicIcon } from '~/utils/levels/topicIcons'
 
 const canEnterLevel = (level: LevelSelectMeta) => !level.comingSoon
@@ -18,21 +23,21 @@ const levelQuizModes = [
     label: 'Jyutping only',
     icon: markRaw(Keyboard),
     buttonClass: 'level-btn-purple',
-    to: (levelId: string) => `/dojo/level/jyutping/training/${levelId}/start`,
+    to: (levelId: string) => `/typing-practice/level/jyutping/training/${levelId}/start`,
   },
   {
     id: 'chinese',
     label: 'Chinese only',
     icon: markRaw(Languages),
     buttonClass: 'level-btn-blue',
-    to: (levelId: string) => `/dojo/level/chinese/training/${levelId}/start`,
+    to: (levelId: string) => `/typing-practice/level/chinese/training/${levelId}/start`,
   },
   {
     id: 'sentences',
     label: 'Sentences Chinese Only',
     icon: markRaw(MessageSquareText),
     buttonClass: 'level-btn-blush',
-    to: (levelId: string) => `/dojo/level/sentences/chinese/${levelId}/start`,
+    to: (levelId: string) => `/typing-practice/level/sentences/chinese/${levelId}/start`,
   },
 ] as const
 
@@ -59,14 +64,14 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   <main class="levels-page max-w-4xl mx-auto py-10 px-4 space-y-8">
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="text-xl font-semibold dojo-page-heading">Level practice</h1>
+      <h1 class="text-xl font-semibold dojo-page-heading">Typing practice by level</h1>
       <p class="dojo-page-subheading">Strengthen your phonetic and typing skills with focused exercises.</p>
     </header>
 
     <!-- Grid -->
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-      <li v-for="quizLevel in jyutPingQuizSelectMetaData" :key="quizLevel.id" class="dojo-level-card" :class="[
+      <li v-for="quizLevel in jyutPingQuizSelectMetaData" :key="quizLevel.id" :style="getLevelPanelStyle(quizLevel.number)" class="dojo-level-card" :class="[
         (!canEnterLevel(quizLevel) || quizLevel.comingSoon)
           ? 'level-locked'
           : ''
@@ -75,7 +80,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
         <!-- Title -->
         <div class="space-y-2 level-card-copy">
           <div class="level-card-header">
-            <h2 class="text-lg font-semibold text-gray-900 ">
+            <h2 class="text-lg font-semibold ">
               {{ quizLevel.title }}
             </h2>
 
@@ -85,11 +90,11 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
             </div>
           </div>
 
-          <p class="text-sm text-gray-600 leading-relaxed">
+          <p class="text-sm leading-relaxed">
             {{ quizLevel.description }}
           </p>
 
-          <p v-if="quizLevel.comingSoon" class="text-xs text-gray-400 font-medium">
+          <p v-if="quizLevel.comingSoon" class="text-xs font-medium">
             Coming soon
           </p>
         </div>
@@ -123,7 +128,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
         </div>
 
         <!-- Locked -->
-        <p v-else-if="!quizLevel.comingSoon" class="text-xs text-center text-gray-500 pt-4">
+        <p v-else-if="!quizLevel.comingSoon" class="text-xs text-center pt-4">
           Upgrade to unlock
         </p>
 
@@ -218,7 +223,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #374151;
+  color: inherit;
 }
 
 .topic-icon {

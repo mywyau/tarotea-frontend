@@ -174,7 +174,7 @@ onBeforeUnmount(() => {
       </div>
       <div class="home-practice-links">
         <NuxtLink to="/quiz"><CircleHelp aria-hidden="true" />Quiz practice</NuxtLink>
-        <NuxtLink to="/dojo"><PenLine aria-hidden="true" />Typing practice</NuxtLink>
+        <NuxtLink to="/typing-practice"><PenLine aria-hidden="true" />Typing practice</NuxtLink>
       </div>
     </AppSection>
 

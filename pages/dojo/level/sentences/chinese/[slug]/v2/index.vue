@@ -125,7 +125,7 @@ const {
 )
 
 const activeSessionKey = ref('')
-const title = ref('Sentence practice')
+const title = ref('Sentence typing practice')
 
 const quizStartedAt = ref<number | null>(null)
 const elapsedMs = ref(0)
@@ -384,7 +384,7 @@ function applyStartPayload(payload: SentenceDojoStartResponse) {
   stopTimer()
 
   activeSessionKey.value = payload.sessionKey
-  title.value = (payload.session.title ?? `Sentence practice - ${levelTitles[slug.value]}`).replace(/dojo/gi, 'practice')
+  title.value = (payload.session.title ?? `Sentence typing practice - ${levelTitles[slug.value]}`).replace(/\bdojo\b/gi, 'typing practice')
 
   sentences.value = payload.session.sentences ?? []
   wordProgressMap.value = payload.progress ?? {}
@@ -589,7 +589,7 @@ watch(
   () => {
     stopTimer()
     activeSessionKey.value = ''
-    title.value = 'Sentence practice'
+    title.value = 'Sentence typing practice'
     sentences.value = []
     wordProgressMap.value = {}
     idx.value = 0
@@ -619,7 +619,7 @@ onBeforeUnmount(() => {
   <main class="dojo-training-page mx-auto max-w-4xl px-6 py-12">
 
     <header class="dojo-training-header space-y-4">
-      <TypewriterTitleBlock :heading-text="title || `Sentence practice - ${levelTitles[slug]}`"
+      <TypewriterTitleBlock :heading-text="title || `Sentence typing practice - ${levelTitles[slug]}`"
         subheading-text="Read the Chinese and type the full sentence in Chinese."
         heading-class="text-2xl font-semibold tracking-tight text-gray-900" subheading-class="text-sm text-gray-600" />
     </header>
@@ -824,7 +824,7 @@ onBeforeUnmount(() => {
                 Play again
               </button>
 
-              <NuxtLink to="/dojo/level/"
+              <NuxtLink to="/typing-practice/level/"
                 class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
                 style="background-color:rgba(244,205,39,0.35);">
                 Back to level practice

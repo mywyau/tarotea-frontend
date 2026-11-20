@@ -60,11 +60,29 @@
   overflow: hidden;
   border: 1px solid rgb(var(--color-ink) / 0.1) !important;
   border-radius: var(--radius-card) !important;
-  background: rgb(var(--color-surface)) !important;
+  background: var(--panel-background, rgb(var(--color-surface))) !important;
   box-shadow: 0 1px 2px rgb(var(--color-ink) / 0.04) !important;
   filter: none !important;
   opacity: 1;
   transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease, transform var(--motion-fast) ease !important;
+}
+
+:where(.level-card, .dojo-level-card) {
+  color: var(--level-text, inherit);
+}
+
+.levels-page :is(.level-card, .dojo-level-card) .level-btn {
+  background: #f6e9f3 !important;
+}
+
+.levels-page .mode-dot {
+  background: var(--level-text);
+  opacity: 0.4;
+}
+
+.levels-page .mode-dot.is-active {
+  background: var(--level-text) !important;
+  opacity: 1;
 }
 
 :where(.level-card, .topic-card, .dojo-level-card, .dojo-tile):hover {
@@ -89,7 +107,7 @@
   will-change: auto !important;
 }
 
-:where(.level-card.is-disabled, .topic-card.is-disabled, .level-card.level-locked) {
+:where(.level-card.is-disabled, .level-card.level-locked) {
   background: rgb(var(--color-ink) / 0.025) !important;
   opacity: 0.68 !important;
 }

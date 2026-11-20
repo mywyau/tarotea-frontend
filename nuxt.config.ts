@@ -3,13 +3,15 @@ import type { NuxtPage } from "@nuxt/schema";
 function usePublicPagePaths(pages: NuxtPage[]) {
   for (const page of pages) {
     const original = page.path;
-    const canonical = original.replace(/\/v\d+(?=\/|$)/g, "");
+    const versionless = original.replace(/\/v\d+(?=\/|$)/g, "");
+    const canonical = versionless.replace(/^\/dojo(?=\/|$)/, "/typing-practice");
     if (canonical !== original) {
       if (pages.some(other => other !== page && other.path === canonical)) {
         throw new Error(`Two pages map to ${canonical}`);
       }
       page.path = canonical;
       page.alias = [original].concat(page.alias ?? []);
+      if (versionless !== original && versionless !== canonical) page.alias.push(versionless);
       // The original navigation also linked to this daily practice shortcut.
       if (canonical === "/daily/vocab/start-quiz") page.alias.push("/daily/v3");
     }
@@ -78,6 +80,7 @@ export default defineNuxtConfig({
     qstashNextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
     qstashToken: process.env.QSTASH_TOKEN,
     public: {
+      isPreviewDeployment: process.env.VERCEL_ENV === "preview",
       appVersion: process.env.VERCEL_GIT_COMMIT_SHA || Date.now().toString(),
       cdnBase: process.env.NUXT_PUBLIC_CDN_BASE,
       auth0Domain: process.env.AUTH0_DOMAIN,
@@ -92,11 +95,6 @@ export default defineNuxtConfig({
       htmlAttrs: {
         lang: "en",
       },
-      titleTemplate: (titleChunk) => {
-        return titleChunk
-          ? `${titleChunk} · TaroTea`
-          : "TaroTea · Learn Cantonese";
-      },
       meta: [
         {
           name: "description",
@@ -110,10 +108,6 @@ export default defineNuxtConfig({
         {
           property: "og:type",
           content: "website",
-        },
-        {
-          name: "twitter:card",
-          content: "summary_large_image",
         },
       ],
       link: [

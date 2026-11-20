@@ -40,47 +40,62 @@ import {
 import type { Component } from 'vue'
 import { markRaw } from 'vue'
 
-const fallbackTopicIcon = markRaw(BookOpen)
-
-const topicIcons: Record<string, Component> = {
-  'survival-essentials': markRaw(ShieldPlus),
-  'greetings-polite': markRaw(HeartHandshake),
-  'basic-verbs': markRaw(Zap),
-  'fruits-vegetables': markRaw(Apple),
-  clothing: markRaw(Shirt),
-  'dim-sum': markRaw(Soup),
-  'restaurant-menu': markRaw(Utensils),
-  colours: markRaw(Palette),
-  math: markRaw(Calculator),
-  'measure-quantities': markRaw(Ruler),
-  'time-dates': markRaw(Clock),
-  'family-members': markRaw(Users),
-  countries: markRaw(Globe2),
-  emotions: markRaw(Smile),
-  furniture: markRaw(Sofa),
-  'sports-fitness': markRaw(Dumbbell),
-  weather: markRaw(CloudSun),
-  technology: markRaw(Smartphone),
-  housing: markRaw(House),
-  'transport-travel': markRaw(Bus),
-  health: markRaw(HeartPulse),
-  'daily-life': markRaw(CalendarDays),
-  materials: markRaw(BrickWall),
-  animals: markRaw(PawPrint),
-  science: markRaw(FlaskConical),
-  'hobbies-interests': markRaw(Gamepad2),
-  'buildings-local-services': markRaw(Building2),
-  business: markRaw(BriefcaseBusiness),
-  'jobs-professions': markRaw(HardHat),
-  'gemstones-jewellery': markRaw(Gem),
-  'landforms-natural-disasters': markRaw(Mountain),
-  'news-media': markRaw(Newspaper),
-  'plants-gardening': markRaw(Sprout),
-  music: markRaw(Music),
-  politics: markRaw(Landmark),
-  onomatopoeia: markRaw(Volume2),
+const palette = {
+  apple: '#F7B9B7',
+  rose: '#F3CBDA',
+  gold: '#F7DCA1',
+  peach: '#F3CCB3',
+  sage: '#C9DFB9',
+  mint: '#BFE2D5',
+  sky: '#C3DFF2',
+  slate: '#D1DCE6',
+  lilac: '#DFCFF0',
+  sand: '#E8D5BD',
 }
 
-export function getTopicIcon(topicId: string) {
-  return topicIcons[topicId] ?? fallbackTopicIcon
+type TopicAppearance = { icon: Component; background: string }
+
+const topicAppearance: Record<string, TopicAppearance> = {
+  'survival-essentials': { icon: markRaw(ShieldPlus), background: palette.mint },
+  'greetings-polite': { icon: markRaw(HeartHandshake), background: palette.rose },
+  'basic-verbs': { icon: markRaw(Zap), background: palette.gold },
+  'fruits-vegetables': { icon: markRaw(Apple), background: palette.apple },
+  clothing: { icon: markRaw(Shirt), background: palette.lilac },
+  'dim-sum': { icon: markRaw(Soup), background: palette.sand },
+  'restaurant-menu': { icon: markRaw(Utensils), background: palette.peach },
+  colours: { icon: markRaw(Palette), background: palette.rose },
+  math: { icon: markRaw(Calculator), background: palette.slate },
+  'measure-quantities': { icon: markRaw(Ruler), background: palette.sand },
+  'time-dates': { icon: markRaw(Clock), background: palette.gold },
+  'family-members': { icon: markRaw(Users), background: palette.rose },
+  countries: { icon: markRaw(Globe2), background: palette.mint },
+  emotions: { icon: markRaw(Smile), background: palette.gold },
+  furniture: { icon: markRaw(Sofa), background: palette.sand },
+  'sports-fitness': { icon: markRaw(Dumbbell), background: palette.sage },
+  weather: { icon: markRaw(CloudSun), background: palette.sky },
+  technology: { icon: markRaw(Smartphone), background: palette.slate },
+  housing: { icon: markRaw(House), background: palette.peach },
+  'transport-travel': { icon: markRaw(Bus), background: palette.gold },
+  health: { icon: markRaw(HeartPulse), background: palette.apple },
+  'daily-life': { icon: markRaw(CalendarDays), background: palette.sky },
+  materials: { icon: markRaw(BrickWall), background: palette.peach },
+  animals: { icon: markRaw(PawPrint), background: palette.sand },
+  science: { icon: markRaw(FlaskConical), background: palette.mint },
+  'hobbies-interests': { icon: markRaw(Gamepad2), background: palette.lilac },
+  'buildings-local-services': { icon: markRaw(Building2), background: palette.slate },
+  business: { icon: markRaw(BriefcaseBusiness), background: palette.slate },
+  'jobs-professions': { icon: markRaw(HardHat), background: palette.gold },
+  'gemstones-jewellery': { icon: markRaw(Gem), background: palette.lilac },
+  'landforms-natural-disasters': { icon: markRaw(Mountain), background: palette.sage },
+  'news-media': { icon: markRaw(Newspaper), background: palette.slate },
+  'plants-gardening': { icon: markRaw(Sprout), background: palette.sage },
+  music: { icon: markRaw(Music), background: palette.lilac },
+  politics: { icon: markRaw(Landmark), background: palette.sky },
+  onomatopoeia: { icon: markRaw(Volume2), background: palette.peach },
+}
+
+const fallback: TopicAppearance = { icon: markRaw(BookOpen), background: palette.sky }
+
+export function getTopicAppearance(topicId: string) {
+  return topicAppearance[topicId] ?? fallback
 }

@@ -19,7 +19,7 @@ const topicTitle = computed(() =>
   <DojoStartPage theme="blush" :heading="`${topicTitle}`"
     description="Practice typing out whole sentences from this topic to challenge and flex typing skills."
     :guest-note="isLoggedIn ? 'XP will be saved.' : 'XP will not be saved.'"
-    :start-to="`/dojo/topic/sentences/chinese/${slug}`" :start-label="'Start exercise'" :xp-rules="[
+    :start-to="`/typing-practice/topic/sentences/chinese/${slug}`" :start-label="'Start exercise'" :xp-rules="[
       { action: 'No hint used', xp: `+${chineseSentenceXp} XP` },
       { action: 'Hint used', xp: `+${chineseSentenceXpHintUsed} XP` },
       { action: 'Unlimited retries', xp: 'check the hint if you are stuck' }

@@ -101,6 +101,11 @@ if (!levelCdnData.value) {
   throw createError({ statusCode: 404, statusMessage: 'Level not found' })
 }
 
+useLearningPageSeo(
+  () => `Cantonese vocabulary · ${levelCdnData.value.title}`,
+  () => levelCdnData.value.description,
+)
+
 const categories = computed(() =>
   Object.entries(levelCdnData.value.categories).map(([key, words]) => ({
     key,

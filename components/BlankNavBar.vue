@@ -25,7 +25,7 @@ const primaryLinks = computed(() => [
   { to: '/levels', label: 'Levels', paths: ['/levels', '/level/'] },
   { to: '/topics', label: 'Topics', paths: ['/topics', '/topic/'], excludes: ['/topics/quiz', '/topic/quiz/'] },
   { to: '/quiz', label: 'Quizzes', paths: ['/quiz', '/topics/quiz', '/topic/quiz/'] },
-  { to: '/dojo', label: 'Practice', paths: ['/dojo'] },
+  { to: '/typing-practice', label: 'Typing practice', paths: ['/typing-practice'] },
   ...(isLoggedIn.value ? [{ to: '/daily/vocab/start-quiz', label: 'Daily', paths: ['/daily/'] }] : []),
 ])
 
@@ -49,8 +49,8 @@ const navigationGroups = computed(() => [
     links: [
       { to: '/quiz', label: 'Level quizzes', description: 'Review vocabulary, audio and sentences', icon: CircleHelp, paths: ['/quiz'] },
       { to: '/topics/quiz', label: 'Topic quizzes', description: 'Practise a vocabulary theme', icon: AudioLines, paths: ['/topics/quiz', '/topic/quiz/'] },
-      { to: '/dojo/level', label: 'Level practice', description: 'Typing and recall by level', icon: Keyboard },
-      { to: '/dojo/topic', label: 'Topic practice', description: 'Train within a chosen topic', icon: Sparkles },
+      { to: '/typing-practice/level', label: 'Typing practice by level', description: 'Type words and sentences at your level', icon: Keyboard },
+      { to: '/typing-practice/topic', label: 'Typing practice by topic', description: 'Type vocabulary from a chosen topic', icon: Sparkles },
       ...(isLoggedIn.value ? [
         { to: '/daily/vocab/start-quiz', label: 'Daily vocabulary', description: 'Your short daily review', icon: CalendarCheck },
         { to: '/daily/jyutping', label: 'Daily Jyutping', description: 'Daily sound and tone practice', icon: AudioLines },
@@ -65,7 +65,7 @@ function isLinkActive(link: { to: string, paths?: string[], excludes?: string[] 
   return (link.paths || [link.to]).some(path => route.path === path || route.path.startsWith(path))
 }
 
-const isMoreRouteActive = computed(() => route.path.startsWith('/daily/') || route.path.startsWith('/dojo/'))
+const isMoreRouteActive = computed(() => route.path.startsWith('/daily/') || isLinkActive({ to: '/typing-practice' }))
 
 function toggleAccountMenu() {
   accountMenuOpen.value = !accountMenuOpen.value

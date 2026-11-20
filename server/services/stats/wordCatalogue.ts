@@ -11,23 +11,32 @@ type WordIndex = { categories: Record<string, { id: string }[]> };
 export const getStatsWordCatalogue = defineCachedFunction(async (cdnBase: string) => {
   const scopes = [
     ...levelSelectMetaData.filter(level => !level.comingSoon).map(level => ({
-      path: `levels/${level.id}`, free: isFreeLevel(level.number), preview: FREE_LEVEL_WORD_LIMIT,
+      path: `levels/${level.id}`, wordPath: `/level/${level.id}/word`, free: isFreeLevel(level.number), preview: FREE_LEVEL_WORD_LIMIT,
     })),
     ...topics.filter(topic => !topic.comingSoon).map(topic => ({
-      path: `topics/${topic.id}`, free: isFreeTopic(topic.id), preview: FREE_WORD_LIMIT,
+      path: `topics/${topic.id}`, wordPath: `/topic/word/${topic.id}`, free: isFreeTopic(topic.id), preview: FREE_WORD_LIMIT,
     })),
   ];
   const all = new Set<string>();
   const unlockable = new Set<string>();
+  const publicWords = new Map<string, string>();
   // Bound concurrent CDN reads on a cold cache. Cache only complete catalogues.
   for (let start = 0; start < scopes.length; start += 6) {
-    await Promise.all(scopes.slice(start, start + 6).map(async scope => {
-      const index = await $fetch<WordIndex>(`${cdnBase}/${scope.path}.json`, { timeout: 5000, retry: 0 });
+    const batch = scopes.slice(start, start + 6);
+    const indexes = await Promise.all(batch.map(scope =>
+      $fetch<WordIndex>(`${cdnBase}/${scope.path}.json`, { timeout: 5000, retry: 0 })
+    ));
+    batch.forEach((scope, i) => {
+      const index = indexes[i];
       Object.values(index.categories).flat().forEach((word, position) => {
         all.add(word.id);
-        if (!scope.free && position >= scope.preview) unlockable.add(word.id);
+        if (!scope.free && position >= scope.preview) {
+          unlockable.add(word.id);
+        } else if (!publicWords.has(word.id)) {
+          publicWords.set(word.id, `${scope.wordPath}/${encodeURIComponent(word.id)}`);
+        }
       });
-    }));
+    });
   }
-  return { all: [...all], unlockable: [...unlockable] };
-}, { name: "stats-word-catalogue", maxAge: 60 * 60, swr: true });
+  return { all: [...all], unlockable: [...unlockable], publicPaths: [...publicWords.values()] };
+}, { name: "published-word-catalogue-v2", maxAge: 60 * 60, swr: true });

@@ -1,13 +1,15 @@
 import { masteryXp } from "~/config/xp/helpers";
 import { getStatsWordCatalogue } from "~/server/services/stats/wordCatalogue";
 import { db } from "~/server/repositories/db";
+import { getUserEntitlement } from "~/server/utils/getEntitlement";
 import { requireUser } from "~/server/utils/requireUser";
+import { hasPaidAccess } from "~/utils/paidAccess";
 
 type UserStatsResponse = {
   total_xp: number;
   words_maxed: number;
   words_seen: number;
-  words_unlocked: number;
+  words_unlocked: number | null;
   total_words: number | null;
   total_unlockable_words: number | null;
   total_correct: number;
@@ -19,7 +21,7 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  const [statsResult, weeklyXpResult, wordProgress, catalogue] = await Promise.all([
+  const [statsResult, weeklyXpResult, wordProgress, entitlement, catalogue] = await Promise.all([
     db.query(
       `
         select
@@ -54,6 +56,7 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
       `,
       [userId, masteryXp]
     ),
+    getUserEntitlement(userId),
     getStatsWordCatalogue(useRuntimeConfig().public.cdnBase).catch(error => {
       console.warn("Could not load word totals for stats", error);
       return null;
@@ -65,7 +68,11 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
   const all = catalogue && new Set(catalogue.all);
   const unlockable = catalogue && new Set(catalogue.unlockable);
   const maxed = wordProgress.rows.filter(row => row.kind === "maxed" && (!all || all.has(row.word_id))).length;
-  const unlocked = wordProgress.rows.filter(row => row.kind === "unlocked" && (!unlockable || unlockable.has(row.word_id))).length;
+  const fullAccess = hasPaidAccess(entitlement);
+  const unlockTotal = (fullAccess ? all : unlockable)?.size ?? null;
+  const unlocked = fullAccess
+    ? unlockTotal
+    : wordProgress.rows.filter(row => row.kind === "unlocked" && (!unlockable || unlockable.has(row.word_id))).length;
 
   return {
     total_xp: Number(statsRow?.total_xp ?? 0),
@@ -73,7 +80,7 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
     words_seen: Number(statsRow?.words_seen ?? 0),
     words_unlocked: unlocked,
     total_words: all?.size ?? null,
-    total_unlockable_words: unlockable?.size ?? null,
+    total_unlockable_words: unlockTotal,
     total_correct: Number(statsRow?.total_correct ?? 0),
     total_wrong: Number(statsRow?.total_wrong ?? 0),
     xp_this_week: Number(weeklyRow?.xp_this_week ?? 0),

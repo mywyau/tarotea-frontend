@@ -9,7 +9,7 @@ useSeoMeta({
 import type { Topic } from '@/types/topic'
 import { sortedTopics } from '@/utils/topics/topics'
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from '@lucide/vue'
-import { getTopicIcon } from '@/utils/topics/icons'
+import { getTopicAppearance } from '@/utils/topics/icons'
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 const {
@@ -172,7 +172,7 @@ await resolve()
           topic.comingSoon
             ? 'is-disabled'
             : 'is-active'
-        ]" :style="topicAnimationStyles[topic.id]">
+        ]" :style="[topicAnimationStyles[topic.id], { '--panel-background': getTopicAppearance(topic.id).background }]">
 
         <NuxtLink :to="topicLink(topic)" class="block space-y-3">
           <div class="min-w-0 topic-card-copy">
@@ -182,7 +182,7 @@ await resolve()
               </h2>
 
               <span class="topic-icon-wrap" role="img" :aria-label="`${topic.title} topic`">
-                <component :is="getTopicIcon(topic.id)" class="topic-icon" aria-hidden="true" />
+                <component :is="getTopicAppearance(topic.id).icon" class="topic-icon" aria-hidden="true" />
               </span>
             </div>
 
@@ -382,7 +382,6 @@ await resolve()
 }
 
 .topic-card.is-disabled {
-  opacity: 0.65;
   cursor: not-allowed;
 }
 

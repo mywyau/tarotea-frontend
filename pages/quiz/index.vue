@@ -1,6 +1,11 @@
 <script setup lang="ts">
+useLearningPageSeo(
+  'Cantonese quizzes by level',
+  'Test your Cantonese vocabulary and listening skills with word and sentence quizzes at ten levels.',
+)
 
-import { levelSelectMetaData } from '@/utils/levels/helpers'
+
+import { getLevelPanelStyle, levelSelectMetaData } from '@/utils/levels/helpers'
 import { getLevelTopicIcon } from '@/utils/levels/topicIcons'
 import { markRaw, onMounted, ref } from 'vue'
 import { BookOpen, ChevronLeft, ChevronRight, Headphones, MessageSquareText, Volume2 } from '@lucide/vue'
@@ -89,6 +94,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
 
     <!-- Header -->
     <header class="text-center space-y-3 max-w-4xl mx-auto">
+      <h1 class="sr-only">Cantonese quizzes by level</h1>
       <nav class="quiz-scope-nav" aria-label="Quiz type">
         <NuxtLink to="/quiz" aria-current="page">Level quizzes</NuxtLink>
         <NuxtLink to="/topics/quiz">Topic quizzes</NuxtLink>
@@ -98,7 +104,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
     <!-- Grid -->
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 
-      <li v-for="quizLevel in levelSelectMetaData" :key="quizLevel.id" class="level-card" :class="[
+      <li v-for="quizLevel in levelSelectMetaData" :key="quizLevel.id" :style="getLevelPanelStyle(quizLevel.number)" class="level-card" :class="[
         quizLevel.comingSoon
           ? 'level-locked'
           : (!canEnterLevel(quizLevel) ? 'level-locked' : '')
@@ -107,7 +113,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
         <!-- Title -->
         <div class="space-y-2 level-card-copy">
           <div class="level-card-header">
-            <h2 class="text-lg font-semibold text-gray-900">
+            <h2 class="text-lg font-semibold">
               {{ quizLevel.title }}
             </h2>
 
@@ -117,11 +123,11 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
             </div>
           </div>
 
-          <p class="text-sm text-gray-600 leading-relaxed">
+          <p class="text-sm leading-relaxed">
             {{ quizLevel.description }}
           </p>
 
-          <p v-if="quizLevel.comingSoon" class="text-xs text-gray-400 font-medium">
+          <p v-if="quizLevel.comingSoon" class="text-xs font-medium">
             Coming soon
           </p>
         </div>
@@ -155,7 +161,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
         </div>
 
         <!-- Locked -->
-        <p v-else-if="!quizLevel.comingSoon" class="text-xs text-center text-gray-500 pt-4">
+        <p v-else-if="!quizLevel.comingSoon" class="text-xs text-center pt-4">
           Upgrade to unlock
         </p>
 
@@ -250,7 +256,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #374151;
+  color: inherit;
 }
 
 .topic-icon {

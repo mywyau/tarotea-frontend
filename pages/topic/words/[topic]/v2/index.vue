@@ -45,6 +45,11 @@ if (!topic.value) {
   throw createError({ statusCode: 404, statusMessage: 'Topic not found' })
 }
 
+useLearningPageSeo(
+  () => `${topic.value.title} in Cantonese`,
+  () => topic.value.description,
+)
+
 const isTopicFree = computed(() => {
   return freeTopics.has(slug)
 })

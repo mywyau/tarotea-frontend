@@ -1,5 +1,11 @@
 <script setup lang="ts">
+useLearningPageSeo(
+  'Cantonese typing practice',
+  'Practise typing Cantonese characters and Jyutping with word and sentence exercises organised by level or topic.',
+)
+
 import { Layers, Tags } from '@lucide/vue'
+
 
 
 definePageMeta({
@@ -16,7 +22,7 @@ definePageMeta({
     <header class="text-center space-y-4">
       <h1 class="text-3xl sm:text-4xl font-semibold text-black dojo-heading">Typing practice</h1>
       <p class="text-gray-700 max-w-lg mx-auto dojo-subheading">
-        Strengthen your Cantonese phonetic skills with focused exercises.
+        Practise typing Cantonese characters and Jyutping.
       </p>
     </header>
 
@@ -24,41 +30,43 @@ definePageMeta({
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 pt-6">
 
       <!-- Level Training -->
-      <NuxtLink to="/dojo/level" class="dojo-tile dojo-tile-blue rounded-2xl p-8 shadow-sm hover:shadow-md transition
-               hover:-translate-y-1 active:scale-[0.99]">
-        <div class="space-y-3 dojo-tile-copy">
-          <div class="dojo-tile-header">
-            <div class="text-xl font-semibold text-black">
-              Levels
-            </div>
+      <NuxtLink to="/typing-practice/level" class="block rounded-2xl">
+        <AppCard tone="lilac" padding="generous" interactive class="relative h-full">
+          <div class="space-y-3 dojo-tile-copy">
+            <div class="dojo-tile-header">
+              <div class="text-xl font-semibold text-black">
+                Levels
+              </div>
 
-            <span class="dojo-tile-icon-wrap" role="img" aria-label="Levels">
-              <Layers class="dojo-tile-icon" aria-hidden="true" />
-            </span>
+              <span class="dojo-tile-icon-wrap" role="img" aria-label="Levels">
+                <Layers class="dojo-tile-icon" aria-hidden="true" />
+              </span>
+            </div>
+            <p class="text-sm text-gray-900/80">
+              Choose a level to practise words and sentences.
+            </p>
           </div>
-          <p class="text-sm text-gray-900/80">
-            Practice by structured progression levels.
-          </p>
-        </div>
+        </AppCard>
       </NuxtLink>
 
       <!-- Topic Training -->
-      <NuxtLink to="/dojo/topic" class="dojo-tile dojo-tile-pink rounded-2xl p-8 shadow-sm hover:shadow-md transition
-               hover:-translate-y-1 active:scale-[0.99]">
-        <div class="space-y-3 dojo-tile-copy">
-          <div class="dojo-tile-header">
-            <div class="text-xl font-semibold text-black">
-              Topics
-            </div>
+      <NuxtLink to="/typing-practice/topic" class="block rounded-2xl">
+        <AppCard tone="blue" padding="generous" interactive class="relative h-full">
+          <div class="space-y-3 dojo-tile-copy">
+            <div class="dojo-tile-header">
+              <div class="text-xl font-semibold text-black">
+                Topics
+              </div>
 
-            <span class="dojo-tile-icon-wrap" role="img" aria-label="Topics">
-              <Tags class="dojo-tile-icon" aria-hidden="true" />
-            </span>
+              <span class="dojo-tile-icon-wrap" role="img" aria-label="Topics">
+                <Tags class="dojo-tile-icon" aria-hidden="true" />
+              </span>
+            </div>
+            <p class="text-sm text-gray-900/80">
+              Choose a topic to practise its vocabulary.
+            </p>
           </div>
-          <p class="text-sm text-gray-900/80">
-            Practise your phonetics by subject area.
-          </p>
-        </div>
+        </AppCard>
       </NuxtLink>
     </div>
 
@@ -70,11 +78,6 @@ main {
   min-height: 60vh;
 }
 
-.dojo-home {
-  --pink: #EAB8E4;
-  --blue: #A8CAE0;
-  --blush: #F6E1E1;
-}
 
 .dojo-heading {
   font-size: 1.3rem;
@@ -90,11 +93,6 @@ main {
   color: rgba(17, 24, 39, 0.65);
 }
 
-.dojo-tile {
-  position: relative;
-  color: #111827;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-}
 
 .dojo-tile-copy {
   padding-right: 2.25rem;
@@ -123,11 +121,5 @@ main {
   stroke-width: 2.35;
 }
 
-.dojo-tile-blue {
-  background-color: rgba(168, 202, 224, 0.66);
-}
 
-.dojo-tile-pink {
-  background-color: rgba(234, 184, 228, 0.66);
-}
 </style>

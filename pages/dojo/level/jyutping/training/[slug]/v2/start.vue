@@ -13,9 +13,9 @@ const levelNumber = computed(() => levelIdToNumbers(slug.value) ?? slug.value)
 </script>
 
 <template>
-  <DojoStartPage theme="purple" :heading="`Level ${levelNumber} · Jyutping practice`"
+  <DojoStartPage theme="purple" :heading="`Level ${levelNumber} · Jyutping typing practice`"
     description="Type the Jyutping for each Chinese word. Build speed and consistency."
-    :start-to="`/dojo/level/jyutping/training/${slug}`" start-label="Start jyutping exercise" :xp-rules="[
+    :start-to="`/typing-practice/level/jyutping/training/${slug}`" start-label="Start jyutping exercise" :xp-rules="[
       { action: 'No hint used', xp: `+${jyutpingXp} XP` },
       { action: 'Hint used', xp: `+${jyutpingXpHintUsed} XP` },
       { action: 'Unlimited retries', xp: 'check the hint if you are stuck' }

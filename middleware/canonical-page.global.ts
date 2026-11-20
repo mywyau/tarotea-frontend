@@ -1,7 +1,8 @@
 export default defineNuxtRouteMiddleware((to) => {
   const record = to.matched.at(-1);
   // Inspect the route template so a slug such as "v2" is preserved.
-  if (!to.name || !record?.aliasOf || !/\/v\d+(?:\/|$)/.test(record.path)) return;
+  if (!to.name || !record?.aliasOf) return;
+  if (!/^\/dojo(?:\/|$)|\/v\d+(?:\/|$)/.test(record.path)) return;
 
   return navigateTo({
     name: to.name,

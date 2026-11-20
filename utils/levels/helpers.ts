@@ -1,3 +1,15 @@
+const levelPanelColours = [
+  '#f7edf6', '#efdaeb', '#e6c7e2', '#dab2d6', '#cb9dc7',
+  '#ba85b6', '#965e94', '#865386', '#704372', '#5b355f',
+]
+
+export function getLevelPanelStyle(level: number) {
+  return {
+    '--panel-background': levelPanelColours[level - 1] ?? levelPanelColours[levelPanelColours.length - 1],
+    '--level-text': level >= 7 ? 'white' : 'rgb(var(--color-ink))',
+  }
+}
+
 export type LevelSelectMeta = {
   id: string;
   number: number;

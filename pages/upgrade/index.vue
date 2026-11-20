@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useLearningPageSeo(
+  'Cantonese learning plans',
+  'Compare TaroTea plans and see what a subscription includes for learning Cantonese.',
+)
+
 
 definePageMeta({ layout: 'default' })
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CircleCheck, Sparkles, TrendingUp, Trophy, UnlockKeyhole } from '@lucide/vue'
+import { Sparkles, TrendingUp, Trophy, UnlockKeyhole } from '@lucide/vue'
 import { markRaw, type Component } from 'vue'
 definePageMeta({
   ssr: false
@@ -10,9 +10,7 @@ type UserStats = {
   words_maxed: number | string
   total_words: number | null
   total_unlockable_words: number | null
-  words_unlocked: number | string
-  total_correct: number | string
-  total_wrong: number | string
+  words_unlocked: number | string | null
   xp_this_week: number | string
 }
 
@@ -22,6 +20,7 @@ type StatCard = {
   icon: Component
   suffix?: string
   total?: number | null
+  displayText?: string
   signed?: boolean
 }
 
@@ -57,6 +56,7 @@ const stats = computed<StatCard[]>(() => {
     {
       label: 'Words Unlocked',
       value: toNumber(statsData.value.words_unlocked),
+      displayText: statsData.value.words_unlocked === null ? 'All words' : undefined,
       total: statsData.value.total_unlockable_words,
       icon: markRaw(UnlockKeyhole)
     },
@@ -65,13 +65,7 @@ const stats = computed<StatCard[]>(() => {
       value: toNumber(statsData.value.words_maxed),
       total: statsData.value.total_words,
       icon: markRaw(Trophy)
-    },
-    {
-      label: 'Correct Answers',
-      value: toNumber(statsData.value.total_correct),
-      icon: markRaw(CircleCheck)
-    },
-
+    }
   ]
 })
 
@@ -98,6 +92,7 @@ function animateStats(targets: number[], duration = 1200) {
 }
 
 function formatStatValue(stat: StatCard, index: number): string {
+  if (stat.displayText) return stat.displayText
   const rawValue = animatedStats.value[index] ?? stat.value
   const suffix = stat.suffix ? ` ${stat.suffix}` : ''
 
@@ -196,9 +191,9 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 sm:gap-4">
+        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
           <div v-for="(stat, index) in stats.slice(1)" :key="stat.label" class="compact-stat-card hover:brightness-105"
-            :class="`stat-${index + 1}`">
+            :class="[`stat-${index + 1}`, { 'col-span-2 sm:col-span-1': index === 0 }]">
             <div class="compact-stat-top">
               <p class="stat-label">
                 {{ stat.label }}
@@ -295,10 +290,6 @@ main {
 
 .stat-3 {
   background: rgba(246, 225, 225, 0.75);
-}
-
-.stat-4 {
-  background: rgba(130, 255, 111, 0.4);
 }
 
 .stats-marquee {

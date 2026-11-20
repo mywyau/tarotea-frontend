@@ -12,15 +12,15 @@ describe('application shell navigation', () => {
     expect(isFocusedLearningPath('/quiz/hsk1/word/start-quiz')).toBe(false)
     expect(isFocusedLearningPath('/topic/quiz/vocabulary/word/survival-essentials')).toBe(true)
     expect(isFocusedLearningPath('/topic/quiz/vocabulary/word/start-quiz/survival-essentials')).toBe(false)
-    expect(isFocusedLearningPath('/dojo/topic/jyutping/training/food')).toBe(true)
-    expect(isFocusedLearningPath('/dojo/topic/jyutping/training/food/start')).toBe(false)
+    expect(isFocusedLearningPath('/typing-practice/topic/jyutping/training/food')).toBe(true)
+    expect(isFocusedLearningPath('/typing-practice/topic/jyutping/training/food/start')).toBe(false)
     expect(isFocusedLearningPath('/topics')).toBe(false)
   })
 
   it('exits focused exercises to a stable selection screen', () => {
     expect(getFocusedLearningExitPath('/quiz/hsk1/word/test')).toBe('/quiz')
     expect(getFocusedLearningExitPath('/topic/quiz/vocabulary/word/food')).toBe('/topics/quiz')
-    expect(getFocusedLearningExitPath('/dojo/level/chinese/training/hsk1')).toBe('/dojo/level')
+    expect(getFocusedLearningExitPath('/typing-practice/level/chinese/training/hsk1')).toBe('/typing-practice/level')
     expect(getFocusedLearningExitPath('/daily/vocab')).toBe('/')
   })
 
@@ -34,7 +34,7 @@ describe('application shell navigation', () => {
     expect(shell).not.toContain('trigger-visibility-btn')
     expect(shell).not.toContain('<Rocket')
     expect(shell).not.toContain('ArrowLeft')
-    expect(shell).toContain("label: 'Practice'")
+    expect(shell).toContain("to: '/typing-practice', label: 'Typing practice'")
     expect(shell).not.toContain("label: 'Dojo'")
   })
 })

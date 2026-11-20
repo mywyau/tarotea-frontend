@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { isFreeTopic } from '~/utils/topics/permissions'
+import { FREE_WORD_LIMIT } from '~/config/topic/topics-config'
 
 definePageMeta({
     ssr: true,
@@ -215,24 +217,20 @@ onMounted(async () => {
     }
 })
 
-watchEffect(() => {
-    if (!word.value) return
-
-    const topicLabel = topic.value.replace(/-/g, " ")
-
-    useSeoMeta({
-        title: `How to say "${word.value.meaning}" in Cantonese (${topicLabel}) – ${word.value.word}`,
-        description: `Learn the Cantonese word for "${word.value.meaning}" in the ${topicLabel} topic. Includes pronunciation (${word.value.jyutping}) and example sentences.`,
-        ogTitle: `${word.value.word} (${word.value.jyutping}) – Cantonese meaning`,
-        ogDescription: `Cantonese vocabulary for "${word.value.meaning}" in ${topicLabel}.`,
-        ogType: 'article',
-    })
+const publicWord = computed(() => currentIndex.value >= 0 && (isFreeTopic(topic.value) || currentIndex.value < FREE_WORD_LIMIT))
+if (error.value) throw createError({ statusCode: error.value.statusCode ?? 500, statusMessage: 'Could not load word' })
+useLearningPageSeo(
+  () => word.value ? `${word.value.word} (${word.value.jyutping}) – ${word.value.meaning} in Cantonese` : 'Cantonese vocabulary',
+  () => word.value ? `Learn ${word.value.word} (“${word.value.meaning}”) with Jyutping, Cantonese audio and example sentences.` : '',
+)
+useSeoMeta({
+  ogType: 'article',
+  robots: () => !publicWord.value || runtimeConfig.public.isPreviewDeployment ? 'noindex, follow' : undefined,
 })
-
 </script>
 
 <template>
-    <main v-if="authReady && word" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
+    <main v-if="word && (publicWord || authReady)" class="word-page max-w-4xl mx-auto px-4 py-8 space-y-4 sm:space-y-6">
 
         <div class="flex items-center justify-end gap-4">
             <div class="flex items-center gap-2">

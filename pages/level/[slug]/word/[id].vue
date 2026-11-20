@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { isFreeLevel } from '~/utils/levels/permissions'
+import { isLevelId, levelIdToNumbers } from '~/utils/levels/levels'
+import { FREE_LEVEL_WORD_LIMIT } from '~/config/level/levels-config'
 import { masteryXp } from '@/config/xp/helpers';
 import { PRONUNCIATION_PRACTICE_ENABLED } from '~/config/features';
 import {
@@ -246,19 +249,17 @@ onMounted(async () => {
   }
 })
 
-// ✅ SEO META (runs when word loads)
-watchEffect(() => {
-  if (!word.value) return
-
-  useSeoMeta({
-    title: `How to say "${word.value.meaning}" in Cantonese – ${word.value.word} (${word.value.jyutping}) | TaroTea`,
-    description: `Learn how to say "${word.value.meaning}" in Cantonese. Includes pronunciation (${word.value.jyutping}), example sentences and audio.`,
-    ogTitle: `How to say "${word.value.meaning}" in Cantonese`,
-    ogDescription: `Cantonese word: ${word.value.word} (${word.value.jyutping}). Includes audio and example sentences.`,
-    ogType: 'article',
-  })
+const publicWord = computed(() => isLevelId(level.value) && currentIndex.value >= 0
+  && (isFreeLevel(levelIdToNumbers(level.value)) || currentIndex.value < FREE_LEVEL_WORD_LIMIT))
+if (error.value) throw createError({ statusCode: error.value.statusCode ?? 500, statusMessage: 'Could not load word' })
+useLearningPageSeo(
+  () => word.value ? `${word.value.word} (${word.value.jyutping}) – ${word.value.meaning} in Cantonese` : 'Cantonese vocabulary',
+  () => word.value ? `Learn ${word.value.word} (“${word.value.meaning}”) with Jyutping, Cantonese audio and example sentences.` : '',
+)
+useSeoMeta({
+  ogType: 'article',
+  robots: () => !publicWord.value || runtimeConfig.public.isPreviewDeployment ? 'noindex, follow' : undefined,
 })
-
 </script>
 
 <template>

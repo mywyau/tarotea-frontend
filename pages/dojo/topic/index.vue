@@ -1,4 +1,9 @@
 <script setup lang="ts">
+useLearningPageSeo(
+  'Cantonese typing practice by topic',
+  'Practise typing Cantonese vocabulary and sentences about food, travel, family and other everyday topics.',
+)
+
 
 definePageMeta({
   ssr: false,
@@ -7,7 +12,7 @@ definePageMeta({
 import { ChevronLeft, ChevronRight, Keyboard, Languages, MessageSquareText } from '@lucide/vue'
 import { markRaw } from 'vue'
 import type { Topic } from '~/types/topic'
-import { getTopicIcon } from '~/utils/topics/icons'
+import { getTopicAppearance } from '~/utils/topics/icons'
 import { sortedTopics } from '~/utils/topics/topics'
 
 const isComingSoon = (topic: Topic) => topic.comingSoon === true
@@ -38,22 +43,19 @@ const topicQuizModes = [
     id: 'jyutping',
     label: 'Jyutping only',
     icon: markRaw(Keyboard),
-    buttonClass: 'topic-btn-purple',
-    to: (topicId: string) => `/dojo/topic/jyutping/training/${topicId}/start`,
+    to: (topicId: string) => `/typing-practice/topic/jyutping/training/${topicId}/start`,
   },
   {
     id: 'chinese',
     label: 'Chinese only',
     icon: markRaw(Languages),
-    buttonClass: 'topic-btn-blue',
-    to: (topicId: string) => `/dojo/topic/chinese/training/${topicId}/start`,
+    to: (topicId: string) => `/typing-practice/topic/chinese/training/${topicId}/start`,
   },
   {
     id: 'sentences',
     label: 'Sentences Chinese Only',
     icon: markRaw(MessageSquareText),
-    buttonClass: 'topic-btn-blush',
-    to: (topicId: string) => `/dojo/topic/sentences/chinese/${topicId}/start`,
+    to: (topicId: string) => `/typing-practice/topic/sentences/chinese/${topicId}/start`,
   },
 ] as const
 
@@ -80,7 +82,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   <main class="topics-page max-w-4xl mx-auto py-10 px-2 space-y-10">
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="text-xl font-semibold dojo-page-heading">Topic practice</h1>
+      <h1 class="text-xl font-semibold dojo-page-heading">Typing practice by topic</h1>
       <p class="dojo-page-subheading">Strengthen your phonetic and typing skills with focused exercises.</p>
     </header>
 
@@ -106,9 +108,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
     </div>
 
     <ul class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-      <li v-for="quizTopic in paginatedTopics" :key="quizTopic.id" class="topic-card" :class="[
-        (!canEnterTopic(quizTopic) || quizTopic.comingSoon) ? 'topic-locked' : ''
-      ]">
+      <li v-for="quizTopic in paginatedTopics" :key="quizTopic.id" class="topic-card" :style="{ '--panel-background': getTopicAppearance(quizTopic.id).background }">
         <div class="space-y-2 topic-card-copy">
           <div class="topic-card-header">
             <h2 class="text-lg font-semibold text-gray-900">
@@ -116,7 +116,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
             </h2>
 
             <span class="quiz-topic-icon-wrap" role="img" :aria-label="`${quizTopic.title} topic`">
-              <component :is="getTopicIcon(quizTopic.id)" class="quiz-topic-icon" aria-hidden="true" />
+              <component :is="getTopicAppearance(quizTopic.id).icon" class="quiz-topic-icon" aria-hidden="true" />
             </span>
           </div>
 
@@ -124,7 +124,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
             {{ quizTopic.description }}
           </p>
 
-          <p v-if="quizTopic.comingSoon" class="text-xs text-gray-400 font-medium">
+          <p v-if="quizTopic.comingSoon" class="text-xs text-gray-700 font-medium">
             Coming soon
           </p>
         </div>
@@ -135,8 +135,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
               <ChevronLeft class="h-5 w-5" aria-hidden="true" />
             </button>
 
-            <NuxtLink :to="getSelectedTopicMode(quizTopic.id).to(quizTopic.id)" class="topic-btn"
-              :class="getSelectedTopicMode(quizTopic.id).buttonClass">
+            <NuxtLink :to="getSelectedTopicMode(quizTopic.id).to(quizTopic.id)" class="typing-mode-link">
               <component :is="getSelectedTopicMode(quizTopic.id).icon" class="dojo-mode-icon" aria-hidden="true" />
 
               <span>
@@ -151,7 +150,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
 
           <div class="mode-dots"
             :aria-label="`Mode ${getSelectedTopicModeIndex(quizTopic.id) + 1} of ${topicQuizModes.length}`">
-            <span v-for="(mode, modeIndex) in topicQuizModes" :key="`${quizTopic.id}-${mode.id}`" class="mode-dot"
+            <span v-for="(mode, modeIndex) in topicQuizModes" :key="`${quizTopic.id}-${mode.id}`" class="typing-mode-dot"
               :class="{ 'is-active': modeIndex === getSelectedTopicModeIndex(quizTopic.id) }" />
           </div>
         </div>
@@ -227,9 +226,6 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.08);
 }
 
-.topic-locked {
-  opacity: 0.6;
-}
 
 .topic-card-header {
   display: flex;
@@ -259,19 +255,31 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
 }
 
 /* Buttons */
-.topic-btn {
+.typing-mode-link {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
   text-align: center;
-  min-height: 52px;
+  min-height: 2.75rem;
   padding: 0.65rem 0.85rem;
+  background: rgb(var(--color-surface));
+  color: rgb(var(--color-ink));
+  border: 1px solid rgb(var(--color-ink) / 0.2);
   font-size: 0.85rem;
-  border-radius: 14px;
-  font-weight: 600;
+  border-radius: var(--radius-control);
+  font-weight: 700;
   line-height: 1.2;
-  transition: all 0.15s ease;
+}
+
+.typing-mode-link:hover {
+  background: #f5f5f5;
+  border-color: rgb(var(--color-ink) / 0.4);
+}
+
+.typing-mode-link:focus-visible {
+  outline: 2px solid rgb(var(--color-ink));
+  outline-offset: 2px;
 }
 
 .dojo-mode-icon {
@@ -280,42 +288,6 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   flex-shrink: 0;
   color: #374151;
   stroke-width: 2.35;
-}
-
-.topic-btn-blue {
-  background: rgba(168, 202, 224, 0.45);
-  color: #1f2937;
-}
-
-.topic-btn-blue:hover {
-  background: rgba(168, 202, 224, 0.65);
-}
-
-.topic-btn-purple {
-  background: rgba(214, 163, 209, 0.45);
-  color: #1f2937;
-}
-
-.topic-btn-purple:hover {
-  background: rgba(214, 163, 209, 0.65);
-}
-
-.topic-btn-yellow {
-  background: rgba(244, 205, 39, 0.45);
-  color: #1f2937;
-}
-
-.topic-btn-yellow:hover {
-  background: rgba(244, 205, 39, 0.65);
-}
-
-.topic-btn-blush {
-  background: rgba(246, 180, 180, 0.42);
-  color: #1f2937;
-}
-
-.topic-btn-blush:hover {
-  background: rgba(246, 180, 180, 0.62);
 }
 
 .topic-mode-toggle {
@@ -346,7 +318,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   gap: 0.35rem;
 }
 
-.mode-dot {
+.typing-mode-dot {
   width: 0.45rem;
   height: 0.45rem;
   border-radius: 9999px;
@@ -354,7 +326,7 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   transition: all 0.15s ease;
 }
 
-.mode-dot.is-active {
+.typing-mode-dot.is-active {
   background: rgba(31, 41, 55, 0.7);
 }
 

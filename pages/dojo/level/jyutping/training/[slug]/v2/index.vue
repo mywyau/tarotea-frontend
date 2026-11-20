@@ -133,7 +133,7 @@ const {
 )
 
 const activeSessionKey = ref('')
-const title = ref('Jyutping practice')
+const title = ref('Jyutping typing practice')
 
 const quizStartedAt = ref<number | null>(null)
 const elapsedMs = ref(0)
@@ -335,7 +335,7 @@ function applyStartPayload(payload: DojoStartResponse) {
   stopTimer()
 
   activeSessionKey.value = payload.sessionKey
-  title.value = (payload.session.title ?? `Jyutping practice - ${levelTitles[slug.value]}`).replace(/dojo/gi, 'practice')
+  title.value = (payload.session.title ?? `Jyutping typing practice - ${levelTitles[slug.value]}`).replace(/\bdojo\b/gi, 'typing practice')
 
   words.value = payload.session.words ?? []
   wordProgressMap.value = payload.progress ?? {}
@@ -667,7 +667,7 @@ watch(
   () => {
     stopTimer()
     activeSessionKey.value = ''
-    title.value = 'Jyutping practice'
+    title.value = 'Jyutping typing practice'
     words.value = []
     wordProgressMap.value = {}
     idx.value = 0
@@ -697,7 +697,7 @@ onBeforeUnmount(() => {
   <main class="dojo-training-page mx-auto max-w-4xl px-6 pt-12 pb-28 sm:pb-12">
 
     <header class="dojo-training-header space-y-4">
-      <TypewriterTitleBlock :heading-text="title || `Jyutping practice - ${levelTitles[slug]}`"
+      <TypewriterTitleBlock :heading-text="title || `Jyutping typing practice - ${levelTitles[slug]}`"
         subheading-text="Type the jyutping for each word shown"
         heading-class="text-2xl font-semibold tracking-tight text-gray-900" subheading-class="text-sm text-gray-600" />
     </header>
@@ -900,7 +900,7 @@ onBeforeUnmount(() => {
                 Play again
               </button>
 
-              <NuxtLink to="/dojo/level/"
+              <NuxtLink to="/typing-practice/level/"
                 class="block w-full rounded-xl text-gray-900 py-3 text-center font-medium hover:brightness-110 transition"
                 style="background-color:rgba(244,205,39,0.35);">
                 Back to level practice

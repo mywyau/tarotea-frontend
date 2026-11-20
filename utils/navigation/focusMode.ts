@@ -7,7 +7,7 @@ const focusRoutePatterns = [
   /^\/topic\/quiz\/sentences\/(?:audio|no-audio)\/[^/]+$/,
   /^\/topic\/quiz\/echo-gecko\/[^/]+$/,
   /^\/daily\/(?:vocab|jyutping)$/,
-  /^\/dojo\/(?:level|topic)\/(?:(?:chinese|jyutping)\/training|sentences\/chinese)\/[^/]+$/,
+  /^\/typing-practice\/(?:level|topic)\/(?:(?:chinese|jyutping)\/training|sentences\/chinese)\/[^/]+$/,
   /^\/echo-lab\//,
   /^\/echo-forest\/[^/]+$/,
   /^\/writing\//,
@@ -26,7 +26,7 @@ export function isFocusedLearningPath(path: string) {
 export function getFocusedLearningExitPath(path: string) {
   if (path.startsWith('/topic/quiz/')) return '/topics/quiz'
   if (path.startsWith('/quiz/')) return '/quiz'
-  if (path.startsWith('/dojo/topic/')) return '/dojo/topic'
-  if (path.startsWith('/dojo/level/')) return '/dojo/level'
+  if (path.startsWith('/typing-practice/topic/')) return '/typing-practice/topic'
+  if (path.startsWith('/typing-practice/level/')) return '/typing-practice/level'
   return '/'
 }
