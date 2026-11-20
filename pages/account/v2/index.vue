@@ -25,6 +25,7 @@ const profileSaving = ref(false);
 const profileSaved = ref(false);
 const profileError = ref("");
 
+const showAccountAIUsage = false;
 const animatedRemaining = ref(0);
 const animatedPercent = ref(0);
 const pageRestoreKey = ref(0);
@@ -127,7 +128,7 @@ async function deleteAccount() {
 }
 
 async function fetchAIUsage() {
-  if (!isLoggedIn.value) return;
+  if (!showAccountAIUsage || !isLoggedIn.value) return;
 
   aiUsageLoading.value = true;
 
@@ -421,6 +422,7 @@ watch(aiUsage, (val) => {
 
           <!-- AI Usage card -->
           <section
+            v-if="showAccountAIUsage"
             class="w-full min-w-0 rounded-lg backdrop-blur p-5 space-y-3"
             style="background-color: #f6e1e1"
           >
@@ -474,14 +476,13 @@ watch(aiUsage, (val) => {
 
           <!-- Primary action -->
           <div class="space-y-3">
-            <button
+            <AppButton
               v-if="entitlement && entitlement.plan !== 'free'"
-              type="button"
-              class="w-full rounded-lg py-3 font-semibold text-white border border-black/10 bg-black backdrop-blur hover:bg-gray-800 transition shadow-sm"
+              block
               @click="openBillingPortal"
             >
               Manage billing
-            </button>
+            </AppButton>
 
             <div v-else>
               <NuxtLink
@@ -549,10 +550,10 @@ watch(aiUsage, (val) => {
             </div>
 
             <div class="pt-2">
-              <button
+              <AppButton
                 v-if="!showDeletePanel"
-                type="button"
-                class="w-full rounded-lg py-3 font-semibold border border-red-300 text-red-800 bg-white/70 backdrop-blur hover:bg-white transition"
+                variant="destructive"
+                block
                 @click="
                   showDeletePanel = true;
                   deleteError = '';
@@ -560,7 +561,7 @@ watch(aiUsage, (val) => {
                 "
               >
                 Show delete options
-              </button>
+              </AppButton>
 
               <div v-else class="space-y-4">
                 <div class="space-y-2">

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { CircleCheck, Eye, Sparkles, TrendingUp, Trophy, UnlockKeyhole } from '@lucide/vue'
+import { CircleCheck, Sparkles, TrendingUp, Trophy, UnlockKeyhole } from '@lucide/vue'
 import { markRaw, type Component } from 'vue'
 definePageMeta({
   ssr: false
@@ -8,7 +8,8 @@ definePageMeta({
 type UserStats = {
   total_xp: number | string
   words_maxed: number | string
-  words_seen: number | string
+  total_words: number | null
+  total_unlockable_words: number | null
   words_unlocked: number | string
   total_correct: number | string
   total_wrong: number | string
@@ -20,6 +21,7 @@ type StatCard = {
   value: number
   icon: Component
   suffix?: string
+  total?: number | null
   signed?: boolean
 }
 
@@ -55,17 +57,14 @@ const stats = computed<StatCard[]>(() => {
     {
       label: 'Words Unlocked',
       value: toNumber(statsData.value.words_unlocked),
+      total: statsData.value.total_unlockable_words,
       icon: markRaw(UnlockKeyhole)
     },
     {
       label: 'Words Maxed',
       value: toNumber(statsData.value.words_maxed),
+      total: statsData.value.total_words,
       icon: markRaw(Trophy)
-    },
-    {
-      label: 'Words Seen',
-      value: toNumber(statsData.value.words_seen),
-      icon: markRaw(Eye)
     },
     {
       label: 'Correct Answers',
@@ -197,7 +196,7 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
+        <div class="grid grid-cols-2 gap-3 sm:gap-4">
           <div v-for="(stat, index) in stats.slice(1)" :key="stat.label" class="compact-stat-card hover:brightness-105"
             :class="`stat-${index + 1}`">
             <div class="compact-stat-top">
@@ -212,6 +211,7 @@ onMounted(async () => {
 
             <p class="compact-stat-value">
               {{ formatStatValue(stat, index + 1) }}
+              <span v-if="stat.total != null" class="stat-total">of {{ stat.total.toLocaleString() }}</span>
             </p>
           </div>
         </div>
@@ -298,10 +298,6 @@ main {
 }
 
 .stat-4 {
-  background: rgba(122, 111, 203, 0.4);
-}
-
-.stat-5 {
   background: rgba(130, 255, 111, 0.4);
 }
 
@@ -431,6 +427,12 @@ main {
   /* background: rgba(255, 255, 255, 0.55); */
   color: rgba(17, 24, 39, 0.72);
   flex: 0 0 auto;
+}
+
+.stat-total {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .compact-stat-value {

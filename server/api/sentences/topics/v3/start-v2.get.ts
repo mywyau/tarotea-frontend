@@ -1,3 +1,4 @@
+import { loadSentenceWordCategories } from "~/server/services/sentence-quiz/start/loadSentenceWordCategories";
 import { createError, getHeader, getQuery, getRequestIP } from "h3";
 import { getUserEntitlement } from "#imports";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
@@ -10,34 +11,17 @@ import {
   TopicSentenceData,
   TopicSentenceItem,
   QuizSession,
+  SentenceProgress,
 } from "~/server/services/topic/sentence-quiz/start/types";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
 import { Entitlement } from "~/types/auth/entitlements";
 import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
-import { buildSentenceQuiz } from "~/utils/quiz/buildSentenceQuiz";
+import { buildSentenceQuiz, buildWordListeningQuiz, hasSpokenTarget } from "~/utils/quiz/buildSentenceQuiz";
 import { shuffleFisherYates } from "~/utils/shuffle";
 
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
-
-type TopicIndexData = {
-  categories?: Record<string, Array<{ id?: string }>>;
-};
-
-async function loadCanonicalTopicWordIds(slug: string): Promise<string[]> {
-  try {
-    const topic = await $fetch<TopicIndexData>(`/api/index/topics/${slug}`);
-    const ids = Object.values(topic.categories ?? {})
-      .flat()
-      .map((word) => word.id ?? "")
-      .filter(Boolean);
-
-    return [...new Set(ids)];
-  } catch {
-    return [];
-  }
-}
 
 export default defineEventHandler(async (event) => {
   const bearerToken = getHeader(event, "authorization");
@@ -98,7 +82,9 @@ export default defineEventHandler(async (event) => {
   const sentenceSourceWordIdsInOrder = [
     ...new Set(allItems.map((item) => item.sourceWordId).filter(Boolean)),
   ];
-  const canonicalWordIdsInOrder = await loadCanonicalTopicWordIds(slug);
+  const wordListening = query.format === "word-listening";
+  const categories = await loadSentenceWordCategories("topics", slug);
+  const canonicalWordIdsInOrder = [...categories.keys()];
   const sourceWordIdsInOrder = canonicalWordIdsInOrder.length
     ? canonicalWordIdsInOrder
     : sentenceSourceWordIdsInOrder;
@@ -132,7 +118,8 @@ export default defineEventHandler(async (event) => {
   const accessibleItems = allItems.filter(
     (item) =>
       sourceWordIdSet.has(item.sourceWordId) &&
-      accessibleWordIdSet.has(item.sourceWordId),
+      accessibleWordIdSet.has(item.sourceWordId) &&
+      (!wordListening || hasSpokenTarget(item)),
   );
 
   if (!accessibleItems.length) {
@@ -172,7 +159,7 @@ export default defineEventHandler(async (event) => {
 
   const sentenceProgressMap = userId
     ? await loadSentenceProgressMap(userId, sentenceIds)
-    : new Map<string, number>();
+    : new Map<string, SentenceProgress>();
 
   const byWord = new Map<string, TopicSentenceItem[]>();
 
@@ -190,7 +177,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const shuffledItems = shuffleFisherYates(selected);
-  const questions = buildSentenceQuiz(shuffledItems).slice(0, 20);
+  const questions = (wordListening
+    ? buildWordListeningQuiz(shuffledItems, categories)
+    : buildSentenceQuiz(shuffledItems)
+  ).slice(0, 20);
   const wordIds = [...new Set(questions.map((q) => q.wordId))];
   const progress = userId
     ? await loadWordProgressMap(userId, wordIds)

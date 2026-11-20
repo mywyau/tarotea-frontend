@@ -24,12 +24,11 @@ const yearlySavings = (monthlyPrice * 12 - yearlyPrice).toFixed(2)
 const yearlyMonthlyEquivalent = (yearlyPrice / 12).toFixed(2)
 
 const benefits = [
-  { icon: markRaw(Sparkles), text: 'Greater language exposure with full access to all content' },
   { icon: markRaw(UnlockKeyhole), text: 'Unlock over 2500 word tiles' },
   { icon: markRaw(BookOpen), text: 'Unlock over 10000 sentences to help with your studies' },
   { icon: markRaw(Target), text: 'Train to improve recognition and recall with our exercises and activities' },
   { icon: markRaw(Sparkles), text: 'Increase exposure to weaker words via our xp system' },
-  { icon: markRaw(Tags), text: 'Access new topics, words and features added regularly' },
+  { icon: markRaw(Tags), text: 'Explore new topics and words as they are added' },
 ]
 
 // Already paid → manage subscription instead
@@ -68,7 +67,7 @@ function upgrade(plan: 'monthly' | 'yearly') {
         </h1>
 
         <p class="text-gray-600 max-w-xl mx-auto">
-          Unlock all content and learn Cantonese without limits.
+          Unlock the full Cantonese vocabulary and sentence quizzes across levels and topics.
         </p>
 
         <!-- Benefits -->

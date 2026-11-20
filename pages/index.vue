@@ -29,6 +29,13 @@ const generalGreeting = ref('')
 const momentumMessage = ref('')
 let onlineRefreshInterval: ReturnType<typeof setInterval> | undefined
 
+const wordCardPalette = ['taro-blue', 'taro-pink', 'taro-yellow', 'success', 'taro-lilac']
+function dailyWordCardColour() {
+  const utcDay = Math.floor(Date.now() / 86_400_000)
+  return `rgb(var(--color-${wordCardPalette[utcDay % wordCardPalette.length]}) / 0.4)`
+}
+const wordCardColour = useState('home-word-card-colour', dailyWordCardColour)
+
 const primaryAction = computed(() => isLoggedIn.value
   ? { to: '/daily/vocab/v2/start-quiz', label: 'Start daily practice' }
   : { to: '/levels', label: 'Start learning' })
@@ -103,8 +110,12 @@ watch(() => user.value?.firstName, updateGeneralGreeting)
 onMounted(() => {
   void resolveMeState()
   updateGeneralGreeting()
-  void refreshCurrentUsers()
-  onlineRefreshInterval = setInterval(() => void refreshCurrentUsers(), 30_000)
+  function refreshHome() {
+    wordCardColour.value = dailyWordCardColour()
+    void refreshCurrentUsers()
+  }
+  refreshHome()
+  onlineRefreshInterval = setInterval(refreshHome, 30_000)
 })
 
 onBeforeUnmount(() => {
@@ -133,32 +144,32 @@ onBeforeUnmount(() => {
       </div>
 
       <div class="home-hero-panel" aria-label="TaroTea learner activity">
-        <div class="home-word-sample">
-          <span class="home-word-label">Today’s studio</span>
+        <div class="home-word-sample" :style="{ backgroundColor: wordCardColour }">
+          <span class="home-word-label">Word of the day</span>
           <strong lang="zh-HK">慢慢嚟</strong>
           <span class="home-jyutping">maan6 maan6 lai4</span>
           <span>Take it slowly</span>
         </div>
         <div class="home-stats">
-          <div><UsersRound aria-hidden="true" /><strong>{{ currentUsers ?? '—' }}</strong><span>online now</span></div>
-          <div><GraduationCap aria-hidden="true" /><strong>{{ stats?.totalUsers ?? '—' }}</strong><span>learners</span></div>
+          <div class="bg-[#efb28f]"><UsersRound aria-hidden="true" /><strong>{{ currentUsers ?? '—' }}</strong><span>online now</span></div>
+          <div class="bg-[#a8ace0]"><GraduationCap aria-hidden="true" /><strong>{{ stats?.totalUsers ?? '—' }}</strong><span>learners</span></div>
         </div>
       </div>
     </section>
 
     <AppSection title="Choose your learning path" description="Start with a structured level or learn the words that matter to you today.">
       <div class="home-path-grid">
-        <AppCard tone="blue" padding="generous" interactive>
+        <AppCard tone="lilac" padding="generous" interactive>
           <span class="home-path-icon"><GraduationCap aria-hidden="true" /></span>
           <h3>Learn by level</h3>
           <p>Build a foundation step by step with grouped vocabulary and sentence patterns.</p>
           <AppButton to="/levels" variant="secondary">Explore levels</AppButton>
         </AppCard>
-        <AppCard tone="pink" padding="generous" interactive>
+        <AppCard tone="blue" padding="generous" interactive>
           <span class="home-path-icon"><Tags aria-hidden="true" /></span>
           <h3>Learn by topic</h3>
           <p>Focus on travel, food, family and other situations from everyday conversation.</p>
-          <AppButton to="/topics" variant="secondary">Explore topics</AppButton>
+          <AppButton to="/topics" class="home-explore-topics">Explore topics</AppButton>
         </AppCard>
       </div>
       <div class="home-practice-links">
@@ -192,14 +203,18 @@ onBeforeUnmount(() => {
 .home-word-label { color: rgb(var(--color-primary-strong)); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .home-word-sample strong { margin-top: 1rem; font-family: var(--font-chinese); font-size: clamp(3rem, 8vw, 5rem); line-height: 1.05; }
 .home-jyutping { margin-top: 0.8rem; color: rgb(var(--color-primary-strong)); font-weight: 700; }
-.home-word-sample > span:last-child { margin-top: 0.25rem; color: rgb(var(--color-muted)); }
+.home-word-sample > span:last-child { margin-top: 0.25rem; color: rgb(var(--color-ink)); }
 .home-stats { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid rgb(var(--color-ink) / 0.09); background: rgb(var(--color-surface) / 0.58); }
 .home-stats div { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0.1rem 0.6rem; padding: 1rem 1.2rem; }
 .home-stats div + div { border-left: 1px solid rgb(var(--color-ink) / 0.09); }
 .home-stats svg { grid-row: 1 / 3; width: 1.2rem; color: rgb(var(--color-primary-strong)); }
 .home-stats strong { line-height: 1; }
-.home-stats span { color: rgb(var(--color-muted)); font-size: 0.72rem; }
+.home-stats span { color: rgb(var(--color-ink)); font-size: 0.72rem; }
 .home-path-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.home-explore-topics {
+  --color-primary: 52 99 133;
+  --color-primary-strong: 37 75 104;
+}
 .home-path-grid h3 { margin: 1.2rem 0 0; font-size: 1.35rem; }
 .home-path-grid p { min-height: 3.2rem; margin: 0.55rem 0 1.4rem; color: rgb(var(--color-muted)); line-height: 1.6; }
 .home-path-icon { display: inline-flex; width: 2.8rem; height: 2.8rem; align-items: center; justify-content: center; border-radius: var(--radius-control); background: rgb(var(--color-surface) / 0.7); color: rgb(var(--color-primary-strong)); }

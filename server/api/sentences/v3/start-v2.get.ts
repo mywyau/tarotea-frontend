@@ -1,3 +1,4 @@
+import { loadSentenceWordCategories } from "~/server/services/sentence-quiz/start/loadSentenceWordCategories";
 import { getUserEntitlement } from "#imports";
 import { createError, getHeader, getQuery, getRequestIP } from "h3";
 import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
@@ -10,12 +11,13 @@ import {
   LevelSentenceData,
   LevelSentenceItem,
   QuizSession,
+  SentenceProgress,
 } from "~/server/services/sentence-quiz/start/types";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
 import { Entitlement } from "~/types/auth/entitlements";
-import { buildSentenceQuiz } from "~/utils/quiz/buildSentenceQuiz";
+import { buildSentenceQuiz, buildWordListeningQuiz, hasSpokenTarget } from "~/utils/quiz/buildSentenceQuiz";
 import { isLevelId, levelIdToNumbers } from "~/utils/levels/levels";
 import {
   canAccessLevel,
@@ -25,24 +27,6 @@ import {
 import { shuffleFisherYates } from "~/utils/shuffle";
 
 const QUIZ_SESSION_TTL_SECONDS = 60 * 30;
-
-type LevelIndexData = {
-  categories?: Record<string, Array<{ id?: string }>>;
-};
-
-async function loadCanonicalLevelWordIds(slug: string): Promise<string[]> {
-  try {
-    const level = await $fetch<LevelIndexData>(`/api/index/levels/${slug}`);
-    const ids = Object.values(level.categories ?? {})
-      .flat()
-      .map((word) => word.id ?? "")
-      .filter(Boolean);
-
-    return [...new Set(ids)];
-  } catch {
-    return [];
-  }
-}
 
 export default defineEventHandler(async (event) => {
   const bearerToken = getHeader(event, "authorization");
@@ -117,7 +101,9 @@ export default defineEventHandler(async (event) => {
   const sentenceSourceWordIdsInOrder = [
     ...new Set(allItems.map((item) => item.sourceWordId).filter(Boolean)),
   ];
-  const canonicalWordIdsInOrder = await loadCanonicalLevelWordIds(slug);
+  const wordListening = query.format === "word-listening";
+  const categories = await loadSentenceWordCategories("levels", slug);
+  const canonicalWordIdsInOrder = [...categories.keys()];
   const sourceWordIdsInOrder = canonicalWordIdsInOrder.length
     ? canonicalWordIdsInOrder
     : sentenceSourceWordIdsInOrder;
@@ -130,7 +116,7 @@ export default defineEventHandler(async (event) => {
       accessibleWordIdSet = new Set(freePreviewIds);
     } else {
       const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
-      const hasFullAccess = canAccessLevel(true, entitlement, levelNumber);
+      const hasFullAccess = canAccessLevel(true, entitlement);
 
       if (!hasFullAccess) {
         const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_LEVEL_WORD_LIMIT);
@@ -151,7 +137,8 @@ export default defineEventHandler(async (event) => {
   const accessibleItems = allItems.filter(
     (item) =>
       sourceWordIdSet.has(item.sourceWordId) &&
-      accessibleWordIdSet.has(item.sourceWordId),
+      accessibleWordIdSet.has(item.sourceWordId) &&
+      (!wordListening || hasSpokenTarget(item)),
   );
 
   if (!accessibleItems.length) {
@@ -190,7 +177,7 @@ export default defineEventHandler(async (event) => {
   ];
   const sentenceProgressMap = userId
     ? await loadSentenceProgressMap(userId, sentenceIds)
-    : new Map<string, number>();
+    : new Map<string, SentenceProgress>();
 
   const byWord = new Map<string, LevelSentenceItem[]>();
 
@@ -208,7 +195,10 @@ export default defineEventHandler(async (event) => {
   }
 
   const shuffledItems = shuffleFisherYates(selected);
-  const questions = buildSentenceQuiz(shuffledItems).slice(0, 20);
+  const questions = (wordListening
+    ? buildWordListeningQuiz(shuffledItems, categories)
+    : buildSentenceQuiz(shuffledItems)
+  ).slice(0, 20);
   const wordIds = [...new Set(questions.map((q) => q.wordId))];
   const progress = userId
     ? await loadWordProgressMap(userId, wordIds)

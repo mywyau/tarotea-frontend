@@ -41,7 +41,6 @@ const progress = computed(() => Math.min((props.xp ?? 0) / masteryXp * 100, 100)
   min-height: 10.5rem;
   flex-direction: column;
   align-items: center;
-  border: 1px solid rgb(var(--color-ink) / 0.1);
   border-radius: var(--radius-card);
   padding: 1.2rem;
   background: rgb(var(--color-surface) / 0.76);
@@ -49,13 +48,17 @@ const progress = computed(() => Math.min((props.xp ?? 0) / masteryXp * 100, 100)
   text-align: center;
   text-decoration: none;
   box-shadow: 0 1px 2px rgb(var(--color-ink) / 0.035);
-  transition: border-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease, transform var(--motion-fast) ease;
+  transition: box-shadow var(--motion-fast) ease, transform var(--motion-fast) ease;
 }
 
 .word-tile:hover {
-  border-color: rgb(var(--color-primary) / 0.35);
   box-shadow: var(--shadow-soft);
   transform: translateY(-2px);
+}
+
+.word-tile:focus-visible {
+  outline: 2px solid rgb(var(--color-primary-strong));
+  outline-offset: 3px;
 }
 
 .word-tile-status {

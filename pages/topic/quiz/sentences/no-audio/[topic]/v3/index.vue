@@ -4,7 +4,7 @@ definePageMeta({
   ssr: false,
 })
 
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { masteryXp, sentenceQuizXp } from '@/config/xp/helpers'
 import {
@@ -54,6 +54,7 @@ type QuizAnswer = {
   correct: boolean
 }
 
+const openQuizResults = useQuizResults()
 const route = useRoute()
 const slug = computed(() => route.params.topic as string)
 const { isLoggedIn } = useMeStateV2()
@@ -193,21 +194,12 @@ function deltaFor(correct: boolean, streakBefore: number) {
 
 const question = computed(() => questions.value[current.value])
 
-const animatedAccuracy = ref(0)
-const completionAnimated = ref(false)
-const animatedXpEarned = ref(0)
-const animatedXpLost = ref(0)
 
 const answerLog = ref<QuizAnswer[]>([])
 const finishing = ref(false)
 const totalXpEarned = ref(0)
 const totalXpLost = ref(0)
 const initialProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
-
-const accuracy = computed(() => {
-  if (!questions.value.length) return 0
-  return Math.round((score.value / questions.value.length) * 100)
-})
 
 const incorrectCount = computed(() => {
   return Math.max(0, questions.value.length - score.value)
@@ -236,20 +228,6 @@ const showQuiz = computed(() => {
   return hasQuestions.value && current.value < questions.value.length
 })
 
-const resultHeroClass = computed(() => {
-  if (accuracy.value >= 80) return 'result-3'
-  if (accuracy.value >= 60) return 'result-0'
-  if (accuracy.value >= 40) return 'result-2'
-  return 'result-1'
-})
-
-const resultMeta = computed(() => {
-  if (accuracy.value === 100) return { title: 'Perfect' }
-  if (accuracy.value >= 70) return { title: 'Great job' }
-  if (accuracy.value >= 50) return { title: 'Nice try' }
-  return { title: 'Keep practicing' }
-})
-
 const tileColors = ref<string[]>([])
 
 function playSentenceAudioAfterAnswer(sentenceId: string) {
@@ -258,7 +236,9 @@ function playSentenceAudioAfterAnswer(sentenceId: string) {
   const audio = new Audio(getRandomizedAudioSrc(`${sentenceId}.mp3`))
   audio.volume = volume.value
   audio.currentTime = 0
-  play(audio)
+  void play(audio).catch(error => {
+    if (error.name !== 'AbortError') console.warn('Sentence audio playback failed', error)
+  })
 }
 
 const MIN_CALCULATING_MS = 1800
@@ -269,36 +249,6 @@ function sleep(ms: number) {
 
 function generateTileColors() {
   tileColors.value = shuffleFisherYates(brandColours).slice(0, 4)
-}
-
-function resetCompletionAnimations() {
-  animatedAccuracy.value = 0
-  animatedXpEarned.value = 0
-  animatedXpLost.value = 0
-  completionAnimated.value = false
-}
-
-function animateCount(target: Ref<number>, end: number, duration: number) {
-  const start = target.value
-  const delta = end - start
-  const startTime = performance.now()
-
-  const tick = (now: number) => {
-    const progress = Math.min((now - startTime) / duration, 1)
-    target.value = Math.round(start + delta * progress)
-
-    if (progress < 1) {
-      requestAnimationFrame(tick)
-    }
-  }
-
-  requestAnimationFrame(tick)
-}
-
-function runCompletionAnimations() {
-  animateCount(animatedAccuracy, accuracy.value, 2300)
-  animateCount(animatedXpEarned, totalXpEarned.value, 1000)
-  animateCount(animatedXpLost, totalXpLost.value, 1000)
 }
 
 function calculateQuizXpTotals() {
@@ -349,7 +299,6 @@ function resetQuizStateFromStartPayload(payload: SentenceQuizStartResponse) {
   elapsedMs.value = 0
   frozenElapsedMs.value = null
   quizStartedAt.value = null
-  resetCompletionAnimations()
 
   wordProgressMap.value = { ...(payload.progress ?? {}) }
   initialProgressMap.value = Object.fromEntries(
@@ -430,8 +379,9 @@ async function answer(index: number) {
     playIncorrectJingle()
   }
 
+  const sentenceId = question.value.sentenceId
   setTimeout(() => {
-    playSentenceAudioAfterAnswer(question.value?.sentenceId ?? '')
+    if (answered.value && question.value?.sentenceId === sentenceId) playSentenceAudioAfterAnswer(sentenceId)
   }, 220)
 
   const wordId = question.value.wordId
@@ -456,6 +406,7 @@ async function answer(index: number) {
 }
 
 async function next() {
+  if (!answered.value || !showQuiz.value) return
   answered.value = false
   selectedIndex.value = null
   current.value++
@@ -499,11 +450,6 @@ watch(
 
     stop()
 
-    if (!completionAnimated.value) {
-      completionAnimated.value = true
-      runCompletionAnimations()
-    }
-
     if (!completionSoundPlayed.value) {
       completionSoundPlayed.value = true
 
@@ -517,6 +463,17 @@ watch(
         }
       }, 250)
     }
+
+    void openQuizResults({
+      title: 'Sentence Quiz Complete',
+      correct: score.value,
+      incorrect: incorrectCount.value,
+      elapsed: formattedElapsedTime.value,
+      xpEarned: totalXpEarned.value,
+      xpLost: totalXpLost.value,
+      retryTo: `/topic/quiz/sentences/no-audio/${slug.value}/v3/start-quiz`,
+      backTo: '/topics/quiz',
+    })
   }
 )
 
@@ -559,7 +516,6 @@ watch(
     elapsedMs.value = 0
     frozenElapsedMs.value = null
     quizStartedAt.value = null
-    resetCompletionAnimations()
   }
 )
 
@@ -679,7 +635,7 @@ onBeforeUnmount(() => {
             <button v-if="answered"
               class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
               @click="next">
-              Next
+              {{ current + 1 === questions.length ? 'View results' : 'Next' }}
             </button>
           </div>
         </div>
@@ -702,31 +658,6 @@ onBeforeUnmount(() => {
           </p>
         </div>
 
-        <div v-else-if="showResults" key="results" class="quiz-completion space-y-6">
-          <transition name="card-fade" appear>
-            <div class="stat-card hero-card" :class="resultHeroClass">
-              <p class="stat-label">
-                Sentence Quiz Complete
-              </p>
-
-              <h2 class="hero-title">
-                {{ resultMeta.title }}
-              </h2>
-
-              <p class="hero-score">
-                {{ animatedAccuracy }}%
-              </p>
-            </div>
-          </transition>
-
-          <transition name="card-fade" appear>
-            <QuizCompletionFlipStats :correct="score" :incorrect="incorrectCount" :time="formattedElapsedTime"
-              :xp-earned="animatedXpEarned" :xp-lost="animatedXpLost" />
-          </transition>
-
-          <QuizCompletionActions :retry-to="`/topic/quiz/sentences/no-audio/${slug}/v3/start-quiz`"
-            back-to="/topics/quiz" />
-        </div>
       </transition>
     </section>
   </main>

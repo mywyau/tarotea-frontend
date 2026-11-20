@@ -53,6 +53,7 @@ type QuizAnswer = {
     correct: boolean
 }
 
+const openQuizResults = useQuizResults()
 const route = useRoute()
 const slug = computed(() => route.params.topic as string)
 
@@ -116,7 +117,6 @@ function resetFinalizeState() {
     totalXpEarned.value = 0
     totalXpLost.value = 0
     completionSoundPlayed.value = false
-    resetCompletionAnimations()
 }
 
 function calculateQuizXpTotals() {
@@ -169,10 +169,6 @@ const finishing = ref(false)
 const totalXpEarned = ref<number>(0)
 const totalXpLost = ref<number>(0)
 
-const animatedAccuracy = ref(0)
-const animatedXpEarned = ref(0)
-const animatedXpLost = ref(0)
-const completionAnimated = ref(false)
 const completionSoundPlayed = ref(false)
 
 const wordProgressMap = ref<Record<string, WordProgress>>({})
@@ -253,17 +249,6 @@ function deltaFor(correct: boolean, streakBefore: number) {
 
 function sleep(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-function resetCompletionAnimations() {
-    animatedAccuracy.value = 0
-    animatedXpEarned.value = 0
-    animatedXpLost.value = 0
-    completionAnimated.value = false
-}
-
-function runCompletionAnimations() {
-    animateCount(animatedAccuracy, accuracy.value, 2300)
 }
 
 function resetQuizState() {
@@ -358,11 +343,6 @@ const pageTitle = computed(() => {
         .join(' ')
 })
 
-const accuracy = computed(() => {
-    if (!questions.value.length) return 0
-    return Math.round((score.value / questions.value.length) * 100)
-})
-
 const incorrectCount = computed(() => {
     return Math.max(0, questions.value.length - score.value)
 })
@@ -402,29 +382,6 @@ const progressPercent = computed(() => {
     if (!total) return 0
     const position = Math.min(current.value + 1, total)
     return Math.round((position / total) * 100)
-})
-
-const resultHeroClass = computed(() => {
-    if (accuracy.value >= 80) return 'result-3'
-    if (accuracy.value >= 70) return 'result-0'
-    if (accuracy.value >= 50) return 'result-2'
-    return 'result-1'
-})
-
-const resultMeta = computed(() => {
-    if (accuracy.value === 100) {
-        return { title: 'Perfect' }
-    }
-
-    if (accuracy.value >= 70) {
-        return { title: 'Great job' }
-    }
-
-    if (accuracy.value >= 50) {
-        return { title: 'Nice try' }
-    }
-
-    return { title: 'Keep practicing' }
 })
 
 const correctWords = computed(() => {
@@ -556,6 +513,7 @@ async function finalizeAudioQuiz() {
 }
 
 async function next() {
+    if (!answered.value || !showQuiz.value) return
     stop()
     answered.value = false
     selectedIndex.value = null
@@ -585,13 +543,6 @@ watch(
     (visible) => {
         if (!visible) return
 
-        if (!completionAnimated.value) {
-            completionAnimated.value = true
-            runCompletionAnimations()
-            animateCount(animatedXpEarned, totalXpEarned.value, 1000)
-            animateCount(animatedXpLost, totalXpLost.value, 1000)
-        }
-
         if (!completionSoundPlayed.value) {
             completionSoundPlayed.value = true
             stop()
@@ -606,6 +557,22 @@ watch(
                 }
             }, 250)
         }
+
+        void openQuizResults({
+          title: 'Quiz Complete',
+          correct: score.value,
+          incorrect: incorrectCount.value,
+          elapsed: formattedElapsedTime.value,
+          xpEarned: totalXpEarned.value,
+          xpLost: totalXpLost.value,
+          retryTo: `/topic/quiz/vocabulary/audio/v5/${slug.value}/start-quiz`,
+          backTo: '/topics/quiz',
+          review: {
+            basePath: `/topic/word/${slug.value}`,
+            correct: reviewedWords(correctWords.value),
+            incorrect: reviewedWords(missedWords.value),
+          },
+        })
     }
 )
 
@@ -722,7 +689,7 @@ onUnmounted(() => {
                     <button v-if="answered"
                         class="next-btn-blue audio-next-button w-full rounded-xl font-medium text-black hover:brightness-110"
                         @click="next">
-                        Next
+                        {{ current + 1 === questions.length ? 'View results' : 'Next' }}
                     </button>
                 </div>
             </div>
@@ -763,59 +730,6 @@ onUnmounted(() => {
                     </button>
                 </div>
 
-                <div v-else-if="showResults" key="results" class="quiz-completion space-y-6">
-                    <transition name="card-fade" appear>
-                        <div class="stat-card hero-card" :class="resultHeroClass">
-                            <p class="stat-label">
-                                Quiz Complete
-                            </p>
-
-                            <h2 class="hero-title">
-                                {{ resultMeta.title }}
-                            </h2>
-
-                            <p class="hero-score">
-                                {{ animatedAccuracy }}%
-                            </p>
-                        </div>
-                    </transition>
-
-                    <transition name="card-fade" appear>
-                        <QuizCompletionFlipStats :correct="score" :incorrect="incorrectCount" :show-score="false"
-                            :time="formattedElapsedTime" :xp-earned="animatedXpEarned" :xp-lost="animatedXpLost" />
-                    </transition>
-
-                    <div v-if="correctWords.length" class="stat-card result-word-card text-left result-3">
-                        <h3 class="text-sm font-semibold text-gray-900 mb-3">
-                            Correct <span>{{ score }}</span>
-                        </h3>
-
-                        <div class="flex flex-wrap gap-2">
-                            <NuxtLink v-for="word in correctWords" :key="word!.id" :to="`/topic/word/${slug}/${word!.id}`" target="_blank" rel="noopener noreferrer"
-                                class="rounded-lg text-green-700 px-3 py-1 text-base hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-700"
-                                :aria-label="`Open word page for ${word!.word} in a new tab`">
-                                {{ word!.word }}
-                            </NuxtLink>
-                        </div>
-                    </div>
-
-                    <div v-if="missedWords.length" class="stat-card result-word-card text-left result-1">
-                        <h3 class="text-sm font-semibold text-gray-900 mb-3">
-                            Incorrect <span>{{ incorrectCount }}</span>
-                        </h3>
-
-                        <div class="flex flex-wrap gap-2">
-                            <NuxtLink v-for="word in missedWords" :key="word!.id" :to="`/topic/word/${slug}/${word!.id}`" target="_blank" rel="noopener noreferrer"
-                                class="rounded-lg text-rose-700 px-3 py-1 text-base hover:brightness-125 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-rose-700"
-                                :aria-label="`Open word page for ${word!.word} in a new tab`">
-                                {{ word!.word }}
-                            </NuxtLink>
-                        </div>
-                    </div>
-
-                    <QuizCompletionActions :retry-to="`/topic/quiz/vocabulary/audio/v5/${slug}/start-quiz`"
-                        back-to="/topics/quiz" />
-                </div>
             </transition>
         </section>
     </main>

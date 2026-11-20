@@ -1,4 +1,5 @@
 const focusRoutePatterns = [
+  /^\/(?:topic\/)?quiz\/results$/,
   /^\/quiz\/[^/]+\/(?:word|audio)\/v2\/test$/,
   /^\/quiz\/[^/]+\/sentences\/(?:audio|no-audio)\/v3$/,
   /^\/quiz\/[^/]+\/echo-gecko$/,

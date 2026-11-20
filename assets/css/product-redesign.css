@@ -146,14 +146,38 @@
 :where(.stat-card, .page-card, .featured-stat-card, .compact-stat-card) {
   border: 1px solid rgb(var(--color-ink) / 0.09) !important;
   border-radius: var(--radius-card) !important;
-  background: rgb(var(--color-surface)) !important;
   color: rgb(var(--color-ink)) !important;
   box-shadow: none !important;
   filter: none !important;
 }
 
+:where(.stat-card, .page-card) {
+  background: var(--stat-surface, rgb(var(--color-surface))) !important;
+}
+
 :where(.stat-label) {
   color: rgb(var(--color-muted)) !important;
+}
+
+:where(.level-page, .topic-page) .stats-grid .stat-0 {
+  --stat-surface: #a8c4da;
+}
+
+:where(.level-page, .topic-page) .stats-grid .stat-1 {
+  --stat-surface: #a4c5ae;
+}
+
+:where(.level-page, .topic-page) .stats-grid .stat-2 {
+  --stat-surface: #dec486;
+}
+
+:where(.level-page, .topic-page) .stats-grid .stat-3 {
+  --stat-surface: #beb0cf;
+}
+
+:where(.level-page, .topic-page) .stats-grid .stat-label,
+.stats-page .stat-label {
+  color: rgb(var(--color-ink)) !important;
 }
 
 :where(.category-heading) {
@@ -540,7 +564,7 @@
 .account-page :where([class*='backdrop-blur'], .rounded-lg.border) {
   border: 1px solid rgb(var(--color-ink) / 0.1) !important;
   border-radius: var(--radius-card) !important;
-  background: rgb(var(--color-surface)) !important;
+  background: rgb(var(--color-surface));
   color: rgb(var(--color-ink)) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;

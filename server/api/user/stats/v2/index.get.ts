@@ -1,3 +1,5 @@
+import { masteryXp } from "~/config/xp/helpers";
+import { getStatsWordCatalogue } from "~/server/services/stats/wordCatalogue";
 import { db } from "~/server/repositories/db";
 import { requireUser } from "~/server/utils/requireUser";
 
@@ -6,6 +8,8 @@ type UserStatsResponse = {
   words_maxed: number;
   words_seen: number;
   words_unlocked: number;
+  total_words: number | null;
+  total_unlockable_words: number | null;
   total_correct: number;
   total_wrong: number;
   xp_this_week: number;
@@ -15,12 +19,11 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
   const auth = await requireUser(event);
   const userId = auth.sub;
 
-  const [statsResult, weeklyXpResult, unlockedWordsResult] = await Promise.all([
+  const [statsResult, weeklyXpResult, wordProgress, catalogue] = await Promise.all([
     db.query(
       `
         select
           total_xp,
-          words_maxed,
           words_seen,
           total_correct,
           total_wrong
@@ -41,23 +44,36 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
     ),
     db.query(
       `
-        select coalesce(count(distinct word_id), 0)::int as words_unlocked
+        select word_id, 'unlocked' as kind
         from user_word_unlocks
         where user_id = $1
+        union all
+        select word_id, 'maxed' as kind
+        from user_word_progress
+        where user_id = $1 and xp >= $2
       `,
-      [userId]
+      [userId, masteryXp]
     ),
+    getStatsWordCatalogue(useRuntimeConfig().public.cdnBase).catch(error => {
+      console.warn("Could not load word totals for stats", error);
+      return null;
+    }),
   ]);
 
   const statsRow = statsResult.rows[0];
   const weeklyRow = weeklyXpResult.rows[0];
-  const unlockedRow = unlockedWordsResult.rows[0];
+  const all = catalogue && new Set(catalogue.all);
+  const unlockable = catalogue && new Set(catalogue.unlockable);
+  const maxed = wordProgress.rows.filter(row => row.kind === "maxed" && (!all || all.has(row.word_id))).length;
+  const unlocked = wordProgress.rows.filter(row => row.kind === "unlocked" && (!unlockable || unlockable.has(row.word_id))).length;
 
   return {
     total_xp: Number(statsRow?.total_xp ?? 0),
-    words_maxed: Number(statsRow?.words_maxed ?? 0),
+    words_maxed: maxed,
     words_seen: Number(statsRow?.words_seen ?? 0),
-    words_unlocked: Number(unlockedRow?.words_unlocked ?? 0),
+    words_unlocked: unlocked,
+    total_words: all?.size ?? null,
+    total_unlockable_words: unlockable?.size ?? null,
     total_correct: Number(statsRow?.total_correct ?? 0),
     total_wrong: Number(statsRow?.total_wrong ?? 0),
     xp_this_week: Number(weeklyRow?.xp_this_week ?? 0),

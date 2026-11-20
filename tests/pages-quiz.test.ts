@@ -111,18 +111,16 @@ describe('quiz page contracts', () => {
     expect(actions).toContain("retryLabel: 'Try again'")
     expect(actions).toContain("backLabel: 'Choose another quiz'")
 
+    const results = readPage('quiz/results.vue')
+    expect(results).toContain('<QuizCompletionActions')
+    expect(results).toContain(':show-score="!result.review"')
+    expect(results).toContain('group.count')
     for (const page of completionPages) {
       const source = readPage(page)
-      expect(source).toContain('class="quiz-completion space-y-6"')
-      expect(source).toContain('<QuizCompletionActions')
-      expect(source).not.toContain('Play Again')
-    }
-
-    for (const page of completionPages.filter(page => page.includes('/word/') || page.includes('/audio/v2/') || page.includes('/audio/v5/'))) {
-      const source = readPage(page)
-      expect(source).toContain(':show-score="false"')
-      expect(source).toContain('Correct <span>{{ score }}</span>')
-      expect(source).toContain('Incorrect <span>{{ incorrectCount }}</span>')
+      expect(source).toContain('openQuizResults({')
+      expect(source).toContain("'View results' : 'Next'")
+      expect(source).not.toContain('<QuizCompletionActions')
+      expect(source).not.toContain('class="quiz-completion space-y-6"')
     }
   })
 

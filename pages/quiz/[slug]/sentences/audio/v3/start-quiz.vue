@@ -29,8 +29,8 @@ watchEffect(() => {
 
 const primaryTips = [
   {
-    title: 'Listen to sentence audio first',
-    body: 'Each question includes audio for the sentence. Replay if needed before answering.',
+    title: 'Which word did you hear?',
+    body: 'Listen to the sentence and choose the word you heard. You can replay the clip before or after answering.',
   },
   {
     title: 'Wrong answers cost 12 XP',
@@ -48,7 +48,7 @@ const scoringTips = [
   'Correct answers earn increasing XP with streaks.',
   'Streak bonus caps after 5 correct answers in a row.',
   'Questions are randomized every run.',
-  'This mode emphasizes listening + sentence meaning recognition.',
+  'After answering, read the highlighted word in the transcript and check its meaning.',
 ]
 
 const showAllTips = ref(false)

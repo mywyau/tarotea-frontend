@@ -4,7 +4,7 @@ definePageMeta({
   ssr: false,
 })
 
-import { computed, ref, watch, type Ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { masteryXp, sentenceQuizXp } from '@/config/xp/helpers'
 import {
@@ -14,19 +14,9 @@ import {
   playQuizCompleteFanfareSong,
   playQuizCompleteOkaySong
 } from '@/utils/sounds'
-import { brandColours } from '~/utils/branding/helpers'
 import { shuffleFisherYates } from '~/utils/shuffle'
 
-type SentenceQuizQuestion = {
-  sentenceId: string
-  wordId: string
-  prompt: string
-  options: string[]
-  correctIndex: number
-  sourceWord: string
-  sourceWordJyutping: string
-  jyutping?: string
-}
+import type { SentenceQuizQuestion } from '~/utils/quiz/buildSentenceQuiz'
 
 type AudioSentenceQuizQuestion = SentenceQuizQuestion & {
   audioKey: string
@@ -61,6 +51,7 @@ type QuizAnswer = {
   correct: boolean
 }
 
+const openQuizResults = useQuizResults()
 const route = useRoute()
 const slug = computed(() => route.params.topic as string)
 const { isLoggedIn } = useMeStateV2()
@@ -114,6 +105,7 @@ const {
         query: {
           scope: 'topic',
           slug: slug.value,
+          format: 'word-listening',
         },
       }),
   {
@@ -201,21 +193,12 @@ function deltaFor(correct: boolean, streakBefore: number) {
 const question = computed(() => questions.value[current.value])
 const currentAudioSrc = computed(() => question.value ? getRandomizedAudioSrc(question.value.audioKey) : '')
 
-const animatedAccuracy = ref(0)
-const completionAnimated = ref(false)
-const animatedXpEarned = ref(0)
-const animatedXpLost = ref(0)
 
 const answerLog = ref<QuizAnswer[]>([])
 const finishing = ref(false)
 const totalXpEarned = ref(0)
 const totalXpLost = ref(0)
 const initialProgressMap = ref<Record<string, { xp: number; streak: number }>>({})
-
-const accuracy = computed(() => {
-  if (!questions.value.length) return 0
-  return Math.round((score.value / questions.value.length) * 100)
-})
 
 const incorrectCount = computed(() => {
   return Math.max(0, questions.value.length - score.value)
@@ -244,60 +227,10 @@ const showQuiz = computed(() => {
   return hasQuestions.value && current.value < questions.value.length
 })
 
-const resultHeroClass = computed(() => {
-  if (accuracy.value >= 80) return 'result-3'
-  if (accuracy.value >= 60) return 'result-0'
-  if (accuracy.value >= 40) return 'result-2'
-  return 'result-1'
-})
-
-const resultMeta = computed(() => {
-  if (accuracy.value === 100) return { title: 'Perfect' }
-  if (accuracy.value >= 70) return { title: 'Great job' }
-  if (accuracy.value >= 50) return { title: 'Nice try' }
-  return { title: 'Keep practicing' }
-})
-
-const tileColors = ref<string[]>([])
-
 const MIN_CALCULATING_MS = 1800
 
 function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-function generateTileColors() {
-  tileColors.value = shuffleFisherYates(brandColours).slice(0, 4)
-}
-
-function resetCompletionAnimations() {
-  animatedAccuracy.value = 0
-  animatedXpEarned.value = 0
-  animatedXpLost.value = 0
-  completionAnimated.value = false
-}
-
-function animateCount(target: Ref<number>, end: number, duration: number) {
-  const start = target.value
-  const delta = end - start
-  const startTime = performance.now()
-
-  const tick = (now: number) => {
-    const progress = Math.min((now - startTime) / duration, 1)
-    target.value = Math.round(start + delta * progress)
-
-    if (progress < 1) {
-      requestAnimationFrame(tick)
-    }
-  }
-
-  requestAnimationFrame(tick)
-}
-
-function runCompletionAnimations() {
-  animateCount(animatedAccuracy, accuracy.value, 2300)
-  animateCount(animatedXpEarned, totalXpEarned.value, 1000)
-  animateCount(animatedXpLost, totalXpLost.value, 1000)
 }
 
 function calculateQuizXpTotals() {
@@ -349,7 +282,6 @@ function resetQuizStateFromStartPayload(payload: TopicSentenceQuizStartResponse)
   elapsedMs.value = 0
   frozenElapsedMs.value = null
   quizStartedAt.value = null
-  resetCompletionAnimations()
 
   wordProgressMap.value = { ...(payload.progress ?? {}) }
   initialProgressMap.value = Object.fromEntries(
@@ -459,6 +391,7 @@ async function answer(index: number) {
 }
 
 async function next() {
+  if (!answered.value || !showQuiz.value) return
   stop()
 
   answered.value = false
@@ -490,24 +423,11 @@ const percentage = computed(() => {
 })
 
 watch(
-  () => question.value?.sentenceId,
-  () => {
-    generateTileColors()
-  },
-  { immediate: true }
-)
-
-watch(
   () => showResults.value,
   (visible) => {
     if (!visible) return
 
     stop()
-
-    if (!completionAnimated.value) {
-      completionAnimated.value = true
-      runCompletionAnimations()
-    }
 
     if (!completionSoundPlayed.value) {
       completionSoundPlayed.value = true
@@ -522,6 +442,17 @@ watch(
         }
       }, 250)
     }
+
+    void openQuizResults({
+      title: 'Sentence Audio Quiz Complete',
+      correct: score.value,
+      incorrect: incorrectCount.value,
+      elapsed: formattedElapsedTime.value,
+      xpEarned: totalXpEarned.value,
+      xpLost: totalXpLost.value,
+      retryTo: `/topic/quiz/sentences/audio/${slug.value}/v3/start-quiz`,
+      backTo: '/topics/quiz',
+    })
   }
 )
 
@@ -567,7 +498,6 @@ watch(
     elapsedMs.value = 0
     frozenElapsedMs.value = null
     quizStartedAt.value = null
-    resetCompletionAnimations()
   }
 )
 
@@ -589,23 +519,8 @@ onBeforeUnmount(() => {
           <QuizHeaderProgress :label="quizTitle" :current="current + 1" :total="questions.length"
             :answered="answered" @advance="next" />
 
-          <div class="text-center space-y-2">
-            <div class="space-y-0.5 text-center transition-all duration-300"
-              :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
-              <p class="text-[0.65rem] uppercase tracking-wide text-gray-500">
-                Target word
-              </p>
-
-              <p class="text-base font-semibold leading-tight text-black">
-                {{ question.sourceWord }}
-              </p>
-
-              <p class="text-xs text-gray-600">
-                {{ question.sourceWordJyutping }}
-              </p>
-            </div>
-
-            <div class="relative transition-all duration-300" :class="!answered && 'blur-md opacity-70 select-none'">
+          <div v-if="answered" class="text-center space-y-2">
+            <div class="relative">
               <div class="flex items-center justify-center gap-3">
                 <div class="w-28 h-1 bg-gray-200 rounded">
                   <div class="h-1 bg-green-500 rounded transition-all duration-500"
@@ -657,48 +572,20 @@ onBeforeUnmount(() => {
       <template v-else>
         <div v-if="showQuiz" class="space-y-6">
           <div class="space-y-6">
-            <div class="flex flex-col items-center justify-center min-h-[80px]">
-              <div class="space-y-2" :class="answered ? 'blur-none opacity-100' : 'blur-md opacity-70 select-none'">
-                <p class="text-2xl text-black leading-relaxed font-semibold text-center">
-                  {{ question.prompt }}
-                </p>
-
-                <p v-if="question.jyutping" class="text-sm text-gray-600 text-center">
-                  {{ question.jyutping }}
-                </p>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 gap-4 w-full">
-              <button v-for="(option, i) in question.options" :key="i"
-                class="rounded-xl flex items-center justify-center text-lg font-medium text-center p-5 select-none transition-all duration-200 ease-out shadow-sm active:scale-95"
-                :style="{
-                  backgroundColor:
-                    !answered
-                      ? tileColors[i]
-                      : i === question.correctIndex
-                        ? '#BBF7D0'
-                        : i === selectedIndex
-                          ? '#FECACA'
-                          : tileColors[i]
-                }" :class="[
-                  !answered && 'hover:-translate-y-1 hover:shadow-lg hover:bg-gray-50 hover:brightness-110',
-                  answered && i === question.correctIndex && 'ring-2 ring-emerald-400',
-                  answered && i === selectedIndex && i !== question.correctIndex && 'animate-shake ring-2 ring-rose-400'
-                ]" @click="answer(i)">
-                {{ option }}
-              </button>
-            </div>
+            <SentenceListeningQuestion :key="question.sentenceId" :question="question" :src="currentAudioSrc"
+              :selected-index="selectedIndex" @answer="answer" />
 
             <div class="h-10 mt-6">
               <button v-if="answered"
                 class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
                 @click="next">
-                Next
+                {{ current + 1 === questions.length ? 'View results' : 'Next' }}
               </button>
             </div>
           </div>
         </div>
+
+        <p v-if="!hasQuestions">No listening questions are available for this topic.</p>
 
         <transition name="fade-scale" mode="out-in">
           <div v-if="showCalculating" key="calculating" class="stat-card hero-card result-2 space-y-4">
@@ -717,37 +604,11 @@ onBeforeUnmount(() => {
             </p>
           </div>
 
-          <div v-else-if="showResults" key="results" class="quiz-completion space-y-6">
-            <transition name="card-fade" appear>
-              <div class="stat-card hero-card" :class="resultHeroClass">
-                <p class="stat-label">
-                  Sentence Audio Quiz Complete
-                </p>
-
-                <h2 class="hero-title">
-                  {{ resultMeta.title }}
-                </h2>
-
-                <p class="hero-score">
-                  {{ animatedAccuracy }}%
-                </p>
-              </div>
-            </transition>
-
-            <transition name="card-fade" appear>
-              <QuizCompletionFlipStats :correct="score" :incorrect="incorrectCount" :time="formattedElapsedTime"
-                :xp-earned="animatedXpEarned" :xp-lost="animatedXpLost" />
-            </transition>
-
-            <QuizCompletionActions :retry-to="`/topic/quiz/sentences/audio/${slug}/v3/start-quiz`"
-              back-to="/topics/quiz" />
-          </div>
         </transition>
       </template>
     </section>
   </main>
 
-  <FloatingAudioButton v-if="showQuiz && question" :key="question.audioKey" :src="currentAudioSrc" />
 </template>
 
 <style scoped>

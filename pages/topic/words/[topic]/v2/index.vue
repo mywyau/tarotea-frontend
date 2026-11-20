@@ -5,6 +5,7 @@ definePageMeta({
 })
 
 import { CircleCheck, Eye, EyeOff, Library } from '@lucide/vue'
+import { filterWordCategories } from '~/utils/filterWordCategories'
 import WordTile from '@/components/WordTile.vue'
 import { masteryXp } from '@/config/xp/helpers'
 import { createError } from 'nuxt/app'
@@ -205,6 +206,9 @@ const gatedCategories = computed(() => {
 
 
 
+const searchQuery = ref('')
+const visibleCategories = computed(() => filterWordCategories(gatedCategories.value, searchQuery.value))
+
 const isMobileStatsExpanded = ref(true)
 
 onMounted(async () => {
@@ -273,7 +277,9 @@ onMounted(async () => {
       </div>
     </section>
 
-    <section v-for="category in gatedCategories" :key="category.key" class="space-y-6">
+    <WordListSearch v-model="searchQuery" scope="topic" :has-matches="visibleCategories.length > 0" />
+
+    <section v-for="category in visibleCategories" :key="category.key" class="space-y-6">
       <div class="flex items-baseline justify-between gap-4">
         <h2 class="category-heading">
           {{ category.title }}
@@ -434,22 +440,6 @@ onMounted(async () => {
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
-}
-
-.stat-0 {
-  background: rgba(234, 184, 228, 0.45);
-}
-
-.stat-1 {
-  background: rgba(88, 199, 95, 0.45);
-}
-
-.stat-2 {
-  background: rgba(244, 205, 39, 0.35);
-}
-
-.stat-3 {
-  background: rgba(111, 92, 202, 0.35);
 }
 
 .stats-grid-collapsed {

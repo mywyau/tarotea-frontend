@@ -1,483 +1,209 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue"
-import { useStrokeWriter } from "~/composables/useStrokeWriter"
+import { ChevronLeft, ChevronRight, Eye, EyeOff, ListVideo, Play, Repeat2, Square } from '@lucide/vue'
+import { useStrokeWriter } from '~/composables/useStrokeWriter'
 
-definePageMeta({
-  ssr: false,
-  // middleware: ["writing-access"]
-  middleware: ["word-access"]
-})
+definePageMeta({ ssr: false, middleware: ['word-access'] })
 
-type VocabWord = {
-  id: string
-  word: string
-  jyutping?: string
-  meaning?: string
-}
+type VocabWord = { id: string; word: string; jyutping?: string; meaning?: string }
 
 const route = useRoute()
 const wordId = computed(() => route.params.id as string)
-
-const ready = ref(false)
-
-const {
-  data: word,
-  pending,
-  error,
-} = await useFetch<VocabWord>(() => `/api/words/${wordId.value}`, {
+const { data: word, pending, error } = await useFetch<VocabWord>(() => `/api/words/${wordId.value}`, {
   key: () => `word-${wordId.value}`,
   watch: [wordId],
 })
-
+const characters = computed(() => Array.from(word.value?.word ?? '').filter(char => /\p{Script=Han}/u.test(char)))
+const index = ref(0)
+const character = computed(() => characters.value[index.value] ?? '')
 const writerHost = ref<HTMLDivElement | null>(null)
+const writerSize = ref(320)
+const { writer, loadError, unsupportedCharacter, retry, whenLoaded } = useStrokeWriter(writerHost, character, writerSize)
 
-const currentCharIndex = ref(0)
+watch(writerHost, (host, _, onCleanup) => {
+  if (!host) return
+  const observer = new ResizeObserver(([entry]) => {
+    if (entry && entry.contentRect.width > 0) writerSize.value = Math.round(entry.contentRect.width)
+  })
+  observer.observe(host)
+  onCleanup(() => observer.disconnect())
+}, { flush: 'post' })
 
-async function animateCurrentCharacter() {
-  if (!writer.value) return
+const playback = ref<'idle' | 'character' | 'loop' | 'word'>('idle')
+const fullCharacter = ref(false)
+let run = 0
 
-  writer.value.hideCharacter({ duration: 0 })
-  writer.value.showOutline({ duration: 0 })
-  await writer.value.animateCharacter()
+function showCharacter(full: boolean) {
+  run++
+  playback.value = 'idle'
+  fullCharacter.value = full
+  if (full) void writer.value?.showCharacter({ duration: 0 })
+  else void writer.value?.hideCharacter({ duration: 0 })
 }
 
-function loopAnimation() {
-  if (!writer.value) return
-
-  writer.value.hideCharacter({ duration: 0 })
-  writer.value.showOutline({ duration: 0 })
-  writer.value.loopCharacterAnimation()
+function selectCharacter(position: number) {
+  showCharacter(false)
+  index.value = position
 }
 
-async function animateWholeWord() {
-  if (!selectedCharacters.value.length) return
+async function play(mode: 'character' | 'loop' | 'word') {
+  if (playback.value === mode) {
+    showCharacter(false)
+    return
+  }
+  if (!writer.value) return
 
-  for (let i = 0; i < selectedCharacters.value.length; i += 1) {
-    currentCharIndex.value = i
+  showCharacter(false)
+  const currentRun = run
+  playback.value = mode
+  if (mode === 'loop') {
+    void writer.value.loopCharacterAnimation()
+    return
+  }
+
+  const first = mode === 'word' ? 0 : index.value
+  const last = mode === 'word' ? characters.value.length - 1 : index.value
+  for (let position = first; position <= last; position++) {
+    index.value = position
     await nextTick()
     await whenLoaded()
-    if (!writer.value || currentCharIndex.value !== i) return
-    await animateCurrentCharacter()
-    await new Promise((resolve) => setTimeout(resolve, 350))
+    if (currentRun !== run) return
+    if (!writer.value) break
+    await writer.value.animateCharacter()
+    if (currentRun !== run) return
+    if (position < last) {
+      await new Promise(resolve => setTimeout(resolve, 350))
+      if (currentRun !== run) return
+    }
   }
+  playback.value = 'idle'
+  fullCharacter.value = !!writer.value
 }
 
-function showOnlyOutline() {
-  if (!writer.value) return
-  writer.value.hideCharacter({ duration: 0 })
-  writer.value.showOutline({ duration: 0 })
-}
-
-function showCharacterAndOutline() {
-  if (!writer.value) return
-  writer.value.showCharacter({ duration: 0 })
-  writer.value.showOutline({ duration: 0 })
-}
-
-function isHanCharacter(char: string): boolean {
-  return /\p{Script=Han}/u.test(char)
-}
-
-const selectedCharacters = computed(() => {
-  return Array.from(word.value?.word ?? "").filter(isHanCharacter)
-})
-
-const currentCharacter = computed(() => {
-  return selectedCharacters.value[currentCharIndex.value] ?? ""
-})
-
-const progressLabel = computed(() => {
-  const total = selectedCharacters.value.length
-  if (total === 0) return "0 / 0"
-  return `${currentCharIndex.value + 1} / ${total}`
-})
-
-function previousCharacter() {
-  if (currentCharIndex.value > 0) currentCharIndex.value -= 1
-}
-
-function nextCharacter() {
-  if (currentCharIndex.value < selectedCharacters.value.length - 1) {
-    currentCharIndex.value += 1
-  }
-}
-
-const writerSize = ref(320)
-
-function updateWriterSize() {
-  if (!process.client) return
-
-  const width = window.innerWidth
-  if (width < 400) writerSize.value = 220
-  else if (width < 640) writerSize.value = 260
-  else writerSize.value = 320
-}
-
-onMounted(() => {
-  updateWriterSize()
-  window.addEventListener("resize", updateWriterSize)
-})
-
-onBeforeUnmount(() => {
-  window.removeEventListener("resize", updateWriterSize)
-})
-
-watch(
-  () => word.value?.id,
-  () => {
-    currentCharIndex.value = 0
-  },
-)
-
-const { writer, loadError, unsupportedCharacter, retry, whenLoaded } =
-  useStrokeWriter(writerHost, currentCharacter, writerSize)
-
-onMounted(() => {
-  ready.value = true
-})
+watch(wordId, () => selectCharacter(0))
+onBeforeUnmount(() => { run++ })
 </script>
 
 <template>
-  <div v-if="ready" class="writing-page mx-auto max-w-4xl px-3 py-5 sm:px-6 sm:py-8 lg:px-8">
+  <div class="writing-page">
+    <h1>Writing practice</h1>
+    <p v-if="pending" role="status">Loading word…</p>
+    <p v-else-if="error || !word" role="alert">Could not load this word.</p>
 
-    <section class="hero-card rounded-2xl p-4 sm:p-6">
-      <p class="page-eyebrow text-xs font-medium uppercase tracking-wide sm:text-sm">
-        Follow the brush strokes
-      </p>
-      <h1 class="page-heading mt-1 text-2xl font-bold sm:mt-2 sm:text-3xl">
-        Learn how to write
-      </h1>
-      <p class="page-subheading mt-2 max-w-3xl text-sm leading-5 sm:mt-3 sm:leading-6 text-black">
-        Grab some pen and paper and follow the brush strokes for this word and move through each character one by one.
-      </p>
-    </section>
+    <template v-else>
+      <header class="word-summary">
+        <strong lang="zh-HK">{{ word.word }}</strong>
+        <span v-if="word.jyutping" class="word-reading">{{ word.jyutping }}</span>
+        <span v-if="word.meaning">{{ word.meaning }}</span>
+      </header>
 
-    <div class="mt-4 grid gap-4 sm:mt-6 sm:gap-6">
-      <section class="practice-card rounded-2xl p-3 sm:p-5">
-        <div v-if="pending" class="status-text">
-          Loading word...
-        </div>
-
-        <div v-else-if="error || !word" class="status-text status-error">
-          Could not load this word.
-        </div>
-
-        <template v-else>
-          <div class="mt-3 grid gap-4 sm:mt-5 sm:gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
-            <div class="space-y-4 sm:space-y-5">
-              <div class="word-card rounded-xl px-3 py-3 sm:px-4">
-                <p class="card-label text-xs sm:text-sm">Word</p>
-                <p class="mt-1 break-words text-xl font-bold sm:text-2xl">
-                  {{ word.word }}
-                </p>
-                <p class="mt-2 text-xs leading-5 sm:text-sm">
-                  {{ word.jyutping || "" }}
-                </p>
-                <p class="mt-1 text-xs font-medium text-black leading-5 sm:text-sm">
-                  {{ word.meaning || "" }}
-                </p>
-              </div>
-
-              <div
-                class="writer-shell flex min-h-[260px] items-center justify-center rounded-2xl p-3 sm:min-h-[320px] sm:p-4">
-                <div v-if="loadError" class="max-w-sm text-center text-sm status-error">
-                  {{ loadError }}
-                  <button type="button" class="btn-secondary mt-2 rounded-lg px-3 py-1.5" @click="retry">Retry</button>
-                </div>
-
-                <div v-else-if="unsupportedCharacter" class="max-w-sm text-center text-sm status-warn">
-                  We do not have stroke data for “{{ unsupportedCharacter }}” yet, so writing
-                  practice is not available for this character.
-                </div>
-
-                <div v-else-if="!currentCharacter" class="max-w-sm text-center text-sm status-text">
-                  No Chinese character available for this word.
-                </div>
-
-                <div ref="writerHost" v-show="writer" :style="{ width: `${writerSize}px`, height: `${writerSize}px` }" />
-              </div>
-            </div>
-
-            <aside class="control-panel h-fit rounded-2xl p-3 sm:p-4">
-              <div class="mb-3 sm:mb-4">
-                <p class="card-label text-xs font-medium sm:text-sm">Current character</p>
-                <p class="mt-1 text-2xl font-bold sm:text-3xl">
-                  {{ currentCharacter || "—" }}
-                </p>
-                <!-- <p class="mt-1.5 text-xs sm:mt-2 sm:text-sm panel-subtext">
-                  Progress: {{ progressLabel }}
-                </p> -->
-              </div>
-
-              <div v-if="selectedCharacters.length > 1" class="mb-4 flex flex-wrap gap-2 sm:mb-5">
-                <button v-for="(char, index) in selectedCharacters" :key="`${char}-${index}`" type="button"
-                  class="char-chip rounded-lg px-3 py-1.5 text-base font-semibold transition"
-                  :class="index === currentCharIndex ? 'char-chip-active' : 'char-chip-inactive'"
-                  @click="currentCharIndex = index">
-                  {{ char }}
-                </button>
-              </div>
-
-              <div class="space-y-2.5 sm:space-y-3">
-                <button type="button"
-                  class="btn-primary w-full rounded-xl px-3 py-2 text-sm text-black font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!writer" @click="animateCurrentCharacter">
-                  Play strokes
-                </button>
-
-                <button type="button"
-                  class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!writer" @click="loopAnimation">
-                  Loop animation
-                </button>
-
-                <button type="button"
-                  class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!writer || !selectedCharacters.length" @click="animateWholeWord">
-                  Play whole word
-                </button>
-              </div>
-
-              <div class="panel-divider my-4 sm:my-5"></div>
-
-              <div class="space-y-2.5 sm:space-y-3">
-
-                <button type="button"
-                  class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="currentCharIndex >= selectedCharacters.length - 1" @click="nextCharacter">
-                  Next character
-                </button>
-
-                <button type="button"
-                  class="btn-secondary w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="currentCharIndex === 0" @click="previousCharacter">
-                  Previous character
-                </button>
-              </div>
-
-              <div class="panel-divider my-4 sm:my-5"></div>
-
-              <div class="space-y-2.5 sm:space-y-3">
-                <button type="button"
-                  class="btn-soft w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!writer" @click="showOnlyOutline">
-                  Outline only
-                </button>
-
-                <button type="button"
-                  class="btn-soft w-full rounded-xl px-3 py-2 text-sm font-medium transition disabled:opacity-50 sm:px-4 sm:py-2.5"
-                  :disabled="!writer" @click="showCharacterAndOutline">
-                  Show full character
-                </button>
-              </div>
-            </aside>
+      <section class="practice-sheet" aria-label="Stroke order practice">
+        <div v-if="characters.length > 1" class="character-picker" role="group" aria-label="Select a character">
+          <div class="character-choices">
+            <button v-for="(glyph, position) in characters" :key="position" type="button" class="character-chip"
+              :aria-label="`Character ${position + 1}: ${glyph}`" :aria-pressed="position === index"
+              @click="selectCharacter(position)"><span lang="zh-HK">{{ glyph }}</span></button>
           </div>
-        </template>
+          <div class="character-nav">
+            <button type="button" class="icon-button" aria-label="Previous character" title="Previous character"
+              :disabled="index === 0" @click="selectCharacter(index - 1)"><ChevronLeft /></button>
+            <span class="position" aria-live="polite">{{ index + 1 }} / {{ characters.length }}</span>
+            <button type="button" class="icon-button" aria-label="Next character" title="Next character"
+              :disabled="index === characters.length - 1" @click="selectCharacter(index + 1)"><ChevronRight /></button>
+          </div>
+        </div>
+
+        <div class="writer-shell" :aria-label="`Stroke order for ${character}`" role="group">
+          <div ref="writerHost" class="writer-glyph" aria-hidden="true" :style="{ visibility: writer ? 'visible' : 'hidden' }" />
+          <div v-if="!writer" class="board-status" role="status">
+            <template v-if="loadError">{{ loadError }} <button type="button" @click="retry">Retry</button></template>
+            <template v-else-if="unsupportedCharacter">Stroke order is unavailable for “{{ unsupportedCharacter }}”.</template>
+            <template v-else-if="!character">No Chinese characters in this word.</template>
+            <template v-else>Loading strokes…</template>
+          </div>
+        </div>
+
+        <div class="controls" role="group" aria-label="Stroke controls">
+          <button type="button" class="play-button" :disabled="!writer" @click="play('character')">
+            <Square v-if="playback === 'character'" /><Play v-else />
+            {{ playback === 'character' ? 'Stop' : 'Play strokes' }}
+          </button>
+          <button v-if="characters.length > 1" type="button" class="word-button" :disabled="!writer && playback !== 'word'"
+            @click="play('word')">
+            <Square v-if="playback === 'word'" /><ListVideo v-else />
+            {{ playback === 'word' ? 'Stop word' : 'Play word' }}
+          </button>
+          <div class="display-controls">
+            <button type="button" class="icon-button" aria-label="Loop strokes" title="Loop strokes"
+              :aria-pressed="playback === 'loop'" :disabled="!writer" @click="play('loop')"><Repeat2 /></button>
+            <button type="button" class="icon-button" aria-label="Show full character"
+              :title="fullCharacter ? 'Show outline only' : 'Show full character'" :aria-pressed="fullCharacter"
+              :disabled="!writer" @click="showCharacter(!fullCharacter)"><Eye v-if="!fullCharacter" /><EyeOff v-else /></button>
+          </div>
+        </div>
       </section>
-    </div>
+    </template>
   </div>
 </template>
 
 <style scoped>
 .writing-page {
-  --pink: #eab8e4;
-  --purple: #d6a3d1;
-  --blue: #a8cae0;
-  --yellow: #f4cd27;
-  --blush: #f6e1e1;
-  --ink: #1f2937;
-  --ink-strong: #111827;
+  width: min(100%, 48rem);
+  margin: 0 auto;
+  padding: clamp(1rem, 4vw, 2.75rem) var(--page-gutter);
+  color: rgb(var(--color-ink));
 }
-
-.hero-card {
-  background: rgba(234, 184, 228, 0.32);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  backdrop-filter: blur(8px);
-  color: var(--ink-strong);
+.writing-page h1 {
+  font-size: clamp(1.55rem, 3.5vw, 2.35rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
 }
-
-.hero-card h1 {
-  color: var(--ink-strong);
-}
-
-.hero-card p {
-  color: rgba(0, 0, 0, 0.82);
-}
-
-.eyebrow {
-  color: rgba(31, 41, 55, 0.62);
-}
-
-.practice-card {
-  background: rgba(255, 255, 255, 0.36);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  box-shadow: 0 12px 28px rgba(17, 24, 39, 0.08);
-  backdrop-filter: blur(10px);
-}
-
-.word-card {
-  background: rgba(168, 202, 224, 0.24);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  color: var(--ink-strong);
-}
-
-/* .writer-shell {
-  background: rgba(246, 225, 225, 0.42);
-  border: 1px dashed rgba(17, 24, 39, 0.18);
-} */
-
+.word-summary { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.85rem; margin: 0.6rem 0 1.15rem; overflow-wrap: anywhere; }
+.word-summary strong { font: 700 1.65rem/1.2 var(--font-chinese); }
+.word-reading { color: rgb(var(--color-primary-strong)); font-weight: 650; }
+.practice-sheet { overflow: hidden; border: 1px solid rgb(var(--color-ink) / 0.15); border-radius: var(--radius-panel); background: rgb(var(--color-surface)); box-shadow: var(--shadow-soft); }
 .writer-shell {
+  display: grid;
+  place-items: center;
   position: relative;
-  overflow: hidden;
-
+  padding: clamp(0.5rem, 2vw, 1rem);
   background-color: #fffdf8;
-  background-image:
-    linear-gradient(rgba(130, 170, 210, 0.16) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(130, 170, 210, 0.16) 1px, transparent 1px);
+  background-image: linear-gradient(#94b5cf38 1px, transparent 1px), linear-gradient(90deg, #94b5cf38 1px, transparent 1px);
   background-size: 32px 32px;
-
-  border: 1px solid rgba(130, 170, 210, 0.32);
-  box-shadow:
-    0 12px 28px rgba(31, 41, 55, 0.08),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  background-position: center;
 }
-
-.writer-shell::before,
-.writer-shell::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  z-index: 0;
-  background: rgba(180, 80, 80, 0.18);
+.writer-shell::before, .writer-shell::after { content: ''; position: absolute; pointer-events: none; background: #ab69734d; }
+.writer-shell::before { width: 1px; height: 100%; }
+.writer-shell::after { width: 100%; height: 1px; }
+.writer-glyph { z-index: 1; width: min(100%, 25rem); aspect-ratio: 1; }
+.board-status { position: absolute; z-index: 2; max-width: 90%; padding: 0.7rem 1rem; background: #fffdf8; text-align: center; }
+.board-status button { color: rgb(var(--color-primary-strong)); text-decoration: underline; }
+.controls, .character-picker { display: flex; align-items: center; flex-wrap: wrap; gap: 0.5rem; padding: 0.7rem clamp(0.5rem, 2vw, 1rem); }
+.controls { border-top: 1px solid rgb(var(--color-ink) / 0.13); }
+.character-picker { justify-content: space-between; border-bottom: 1px solid rgb(var(--color-ink) / 0.13); }
+.character-choices, .character-nav, .display-controls { display: flex; align-items: center; gap: 0.25rem; }
+.character-choices { flex-wrap: wrap; }
+.display-controls { margin-left: auto; }
+.position { min-width: 3rem; text-align: center; color: rgb(var(--color-muted)); font-size: 0.875rem; font-variant-numeric: tabular-nums; }
+.controls button, .character-picker button {
+  display: inline-flex;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  border-radius: var(--radius-control);
+  font-size: 0.9rem;
+  font-weight: 650;
 }
-
-.writer-shell::before {
-  width: 1px;
-  height: 100%;
-  left: 50%;
-  top: 0;
-}
-
-.writer-shell::after {
-  height: 1px;
-  width: 100%;
-  left: 0;
-  top: 50%;
-}
-
-.writer-shell>div {
-  position: relative;
-  z-index: 1;
-}
-
-.control-panel {
-  background: rgba(255, 255, 255, 0.42);
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
-  backdrop-filter: blur(8px);
-  color: var(--ink-strong);
-}
-
-.card-label {
-  color: rgba(31, 41, 55, 0.62);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.panel-subtext {
-  color: rgba(31, 41, 55, 0.72);
-}
-
-.panel-divider {
-  border-top: 1px solid rgba(17, 24, 39, 0.1);
-}
-
-.status-text {
-  color: rgba(31, 41, 55, 0.68);
-}
-
-.status-error {
-  color: rgb(185, 28, 28);
-}
-
-.status-warn {
-  color: rgb(146, 64, 14);
-}
-
-.char-chip {
-  border: 1px solid rgba(17, 24, 39, 0.1);
-}
-
-.char-chip-active {
-  background: rgb(126, 147, 255);
-  color: rgb(0, 0, 0);
-  border-color: rgba(126, 147, 255, 0.9);
-  box-shadow: 0 8px 18px rgba(126, 147, 255, 0.24);
-}
-
-.char-chip-inactive {
-  background: rgba(255, 255, 255, 0.6);
-  color: var(--ink-strong);
-}
-
-.char-chip-inactive:hover {
-  background: rgba(234, 184, 228, 0.34);
-}
-
-.btn-primary,
-.btn-secondary,
-.btn-soft {
-  border: 1px solid rgba(17, 24, 39, 0.08);
-}
-
-.btn-primary {
-  background: rgb(126, 147, 255);
-  /* color: white; */
-  box-shadow: 0 10px 22px rgba(126, 147, 255, 0.22);
-}
-
-.btn-primary:hover:not(:disabled) {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
-}
-
-.btn-secondary {
-  background: rgba(168, 202, 224, 0.38);
-  color: var(--ink-strong);
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background: rgba(214, 163, 209, 0.34);
-  transform: translateY(-1px);
-}
-
-.btn-soft {
-  background: rgba(246, 225, 225, 0.66);
-  color: var(--ink-strong);
-}
-
-.btn-soft:hover:not(:disabled) {
-  background: rgba(234, 184, 228, 0.3);
-  transform: translateY(-1px);
-}
-
-.btn-primary:disabled,
-.btn-secondary:disabled,
-.btn-soft:disabled,
-.char-chip:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  transform: none;
-}
-
-@media (max-width: 640px) {
-
-  .hero-card,
-  .practice-card,
-  .control-panel,
-  .word-card,
-  .writer-shell {
-    backdrop-filter: blur(6px);
-  }
-}
+.writing-page button:focus-visible { outline: 2px solid rgb(var(--color-primary-strong)); outline-offset: -2px; }
+.controls .play-button:focus-visible { outline-color: white; }
+.controls button:disabled, .character-picker button:disabled { opacity: 0.4; cursor: not-allowed; }
+.controls svg, .character-picker svg { width: 1.15rem; height: 1.15rem; pointer-events: none; }
+.play-button, .word-button { padding-inline: 0.85rem; }
+.play-button { color: white; background: rgb(var(--color-primary)); }
+.play-button:hover:enabled { background: rgb(var(--color-primary-strong)); }
+.word-button, .icon-button, .character-chip { color: rgb(var(--color-primary-strong)); background: rgb(var(--color-primary) / 0.07); }
+.word-button:hover:enabled, .icon-button:hover:enabled, .character-chip:hover { background: rgb(var(--color-taro-lilac) / 0.34); }
+button[aria-pressed='true'] { background: rgb(var(--color-taro-lilac) / 0.48); box-shadow: inset 0 0 0 1px rgb(var(--color-primary) / 0.48); }
+.character-picker .character-chip { padding-inline: 0.5rem; font: 650 1.25rem var(--font-chinese); }
 </style>

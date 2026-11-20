@@ -18,6 +18,11 @@ const {
 const levelAnimationStyles = ref<Record<string, Record<string, string>>>({})
 const isLevelAnimationReady = ref(false)
 
+const levelPanelColours = [
+  '#f7edf6', '#efdaeb', '#e6c7e2', '#dab2d6', '#cb9dc7',
+  '#ba85b6', '#965e94', '#865386', '#704372', '#5b355f',
+]
+
 function generateLevelAnimationStyles() {
   const nextStyles: Record<string, Record<string, string>> = {}
 
@@ -69,7 +74,10 @@ onMounted(async () => {
         class="level-card catalog-card relative rounded-xl p-4 sm:p-6 transition shadow-sm hover:shadow-md" :class="[
           isLevelAnimationReady ? 'level-card-drop-in' : '',
           level.comingSoon ? 'is-disabled' : 'is-active'
-        ]" :style="levelAnimationStyles[level.id]">
+        ]" :style="[levelAnimationStyles[level.id], {
+          '--level-surface': levelPanelColours[level.number - 1],
+          '--level-text': level.number >= 7 ? 'white' : 'rgb(var(--color-ink))',
+        }]">
 
         <!-- Accessible level -->
         <NuxtLink v-if="true" :to="`/level/${level.id}/v2`" class="block space-y-3">
@@ -77,7 +85,7 @@ onMounted(async () => {
           <div class="flex items-start justify-between gap-4">
             <div class="min-w-0 flex-1 level-card-copy">
               <div class="level-card-header">
-                <div class="text-lg font-semibold text-gray-900">
+                <div class="text-lg font-semibold">
                   {{ level.title }}
                 </div>
 
@@ -90,7 +98,7 @@ onMounted(async () => {
                 </div>
               </div>
 
-              <div class="hidden sm:block text-sm text-gray-700 mt-1">
+              <div class="hidden sm:block text-sm mt-1">
                 {{ level.description }}
               </div>
             </div>
@@ -225,9 +233,13 @@ onMounted(async () => {
 }
 
 /* Active hover */
+.level-card.is-active {
+  background-color: var(--level-surface, rgb(var(--color-surface))) !important;
+  color: var(--level-text);
+}
+
 .level-card.is-active:hover {
   transform: translateY(-1px);
-  background: rgba(255, 255, 255, 0.85);
   border-color: rgba(234, 184, 228, 0.65);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
 }
