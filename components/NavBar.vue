@@ -40,7 +40,7 @@ onMounted(() => {
       <!-- Desktop Navigation -->
       <nav class="hidden md:flex items-center gap-6">
 
-        <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="nav-link hover:text-gray-600">
+        <NuxtLink v-if="isLoggedIn" to="/daily/vocab/start-quiz" class="nav-link hover:text-gray-600">
           Daily
         </NuxtLink>
 
@@ -95,7 +95,7 @@ onMounted(() => {
       <!-- Primary Links -->
       <div class="space-y-4 py-4">
 
-        <NuxtLink v-if="isLoggedIn" to="/daily/v3" class="mobile-primary block" @click="closeMobile">
+        <NuxtLink v-if="isLoggedIn" to="/daily/vocab/start-quiz" class="mobile-primary block" @click="closeMobile">
           Daily
         </NuxtLink>
 

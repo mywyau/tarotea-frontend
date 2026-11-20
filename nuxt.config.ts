@@ -1,7 +1,26 @@
-// // https://nuxt.com/docs/api/configuration/nuxt-config
+import type { NuxtPage } from "@nuxt/schema";
+
+function usePublicPagePaths(pages: NuxtPage[]) {
+  for (const page of pages) {
+    const original = page.path;
+    const canonical = original.replace(/\/v\d+(?=\/|$)/g, "");
+    if (canonical !== original) {
+      if (pages.some(other => other !== page && other.path === canonical)) {
+        throw new Error(`Two pages map to ${canonical}`);
+      }
+      page.path = canonical;
+      page.alias = [original].concat(page.alias ?? []);
+      // The original navigation also linked to this daily practice shortcut.
+      if (canonical === "/daily/vocab/start-quiz") page.alias.push("/daily/v3");
+    }
+    if (page.children) usePublicPagePaths(page.children);
+  }
+}
 
 export default defineNuxtConfig({
   modules: ["@nuxtjs/tailwindcss", "@nuxt/fonts"],
+
+  hooks: { "pages:extend": usePublicPagePaths },
 
   components: [{ path: "~/components", pathPrefix: false }],
 

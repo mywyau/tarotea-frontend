@@ -40,7 +40,7 @@ function topicLink(topic: Topic) {
   if (topic.comingSoon) return "/coming-soon"
 
   if (!topic.requiresPaid) {
-    return `/topic/words/${topic.id}/v2`
+    return `/topic/words/${topic.id}`
   }
 }
 

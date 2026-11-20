@@ -15,7 +15,7 @@ const levelNumber = computed(() => levelIdToNumbers(slug.value) ?? slug.value)
 <template>
   <DojoStartPage theme="blush" :heading="`Level ${levelNumber} · Sentence practice`"
     description="Fill in missing Chinese words in sentence context to sharpen practical usage and recognition."
-    :start-to="`/dojo/level/sentences/chinese/${slug}/v2`" start-label="Start sentence exercise" :xp-rules="[
+    :start-to="`/dojo/level/sentences/chinese/${slug}`" start-label="Start sentence exercise" :xp-rules="[
       { action: 'No hint used', xp: `+${chineseSentenceXp} XP` },
       { action: 'Hint used', xp: `+${chineseSentenceXpHintUsed} XP` },
       { action: 'Unlimited retries', xp: 'check the hint if you are stuck' }

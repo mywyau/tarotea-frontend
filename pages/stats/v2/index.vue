@@ -166,7 +166,7 @@ onMounted(async () => {
     <div v-else-if="signInRequired" class="stats-state">
       <h1 class="your-stat-heading">Your stats</h1>
       <p>Sign in to see your learning progress and recent activity.</p>
-      <AppButton to="/please-sign-in?redirect=/stats/v2">Sign in to view stats</AppButton>
+      <AppButton to="/please-sign-in?redirect=/stats">Sign in to view stats</AppButton>
     </div>
 
     <div v-else-if="errorState" class="stats-state" role="alert">

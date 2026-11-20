@@ -20,7 +20,7 @@ const topicTitle = computed(() =>
   <DojoStartPage theme="purple" :heading="`${topicTitle}`"
     description="Type the Jyutping for words in this topic and build typing skills and recall."
     :guest-note="isLoggedIn ? 'XP will be saved.' : 'XP will not be saved.'"
-    :start-to="`/dojo/topic/jyutping/training/${slug}/v2`" :start-label="'Start exercise'" :xp-rules="[
+    :start-to="`/dojo/topic/jyutping/training/${slug}`" :start-label="'Start exercise'" :xp-rules="[
       { action: 'No hint used', xp: `+${jyutpingXp} XP` },
       { action: 'Hint used', xp: `+${jyutpingXpHintUsed} XP` },
       { action: 'Unlimited retries', xp: 'check the hint if you are stuck' }

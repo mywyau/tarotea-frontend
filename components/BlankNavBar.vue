@@ -26,7 +26,7 @@ const primaryLinks = computed(() => [
   { to: '/topics', label: 'Topics', paths: ['/topics', '/topic/'], excludes: ['/topics/quiz', '/topic/quiz/'] },
   { to: '/quiz', label: 'Quizzes', paths: ['/quiz', '/topics/quiz', '/topic/quiz/'] },
   { to: '/dojo', label: 'Practice', paths: ['/dojo'] },
-  ...(isLoggedIn.value ? [{ to: '/daily/vocab/v2/start-quiz', label: 'Daily', paths: ['/daily/'] }] : []),
+  ...(isLoggedIn.value ? [{ to: '/daily/vocab/start-quiz', label: 'Daily', paths: ['/daily/'] }] : []),
 ])
 
 const mobileNavLinks = [
@@ -52,8 +52,8 @@ const navigationGroups = computed(() => [
       { to: '/dojo/level', label: 'Level practice', description: 'Typing and recall by level', icon: Keyboard },
       { to: '/dojo/topic', label: 'Topic practice', description: 'Train within a chosen topic', icon: Sparkles },
       ...(isLoggedIn.value ? [
-        { to: '/daily/vocab/v2/start-quiz', label: 'Daily vocabulary', description: 'Your short daily review', icon: CalendarCheck },
-        { to: '/daily/jyutping/v2', label: 'Daily Jyutping', description: 'Daily sound and tone practice', icon: AudioLines },
+        { to: '/daily/vocab/start-quiz', label: 'Daily vocabulary', description: 'Your short daily review', icon: CalendarCheck },
+        { to: '/daily/jyutping', label: 'Daily Jyutping', description: 'Daily sound and tone practice', icon: AudioLines },
       ] : []),
     ],
   },
@@ -217,10 +217,10 @@ watch(() => props.focusMode, focusMode => {
                   <span class="account-avatar" aria-hidden="true">{{ accountLabel.charAt(0).toUpperCase() }}</span>
                   <span><strong>{{ accountLabel }}</strong><small>Your learning space</small></span>
                 </div>
-                <NuxtLink to="/account/v2" class="account-menu-link" role="menuitem" @click="closeAccountMenu">
+                <NuxtLink to="/account" class="account-menu-link" role="menuitem" @click="closeAccountMenu">
                   <UserRound aria-hidden="true" /> Account
                 </NuxtLink>
-                <NuxtLink to="/stats/v2" class="account-menu-link" role="menuitem" @click="closeAccountMenu">
+                <NuxtLink to="/stats" class="account-menu-link" role="menuitem" @click="closeAccountMenu">
                   <BarChart3 aria-hidden="true" /> Stats
                 </NuxtLink>
                 <NuxtLink to="/upgrade" class="account-menu-link account-menu-upgrade" role="menuitem" @click="closeAccountMenu">
@@ -277,8 +277,8 @@ watch(() => props.focusMode, focusMode => {
 
           <div class="drawer-account">
             <template v-if="isLoggedIn">
-              <NuxtLink to="/account/v2" @click="closeNav(false)">Account</NuxtLink>
-              <NuxtLink to="/stats/v2" @click="closeNav(false)">Stats</NuxtLink>
+              <NuxtLink to="/account" @click="closeNav(false)">Account</NuxtLink>
+              <NuxtLink to="/stats" @click="closeNav(false)">Stats</NuxtLink>
               <NuxtLink to="/upgrade" @click="closeNav(false)">Upgrade</NuxtLink>
             </template>
             <button v-else type="button" @click="handleLogin">Sign in to save progress</button>

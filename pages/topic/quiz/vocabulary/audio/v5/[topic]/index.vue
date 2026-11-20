@@ -565,7 +565,7 @@ watch(
           elapsed: formattedElapsedTime.value,
           xpEarned: totalXpEarned.value,
           xpLost: totalXpLost.value,
-          retryTo: `/topic/quiz/vocabulary/audio/v5/${slug.value}/start-quiz`,
+          retryTo: `/topic/quiz/vocabulary/audio/${slug.value}/start-quiz`,
           backTo: '/topics/quiz',
           review: {
             basePath: `/topic/word/${slug.value}`,

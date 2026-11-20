@@ -39,21 +39,21 @@ const topicQuizModes = [
     label: 'Jyutping only',
     icon: markRaw(Keyboard),
     buttonClass: 'topic-btn-purple',
-    to: (topicId: string) => `/dojo/topic/jyutping/training/${topicId}/v2/start`,
+    to: (topicId: string) => `/dojo/topic/jyutping/training/${topicId}/start`,
   },
   {
     id: 'chinese',
     label: 'Chinese only',
     icon: markRaw(Languages),
     buttonClass: 'topic-btn-blue',
-    to: (topicId: string) => `/dojo/topic/chinese/training/${topicId}/v2/start`,
+    to: (topicId: string) => `/dojo/topic/chinese/training/${topicId}/start`,
   },
   {
     id: 'sentences',
     label: 'Sentences Chinese Only',
     icon: markRaw(MessageSquareText),
     buttonClass: 'topic-btn-blush',
-    to: (topicId: string) => `/dojo/topic/sentences/chinese/${topicId}/v2/start`,
+    to: (topicId: string) => `/dojo/topic/sentences/chinese/${topicId}/start`,
   },
 ] as const
 

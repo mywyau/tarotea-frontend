@@ -48,7 +48,7 @@ const showAllTips = ref(false)
       </p>
 
       <div class="pt-6">
-        <NuxtLink to="/daily/vocab/v2" class="start-btn">
+        <NuxtLink to="/daily/vocab" class="start-btn">
           Start daily vocabulary quiz
         </NuxtLink>
       </div>

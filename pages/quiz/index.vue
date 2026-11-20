@@ -52,14 +52,14 @@ const levelQuizModes = [
     label: 'Sentences',
     icon: markRaw(MessageSquareText),
     buttonClass: 'level-btn-yellow',
-    to: (levelId: string) => `/quiz/${levelId}/sentences/no-audio/v3/start-quiz`,
+    to: (levelId: string) => `/quiz/${levelId}/sentences/no-audio/start-quiz`,
   },
   {
     id: 'sentence-audio',
     label: 'Sentence Audio Only',
     icon: markRaw(Volume2),
     buttonClass: 'level-btn-blush',
-    to: (levelId: string) => `/quiz/${levelId}/sentences/audio/v3/start-quiz`,
+    to: (levelId: string) => `/quiz/${levelId}/sentences/audio/start-quiz`,
   },
 ] as const
 

@@ -18,21 +18,21 @@ const levelQuizModes = [
     label: 'Jyutping only',
     icon: markRaw(Keyboard),
     buttonClass: 'level-btn-purple',
-    to: (levelId: string) => `/dojo/level/jyutping/training/${levelId}/v2/start`,
+    to: (levelId: string) => `/dojo/level/jyutping/training/${levelId}/start`,
   },
   {
     id: 'chinese',
     label: 'Chinese only',
     icon: markRaw(Languages),
     buttonClass: 'level-btn-blue',
-    to: (levelId: string) => `/dojo/level/chinese/training/${levelId}/v2/start`,
+    to: (levelId: string) => `/dojo/level/chinese/training/${levelId}/start`,
   },
   {
     id: 'sentences',
     label: 'Sentences Chinese Only',
     icon: markRaw(MessageSquareText),
     buttonClass: 'level-btn-blush',
-    to: (levelId: string) => `/dojo/level/sentences/chinese/${levelId}/v2/start`,
+    to: (levelId: string) => `/dojo/level/sentences/chinese/${levelId}/start`,
   },
 ] as const
 

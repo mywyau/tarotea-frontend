@@ -475,7 +475,7 @@ watch(
           elapsed: formattedElapsedTime.value,
           xpEarned: totalXpEarned.value,
           xpLost: totalXpLost.value,
-          retryTo: `/quiz/${slug.value}/sentences/no-audio/v3/start-quiz`,
+          retryTo: `/quiz/${slug.value}/sentences/no-audio/start-quiz`,
           backTo: '/quiz',
         })
     }

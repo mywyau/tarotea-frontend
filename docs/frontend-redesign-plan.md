@@ -177,7 +177,7 @@ Representative routes:
 - one level word page;
 - one topic word page;
 - one free vocabulary quiz start and active question page;
-- `/account/v2` and `/stats/v2` when authenticated.
+- `/account` and `/stats` when authenticated.
 
 Approval gate:
 
@@ -321,7 +321,7 @@ Status: implemented locally; awaiting final preview review
 
 Scope:
 
-- apply the system to `/account/v2`, `/stats/v2` and `/upgrade`;
+- apply the system to `/account`, `/stats` and `/upgrade`;
 - standardise billing, authentication, empty, error and confirmation states;
 - restyle legal and informational pages with the reading layout.
 

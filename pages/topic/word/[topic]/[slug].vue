@@ -451,7 +451,7 @@ watchEffect(() => {
                                 </NuxtLink>
 
                                 <NuxtLink v-if="showPracticeButtons && PRONUNCIATION_PRACTICE_ENABLED"
-                                    :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/v2/${currentExampleIndex}`"
+                                    :to="`/echo-lab/pronunciation-check/topic/${topic}/sentences/${word.id}/${currentExampleIndex}`"
                                     class="action-chip action-chip-sm action-chip-speak example-action-btn"
                                     aria-label="Practice pronunciation for this sentence">
                                     <Mic class="mobile-action-icon h-3.5 w-3.5" />

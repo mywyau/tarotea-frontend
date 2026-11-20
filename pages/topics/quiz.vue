@@ -92,7 +92,7 @@ const topicQuizModes = [
         icon: markRaw(BookOpen),
         buttonClass: 'topic-btn-blue',
         dotClass: 'dot-blue',
-        to: (topicId: string) => `/topic/quiz/vocabulary/word/v5/start-quiz/${topicId}`,
+        to: (topicId: string) => `/topic/quiz/vocabulary/word/start-quiz/${topicId}`,
     },
     {
         id: 'audio',
@@ -100,7 +100,7 @@ const topicQuizModes = [
         icon: markRaw(Headphones),
         buttonClass: 'topic-btn-purple',
         dotClass: 'dot-purple',
-        to: (topicId: string) => `/topic/quiz/vocabulary/audio/v5/${topicId}/start-quiz`,
+        to: (topicId: string) => `/topic/quiz/vocabulary/audio/${topicId}/start-quiz`,
     },
     {
         id: 'sentences',
@@ -108,7 +108,7 @@ const topicQuizModes = [
         icon: markRaw(MessageSquareText),
         buttonClass: 'topic-btn-yellow',
         dotClass: 'dot-yellow',
-        to: (topicId: string) => `/topic/quiz/sentences/no-audio/${topicId}/v3/start-quiz`,
+        to: (topicId: string) => `/topic/quiz/sentences/no-audio/${topicId}/start-quiz`,
     },
     {
         id: 'sentences-audio',
@@ -116,7 +116,7 @@ const topicQuizModes = [
         icon: markRaw(Volume2),
         buttonClass: 'topic-btn-blush',
         dotClass: 'dot-blush',
-        to: (topicId: string) => `/topic/quiz/sentences/audio/${topicId}/v3/start-quiz`,
+        to: (topicId: string) => `/topic/quiz/sentences/audio/${topicId}/start-quiz`,
     },
 ] as const
 

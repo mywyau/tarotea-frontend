@@ -540,7 +540,7 @@ watch(
       elapsed: formattedElapsedTime.value,
       xpEarned: totalXpEarned.value,
       xpLost: totalXpLost.value,
-      retryTo: `/topic/quiz/vocabulary/word/v5/start-quiz/${topicSlug.value}`,
+      retryTo: `/topic/quiz/vocabulary/word/start-quiz/${topicSlug.value}`,
       backTo: '/topics/quiz',
       review: {
         basePath: `/topic/word/${topicSlug.value}`,

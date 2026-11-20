@@ -83,7 +83,7 @@ const canEnterTopic = () => true
       </p>
 
       <div class="pt-6">
-        <NuxtLink :to="`/topic/quiz/sentences/no-audio/${topicSlug}/v3`" class="start-btn">
+        <NuxtLink :to="`/topic/quiz/sentences/no-audio/${topicSlug}`" class="start-btn">
           Start
         </NuxtLink>
       </div>

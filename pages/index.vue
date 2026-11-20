@@ -37,7 +37,7 @@ function dailyWordCardColour() {
 const wordCardColour = useState('home-word-card-colour', dailyWordCardColour)
 
 const primaryAction = computed(() => isLoggedIn.value
-  ? { to: '/daily/vocab/v2/start-quiz', label: 'Start daily practice' }
+  ? { to: '/daily/vocab/start-quiz', label: 'Start daily practice' }
   : { to: '/levels', label: 'Start learning' })
 
 const learningModes = [
