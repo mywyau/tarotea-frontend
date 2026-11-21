@@ -53,7 +53,8 @@ function syncFeaturedDay() {
   midnightTimer = setTimeout(syncFeaturedDay, dayInMilliseconds - (now % dayInMilliseconds))
 }
 
-const primaryAction = computed(() => isLoggedIn.value
+const { dailyPracticeEnabled } = useRuntimeConfig().public
+const primaryAction = computed(() => dailyPracticeEnabled && isLoggedIn.value
   ? { to: '/daily/vocab/start-quiz', label: 'Start daily practice' }
   : { to: '/levels', label: 'Start learning' })
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+const { dailyPracticeEnabled } = useRuntimeConfig().public
 const { data: stats } = await useFetch('/api/total-users-stats', {
   server: true,
   lazy: true,
@@ -82,7 +83,7 @@ onMounted(() => {
     <div class="mt-12 space-y-10">
 
       <!-- DAILY -->
-      <div v-if="true">
+      <div v-if="dailyPracticeEnabled">
         <h2 class="text-sm uppercase tracking-wide text-gray-500 mb-4">
           Daily Exercise
         </h2>

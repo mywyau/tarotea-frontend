@@ -29,8 +29,8 @@ watchEffect(() => {
 
 const primaryTips = [
   {
-    title: 'Read the sentence, then pick the meaning',
-    body: 'Each question shows a Cantonese sentence and 4 English choices.',
+    title: 'Choose the matching Cantonese sentence',
+    body: 'Read the English prompt and choose its Cantonese translation. You’ll hear the sentence after you answer.',
   },
   {
     title: 'Wrong answers cost 12 XP',

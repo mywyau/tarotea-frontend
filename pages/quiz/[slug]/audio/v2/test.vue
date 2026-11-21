@@ -494,13 +494,12 @@ onBeforeUnmount(() => {
 
       <div v-if="showQuiz" class="audio-quiz-question">
         <div class="audio-quiz-prompt flex flex-col items-center justify-center gap-2">
-          <p v-if="answered && currentWord" class="audio-revealed-word text-4xl font-semibold">
+          <p v-if="answered && currentWord" class="text-4xl font-semibold">
             {{ currentWord.word }}
           </p>
 
-          <p v-else-if="currentWord" class="audio-concealed-word text-4xl font-semibold" aria-hidden="true"
-            style="filter: blur(14px); opacity: 0.42; user-select: none;">
-            {{ currentWord.word }}
+          <p v-else class="font-semibold">
+            Which word did you hear?
           </p>
 
           <p v-if="answered && currentWord?.jyutping" class="text-sm text-gray-500">

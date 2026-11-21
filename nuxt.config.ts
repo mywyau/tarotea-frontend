@@ -80,6 +80,7 @@ export default defineNuxtConfig({
     qstashNextSigningKey: process.env.QSTASH_NEXT_SIGNING_KEY,
     qstashToken: process.env.QSTASH_TOKEN,
     public: {
+      dailyPracticeEnabled: false,
       isPreviewDeployment: process.env.VERCEL_ENV === "preview",
       appVersion: process.env.VERCEL_GIT_COMMIT_SHA || Date.now().toString(),
       cdnBase: process.env.NUXT_PUBLIC_CDN_BASE,

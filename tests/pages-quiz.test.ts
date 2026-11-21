@@ -74,7 +74,19 @@ describe('quiz page contracts', () => {
       expect(source).toContain('audio-answer-tile')
       expect(source).not.toContain('answer-tile aspect-square')
       expect(source).toContain('v-if="answered && currentWord"')
-      expect(source).toContain('style="filter: blur(14px); opacity: 0.42; user-select: none;"')
+      expect(source.match(/{{ currentWord\.word }}/g)).toHaveLength(1)
+      expect(source).toContain('Which word did you hear?')
+    }
+  })
+
+  it('reveals target-word feedback only after a level or topic sentence answer', () => {
+    for (const page of [
+      'quiz/[slug]/sentences/no-audio/v3/index.vue',
+      'topic/quiz/sentences/no-audio/[topic]/v3/index.vue',
+    ]) {
+      const source = readPage(page)
+      expect(source).toMatch(/<div v-if="answered"[^>]*>\s*<div[^>]*>\s*<p[^>]*>\s*Target word/)
+      expect(source).not.toContain('blur-lg')
     }
   })
 

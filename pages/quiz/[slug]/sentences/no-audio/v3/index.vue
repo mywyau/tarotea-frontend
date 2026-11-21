@@ -539,9 +539,8 @@ onBeforeUnmount(() => {
                 <QuizHeaderProgress :label="quizTitle" :current="current + 1" :total="questions.length"
                   :answered="answered" @advance="next" />
 
-                <div class="text-center space-y-2">
-                  <div class="space-y-0.5 text-center transition-all duration-300"
-                    :class="answered ? 'blur-none opacity-100' : 'blur-lg opacity-60 select-none pointer-events-none'">
+                <div v-if="answered" class="text-center space-y-2">
+                  <div class="space-y-0.5 text-center">
                     <p class="text-[0.65rem] uppercase tracking-wide text-gray-500">
                       Target word
                     </p>
@@ -555,7 +554,7 @@ onBeforeUnmount(() => {
                     </p>
                   </div>
 
-                  <div class="relative transition-all duration-300" :class="!answered && 'blur-md opacity-70 select-none'">
+                  <div class="relative">
                     <div class="flex items-center justify-center gap-3">
                       <div class="w-28 h-1 bg-gray-200 rounded">
                         <div class="h-1 bg-green-500 rounded transition-all duration-500"

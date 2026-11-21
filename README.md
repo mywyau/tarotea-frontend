@@ -15,6 +15,9 @@ The goal is not academic Cantonese, but the words and phrases you actually hear 
 - 💳 Stripe subscriptions (Free / Pro)
 - 🗑️ Full account deletion with data and billing cleanup
 
+Daily vocabulary and the Daily Jyutping guessing game are paused by default. Set
+`NUXT_PUBLIC_DAILY_PRACTICE_ENABLED=true` and restart the app or redeploy to enable both.
+
 ---
 
 ## Tech Stack

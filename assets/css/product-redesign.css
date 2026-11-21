@@ -356,18 +356,6 @@
   line-height: 1.05;
 }
 
-.audio-concealed-word {
-  filter: blur(14px) !important;
-  opacity: 0.42 !important;
-  pointer-events: none;
-  transition: none !important;
-}
-
-.audio-revealed-word {
-  filter: none;
-  opacity: 1;
-}
-
 .audio-quiz-xp {
   display: grid;
   gap: 0.25rem;

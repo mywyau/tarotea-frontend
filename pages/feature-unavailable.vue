@@ -5,15 +5,20 @@ useSeoMeta({
 })
 
 const route = useRoute()
-const isPronunciation = computed(() => route.query.feature === 'pronunciation')
+const heading = computed(() => {
+  if (route.query.feature === 'daily') return 'Daily practice is paused'
+  if (route.query.feature === 'pronunciation') return 'Speaking practice is taking a short break'
+  return 'This feature is taking a short break'
+})
 </script>
 
 <template>
   <AppPage size="compact" class="feature-unavailable-page">
     <AppCard padding="generous">
       <AppBadge tone="neutral">Temporarily unavailable</AppBadge>
-      <h1>{{ isPronunciation ? 'Speaking practice is taking a short break' : 'This feature is taking a short break' }}</h1>
-      <p>
+      <h1>{{ heading }}</h1>
+      <p v-if="route.query.feature === 'daily'">Level and topic quizzes are available to practise vocabulary and listening.</p>
+      <p v-else>
         We’ve paused this feature while we improve its reliability and capacity. Your existing learning progress is not affected.
       </p>
       <div class="feature-unavailable-actions">
