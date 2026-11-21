@@ -220,7 +220,7 @@
   padding: clamp(1.5rem, 4vw, 3rem) var(--page-gutter) !important;
 }
 
-.word-page :where(.word-card, .section-card, .example-card) {
+.word-page :where(.word-card, .section-card) {
   border: 1px solid rgb(var(--color-ink) / 0.1) !important;
   border-radius: var(--radius-card) !important;
   background: rgb(var(--color-surface)) !important;

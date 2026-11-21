@@ -449,7 +449,7 @@ useSeoMeta({
       </h2>
 
       <ul class="space-y-5">
-        <li v-if="currentExample" :key="`${word.id}-${currentExampleIndex}`" class="example-card rounded-lg p-4">
+        <li v-if="currentExample" :key="`${word.id}-${currentExampleIndex}`" class="p-4">
           <div class="space-y-3">
             <div v-if="showPracticeButtons || showAudioButtons" class="flex justify-end">
               <div class="example-actions-row">
@@ -609,11 +609,6 @@ useSeoMeta({
 }
 
 /* Examples */
-.example-card {
-  background: rgba(168, 202, 224, 0.20);
-  border-left: 4px solid rgba(168, 202, 224, 0.70);
-}
-
 .example-scroll-block {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;

@@ -435,7 +435,7 @@ useSeoMeta({
 
             <ul class="space-y-5 list-none pl-0">
                 <li v-if="currentExample" :key="`${word.id}-${currentExampleIndex}`"
-                    class="example-card rounded-lg p-4">
+                    class="p-4">
                     <div class="space-y-3">
                         <!-- buttons aligned right -->
                         <div v-if="showPracticeButtons || showAudioButtons" class="flex justify-end">
@@ -592,11 +592,6 @@ useSeoMeta({
 }
 
 /* Examples */
-.example-card {
-    background: rgba(168, 202, 224, 0.20);
-    border-left: 4px solid rgba(168, 202, 224, 0.70);
-}
-
 .example-scroll-block {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;

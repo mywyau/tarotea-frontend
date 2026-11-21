@@ -6,6 +6,7 @@ useSeoMeta({
   ogDescription: 'Build everyday Cantonese with short, focused practice sessions.',
 })
 
+import { dayInMilliseconds, utcDayNumber, offlineWordForDay } from '~/utils/wordOfTheDay'
 import {
   ArrowRight,
   CalendarCheck,
@@ -30,11 +31,27 @@ const momentumMessage = ref('')
 let onlineRefreshInterval: ReturnType<typeof setInterval> | undefined
 
 const wordCardPalette = ['taro-blue', 'taro-pink', 'taro-yellow', 'success', 'taro-lilac']
-function dailyWordCardColour() {
-  const utcDay = Math.floor(Date.now() / 86_400_000)
-  return `rgb(var(--color-${wordCardPalette[utcDay % wordCardPalette.length]}) / 0.4)`
+const featuredDay = useState('home-featured-utc-day', () => utcDayNumber(Date.now()))
+const { data: dailyFeature } = await useFetch('/api/word-of-the-day', {
+  watch: [featuredDay],
+  timeout: 5000,
+  retry: 0,
+})
+const featuredWord = computed(() => {
+  const feature = dailyFeature.value
+  if (feature?.day === featuredDay.value) return feature.today
+  if (feature && feature.day + 1 === featuredDay.value) return feature.tomorrow
+  return offlineWordForDay(featuredDay.value)
+})
+const wordCardColour = computed(() => `rgb(var(--color-${wordCardPalette[featuredDay.value % wordCardPalette.length]}) / 0.4)`)
+let midnightTimer: ReturnType<typeof setTimeout> | undefined
+
+function syncFeaturedDay() {
+  clearTimeout(midnightTimer)
+  const now = Date.now()
+  featuredDay.value = utcDayNumber(now)
+  midnightTimer = setTimeout(syncFeaturedDay, dayInMilliseconds - (now % dayInMilliseconds))
 }
-const wordCardColour = useState('home-word-card-colour', dailyWordCardColour)
 
 const primaryAction = computed(() => isLoggedIn.value
   ? { to: '/daily/vocab/start-quiz', label: 'Start daily practice' }
@@ -110,15 +127,15 @@ watch(() => user.value?.firstName, updateGeneralGreeting)
 onMounted(() => {
   void resolveMeState()
   updateGeneralGreeting()
-  function refreshHome() {
-    wordCardColour.value = dailyWordCardColour()
-    void refreshCurrentUsers()
-  }
-  refreshHome()
-  onlineRefreshInterval = setInterval(refreshHome, 30_000)
+  syncFeaturedDay()
+  document.addEventListener('visibilitychange', syncFeaturedDay)
+  void refreshCurrentUsers()
+  onlineRefreshInterval = setInterval(refreshCurrentUsers, 30_000)
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(midnightTimer)
+  document.removeEventListener('visibilitychange', syncFeaturedDay)
   if (onlineRefreshInterval) clearInterval(onlineRefreshInterval)
 })
 </script>
@@ -146,9 +163,9 @@ onBeforeUnmount(() => {
       <div class="home-hero-panel" aria-label="TaroTea learner activity">
         <div class="home-word-sample" :style="{ backgroundColor: wordCardColour }">
           <span class="home-word-label">Word of the day</span>
-          <strong lang="zh-HK">慢慢嚟</strong>
-          <span class="home-jyutping">maan6 maan6 lai4</span>
-          <span>Take it slowly</span>
+          <strong lang="zh-HK">{{ featuredWord.word }}</strong>
+          <span class="home-jyutping">{{ featuredWord.jyutping }}</span>
+          <span>{{ featuredWord.meaning }}</span>
         </div>
         <div class="home-stats">
           <div class="bg-[#efb28f]"><UsersRound aria-hidden="true" /><strong>{{ currentUsers ?? '—' }}</strong><span>online now</span></div>

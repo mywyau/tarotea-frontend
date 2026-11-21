@@ -26,18 +26,6 @@ const slug = computed(() => route.params.slug as string)
 
 type QuizAnswer = { wordId: string; correct: boolean }
 
-type FinalizeResponse = {
-    quiz: {
-        mode: string
-        correctCount: number
-        totalQuestions: number
-    }
-    attemptId: string
-    queued?: boolean
-    deduped?: boolean
-    status?: string
-}
-
 const {
     elapsedMs,
     formattedElapsedTime,
@@ -71,36 +59,6 @@ async function playCurrentWordAudio() {
     }
 }
 
-const finalizeAttemptId = ref<string | null>(null)
-const finalizeCompleted = ref(false)
-const finalizeError = ref<string | null>(null)
-const completionSoundPlayed = ref(false)
-
-function createAttemptId() {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-        return crypto.randomUUID()
-    }
-
-    return `quiz-${slug.value}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
-}
-
-function ensureFinalizeAttemptId() {
-    if (!finalizeAttemptId.value) {
-        finalizeAttemptId.value = createAttemptId()
-    }
-
-    return finalizeAttemptId.value
-}
-
-function resetFinalizeState() {
-    finalizeAttemptId.value = null
-    finalizeCompleted.value = false
-    finalizeError.value = null
-    totalXpEarned.value = 0
-    totalXpLost.value = 0
-    finishing.value = false
-    completionSoundPlayed.value = false
-}
 
 function resetQuizRunState() {
     answerLog.value = []
@@ -150,9 +108,6 @@ function calculateQuizXpTotals() {
 }
 
 const answerLog = ref<QuizAnswer[]>([])
-const finishing = ref(false)
-const totalXpEarned = ref<number>(0)
-const totalXpLost = ref<number>(0)
 
 
 const tileColors = ref<string[]>([])
@@ -173,7 +128,7 @@ const { getAccessToken } = await useAuth()
 
 const token = await getAccessToken()
 
-const { isLoggedIn } = useMeStateV2() // for now just to prevent hydration redirect jitters
+const { isLoggedIn, user } = useMeStateV2() // for now just to prevent hydration redirect jitters
 
 const { data, error } = await useFetch<LevelData>(
     () =>
@@ -249,15 +204,10 @@ const question = computed(() => questions.value[current.value])
 
 const STREAK_CAP = 5
 const WRONG_PENALTY = -12
-const MIN_CALCULATING_MS = 1800
 
 function deltaFor(correct: boolean, streakBefore: number) {
     if (!correct) return WRONG_PENALTY
     return 5 + Math.min(streakBefore, STREAK_CAP) * 2
-}
-
-function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 const incorrectCount = computed(() => {
@@ -293,102 +243,12 @@ const missedWords = computed(() => {
 
 const hasQuestions = computed(() => questions.value.length > 0)
 
-const quizFinished = computed(() => {
-    return hasQuestions.value && current.value >= questions.value.length
-})
 
 const showQuiz = computed(() => {
     return hasQuestions.value && current.value < questions.value.length
 })
 
-const showCalculating = computed(() => {
-    return quizFinished.value && finishing.value
-})
-
-const showFinalizeError = computed(() => {
-    return quizFinished.value && !finishing.value && !finalizeCompleted.value && !!finalizeError.value
-})
-
-const showResults = computed(() => {
-    return quizFinished.value && !finishing.value && finalizeCompleted.value
-})
 const isGuestMode = computed(() => !isLoggedIn.value)
-async function finalizeQuiz() {
-    if (finishing.value || finalizeCompleted.value) return
-    if (!answerLog.value.length) return
-
-    finishing.value = true
-    finalizeError.value = null
-
-    const attemptId = ensureFinalizeAttemptId()
-    const startedAt = Date.now()
-
-    try {
-        const token = await getAccessToken()
-        if (!token || isGuestMode.value) {
-            const elapsed = Date.now() - startedAt
-            const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
-
-            if (remaining > 0) {
-                await sleep(remaining)
-            }
-
-            totalXpEarned.value = 0
-            totalXpLost.value = 0
-            finalizeCompleted.value = true
-            return
-        }
-
-        const res = await $fetch<FinalizeResponse>(
-            // '/api/quiz/grind/finalize-v4',
-            '/api/quiz/grind/finalize-v5',
-            {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`
-                },
-                body: {
-                    attemptId,
-                    mode: 'grind-level',
-                    answers: answerLog.value
-                }
-            })
-
-        const elapsed = Date.now() - startedAt
-        const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
-
-        if (remaining > 0) {
-            await sleep(remaining)
-        }
-
-        const { earned, lost } = calculateQuizXpTotals()
-        totalXpEarned.value = earned
-        totalXpLost.value = lost
-        finalizeCompleted.value = true
-
-        console.info('Quiz finalized', {
-            attemptId: res.attemptId,
-            queued: res.queued,
-            deduped: res.deduped
-        })
-    } catch (err) {
-        const elapsed = Date.now() - startedAt
-        const remaining = Math.max(0, MIN_CALCULATING_MS - elapsed)
-
-        if (remaining > 0) {
-            await sleep(remaining)
-        }
-
-        finalizeError.value = 'We could not save your quiz result. Please try again.'
-        console.error('Finalize failed', {
-            attemptId,
-            err
-        })
-    } finally {
-        finishing.value = false
-    }
-}
-
 function answer(index: number) {
     if (answered.value) return
     if (!question.value) return
@@ -446,10 +306,7 @@ async function next() {
 
     if (current.value >= questions.value.length) {
         freezeTimer()
-
-        if (answerLog.value.length > 0) {
-            await finalizeQuiz()
-        }
+        await showWordResults()
         return
     }
 
@@ -491,7 +348,6 @@ watch(
     () => questions.value,
     async (qs) => {
         resetQuizRunState()
-        resetFinalizeState()
 
         if (!qs.length) return
 
@@ -546,44 +402,32 @@ watch(
     { immediate: true }
 )
 
-watch(
-    () => showResults.value,
-    (visible) => {
-        if (!visible) return
+async function showWordResults() {
+    const userId = user.value?.id
+    const { earned, lost } = userId ? calculateQuizXpTotals() : { earned: 0, lost: 0 }
+    const percent = percentage.value
+    setTimeout(() => {
+        if (percent >= 70) playQuizCompleteFanfareSong()
+        else if (percent >= 50) playQuizCompleteOkaySong()
+        else playQuizCompleteFailSong()
+    }, 250)
 
-        if (!completionSoundPlayed.value) {
-            completionSoundPlayed.value = true
-
-            setTimeout(() => {
-                const p = percentage.value
-
-                if (p >= 70) {
-                    playQuizCompleteFanfareSong()
-                } else if (p >= 50) {
-                    playQuizCompleteOkaySong()
-                } else {
-                    playQuizCompleteFailSong()
-                }
-            }, 250)
-        }
-
-        void openQuizResults({
-          title: 'Quiz Complete',
-          correct: score.value,
-          incorrect: incorrectCount.value,
-          elapsed: formattedElapsedTime.value,
-          xpEarned: totalXpEarned.value,
-          xpLost: totalXpLost.value,
-          retryTo: `/quiz/${slug.value}/word/start-quiz`,
-          backTo: '/quiz',
-          review: {
+    await openQuizResults({
+        title: 'Quiz Complete',
+        correct: score.value,
+        incorrect: incorrectCount.value,
+        elapsed: formattedElapsedTime.value,
+        xpEarned: earned,
+        xpLost: lost,
+        retryTo: `/quiz/${slug.value}/word/start-quiz`,
+        backTo: '/quiz',
+        review: {
             basePath: `/level/${slug.value}/word`,
             correct: reviewedWords(correctWords.value),
             incorrect: reviewedWords(missedWords.value),
-          },
-        })
-    }
-)
+        },
+    }, userId ? { userId, mode: 'grind-level', answers: answerLog.value } : undefined)
+}
 
 watch(
     () => question.value?.wordId,
@@ -673,47 +517,6 @@ onBeforeUnmount(() => {
                     </button>
                 </div>
             </div>
-
-
-
-            <transition name="fade-scale" mode="out-in">
-                <div v-if="showCalculating" key="calculating" class="stat-card hero-card result-2 space-y-4">
-                    <div class="spinner mx-auto" />
-
-                    <p class="stat-label">
-                        Calculating
-                    </p>
-
-                    <h2 class="hero-title">
-                        Marking your quiz...
-                    </h2>
-
-                    <p class="hero-subtext">
-                        Updating your XP and preparing your results
-                    </p>
-                </div>
-
-                <div v-else-if="showFinalizeError" key="finalize-error" class="stat-card hero-card result-1 space-y-4">
-                    <p class="stat-label">
-                        Save Failed
-                    </p>
-
-                    <h2 class="hero-title">
-                        Could not finish quiz
-                    </h2>
-
-                    <p class="hero-subtext">
-                        {{ finalizeError }}
-                    </p>
-
-                    <button
-                        class="next-btn-blue w-full rounded-xl font-medium text-black text-lg py-3 hover:brightness-110"
-                        @click="finalizeQuiz">
-                        Retry Saving Results
-                    </button>
-                </div>
-
-            </transition>
         </section>
     </main>
 </template>
