@@ -94,10 +94,10 @@ onMounted(() => {
 <template>
   <main class="mx-auto w-full max-w-3xl px-4 py-8">
     <section v-if="result" class="quiz-completion space-y-6">
-      <header class="stat-card hero-card text-center">
-        <h1 class="stat-label">{{ result.title }}</h1>
-        <p class="hero-title">{{ headline }}</p>
-        <p class="hero-score">{{ accuracy }}%</p>
+      <header class="space-y-2 py-2 text-center">
+        <h1 class="text-sm font-semibold">{{ result.title }}</h1>
+        <p class="text-2xl font-semibold tracking-tight sm:text-3xl">{{ headline }}</p>
+        <p class="text-5xl font-bold tracking-tight sm:text-6xl">{{ accuracy }}%</p>
       </header>
       <QuizCompletionFlipStats :correct="result.correct" :incorrect="result.incorrect" :show-score="!result.review"
         :time="result.elapsed" :xp-earned="earned" :xp-lost="lost" :show-xp="!result.pendingSave" />
