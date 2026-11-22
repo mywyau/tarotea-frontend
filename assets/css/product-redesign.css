@@ -276,7 +276,7 @@
   font-family: var(--font-brand);
 }
 
-:where(.quiz-card, .hero-card) {
+:where(.hero-card) {
   border: 1px solid rgb(var(--color-ink) / 0.1) !important;
   border-radius: var(--radius-panel) !important;
   background: rgb(var(--color-surface)) !important;

@@ -4,11 +4,13 @@ const props = defineProps<{
   total: number
   label?: string
   answered?: boolean
+  sentenceQuiz?: boolean
 }>()
 
 const emit = defineEmits<{ advance: [] }>()
 const AUTO_ADVANCE_DELAY_MS = 2500
-const autoAdvance = useCookie<boolean>('quiz-auto-advance', {
+const advanceDelayMs = props.sentenceQuiz ? 8000 : AUTO_ADVANCE_DELAY_MS
+const autoAdvance = props.sentenceQuiz ? ref(false) : useCookie<boolean>('quiz-auto-advance', {
   default: () => false,
   sameSite: 'lax',
 })
@@ -29,7 +31,7 @@ watch([() => props.answered, autoAdvance], ([answered, automatic]) => {
   clearAdvanceTimer()
   if (!answered || !automatic) return
 
-  advanceTimer = setTimeout(() => emit('advance'), AUTO_ADVANCE_DELAY_MS)
+  advanceTimer = setTimeout(() => emit('advance'), advanceDelayMs)
 })
 
 onBeforeUnmount(clearAdvanceTimer)
@@ -46,9 +48,10 @@ onBeforeUnmount(clearAdvanceTimer)
         </div>
         <span class="quiz-header-progress-count">{{ current }} / {{ total }}</span>
         <button type="button" class="quiz-auto-toggle" role="switch" :aria-checked="autoAdvance"
-          :title="autoAdvance ? 'Automatic next question is on' : 'Automatic next question is off'"
+          aria-label="Automatically advance to the next question"
+          :title="`Advance ${advanceDelayMs / 1000} seconds after answering`"
           @click="autoAdvance = !autoAdvance">
-          Auto {{ autoAdvance ? 'on' : 'off' }}
+          Auto {{ autoAdvance ? 'on' : 'off' }}<span v-if="sentenceQuiz && autoAdvance"> · {{ advanceDelayMs / 1000 }}s</span>
         </button>
       </div>
     </Teleport>

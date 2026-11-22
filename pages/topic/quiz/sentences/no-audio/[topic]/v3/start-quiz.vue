@@ -55,7 +55,7 @@ const canEnterTopic = () => true
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
 
-    <section v-if="authReady && !canEnterTopic()" class="quiz-card text-center space-y-4">
+    <section v-if="authReady && !canEnterTopic()" class="text-center space-y-4">
       <h1 class="text-2xl font-semibold text-gray-900">
         Quiz locked
       </h1>
@@ -73,7 +73,7 @@ const canEnterTopic = () => true
       </NuxtLink>
     </section>
 
-    <section v-else class="quiz-card text-center space-y-6">
+    <section v-else class="text-center space-y-6">
       <h1 class="text-3xl font-semibold text-gray-900 level-heading">
         {{ topicSlug }}
       </h1>
@@ -129,11 +129,6 @@ const canEnterTopic = () => true
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgba(17, 24, 39, 0.65);
-}
-
-.quiz-card {
-  border-radius: 26px;
-  padding: 2rem;
 }
 
 .start-btn {

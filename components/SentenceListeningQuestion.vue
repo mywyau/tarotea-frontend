@@ -6,6 +6,9 @@ import { shuffleFisherYates } from '~/utils/shuffle'
 const props = defineProps<{
   question: SentenceQuizQuestion
   src: string
+  xp: number
+  xpDelta: number | null
+  streak: number
   selectedIndex: number | null
 }>()
 const emit = defineEmits<{ answer: [index: number] }>()
@@ -18,6 +21,8 @@ const tileColors = shuffleFisherYates(brandColours).slice(0, 4)
     <h1 class="text-2xl font-semibold">Which word did you hear?</h1>
     <AudioButton :src="src" autoplay aria-label="Play sentence" />
   </div>
+  <SentenceQuizTarget :answered="answered" :word="question.sourceWord" :jyutping="question.sourceWordJyutping"
+    :xp="xp" :xp-delta="xpDelta" :streak="streak" />
   <div class="grid grid-cols-2 gap-4 w-full">
     <button v-for="(option, i) in question.options" :key="i"
       :disabled="answered" lang="zh-HK"

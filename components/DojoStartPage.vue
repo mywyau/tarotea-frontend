@@ -24,7 +24,7 @@ const showAdvancedTips = ref(false)
 <template>
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
-    <section class="quiz-card text-center space-y-6">
+    <section class="text-center space-y-6">
       <TypewriterTitleBlock :heading-text="props.heading" :subheading-text="props.description"
         heading-class="text-3xl font-semibold text-gray-900 level-heading"
         subheading-class="text-black level-subheading" gap="1.5rem" />
@@ -97,11 +97,6 @@ const showAdvancedTips = ref(false)
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: rgba(17, 24, 39, 0.65);
-}
-
-.quiz-card {
-  border-radius: 26px;
-  padding: 2rem;
 }
 
 .start-btn {

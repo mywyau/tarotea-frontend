@@ -38,7 +38,7 @@ const showAllTips = ref(false)
   <main class="quiz-intro-page max-w-xl mx-auto px-4 py-16 space-y-10">
 
 
-    <section class="quiz-card text-center space-y-6">
+    <section class="text-center space-y-6">
       <h1 class="text-3xl font-semibold text-gray-900 level-heading">
         Daily 20 Questions
       </h1>
@@ -104,11 +104,6 @@ const showAllTips = ref(false)
   --blue: #a8cae0;
   --yellow: #f4cd27;
   --blush: #f6e1e1;
-}
-
-.quiz-card {
-  border-radius: 26px;
-  padding: 2rem;
 }
 
 .start-btn {
@@ -257,11 +252,5 @@ const showAllTips = ref(false)
 .tip-expand-leave-to {
   opacity: 0;
   transform: translateY(-4px);
-}
-
-@media (max-width: 640px) {
-  .quiz-card {
-    padding: 1.5rem;
-  }
 }
 </style>

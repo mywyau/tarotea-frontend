@@ -118,6 +118,7 @@ const nextWord = computed(() => {
 })
 
 const { volume } = useAudioVolume()
+const { showJyutping, showTranslation } = useReadingPreferences()
 
 const showXpBar = useCookie<boolean>('word-page-show-xp-bar', {
     default: () => true,
@@ -337,6 +338,8 @@ useSeoMeta({
 
               <div class="space-y-2 border-t border-gray-300 pt-3">
                 <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Page display</p>
+                <ReadingDisplayToggle v-model="showJyutping" class="w-full">Show Jyutping</ReadingDisplayToggle>
+                <ReadingDisplayToggle v-model="showTranslation" class="w-full">Show translation</ReadingDisplayToggle>
                 <label class="flex cursor-pointer items-center justify-between gap-3 text-xs font-medium text-gray-700">
                   <span>Show XP bar</span>
                   <input v-model="showXpBar" type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-blue-600" />
@@ -363,11 +366,11 @@ useSeoMeta({
         {{ word.word }}
       </h1>
 
-      <div class="text-lg text-black">
+      <div v-if="showJyutping" class="text-lg text-black">
         {{ word.jyutping }}
       </div>
 
-      <div class="text-lg text-black">
+      <div v-if="showTranslation" class="text-lg text-black">
         {{ word.meaning }}
       </div>
 
@@ -426,7 +429,7 @@ useSeoMeta({
 
     <!-- Usage -->
     <section v-if="word.usage?.length" class="section-card rounded-xl p-6">
-      <details class="usage-details">
+      <details :key="word.id" class="usage-details" open>
         <summary class="usage-summary text-gray-900" aria-label="Usage notes" title="Usage notes">
           <EyeOff class="usage-icon usage-icon-closed h-4 w-4" aria-hidden="true" />
           <Eye class="usage-icon usage-icon-open h-4 w-4" aria-hidden="true" />
@@ -482,11 +485,11 @@ useSeoMeta({
                   {{ currentExample.sentence }}
                 </div>
 
-                <div class="mt-2 text-sm text-gray-500 whitespace-nowrap">
+                <div v-if="showJyutping" class="mt-2 text-sm text-gray-500 whitespace-nowrap">
                   {{ currentExample.jyutping }}
                 </div>
 
-                <div class="mt-2 text-sm text-gray-700 whitespace-nowrap">
+                <div v-if="showTranslation" class="mt-2 text-sm text-gray-700 whitespace-nowrap">
                   {{ currentExample.meaning }}
                 </div>
               </div>

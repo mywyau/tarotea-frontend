@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ChevronLeft, ChevronRight, Eye, EyeOff, ListVideo, Play, Repeat2, Square } from '@lucide/vue'
+import { ChevronLeft, ChevronRight, Eye, EyeOff, ListVideo, Pause, Play, Repeat2, RotateCcw } from '@lucide/vue'
 import { useStrokeWriter } from '~/composables/useStrokeWriter'
 
 const props = defineProps<{
@@ -11,6 +11,7 @@ const props = defineProps<{
   errorMessage?: string
 }>()
 
+const { showJyutping, showTranslation } = useReadingPreferences()
 const characters = computed(() => Array.from(props.text ?? '').filter(char => /\p{Script=Han}/u.test(char)))
 const index = ref(0)
 const choices = ref<HTMLDivElement | null>(null)
@@ -41,58 +42,102 @@ watch(writerHost, (host, _, onCleanup) => {
   onCleanup(() => observer.disconnect())
 }, { flush: 'post' })
 
-const playback = ref<'idle' | 'character' | 'loop' | 'sequence'>('idle')
+const playback = ref<'idle' | 'playing' | 'paused' | 'finished'>('idle')
+const autoAdvance = ref(true)
+const looping = ref(false)
 const fullCharacter = ref(false)
 let run = 0
+let releasePause: (() => void) | undefined
+
+function stopPlayback() {
+  run++
+  releasePause?.()
+  releasePause = undefined
+  playback.value = 'idle'
+  looping.value = false
+}
 
 function showCharacter(full: boolean) {
-  run++
-  playback.value = 'idle'
+  stopPlayback()
   fullCharacter.value = full
   if (full) void writer.value?.showCharacter({ duration: 0 })
   else void writer.value?.hideCharacter({ duration: 0 })
 }
 
-function selectCharacter(position: number) {
-  showCharacter(false)
-  index.value = position
+// Pause can also land during a data request or in the gap between characters.
+async function waitForPlayback(currentRun: number) {
+  while (currentRun === run && playback.value === 'paused') {
+    await new Promise<void>(resolve => { releasePause = resolve })
+  }
+  return currentRun === run
 }
 
-async function play(mode: 'character' | 'loop' | 'sequence') {
-  if (playback.value === mode) {
-    showCharacter(false)
-    return
-  }
-  if (!writer.value) return
-
+async function playFrom(position: number, repeat = false) {
   showCharacter(false)
   const currentRun = run
-  playback.value = mode
-  if (mode === 'loop') {
-    void writer.value.loopCharacterAnimation()
-    return
-  }
+  playback.value = 'playing'
+  looping.value = repeat
 
-  const first = mode === 'sequence' ? 0 : index.value
-  const last = mode === 'sequence' ? characters.value.length - 1 : index.value
-  for (let position = first; position <= last; position++) {
+  for (; position < characters.value.length; position++) {
     index.value = position
     await nextTick()
     await whenLoaded()
-    if (currentRun !== run) return
-    if (!writer.value) break
-    await writer.value.animateCharacter()
-    if (currentRun !== run) return
-    if (position < last) {
-      await new Promise(resolve => setTimeout(resolve, 350))
+    if (!(await waitForPlayback(currentRun))) return
+
+    if (writer.value) {
+      if (repeat) await writer.value.loopCharacterAnimation()
+      else await writer.value.animateCharacter()
       if (currentRun !== run) return
+      fullCharacter.value = true
+    } else if (!unsupportedCharacter.value) {
+      stopPlayback()
+      return
     }
+
+    if (!autoAdvance.value || position === characters.value.length - 1) break
+    await new Promise(resolve => setTimeout(resolve, 350))
+    if (!(await waitForPlayback(currentRun))) return
+    if (!autoAdvance.value) break
+    fullCharacter.value = false
   }
-  playback.value = 'idle'
-  fullCharacter.value = !!writer.value
+  playback.value = 'finished'
 }
 
-onBeforeUnmount(() => { run++ })
+function togglePlayback() {
+  if (playback.value === 'playing') {
+    playback.value = 'paused'
+    void writer.value?.pauseAnimation()
+  } else if (playback.value === 'paused') {
+    playback.value = 'playing'
+    void writer.value?.resumeAnimation()
+    releasePause?.()
+    releasePause = undefined
+  } else {
+    const replayAll = autoAdvance.value && playback.value === 'finished' && index.value === characters.value.length - 1
+    void playFrom(replayAll ? 0 : index.value)
+  }
+}
+
+function startOver() {
+  const position = looping.value || !autoAdvance.value ? index.value : 0
+  void playFrom(position, looping.value)
+}
+
+function selectCharacter(position: number) {
+  if (playback.value === 'playing') void playFrom(position, looping.value)
+  else {
+    showCharacter(false)
+    index.value = position
+  }
+}
+
+watch([writerHost, characters], ([host, glyphs]) => {
+  if (host && glyphs.length > 0 && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    void playFrom(0)
+  }
+}, { flush: 'post' })
+
+onBeforeUnmount(() => showCharacter(false))
 </script>
 
 <template>
@@ -104,8 +149,12 @@ onBeforeUnmount(() => { run++ })
     <template v-else>
       <header class="word-summary">
         <strong lang="zh-HK">{{ text }}</strong>
-        <span v-if="jyutping" class="word-reading">{{ jyutping }}</span>
-        <span v-if="meaning">{{ meaning }}</span>
+        <span v-if="jyutping && showJyutping" class="word-reading">{{ jyutping }}</span>
+        <span v-if="meaning && showTranslation">{{ meaning }}</span>
+        <div v-if="jyutping || meaning" class="flex flex-wrap items-center gap-x-4">
+          <ReadingDisplayToggle v-if="jyutping" v-model="showJyutping">Show Jyutping</ReadingDisplayToggle>
+          <ReadingDisplayToggle v-if="meaning" v-model="showTranslation">Show translation</ReadingDisplayToggle>
+        </div>
       </header>
 
       <section class="practice-sheet" aria-label="Stroke order practice">
@@ -135,18 +184,18 @@ onBeforeUnmount(() => { run++ })
         </div>
 
         <div class="controls" role="group" aria-label="Stroke controls">
-          <button type="button" class="play-button" :disabled="!writer" @click="play('character')">
-            <Square v-if="playback === 'character'" /><Play v-else />
-            <span class="play-label">{{ playback === 'character' ? 'Stop' : 'Play strokes' }}</span>
+          <button type="button" class="play-button" :disabled="!characters.length || !!loadError" @click="togglePlayback">
+            <Pause v-if="playback === 'playing'" /><Play v-else />
+            {{ playback === 'playing' ? 'Pause' : playback === 'paused' ? 'Resume' : 'Play' }}
           </button>
-          <button v-if="characters.length > 1" type="button" class="sequence-button" :disabled="!writer && playback !== 'sequence'"
-            @click="play('sequence')">
-            <Square v-if="playback === 'sequence'" /><ListVideo v-else />
-            {{ playback === 'sequence' ? 'Stop' : 'Play' }} {{ kind }}
+          <button type="button" class="sequence-button" :disabled="!characters.length" @click="startOver">
+            <RotateCcw /> Start over
           </button>
           <div class="display-controls">
+            <button v-if="characters.length > 1" type="button" class="icon-button" aria-label="Auto-advance"
+              title="Auto-advance to the next character" :aria-pressed="autoAdvance" @click="autoAdvance = !autoAdvance"><ListVideo /></button>
             <button type="button" class="icon-button" aria-label="Loop strokes" title="Loop strokes"
-              :aria-pressed="playback === 'loop'" :disabled="!writer" @click="play('loop')"><Repeat2 /></button>
+              :aria-pressed="looping" :disabled="!writer" @click="looping ? showCharacter(false) : playFrom(index, true)"><Repeat2 /></button>
             <button type="button" class="icon-button" aria-label="Show full character"
               :title="fullCharacter ? 'Show outline only' : 'Show full character'" :aria-pressed="fullCharacter"
               :disabled="!writer" @click="showCharacter(!fullCharacter)"><Eye v-if="!fullCharacter" /><EyeOff v-else /></button>
@@ -230,15 +279,4 @@ button[aria-pressed='true'] { background: rgb(var(--color-taro-lilac) / 0.48); b
 }
 .sentence-practice .character-chip, .sentence-practice .character-nav { flex-shrink: 0; }
 
-@media (max-width: 420px) {
-  .sentence-practice .play-button:has(+ .sequence-button) { padding-inline: 0.65rem; }
-  .sentence-practice .play-button:has(+ .sequence-button) .play-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
 </style>

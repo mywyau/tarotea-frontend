@@ -80,13 +80,15 @@ describe('quiz page contracts', () => {
   })
 
   it('reveals target-word feedback only after a level or topic sentence answer', () => {
-    for (const page of [
-      'quiz/[slug]/sentences/no-audio/v3/index.vue',
-      'topic/quiz/sentences/no-audio/[topic]/v3/index.vue',
+    const target = readProjectFile('components/SentenceQuizTarget.vue')
+    expect(target).toMatch(/<div v-if="answered"[^>]*>[\s\S]*?{{ word }}[\s\S]*?{{ jyutping }}[\s\S]*?<\/div>/)
+    expect(target).toContain('<span v-if="answered"')
+    for (const source of [
+      readPage('quiz/[slug]/sentences/no-audio/v3/index.vue'),
+      readPage('topic/quiz/sentences/no-audio/[topic]/v3/index.vue'),
+      readProjectFile('components/SentenceListeningQuestion.vue'),
     ]) {
-      const source = readPage(page)
-      expect(source).toMatch(/<div v-if="answered"[^>]*>\s*<div[^>]*>\s*<p[^>]*>\s*Target word/)
-      expect(source).not.toContain('blur-lg')
+      expect(source).toContain('<SentenceQuizTarget :answered="answered"')
     }
   })
 
