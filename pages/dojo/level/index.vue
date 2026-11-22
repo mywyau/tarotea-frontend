@@ -64,7 +64,7 @@ function cycleLevelMode(levelId: string, direction: 1 | -1) {
   <main class="levels-page max-w-4xl mx-auto py-10 px-4 space-y-8">
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="text-xl font-semibold dojo-page-heading">Typing practice by level</h1>
+      <h1 class="text-xl font-semibold dojo-page-heading">Typing practice</h1>
       <p class="dojo-page-subheading">Strengthen your phonetic and typing skills with focused exercises.</p>
     </header>
 

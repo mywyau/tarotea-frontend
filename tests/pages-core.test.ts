@@ -17,7 +17,7 @@ describe('core page contracts', () => {
 
   it('home page keeps SEO metadata and start-learning call to action', () => {
     const source = readPage('index.vue')
-    expect(source).toContain("title: 'Learn Cantonese in 15 minutes a day'")
+    expect(source).toContain("title: 'Learn Cantonese for everyday life'")
     expect(source).toContain('Build Cantonese you can actually use.')
     expect(source).toContain("label: 'Start learning'")
     expect(source).toContain('online now')

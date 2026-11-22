@@ -6,6 +6,7 @@ const props = withDefaults(defineProps<{
   autoplay?: boolean
   size?: 'sm' | 'md' | 'lg'
   playbackRate?: number
+  label?: string
 }>(), {
   size: 'md',
   playbackRate: 1,
@@ -14,6 +15,7 @@ const props = withDefaults(defineProps<{
 const emit = defineEmits<{
   autoplayBlocked: []
   played: []
+  playbackFailed: []
 }>()
 
 const { volume } = useAudioVolume()
@@ -51,6 +53,7 @@ const play = async () => {
     }
 
     console.warn('Audio playback failed', error)
+    emit('playbackFailed')
   }
 }
 
@@ -123,12 +126,12 @@ onBeforeUnmount(() => {
       'border border-transparent bg-[#A8CAE0] text-black hover:brightness-110',
       sizeClass
     ]"
-    aria-label="Play audio"
+    :aria-label="label || 'Play audio'"
   >
     <Volume2 :class="iconClass" aria-hidden="true" />
 
     <span v-if="props.size !== 'sm'">
-      Play
+      {{ label || 'Play' }}
     </span>
   </button>
 </template>

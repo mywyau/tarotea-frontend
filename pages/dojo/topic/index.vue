@@ -82,12 +82,12 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   <main class="topics-page max-w-4xl mx-auto py-10 px-2 space-y-10">
 
     <header class="text-center space-y-3 max-w-2xl mx-auto">
-      <h1 class="text-xl font-semibold dojo-page-heading">Typing practice by topic</h1>
+      <h1 class="text-xl font-semibold dojo-page-heading">Typing practice</h1>
       <p class="dojo-page-subheading">Strengthen your phonetic and typing skills with focused exercises.</p>
     </header>
 
     <div v-if="totalPages > 1" class="pagination-wrapper flex flex-col items-center gap-3 pt-8">
-      <div class="pagination-row flex items-center justify-center gap-1.5 sm:gap-3 max-w-full overflow-x-auto">
+      <div class="pagination-row flex max-w-full flex-wrap items-center justify-center gap-1.5 sm:gap-3">
         <button @click="goToPage(currentPage - 1)" :disabled="currentPage === 1" class="pagination-arrow">
           <ChevronLeft class="h-4 w-4" aria-hidden="true" />
         </button>
@@ -335,14 +335,9 @@ function cycleTopicMode(topicId: string, direction: 1 | -1) {
   border-radius: 16px;
 }
 
-.pagination-row {
-  flex-wrap: nowrap;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-
-.pagination-row::-webkit-scrollbar {
-  display: none;
+.pagination-row button:focus-visible {
+  outline: 2px solid rgb(var(--color-ink));
+  outline-offset: 2px;
 }
 
 .pagination-page,

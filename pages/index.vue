@@ -1,8 +1,8 @@
 <script setup lang="ts">
 useSeoMeta({
-  title: 'Learn Cantonese in 15 minutes a day',
+  title: 'Learn Cantonese for everyday life',
   description: 'Learn natural Cantonese with vocabulary, sentence quizzes, audio-only drills, and writing practice.',
-  ogTitle: 'Learn Cantonese in 15 minutes a day | TaroTea',
+  ogTitle: 'Learn Cantonese for everyday life | TaroTea',
   ogDescription: 'Build everyday Cantonese with short, focused practice sessions.',
 })
 
@@ -163,10 +163,15 @@ onBeforeUnmount(() => {
 
       <div class="home-hero-panel" aria-label="TaroTea learner activity">
         <div class="home-word-sample" :style="{ backgroundColor: wordCardColour }">
-          <span class="home-word-label">Word of the day</span>
-          <strong lang="zh-HK">{{ featuredWord.word }}</strong>
-          <span class="home-jyutping">{{ featuredWord.jyutping }}</span>
-          <span>{{ featuredWord.meaning }}</span>
+          <div class="home-word-heading">
+            <span class="home-word-label">Word of the day</span>
+            <RecordingListenButton v-if="featuredWord.audioFile" :file="featuredWord.audioFile" />
+          </div>
+          <div class="home-word-content">
+            <strong lang="zh-HK">{{ featuredWord.word }}</strong>
+            <span class="home-jyutping">{{ featuredWord.jyutping }}</span>
+            <span class="home-word-meaning">{{ featuredWord.meaning }}</span>
+          </div>
         </div>
         <div class="home-stats">
           <div class="bg-[#efb28f]"><UsersRound aria-hidden="true" /><strong>{{ currentUsers ?? '—' }}</strong><span>online now</span></div>
@@ -217,11 +222,16 @@ onBeforeUnmount(() => {
 .home-momentum { margin: 0.75rem 0 0; color: rgb(var(--color-primary-strong)); font-size: 0.9rem; }
 .home-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.8rem; }
 .home-hero-panel { overflow: hidden; border: 1px solid rgb(var(--color-ink) / 0.09); border-radius: var(--radius-panel); background: rgb(var(--color-surface)); box-shadow: var(--shadow-soft); }
-.home-word-sample { display: flex; min-height: 20rem; flex-direction: column; justify-content: center; padding: clamp(2rem, 6vw, 4rem); }
+.home-word-sample { display: flex; min-height: 20rem; flex-direction: column; padding: 1rem; }
+.home-word-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 0.5rem; }
+.home-word-heading :deep(button) { min-height: 2.75rem; background: transparent; color: #000; border: 0; box-shadow: none; }
+.home-word-heading :deep(button:hover) { text-decoration: underline; }
+.home-word-heading :deep(button:focus-visible) { outline: 2px solid currentColor; outline-offset: 2px; }
+.home-word-content { flex: 1; display: flex; flex-direction: column; justify-content: center; padding: 0 clamp(1rem, 4vw, 3rem) 1rem; }
 .home-word-label { color: rgb(var(--color-primary-strong)); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .home-word-sample strong { margin-top: 1rem; font-family: var(--font-chinese); font-size: clamp(3rem, 8vw, 5rem); line-height: 1.05; }
 .home-jyutping { margin-top: 0.8rem; color: rgb(var(--color-primary-strong)); font-weight: 700; }
-.home-word-sample > span:last-child { margin-top: 0.25rem; color: rgb(var(--color-ink)); }
+.home-word-meaning { margin-top: 0.25rem; color: rgb(var(--color-ink)); }
 .home-stats { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid rgb(var(--color-ink) / 0.09); background: rgb(var(--color-surface) / 0.58); }
 .home-stats div { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0.1rem 0.6rem; padding: 1rem 1.2rem; }
 .home-stats div + div { border-left: 1px solid rgb(var(--color-ink) / 0.09); }

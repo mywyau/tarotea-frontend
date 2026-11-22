@@ -20,10 +20,11 @@ describe('homepage word of the day', () => {
   it('always serves a different complete entry on consecutive days, including at the end of the rotation', () => {
     const firstDay = utcDayNumber(Date.UTC(2026, 0, 1))
     for (let day = firstDay; day < firstDay + 366; day++) {
-      const { word, jyutping, meaning } = offlineWordForDay(day)
+      const { word, jyutping, meaning, audioFile } = offlineWordForDay(day)
       expect(word).not.toBe(offlineWordForDay(day + 1).word)
       expect(jyutping.trim()).not.toBe('')
       expect(meaning.trim()).not.toBe('')
+      expect(audioFile).toMatch(/\.mp3$/)
     }
   })
 })

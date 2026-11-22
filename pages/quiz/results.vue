@@ -8,6 +8,13 @@ useHead({ title: 'Quiz results · TaroTea' })
 const route = useRoute()
 const router = useRouter()
 const result = shallowRef<QuizResult>()
+const practising = ref(false)
+const practiceButton = ref<{ $el: HTMLButtonElement } | null>(null)
+async function closePractice() {
+  practising.value = false
+  await nextTick()
+  practiceButton.value?.$el.focus()
+}
 const saving = ref(false)
 const saveError = ref('')
 const ready = ref(false)
@@ -93,7 +100,9 @@ onMounted(() => {
 
 <template>
   <main class="mx-auto w-full max-w-3xl px-4 py-8">
-    <section v-if="result" class="quiz-completion space-y-6">
+    <MissedWordPractice v-if="practising && result?.missedQuestions?.length"
+      :questions="result.missedQuestions" @close="closePractice" />
+    <section v-else-if="result" class="quiz-completion space-y-6">
       <header class="space-y-2 py-2 text-center">
         <h1 class="text-sm font-semibold">{{ result.title }}</h1>
         <p class="text-2xl font-semibold tracking-tight sm:text-3xl">{{ headline }}</p>
@@ -105,6 +114,9 @@ onMounted(() => {
         <p>{{ saveError || 'Saving your XP…' }}</p>
         <AppButton v-if="saveError" @click="saveWordQuiz">Retry saving XP</AppButton>
       </div>
+      <AppButton v-if="result.missedQuestions?.length" ref="practiceButton" @click="practising = true">
+        Practise the words I missed
+      </AppButton>
       <section v-for="group in reviewGroups" :key="group.title" class="stat-card result-word-card">
         <h3>{{ group.title }} <span>{{ group.count }}</span></h3>
         <div class="flex flex-wrap gap-2">

@@ -436,6 +436,7 @@ watch(
       elapsed: formattedElapsedTime.value,
       xpEarned: totalXpEarned.value,
       xpLost: totalXpLost.value,
+      missedQuestions: missedPracticeQuestions(questions.value, answerLog.value, true),
       retryTo: `/quiz/${slug.value}/sentences/audio/start-quiz`,
       backTo: '/quiz',
     })

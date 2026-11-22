@@ -115,11 +115,22 @@ export default defineNuxtConfig({
         {
           rel: "icon",
           type: "image/png",
+          sizes: "32x32",
           href: "/favicon-32x32.png",
+        },
+        {
+          rel: "icon",
+          type: "image/svg+xml",
+          sizes: "any",
+          href: "/favicon.svg",
         },
         {
           rel: "apple-touch-icon",
           href: "/apple-touch-icon.png",
+        },
+        {
+          rel: "manifest",
+          href: "/site.webmanifest",
         },
       ],
     },

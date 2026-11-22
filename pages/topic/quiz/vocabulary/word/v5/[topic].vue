@@ -383,6 +383,7 @@ async function showWordResults() {
     elapsed: formattedElapsedTime.value,
     xpEarned: earned,
     xpLost: lost,
+    missedQuestions: missedPracticeQuestions(questions.value, answerLog.value),
     retryTo: `/topic/quiz/vocabulary/word/start-quiz/${topicSlug.value}`,
     backTo: '/topics/quiz',
     review: {

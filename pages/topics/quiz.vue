@@ -90,32 +90,24 @@ const topicQuizModes = [
         id: 'vocab',
         label: 'Vocab',
         icon: markRaw(BookOpen),
-        buttonClass: 'topic-btn-blue',
-        dotClass: 'dot-blue',
         to: (topicId: string) => `/topic/quiz/vocabulary/word/start-quiz/${topicId}`,
     },
     {
         id: 'audio',
         label: 'Audio Only',
         icon: markRaw(Headphones),
-        buttonClass: 'topic-btn-purple',
-        dotClass: 'dot-purple',
         to: (topicId: string) => `/topic/quiz/vocabulary/audio/${topicId}/start-quiz`,
     },
     {
         id: 'sentences',
         label: 'Sentences',
         icon: markRaw(MessageSquareText),
-        buttonClass: 'topic-btn-yellow',
-        dotClass: 'dot-yellow',
         to: (topicId: string) => `/topic/quiz/sentences/no-audio/${topicId}/start-quiz`,
     },
     {
         id: 'sentences-audio',
         label: 'Audio Sentences',
         icon: markRaw(Volume2),
-        buttonClass: 'topic-btn-blush',
-        dotClass: 'dot-blush',
         to: (topicId: string) => `/topic/quiz/sentences/audio/${topicId}/start-quiz`,
     },
 ] as const
@@ -192,22 +184,13 @@ onMounted(async () => {
                 <!-- Buttons -->
                 <div class="pt-4 space-y-3">
                     <div class="quiz-mode-selector">
-                        <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, -1)"
+                        <button type="button" @click="cycleTopicMode(topic.id, -1)"
                             aria-label="Previous quiz mode" :disabled="!canEnterTopic(topic) || topic.comingSoon">
                             <ChevronLeft class="h-5 w-5" aria-hidden="true" />
                         </button>
 
-                        <!-- <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
-                            class="topic-btn"
-                            :class="[getSelectedTopicMode(topic.id).buttonClass, { 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }]">
-                            {{ getSelectedTopicMode(topic.id).label }}
-                        </NuxtLink> -->
-
                         <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
-                            class="topic-btn" :class="[
-                                getSelectedTopicMode(topic.id).buttonClass,
-                                { 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }
-                            ]">
+                            class="quiz-mode-link" :class="{ 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }">
                             <component :is="getSelectedTopicMode(topic.id).icon" class="quiz-mode-icon"
                                 aria-hidden="true" />
 
@@ -216,7 +199,7 @@ onMounted(async () => {
                             </span>
                         </NuxtLink>
 
-                        <button class="topic-mode-toggle" @click="cycleTopicMode(topic.id, 1)"
+                        <button type="button" @click="cycleTopicMode(topic.id, 1)"
                             aria-label="Next quiz mode" :disabled="!canEnterTopic(topic) || topic.comingSoon">
                             <ChevronRight class="h-5 w-5" aria-hidden="true" />
                         </button>
@@ -225,7 +208,7 @@ onMounted(async () => {
                     <div class="mode-dots"
                         :aria-label="`Mode ${getSelectedTopicModeIndex(topic.id) + 1} of ${topicQuizModes.length}`">
                         <span v-for="(mode, modeIndex) in topicQuizModes" :key="`${topic.id}-${mode.id}`"
-                            class="mode-dot"
+                            class="quiz-mode-dot"
                             :class="{ 'is-active': modeIndex === getSelectedTopicModeIndex(topic.id) }" />
                     </div>
                 </div>
@@ -362,128 +345,51 @@ onMounted(async () => {
     stroke-width: 2.35;
 }
 
-/* Buttons */
-/* .topic-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    min-height: 52px;
-    padding: 0.6rem 0.75rem;
-    font-size: 0.85rem;
-    border-radius: 8px;
-    font-weight: 600;
-    line-height: 1.2;
-    transition: all 0.15s ease;
-} */
+.quiz-mode-selector {
+    display: grid;
+    grid-template-columns: 2.75rem minmax(0, 1fr) 2.75rem;
+    gap: 0.5rem;
+}
 
-.topic-btn {
+.quiz-mode-selector > :is(a, button) {
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 2.75rem;
+    border: 1px solid rgb(var(--color-muted));
+    border-radius: var(--radius-control);
+    background: rgb(var(--color-surface));
+    color: rgb(var(--color-ink));
+}
+
+.quiz-mode-selector > :is(a, button:enabled):hover {
+    border-color: rgb(var(--color-ink));
+    background: #f5f5f5;
+}
+
+.quiz-mode-selector > :focus-visible {
+    outline: 2px solid rgb(var(--color-ink));
+    outline-offset: 2px;
+}
+
+.quiz-mode-selector > button:disabled {
+    opacity: 0.4;
+}
+
+.quiz-mode-link {
     gap: 0.45rem;
-    text-align: center;
-    min-height: 52px;
     padding: 0.65rem 0.85rem;
+    text-align: center;
     font-size: 0.85rem;
-    border-radius: 14px;
     font-weight: 700;
     line-height: 1.2;
-    transition:
-        transform 0.18s ease,
-        box-shadow 0.18s ease,
-        background 0.18s ease;
 }
 
 .quiz-mode-icon {
     width: 1.25rem;
     height: 1.25rem;
     flex-shrink: 0;
-    color: #374151;
     stroke-width: 2.35;
-}
-
-.topic-btn:hover {
-    transform: translateY(-2px);
-}
-
-/* Colour variations */
-.topic-btn-blue {
-    background: rgba(168, 202, 224, 0.45);
-    color: #1f2937;
-}
-
-.topic-btn-blue:hover {
-    background: rgba(168, 202, 224, 0.65);
-}
-
-.topic-btn-purple {
-    background: rgba(214, 163, 209, 0.45);
-    color: #1f2937;
-}
-
-.topic-btn-purple:hover {
-    background: rgba(214, 163, 209, 0.65);
-}
-
-.topic-btn-yellow {
-    background: rgba(244, 205, 39, 0.45);
-    color: #1f2937;
-}
-
-.topic-btn-yellow:hover {
-    background: rgba(244, 205, 39, 0.65);
-}
-
-.topic-btn-blush {
-    background: rgba(246, 180, 180, 0.42);
-    color: #1f2937;
-    box-shadow: 0 8px 18px rgba(246, 180, 180, 0.18);
-}
-
-.topic-btn-blush:hover {
-    background: rgba(246, 180, 180, 0.62);
-    box-shadow: 0 12px 24px rgba(246, 180, 180, 0.26);
-}
-
-.topic-btn-green {
-    background: rgba(205, 232, 201, 0.45);
-    color: #1f2937;
-}
-
-.topic-btn-green:hover {
-    background: rgba(205, 232, 201, 0.65);
-}
-
-.quiz-mode-selector {
-    display: grid;
-    grid-template-columns: 2.5rem minmax(0, 1fr) 2.5rem;
-    align-items: stretch;
-    column-gap: 0.75rem;
-}
-
-.topic-mode-toggle {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 52px;
-    border-radius: 8px;
-    background: transparent;
-    color: #1f2937;
-    font-size: 1.25rem;
-    line-height: 1;
-    font-weight: 700;
-    transition: color 0.15s ease, transform 0.15s ease;
-}
-
-.topic-mode-toggle:hover:not(:disabled) {
-    color: rgba(31, 41, 55, 0.7);
-    transform: translateY(-1px);
-}
-
-.topic-mode-toggle:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
 }
 
 .mode-dots {
@@ -492,16 +398,17 @@ onMounted(async () => {
     gap: 0.35rem;
 }
 
-.mode-dot {
+.quiz-mode-dot {
     width: 0.45rem;
     height: 0.45rem;
+    border: 1px solid rgb(var(--color-muted));
     border-radius: 9999px;
-    background: rgba(31, 41, 55, 0.2);
-    transition: all 0.15s ease;
 }
 
-.mode-dot.is-active {
-    background: rgba(31, 41, 55, 0.7);
+.quiz-mode-dot.is-active {
+    width: 0.9rem;
+    border-color: rgb(var(--color-ink));
+    background: rgb(var(--color-ink));
 }
 
 .pagination-wrapper {

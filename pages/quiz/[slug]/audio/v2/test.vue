@@ -459,6 +459,7 @@ async function showWordResults() {
     elapsed: formattedElapsedTime.value,
     xpEarned: earned,
     xpLost: lost,
+    missedQuestions: missedPracticeQuestions(questions.value, answerLog.value, true),
     retryTo: `/quiz/${slug.value}/audio/start-quiz`,
     backTo: '/quiz',
     review: {

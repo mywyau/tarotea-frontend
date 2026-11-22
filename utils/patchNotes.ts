@@ -6,6 +6,14 @@ export interface PatchNote {
 
 export const patchNotes: PatchNote[] = [
   {
+    date: "22 November 2026",
+    title: "Topic quizzes and typing practice",
+    items: [
+      "Quiz modes are easier to read on coloured topic cards.",
+      "Page buttons are fully visible in topic typing practice.",
+    ],
+  },
+  {
     date: "May 2026",
     title: "Upcoming",
     items: [

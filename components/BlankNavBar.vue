@@ -179,13 +179,12 @@ watch(() => props.focusMode, focusMode => {
         <span>TaroTea</span>
       </NuxtLink>
 
-      <template v-if="props.focusMode">
-        <span class="focus-label">Practice mode</span>
-        <div id="quiz-header-progress" class="quiz-header-progress-slot" />
-        <button type="button" class="focus-exit" @click="exitPractice">
-          <span>Exit practice</span>
-        </button>
-      </template>
+      <span v-if="props.focusMode" class="focus-label">Practice mode</span>
+      <!-- Quiz pages can mount before Nuxt updates the shell's route. Keep the Teleport target mounted. -->
+      <div v-show="props.focusMode" id="quiz-header-progress" class="quiz-header-progress-slot" />
+      <button v-if="props.focusMode" type="button" class="focus-exit" @click="exitPractice">
+        <span>Exit practice</span>
+      </button>
 
       <template v-else>
         <nav class="desktop-primary-nav" aria-label="Primary navigation">
