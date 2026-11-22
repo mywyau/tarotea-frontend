@@ -151,10 +151,6 @@ onBeforeUnmount(() => showCharacter(false))
         <strong lang="zh-HK">{{ text }}</strong>
         <span v-if="jyutping && showJyutping" class="word-reading">{{ jyutping }}</span>
         <span v-if="meaning && showTranslation">{{ meaning }}</span>
-        <div v-if="jyutping || meaning" class="flex flex-wrap items-center gap-x-4">
-          <ReadingDisplayToggle v-if="jyutping" v-model="showJyutping">Show Jyutping</ReadingDisplayToggle>
-          <ReadingDisplayToggle v-if="meaning" v-model="showTranslation">Show translation</ReadingDisplayToggle>
-        </div>
       </header>
 
       <section class="practice-sheet" aria-label="Stroke order practice">
@@ -191,6 +187,10 @@ onBeforeUnmount(() => showCharacter(false))
           <button type="button" class="sequence-button" :disabled="!characters.length" @click="startOver">
             <RotateCcw /> Start over
           </button>
+          <div v-if="jyutping || meaning" class="flex max-w-full flex-wrap items-center gap-x-4">
+            <ReadingDisplayToggle v-if="jyutping" v-model="showJyutping">Show Jyutping</ReadingDisplayToggle>
+            <ReadingDisplayToggle v-if="meaning" v-model="showTranslation">Show translation</ReadingDisplayToggle>
+          </div>
           <div class="display-controls">
             <button v-if="characters.length > 1" type="button" class="icon-button" aria-label="Auto-advance"
               title="Auto-advance to the next character" :aria-pressed="autoAdvance" @click="autoAdvance = !autoAdvance"><ListVideo /></button>

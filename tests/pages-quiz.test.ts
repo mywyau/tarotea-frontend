@@ -81,8 +81,11 @@ describe('quiz page contracts', () => {
 
   it('reveals target-word feedback only after a level or topic sentence answer', () => {
     const target = readProjectFile('components/SentenceQuizTarget.vue')
-    expect(target).toMatch(/<div v-if="answered"[^>]*>[\s\S]*?{{ word }}[\s\S]*?{{ jyutping }}[\s\S]*?<\/div>/)
-    expect(target).toContain('<span v-if="answered"')
+    expect(target).toContain(":inert=\"!answered\"")
+    expect(target).toContain("filter: answered ? undefined : 'blur(8px)'")
+    expect(target).toContain('{{ word }}')
+    expect(target).toContain('{{ jyutping }}')
+    expect(target).toContain("width: Math.min(xp / masteryXp * 100, 100) + '%'")
     for (const source of [
       readPage('quiz/[slug]/sentences/no-audio/v3/index.vue'),
       readPage('topic/quiz/sentences/no-audio/[topic]/v3/index.vue'),
