@@ -4,18 +4,16 @@ definePageMeta({
 })
 
 import { chineseXp, chineseXpHintUsed } from '~/config/dojo/xp_config'
-import { levelIdToNumbers } from '~/utils/levels/levels'
+import { levelTitles } from '~/utils/levels/levels'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
-
-const levelNumber = computed(() => levelIdToNumbers(slug.value) ?? slug.value)
 </script>
 
 <template>
-  <DojoStartPage :heading="`Level ${levelNumber} · Chinese typing practice`"
+  <DojoStartPage :heading="levelTitles[slug] ?? slug"
     description="Type the Chinese. Great for character recall and typing fluency."
-    :start-to="`/typing-practice/level/chinese/training/${slug}`" start-label="Start chinese exercise" :xp-rules="[
+    :start-to="`/typing-practice/level/chinese/training/${slug}`" start-label="Start exercise" :xp-rules="[
       { action: 'No hint used', xp: `+${chineseXp} XP` },
       { action: 'Hint used', xp: `+${chineseXpHintUsed} XP` },
       { action: 'Unlimited retries', xp: 'check the hint if you are stuck' }

@@ -566,13 +566,6 @@
   padding-block: clamp(2.5rem, 6vw, 5rem) !important;
 }
 
-.upgrade-card {
-  border: 1px solid rgb(var(--color-ink) / 0.09);
-  border-radius: var(--radius-panel);
-  background: rgb(var(--color-surface));
-  box-shadow: var(--shadow-soft);
-}
-
 .upgrade-benefits {
   border: 1px solid rgb(var(--color-ink) / 0.08);
   background: rgb(var(--color-canvas));

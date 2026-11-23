@@ -64,10 +64,7 @@ onMounted(() => {
 
 .completion-stat {
   min-width: 0;
-  border: 1px solid rgb(var(--color-ink) / 0.08);
-  border-radius: var(--radius-card);
-  padding: 0.9rem;
-  background: rgb(var(--color-surface));
+  padding-block: 0.5rem;
   text-align: left;
 }
 

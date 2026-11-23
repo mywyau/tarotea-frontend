@@ -21,6 +21,7 @@ const emit = defineEmits<{
 }>()
 
 const { volume } = useAudioVolume()
+const showTranslation = defineModel<boolean>('showTranslation', { default: undefined })
 
 const settingsDetails = ref<HTMLDetailsElement | null>(null)
 const minPlaybackRate = 0.4
@@ -84,11 +85,13 @@ const increasePlaybackRate = () => {
         <div class="space-y-1">
           <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Volume</p>
           <div class="flex items-center gap-2">
-            <input v-model="volume" type="range" min="0" max="1" step="0.01"
-              class="h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-blue-600" />
+            <VolumeSlider v-model="volume" />
             <span class="w-8 text-xs tabular-nums text-gray-700">{{ Math.round(volume * 100) }}%</span>
           </div>
         </div>
+        <ReadingDisplayToggle v-if="showTranslation !== undefined" v-model="showTranslation" class="w-full">
+          Show translation
+        </ReadingDisplayToggle>
 
         <div class="space-y-1">
           <p class="text-[11px] font-semibold uppercase tracking-wide text-gray-500">Speed</p>

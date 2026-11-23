@@ -4,18 +4,16 @@ definePageMeta({
 })
 
 import { jyutpingXp, jyutpingXpHintUsed } from '~/config/dojo/xp_config'
-import { levelIdToNumbers } from '~/utils/levels/levels'
+import { levelTitles } from '~/utils/levels/levels'
 
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
-
-const levelNumber = computed(() => levelIdToNumbers(slug.value) ?? slug.value)
 </script>
 
 <template>
-  <DojoStartPage theme="purple" :heading="`Level ${levelNumber} · Jyutping typing practice`"
+  <DojoStartPage theme="purple" :heading="levelTitles[slug] ?? slug"
     description="Type the Jyutping for each Chinese word. Build speed and consistency."
-    :start-to="`/typing-practice/level/jyutping/training/${slug}`" start-label="Start jyutping exercise" :xp-rules="[
+    :start-to="`/typing-practice/level/jyutping/training/${slug}`" start-label="Start exercise" :xp-rules="[
       { action: 'No hint used', xp: `+${jyutpingXp} XP` },
       { action: 'Hint used', xp: `+${jyutpingXpHintUsed} XP` },
       { action: 'Unlimited retries', xp: 'check the hint if you are stuck' }

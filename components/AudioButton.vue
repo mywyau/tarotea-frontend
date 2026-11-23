@@ -4,11 +4,14 @@ import { Volume2 } from '@lucide/vue'
 const props = withDefaults(defineProps<{
   src: string
   autoplay?: boolean
+  autoplayDelayMs?: number
   size?: 'sm' | 'md' | 'lg'
   playbackRate?: number
+  variant?: 'filled' | 'plain'
   label?: string
 }>(), {
   size: 'md',
+  variant: 'filled',
   playbackRate: 1,
 })
 
@@ -22,6 +25,7 @@ const { volume } = useAudioVolume()
 const { play: playGlobal } = useGlobalAudio()
 
 const audio = ref<HTMLAudioElement | null>(null)
+let autoplayTimer: ReturnType<typeof setTimeout> | undefined
 
 const ensureAudio = () => {
   if (!audio.value) {
@@ -30,6 +34,7 @@ const ensureAudio = () => {
 }
 
 const play = async () => {
+  clearTimeout(autoplayTimer)
   ensureAudio()
 
   if (!audio.value) return
@@ -82,9 +87,9 @@ const iconClass = computed(() => {
 })
 
 onMounted(() => {
-  if (props.autoplay) {
-    void play()
-  }
+  if (!props.autoplay) return
+  if (props.autoplayDelayMs) autoplayTimer = setTimeout(play, props.autoplayDelayMs)
+  else void play()
 })
 
 watch(volume, v => {
@@ -109,6 +114,7 @@ watch(() => props.src, (newSrc) => {
 })
 
 onBeforeUnmount(() => {
+  clearTimeout(autoplayTimer)
   if (audio.value) {
     audio.value.pause()
     audio.value.src = ''
@@ -122,8 +128,10 @@ onBeforeUnmount(() => {
     type="button"
     @click="play"
     :class="[
-      'inline-flex items-center justify-center font-medium transition-all duration-150 active:scale-[0.98] shadow-sm',
-      'border border-transparent bg-[#A8CAE0] text-black hover:brightness-110',
+      'inline-flex items-center justify-center font-medium transition-all duration-150 active:scale-[0.98] text-black',
+      variant === 'plain'
+        ? 'border-0 bg-transparent shadow-none hover:underline focus-visible:outline-2 focus-visible:outline-current'
+        : 'border border-transparent bg-[#A8CAE0] shadow-sm hover:brightness-110',
       sizeClass
     ]"
     :aria-label="label || 'Play audio'"

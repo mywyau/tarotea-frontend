@@ -55,6 +55,7 @@ type DojoFinalizeResponse = {
 }
 
 const route = useRoute()
+const { showTranslation } = useReadingPreferences()
 const slug = computed(() => route.params.slug as string)
 const { isLoggedIn } = useMeStateV2()
 
@@ -83,10 +84,6 @@ const currentAudioSrc = computed(() => {
 
 function setVoice(voice: AudioVoice) {
   selectedVoice.value = voice
-
-  setTimeout(() => {
-    playCurrentAudio()
-  }, 50)
 }
 
 const auth = await useAuth()
@@ -138,7 +135,6 @@ const {
 )
 
 const activeSessionKey = ref('')
-const title = ref('Chinese typing practice')
 
 const quizStartedAt = ref<number | null>(null)
 const elapsedMs = ref(0)
@@ -247,11 +243,6 @@ const chineseChars = computed(() =>
 const completedWordsCount = computed(() => sessionResult.value?.correctCount ?? 0)
 const totalWordsCount = computed(() => sessionResult.value?.totalWords ?? words.value.length)
 
-const exerciseProgressPercent = computed(() => {
-  if (!words.value.length) return 0
-  return Math.min((idx.value / words.value.length) * 100, 100)
-})
-
 const hintsUsedCount = computed(() =>
   batchAttempts.value.filter(a => a.hintUsed).length
 )
@@ -348,7 +339,6 @@ function applyStartPayload(payload: DojoStartResponse) {
   stopTimer()
 
   activeSessionKey.value = payload.sessionKey
-  title.value = (payload.session.title ?? `Chinese typing practice - ${levelTitles[slug.value]}`).replace(/\bdojo\b/gi, 'typing practice')
 
   words.value = payload.session.words ?? []
   wordProgressMap.value = payload.progress ?? {}
@@ -495,22 +485,6 @@ function advance() {
   }
 }
 
-const wordAudio = ref<HTMLAudioElement | null>(null)
-
-function playCurrentAudio() {
-  if (!currentAudioSrc.value) return
-
-  if (!wordAudio.value) {
-    wordAudio.value = new Audio()
-  }
-
-  wordAudio.value.pause()
-  wordAudio.value.src = currentAudioSrc.value
-  wordAudio.value.currentTime = 0
-  wordAudio.value.playbackRate = playbackRate.value
-  wordAudio.value.play().catch(() => { })
-}
-
 watch(
   () => data.value,
   (value) => {
@@ -527,12 +501,6 @@ watch(
 
     currentXp.value = wordProgressMap.value[id]?.xp ?? 0
     xpDelta.value = null
-
-    if (!isComplete.value) {
-      setTimeout(() => {
-        playCurrentAudio()
-      }, 300)
-    }
   },
   { immediate: true }
 )
@@ -608,7 +576,6 @@ watch(
   () => {
     stopTimer()
     activeSessionKey.value = ''
-    title.value = 'Chinese typing practice'
     words.value = []
     wordProgressMap.value = {}
     idx.value = 0
@@ -638,7 +605,7 @@ onBeforeUnmount(() => {
   <main class="dojo-training-page mx-auto max-w-4xl px-6 py-12">
 
     <header class="dojo-training-header space-y-4">
-      <TypewriterTitleBlock :heading-text="title || `Chinese typing practice - ${levelTitles[slug]}`"
+      <TypewriterTitleBlock :heading-text="levelTitles[slug] ?? slug"
         subheading-text="Type the Chinese characters for each word"
         heading-class="text-2xl font-semibold tracking-tight text-gray-900" subheading-class="text-sm text-gray-600" />
     </header>
@@ -666,35 +633,18 @@ onBeforeUnmount(() => {
 
       <div v-else class="space-y-5">
         <div v-if="showTraining" class="space-y-5">
-          <FloatingAudioButton
-            v-if="currentAudioSrc"
-            :key="`floating-audio-${selectedVoice}-${currentAudioSrc}`"
-            :src="currentAudioSrc"
-            :voice="selectedVoice"
-            :playback-rate="playbackRate"
-            :autoplay="false"
-          />
+          <PracticeHeaderProgress label="Word" :current="idx + 1" :completed="idx" :total="words.length"
+            progress-label="Typing practice progress" />
 
-          <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="w-full sm:w-auto">
-              <div class="text-xs text-black">
-                Word {{ idx + 1 }} / {{ words.length }}
-              </div>
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <AudioButton v-if="currentAudioSrc" :key="currentAudioSrc" :src="currentAudioSrc"
+              :playback-rate="playbackRate" autoplay label="Play" variant="plain" />
+            <DojoAudioSettings v-model:show-translation="showTranslation" :voice="selectedVoice" :playback-rate="playbackRate"
+              @update:voice="setVoice" @update:playback-rate="playbackRate = $event" />
 
-              <div class="mt-2 h-1.5 w-full min-w-[180px] overflow-hidden rounded-full bg-gray-200/80">
-                <div class="dojo-mini-progress h-full rounded-full transition-all duration-300"
-                  :style="{ width: `${exerciseProgressPercent}%` }" />
-              </div>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-              <DojoAudioSettings :voice="selectedVoice" :playback-rate="playbackRate"
-                @update:voice="setVoice" @update:playback-rate="playbackRate = $event" />
-
-              <span class="px-3 py-1 text-xs font-medium text-gray-700">
-                {{ formattedElapsedTime }}
-              </span>
-            </div>
+            <span class="px-3 py-1 text-xs font-medium text-gray-700">
+              {{ formattedElapsedTime }}
+            </span>
           </div>
 
           <div class="rounded-2xl p-5">
@@ -707,17 +657,12 @@ onBeforeUnmount(() => {
               />
             </transition>
 
-            <div v-if="current?.meaning" class="mt-2 text-lg text-gray-700">
+            <div v-if="showTranslation && current?.meaning" class="mt-2 text-lg text-gray-700">
               {{ current.meaning }}
             </div>
 
             <div class="mt-4 min-h-[36px]">
-              <button type="button" @click="() => {
-                showHint = !showHint
-                if (showHint) hintUsedThisQuestion = true
-              }" class="text-xs text-gray-500 hover:text-gray-700 transition underline">
-                {{ showHint ? 'Hide Jyutping' : 'Show Jyutping (hint)' }}
-              </button>
+              <DojoHintToggle v-model="showHint" @reveal="hintUsedThisQuestion = true" />
 
               <transition name="fade-word">
                 <div v-if="showHint" class="mt-2 text-base font-mono text-gray-500 flex items-center gap-2">
@@ -990,10 +935,6 @@ onBeforeUnmount(() => {
   margin-top: 0.65rem;
   font-size: 0.95rem;
   color: rgba(17, 24, 39, 0.68);
-}
-
-.dojo-mini-progress {
-  background: var(--blue);
 }
 
 .fade-scale-enter-active,

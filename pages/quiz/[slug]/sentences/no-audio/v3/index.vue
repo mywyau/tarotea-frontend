@@ -60,8 +60,7 @@ const slug = computed(() => route.params.slug as string)
 const { isLoggedIn } = useMeStateV2()
 const runtimeConfig = useRuntimeConfig()
 const cdnBase = runtimeConfig.public.cdnBase
-const { volume } = useAudioVolume()
-const { stop, play } = useGlobalAudio()
+const { stop } = useGlobalAudio()
 
 const auth = await useAuth()
 
@@ -342,17 +341,6 @@ async function finalizeQuiz() {
 
 const tileColors = ref<string[]>([])
 
-function playSentenceAudioAfterAnswer(sentenceId: string) {
-    if (!process.client || !sentenceId) return
-
-    const audio = new Audio(`${cdnBase}/audio/${sentenceId}.mp3`)
-    audio.volume = volume.value
-    audio.currentTime = 0
-    void play(audio).catch(error => {
-        if (error.name !== 'AbortError') console.warn('Sentence audio playback failed', error)
-    })
-}
-
 async function answer(index: number) {
     if (answered.value) return
     if (!question.value) return
@@ -374,11 +362,6 @@ async function answer(index: number) {
     } else {
         playIncorrectJingle()
     }
-
-    const sentenceId = question.value.sentenceId
-    setTimeout(() => {
-        if (answered.value && question.value?.sentenceId === sentenceId) playSentenceAudioAfterAnswer(sentenceId)
-    }, 220)
 
     const wordId = question.value.wordId
     const prev = wordProgressMap.value[wordId] ?? { xp: 0, streak: 0 }
@@ -558,6 +541,9 @@ onBeforeUnmount(() => {
                             <p class="text-2xl text-black leading-relaxed font-semibold text-center">
                                 {{ question.prompt }}
                             </p>
+                            <AudioButton v-if="answered" :key="question.sentenceId"
+                                :src="`${cdnBase}/audio/${question.sentenceId}.mp3`" autoplay :autoplay-delay-ms="220"
+                                variant="plain" label="Play" />
                         </div>
 
                         <SentenceQuizTarget :answered="answered" :word="question.sourceWord" :jyutping="question.sourceWordJyutping"

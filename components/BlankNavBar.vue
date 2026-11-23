@@ -262,10 +262,6 @@ watch(() => props.focusMode, focusMode => {
           </div>
 
           <nav class="drawer-navigation" aria-label="All destinations">
-            <NuxtLink to="/" class="drawer-home-link" :aria-current="route.path === '/' ? 'page' : undefined" @click="closeNav(false)">
-              <House aria-hidden="true" /> Home
-            </NuxtLink>
-
             <section v-for="group in navigationGroups" :key="group.label" class="drawer-group">
               <h3>{{ group.label }}</h3>
               <NuxtLink v-for="link in group.links" :key="link.to" :to="link.to" class="drawer-link"
@@ -344,9 +340,7 @@ watch(() => props.focusMode, focusMode => {
 .drawer-close:hover { background: rgb(var(--color-ink) / 0.05); }
 .drawer-close :deep(svg) { width: 1.25rem; height: 1.25rem; }
 .drawer-navigation { flex: 1 1 auto; overflow-y: auto; padding: 1rem var(--page-gutter) 1.5rem; overscroll-behavior: contain; }
-.drawer-home-link { display: flex; min-height: 2.75rem; align-items: center; gap: 0.65rem; border-radius: var(--radius-control); padding: 0.65rem 0.75rem; background: rgb(var(--color-surface)); color: rgb(var(--color-ink)); font-weight: 700; text-decoration: none; }
-.drawer-home-link :deep(svg) { width: 1.1rem; height: 1.1rem; }
-.drawer-group { margin-top: 1.5rem; }
+.drawer-group + .drawer-group { margin-top: 1.5rem; }
 .drawer-group h3 { margin: 0 0 0.55rem; padding-inline: 0.35rem; color: rgb(var(--color-muted)); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .drawer-link { display: flex; min-height: 3.65rem; align-items: center; gap: 0.75rem; border-radius: var(--radius-control); padding: 0.55rem; color: rgb(var(--color-ink)); text-decoration: none; transition: background var(--motion-fast) ease; }
 .drawer-link:hover, .drawer-link-active { background: rgb(var(--color-taro-pink) / 0.24); }

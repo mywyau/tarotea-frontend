@@ -49,102 +49,93 @@ function upgrade(plan: 'monthly' | 'yearly') {
 </script>
 
 <template>
-  <main class="upgrade-page min-h-[70vh] px-4 pt-6 pb-6">
-
-    <div class="max-w-3xl mx-auto">
-
-
-
-      <!-- Card -->
-      <div class="upgrade-card p-6 md:p-10 text-center space-y-6">
-
-        <!-- Icon -->
-        <div class="flex justify-center">
-          <div class="w-20 h-20 flex items-center justify-center rounded-full text-[#7A6FCB]"
-            style="background-color:#EAB8E4;">
-            <Sparkles class="h-10 w-10" aria-hidden="true" />
-          </div>
+  <main class="upgrade-page min-h-[70vh]">
+    <div class="mx-auto max-w-3xl space-y-6 text-center">
+      <!-- Icon -->
+      <div class="flex justify-center">
+        <div class="w-20 h-20 flex items-center justify-center rounded-full text-[#7A6FCB]"
+          style="background-color:#EAB8E4;">
+          <Sparkles class="h-10 w-10" aria-hidden="true" />
         </div>
+      </div>
 
-        <!-- Title -->
-        <h1 class="text-2xl font-semibold">
-          Upgrade your plan
-        </h1>
+      <!-- Title -->
+      <h1 class="text-2xl font-semibold">
+        Upgrade your plan
+      </h1>
 
-        <p class="text-gray-600 max-w-xl mx-auto">
-          Unlock the full Cantonese vocabulary and sentence quizzes across levels and topics.
-        </p>
+      <p class="text-gray-600 max-w-xl mx-auto">
+        Unlock the full Cantonese vocabulary and sentence quizzes across levels and topics.
+      </p>
 
-        <!-- Benefits -->
-        <div class="upgrade-benefits max-w-xl mx-auto rounded-2xl p-5 md:p-6">
-          <ul class="space-y-3 text-left text-gray-700 leading-relaxed">
-            <li v-for="benefit in benefits" :key="benefit.text" class="flex items-start gap-3">
-              <component :is="benefit.icon" class="mt-0.5 h-4 w-4 shrink-0 text-[#7A6FCB]" aria-hidden="true" />
-              <span>{{ benefit.text }}</span>
-            </li>
-          </ul>
-        </div>
+      <!-- Benefits -->
+      <div class="upgrade-benefits max-w-xl mx-auto rounded-2xl p-5 md:p-6">
+        <ul class="space-y-3 text-left text-gray-700 leading-relaxed">
+          <li v-for="benefit in benefits" :key="benefit.text" class="flex items-start gap-3">
+            <component :is="benefit.icon" class="mt-0.5 h-4 w-4 shrink-0 text-[#7A6FCB]" aria-hidden="true" />
+            <span>{{ benefit.text }}</span>
+          </li>
+        </ul>
+      </div>
 
-        <!-- Plans -->
-        <div v-if="isLoggedIn" class="space-y-3 pt-4 max-w-md mx-auto">
-          <p class="text-sm text-gray-500">
-            Choose a plan
-          </p>
-
-          <!-- Monthly (Pastel themed) -->
-          <button class="upgrade-plan upgrade-plan-monthly block w-full rounded-xl py-3 font-medium transition shadow-sm"
-            :class="isSubscribed
-              ? 'opacity-60 cursor-not-allowed'
-              : 'hover:brightness-110 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('monthly')">
-            <span class="block">Monthly plan · £{{ monthlyPrice }}</span>
-            <span class="block text-xs text-gray-700 mt-0.5">Flexible month-to-month billing</span>
-          </button>
-
-          <!-- Yearly (KEEP BLACK) -->
-          <button class="upgrade-plan upgrade-plan-yearly block w-full rounded-xl text-black px-3 py-3 font-medium transition shadow-md" :class="isSubscribed
-            ? 'opacity-60 cursor-not-allowed'
-            : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
-            >
-            <span class="block">Yearly plan · £{{ yearlyPrice }}</span>
-            <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Get 2 months
-              free</span>
-          </button>
-
-        </div>
-
-        <div v-else class="pt-4 max-w-md mx-auto">
-          <NuxtLink :to="{ path: '/please-sign-in', query: { redirect: '/upgrade' } }"
-            class="upgrade-sign-in block w-full rounded-xl py-3 px-3 font-medium transition shadow-sm hover:brightness-110 active:scale-[0.98]">
-            Sign in to choose a plan
-          </NuxtLink>
-        </div>
-
-        <!-- Subscribed -->
-        <p v-if="isSubscribed" class="text-sm text-gray-600">
-          You’re already subscribed.
-          <NuxtLink to="/account" class="text-purple-500 hover:underline">
-            Manage your plan
-          </NuxtLink>
-        </p>
-
-        <!-- Continue without upgrading -->
-        <p v-if="!isSubscribed" class="text-sm text-gray-500">
-          <NuxtLink to="/levels" class="hover:underline">
-            Continue learning without upgrading
-          </NuxtLink>
-        </p>
-
+      <!-- Plans -->
+      <div v-if="isLoggedIn" class="space-y-3 pt-4 max-w-md mx-auto">
         <p class="text-sm text-gray-500">
-          <NuxtLink to="/refund-policy" class="hover:underline">
-            View refund policy
-          </NuxtLink>
+          Choose a plan
         </p>
 
-        <p class="text-xs text-gray-400 pt-4">
-          You can cancel your plan at any time.
-        </p>
+        <!-- Monthly (Pastel themed) -->
+        <button class="upgrade-plan upgrade-plan-monthly block w-full rounded-xl py-3 font-medium transition shadow-sm"
+          :class="isSubscribed
+            ? 'opacity-60 cursor-not-allowed'
+            : 'hover:brightness-110 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('monthly')">
+          <span class="block">Monthly plan · £{{ monthlyPrice }}</span>
+          <span class="block text-xs text-gray-700 mt-0.5">Flexible month-to-month billing</span>
+        </button>
+
+        <!-- Yearly (KEEP BLACK) -->
+        <button class="upgrade-plan upgrade-plan-yearly block w-full rounded-xl text-black px-3 py-3 font-medium transition shadow-md" :class="isSubscribed
+          ? 'opacity-60 cursor-not-allowed'
+          : 'hover:bg-gray-800 active:scale-[0.98]'" :disabled="isSubscribed" @click="upgrade('yearly')"
+          >
+          <span class="block">Yearly plan · £{{ yearlyPrice }}</span>
+          <span class="block text-xs text-gray-700 mt-0.5">≈ £{{ yearlyMonthlyEquivalent }}/mo · Get 2 months
+            free</span>
+        </button>
 
       </div>
+
+      <div v-else class="pt-4 max-w-md mx-auto">
+        <NuxtLink :to="{ path: '/please-sign-in', query: { redirect: '/upgrade' } }"
+          class="upgrade-sign-in block w-full rounded-xl py-3 px-3 font-medium transition shadow-sm hover:brightness-110 active:scale-[0.98]">
+          Sign in to choose a plan
+        </NuxtLink>
+      </div>
+
+      <!-- Subscribed -->
+      <p v-if="isSubscribed" class="text-sm text-gray-600">
+        You’re already subscribed.
+        <NuxtLink to="/account" class="text-purple-500 hover:underline">
+          Manage your plan
+        </NuxtLink>
+      </p>
+
+      <!-- Continue without upgrading -->
+      <p v-if="!isSubscribed" class="text-sm text-gray-500">
+        <NuxtLink to="/levels" class="hover:underline">
+          Continue learning without upgrading
+        </NuxtLink>
+      </p>
+
+      <p class="text-sm text-gray-500">
+        <NuxtLink to="/refund-policy" class="hover:underline">
+          View refund policy
+        </NuxtLink>
+      </p>
+
+      <p class="text-xs text-gray-400 pt-4">
+        You can cancel your plan at any time.
+      </p>
     </div>
   </main>
 </template>
