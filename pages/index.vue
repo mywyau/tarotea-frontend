@@ -16,7 +16,6 @@ import {
   PenLine,
   Tags,
   TrendingUp,
-  UsersRound,
 } from '@lucide/vue'
 
 const { data: stats } = await useFetch('/api/total-users-stats', {
@@ -25,10 +24,8 @@ const { data: stats } = await useFetch('/api/total-users-stats', {
 })
 
 const { isLoggedIn, user, resolve: resolveMeState } = useMeStateV2()
-const currentUsers = ref<number | null>(null)
 const generalGreeting = ref('')
 const momentumMessage = ref('')
-let onlineRefreshInterval: ReturnType<typeof setInterval> | undefined
 
 const wordCardPalette = ['taro-blue', 'taro-pink', 'taro-yellow', 'success', 'taro-lilac']
 const featuredDay = useState('home-featured-utc-day', () => utcDayNumber(Date.now()))
@@ -108,21 +105,6 @@ function updateGeneralGreeting() {
       : 'Wind down with a quick Cantonese practice session.'
 }
 
-const sessionCookie = useCookie<string>('online_session_id', {
-  maxAge: 60 * 60 * 24 * 365,
-  sameSite: 'lax',
-})
-
-async function refreshCurrentUsers() {
-  if (!sessionCookie.value && import.meta.client) sessionCookie.value = crypto.randomUUID()
-
-  const data = await $fetch<{ currentUsers: number }>('/api/current-users', {
-    method: 'POST',
-    body: { sessionId: sessionCookie.value },
-  })
-  currentUsers.value = data.currentUsers
-}
-
 watch(() => user.value?.firstName, updateGeneralGreeting)
 
 onMounted(() => {
@@ -130,14 +112,11 @@ onMounted(() => {
   updateGeneralGreeting()
   syncFeaturedDay()
   document.addEventListener('visibilitychange', syncFeaturedDay)
-  void refreshCurrentUsers()
-  onlineRefreshInterval = setInterval(refreshCurrentUsers, 30_000)
 })
 
 onBeforeUnmount(() => {
   clearTimeout(midnightTimer)
   document.removeEventListener('visibilitychange', syncFeaturedDay)
-  if (onlineRefreshInterval) clearInterval(onlineRefreshInterval)
 })
 </script>
 
@@ -173,9 +152,8 @@ onBeforeUnmount(() => {
             <span class="home-word-meaning">{{ featuredWord.meaning }}</span>
           </div>
         </div>
-        <div class="home-stats">
-          <div class="bg-[#efb28f]"><UsersRound aria-hidden="true" /><strong>{{ currentUsers ?? '—' }}</strong><span>online now</span></div>
-          <div class="bg-[#a8ace0]"><GraduationCap aria-hidden="true" /><strong>{{ stats?.totalUsers ?? '—' }}</strong><span>learners</span></div>
+        <div class="home-stats bg-[#a8ace0]">
+          <GraduationCap aria-hidden="true" /><strong>{{ stats?.totalUsers ?? '—' }}</strong><span>learners</span>
         </div>
       </div>
     </section>
@@ -232,9 +210,7 @@ onBeforeUnmount(() => {
 .home-word-sample strong { margin-top: 1rem; font-family: var(--font-chinese); font-size: clamp(3rem, 8vw, 5rem); line-height: 1.05; }
 .home-jyutping { margin-top: 0.8rem; color: rgb(var(--color-primary-strong)); font-weight: 700; }
 .home-word-meaning { margin-top: 0.25rem; color: rgb(var(--color-ink)); }
-.home-stats { display: grid; grid-template-columns: repeat(2, 1fr); border-top: 1px solid rgb(var(--color-ink) / 0.09); background: rgb(var(--color-surface) / 0.58); }
-.home-stats div { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0.1rem 0.6rem; padding: 1rem 1.2rem; }
-.home-stats div + div { border-left: 1px solid rgb(var(--color-ink) / 0.09); }
+.home-stats { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 0.1rem 0.6rem; padding: 1rem 1.2rem; border-top: 1px solid rgb(var(--color-ink) / 0.09); }
 .home-stats svg { grid-row: 1 / 3; width: 1.2rem; color: rgb(var(--color-primary-strong)); }
 .home-stats strong { line-height: 1; }
 .home-stats span { color: rgb(var(--color-ink)); font-size: 0.72rem; }

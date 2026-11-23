@@ -16,8 +16,6 @@ limit to make the test pass.
 
 | Group | Current routes | Subject | Current boundary | Purpose |
 | --- | --- | --- | --- | --- |
-| Public presence read | `GET /api/current-users` | IP | 240/minute | Bound polling and Redis reads |
-| Presence heartbeat | `POST /api/current-users` | IP plus session prefix | 120/minute per IP and 6/minute per session | Permit shared networks while bounding one browser |
 | Account read | `GET /api/meV2` | user | 1,200/minute | High ceiling for existing UI polling; observe before reducing |
 | Account/auth mutation | profile update, post-login sync | user | 60/minute profile; 10/minute post-login | Bound database writes and identity synchronization |
 | Billing session creation | Stripe checkout and portal | user, shared group | 10/minute | Bound external session creation while allowing UI/network retries |
@@ -30,13 +28,13 @@ The standalone typing-sentence finalizer is intentionally included at
 20/minute; it previously had no request boundary even though the equivalent
 level and topic finalizers did.
 
+The disabled presence endpoint returns an empty count for older clients without accessing Redis.
+
 ## Subject rules
 
 - Authenticated optional-access routes use `user:<id>`.
 - Anonymous quiz starts use `guest:<forwarded IP>`; they never share one global
   guest key.
-- Presence uses an IP boundary and a normalized session boundary because it is
-  intentionally anonymous and frequently polled.
 - Free pronunciation adds device and hashed-IP daily boundaries because it
   invokes a paid provider.
 - When a trustworthy IP is unavailable, optional-access routes fall back to
@@ -48,9 +46,7 @@ level and topic finalizers did.
 An IP-only guest boundary prevents trivial cookie rotation but can group many
 legitimate learners behind a school, office, mobile carrier, or household NAT.
 A session-only boundary is fairer but is not abuse-resistant because a caller
-can discard or invent client cookies. The existing `online_session_id` cookie is
-browser-generated for presence tracking, is not guaranteed on direct quiz entry,
-and must not become the sole rate-limit identity.
+can discard or invent client cookies.
 
 The intended follow-up design is a dual boundary:
 

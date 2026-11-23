@@ -313,6 +313,22 @@ export const topics = [
     requiresPaid: false,
     quizRequiresPaid: false,
   },
+  {
+    id: "visiting-family",
+    title: "Visiting Family",
+    comingSoon: true,
+    description: "Greet relatives at the door, catch up over a meal, and thank your hosts.",
+    requiresPaid: false,
+    quizRequiresPaid: false,
+  },
+  {
+    id: "festivals-celebrations",
+    title: "Festivals & Celebrations",
+    comingSoon: true,
+    description: "Exchange Lunar New Year greetings, share mooncakes, and make plans for Mid-Autumn Festival.",
+    requiresPaid: false,
+    quizRequiresPaid: false,
+  },
 ];
 
 const allTopicIds = [
@@ -352,6 +368,8 @@ const allTopicIds = [
   "music",
   "politics",
   "onomatopoeia",
+  "visiting-family",
+  "festivals-celebrations",
 ];
 
 export const sortedTopics = [...topics].sort((a, b) => {

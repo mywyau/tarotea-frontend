@@ -24,7 +24,6 @@ Last reviewed: 2026-11-18
 | Quiz/dojo sessions | Quiz-specific user/session keys | 30 minutes | Worker deletes completed sessions where implemented; TTL bounds abandoned sessions | Fail closed because workers require the server-created allow-list for integrity |
 | Pronunciation lock | `lock:pronunciation:<subject>` | 30 seconds | Released after request; TTL recovers crashed requests | Fail closed to avoid concurrent provider usage and duplicate charging |
 | Rate limits | `rl:<class>:<subject>` | Endpoint window | Atomic script increments and assigns/repairs expiry | Fail closed today; an outage policy must be chosen per endpoint class |
-| Online sessions | `online_users:sessions` sorted set | Two-minute rolling window | Stale scores are pruned on every touch/count | Feature may fail without affecting learning or billing correctness |
 
 ## Invalidation procedure
 

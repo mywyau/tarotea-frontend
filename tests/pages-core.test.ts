@@ -20,7 +20,7 @@ describe('core page contracts', () => {
     expect(source).toContain("title: 'Learn Cantonese for everyday life'")
     expect(source).toContain('Build Cantonese you can actually use.')
     expect(source).toContain("label: 'Start learning'")
-    expect(source).toContain('online now')
+    expect(source).toContain('stats?.totalUsers')
     expect(source).toContain("? 'Burning the midnight oil'")
     expect(source).toContain(": 'Good evening'")
     expect(source).toContain('user.value?.firstName')

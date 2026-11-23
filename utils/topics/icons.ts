@@ -23,6 +23,7 @@ import {
   Music,
   Newspaper,
   Palette,
+  PartyPopper,
   PawPrint,
   Ruler,
   ShieldPlus,
@@ -92,6 +93,8 @@ const topicAppearance: Record<string, TopicAppearance> = {
   music: { icon: markRaw(Music), background: palette.lilac },
   politics: { icon: markRaw(Landmark), background: palette.sky },
   onomatopoeia: { icon: markRaw(Volume2), background: palette.peach },
+  'visiting-family': { icon: markRaw(House), background: palette.rose },
+  'festivals-celebrations': { icon: markRaw(PartyPopper), background: palette.gold },
 }
 
 const fallback: TopicAppearance = { icon: markRaw(BookOpen), background: palette.sky }

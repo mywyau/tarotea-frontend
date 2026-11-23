@@ -182,15 +182,15 @@ onMounted(async () => {
                 </div>
 
                 <!-- Buttons -->
-                <div class="pt-4 space-y-3">
+                <div v-if="!topic.comingSoon" class="pt-4 space-y-3">
                     <div class="quiz-mode-selector">
                         <button type="button" @click="cycleTopicMode(topic.id, -1)"
-                            aria-label="Previous quiz mode" :disabled="!canEnterTopic(topic) || topic.comingSoon">
+                            aria-label="Previous quiz mode" :disabled="!canEnterTopic(topic)">
                             <ChevronLeft class="h-5 w-5" aria-hidden="true" />
                         </button>
 
                         <NuxtLink :to="canEnterTopic(topic) ? getSelectedTopicMode(topic.id).to(topic.id) : undefined"
-                            class="quiz-mode-link" :class="{ 'pointer-events-none opacity-60': topic.comingSoon || !canEnterTopic(topic) }">
+                            class="quiz-mode-link" :class="{ 'pointer-events-none opacity-60': !canEnterTopic(topic) }">
                             <component :is="getSelectedTopicMode(topic.id).icon" class="quiz-mode-icon"
                                 aria-hidden="true" />
 
@@ -200,7 +200,7 @@ onMounted(async () => {
                         </NuxtLink>
 
                         <button type="button" @click="cycleTopicMode(topic.id, 1)"
-                            aria-label="Next quiz mode" :disabled="!canEnterTopic(topic) || topic.comingSoon">
+                            aria-label="Next quiz mode" :disabled="!canEnterTopic(topic)">
                             <ChevronRight class="h-5 w-5" aria-hidden="true" />
                         </button>
                     </div>
