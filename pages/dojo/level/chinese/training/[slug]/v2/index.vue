@@ -768,7 +768,7 @@ onBeforeUnmount(() => {
               </p>
             </div>
 
-            <QuizCompletionFlipStats correct-label="Hint-Free" incorrect-label="Hints Used" :correct="hintFreeCount"
+            <QuizCompletionFlipStats :show-xp-lost="false" correct-label="Hint-Free" incorrect-label="Hints Used" :correct="hintFreeCount"
               :incorrect="hintsUsedCount" :time="formattedElapsedTime" :xp-earned="animatedXpEarned" />
 
             <p v-if="isGuestPreview" class="hero-subtext text-center">

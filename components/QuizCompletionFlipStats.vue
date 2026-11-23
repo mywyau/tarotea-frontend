@@ -11,11 +11,13 @@ const props = withDefaults(defineProps<{
   xpLost?: number | string
   showScore?: boolean
   showXp?: boolean
+  showXpLost?: boolean
 }>(), {
   xpEarned: 0,
   xpLost: 0,
   showScore: true,
   showXp: true,
+  showXpLost: true,
   correctLabel: 'Correct',
   incorrectLabel: 'Incorrect',
 })
@@ -27,6 +29,8 @@ const stats = computed(() => [
   ] : []),
   ...(props.showXp ? [
     { label: 'XP earned', value: `+${Number(props.xpEarned) || 0} XP`, icon: TrendingUp, tone: 'success' },
+  ] : []),
+  ...(props.showXp && props.showXpLost ? [
     { label: 'XP lost', value: `-${Number(props.xpLost) || 0} XP`, icon: TrendingDown, tone: 'error' },
   ] : []),
   { label: 'Time', value: props.time, icon: Clock3, tone: 'neutral' },
@@ -40,11 +44,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <dl class="completion-stat-grid" :class="{
-    'completion-stat-grid-with-score': showScore,
-    'completion-stat-grid-compact': !showXp,
-  }"
-    aria-label="Quiz completion stats">
+  <dl class="completion-stat-grid" aria-label="Quiz completion stats">
     <div v-for="stat in stats" :key="stat.label" class="completion-stat" :class="`is-${stat.tone}`">
       <dt>
         <component :is="stat.icon" aria-hidden="true" />
@@ -101,9 +101,7 @@ onMounted(() => {
 .completion-stat.is-neutral svg { color: rgb(var(--color-primary)); }
 
 @media (min-width: 640px) {
-  .completion-stat-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .completion-stat-grid-with-score { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .completion-stat-grid-compact { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .completion-stat-grid { grid-template-columns: repeat(v-bind('stats.length'), minmax(0, 1fr)); }
   .completion-stat:last-child:nth-child(odd) { grid-column: auto; }
 }
 </style>
