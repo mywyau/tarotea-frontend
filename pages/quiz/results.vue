@@ -58,12 +58,16 @@ async function saveWordQuiz() {
       saveError.value = 'Sign in again to save your XP.'
       return
     }
-    await $fetch('/api/quiz/grind/finalize-v5', {
+    const receipt = await $fetch('/api/quiz/grind/finalize-v5', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
       body: attempt,
       timeout: 15000,
     })
+    if (receipt.status === 'recovery_pending') {
+      saveError.value = 'Your quiz is saved. We’ll retry your XP automatically, even if you close this page.'
+      return
+    }
     const completed = { ...summary }
     delete completed.pendingSave
     result.value = completed

@@ -114,3 +114,20 @@ and never mark a database record processed merely to clear an alert.
 2. Persist and alert on terminal failures.
 3. Add a restricted replay endpoint or script that accepts only existing persisted event IDs and records the replay audit fields above.
 4. Add queue-depth and oldest-event queries to operational monitoring.
+
+## Recovering vocabulary quiz XP
+
+After applying `npm run db:migrate` and deploying the frontend, create a recurring
+QStash schedule for that environment. Set the destination to the deployed
+`SITE_URL` followed by `/api/worker/recover-word-quiz-xp`, the method to
+`POST`, and the cron expression to `*/5 * * * *` (every five minutes). The
+body can be empty. The endpoint uses the existing QStash signing keys.
+Confirm a scheduled delivery returns HTTP 200, including when the batch is empty.
+
+Each run claims up to 20 level or topic vocabulary attempts pending for at
+least five minutes, oldest eligible first. This includes attempts saved before
+the migration. An interrupted run becomes eligible again after five minutes.
+The regular XP worker locks each attempt and commits the award and processed
+flag together. A repeated delivery is safe. Daily and sentence quizzes use
+separate flows. Monitor the oldest unprocessed vocabulary attempt after an
+outage to confirm the backlog drains.

@@ -509,8 +509,7 @@
 
 // new api
 
-import { useRuntimeConfig } from "#imports";
-import { Receiver } from "@upstash/qstash";
+import { verifyQuizWorkerRequest } from "~/server/utils/qstash/verifyQuizWorkerRequest";
 import { createError, defineEventHandler, getHeader, readRawBody } from "h3";
 import { redactIdentifier } from "~/server/utils/logging/redact";
 import { db } from "~/server/repositories/db";
@@ -538,6 +537,7 @@ type QuizEventRow = {
   payload: unknown;
   processed: boolean;
   mode: string;
+  stat_date: string;
   applied_total_delta: number | string | null;
 };
 
@@ -776,62 +776,6 @@ function buildAggregatedUpdates(
   };
 }
 
-async function verifyQStashRequest(
-  event: Parameters<typeof defineEventHandler>[0],
-  rawBody: string,
-): Promise<void> {
-  const config = useRuntimeConfig(event);
-
-  const currentSigningKey = config.qstashCurrentSigningKey as
-    | string
-    | undefined;
-  const nextSigningKey = config.qstashNextSigningKey as string | undefined;
-  const appBaseUrl = config.public.siteUrl as string | undefined;
-
-  if (!currentSigningKey || !nextSigningKey) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Missing QStash signing keys",
-    });
-  }
-
-  if (!appBaseUrl) {
-    throw createError({
-      statusCode: 500,
-      statusMessage: "Missing public.siteUrl",
-    });
-  }
-
-  const signature = getHeader(event, "Upstash-Signature");
-
-  if (!signature) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Missing Upstash signature",
-    });
-  }
-
-  const receiver = new Receiver({
-    currentSigningKey,
-    nextSigningKey,
-  });
-
-  const workerUrl = `${appBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v5`;
-
-  const isValid = await receiver.verify({
-    signature,
-    body: rawBody,
-    url: workerUrl,
-  });
-
-  if (!isValid) {
-    throw createError({
-      statusCode: 401,
-      statusMessage: "Invalid Upstash signature",
-    });
-  }
-}
-
 export default defineEventHandler(async (event) => {
   const rawBody = await readRawBody(event, "utf8");
 
@@ -842,7 +786,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  await verifyQStashRequest(event, rawBody);
+  await verifyQuizWorkerRequest(event, rawBody, "/api/worker/xp-quiz-v5");
 
   const job = parseWorkerJob(rawBody);
   const qstashMessageId = getHeader(event, "Upstash-Message-Id");
@@ -855,7 +799,8 @@ export default defineEventHandler(async (event) => {
 
     const eventResult = await client.query<QuizEventRow>(
       `
-      select id, payload, processed, mode
+      select id, payload, processed, mode,
+             to_char(created_at at time zone 'UTC', 'YYYY-MM-DD') as stat_date
       from xp_quiz_events
       where user_id = $1
         and attempt_id = $2
@@ -917,7 +862,9 @@ export default defineEventHandler(async (event) => {
     } = buildAggregatedUpdates(quizEvent.mode, rawAnswers, streakMap, xpMap);
 
     const wrongCount = totalQuestions - correctCount;
-    const statDate = new Date().toISOString().slice(0, 10);
+    const statDate = quizEvent.mode === DAILY_MODE
+      ? new Date().toISOString().slice(0, 10)
+      : quizEvent.stat_date;
 
     const wordIds = updates.map((u) => u.wordId);
     const deltas = updates.map((u) => u.delta);

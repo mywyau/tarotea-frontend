@@ -1,5 +1,4 @@
-import { useRuntimeConfig } from "#imports";
-import { Client } from "@upstash/qstash";
+import { publishWordQuizXp } from "~/server/utils/publishWordQuizXp";
 import { redactIdentifier } from "~/server/utils/logging/redact";
 import { createError, readBody } from "h3";
 import { db } from "~/server/repositories/db";
@@ -108,59 +107,6 @@ function buildWordOutcomeMap(rawAnswers: unknown): Map<string, boolean> {
   return map;
 }
 
-let qstashClient: Client | null = null;
-
-function getQstashClient(
-  event: Parameters<typeof defineEventHandler>[0],
-): Client {
-  if (qstashClient) return qstashClient;
-
-  const config = useRuntimeConfig(event);
-  const qstashToken = config.qstashToken as string | undefined;
-
-  if (!qstashToken) {
-    throw new Error("Missing qstashToken runtime config");
-  }
-
-  qstashClient = new Client({ token: qstashToken });
-  return qstashClient;
-}
-
-function safeDeduplicationId(job: {
-  attemptId: string;
-  userId: string;
-}): string {
-  return `${job.userId}__${job.attemptId}`.replace(/[^a-zA-Z0-9._-]/g, "_");
-}
-
-async function enqueueFinalizeJob(
-  event: Parameters<typeof defineEventHandler>[0],
-  job: { attemptId: string; userId: string },
-): Promise<void> {
-  const config = useRuntimeConfig(event);
-  const workerBaseUrl = config.public.siteUrl as string | undefined;
-
-  if (!workerBaseUrl) {
-    throw new Error("Missing public.siteUrl runtime config");
-  }
-
-  const workerUrl = `${workerBaseUrl.replace(/\/+$/, "")}/api/worker/xp-quiz-v5`;
-  const client = getQstashClient(event);
-
-  await client.publishJSON({
-    url: workerUrl,
-    body: job,
-    retries: 3,
-    deduplicationId: safeDeduplicationId(job),
-    flowControl: {
-      key: "quiz-finalize-vocab",
-      parallelism: 20,
-      rate: 2000,
-      period: "1m",
-    },
-  });
-}
-
 export default defineEventHandler(async (event) => {
   const t0 = performance.now();
 
@@ -201,8 +147,8 @@ export default defineEventHandler(async (event) => {
       }),
     );
 
-    const totalQuestions = rawAnswers.length;
-    const correctCount = rawAnswers.reduce(
+    let totalQuestions = rawAnswers.length;
+    let correctCount = rawAnswers.reduce(
       (sum, answer) => sum + (answer.correct ? 1 : 0),
       0,
     );
@@ -213,6 +159,7 @@ export default defineEventHandler(async (event) => {
     const tAcquire1 = performance.now();
 
     let insertResult;
+    let processed = false;
     let dbQueryMs = 0;
 
     try {
@@ -249,21 +196,45 @@ export default defineEventHandler(async (event) => {
           correctCount,
         ],
       );
+      if (!insertResult.rowCount) {
+        const existing = await client.query<{
+          mode: QuizMode;
+          processed: boolean;
+          correct_count: number;
+          total_questions: number;
+        }>(
+          `select mode, processed, correct_count, total_questions from xp_quiz_events
+           where user_id = $1 and attempt_id = $2`,
+          [userId, attemptId],
+        );
+        const saved = existing.rows[0];
+        if (!saved || !ALLOWED_MODES.includes(saved.mode)) {
+          throw createError({ statusCode: 409, statusMessage: "Quiz attempt conflict" });
+        }
+        processed = saved.processed;
+        mode = saved.mode;
+        correctCount = saved.correct_count;
+        totalQuestions = saved.total_questions;
+      }
       const tQuery1 = performance.now();
       dbQueryMs = tQuery1 - tQuery0;
     } finally {
       client.release();
     }
 
-    const inserted = insertResult.rowCount > 0;
+    const inserted = Boolean(insertResult.rowCount);
 
     let enqueueMs = 0;
 
-    if (inserted) {
+    let queued = false;
+    let status: "processed" | "pending" | "recovery_pending" = processed ? "processed" : "pending";
+    if (!processed) {
       const tEnqueue0 = performance.now();
       try {
-        await enqueueFinalizeJob(event, { attemptId, userId });
+        const delivery = await publishWordQuizXp(event, { attemptId, userId });
+        queued = !delivery.deduplicated;
       } catch (enqueueError) {
+        status = "recovery_pending";
         console.error("VOCAB FINALIZE ENQUEUE FAILED", {
           userHash: redactIdentifier(userId),
           attemptId,
@@ -294,9 +265,9 @@ export default defineEventHandler(async (event) => {
 
     return {
       attemptId,
-      queued: inserted,
+      queued,
       deduped: !inserted,
-      status: "pending",
+      status,
       quiz: {
         mode,
         correctCount,
