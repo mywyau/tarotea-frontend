@@ -55,7 +55,6 @@ function closeUnlockPanel() {
   errorMessage.value = ''
 }
 
-const wordApiPath: string = `/api/words/${wordId}`
 const wordPagePath: string = `/level/${slug}/word/${wordId}`
 
 async function loadData() {
@@ -90,7 +89,11 @@ async function loadData() {
       creditsAvailable: unlocks.creditsAvailable,
     }
 
-    word.value = await $fetch(wordApiPath)
+    const index = await $fetch<{ categories: Record<string, NonNullable<typeof word.value>[]> }>(
+      `/api/index/levels/${encodeURIComponent(slug)}`
+    )
+    word.value = Object.values(index.categories).flat().find(entry => entry.id === wordId) ?? null
+    if (!word.value) errorMessage.value = 'Word not found in this level.'
   } catch {
     errorMessage.value = 'Failed to load unlock details.'
   } finally {

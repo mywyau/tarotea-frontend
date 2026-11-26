@@ -116,3 +116,11 @@ npx tsx scripts/seed-levels.ts
 - Keep the app simple and calm
 - Teach natural Cantonese, not textbook grammar
 - Respect user data: no dark patterns, easy deletion
+
+## Deploying protected lessons
+
+Set `R2_LESSON_BUCKET_NAME=tarotea-content` for the Vercel Preview environment. The server reads the existing catalogue, word and sentence JSON from R2 using its account credentials. It signs individual recordings for 60 seconds. Keep the existing object keys and configure bucket CORS for audio GET requests from the app origins that use pronunciation analysis.
+
+1. Deploy the access-control branch to Preview. Check the word lists, a free lesson, a locked tile, sentence practice, and both recording voices. Verify guests receive 401 for a locked lesson, a signed-in account without an unlock receives 403, and paid users and TaroKey buyers can open it.
+2. After preview verification, set the same bucket variable for Production and deploy the tested commit. Verify the production app before changing public bucket access.
+3. Close public access to the bucket across its custom domains and R2 development URL. Account for any other consumers of those domains first. Invalidate previous public lesson files and recordings on the CDN and old lesson pages, API responses and sentence feeds on Vercel. Check that anonymous origin requests for previously published files are denied, and repeat the app access checks.

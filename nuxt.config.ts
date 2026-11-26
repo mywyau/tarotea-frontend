@@ -59,6 +59,14 @@ export default defineNuxtConfig({
         },
       },
 
+      "/api/words/**": { headers: { "Cache-Control": "private, no-store" } },
+      "/api/lesson-audio/**": { headers: { "Cache-Control": "private, no-store" } },
+      "/api/daily/**": { headers: { "Cache-Control": "private, no-store" } },
+      "/api/sentences/**": { headers: { "Cache-Control": "private, no-store" } },
+      "/api/topic/sentences/**": { headers: { "Cache-Control": "private, no-store" } },
+      "/level/**": { headers: { "Cache-Control": "private, no-store" } },
+      "/topic/word/**": { headers: { "Cache-Control": "private, no-store" } },
+
       // Static Nuxt assets (hashed, safe to cache)
       "/_nuxt/**": {
         headers: {

@@ -55,21 +55,13 @@ type LevelWordItem = {
 
 const route = useRoute()
 const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 // Dynamic params
 const level = computed(() => route.params.slug as string)
 const id = computed(() => decodeURIComponent(route.params.id as string))
 
 // Fetch word data
-const { data, error } = await useFetch(
-  () => `/api/words/${id.value}`,
-  {
-    key: () => `word-${id.value}`,
-    server: true,
-  }
-)
-
 const { data: levelIndex } = await useFetch<LevelIndex>(
   () => `/api/index/levels/${level.value}`,
   {
@@ -97,6 +89,16 @@ const orderedLevelWords = computed<LevelWordItem[]>(() => {
 
   return []
 })
+
+const wordPosition = computed(() => orderedLevelWords.value.findIndex(entry => entry.id === id.value))
+if (wordPosition.value < 0) throw createError({ statusCode: 404, statusMessage: "Word not found in this level" })
+const publicWord = computed(() => wordPosition.value >= 0 && ((isLevelId(level.value) && isFreeLevel(levelIdToNumbers(level.value))) || wordPosition.value < FREE_LEVEL_WORD_LIMIT))
+
+const { data, error } = await useAsyncData(
+  () => `word-${id.value}`,
+  () => fetchLessonWord(id.value),
+  { server: publicWord.value },
+)
 
 const currentIndex = computed(() => {
   const currentWordId = word.value?.id
@@ -161,7 +163,7 @@ const audioDirectory = computed(() => {
 
 const getAudioSrc = (fileName?: string | null) => {
   if (!fileName) return ''
-  return `${cdnBase}/${audioDirectory.value}/${fileName}`
+  return `/api/lesson-audio/${audioDirectory.value}/${fileName}`
 }
 
 const word = computed(() => data.value)
@@ -250,8 +252,6 @@ onMounted(async () => {
   }
 })
 
-const publicWord = computed(() => isLevelId(level.value) && currentIndex.value >= 0
-  && (isFreeLevel(levelIdToNumbers(level.value)) || currentIndex.value < FREE_LEVEL_WORD_LIMIT))
 if (error.value) throw createError({ statusCode: error.value.statusCode ?? 500, statusMessage: 'Could not load word' })
 useLearningPageSeo(
   () => word.value ? `${word.value.word} (${word.value.jyutping}) – ${word.value.meaning} in Cantonese` : 'Cantonese vocabulary',

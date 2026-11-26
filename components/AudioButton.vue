@@ -27,27 +27,21 @@ const { play: playGlobal } = useGlobalAudio()
 const audio = ref<HTMLAudioElement | null>(null)
 let autoplayTimer: ReturnType<typeof setTimeout> | undefined
 
-const ensureAudio = () => {
-  if (!audio.value) {
-    audio.value = new Audio(props.src)
-  }
-}
+let playRequest = 0
 
 const play = async () => {
   clearTimeout(autoplayTimer)
-  ensureAudio()
-
-  if (!audio.value) return
-
-  audio.value.volume = volume.value
-  audio.value.playbackRate = props.playbackRate
-  audio.value.currentTime = 0
-
-  if ('preservesPitch' in audio.value) {
-    audio.value.preservesPitch = true
-  }
-
+  const request = ++playRequest
   try {
+    if (!audio.value) {
+      const url = await resolveLessonAudio(props.src)
+      if (request !== playRequest) return
+      audio.value = new Audio(url)
+    }
+    audio.value.volume = volume.value
+    audio.value.playbackRate = props.playbackRate
+    audio.value.currentTime = 0
+    if ('preservesPitch' in audio.value) audio.value.preservesPitch = true
     await playGlobal(audio.value)
     emit('played')
   } catch (error) {
@@ -57,6 +51,7 @@ const play = async () => {
       return
     }
 
+    audio.value = null
     console.warn('Audio playback failed', error)
     emit('playbackFailed')
   }
@@ -104,16 +99,14 @@ watch(() => props.playbackRate, rate => {
   }
 })
 
-watch(() => props.src, (newSrc) => {
-  if (audio.value) {
-    audio.value.pause()
-    audio.value = new Audio(newSrc)
-    audio.value.volume = volume.value
-    audio.value.playbackRate = props.playbackRate
-  }
+watch(() => props.src, () => {
+  playRequest++
+  audio.value?.pause()
+  audio.value = null
 })
 
 onBeforeUnmount(() => {
+  playRequest++
   clearTimeout(autoplayTimer)
   if (audio.value) {
     audio.value.pause()

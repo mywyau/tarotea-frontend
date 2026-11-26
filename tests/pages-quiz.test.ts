@@ -151,11 +151,10 @@ describe('quiz page contracts', () => {
     expect(floatingAudio).toContain('@played="autoplayBlocked = false"')
   })
 
-  it('gives guests full sentence quizzes for free levels', () => {
+  it('applies level lesson access when selecting sentence quiz items', () => {
     const source = readProjectFile('server/api/sentences/v3/start-v2.get.ts')
 
-    expect(source).toContain(
-      'if (!isFreeLevel(levelNumber)) {\n    if (!userId) {'
-    )
+    expect(source).toContain('allowedLessonIds(ids, userId, `levels/${slug}`)')
+    expect(source).toContain('allowed.has(item.sourceWordId)')
   })
 })

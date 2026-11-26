@@ -1,3 +1,4 @@
+import { readLessonJson } from "~/server/services/lessons/storage";
 // server/api/topic/audio-quiz/[topicSlug].get.ts
 
 import { createError, getRouterParam } from "h3";
@@ -191,12 +192,11 @@ async function loadTopicData(topicSlug: string): Promise<TopicData> {
   }
 
   return runSingleFlight(cacheKey, async () => {
-    const cdnBase = useRuntimeConfig().public.cdnBase;
 
     let data: TopicData;
 
     try {
-      data = await $fetch<TopicData>(`${cdnBase}/topics/${topicSlug}.json`);
+      data = await readLessonJson<TopicData>("topics", topicSlug);
     } catch {
       throw createError({
         statusCode: 404,

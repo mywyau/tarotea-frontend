@@ -1,3 +1,5 @@
+import { allowedLessonIds } from "~/server/services/lessons/access";
+import { readLessonJson } from "~/server/services/lessons/storage";
 import { createError } from "h3";
 import { redis } from "~/server/repositories/redis";
 import { buildSentenceQuiz } from "~/utils/quiz/buildSentenceQuiz";
@@ -74,7 +76,6 @@ export async function buildSentenceQuizStart({
   userId,
   slug,
   scope,
-  cdnBase,
 }: BuildSentenceQuizStartInput): Promise<SentenceQuizStartResult> {
   if (scope !== "level") {
     throw createError({
@@ -83,18 +84,10 @@ export async function buildSentenceQuizStart({
     });
   }
 
-  let data: LevelSentenceData;
+  const data = await readLessonJson<LevelSentenceData>("sentences", slug + "-sentences");
 
-  try {
-    data = await $fetch<LevelSentenceData>(
-      `${cdnBase}/sentences/${slug}-sentences.json`,
-    );
-  } catch {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "sentence set not found",
-    });
-  }
+  const allowed = await allowedLessonIds((data.items ?? []).map(item => item.sourceWordId), userId, `levels/${slug}`);
+  data.items = (data.items ?? []).filter(item => allowed.has(item.sourceWordId));
 
   if (!data.items?.length) {
     const sessionKey = crypto.randomUUID();

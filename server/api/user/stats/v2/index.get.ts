@@ -57,7 +57,7 @@ export default defineEventHandler(async (event): Promise<UserStatsResponse> => {
       [userId, masteryXp]
     ),
     getUserEntitlement(userId),
-    getStatsWordCatalogue(useRuntimeConfig().public.cdnBase).catch(error => {
+    getStatsWordCatalogue().catch(error => {
       console.warn("Could not load word totals for stats", error);
       return null;
     }),

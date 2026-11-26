@@ -22,13 +22,12 @@ const openQuizResults = useQuizResults()
 const route = useRoute()
 const topicSlug = computed(() => route.params.topic as string)
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 function getRandomizedAudioSrc(audioKey: string) {
   const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
   const voiceDirectory = voiceDirectories[0]
-  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+  return `/api/lesson-audio/${voiceDirectory}/${audioKey}`
 }
 const playbackRate = ref(1)
 
@@ -287,7 +286,7 @@ async function playCurrentWordAudio() {
 
   try {
     currentWordAudio?.pause()
-    currentWordAudio = new Audio(currentWordAudioSrc.value)
+    currentWordAudio = new Audio(await resolveLessonAudio(currentWordAudioSrc.value))
     currentWordAudio.playbackRate = playbackRate.value
     currentWordAudio.volume = 1
     await currentWordAudio.play()

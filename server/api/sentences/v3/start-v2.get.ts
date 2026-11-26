@@ -1,13 +1,12 @@
+import { allowedLessonIds } from "~/server/services/lessons/access";
+import { readLessonJson } from "~/server/services/lessons/storage";
 import { loadSentenceWordCategories } from "~/server/services/sentence-quiz/start/loadSentenceWordCategories";
-import { getUserEntitlement } from "#imports";
 import { createError, getHeader, getQuery, getRequestIP } from "h3";
-import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
 import { redis } from "~/server/repositories/redis";
-import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { loadSentenceProgressMap } from "~/server/services/sentence-quiz/start/loadSentenceProgressMap";
 import { loadWordProgressMap } from "~/server/services/sentence-quiz/start/loadWordProgressMap";
 import { pickBestVariantForWord } from "~/server/services/sentence-quiz/start/pickBestVariantForWord";
-import {
+import type {
   LevelSentenceData,
   LevelSentenceItem,
   QuizSession,
@@ -16,13 +15,10 @@ import {
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
-import { Entitlement } from "~/types/auth/entitlements";
 import { buildSentenceQuiz, buildWordListeningQuiz, hasSpokenTarget } from "~/utils/quiz/buildSentenceQuiz";
 import { isLevelId, levelIdToNumbers } from "~/utils/levels/levels";
 import {
-  canAccessLevel,
   isComingSoon,
-  isFreeLevel,
 } from "~/utils/levels/permissions";
 import { shuffleFisherYates } from "~/utils/shuffle";
 
@@ -79,66 +75,17 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
 
-  let data: LevelSentenceData;
-
-  try {
-    data = await $fetch<LevelSentenceData>(
-      `${cdnBase}/sentences/${slug}-sentences.json`,
-    );
-  } catch {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "sentence set not found",
-    });
-  }
+  const data = await readLessonJson<LevelSentenceData>("sentences", slug + "-sentences");
 
   const allItems = data.items ?? [];
 
-  const sentenceSourceWordIdsInOrder = [
-    ...new Set(allItems.map((item) => item.sourceWordId).filter(Boolean)),
-  ];
   const wordListening = query.format === "word-listening";
   const categories = await loadSentenceWordCategories("levels", slug);
-  const canonicalWordIdsInOrder = [...categories.keys()];
-  const sourceWordIdsInOrder = canonicalWordIdsInOrder.length
-    ? canonicalWordIdsInOrder
-    : sentenceSourceWordIdsInOrder;
-
-  let accessibleWordIdSet = new Set<string>(sourceWordIdsInOrder);
-
-  if (!isFreeLevel(levelNumber)) {
-    if (!userId) {
-      const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_LEVEL_WORD_LIMIT);
-      accessibleWordIdSet = new Set(freePreviewIds);
-    } else {
-      const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
-      const hasFullAccess = canAccessLevel(true, entitlement);
-
-      if (!hasFullAccess) {
-        const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_LEVEL_WORD_LIMIT);
-        const unlockedWordIds = await getUnlockedWordIdsForUser(
-          userId,
-          sourceWordIdsInOrder,
-        );
-
-        accessibleWordIdSet = new Set([
-          ...freePreviewIds,
-          ...unlockedWordIds,
-        ]);
-      }
-    }
-  }
-
-  const sourceWordIdSet = new Set(sourceWordIdsInOrder);
-  const accessibleItems = allItems.filter(
-    (item) =>
-      sourceWordIdSet.has(item.sourceWordId) &&
-      accessibleWordIdSet.has(item.sourceWordId) &&
-      (!wordListening || hasSpokenTarget(item)),
+  const ids = allItems.map(item => item.sourceWordId);
+  const allowed = await allowedLessonIds(ids, userId, `levels/${slug}`);
+  const accessibleItems = allItems.filter(item =>
+    allowed.has(item.sourceWordId) && (!wordListening || hasSpokenTarget(item))
   );
 
   if (!accessibleItems.length) {

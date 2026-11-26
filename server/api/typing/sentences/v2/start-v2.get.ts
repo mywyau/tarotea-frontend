@@ -1,26 +1,16 @@
-import { getUserEntitlement } from "#imports";
+import { allowedLessonIds } from "~/server/services/lessons/access";
+import { readLessonJson } from "~/server/services/lessons/storage";
 import { createError, getHeader, getQuery, getRequestIP } from "h3";
-import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
-import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { db } from "~/server/repositories/db";
 import { redis } from "~/server/repositories/redis";
-import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
-import { Entitlement } from "~/types/auth/entitlements";
 import {
   isLevelId,
-  levelIdToNumbers,
   levelTitles,
 } from "~/utils/levels/levels";
-import {
-  canAccessLevel,
-  isComingSoon,
-  isFreeLevel,
-} from "~/utils/levels/permissions";
 import { shuffleFisherYates } from "~/utils/shuffle";
-import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
 import { topics } from "~/utils/topics/topics";
 import {
   totalSentenceQuestions,
@@ -244,26 +234,8 @@ async function loadSentenceSet(
   scope: Scope,
   slug: string,
 ): Promise<SentenceSetResponse> {
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
-
-  try {
-    if (scope === "level") {
-      return await $fetch<SentenceSetResponse>(
-        `${cdnBase}/sentences/${slug}-sentences.json`,
-      );
-    }
-
-    return await $fetch<SentenceSetResponse>(
-      `${cdnBase}/topic-sentences/${slug}-sentences.json`,
-    );
-  } catch {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Sentence set not found",
-    });
-  }
+  const directory = scope === "level" ? "sentences" : "topic-sentences";
+  return readLessonJson<SentenceSetResponse>(directory, slug + "-sentences");
 }
 
 async function buildAndCacheSentenceContent(
@@ -410,104 +382,21 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  if (scope === "level" && !isLevelId(slug)) {
+    throw createError({ statusCode: 404, statusMessage: "Level not found" });
+  }
+
   const { items: allSentences, sourceWordIds: allWordIds } = await timedStep(
     timings,
     "loadContentMs",
     async () => getCachedSentenceContent(scope, slug, timings),
   );
 
-  let accessibleSentences = allSentences;
-  let accessibleWordIds = allWordIds;
-
-  if (scope === "level") {
-    if (!isLevelId(slug)) {
-      throw createError({
-        statusCode: 404,
-        statusMessage: "Level not found",
-      });
-    }
-
-    const levelNumber = levelIdToNumbers(slug);
-
-    if (isComingSoon(levelNumber)) {
-      throw createError({
-        statusCode: 403,
-        statusMessage: "Level coming soon",
-      });
-    }
-
-    if (!userId) {
-      const freePreviewIds = allWordIds.slice(0, FREE_LEVEL_WORD_LIMIT);
-      const previewSet = new Set(freePreviewIds);
-      accessibleSentences = allSentences.filter((sentence) =>
-        previewSet.has(sentence.sourceWordId),
-      );
-      accessibleWordIds = allWordIds.filter((id) => previewSet.has(id));
-    } else if (!isFreeLevel(levelNumber)) {
-      const entitlement = (await getUserEntitlement(
-        userId,
-      )) as Entitlement | null;
-      const hasFullAccess = canAccessLevel(true, entitlement, levelNumber);
-
-      if (!hasFullAccess) {
-        const freePreviewIds = allWordIds.slice(0, FREE_LEVEL_WORD_LIMIT);
-        const unlockedWordIds = await timedStep(
-          timings,
-          "unlockLookupMs",
-          async () => getUnlockedWordIdsForUser(userId, allWordIds),
-        );
-
-        const accessibleWordIdSet = new Set([
-          ...freePreviewIds,
-          ...unlockedWordIds,
-        ]);
-
-        accessibleSentences = allSentences.filter((sentence) =>
-          accessibleWordIdSet.has(sentence.sourceWordId),
-        );
-        accessibleWordIds = allWordIds.filter((id) =>
-          accessibleWordIdSet.has(id),
-        );
-      }
-    }
-  } else {
-    if (!freeTopics.has(slug)) {
-      if (!userId) {
-        const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
-        const previewSet = new Set(freePreviewIds);
-        accessibleSentences = allSentences.filter((sentence) =>
-          previewSet.has(sentence.sourceWordId),
-        );
-        accessibleWordIds = allWordIds.filter((id) => previewSet.has(id));
-      } else {
-      const entitlement = (await getUserEntitlement(
-        userId,
-      )) as Entitlement | null;
-      const hasFullAccess = canAccessTopicWord(true, entitlement, slug);
-
-      if (!hasFullAccess) {
-        const freePreviewIds = allWordIds.slice(0, FREE_WORD_LIMIT);
-        const unlockedWordIds = await timedStep(
-          timings,
-          "unlockLookupMs",
-          async () => getUnlockedWordIdsForUser(userId, allWordIds),
-        );
-
-        const accessibleWordIdSet = new Set([
-          ...freePreviewIds,
-          ...unlockedWordIds,
-        ]);
-
-        accessibleSentences = allSentences.filter((sentence) =>
-          accessibleWordIdSet.has(sentence.sourceWordId),
-        );
-        accessibleWordIds = allWordIds.filter((id) =>
-          accessibleWordIdSet.has(id),
-        );
-      }
-      }
-    }
-  }
+  const allowed = await timedStep(timings, "unlockLookupMs", () =>
+    allowedLessonIds(allWordIds, userId, `${scope === "level" ? "levels" : "topics"}/${slug}`),
+  );
+  const accessibleSentences = allSentences.filter(sentence => allowed.has(sentence.sourceWordId));
+  const accessibleWordIds = allWordIds.filter(id => allowed.has(id));
 
   if (!accessibleSentences.length) {
     const sessionKey = crypto.randomUUID();

@@ -1,6 +1,6 @@
 import { createError } from "h3";
 import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
-import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
+import { purchasedLessonIds } from "~/server/services/lessons/access";
 import { requireUser } from "~/server/utils/requireUser";
 import { getUserUnlockBalance } from "~/server/utils/unlock/getUserUnlockBalance";
 import type { Entitlement } from "~/types/auth/entitlements";
@@ -74,7 +74,7 @@ export default defineEventHandler(async (event) => {
   const hasFullAccess =
     !!userId && canAccessTopicWord(true, entitlementValue, slug);
 
-  if (hasFullAccess) {
+  if (hasFullAccess && userId) {
     const balance = await getUserUnlockBalance(userId);
 
     return {
@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
 
   const [balance, unlockedWordIds] = await Promise.all([
     getUserUnlockBalance(userId),
-    getUnlockedWordIdsForUser(userId, allWordIds),
+    purchasedLessonIds(userId, allWordIds),
   ]);
 
   return {

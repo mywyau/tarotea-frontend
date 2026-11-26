@@ -59,8 +59,7 @@ const { showTranslation } = useReadingPreferences()
 const slug = computed(() => route.params.slug as string)
 const { isLoggedIn } = useMeStateV2()
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 type AudioVoice = 'male' | 'female'
 
@@ -79,7 +78,7 @@ const audioDirectory = computed(() => {
 
 const currentAudioSrc = computed(() => {
   if (!current.value?.wordId) return ''
-  return `${cdnBase}/${audioDirectory.value}/${current.value.wordId}.mp3`
+  return `/api/lesson-audio/${audioDirectory.value}/${current.value.wordId}.mp3`
 })
 
 function setVoice(voice: AudioVoice) {

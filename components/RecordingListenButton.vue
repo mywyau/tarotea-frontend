@@ -1,8 +1,8 @@
 <script setup lang="ts">
-const props = defineProps<{ file: string; autoplay?: boolean; variant?: 'plain' | 'filled' }>()
-const { cdnBase } = useRuntimeConfig().public
+const props = defineProps<{ file: string; featured?: boolean; autoplay?: boolean; variant?: 'plain' | 'filled' }>()
+
 const voice = useCookie<string | null>('audio-voice')
-const src = computed(() => `${cdnBase}/audio-${voice.value === 'female' ? 'female' : 'male'}/${encodeURIComponent(props.file)}`)
+const src = computed(() => `/api/lesson-audio/audio-${voice.value === 'female' ? 'female' : 'male'}/${encodeURIComponent(props.file)}${props.featured ? "?featured=1" : ""}`)
 const failed = ref(false)
 watch(src, () => { failed.value = false })
 </script>

@@ -34,8 +34,7 @@ const {
     freezeTimer
 } = useQuizTimer()
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 const playbackRate = ref(1)
 
 let currentWordAudio: HTMLAudioElement | null = null
@@ -43,7 +42,7 @@ let currentWordAudio: HTMLAudioElement | null = null
 const currentWordAudioSrc = computed(() => {
     const wordId = question.value?.wordId
     if (!wordId) return null
-    return `${cdnBase}/audio/${wordId}.mp3`
+    return `/api/lesson-audio/audio/${wordId}.mp3`
 })
 
 async function playCurrentWordAudio() {
@@ -51,7 +50,7 @@ async function playCurrentWordAudio() {
 
     try {
         currentWordAudio?.pause()
-        currentWordAudio = new Audio(currentWordAudioSrc.value)
+        currentWordAudio = new Audio(await resolveLessonAudio(currentWordAudioSrc.value))
         currentWordAudio.playbackRate = playbackRate.value
         await currentWordAudio.play()
     } catch (err) {

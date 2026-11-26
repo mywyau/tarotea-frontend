@@ -391,7 +391,7 @@ async function loadEligibility() {
 }
 
 async function loadWord(id: string) {
-  const data = await $fetch<any>(`/api/daily/jyutping/v2/words/${id}`)
+  const data = await fetchLessonWord(id)
 
   challenge.value = {
     date: new Date().toISOString().slice(0, 10),
@@ -399,7 +399,7 @@ async function loadWord(id: string) {
     word: data.word,
     jyutping: data.jyutping,
     meaning: data.meaning,
-    audioUrl: data.audioUrl,
+    audioUrl: data.audio?.word ? `/api/lesson-audio/audio/${data.audio.word}` : undefined,
   }
 
   resetRoundState()
@@ -488,15 +488,15 @@ async function startChallenge() {
   }
 }
 
-function playAudio() {
+async function playAudio() {
   if (!challenge.value?.audioUrl) return
-
-  if (!audio.value || audio.value.src !== challenge.value.audioUrl) {
-    audio.value = new Audio(challenge.value.audioUrl)
+  try {
+    audio.value?.pause()
+    audio.value = new Audio(await resolveLessonAudio(challenge.value.audioUrl))
+    await audio.value.play()
+  } catch {
+    errorMessage.value = 'Unable to play this recording.'
   }
-
-  audio.value.currentTime = 0
-  audio.value.play().catch(() => { })
 }
 
 async function finalizeDaily() {
