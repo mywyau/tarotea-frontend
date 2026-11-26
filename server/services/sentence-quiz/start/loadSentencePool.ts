@@ -1,19 +1,20 @@
+import { allowedLessonIds } from "~/server/services/lessons/access";
+import { readLessonJson } from "~/server/services/lessons/storage";
 import { createError } from "h3";
 import { shuffleFisherYates } from "~/utils/shuffle";
 import { loadSentenceProgressMap } from "./loadSentenceProgressMap";
 import { pickBestVariantForWord } from "./pickBestVariantForWord";
-import {
+import type {
   LevelSentenceData,
   LevelSentenceItem,
   LoadSentencePoolInput,
   SentencePoolResult,
-} from "../types";
+} from "./types";
 
 export async function loadSentencePool({
   userId,
   slug,
   scope,
-  cdnBase,
 }: LoadSentencePoolInput): Promise<SentencePoolResult> {
   if (scope !== "level") {
     throw createError({
@@ -22,18 +23,10 @@ export async function loadSentencePool({
     });
   }
 
-  let data: LevelSentenceData;
+  const data = await readLessonJson<LevelSentenceData>("sentences", slug + "-sentences");
 
-  try {
-    data = await $fetch<LevelSentenceData>(
-      `${cdnBase}/sentences/${slug}-sentences.json`,
-    );
-  } catch {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "sentence set not found",
-    });
-  }
+  const allowed = await allowedLessonIds((data.items ?? []).map(item => item.sourceWordId), userId, `levels/${slug}`);
+  data.items = (data.items ?? []).filter(item => allowed.has(item.sourceWordId));
 
   if (!data.items?.length) {
     return {

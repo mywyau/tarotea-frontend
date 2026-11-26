@@ -9,8 +9,7 @@ import { MAX_AUDIO_BYTES, MAX_RECORDING_SECONDS } from "~/config/audio_config"
 
 const route = useRoute()
 const router = useRouter()
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 type AudioVoice = 'male' | 'female'
 const selectedAudioVoice = useCookie<AudioVoice>('audio-voice', {
@@ -43,10 +42,10 @@ type WordResponse = {
 }
 
 const { data, error } = await useAsyncData<WordResponse>(
-  () => `word-${wordSlug.value}`,
-  () => $fetch(`/api/words/${wordSlug.value}` as string),
+  () => `practice-word-${wordSlug.value}`,
+  () => fetchLessonWord(wordSlug.value),
   {
-    server: true,
+    server: false,
   }
 )
 
@@ -73,7 +72,7 @@ const practiceTarget = computed(() => {
 
 const phraseAudioSrc = computed(() => {
   const filename = word.value?.audio?.examples?.[idx.value]
-  return filename ? `${cdnBase}/${audioDirectory.value}/${filename}` : null
+  return filename ? `/api/lesson-audio/${audioDirectory.value}/${filename}` : null
 })
 
 const supported = ref(false)

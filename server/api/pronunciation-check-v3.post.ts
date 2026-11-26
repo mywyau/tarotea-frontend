@@ -1,3 +1,4 @@
+import { readLessonJson } from "~/server/services/lessons/storage";
 import { createError, readMultipartFormData, setHeader } from "h3";
 import OpenAI from "openai";
 import {
@@ -134,13 +135,8 @@ export default defineEventHandler(async (event) => {
       });
     }
 
-    const {
-      public: { cdnBase },
-    } = useRuntimeConfig();
 
-    const word = await $fetch<any>(
-      `${cdnBase}/words/${encodeURIComponent(wordId)}.json`,
-    );
+    const word = await readLessonJson<any>("words", wordId);
 
     const example = word?.examples?.[exampleIndex];
 

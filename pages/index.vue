@@ -144,7 +144,7 @@ onBeforeUnmount(() => {
         <div class="home-word-sample" :style="{ backgroundColor: wordCardColour }">
           <div class="home-word-heading">
             <span class="home-word-label">Word of the day</span>
-            <RecordingListenButton v-if="featuredWord.audioFile" :file="featuredWord.audioFile" />
+            <RecordingListenButton v-if="featuredWord.audioFile" :file="featuredWord.audioFile" featured />
           </div>
           <div class="home-word-content">
             <strong lang="zh-HK">{{ featuredWord.word }}</strong>

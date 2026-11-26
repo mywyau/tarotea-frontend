@@ -54,8 +54,7 @@ const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 const { isLoggedIn } = useMeStateV2()
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 const auth = await useAuth()
 const { stop } = useGlobalAudio()
@@ -183,7 +182,7 @@ function deltaFor(correct: boolean, streakBefore: number) {
 
 const question = computed(() => questions.value[current.value])
 const currentAudioSrc = computed(() =>
-  question.value ? `${cdnBase}/audio/${question.value.audioKey}` : ''
+  question.value ? `/api/lesson-audio/audio/${question.value.audioKey}` : ''
 )
 
 

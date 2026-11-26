@@ -1,14 +1,13 @@
 <script setup lang="ts">
 definePageMeta({ ssr: false, middleware: ['word-access'] })
 
-type VocabWord = { id: string; word: string; jyutping?: string; meaning?: string }
-
 const route = useRoute()
 const wordId = computed(() => route.params.id as string)
-const { data: word, pending, error } = await useFetch<VocabWord>(() => `/api/words/${wordId.value}`, {
-  key: () => `word-${wordId.value}`,
-  watch: [wordId],
-})
+const { data: word, pending, error } = await useAsyncData(
+  () => `writing-word-${wordId.value}`,
+  () => fetchLessonWord(wordId.value),
+  { server: false },
+)
 </script>
 
 <template>

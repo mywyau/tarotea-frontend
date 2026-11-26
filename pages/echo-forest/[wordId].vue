@@ -41,8 +41,7 @@ type WordMeta = {
   }
 }
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 const route = useRoute()
 const { volume } = useAudioVolume()
 
@@ -102,9 +101,9 @@ const { data: selectedWord } = await useAsyncData<WordMeta | null>(
   () => `tone-word-debug-${wordIdFromRoute.value || "none"}`,
   async () => {
     if (!wordIdFromRoute.value) return null
-    return await $fetch(`/api/words/${encodeURIComponent(wordIdFromRoute.value)}` as string)
+    return await fetchLessonWord(wordIdFromRoute.value)
   },
-  { watch: [wordIdFromRoute] },
+  { server: false, watch: [wordIdFromRoute] },
 )
 
 const expectedChinese = computed(() => selectedWord.value?.word ?? "")
@@ -114,7 +113,7 @@ const referenceAudioPath = computed(() => {
   return filename ? `${audioDirectory.value}/${filename}` : ""
 })
 const referenceAudioUrl = computed(() => {
-  return referenceAudioPath.value ? `${cdnBase}/${referenceAudioPath.value}` : ""
+  return referenceAudioPath.value ? `/api/lesson-audio/${referenceAudioPath.value}` : ""
 })
 
 const NEAR_PERFECT_PASS_SCORE = 80
@@ -343,7 +342,7 @@ async function fetchReferenceContours(expectedTokenCount: number): Promise<Pitch
   if (!referenceAudioPath.value || !expectedTokenCount) return []
 
   try {
-    const response = await fetch(referenceAudioUrl.value)
+    const response = await fetch(await resolveLessonAudio(referenceAudioUrl.value))
 
     if (!response.ok) {
       console.warn("[tone-word-v1] reference audio fetch failed", response.status)
@@ -358,14 +357,16 @@ async function fetchReferenceContours(expectedTokenCount: number): Promise<Pitch
   }
 }
 
-function playReferenceAudio() {
+async function playReferenceAudio() {
   if (!referenceAudioUrl.value) return
-  const audio = new Audio(referenceAudioUrl.value)
-  audio.volume = volume.value
-  audio.playbackRate = playbackRate.value
-  audio.play().catch(() => {
+  try {
+    const audio = new Audio(await resolveLessonAudio(referenceAudioUrl.value))
+    audio.volume = volume.value
+    audio.playbackRate = playbackRate.value
+    await audio.play()
+  } catch {
     errorMessage.value = "Unable to play reference audio."
-  })
+  }
 }
 
 async function startRecording() {

@@ -108,9 +108,7 @@ type QueueAttemptResponse = {
 };
 
 const route = useRoute();
-const runtimeConfig = useRuntimeConfig();
 
-const cdnBase = runtimeConfig.public.cdnBase;
 
 const selectedAudioVoice = useCookie<AudioVoice>("audio-voice", {
     default: () => "male",
@@ -141,7 +139,7 @@ const idx = computed(() => {
 
 const { data, error } = await useAsyncData<WordResponse>(
     () => `echo-lab-upload-test-word-${wordSlug.value}`,
-    () => $fetch(`/api/words/${wordSlug.value}`),
+    () => fetchLessonWord(wordSlug.value),
     {
         server: false,
         watch: [wordSlug],
@@ -171,7 +169,7 @@ const practiceTarget = computed(() => {
 const phraseAudioSrc = computed(() => {
     const filename = word.value?.audio?.examples?.[idx.value];
 
-    return filename ? `${cdnBase}/${audioDirectory.value}/${filename}` : null;
+    return filename ? `/api/lesson-audio/${audioDirectory.value}/${filename}` : null;
 });
 
 const supported = ref(false);

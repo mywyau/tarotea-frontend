@@ -1,28 +1,3 @@
-import { applyPublicContentCacheControl } from "~/server/utils/cacheControl";
+import { readSentenceFeed } from "~/server/services/lessons/sentences";
 
-export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id");
-
-  if (!id) {
-    throw createError({ statusCode: 400, statusMessage: "Missing id" });
-  }
-
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
-
-  try {
-    const content = await $fetch(`${cdnBase}/topic-sentences/${id}.json`);
-    applyPublicContentCacheControl(event);
-    return content;
-  } catch (error) {
-    console.error("[topic/sentences] Failed to load sentence set", {
-      id,
-      error,
-    });
-    throw createError({
-      statusCode: 404,
-      statusMessage: "sentence set not found",
-    });
-  }
-});
+export default defineEventHandler(event => readSentenceFeed(event, "topic-sentences"));

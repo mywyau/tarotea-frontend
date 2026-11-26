@@ -1,35 +1,9 @@
-import { applyPublicContentCacheControl } from "~/server/utils/cacheControl";
+import { contentSlug, readLessonJson } from "~/server/services/lessons/storage";
+import { requireLesson } from "~/server/services/lessons/access";
+import type { WordEntry } from "~/types/word";
 
-export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, "id");
-
-  console.log("Word API called", {
-    id,
-    time: new Date().toISOString(),
-  });
-
-  if (!id) {
-    console.warn("Missing word id");
-    throw createError({ statusCode: 400, statusMessage: "Missing id" });
-  }
-
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
-
-  try {
-    const word = await $fetch(`${cdnBase}/words/${id}.json`);
-
-    console.log("Word served successfully", { id });
-
-    applyPublicContentCacheControl(event);
-    return word;
-  } catch (err) {
-    console.error("Word not found", { id });
-
-    throw createError({
-      statusCode: 404,
-      statusMessage: "Word not found",
-    });
-  }
+export default defineEventHandler(async event => {
+  const id = contentSlug(getRouterParam(event, "id"));
+  await requireLesson(event, id);
+  return readLessonJson<WordEntry>("words", id);
 });

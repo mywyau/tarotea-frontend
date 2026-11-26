@@ -59,8 +59,7 @@ const MIN_RECORDING_PEAK = 0.035
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 const { volume } = useAudioVolume()
 const selectedVoice = useCookie<AudioVoice>('audio-voice', {
@@ -127,7 +126,7 @@ const canSkipCurrentWord = computed(() => currentWordAttemptCount.value >= SKIP_
 const skipAttemptsRemaining = computed(() => Math.max(0, SKIP_UNLOCK_ATTEMPTS - currentWordAttemptCount.value))
 const currentWordAudioUrl = computed(() => {
   const id = currentWord.value?.id
-  return id ? `${cdnBase}/${audioDirectory.value}/${id}.mp3` : ""
+  return id ? `/api/lesson-audio/${audioDirectory.value}/${id}.mp3` : ""
 })
 
 function stripToneDigit(token: string) {
@@ -411,7 +410,7 @@ async function playCurrentWordAudio() {
   if (!currentWordAudioUrl.value) return
   try {
     currentWordAudio?.pause()
-    currentWordAudio = new Audio(currentWordAudioUrl.value)
+    currentWordAudio = new Audio(await resolveLessonAudio(currentWordAudioUrl.value))
     currentWordAudio.volume = volume.value
     currentWordAudio.playbackRate = playbackRate.value
     await currentWordAudio.play()

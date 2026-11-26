@@ -1,13 +1,12 @@
+import { allowedLessonIds } from "~/server/services/lessons/access";
+import { readLessonJson } from "~/server/services/lessons/storage";
 import { loadSentenceWordCategories } from "~/server/services/sentence-quiz/start/loadSentenceWordCategories";
 import { createError, getHeader, getQuery, getRequestIP } from "h3";
-import { getUserEntitlement } from "#imports";
-import { FREE_WORD_LIMIT } from "~/config/topic/topics-config";
 import { redis } from "~/server/repositories/redis";
-import { getUnlockedWordIdsForUser } from "~/server/services/cache/wordUnlockCache";
 import { loadSentenceProgressMap } from "~/server/services/topic/sentence-quiz/start/loadSentenceProgressMap";
 import { loadWordProgressMap } from "~/server/services/topic/sentence-quiz/start/loadWordProgressMap";
 import { pickBestVariantForWord } from "~/server/services/topic/sentence-quiz/start/pickBestVariantForWord";
-import {
+import type {
   TopicSentenceData,
   TopicSentenceItem,
   QuizSession,
@@ -16,8 +15,6 @@ import {
 import { enforceRateLimit } from "~/server/utils/rate-limiting/rateLimit";
 import { getRateLimitSubject } from "~/server/utils/rate-limiting/subject";
 import { requireUser } from "~/server/utils/requireUser";
-import { Entitlement } from "~/types/auth/entitlements";
-import { canAccessTopicWord, freeTopics } from "~/utils/topics/permissions";
 import { buildSentenceQuiz, buildWordListeningQuiz, hasSpokenTarget } from "~/utils/quiz/buildSentenceQuiz";
 import { shuffleFisherYates } from "~/utils/shuffle";
 
@@ -57,69 +54,17 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
 
-  let data: TopicSentenceData;
-
-  try {
-    data = await $fetch<TopicSentenceData>(
-      `${cdnBase}/topic-sentences/${slug}-sentences.json`,
-    );
-  } catch {
-    throw createError({
-      statusCode: 404,
-      statusMessage: "sentence set not found",
-    });
-  }
+  const data = await readLessonJson<TopicSentenceData>("topic-sentences", slug + "-sentences");
 
   const allItems = data.items ?? [];
 
-  // Build the ordered source-word pool for this sentence set.
-  // If you want preview order to match the topic tiles exactly,
-  // later extract this from the topic access helper instead.
-  const sentenceSourceWordIdsInOrder = [
-    ...new Set(allItems.map((item) => item.sourceWordId).filter(Boolean)),
-  ];
   const wordListening = query.format === "word-listening";
   const categories = await loadSentenceWordCategories("topics", slug);
-  const canonicalWordIdsInOrder = [...categories.keys()];
-  const sourceWordIdsInOrder = canonicalWordIdsInOrder.length
-    ? canonicalWordIdsInOrder
-    : sentenceSourceWordIdsInOrder;
-
-  let accessibleWordIdSet = new Set<string>(sourceWordIdsInOrder);
-
-  if (!freeTopics.has(slug)) {
-    if (!userId) {
-      const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_WORD_LIMIT);
-      accessibleWordIdSet = new Set(freePreviewIds);
-    } else {
-      const entitlement = (await getUserEntitlement(userId)) as Entitlement | null;
-      const hasFullAccess = canAccessTopicWord(true, entitlement, slug);
-
-      if (!hasFullAccess) {
-      const freePreviewIds = sourceWordIdsInOrder.slice(0, FREE_WORD_LIMIT);
-      const unlockedWordIds = await getUnlockedWordIdsForUser(
-        userId,
-        sourceWordIdsInOrder,
-      );
-
-      accessibleWordIdSet = new Set([
-        ...freePreviewIds,
-        ...unlockedWordIds,
-      ]);
-      }
-    }
-  }
-
-  const sourceWordIdSet = new Set(sourceWordIdsInOrder);
-  const accessibleItems = allItems.filter(
-    (item) =>
-      sourceWordIdSet.has(item.sourceWordId) &&
-      accessibleWordIdSet.has(item.sourceWordId) &&
-      (!wordListening || hasSpokenTarget(item)),
+  const ids = allItems.map(item => item.sourceWordId);
+  const allowed = await allowedLessonIds(ids, userId, `topics/${slug}`);
+  const accessibleItems = allItems.filter(item =>
+    allowed.has(item.sourceWordId) && (!wordListening || hasSpokenTarget(item))
   );
 
   if (!accessibleItems.length) {

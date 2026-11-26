@@ -70,13 +70,12 @@ type DailyResultResponse = {
 
 const DAILY_MODE = "daily_meaning_quiz"
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 function getRandomizedAudioSrc(audioKey: string) {
   const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
   const voiceDirectory = voiceDirectories[0]
-  return `${cdnBase}/${voiceDirectory}/${audioKey}.mp3`
+  return `/api/lesson-audio/${voiceDirectory}/${audioKey}.mp3`
 }
 
 const { getAccessToken } = await useAuth()
@@ -615,7 +614,7 @@ onUnmounted(() => {
               </div>
 
               <div class="text-center">
-                <!-- <AudioButton :key="currentQuestion.id" :src="`${cdnBase}/audio/${currentQuestion.id}.mp3`" autoplay /> -->
+                <!-- <AudioButton :key="currentQuestion.id" :src="`/api/lesson-audio/audio/${currentQuestion.id}.mp3`" autoplay /> -->
                 <AudioButton :key="currentQuestion.id" :src="currentQuestionAudioSrc" autoplay />
               </div>
             </div>

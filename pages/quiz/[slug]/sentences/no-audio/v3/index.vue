@@ -58,8 +58,7 @@ const openQuizResults = useQuizResults()
 const route = useRoute()
 const slug = computed(() => route.params.slug as string)
 const { isLoggedIn } = useMeStateV2()
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 const { stop } = useGlobalAudio()
 
 const auth = await useAuth()
@@ -542,7 +541,7 @@ onBeforeUnmount(() => {
                                 {{ question.prompt }}
                             </p>
                             <AudioButton v-if="answered" :key="question.sentenceId"
-                                :src="`${cdnBase}/audio/${question.sentenceId}.mp3`" autoplay :autoplay-delay-ms="220"
+                                :src="`/api/lesson-audio/audio/${question.sentenceId}.mp3`" autoplay :autoplay-delay-ms="220"
                                 variant="plain" label="Play" />
                         </div>
 

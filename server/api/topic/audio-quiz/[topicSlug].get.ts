@@ -1,3 +1,5 @@
+import { readLessonJson } from "~/server/services/lessons/storage";
+import { allowedLessonIds } from "~/server/services/lessons/access";
 // server/api/topic/audio-quiz/[topicSlug].get.ts
 
 import { createError, getRouterParam } from "h3";
@@ -203,12 +205,11 @@ async function loadTopicData(topicSlug: string): Promise<TopicData> {
   }
 
   return runSingleFlight(cacheKey, async () => {
-    const cdnBase = useRuntimeConfig().public.cdnBase;
 
     let data: TopicData;
 
     try {
-      data = await $fetch<TopicData>(`${cdnBase}/topics/${topicSlug}.json`);
+      data = await readLessonJson<TopicData>("topics", topicSlug);
     } catch {
       throw createError({
         statusCode: 404,
@@ -452,7 +453,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const topicData = await loadTopicData(topicSlug);
-  const allWords = flattenTopicWords(topicData);
+  const words = flattenTopicWords(topicData);
+  const allowed = await allowedLessonIds(words.map(word => word.id), userId, `topics/${topicSlug}`);
+  const allWords = words.filter(word => allowed.has(word.id));
 
   const audioWords = allWords.filter((word) => !!resolveAudioKey(word));
 

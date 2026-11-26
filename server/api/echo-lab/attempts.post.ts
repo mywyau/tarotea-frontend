@@ -1,3 +1,4 @@
+import { readLessonJson } from "~/server/services/lessons/storage";
 import { createError, defineEventHandler, readBody, type H3Event } from "h3";
 
 import { db } from "~/server/repositories/db";
@@ -150,13 +151,8 @@ const handler = async (event: H3Event): Promise<EchoLabAttemptResponse> => {
     });
   }
 
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
 
-  const word = await $fetch<any>(
-    `${cdnBase}/words/${encodeURIComponent(wordId)}.json`,
-  );
+  const word = await readLessonJson<any>("words", wordId);
 
   const example = word?.examples?.[exampleIndex];
 

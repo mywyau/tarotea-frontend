@@ -58,13 +58,12 @@ const openQuizResults = useQuizResults()
 const route = useRoute()
 const slug = computed(() => route.params.topic as string)
 const { isLoggedIn } = useMeStateV2()
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 function getRandomizedAudioSrc(audioKey: string) {
   const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
   const voiceDirectory = voiceDirectories[0]
-  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+  return `/api/lesson-audio/${voiceDirectory}/${audioKey}`
 }
 const { volume } = useAudioVolume()
 const { stop, play } = useGlobalAudio()
@@ -230,15 +229,15 @@ const showQuiz = computed(() => {
 
 const tileColors = ref<string[]>([])
 
-function playSentenceAudioAfterAnswer(sentenceId: string) {
+async function playSentenceAudioAfterAnswer(sentenceId: string) {
   if (!process.client || !sentenceId) return
-
-  const audio = new Audio(getRandomizedAudioSrc(`${sentenceId}.mp3`))
-  audio.volume = volume.value
-  audio.currentTime = 0
-  void play(audio).catch(error => {
-    if (error.name !== 'AbortError') console.warn('Sentence audio playback failed', error)
-  })
+  try {
+    const audio = new Audio(await resolveLessonAudio(getRandomizedAudioSrc(`${sentenceId}.mp3`)))
+    audio.volume = volume.value
+    await play(audio)
+  } catch (error) {
+    if ((error as Error).name !== 'AbortError') console.warn('Sentence audio playback failed', error)
+  }
 }
 
 const MIN_CALCULATING_MS = 1800

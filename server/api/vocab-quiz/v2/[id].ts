@@ -1,3 +1,4 @@
+import { readLessonJson } from "~/server/services/lessons/storage";
 // server/api/vocab-quiz/[id].ts
 
 import { getUserEntitlement } from "#imports";
@@ -53,14 +54,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
 
   let quiz: VocabQuizData;
 
   try {
-    quiz = await $fetch<VocabQuizData>(`${cdnBase}/vocab-quiz/${id}.json`);
+    quiz = await readLessonJson<VocabQuizData>("vocab-quiz", id);
   } catch {
     console.error("Vocab quiz not found", { id });
 

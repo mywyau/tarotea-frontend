@@ -1,3 +1,4 @@
+import { readLessonJson } from "~/server/services/lessons/storage";
 import { getUserEntitlement } from "#imports";
 import { createError, getHeader, getQuery } from "h3";
 import { FREE_LEVEL_WORD_LIMIT } from "~/config/level/levels-config";
@@ -111,7 +112,6 @@ function getSessionCacheKey(userId: string, sessionKey: string) {
 
 async function getCachedLevelContent(
   slug: string,
-  cdnBase: string,
   timings: Record<string, number>,
 ): Promise<CachedLevelContent> {
   const cacheKey = getLevelContentCacheKey(slug);
@@ -150,7 +150,7 @@ async function getCachedLevelContent(
 
   const levelData = await timedStep(timings, "cdnFetchMs", async () => {
     try {
-      return await $fetch<LevelData>(`${cdnBase}/vocab-quiz/${slug}.json`);
+      return await readLessonJson<LevelData>("vocab-quiz", slug);
     } catch {
       throw createError({
         statusCode: 404,
@@ -243,14 +243,11 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  const {
-    public: { cdnBase },
-  } = useRuntimeConfig();
 
   const { words: allWords, wordIds: allWordIds } = await timedStep(
     timings,
     "loadContentMs",
-    async () => getCachedLevelContent(slug, cdnBase, timings),
+    async () => getCachedLevelContent(slug, timings),
   );
 
   let accessibleWords = allWords;

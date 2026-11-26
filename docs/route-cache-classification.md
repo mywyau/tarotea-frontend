@@ -17,9 +17,9 @@ This permits a one-minute browser copy, a ten-minute shared-edge copy, and stale
 | Class | Examples | Policy |
 | --- | --- | --- |
 | Immutable build assets | `/_nuxt/**` | One year, public, immutable |
-| Deterministic CDN proxy content | Level/topic indexes, word details, vocab JSON, sentence JSON | Explicit bounded public/edge caching after success |
+| Deterministic CDN proxy content | Level/topic indexes and vocabulary preview fields | Explicit bounded public/edge caching after success |
 | Public but dynamic aggregate | `/api/total-users-stats` | Existing 60-second shared cache with five-minute stale revalidation |
-| Personalized reads | Access checks, quiz starts, progress, stats, unlocks, billing, AI usage, account data | Private, no-store |
+| Personalized reads | Lesson records, sentence feeds, recording links, access checks, quiz starts, progress, stats, unlocks, billing, AI usage, account data | Private, no-store |
 | Mutations | Finalizers, unlock purchase, account/profile changes, pronunciation checks, webhooks | Private, no-store |
 | Workers and queue callbacks | XP, Stripe, and deletion workers | Private, no-store; QStash signature verification remains mandatory |
 | Health | `/api/health` | No-store |
@@ -44,14 +44,10 @@ data and cookie reads are removed or proven request-independent.
 - `/api/index/levels/:id`
 - `/api/index/topics/:id`
 - `/api/topic/:id`
-- `/api/words/:id`
 - `/api/vocab-quiz/:id`
-- `/api/sentences/:id`
-- `/api/sentences/topics/:id`
-- `/api/topic/sentences/:id`
 - `/api/total-users-stats`
 
-The authenticated `/api/index/levels/:slug` access wrapper, quiz-generation endpoints, and all v2 quiz endpoints are not public-cache candidates even when some anonymous responses appear deterministic; their output can vary by entitlement, unlock state, or progress.
+Lesson reads, quiz-generation endpoints, and all v2 quiz endpoints are not public-cache candidates even when some anonymous responses appear deterministic; their output can vary by entitlement, unlock state, or progress.
 
 ## Verification after deployment
 

@@ -34,13 +34,12 @@ const { getAccessToken } = await useAuth()
 const { isLoggedIn, user } = useMeStateV2()
 const { stop } = useGlobalAudio()
 
-const runtimeConfig = useRuntimeConfig()
-const cdnBase = runtimeConfig.public.cdnBase
+
 
 function getRandomizedAudioSrc(audioKey: string) {
   const voiceDirectories = shuffleFisherYates(['audio-male', 'audio-female'])
   const voiceDirectory = voiceDirectories[0]
-  return `${cdnBase}/${voiceDirectory}/${audioKey}`
+  return `/api/lesson-audio/${voiceDirectory}/${audioKey}`
 }
 
 
